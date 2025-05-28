@@ -9,13 +9,6 @@ export default function Home() {
         width={500}
         height={500}
       />
-
-      <Image
-        src="/assets/logo-full.png"
-        alt="Note Overflow"
-        width={500}
-        height={500}
-      />
     </div>
   );
 }
