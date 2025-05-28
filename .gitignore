@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/src/drizzle/migrations
 
 # testing
 /coverage
