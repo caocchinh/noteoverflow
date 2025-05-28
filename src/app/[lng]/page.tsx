@@ -4,14 +4,14 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-24">
       <Image
-        src="/logo-full-colorised.png"
+        src="/assets/logo-full-colorised.png"
         alt="Note Overflow"
         width={500}
         height={500}
       />
 
       <Image
-        src="/logo-full.png"
+        src="/assets/logo-full.png"
         alt="Note Overflow"
         width={500}
         height={500}
