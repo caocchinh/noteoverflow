@@ -1,0 +1,27 @@
+1. CMS for uploading past papers, topical past papers that's scalable, capable of collaboration among many contributors. Add, delete, sort, putting into categories, ...
+
+2. On each topical question allow for the ability for registered user to post their answer, in latex and image submission. Have upvotes and downvotes. Each user can only have 1 answer in 1 question, able for edit, maximum upload of 3 image and sizes must be less than 500kb. Before uploading, needs to submit verification to admins or founder to verify. Answer are ranked by most upvote ratio
+
+3. User who uploads unwanted content or hate speech will be rejected and temporary ban for 1 week of no submitting content with NO APPEAL. Think before submit.
+
+4. A search bar to allow user to type in the past paper code, when clicked in it will show all filters. Can use a shortcut to open it like a command. This can be embeded into a browser extension for quick access. When entered it will just direct to the actual link of the pdf
+
+5. Have a rating of question difficulty.
+
+6. On each topical question viewed or past paper clicked, add them to local storage with timestamps of max 100 past viewed questions/paper. 
+
+7. On each questions/paper, just like youtube. You can have your own note list with topical questions/paper which is tied to your account and saved in database and can be view later. 
+
+8. Have grade boundary for each past paper question (include this in the extension too)
+
+9. Have the topical question linked to the paper that it exist in.
+
+11. Rate limitting and protection with cloudflare turnstile.
+
+12. A discord server dedicated to the website.
+
+13. A page for learning motivations. Quotes, books, videos, ...
+
+14. Ads for sustaining website. Make sure it doesn't go down due to bills ☠️🙏🏻
+
+15. Methods for selecting a group of trusted user to upload fresh past papers, ...
