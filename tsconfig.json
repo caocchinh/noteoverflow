@@ -21,10 +21,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": [
-        "./cloudflare-env.d.ts",
-        "node"
-    ]
+    "types": ["./cloudflare-env.d.ts", "./cloudflare-env-extras.d.ts", "node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

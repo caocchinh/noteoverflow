@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "my-next-app",
+  "name": "noteoverflow",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -28,19 +28,12 @@
       "database_id": "0b76f3c9-07ac-41ac-aabd-9d155d22482e",
       "migrations_dir": "drizzle/main/migrations"
     }
-  ]
+  ],
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
-  // "placement": { "mode": "smart" },
-
-  /**
-   * Bindings
-   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-   * databases, object storage, AI inference, real-time communication and more.
-   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-   */
+  "placement": { "mode": "smart" }
 
   /**
    * Environment Variables
