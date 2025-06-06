@@ -45,17 +45,5 @@
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
-  "placement": { "mode": "smart" },
-
-  "env": {
-    "dev": {
-      "d1_databases": [
-        {
-          "binding": "AUTH_DB",
-          "database_name": "nfauth-dev",
-          "database_id": "c4ea3d2e-bf0a-416d-a2b1-780585358bcd"
-        }
-      ]
-    }
-  }
+  "placement": { "mode": "smart" }
 }
