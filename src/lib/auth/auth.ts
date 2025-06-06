@@ -1,15 +1,17 @@
 import { getAuthDb } from "@/drizzle/auth/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { multiSession } from "better-auth/plugins";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import * as schema from "@/drizzle/auth/schema";
 
 export const auth = () =>
   betterAuth({
-    database: drizzleAdapter(getAuthDb, {
+    database: drizzleAdapter(getAuthDb(), {
       provider: "sqlite",
+      schema: schema,
     }),
-    plugins: [multiSession()],
+    baseURL: getCloudflareContext().env.BETTER_AUTH_URL,
+    secret: getCloudflareContext().env.BETTER_AUTH_SECRET,
     socialProviders: {
       google: {
         prompt: "select_account",

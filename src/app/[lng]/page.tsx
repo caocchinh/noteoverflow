@@ -1,9 +1,9 @@
 "use client";
 import { useT } from "../i18n/client";
 import { authClient } from "@/lib/auth/auth-client";
-
 export default function Home() {
   const { t } = useT("landing-page");
+
   const handleSignIn = async () => {
     try {
       console.log("bbbbbbbbb");
