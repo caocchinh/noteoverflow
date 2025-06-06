@@ -3,12 +3,13 @@ import { cache } from "react";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "./schema";
 
-//  npx wrangler d1 execute nfauth-dev --file=./src/drizzle/auth/migrations/{$filename} --remote
-//  npx wrangler d1 execute nfauth --file=./src/drizzle/auth/migrations/{$filename} --remote
+//  npx wrangler d1 execute nfauth-dev --file=./src/drizzle/auth/migrations/{$filename} --> Local development
+//  npx wrangler d1 execute nfauth --file=./src/drizzle/auth/migrations/{$filename} --> Local development
+//  npx wrangler d1 execute nfauth-dev --file=./src/drizzle/auth/migrations/{$filename} --remote --> Remote development
+//  npx wrangler d1 execute nfauth --file=./src/drizzle/auth/migrations/{$filename} --remote --> Remote development
 
 export const getAuthDb = cache(() => {
   const { env } = getCloudflareContext();
-
   return drizzle(env.AUTH_DB, { schema });
 });
 

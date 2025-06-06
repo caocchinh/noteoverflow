@@ -1,23 +1,14 @@
-"use client";
-import { useT } from "../i18n/client";
-import { authClient } from "@/lib/auth/auth-client";
-export default function Home() {
-  const { t } = useT("landing-page");
-
-  const handleSignIn = async () => {
-    try {
-      console.log("bbbbbbbbb");
-      await authClient.signIn.social({
-        provider: "google",
-      });
-    } catch (error) {
-      console.error(t("sign_in_error"), error);
-    }
-  };
+import { headers } from "next/headers";
+import TestPage from "./TestPage";
+import { auth } from "@/lib/auth/auth";
+export default async function Home() {
+  const session = await auth().api.getSession({
+    headers: await headers(),
+  });
 
   return (
     <div>
-      <button onClick={handleSignIn}>{t("title")}</button>
+      <TestPage email={session?.user?.email} />
     </div>
   );
 }
