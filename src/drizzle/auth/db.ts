@@ -8,6 +8,7 @@ import * as schema from "./schema";
 
 export const getAuthDb = cache(() => {
   const { env } = getCloudflareContext();
+  console.log(schema);
   return drizzle(env.AUTH_DB, { schema });
 });
 

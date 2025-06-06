@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Noteoverflow",
   description:
-    "World's most comprehensive Cambridge study materials platform for academic excellence",
+    "World's most comprehensive IGCSE, AS & A-level study materials platform",
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
         <title>Noteoverflow</title>
         <meta
           name="description"
-          content="World's most comprehensive Cambridge study materials platform for academic excellence"
+          content="World's most comprehensive IGCSE, AS & A-level study materials platform"
         />
         <link rel="icon" href="/assets/favicon.ico" />
       </head>
