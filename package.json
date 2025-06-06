@@ -10,8 +10,6 @@
     "db:studio:all": "drizzle-kit studio --config drizzle-auth.config.ts && drizzle-kit studio --config drizzle-main.config.ts",
     "db:generate:auth": "drizzle-kit generate --config drizzle-auth.config.ts",
     "db:generate:main": "drizzle-kit generate --config drizzle-main.config.ts",
-    "db:migrate:auth": "drizzle-kit migrate --config drizzle-auth.config.ts",
-    "db:migrate:main": "drizzle-kit migrate --config drizzle-main.config.ts",
     "db:generate:all": "npm run db:generate:auth && npm run db:generate:main",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

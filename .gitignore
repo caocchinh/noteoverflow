@@ -19,6 +19,8 @@
 # misc
 .DS_Store
 *.pem
+/src/drizzle/auth/migrations
+/src/drizzle/main/migrations
 
 # debug
 npm-debug.log*

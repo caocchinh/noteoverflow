@@ -35,7 +35,7 @@
       "bucket_name": "noteoverflow-dev"
     },
     {
-      "binding": "CACHE_BUCKET",
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "nfcache-dev"
     }
   ],
@@ -44,16 +44,6 @@
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
   "placement": { "mode": "smart" }
-
-  /**
-   * Environment Variables
-   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-   */
-  // "vars": { "MY_VARIABLE": "production_value" },
-  /**
-   * Note: Use secrets to store sensitive data.
-   * https://developers.cloudflare.com/workers/configuration/secrets/
-   */
 
   /**
    * Static Assets
