@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Noteoverflow",
+  title: "NoteOverflow",
   description:
     "World's most comprehensive IGCSE, AS & A-level study materials platform",
 };
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Noteoverflow</title>
+        <title>NoteOverflow</title>
         <meta
           name="description"
           content="World's most comprehensive IGCSE, AS & A-level study materials platform"

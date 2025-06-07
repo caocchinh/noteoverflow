@@ -10,8 +10,11 @@ export const auth = () =>
       provider: "sqlite",
       schema: schema,
     }),
+    appName: "NoteOverflow",
     baseURL: process.env.BETTER_AUTH_URL,
     secret: process.env.BETTER_AUTH_SECRET,
+    trustedOrigins: [process.env.BETTER_AUTH_URL],
+
     socialProviders: {
       google: {
         prompt: "select_account",
