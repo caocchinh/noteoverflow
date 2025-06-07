@@ -28,7 +28,7 @@ const TestPage = ({ email }: { email?: string }) => {
   return (
     <div>
       <p>{email}</p>
-      <img src="/assets/logo-colorised.png" alt="favicon" />
+      <img src="/assets/logo-bg-colorised-modified.png" alt="favicon" />
       <Button onClick={handleSignIn}>{t("title")}</Button>
       <Button onClick={handleSignOut} className="bg-red-500">
         {t("title")}

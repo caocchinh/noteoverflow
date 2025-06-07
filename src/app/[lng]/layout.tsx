@@ -31,7 +31,7 @@ export default function RootLayout({
           name="description"
           content="World's most comprehensive IGCSE, AS & A-level study materials platform"
         />
-        <link rel="icon" href="/assets/favicon.ico" />
+        <link rel="icon" href="/assets/logo-bg-colorised-modified.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
