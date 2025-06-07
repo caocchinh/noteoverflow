@@ -12,6 +12,9 @@
    * Static Assets
    * https://developers.cloudflare.com/workers/static-assets/binding/
    */
+
+  "preview_urls": true,
+  "workers_dev": true,
   "assets": {
     "binding": "ASSETS",
     "directory": ".open-next/assets"
@@ -23,26 +26,26 @@
     {
       "binding": "AUTH_DB",
       "database_name": "nfauth",
-      "database_id": "cbac6972-6904-4a66-b042-c099901358e9",
-      "preview_database_id": "c4ea3d2e-bf0a-416d-a2b1-780585358bcd"
+      "database_id": "cbac6972-6904-4a66-b042-c099901358e9"
+      // "preview_database_id": "c4ea3d2e-bf0a-416d-a2b1-780585358bcd"
     },
     {
       "binding": "MAIN_DB",
       "database_name": "noteoverflow",
-      "database_id": "0b76f3c9-07ac-41ac-aabd-9d155d22482e",
-      "preview_database_id": "8407adc1-91c9-4850-a1b3-a0e5c75c27c0"
+      "database_id": "0b76f3c9-07ac-41ac-aabd-9d155d22482e"
+      // "preview_database_id": "8407adc1-91c9-4850-a1b3-a0e5c75c27c0"
     }
   ],
   "r2_buckets": [
     {
       "binding": "MAIN_BUCKET",
-      "bucket_name": "noteoverflow",
-      "preview_bucket_name": "noteoverflow-dev"
+      "bucket_name": "noteoverflow"
+      // "preview_bucket_name": "noteoverflow-dev"
     },
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "nfcache",
-      "preview_bucket_name": "nfcache-dev"
+      "bucket_name": "nfcache"
+      // "preview_bucket_name": "nfcache-dev"
     }
   ],
   "durable_objects": {
