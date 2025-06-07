@@ -3,11 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
+    remotePatterns: [
+      new URL("https://noteoverflow-dev.r2.dev/**"),
+      new URL("http://127.0.0.1:8787/**"),
+      new URL("https://localhost:3000/**"),
+    ],
   },
 };
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+initOpenNextCloudflareForDev({ persist: true });
 
 export default nextConfig;
 
