@@ -21,5 +21,14 @@ export const auth = () =>
         clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
         clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
       },
+      discord: {
+        clientId: process.env.DISCORD_CLIENT_ID,
+        clientSecret: process.env.DISCORD_CLIENT_SECRET,
+      },
+      reddit: {
+        clientId: process.env.REDDIT_CLIENT_ID,
+        clientSecret: process.env.REDDIT_CLIENT_SECRET,
+        scope: ["identity"],
+      },
     },
   });
