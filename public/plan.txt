@@ -4,7 +4,7 @@
 
 3. User who uploads unwanted content or hate speech will be rejected and temporary ban for 1 week of no submitting content with NO APPEAL. Think before submit.
 
-4. A search bar to allow user to type in the past paper code, when clicked in it will show all filters. Can use a shortcut to open it like a command. This can be embeded into a browser extension for quick access. When entered it will just direct to the actual link of the pdf
+    4. A search bar to allow user to type in the past paper code, when clicked in it will show all filters. Can use a shortcut to open it like a command. This can be embeded into a browser extension for quick access. When entered it will just direct to the actual link of the pdf
 
 5. Have a rating of question difficulty.
 

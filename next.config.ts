@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
     remotePatterns: [
       new URL("https://noteoverflow-dev.r2.dev/**"),
-      new URL("http://127.0.0.1:8787/**"),
+      new URL("http://localhost:8787/**"),
       new URL("https://localhost:3000/**"),
     ],
   },
