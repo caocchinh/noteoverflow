@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import NextTopLoader from "nextjs-toploader";
+import { LOGO_MAIN_COLOR } from "@/constants/constants";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +30,10 @@ export default function RootLayout({
         />
         <link rel="icon" href="/assets/favicon.ico" />
       </head>
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} antialiased`}>
+        <NextTopLoader color={LOGO_MAIN_COLOR} showSpinner={false} />
+        {children}
+      </body>
     </html>
   );
 }

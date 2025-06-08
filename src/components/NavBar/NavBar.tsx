@@ -3,6 +3,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
+import ShinyText from "../ShinyText";
 
 const NavBar = () => {
   return (
@@ -42,7 +43,7 @@ const NavBar = () => {
           >
             <Link href="/app">
               <Layers />
-              Topical questions
+              <ShinyText text="Topical questions" />
             </Link>
           </Button>
           <Button
