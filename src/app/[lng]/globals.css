@@ -20,6 +20,7 @@
       background-position: -100%;
     }
   }
+
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);

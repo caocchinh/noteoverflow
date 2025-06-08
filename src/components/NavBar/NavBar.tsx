@@ -3,19 +3,20 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
-import ShinyText from "../ShinyText";
+import ShinyText from "../ui/animation/ShinyText";
 
 const NavBar = () => {
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-transparent backdrop-blur-sm border-b border-background/10 fixed top-0 left-0 right-0 z-50">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-50">
       <nav className="flex items-center justify-evenly sm:justify-between gap-2 sm:gap-8 w-full">
-        <Image
-          className="hidden lg:block"
-          src="/assets/logo-full-colorised-white.png"
-          alt="logo"
-          width={245}
-          height={28}
-        />
+        <a href="#" className="hidden lg:block">
+          <Image
+            src="/assets/logo-full-colorised-white.png"
+            alt="logo"
+            width={245}
+            height={28}
+          />
+        </a>
         <Image
           className="block lg:hidden"
           src="/assets/logo-bg-colorised-modified-small.png"
@@ -26,7 +27,7 @@ const NavBar = () => {
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
             placeholder="Search"
-            className="w-full rounded-xl max-w-md border-background/20 rounded-r-none h-full text-background"
+            className="w-full rounded-xl bg-foreground max-w-md border-background/20 rounded-r-none h-full text-background"
           />
           <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 border-background/20 border-1 bg-foreground-secondary">
             <Search />

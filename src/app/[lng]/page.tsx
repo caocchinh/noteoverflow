@@ -2,12 +2,89 @@
 import AnimatedText from "@/components/ui/animation/AnimatedText";
 import NavBar from "@/components/NavBar/NavBar";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import {
+  Atom,
+  ChartLine,
+  Code,
+  Dna,
+  FlaskConical,
+  Pi,
+  RectangleEllipsis,
+  Sparkles,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import RotatingText from "@/components/ui/animation/RotatingText";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/ui/grid-pattern";
+import InfiniteScroll from "@/components/ui/animation/InfiniteScroll";
+import CountUp from "@/components/ui/animation/CountUp";
+
+const InfiniteScrollItems = [
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <Dna /> Biology (9700)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <FlaskConical /> Chemistry (9701)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <Atom /> Physics (9702)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <Code /> Computer Science (9618)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <Pi /> Further Mathematics (9231)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <ChartLine /> Economics (9708)
+        </div>
+      </div>
+    ),
+  },
+  {
+    content: (
+      <div className="flex flex-col items-center justify-center">
+        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+          <RectangleEllipsis /> Many more...
+        </div>
+      </div>
+    ),
+  },
+];
 
 export default function Home() {
   return (
@@ -57,10 +134,16 @@ export default function Home() {
         >
           <div className="flex flex-col items-center justify-center gap-4">
             <h1 className="text-3xl md:text-5xl font-bold text-background ">
-              Exam preparation.
+              CAIE Exams Preparation.
             </h1>
             <RotatingText
-              texts={["Reimagined.", "Simplified.", "Accelerated.", "Refined."]}
+              texts={[
+                "Free forever.",
+                "Reimagined.",
+                "Simplified.",
+                "Accelerated.",
+                "Refined.",
+              ]}
               mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main text-background overflow-hidden py-0.5 sm:py-1 md:py-2  justify-center rounded-lg text-4xl md:text-5xl font-bold text-background"
               staggerFrom={"last"}
               initial={{ y: "100%" }}
@@ -96,6 +179,41 @@ export default function Home() {
             <Sparkles />
           </Button>
         </motion.div>
+      </section>
+      <section className="relative min-h-screen gap-12 py-12 px-4 md:px-8 flex flex-row items-center justify-center">
+        <div className="w-1/2 overflow-hidden flex items-center justify-center">
+          <InfiniteScroll
+            items={InfiniteScrollItems}
+            isTilted={true}
+            width="500px"
+            itemMinHeight={70}
+            maxHeight="800px"
+            tiltDirection="left"
+            autoplay={false}
+            autoplaySpeed={0.1}
+            autoplayDirection="up"
+            pauseOnHover={true}
+          />
+        </div>
+        <div className="w-1/2 overflow-hidden">
+          <div>
+            <CountUp
+              to={200000}
+              from={0}
+              direction="up"
+              delay={0}
+              duration={2}
+              className="text-logo-main text-4xl font-bold w-full"
+            />
+            <span className="text-logo-main text-4xl font-bold">+</span>
+          </div>
+          <h1 className="text-background text-4xl font-bold w-full">
+            Convenient topical past paper questions
+          </h1>
+          <p className="text-background/50 text-lg w-full mt-2">
+            from 2009 of the most popular IGCSE, AS & A-level subjects
+          </p>
+        </div>
       </section>
     </div>
   );
