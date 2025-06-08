@@ -140,3 +140,8 @@
     @apply bg-background text-foreground;
   }
 }
+img,
+video {
+  max-width: unset;
+  height: unset;
+}

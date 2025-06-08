@@ -17,13 +17,15 @@ const NavBar = () => {
             height={28}
           />
         </a>
-        <Image
-          className="block lg:hidden"
-          src="/assets/logo-bg-colorised-modified-small.png"
-          alt="logo"
-          width={40}
-          height={40}
-        />
+        <a href="#" className="lg:hidden block">
+          <Image
+            src="/assets/logo-bg-colorised-modified-small.png"
+            alt="logo"
+            width={40}
+            height={40}
+          />
+        </a>
+
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
             placeholder="Search"
@@ -44,7 +46,11 @@ const NavBar = () => {
           >
             <Link href="/app">
               <Layers />
-              <ShinyText text="Topical questions" />
+              <ShinyText
+                text="Topical questions"
+                className="hidden sm:inline-block"
+              />
+              <ShinyText text="Topical" className="inline-block sm:hidden" />
             </Link>
           </Button>
           <Button

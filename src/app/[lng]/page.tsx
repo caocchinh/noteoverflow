@@ -19,7 +19,186 @@ import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import InfiniteScroll from "@/components/ui/animation/InfiniteScroll";
 import CountUp from "@/components/ui/animation/CountUp";
+import GridMotion from "@/components/ui/animation/GridMotion";
 
+const items = [
+  <Image
+    key="logo1"
+    src="/assets/demo/1.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo2"
+    src="/assets/demo/2.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo3"
+    src="/assets/demo/3.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo4"
+    src="/assets/demo/4.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo5"
+    src="/assets/demo/5.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo6"
+    src="/assets/demo/6.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo7"
+    src="/assets/demo/7.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo8"
+    src="/assets/demo/8.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo9"
+    src="/assets/demo/9.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo10"
+    src="/assets/demo/10.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo11"
+    src="/assets/demo/11.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo12"
+    src="/assets/demo/12.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo13"
+    src="/assets/demo/13.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo14"
+    src="/assets/demo/14.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo15"
+    src="/assets/demo/15.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo16"
+    src="/assets/demo/16.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo17"
+    src="/assets/demo/17.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo18"
+    src="/assets/demo/18.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo19"
+    src="/assets/demo/19.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo20"
+    src="/assets/demo/20.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo21"
+    src="/assets/demo/21.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+  <Image
+    key="logo22"
+    src="/assets/demo/22.png"
+    alt="NoteOverflow"
+    className="w-full !h-full object-contain object-left rounded-lg"
+    width={65}
+    height={65}
+  />,
+];
 const InfiniteScrollItems = [
   {
     content: (
@@ -180,8 +359,8 @@ export default function Home() {
           </Button>
         </motion.div>
       </section>
-      <section className="relative min-h-screen gap-12 py-12 px-4 md:px-8 flex flex-row items-center justify-center">
-        <div className="w-1/2 overflow-hidden flex items-center justify-center">
+      <section className="relative min-h-screen gap-12 py-12 px-4 md:px-8 flex flex-col md:flex-row items-center justify-center">
+        <div className="w-full md:w-1/2 order-2 md:order-1 overflow-hidden flex items-center justify-center">
           <InfiniteScroll
             items={InfiniteScrollItems}
             isTilted={true}
@@ -195,7 +374,7 @@ export default function Home() {
             pauseOnHover={true}
           />
         </div>
-        <div className="w-1/2 overflow-hidden">
+        <div className="w-full md:w-1/2 order-1 md:order-2 overflow-hidden">
           <div>
             <CountUp
               to={200000}
@@ -215,6 +394,7 @@ export default function Home() {
           </p>
         </div>
       </section>
+      <GridMotion items={items} />
     </div>
   );
 }
