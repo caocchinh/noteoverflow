@@ -20,6 +20,7 @@ import { GridPattern } from "@/components/ui/grid-pattern";
 import InfiniteScroll from "@/components/ui/animation/InfiniteScroll";
 import CountUp from "@/components/ui/animation/CountUp";
 import GridMotion from "@/components/ui/animation/GridMotion";
+import Beams from "@/components/ui/animation/Beams";
 
 const items = [
   <Image
@@ -395,6 +396,18 @@ export default function Home() {
         </div>
       </section>
       <GridMotion items={items} />
+      <div className="w-full h-screen relative">
+        <Beams
+          beamWidth={3}
+          beamHeight={30}
+          beamNumber={25}
+          lightColor="#7bb2f9"
+          speed={2}
+          noiseIntensity={1.75}
+          scale={0.2}
+          rotation={30}
+        />
+      </div>
     </div>
   );
 }
