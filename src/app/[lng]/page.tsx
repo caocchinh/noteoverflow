@@ -6,12 +6,33 @@ import { Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import RotatingText from "@/components/ui/animation/RotatingText";
+import { cn } from "@/lib/utils";
+import { GridPattern } from "@/components/ui/grid-pattern";
 
 export default function Home() {
   return (
     <div className="bg-foreground min-h-screen">
       <NavBar />
       <section className="flex flex-col items-center justify-center min-h-screen px-4 md:px-8 py-12 text-center relative">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 0.3,
+            ease: "easeInOut",
+          }}
+        >
+          <GridPattern
+            width={30}
+            height={30}
+            x={-1}
+            y={-1}
+            strokeDasharray={"4 2"}
+            className={cn(
+              "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]"
+            )}
+          />
+        </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -39,13 +60,7 @@ export default function Home() {
               Exam preparation.
             </h1>
             <RotatingText
-              texts={[
-                "Reimagined.",
-                "Simplified.",
-                "Elevated.",
-                "Accelerated.",
-                "Refined.",
-              ]}
+              texts={["Reimagined.", "Simplified.", "Accelerated.", "Refined."]}
               mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main text-background overflow-hidden py-0.5 sm:py-1 md:py-2  justify-center rounded-lg text-4xl md:text-5xl font-bold text-background"
               staggerFrom={"last"}
               initial={{ y: "100%" }}
@@ -54,7 +69,7 @@ export default function Home() {
               staggerDuration={0.025}
               splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
               transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              rotationInterval={5000}
+              rotationInterval={4000}
             />
           </div>
         </motion.div>
