@@ -11,7 +11,6 @@ import {
   RectangleEllipsis,
   Sparkles,
 } from "lucide-react";
-
 import { motion } from "motion/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -309,7 +308,7 @@ export default function Home() {
           </div>
           <PixelCard variant="blue">
             <Button className="absolute top-0 border-background/20 border-1 left-0 w-full h-full bg-transparent hover:bg-transparent">
-              Learn with zero cost
+              Start learning with zero cost
               <HandCoins />
             </Button>
           </PixelCard>
@@ -325,15 +324,15 @@ export default function Home() {
             handle="founder@noteoverflow.com"
           />
 
-          <div className="flex flex-col items-center justify-center w-[90%] md:w-[400px] relative">
+          <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative">
             <p className="text-background/80 text-left text-4xl ">
               &quot;In every opened mind and heart, education sows the seeds of
               boundless <span className="text-rose-700">compassion.</span>&quot;
             </p>
             <hr className="w-[69%] border-background/20 border-2 mt-5 mr-auto" />
             <p className="text-background/80 text-left text-lg mt-2">
-              *This project is created with pride by a Vietnamese student at
-              Vinschool.{" "}
+              *This project is created with pride by a 12th grader Vietnamese
+              student at Vinschool Central Park.{" "}
               <span>
                 <Image
                   src="/assets/vn.svg"

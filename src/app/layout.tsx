@@ -4,6 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/context/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,15 +32,22 @@ export default function RootLayout({
         />
         <link rel="icon" href="/assets/favicon.ico" />
       </head>
-      <body className={`${inter.variable} antialiased`}>
-        <NextTopLoader
-          zIndex={99999999}
-          color={LOGO_MAIN_COLOR}
-          showSpinner={false}
-        />
-        {children}
-        <Toaster />
-      </body>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <body className={`${inter.variable} antialiased`}>
+          <NextTopLoader
+            zIndex={99999999}
+            color={LOGO_MAIN_COLOR}
+            showSpinner={false}
+          />
+          {children}
+          <Toaster />
+        </body>
+      </ThemeProvider>
     </html>
   );
 }
