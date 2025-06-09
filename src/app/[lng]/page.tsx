@@ -270,7 +270,7 @@ export default function Home() {
           </div>
         </section>
         <GridMotion items={items} />
-        <div
+        <section
           className="w-full h-screen relative gap-6 flex flex-col items-center justify-center"
           ref={containerRef}
         >
@@ -291,7 +291,10 @@ export default function Home() {
               rotation={30}
             />
           </div>
-          <div ref={scrambleRef}>
+          <div
+            ref={scrambleRef}
+            className="w-full flex items-center justify-center"
+          >
             <TextScramble
               className="text-7xl font-semibold text-center relative z-10 text-background"
               as="span"
@@ -308,14 +311,25 @@ export default function Home() {
               <HandCoins />
             </Button>
           </PixelCard>
-        </div>
-        <ProfileCard
-          avatarUrl="/assets/founder.png"
-          iconUrl="/assets/logo-bg.png"
-          grainUrl="/assets/grain.jpg"
-          behindGradient="/assets/behind-gradient.jpg"
-          innerGradient="/assets/inner-gradient.jpg"
-        />
+        </section>
+        <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 md:px-8 gap-12 ">
+          <ProfileCard
+            avatarUrl="/assets/founder.png"
+            iconUrl="/assets/logo-bg.png"
+            grainUrl="/assets/grain.webp"
+            name="Mr. Cao Cự Chính"
+            title="Founder & Developer"
+            className="order-1 md:order-0"
+            handle="founder@noteoverflow.com"
+          />
+
+          <div className="flex flex-row items-center justify-center w-[90%] sm:w-[320px] relative">
+            <p className="text-background/80 text-justify text-4xl ">
+              &quot;In every opened mind and heart, education sows the seeds of
+              boundless compassion.&quot;
+            </p>
+          </div>
+        </section>
       </ClickSpark>
     </div>
   );

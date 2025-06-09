@@ -28,14 +28,14 @@
   --card-radius: 30px;
 }
 
-.pc-card-wrapper {
+.pcCardWrapper {
   perspective: 500px;
   transform: translate3d(0, 0, 0.1px);
   position: relative;
   touch-action: none;
 }
 
-.pc-card-wrapper::before {
+.pcCardWrapper::before {
   content: "";
   position: absolute;
   inset: -10px;
@@ -49,18 +49,18 @@
   background-image: var(--behind-gradient);
 }
 
-.pc-card-wrapper:hover,
-.pc-card-wrapper.active {
+.pcCardWrapper:hover,
+.pcCardWrapper.active {
   --card-opacity: 1;
 }
 
-.pc-card-wrapper:hover::before,
-.pc-card-wrapper.active::before {
+.pcCardWrapper:hover::before,
+.pcCardWrapper.active::before {
   filter: contrast(1) saturate(2) blur(40px) opacity(1);
   transform: scale(0.9) translate3d(0, 0, 0.1px);
 }
 
-.pc-card {
+.pcCard {
   height: 80svh;
   max-height: 540px;
   display: grid;
@@ -94,14 +94,14 @@
   overflow: hidden;
 }
 
-.pc-card:hover,
-.pc-card.active {
+.pcCard:hover,
+.pcCard.active {
   transition: none;
   transform: translate3d(0, 0, 0.1px) rotateX(var(--rotate-y))
     rotateY(var(--rotate-x));
 }
 
-.pc-card * {
+.pcCard * {
   display: grid;
   grid-area: 1/-1;
   border-radius: var(--card-radius);
@@ -109,7 +109,7 @@
   pointer-events: none;
 }
 
-.pc-inside {
+.pcInside {
   inset: 1px;
   position: absolute;
   background-image: var(--inner-gradient);
@@ -117,7 +117,7 @@
   transform: translate3d(0, 0, 0.01px);
 }
 
-.pc-shine {
+.pcShine {
   mask-image: var(--icon);
   mask-mode: luminance;
   mask-repeat: repeat;
@@ -130,8 +130,8 @@
   mix-blend-mode: color-dodge;
 }
 
-.pc-shine,
-.pc-shine::after {
+.pcShine,
+.pcShine::after {
   --space: 5%;
   --angle: -45deg;
   transform: translate3d(0, 0, 1px);
@@ -172,8 +172,8 @@
   background-repeat: repeat;
 }
 
-.pc-shine::before,
-.pc-shine::after {
+.pcShine::before,
+.pcShine::after {
   content: "";
   background-position: center;
   background-size: cover;
@@ -181,20 +181,20 @@
   opacity: 0;
 }
 
-.pc-card:hover .pc-shine,
-.pc-card.active .pc-shine {
+.pcCard:hover .pcShine,
+.pcCard.active .pcShine {
   filter: brightness(0.85) contrast(1.5) saturate(0.5);
   animation: none;
 }
 
-.pc-card:hover .pc-shine::before,
-.pc-card.active .pc-shine::before,
-.pc-card:hover .pc-shine::after,
-.pc-card.active .pc-shine::after {
+.pcCard:hover .pcShine::before,
+.pcCard.active .pcShine::before,
+.pcCard:hover .pcShine::after,
+.pcCard.active .pcShine::after {
   opacity: 1;
 }
 
-.pc-shine::before {
+.pcShine::before {
   background-image: linear-gradient(
       45deg,
       var(--sunpillar-4),
@@ -220,7 +220,7 @@
   mix-blend-mode: luminosity;
 }
 
-.pc-shine::after {
+.pcShine::after {
   background-position: 0 var(--background-y),
     calc(var(--background-x) * 0.4) calc(var(--background-y) * 0.5), center;
   background-size: 200% 300%, 700% 700%, 100% 100%;
@@ -228,7 +228,7 @@
   filter: brightness(0.8) contrast(1.5);
 }
 
-.pc-glare {
+.pcGlare {
   transform: translate3d(0, 0, 1.1px);
   overflow: hidden;
   background-image: radial-gradient(
@@ -241,13 +241,16 @@
   z-index: 4;
 }
 
-.pc-avatar-content {
+.pcAvatarContent {
   mix-blend-mode: screen;
   overflow: hidden;
 }
 
-.pc-avatar-content .avatar {
-  width: 100%;
+.avatar {
+  width: 100% !important;
+  height: 120% !important;
+  object-fit: cover;
+  object-position: 75% 100%;
   position: absolute;
   left: 50%;
   transform: translateX(-50%) scale(1);
@@ -255,7 +258,7 @@
   opacity: calc(1.75 - var(--pointer-from-center));
 }
 
-.pc-avatar-content::before {
+.pcAvatarContent::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -271,15 +274,17 @@
   pointer-events: none;
 }
 
-.pc-user-info {
+.pcUserInfo {
   position: absolute;
   bottom: 20px;
   left: 20px;
   right: 20px;
   z-index: 2;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 5px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -288,67 +293,50 @@
   pointer-events: auto;
 }
 
-.pc-user-details {
+.pcUserDetails {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.pc-mini-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-}
-
-.pc-mini-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.pc-user-text {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pc-handle {
+.pcHandle {
   font-size: 14px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1;
 }
 
-.pc-status {
+.pcStatus {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1;
 }
 
-.pc-contact-btn {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 8px 16px;
+.pcContactBtn {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 4px 0px !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.9) !important;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 90%;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
 }
 
-.pc-contact-btn:hover {
+.pcContactBtn:hover {
   border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
   transition: all 0.2s ease;
 }
 
-.pc-content {
+.pcContent {
   max-height: 100%;
   overflow: hidden;
   text-align: center;
@@ -362,15 +350,15 @@
   mix-blend-mode: luminosity;
 }
 
-.pc-details {
+.pcDetails {
   width: 100%;
   position: absolute;
-  top: 3em;
+  top: 1em;
   display: flex;
   flex-direction: column;
 }
 
-.pc-details h3 {
+.pcDetails h3 {
   font-weight: 600;
   margin: 0;
   font-size: min(5svh, 3em);
@@ -382,10 +370,10 @@
   -webkit-background-clip: text;
 }
 
-.pc-details p {
+.pcDetails p {
   font-weight: 600;
   position: relative;
-  top: -12px;
+  top: -3px;
   white-space: nowrap;
   font-size: 16px;
   margin: 0 auto;
@@ -419,73 +407,68 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .pc-card {
+  .pcCard {
     height: 70svh;
     max-height: 450px;
   }
 
-  .pc-details {
+  .pcDetails {
     top: 2em;
   }
 
-  .pc-details h3 {
+  .pcDetails h3 {
     font-size: min(4svh, 2.5em);
   }
 
-  .pc-details p {
+  .pcDetails p {
     font-size: 14px;
   }
 
-  .pc-user-info {
+  .pcUserInfo {
     bottom: 15px;
     left: 15px;
     right: 15px;
     padding: 10px 12px;
   }
 
-  .pc-mini-avatar {
-    width: 28px;
-    height: 28px;
-  }
-
-  .pc-user-details {
+  .pcUserDetails {
     gap: 10px;
   }
 
-  .pc-handle {
+  .pcHandle {
     font-size: 13px;
   }
 
-  .pc-status {
+  .pcStatus {
     font-size: 10px;
   }
 
-  .pc-contact-btn {
+  .pcContactBtn {
     padding: 6px 12px;
     font-size: 11px;
   }
 }
 
 @media (max-width: 480px) {
-  .pc-card {
+  .pcCard {
     height: 60svh;
     max-height: 380px;
   }
 
-  .pc-details {
+  .pcDetails {
     top: 1.5em;
   }
 
-  .pc-details h3 {
+  .pcDetails h3 {
     font-size: min(3.5svh, 2em);
   }
 
-  .pc-details p {
+  .pcDetails p {
     font-size: 12px;
     top: -8px;
   }
 
-  .pc-user-info {
+  .pcUserInfo {
     bottom: 12px;
     left: 12px;
     right: 12px;
@@ -493,24 +476,19 @@
     border-radius: 50px;
   }
 
-  .pc-mini-avatar {
-    width: 24px;
-    height: 24px;
-  }
-
-  .pc-user-details {
+  .pcUserDetails {
     gap: 8px;
   }
 
-  .pc-handle {
+  .pcHandle {
     font-size: 12px;
   }
 
-  .pc-status {
+  .pcStatus {
     font-size: 9px;
   }
 
-  .pc-contact-btn {
+  .pcContactBtn {
     padding: 5px 10px;
     font-size: 10px;
     border-radius: 50px;
@@ -518,42 +496,37 @@
 }
 
 @media (max-width: 320px) {
-  .pc-card {
+  .pcCard {
     height: 55svh;
     max-height: 320px;
   }
 
-  .pc-details h3 {
+  .pcDetails h3 {
     font-size: min(3svh, 1.5em);
   }
 
-  .pc-details p {
+  .pcDetails p {
     font-size: 11px;
   }
 
-  .pc-user-info {
+  .pcUserInfo {
     padding: 6px 8px;
     border-radius: 50px;
   }
 
-  .pc-mini-avatar {
-    width: 20px;
-    height: 20px;
-  }
-
-  .pc-user-details {
+  .pcUserDetails {
     gap: 6px;
   }
 
-  .pc-handle {
+  .pcHandle {
     font-size: 11px;
   }
 
-  .pc-status {
+  .pcStatus {
     font-size: 8px;
   }
 
-  .pc-contact-btn {
+  .pcContactBtn {
     padding: 4px 8px;
     font-size: 9px;
     border-radius: 50px;

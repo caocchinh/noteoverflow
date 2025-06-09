@@ -1,6 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import styles from "./profile.module.css";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Mail } from "lucide-react";
 
 interface ProfileCardProps {
   avatarUrl: string;
@@ -61,17 +70,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   showBehindGradient = true,
   className = "",
   enableTilt = true,
-  miniAvatarUrl,
-  name = "Javi A. Torres",
-  title = "Software Engineer",
-  handle = "javicodes",
-  status = "Online",
-  contactText = "Contact",
+  name = "Cao Cự Chính",
+  title = "Founder & Developer",
+  handle = "founder@noteoverflow.com",
   showUserInfo = true,
   onContactClick,
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [buttonText, setButtonText] = useState("Copy email");
 
   const animationHandlers = useMemo(() => {
     if (!enableTilt) return null;
@@ -260,13 +267,23 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   );
 
   const handleContactClick = useCallback(() => {
+    navigator.clipboard.writeText(handle);
+
+    setButtonText("Copied");
+
+    toast.success("Email copied to clipboard");
+
+    setTimeout(() => {
+      setButtonText("Copy email");
+    }, 2000);
+
     onContactClick?.();
-  }, [onContactClick]);
+  }, [onContactClick, handle]);
 
   return (
     <div
       ref={wrapRef}
-      className={`${styles.pcCardWrapper} ${className}`.trim()}
+      className={`${styles.pcCardWrapper} ${className} w-max`.trim()}
       style={cardStyle}
     >
       <section ref={cardRef} className={styles.pcCard}>
@@ -286,33 +303,17 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
             />
             {showUserInfo && (
               <div className={styles.pcUserInfo}>
-                <div className={styles.pcUserDetails}>
-                  <div className={styles.pcMiniAvatar}>
-                    <img
-                      src={miniAvatarUrl || avatarUrl}
-                      alt={`${name || "User"} mini avatar`}
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.opacity = "0.5";
-                        target.src = avatarUrl;
-                      }}
-                    />
-                  </div>
-                  <div className={styles.pcUserText}>
-                    <div className={styles.pcHandle}>@{handle}</div>
-                    <div className={styles.pcStatus}>{status}</div>
-                  </div>
-                </div>
-                <button
+                <div className={styles.pcHandle}>{handle}</div>
+                <Button
                   className={styles.pcContactBtn}
                   onClick={handleContactClick}
                   style={{ pointerEvents: "auto" }}
                   type="button"
-                  aria-label={`Contact ${name || "user"}`}
+                  aria-label={`Copy email ${name || "user"}`}
                 >
-                  {contactText}
-                </button>
+                  {buttonText}
+                  <Mail />
+                </Button>
               </div>
             )}
           </div>

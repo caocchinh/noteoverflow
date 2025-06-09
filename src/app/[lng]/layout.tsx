@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <NextTopLoader color={LOGO_MAIN_COLOR} showSpinner={false} />
         {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -28,7 +28,7 @@ const NavBar = () => {
 
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
-            placeholder="Search"
+            placeholder="Enter paper code"
             className="w-full rounded-xl bg-foreground max-w-md border-background/20 rounded-r-none h-full text-background"
           />
           <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 border-background/20 border-1 bg-foreground-secondary">
