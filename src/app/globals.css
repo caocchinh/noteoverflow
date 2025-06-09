@@ -3,6 +3,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Theme-independent variables for specific components */
+:root {
+  /* Navbar specific variables */
+  --navbar-bg: oklch(0.145 0 0);
+  --navbar-text: oklch(0.985 0 0);
+  --navbar-border: oklch(1 0 0 / 10%);
+  --navbar-input-border: oklch(1 0 0 / 40%);
+  --navbar-button-bg: oklch(0.269 0 0);
+  --navbar-button-hover: oklch(0.985 0 0 / 80%);
+
+  /* Home page specific variables */
+  --home-page-bg: oklch(0.145 0 0);
+  --home-page-text: oklch(0.985 0 0);
+  --home-page-text-muted: oklch(0.985 0 0 / 50%);
+  --home-page-border: oklch(0.985 0 0 / 20%);
+  --home-page-hover-bg: oklch(0.985 0 0 / 10%);
+}
+
 @theme inline {
   --color-logo-main: var(--logo-main-color);
   --color-logo-secondary: var(--logo-secondary-color);

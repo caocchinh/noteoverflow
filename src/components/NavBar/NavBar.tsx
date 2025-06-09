@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -5,10 +6,13 @@ import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
 import ShinyText from "@/features/home/components/animation/ShinyText";
 import { ModeToggle } from "./ThemeToggle";
+import { usePathname } from "next/navigation";
 
 const NavBar = () => {
+  const pathname = usePathname();
+
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-[999999]">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[999999] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
         <Link href="/" className="hidden lg:block">
           <Image
@@ -30,18 +34,18 @@ const NavBar = () => {
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
             placeholder="Enter paper code"
-            className="w-full rounded-xl bg-foreground max-w-md border-background/20 rounded-r-none h-full text-background"
+            className="w-full rounded-xl max-w-md rounded-r-none h-full bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
           />
-          <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 border-background/20 border-1 bg-foreground-secondary">
-            <Search />
+          <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)]">
+            <Search className="text-[var(--navbar-text)]" />
           </Button>
         </div>
         <div className="flex items-center header-content-group gap-4">
-          <Button className=" sm:hidden bg-transparent text-background hover:cursor-pointer border-1 border-background/20 w-9 p-2 h-full flex items-center justify-center">
+          <Button className="sm:hidden bg-transparent hover:cursor-pointer w-9 p-2 h-full flex items-center justify-center border border-[var(--navbar-border)] text-[var(--navbar-text)]">
             <Search />
           </Button>
           <Button
-            className="bg-transparent rounded-lg border-1 border-background/20"
+            className="bg-transparent  dark:hover:bg-white/5 rounded-lg border border-[var(--navbar-border)] text-[var(--navbar-text)]"
             asChild
             title="Access topical questions"
           >
@@ -55,7 +59,7 @@ const NavBar = () => {
             </Link>
           </Button>
           <Button
-            className="bg-background text-foreground hover:bg-background/80 hover:text-foreground"
+            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)]"
             asChild
             title="Login to access all features"
           >
@@ -64,7 +68,7 @@ const NavBar = () => {
               Login
             </Link>
           </Button>
-          <ModeToggle />
+          {pathname !== "/" && <ModeToggle />}
         </div>
       </nav>
     </header>

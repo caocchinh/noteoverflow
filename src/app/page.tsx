@@ -47,7 +47,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <Dna /> Biology (9700)
         </div>
       </div>
@@ -56,7 +56,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <FlaskConical /> Chemistry (9701)
         </div>
       </div>
@@ -65,7 +65,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <Atom /> Physics (9702)
         </div>
       </div>
@@ -74,7 +74,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <Code /> Computer Science (9618)
         </div>
       </div>
@@ -83,7 +83,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <Pi /> Further Mathematics (9231)
         </div>
       </div>
@@ -92,7 +92,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <ChartLine /> Economics (9708)
         </div>
       </div>
@@ -101,7 +101,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="text-background border-background/20 border-1 rounded-lg flex items-center gap-2 justify-center hover:bg-background/10 transition-all duration-300 w-max p-6 text-2xl hover:cursor-pointer">
+        <div className="flex items-center gap-2 justify-center hover:cursor-pointer w-max p-6 text-2xl rounded-lg text-[var(--home-page-text)] border border-[var(--home-page-border)] transition-all duration-300 ease-in-out hover:bg-[var(--home-page-hover-bg)]">
           <RectangleEllipsis /> Many more...
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-foreground min-h-screen">
+    <div className="bg-[var(--home-page-bg)] min-h-screen">
       <NavBar />
       <ClickSpark
         sparkColor="#fff"
@@ -188,7 +188,7 @@ export default function Home() {
             className="mb-4"
           >
             <div className="flex flex-col items-center justify-center gap-4">
-              <h1 className="text-3xl md:text-5xl font-bold text-background ">
+              <h1 className="text-3xl md:text-5xl font-bold text-[var(--home-page-text)]">
                 CAIE Exams Preparation.
               </h1>
               <RotatingText
@@ -199,7 +199,7 @@ export default function Home() {
                   "Accelerated.",
                   "Refined.",
                 ]}
-                mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main text-background overflow-hidden py-0.5 sm:py-1 md:py-2  justify-center rounded-lg text-4xl md:text-5xl font-bold text-background"
+                mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg text-4xl md:text-5xl font-bold text-[var(--home-page-text)]"
                 staggerFrom={"last"}
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
@@ -214,7 +214,7 @@ export default function Home() {
 
           <AnimatedText
             text="A robust, comprehensive IGCSE, AS & A-level study materials platform"
-            className="max-w-2xl mx-auto text-background/50"
+            className="max-w-2xl mx-auto text-[var(--home-page-text-muted)]"
             delay={1}
           />
 
@@ -227,9 +227,9 @@ export default function Home() {
               damping: 10,
               stiffness: 100,
             }}
-            className="mt-7"
+            className="mt-7 w-full"
           >
-            <Button className="p-6 !px-6 cursor-pointer bg-transparent hover:bg-background border-1 border-background hover:text-foreground  text-background text-[18px] rounded-lg hover:opacity-90 transition-all shadow-lg">
+            <Button className="p-6 !px-6 cursor-pointer rounded-lg transition-all shadow-lg bg-transparent text-[var(--home-page-text)] border border-[var(--home-page-text)] hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 w-[90%] md:w-[50%]">
               Get Started
               <Sparkles />
             </Button>
@@ -262,10 +262,10 @@ export default function Home() {
               />
               <span className="text-logo-main text-5xl font-bold">+</span>
             </div>
-            <h1 className="text-background text-4xl font-bold w-full">
+            <h1 className="text-4xl font-bold w-full text-[var(--home-page-text)]">
               Convenient topical past paper questions
             </h1>
-            <p className="text-background/50 text-lg w-full mt-2">
+            <p className="text-lg w-full mt-2 text-[var(--home-page-text-muted)]">
               from 2009 of the most popular IGCSE, AS & A-level subjects
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function Home() {
             className="w-full flex items-center justify-center"
           >
             <TextScramble
-              className="text-7xl font-semibold text-center relative z-10 text-background"
+              className="text-7xl font-semibold text-center relative z-10 text-[var(--home-page-text)]"
               as="span"
               trigger={isTrigger}
               duration={1.2}
@@ -307,7 +307,7 @@ export default function Home() {
             </TextScramble>
           </div>
           <PixelCard variant="blue">
-            <Button className="absolute top-0 border-background/20 border-1 left-0 w-full h-full bg-transparent hover:bg-transparent">
+            <Button className="absolute top-0 left-0 w-full h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
               Start learning with zero cost
               <HandCoins />
             </Button>
@@ -325,12 +325,12 @@ export default function Home() {
           />
 
           <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative">
-            <p className="text-background/80 text-left text-4xl ">
+            <p className="text-left text-4xl text-[var(--home-page-text)]">
               &quot;In every opened mind and heart, education sows the seeds of
               boundless <span className="text-rose-700">compassion.</span>&quot;
             </p>
-            <hr className="w-[69%] border-background/20 border-2 mt-5 mr-auto" />
-            <p className="text-background/80 text-left text-lg mt-2">
+            <hr className="w-[69%] mt-5 mr-auto border-2 border-[var(--home-page-border)]" />
+            <p className="text-left text-lg mt-2 text-[var(--home-page-text-muted)]">
               *This project is created with pride by a 12th grader Vietnamese
               student at Vinschool Central Park.{" "}
               <span>

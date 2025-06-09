@@ -17,7 +17,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
 
   return (
     <div
-      className={`text-[#b5b5b5a4] bg-clip-text ${
+      className={`text-[#b5b5b5a4] bg-clip-text hover:bg-transparent ${
         disabled ? "" : "animate-shine"
       } ${className}`}
       style={{

@@ -32,22 +32,24 @@ export default function RootLayout({
         />
         <link rel="icon" href="/assets/favicon.ico" />
       </head>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <body className={`${inter.variable} antialiased`}>
+
+      <body className={`${inter.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
           <NextTopLoader
             zIndex={99999999}
             color={LOGO_MAIN_COLOR}
             showSpinner={false}
           />
           {children}
-          <Toaster />
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+
+        <Toaster />
+      </body>
     </html>
   );
 }
