@@ -1,4 +1,10 @@
-:global(:root) {
+.pcCardWrapper {
+  perspective: 500px;
+  transform: translate3d(0, 0, 0.1px);
+  position: relative;
+  touch-action: none;
+
+  /* CSS Variables */
   --pointer-x: 50%;
   --pointer-y: 50%;
   --pointer-from-center: 0;
@@ -26,13 +32,6 @@
   --sunpillar-clr-5: var(--sunpillar-5);
   --sunpillar-clr-6: var(--sunpillar-6);
   --card-radius: 30px;
-}
-
-.pcCardWrapper {
-  perspective: 500px;
-  transform: translate3d(0, 0, 0.1px);
-  position: relative;
-  touch-action: none;
 }
 
 .pcCardWrapper::before {

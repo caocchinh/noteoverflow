@@ -326,7 +326,7 @@ export default function Home() {
 
           <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative">
             <p className="text-left text-4xl text-[var(--home-page-text)]">
-              &quot;In every opened mind and heart, education sows the seeds of
+              &quot;In every great mind and heart, education sows the seeds of
               boundless <span className="text-rose-700">compassion.</span>&quot;
             </p>
             <hr className="w-[69%] mt-5 mr-auto border-2 border-[var(--home-page-border)]" />
