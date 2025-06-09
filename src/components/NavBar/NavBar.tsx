@@ -36,12 +36,12 @@ const NavBar = () => {
             placeholder="Enter paper code"
             className="w-full rounded-xl max-w-md rounded-r-none h-full bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
           />
-          <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)]">
+          <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)] hover:bg-[var(--navbar-border)]">
             <Search className="text-[var(--navbar-text)]" />
           </Button>
         </div>
         <div className="flex items-center header-content-group gap-4">
-          <Button className="sm:hidden bg-transparent hover:cursor-pointer w-9 p-2 h-full flex items-center justify-center border border-[var(--navbar-border)] text-[var(--navbar-text)]">
+          <Button className="sm:hidden bg-transparent hover:cursor-pointer w-9 p-2 h-full flex items-center justify-center border border-[var(--navbar-border)] text-[var(--navbar-text)] hover:bg-[var(--navbar-border)]">
             <Search />
           </Button>
           <Button
@@ -59,7 +59,7 @@ const NavBar = () => {
             </Link>
           </Button>
           <Button
-            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)]"
+            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
             asChild
             title="Login to access all features"
           >

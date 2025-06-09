@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
@@ -9,6 +9,12 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -33,11 +39,13 @@ export default function RootLayout({
         <link rel="icon" href="/assets/favicon.ico" />
       </head>
 
-      <body className={`${inter.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          enableSystem={false}
           disableTransitionOnChange
         >
           <NextTopLoader

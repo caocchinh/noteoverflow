@@ -25,6 +25,8 @@
   --color-logo-main: var(--logo-main-color);
   --color-logo-secondary: var(--logo-secondary-color);
   --color-background: var(--background);
+  --font-inter: var(--font-inter);
+  --font-roboto: var(--font-roboto);
   --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
   --color-foreground-secondary: var(--foreground-secondary);
