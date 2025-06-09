@@ -312,7 +312,7 @@ export default function Home() {
             </Button>
           </PixelCard>
         </section>
-        <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 md:px-8 gap-12 ">
+        <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-2 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 ">
           <ProfileCard
             avatarUrl="/assets/founder.png"
             iconUrl="/assets/logo-bg.png"
@@ -323,10 +323,24 @@ export default function Home() {
             handle="founder@noteoverflow.com"
           />
 
-          <div className="flex flex-row items-center justify-center w-[90%] sm:w-[320px] relative">
-            <p className="text-background/80 text-justify text-4xl ">
+          <div className="flex flex-col items-center justify-center w-[90%] md:w-[400px] relative">
+            <p className="text-background/80 text-left text-4xl ">
               &quot;In every opened mind and heart, education sows the seeds of
-              boundless compassion.&quot;
+              boundless <span className="text-rose-700">compassion.</span>&quot;
+            </p>
+            <hr className="w-[69%] border-background/20 border-2 mt-5 mr-auto" />
+            <p className="text-background/80 text-left text-lg mt-2">
+              *This project is created with pride by a Vietnamese student at
+              Vinschool.{" "}
+              <span>
+                <Image
+                  src="/assets/vn.svg"
+                  alt="Vinschool"
+                  className="inline-block -mt-[5px]"
+                  width={25}
+                  height={25}
+                />
+              </span>
             </p>
           </div>
         </section>

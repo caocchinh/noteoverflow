@@ -4,11 +4,12 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
 import ShinyText from "../../features/home/components/animation/ShinyText";
+import LanguageBar from "./LanguageBar";
 
 const NavBar = () => {
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-[9999999999]">
-      <nav className="flex items-center justify-evenly sm:justify-between gap-2 sm:gap-8 w-full">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-[999999]">
+      <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
         <a href="#" className="hidden lg:block">
           <Image
             src="/assets/logo-full-colorised-white.png"
@@ -35,7 +36,7 @@ const NavBar = () => {
             <Search />
           </Button>
         </div>
-        <div className="flex items-center sm:gap-4 gap-2">
+        <div className="flex items-center header-content-group gap-4">
           <Button className=" sm:hidden bg-transparent text-background hover:cursor-pointer border-1 border-background/20 w-9 p-2 h-full flex items-center justify-center">
             <Search />
           </Button>
@@ -63,6 +64,7 @@ const NavBar = () => {
               Login
             </Link>
           </Button>
+          <LanguageBar />
         </div>
       </nav>
     </header>

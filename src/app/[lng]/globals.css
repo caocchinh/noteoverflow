@@ -145,3 +145,15 @@ video {
   max-width: unset;
   height: unset;
 }
+
+@media (max-width: 400px) {
+  .header-content-group {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 365px) {
+  .header-content-group {
+    gap: 5px;
+  }
+}
