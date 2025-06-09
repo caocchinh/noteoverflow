@@ -364,7 +364,9 @@
   font-size: min(5svh, 3em);
   margin: 0;
   padding-left: 15px;
+  font-size: 40px;
   padding-right: 15px;
+  white-space: nowrap;
   background-image: linear-gradient(to bottom, #fff, #6f6fbe);
   background-size: 1em 1.5em;
   -webkit-text-fill-color: transparent;
@@ -419,7 +421,7 @@
   }
 
   .pcDetails h3 {
-    font-size: min(4svh, 2.5em);
+    font-size: min(4svh, 2em);
   }
 
   .pcDetails p {
@@ -462,7 +464,7 @@
   }
 
   .pcDetails h3 {
-    font-size: min(3.5svh, 2em);
+    font-size: min(3.5svh, 1.7em);
   }
 
   .pcDetails p {

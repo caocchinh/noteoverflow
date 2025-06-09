@@ -31,15 +31,15 @@ const LanguageBar = () => {
             }
             alt="language"
             width={15}
-            height={15}
+            height={11.25}
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 relative z-[9999999999]">
+      <PopoverContent className="w-[140px] p-0 relative z-[9999999999]">
         {LANGUAGE_LIST.map((_language) => (
           <div
             key={_language.value}
-            className="cursor-pointer flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"
+            className="cursor-pointer rounded-md flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"
             onClick={() => {
               console.log(_language.value);
               setIsOpen(false);
@@ -53,7 +53,7 @@ const LanguageBar = () => {
               src={_language.image_src}
               alt="language"
               width={20}
-              height={20}
+              height={15}
             />
             <Check
               size={16}

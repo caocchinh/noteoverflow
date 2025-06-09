@@ -271,7 +271,7 @@ export default function Home() {
         </section>
         <GridMotion items={items} />
         <section
-          className="w-full h-screen relative gap-6 flex flex-col items-center justify-center"
+          className="w-full h-screen relative gap-6 flex flex-col items-center justify-center px-5"
           ref={containerRef}
         >
           <Crosshair
@@ -300,7 +300,7 @@ export default function Home() {
               as="span"
               trigger={isTrigger}
               duration={1.2}
-              delay={300}
+              delay={200}
             >
               FREE. FOREVER.
             </TextScramble>
