@@ -12,7 +12,7 @@ const GridMotion: FC<GridMotionProps> = ({
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const mouseXRef = useRef<number>(window.innerWidth / 2);
+  const mouseXRef = useRef<number>(0); // Default value without window reference
 
   // Ensure the grid has 28 items (4 rows x 7 columns) by default
   const totalItems = 28;
@@ -24,6 +24,9 @@ const GridMotion: FC<GridMotionProps> = ({
     items.length > 0 ? items.slice(0, totalItems) : defaultItems;
 
   useEffect(() => {
+    // Set initial mouse position when component mounts in browser
+    mouseXRef.current = window.innerWidth / 2;
+
     gsap.ticker.lagSmoothing(0);
 
     const handleMouseMove = (e: MouseEvent): void => {
