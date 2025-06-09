@@ -3,8 +3,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
-import LanguageBar from "./LanguageBar";
-import ShinyText from "../../_features/home/components/animation/ShinyText";
+import ShinyText from "../../features/home/components/animation/ShinyText";
 
 const NavBar = () => {
   return (
@@ -64,7 +63,6 @@ const NavBar = () => {
               Login
             </Link>
           </Button>
-          <LanguageBar />
         </div>
       </nav>
     </header>

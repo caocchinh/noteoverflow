@@ -1,6 +1,5 @@
 "use client";
-import NavBar from "@/app/[lng]/_components/NavBar/NavBar";
-import { Button } from "@/app/[lng]/_components/ui/button";
+
 import {
   Atom,
   ChartLine,
@@ -12,22 +11,25 @@ import {
   RectangleEllipsis,
   Sparkles,
 } from "lucide-react";
+
 import { motion } from "motion/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { GridPattern } from "@/app/[lng]/_components/ui/grid-pattern";
 import { useState, useRef, useEffect, RefObject } from "react";
-import AnimatedText from "./_features/home/components/animation/AnimatedText";
-import RotatingText from "./_features/home/components/animation/RotatingText";
-import InfiniteScroll from "./_features/home/components/animation/InfiniteScroll";
-import CountUp from "./_features/home/components/animation/CountUp";
-import GridMotion from "./_features/home/components/animation/GridMotion";
-import Beams from "./_features/home/components/animation/Beams";
-import { TextScramble } from "./_features/home/components/animation/text-scramble";
-import Crosshair from "./_features/home/components/animation/Crosshair";
-import PixelCard from "./_features/home/components/animation/PixelCard";
-import ClickSpark from "./_features/home/components/animation/ClickSpark";
-import ProfileCard from "./_features/home/components/ProfileCard/ProfileCard";
+import { GridPattern } from "@/components/ui/grid-pattern";
+import NavBar from "@/components/NavBar/NavBar";
+import { Button } from "@/components/ui/button";
+import AnimatedText from "@/features/home/components/animation/AnimatedText";
+import RotatingText from "@/features/home/components/animation/RotatingText";
+import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
+import CountUp from "@/features/home/components/animation/CountUp";
+import GridMotion from "@/features/home/components/animation/GridMotion";
+import Beams from "@/features/home/components/animation/Beams";
+import { TextScramble } from "@/features/home/components/animation/text-scramble";
+import ClickSpark from "@/features/home/components/animation/ClickSpark";
+import PixelCard from "@/features/home/components/animation/PixelCard";
+import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
+import Crosshair from "@/features/home/components/animation/Crosshair";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
