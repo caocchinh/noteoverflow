@@ -1,5 +1,5 @@
 "use client";
-import AnimatedText from "@/components/ui/animation/AnimatedText";
+import AnimatedText from "@/features/home/components/animation/AnimatedText";
 import NavBar from "@/components/NavBar/NavBar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,18 +15,19 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import RotatingText from "@/components/ui/animation/RotatingText";
+import RotatingText from "@/features/home/components/animation/RotatingText";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/ui/grid-pattern";
-import InfiniteScroll from "@/components/ui/animation/InfiniteScroll";
-import CountUp from "@/components/ui/animation/CountUp";
-import GridMotion from "@/components/ui/animation/GridMotion";
-import Beams from "@/components/ui/animation/Beams";
-import { TextScramble } from "@/components/ui/animation/text-scramble";
+import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
+import CountUp from "@/features/home/components/animation/CountUp";
+import GridMotion from "@/features/home/components/animation/GridMotion";
+import Beams from "@/features/home/components/animation/Beams";
+import { TextScramble } from "@/features/home/components/animation/text-scramble";
 import { RefObject, useEffect, useRef, useState } from "react";
-import Crosshair from "@/components/ui/animation/Crosshair";
-import PixelCard from "@/components/ui/animation/PixelCard";
-import ClickSpark from "@/components/ui/animation/ClickSpark";
+import Crosshair from "@/features/home/components/animation/Crosshair";
+import PixelCard from "@/features/home/components/animation/PixelCard";
+import ClickSpark from "@/features/home/components/animation/ClickSpark";
+import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -256,9 +257,9 @@ export default function Home() {
                 direction="up"
                 delay={0}
                 duration={2}
-                className="text-logo-main text-4xl font-bold w-full"
+                className="text-logo-main text-5xl font-bold w-full"
               />
-              <span className="text-logo-main text-4xl font-bold">+</span>
+              <span className="text-logo-main text-5xl font-bold">+</span>
             </div>
             <h1 className="text-background text-4xl font-bold w-full">
               Convenient topical past paper questions
@@ -296,18 +297,25 @@ export default function Home() {
               as="span"
               trigger={isTrigger}
               duration={1.2}
-              delay={500}
+              delay={300}
             >
               FREE. FOREVER.
             </TextScramble>
           </div>
           <PixelCard variant="blue">
             <Button className="absolute top-0 border-background/20 border-1 left-0 w-full h-full bg-transparent hover:bg-transparent">
-              Learn at zero cost
+              Learn with zero cost
               <HandCoins />
             </Button>
           </PixelCard>
         </div>
+        <ProfileCard
+          avatarUrl="/assets/founder.png"
+          iconUrl="/assets/logo-bg.png"
+          grainUrl="/assets/grain.jpg"
+          behindGradient="/assets/behind-gradient.jpg"
+          innerGradient="/assets/inner-gradient.jpg"
+        />
       </ClickSpark>
     </div>
   );

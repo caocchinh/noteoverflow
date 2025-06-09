@@ -188,9 +188,13 @@ export default function PixelCard({
   const animationRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(
     null
   );
-  const timePreviousRef = useRef(performance.now());
+  const timePreviousRef = useRef(
+    typeof performance !== "undefined" ? performance.now() : 0
+  );
   const reducedMotion = useRef(
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false
   ).current;
 
   const variantCfg: VariantConfig = VARIANTS[variant] || VARIANTS.default;
@@ -240,7 +244,13 @@ export default function PixelCard({
     pixelsRef.current = pxs;
   };
 
-  const doAnimate = (fnName: keyof Pixel) => {
+  // Define a type for callable methods of Pixel
+  type PixelMethod = Extract<
+    keyof Pixel,
+    "appear" | "disappear" | "shimmer" | "draw"
+  >;
+
+  const doAnimate = (fnName: PixelMethod) => {
     animationRef.current = requestAnimationFrame(() => doAnimate(fnName));
     const timeNow = performance.now();
     const timePassed = timeNow - timePreviousRef.current;
@@ -268,7 +278,7 @@ export default function PixelCard({
     }
   };
 
-  const handleAnimation = (name: keyof Pixel) => {
+  const handleAnimation = (name: PixelMethod) => {
     if (animationRef.current !== null) {
       cancelAnimationFrame(animationRef.current);
     }

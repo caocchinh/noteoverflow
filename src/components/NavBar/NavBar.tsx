@@ -3,11 +3,11 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
-import ShinyText from "../ui/animation/ShinyText";
+import ShinyText from "../../features/home/components/animation/ShinyText";
 
 const NavBar = () => {
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-50">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 bg-foreground border-b border-background/10 fixed top-0 left-0 right-0 z-[9999999999]">
       <nav className="flex items-center justify-evenly sm:justify-between gap-2 sm:gap-8 w-full">
         <a href="#" className="hidden lg:block">
           <Image
