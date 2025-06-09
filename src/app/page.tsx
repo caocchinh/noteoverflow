@@ -213,7 +213,7 @@ export default function Home() {
           </motion.div>
 
           <AnimatedText
-            text="A robust, comprehensive IGCSE, AS & A-level study materials platform"
+            text="A robust, comprehensive IGCSE, AS & A-level study materials platform."
             className="max-w-2xl mx-auto text-[var(--home-page-text-muted)]"
             delay={1}
           />
