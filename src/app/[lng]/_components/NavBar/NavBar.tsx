@@ -3,8 +3,8 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
-import ShinyText from "../../features/home/components/animation/ShinyText";
 import LanguageBar from "./LanguageBar";
+import ShinyText from "../../_features/home/components/animation/ShinyText";
 
 const NavBar = () => {
   return (

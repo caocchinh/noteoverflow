@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import styles from "./profile.module.css";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/[lng]/_components/ui/button";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
 
