@@ -5,6 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import NavBar from "@/components/NavBar/NavBar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -53,6 +54,7 @@ export default function RootLayout({
             color={LOGO_MAIN_COLOR}
             showSpinner={false}
           />
+          <NavBar />
           {children}
         </ThemeProvider>
 

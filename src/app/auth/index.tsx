@@ -1,11 +1,95 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import Silk from "@/features/auth/components/animation/Silk";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { authClient } from "@/lib/auth/auth-client";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const AuthPageClient = () => {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      if (errorParam === "access_denied") {
+        setError("Access denied. Please try again.");
+      } else {
+        setError("Login failed, please try again");
+      }
+    }
+  }, [searchParams]);
+
+  const handleSignInWithGoogle = async () => {
+    try {
+      setIsNavigating(true);
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/app",
+      });
+    } catch {
+      setError("Something went wrong, please try again");
+      setIsNavigating(false);
+    }
+  };
+
+  const handleSignInWithApple = async () => {
+    try {
+      setIsNavigating(true);
+      await authClient.signIn.social({
+        provider: "apple",
+        callbackURL: "/app",
+      });
+    } catch {
+      setError("Something went wrong, please try again");
+      setIsNavigating(false);
+    }
+  };
+
+  const handleSignInWithMicrosoft = async () => {
+    try {
+      setIsNavigating(true);
+      await authClient.signIn.social({
+        provider: "microsoft",
+        callbackURL: "/app",
+      });
+    } catch {
+      setError("Something went wrong, please try again");
+      setIsNavigating(false);
+    }
+  };
+
+  const handleSignInWithReddit = async () => {
+    try {
+      setIsNavigating(true);
+      await authClient.signIn.social({
+        provider: "reddit",
+        callbackURL: "/app",
+      });
+    } catch {
+      setError("Something went wrong, please try again");
+      setIsNavigating(false);
+    }
+  };
+
+  const handleSignInWithDiscord = async () => {
+    try {
+      setIsNavigating(true);
+      await authClient.signIn.social({
+        provider: "discord",
+        callbackURL: "/app",
+      });
+    } catch {
+      setError("Something went wrong, please try again");
+      setIsNavigating(false);
+    }
+  };
+
   return (
     <div className="grid min-h-svh md:grid-cols-2 bg-background">
       <motion.div
@@ -24,16 +108,32 @@ const AuthPageClient = () => {
           animate="show"
           transition={{ staggerChildren: 0.1 }}
         >
-          <div className="after:border-foreground w-full after:w-[50%] after:max-w-[275px] relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:z-0 after:flex after:items-center after:border-t-2 flex justify-center mb-4">
-            <motion.h1
-              className="text-3xl bg-background text-foreground relative z-10 px-2 font-semibold text-center"
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0 },
-              }}
-            >
-              Sign In
-            </motion.h1>
+          <div className="flex flex-col w-full">
+            <div className="after:border-foreground w-full after:w-[50%] after:max-w-[275px] relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:z-0 after:flex after:items-center after:border-t-2 flex justify-center mb-2">
+              <motion.h1
+                className="text-3xl bg-background text-foreground relative z-10 px-2 font-semibold text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0 },
+                }}
+              >
+                Sign In
+              </motion.h1>
+            </div>
+
+            {error && (
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0 },
+                }}
+                className="w-full flex items-center justify-center mb-2"
+              >
+                <div className="text-red-500 font-medium text-center">
+                  {error}
+                </div>
+              </motion.div>
+            )}
           </div>
 
           <motion.div
@@ -46,6 +146,8 @@ const AuthPageClient = () => {
             <Button
               variant="outline"
               className="!w-[200px] !h-[40px] border-1 border-[#747775] text-[#1F1F1F] !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer dark:text-[#E3E3E3] dark:border-[#8E918F]"
+              onClick={handleSignInWithGoogle}
+              disabled={isNavigating}
             >
               <Image
                 src="/assets/google.svg"
@@ -67,6 +169,8 @@ const AuthPageClient = () => {
             <Button
               variant="outline"
               className="!w-[200px] !h-[41px] border-1 border-black !font-semibold !font !rounded-[4px] flex items-center justify-center !gap-[3px] !px-[12px] hover:cursor-pointer bg-white dark:bg-black dark:border-white dark:text-white text-black"
+              onClick={handleSignInWithApple}
+              disabled={isNavigating}
             >
               <Image
                 src="/assets/apple-white.svg"
@@ -96,6 +200,8 @@ const AuthPageClient = () => {
             <Button
               variant="outline"
               className="!w-[200px] !h-[41px] border-1 border-[#8C8C8C] text-[#5E5E5E] !font-medium !font !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer bg-white dark:bg-[#2F2F2F] dark:border-[#8E918F] dark:text-white"
+              onClick={handleSignInWithMicrosoft}
+              disabled={isNavigating}
             >
               <Image
                 src="/assets/microsoft.svg"
@@ -117,6 +223,8 @@ const AuthPageClient = () => {
             <Button
               variant="outline"
               className="!w-[200px] !h-[40px] border-1 border-[#747775] !text-white !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer !bg-[#ff4500]  dark:border-[#8E918F]"
+              onClick={handleSignInWithReddit}
+              disabled={isNavigating}
             >
               <Image
                 src="/assets/reddit.svg"
@@ -138,6 +246,8 @@ const AuthPageClient = () => {
             <Button
               variant="outline"
               className="!w-[200px] !h-[40px] border-1 border-[#747775] !text-white !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer !bg-[#5865F2]  dark:border-[#8E918F]"
+              onClick={handleSignInWithDiscord}
+              disabled={isNavigating}
             >
               <Image
                 src="/assets/discord.svg"

@@ -16,7 +16,6 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, RefObject } from "react";
 import { GridPattern } from "@/components/ui/grid-pattern";
-import NavBar from "@/components/NavBar/NavBar";
 import { Button } from "@/components/ui/button";
 import AnimatedText from "@/features/home/components/animation/AnimatedText";
 import RotatingText from "@/features/home/components/animation/RotatingText";
@@ -139,7 +138,6 @@ export default function Home() {
 
   return (
     <div className="bg-[var(--home-page-bg)] min-h-screen">
-      <NavBar />
       <ClickSpark
         sparkColor="#fff"
         sparkSize={10}
