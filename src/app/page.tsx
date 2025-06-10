@@ -308,7 +308,7 @@ export default function Home() {
               as="span"
               trigger={isTrigger}
               duration={1.2}
-              delay={250}
+              delay={300}
             >
               FREE. FOREVER.
             </TextScramble>

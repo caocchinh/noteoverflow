@@ -14,6 +14,7 @@ export const auth = () =>
     baseURL: process.env.BETTER_AUTH_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: [process.env.BETTER_AUTH_URL],
+
     onAPIError: {
       throw: true,
       errorURL: "/auth",

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Layers, Search, SquareUserRound } from "lucide-react";
-import ShinyText from "@/features/home/components/animation/ShinyText";
+import ShinyText from "@/components/ShinyText";
 import { ModeToggle } from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 
