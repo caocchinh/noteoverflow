@@ -341,7 +341,7 @@ export default function Home() {
               boundless <span className="text-rose-700">compassion.</span>&quot;
             </p>
             <hr className="w-[69%] mt-5 mr-auto border-2 border-[var(--home-page-border)]" />
-            <p className="text-left text-lg mt-2 text-[var(--home-page-text-muted)]">
+            <p className="text-left text-md mt-2 text-[var(--home-page-text-muted)]">
               *This project is created with pride by a 12th grader Vietnamese
               student at Vinschool Central Park.{" "}
               <span>
@@ -349,8 +349,8 @@ export default function Home() {
                   src="/assets/vn.svg"
                   alt="Vinschool"
                   className="inline-block -mt-[5px]"
-                  width={25}
-                  height={25}
+                  width={20}
+                  height={20}
                 />
               </span>
             </p>
