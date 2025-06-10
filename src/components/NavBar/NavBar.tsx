@@ -61,11 +61,11 @@ const NavBar = () => {
           <Button
             className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
             asChild
-            title="Login to access all features"
+            title="Sign in to access all features"
           >
             <Link href="/auth">
               <SquareUserRound />
-              Login
+              Sign in
             </Link>
           </Button>
           {pathname !== "/" && <ModeToggle />}

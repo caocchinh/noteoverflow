@@ -213,7 +213,7 @@ export default function Home() {
           </motion.div>
 
           <AnimatedText
-            text="A robust, comprehensive IGCSE, AS & A-level study materials platform."
+            text="World's most comprehensive IGCSE, AS & A-level study materials platform."
             className="max-w-2xl mx-auto text-[var(--home-page-text-muted)]"
             delay={1}
           />
@@ -272,7 +272,7 @@ export default function Home() {
         </section>
         <GridMotion items={items} />
         <section
-          className="w-full h-screen relative gap-6 flex flex-col items-center justify-center px-5"
+          className="w-full h-screen relative gap-6 flex flex-col items-center justify-center px-5 cursor-none"
           ref={containerRef}
         >
           <Crosshair
@@ -306,9 +306,9 @@ export default function Home() {
               FREE. FOREVER.
             </TextScramble>
           </div>
-          <PixelCard variant="blue">
-            <Button className="absolute top-0 left-0 w-full h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
-              Start learning with zero cost
+          <PixelCard variant="blue" className="cursor-none">
+            <Button className="absolute hover:cursor-none top-0 left-0 w-full h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
+              Learn with zero cost
               <HandCoins />
             </Button>
           </PixelCard>
