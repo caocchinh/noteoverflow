@@ -11,48 +11,48 @@ import { usePathname } from "next/navigation";
 const NavBar = () => {
   const pathname = usePathname();
 
-  const handleScrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[999999] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
-        <Link
-          href="/"
-          className="hidden lg:block"
-          onClick={() => {
-            if (pathname == "/") {
-              handleScrollToTop();
-            }
-          }}
-        >
-          <Image
-            src="/assets/logo-full-colorised-white.png"
-            alt="logo"
-            width={245}
-            height={28}
-          />
-        </Link>
-        <Link
-          href="/"
-          className="lg:hidden block"
-          onClick={() => {
-            if (pathname == "/") {
-              handleScrollToTop();
-            }
-          }}
-        >
-          <Image
-            src="/assets/logo-bg-colorised-modified-small.png"
-            alt="logo"
-            width={40}
-            height={40}
-          />
-        </Link>
+        {pathname !== "/" ? (
+          <>
+            <Link href="/" className="hidden lg:block">
+              <Image
+                src="/assets/logo-full-colorised-white.png"
+                alt="logo"
+                width={245}
+                height={28}
+              />
+            </Link>
+            <Link href="/" className="lg:hidden block">
+              <Image
+                src="/assets/logo-bg-colorised-modified-small.png"
+                alt="logo"
+                width={40}
+                height={40}
+              />
+            </Link>
+          </>
+        ) : (
+          <>
+            <a href="#" className="hidden lg:block">
+              <Image
+                src="/assets/logo-full-colorised-white.png"
+                alt="logo"
+                width={245}
+                height={28}
+              />
+            </a>
+            <a href="#" className="lg:hidden block">
+              <Image
+                src="/assets/logo-bg-colorised-modified-small.png"
+                alt="logo"
+                width={40}
+                height={40}
+              />
+            </a>
+          </>
+        )}
 
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input

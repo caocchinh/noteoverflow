@@ -298,19 +298,22 @@ export default function Home() {
             className="w-full flex items-center justify-center"
           >
             <TextScramble
-              className="text-7xl font-semibold text-center relative z-10 text-[var(--home-page-text)]"
+              className="text-6xl -mt-24 sm:text-7xl font-semibold text-center relative z-10 text-[var(--home-page-text)]"
               as="span"
               trigger={isTrigger}
               duration={1.2}
-              delay={200}
+              delay={222}
             >
               FREE. FOREVER.
             </TextScramble>
           </div>
-          <PixelCard variant="blue" className="cursor-none">
-            <Button className="absolute hover:cursor-none top-0 left-0 w-full h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
+          <PixelCard
+            variant="blue"
+            className="cursor-none !absolute top-[55%] left-1/2 -translate-x-1/2 w-[300px] h-[80px]"
+          >
+            <Button className="absolute hover:cursor-none top-0 left-0 w-full text-xl h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
               Learn with zero cost
-              <HandCoins />
+              <HandCoins className="!w-6 !h-6" />
             </Button>
           </PixelCard>
         </section>

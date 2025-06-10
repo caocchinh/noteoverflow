@@ -178,6 +178,7 @@ video {
   }
 }
 
+html,
 body {
   scroll-behavior: smooth;
 }

@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: "Login to NoteOverflow",
 };
 
-export default function LoginPage() {
-  return <AuthPageClient />;
+type SearchParams = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function LoginPage({ searchParams }: SearchParams) {
+  return <AuthPageClient searchParams={await searchParams} />;
 }

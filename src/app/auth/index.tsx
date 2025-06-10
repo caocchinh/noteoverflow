@@ -7,14 +7,16 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const AuthPageClient = () => {
+const AuthPageClient = ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingText, setLoadingText] = useState("");
-  const searchParams = useSearchParams();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadingMessages = useMemo(
@@ -46,9 +48,8 @@ const AuthPageClient = () => {
   );
 
   useEffect(() => {
-    const errorParam = searchParams.get("error");
-    if (errorParam) {
-      if (errorParam === "access_denied") {
+    if (Object.keys(searchParams).includes("error")) {
+      if (searchParams.error === "access_denied") {
         setError("Access denied. Please try again.");
       } else {
         setError("Login failed, please try again");
