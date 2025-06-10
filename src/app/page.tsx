@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, RefObject } from "react";
 import { GridPattern } from "@/features/home/components/animation/grid-pattern";
@@ -230,9 +231,14 @@ export default function Home() {
             }}
             className="mt-7 w-full"
           >
-            <Button className="p-6 !px-6 cursor-pointer rounded-lg transition-all shadow-lg bg-transparent text-[var(--home-page-text)] border border-[var(--home-page-text)] hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 w-[90%] md:w-[50%]">
-              Get Started
-              <SparklesIcon />
+            <Button
+              asChild
+              className="p-6 !px-6 cursor-pointer rounded-lg transition-all shadow-lg bg-transparent text-[var(--home-page-text)] border border-[var(--home-page-text)] hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 w-[90%] md:w-[50%] active:scale-[0.99]"
+            >
+              <Link href="/app">
+                Get Started
+                <SparklesIcon />
+              </Link>
             </Button>
           </motion.div>
         </section>
@@ -245,8 +251,8 @@ export default function Home() {
               itemMinHeight={70}
               maxHeight="800px"
               tiltDirection="left"
-              autoplay={false}
-              autoplaySpeed={0.1}
+              autoplay={true}
+              autoplaySpeed={0.5}
               autoplayDirection="up"
               pauseOnHover={true}
             />
@@ -302,22 +308,27 @@ export default function Home() {
               as="span"
               trigger={isTrigger}
               duration={1.2}
-              delay={222}
+              delay={250}
             >
               FREE. FOREVER.
             </TextScramble>
           </div>
           <PixelCard
             variant="blue"
-            className="cursor-none !absolute top-[55%] left-1/2 -translate-x-1/2 w-[300px] h-[80px]"
+            className="cursor-none !absolute top-[54%] left-1/2 -translate-x-1/2 w-[300px] h-[80px]"
           >
-            <Button className="absolute hover:cursor-none top-0 left-0 w-full text-xl h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)]">
-              Learn with zero cost
-              <HandCoins className="!w-6 !h-6" />
+            <Button
+              asChild
+              className="absolute hover:cursor-none top-0 left-0 w-full text-xl h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)] active:scale-[0.98]"
+            >
+              <Link href="/app">
+                Learn with zero cost
+                <HandCoins className="!w-6 !h-6" />
+              </Link>
             </Button>
           </PixelCard>
         </section>
-        <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-2 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 relative overflow-hidden">
+        <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-6 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 relative overflow-hidden">
           <div className="absolute top-1/2 -translate-y-1/2 h-full z-[10] w-screen overflow-hidden ">
             <Sparkles
               density={200}
