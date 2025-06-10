@@ -9,7 +9,7 @@ import {
   HandCoins,
   Pi,
   RectangleEllipsis,
-  Sparkles,
+  Sparkles as SparklesIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -29,6 +29,8 @@ import ClickSpark from "@/features/home/components/animation/ClickSpark";
 import PixelCard from "@/features/home/components/animation/PixelCard";
 import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
 import Crosshair from "@/features/home/components/animation/Crosshair";
+import { Sparkles } from "@/features/home/components/animation/Sparkles";
+import { LOGO_MAIN_COLOR } from "@/constants/constants";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -177,6 +179,7 @@ export default function Home() {
             <Image
               src="/assets/logo-bg-colorised-modified-small.png"
               alt="NoteOverflow"
+              className="relative z-10"
               width={65}
               height={65}
             />
@@ -187,8 +190,8 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.8 }}
             className="mb-4"
           >
-            <div className="flex flex-col items-center justify-center gap-4">
-              <h1 className="text-3xl md:text-5xl font-bold text-[var(--home-page-text)]">
+            <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+              <h1 className="text-3xl md:text-5xl font-bold text-[var(--home-page-text)] ">
                 CAIE Exams Preparation.
               </h1>
               <RotatingText
@@ -214,7 +217,7 @@ export default function Home() {
 
           <AnimatedText
             text="World's most comprehensive IGCSE, AS & A-level study materials platform."
-            className="max-w-2xl mx-auto text-[var(--home-page-text-muted)]"
+            className="max-w-2xl mx-auto text-[var(--home-page-text-muted)] relative z-10"
             delay={1}
           />
 
@@ -231,7 +234,7 @@ export default function Home() {
           >
             <Button className="p-6 !px-6 cursor-pointer rounded-lg transition-all shadow-lg bg-transparent text-[var(--home-page-text)] border border-[var(--home-page-text)] hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 w-[90%] md:w-[50%]">
               Get Started
-              <Sparkles />
+              <SparklesIcon />
             </Button>
           </motion.div>
         </section>
@@ -313,18 +316,26 @@ export default function Home() {
             </Button>
           </PixelCard>
         </section>
-        <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-2 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 ">
+        <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-2 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 relative overflow-hidden">
+          <div className="absolute top-1/2 -translate-y-1/2 h-full z-[10] w-screen overflow-hidden ">
+            <Sparkles
+              density={200}
+              speed={1.2}
+              color={LOGO_MAIN_COLOR}
+              direction="top"
+            />
+          </div>
           <ProfileCard
             avatarUrl="/assets/founder.png"
             iconUrl="/assets/logo-bg.png"
             grainUrl="/assets/grain.webp"
             name="Mr. Cao Cự Chính"
             title="Founder & Developer"
-            className="order-1 md:order-0"
+            className="order-1 md:order-0 z-20"
             handle="founder@noteoverflow.com"
           />
 
-          <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative">
+          <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative z-20">
             <p className="text-left text-4xl text-[var(--home-page-text)]">
               &quot;In every great mind and heart, education sows the seeds of
               boundless <span className="text-rose-700">compassion.</span>&quot;
