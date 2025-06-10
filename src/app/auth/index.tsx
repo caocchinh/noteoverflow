@@ -6,13 +6,44 @@ import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const AuthPageClient = () => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingText, setLoadingText] = useState("");
   const searchParams = useSearchParams();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const loadingMessages = useMemo(
+    () => [
+      "Destination in sight...",
+      "Bribing the login gods...",
+      "Untangling the internet cables...",
+      "Feeding the hamsters that power our servers...",
+      "Waiting for the Wi-Fi to wake up...",
+      "Convincing your browser to cooperate...",
+      "Googling 'how to login'...",
+      "Dusting off your account...",
+      "Waking up the login fairy...",
+      "Performing ancient login rituals...",
+      "Consulting the magic 8-ball...",
+      "Summoning your digital self...",
+      "Negotiating with the firewall...",
+      "Teaching robots to trust you...",
+      "Polishing your virtual doorknob...",
+      "Searching for your lost password in the couch cushions...",
+      "Reversing the polarity...",
+      "Spinning up the flux capacitor...",
+      "Loading your awesomeness...",
+      "Calibrating the cool factor...",
+      "Initializing maximum security mode...",
+      "Activating VIP treatment...",
+    ],
+    []
+  );
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -23,16 +54,45 @@ const AuthPageClient = () => {
         setError("Login failed, please try again");
       }
     }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [searchParams]);
+
+  const getRandomMessage = () => {
+    const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+    return loadingMessages[randomIndex];
+  };
+
+  const startAuthTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setError("Authentication timed out. Please try again.");
+      setIsNavigating(false);
+    }, 30000);
+  };
 
   const handleSignInWithGoogle = async () => {
     try {
       setIsNavigating(true);
+      setLoadingText(getRandomMessage());
+      startAuthTimeout();
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/app",
       });
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } catch {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setError("Something went wrong, please try again");
       setIsNavigating(false);
     }
@@ -41,11 +101,19 @@ const AuthPageClient = () => {
   const handleSignInWithApple = async () => {
     try {
       setIsNavigating(true);
+      setLoadingText(getRandomMessage());
+      startAuthTimeout();
       await authClient.signIn.social({
         provider: "apple",
         callbackURL: "/app",
       });
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } catch {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setError("Something went wrong, please try again");
       setIsNavigating(false);
     }
@@ -54,11 +122,19 @@ const AuthPageClient = () => {
   const handleSignInWithMicrosoft = async () => {
     try {
       setIsNavigating(true);
+      setLoadingText(getRandomMessage());
+      startAuthTimeout();
       await authClient.signIn.social({
         provider: "microsoft",
         callbackURL: "/app",
       });
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } catch {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setError("Something went wrong, please try again");
       setIsNavigating(false);
     }
@@ -67,11 +143,19 @@ const AuthPageClient = () => {
   const handleSignInWithReddit = async () => {
     try {
       setIsNavigating(true);
+      setLoadingText(getRandomMessage());
+      startAuthTimeout();
       await authClient.signIn.social({
         provider: "reddit",
         callbackURL: "/app",
       });
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } catch {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setError("Something went wrong, please try again");
       setIsNavigating(false);
     }
@@ -80,11 +164,19 @@ const AuthPageClient = () => {
   const handleSignInWithDiscord = async () => {
     try {
       setIsNavigating(true);
+      setLoadingText(getRandomMessage());
+      startAuthTimeout();
       await authClient.signIn.social({
         provider: "discord",
         callbackURL: "/app",
       });
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     } catch {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setError("Something went wrong, please try again");
       setIsNavigating(false);
     }
@@ -109,7 +201,12 @@ const AuthPageClient = () => {
           transition={{ staggerChildren: 0.1 }}
         >
           <div className="flex flex-col w-full">
-            <div className="after:border-foreground w-full after:w-[50%] after:max-w-[275px] relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:z-0 after:flex after:items-center after:border-t-2 flex justify-center mb-2">
+            <div
+              className={cn(
+                "after:border-foreground w-full after:w-[50%] after:max-w-[275px] relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:z-0 after:flex after:items-center after:border-t-2 flex justify-center mb-2",
+                isNavigating && "after:!border-transparent"
+              )}
+            >
               <motion.h1
                 className="text-3xl bg-background text-foreground relative z-10 px-2 font-semibold text-center"
                 variants={{
@@ -117,7 +214,7 @@ const AuthPageClient = () => {
                   show: { opacity: 1, y: 0 },
                 }}
               >
-                Sign In
+                {isNavigating ? loadingText : "Sign In"}
               </motion.h1>
             </div>
 

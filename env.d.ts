@@ -11,5 +11,11 @@ declare namespace NodeJS {
     DISCORD_CLIENT_SECRET: string;
     REDDIT_CLIENT_ID: string;
     REDDIT_CLIENT_SECRET: string;
+    APPLE_CLIENT_ID: string;
+    APPLE_CLIENT_SECRET: string;
+    APPLE_APP_BUNDLE_IDENTIFIER: string;
+    MICROSOFT_CLIENT_ID: string;
+    MICROSOFT_CLIENT_SECRET: string;
+    MICROSOFT_TENANT_ID: string;
   }
 }

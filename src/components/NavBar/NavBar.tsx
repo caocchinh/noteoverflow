@@ -11,10 +11,25 @@ import { usePathname } from "next/navigation";
 const NavBar = () => {
   const pathname = usePathname();
 
+  const handleScrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[999999] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
-        <Link href="/" className="hidden lg:block">
+        <Link
+          href="/"
+          className="hidden lg:block"
+          onClick={() => {
+            if (pathname == "/") {
+              handleScrollToTop();
+            }
+          }}
+        >
           <Image
             src="/assets/logo-full-colorised-white.png"
             alt="logo"
@@ -22,7 +37,15 @@ const NavBar = () => {
             height={28}
           />
         </Link>
-        <Link href="/" className="lg:hidden block">
+        <Link
+          href="/"
+          className="lg:hidden block"
+          onClick={() => {
+            if (pathname == "/") {
+              handleScrollToTop();
+            }
+          }}
+        >
           <Image
             src="/assets/logo-bg-colorised-modified-small.png"
             alt="logo"

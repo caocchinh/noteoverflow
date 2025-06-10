@@ -15,7 +15,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, RefObject } from "react";
-import { GridPattern } from "@/components/ui/grid-pattern";
+import { GridPattern } from "@/features/home/components/animation/grid-pattern";
 import { Button } from "@/components/ui/button";
 import AnimatedText from "@/features/home/components/animation/AnimatedText";
 import RotatingText from "@/features/home/components/animation/RotatingText";
