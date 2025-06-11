@@ -40,11 +40,23 @@ const AuthPageClient = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isInvisibleVerifying, setIsInvisibleVerifying] = useState(true);
-  // const [widgetId, setWidgetId] = useState<string | null>(null);
 
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback";
+    script.async = true;
+    script.id = "turnstile-script";
+    document.head.appendChild(script);
+
     if (typeof window !== "undefined") {
       window.onloadTurnstileCallback = function () {
+        // Check if widget already exists in this container
+        const container = document.getElementById("cf-turnstile");
+        if (container && container.hasChildNodes()) {
+          return;
+        }
+
         turnstile.render("#cf-turnstile", {
           sitekey: turnstileSiteKey,
           callback: function (token: string) {
@@ -74,10 +86,18 @@ const AuthPageClient = ({
           },
           retry: "never",
         });
-        // setWidgetId(id);
       };
     }
   }, [turnstileSiteKey]);
+
+  useEffect(() => {
+    return () => {
+      const scriptElement = document.getElementById("turnstile-script");
+      if (scriptElement) {
+        document.head.removeChild(scriptElement);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (Object.keys(searchParams).includes("error")) {
