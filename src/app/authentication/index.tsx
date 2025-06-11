@@ -2,11 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import Silk from "@/features/authentication/components/animation/Silk";
-import {
-  FUNNY_VERIFICATION_MESSAGES,
-  LOADING_MESSAGES,
-  LOGO_MAIN_COLOR,
-} from "@/constants/constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
@@ -15,6 +10,11 @@ import { cn } from "@/lib/utils";
 import { TurnstileOptions } from "@/constants/types";
 import VerifyingLoader from "@/features/authentication/components/VerifyingLoader/VerifyingLoader";
 import { RefreshCcw } from "lucide-react";
+import {
+  FUNNY_VERIFICATION_MESSAGES,
+  LOADING_MESSAGES,
+} from "@/features/authentication/constants/constants";
+import { LOGO_MAIN_COLOR } from "@/constants/constants";
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -157,7 +157,6 @@ const AuthPageClient = ({
   const handleSignIn = async (
     provider: "google" | "apple" | "microsoft" | "reddit" | "discord"
   ) => {
-    console.log(turnstileToken);
     try {
       setIsNavigating(true);
       setLoadingText(getRandomMessage());

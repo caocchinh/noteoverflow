@@ -329,7 +329,7 @@ export default function Home() {
           </PixelCard>
         </section>
         <section className="flex flex-col md:flex-row items-center justify-center pb-12 pt-6 md:pt-10 px-4 md:px-8 md:gap-18 gap-10 relative overflow-hidden">
-          <div className="absolute top-1/2 -translate-y-1/2 h-full z-[10] w-screen overflow-hidden ">
+          <div className="hidden sm:block absolute top-1/2 -translate-y-1/2 h-full z-[10] w-screen overflow-hidden ">
             <Sparkles
               density={200}
               speed={1.2}
@@ -337,23 +337,16 @@ export default function Home() {
               direction="top"
             />
           </div>
-          <ProfileCard
-            avatarUrl="/assets/founder.png"
-            iconUrl="/assets/logo-bg.png"
-            grainUrl="/assets/grain.webp"
-            name="Mr. Cao Cự Chính"
-            title="Founder & Developer"
-            className="order-1 md:order-0 z-20"
-            handle="founder@noteoverflow.com"
-          />
-
-          <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative z-20">
-            <p className="text-left text-4xl text-[var(--home-page-text)]">
-              &quot;In every great mind and heart, education sows the seeds of
-              boundless <span className="text-rose-700">compassion.</span>&quot;
-            </p>
-            <hr className="w-[69%] mt-5 mr-auto border-2 border-[var(--home-page-border)]" />
-            <p className="text-left text-md mt-2 text-[var(--home-page-text-muted)]">
+          <div className="flex flex-col items-center justify-center gap-4 order-1 md:order-0 z-20">
+            <ProfileCard
+              avatarUrl="/assets/founder.png"
+              iconUrl="/assets/logo-bg.png"
+              grainUrl="/assets/grain.webp"
+              name="Mr. Cao Cự Chính"
+              title="Founder & Developer"
+              handle="founder@noteoverflow.com"
+            />
+            <p className="text-left text-xs sm:text-sm text-[var(--home-page-text-muted)] w-[350px]">
               *This project is created with pride by a 12th grader Vietnamese
               student at Vinschool Central Park.{" "}
               <span>
@@ -365,6 +358,16 @@ export default function Home() {
                   height={20}
                 />
               </span>
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative z-20">
+            <p className="text-left text-[32px] text-[var(--home-page-text)]">
+              &quot;Be kind whenever possible. It is always{" "}
+              <span className="text-rose-700">possible.</span>&quot;
+            </p>
+            <p className="text-left text-md text-[var(--home-page-text-muted)] after:content-[''] after:absolute after:top-1/2 after:-translate-y-1/2 after:left-[-38px] after:w-[35px] after:h-[1px] after:bg-[var(--home-page-text-muted)] after:z-[10] relative self-end">
+              14th Dalai Lama (Tenzin Gyatso)
             </p>
           </div>
         </section>
