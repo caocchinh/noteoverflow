@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Silk from "@/features/auth/components/animation/Silk";
+import Silk from "@/features/authentication/components/animation/Silk";
 import { LOADING_MESSAGES, LOGO_MAIN_COLOR } from "@/constants/constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { TurnstileOptions } from "@/constants/types";
+import VerifyingLoader from "@/features/authentication/components/VerifyingLoader/VerifyingLoader";
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -18,7 +19,11 @@ declare global {
 }
 
 declare const turnstile: {
-  render: (container: string | HTMLElement, options: TurnstileOptions) => void;
+  render: (
+    container: string | HTMLElement,
+    options: TurnstileOptions
+  ) => string;
+  reset: (widgetId: string) => void;
 };
 
 const AuthPageClient = ({
@@ -34,14 +39,16 @@ const AuthPageClient = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isInvisibleVerifying, setIsInvisibleVerifying] = useState(true);
+  const [widgetId, setWidgetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.onloadTurnstileCallback = function () {
-        turnstile.render("#cf-turnstile", {
+        const id = turnstile.render("#cf-turnstile", {
           sitekey: turnstileSiteKey,
           callback: function (token: string) {
             setError(null);
+            setIsInvisibleVerifying(false);
             setTurnstileToken(token);
           },
           "expired-callback": function () {
@@ -53,7 +60,6 @@ const AuthPageClient = ({
             setError("Unable to verify, please try again!");
           },
           "timeout-callback": function () {
-            setIsInvisibleVerifying(false);
             setError("Timeout, please try again!");
           },
           "before-interactive-callback": function () {
@@ -67,6 +73,7 @@ const AuthPageClient = ({
           },
           retry: "never",
         });
+        setWidgetId(id);
       };
     }
   }, [turnstileSiteKey]);
@@ -105,11 +112,12 @@ const AuthPageClient = ({
   const handleSignIn = async (
     provider: "google" | "apple" | "microsoft" | "reddit" | "discord"
   ) => {
+    console.log(turnstileToken);
     try {
       setIsNavigating(true);
       setLoadingText(getRandomMessage());
       startAuthTimeout();
-      await authClient.signIn.social({
+      const response = await authClient.signIn.social({
         provider,
         callbackURL: "/app",
         fetchOptions: {
@@ -118,6 +126,11 @@ const AuthPageClient = ({
           },
         },
       });
+      if (response.error) {
+        setError(
+          response.error.message ?? "Something went wrong, please try again"
+        );
+      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -128,13 +141,18 @@ const AuthPageClient = ({
       setError("Something went wrong, please try again");
     } finally {
       setIsNavigating(false);
+      setIsInvisibleVerifying(true);
+      setTurnstileToken(null);
+      if (widgetId) {
+        turnstile.reset(widgetId);
+      }
     }
   };
 
   return (
     <div className="grid min-h-svh md:grid-cols-2 bg-background">
       <motion.div
-        className="w-full flex items-center justify-center flex-col gap-2"
+        className="w-full mt-16 flex items-center justify-center flex-col gap-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -170,8 +188,11 @@ const AuthPageClient = ({
             </motion.div>
 
             {isInvisibleVerifying && (
-              <div className="text-center text-sm text-foreground">
-                Verifying you are human...
+              <div className="w-full flex flex-col gap-2 items-center justify-center">
+                <div className="text-center text-sm text-foreground">
+                  Verifying you are human...
+                </div>
+                <VerifyingLoader />
               </div>
             )}
 

@@ -20,6 +20,7 @@ export const auth = () =>
       captcha({
         provider: "cloudflare-turnstile",
         secretKey: process.env.TURNSTILE_SECRET_KEY,
+        endpoints: [`${process.env.BETTER_AUTH_URL}/authentication`],
       }),
     ],
     // databaseHooks:{
@@ -27,8 +28,9 @@ export const auth = () =>
     // }
     onAPIError: {
       throw: true,
-      errorURL: "/auth",
+      errorURL: "/authentication",
     },
+
     socialProviders: {
       google: {
         prompt: "select_account",

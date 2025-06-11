@@ -86,7 +86,7 @@ const NavBar = () => {
             asChild
             title="Sign in to access all features"
           >
-            <Link href="/auth">
+            <Link href="/authentication">
               <SquareUserRound />
               Sign in
             </Link>

@@ -307,7 +307,7 @@ export default function Home() {
               className="text-6xl -mt-24 sm:text-7xl font-semibold text-center relative z-10 text-[var(--home-page-text)]"
               as="span"
               trigger={isTrigger}
-              duration={1.2}
+              duration={1.7}
               delay={300}
             >
               FREE. FOREVER.
