@@ -13,7 +13,7 @@ const NavBar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[999999] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[100] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
         {pathname !== "/" ? (
           <>
@@ -58,7 +58,7 @@ const NavBar = () => {
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
             placeholder="Enter paper code"
-            className="w-full rounded-xl placeholder:text-white/50 max-w-md rounded-r-none h-full bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
+            className="w-full rounded-xl placeholder:text-white/50 max-w-md rounded-r-none h-full dark:bg-[var(--navbar-bg)] bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
           />
           <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)] hover:bg-[var(--navbar-border)]">
             <Search className="text-[var(--navbar-text)]" />
@@ -83,7 +83,7 @@ const NavBar = () => {
             </Link>
           </Button>
           <User />
-          {pathname !== "/" && <ModeToggle />}
+          <ModeToggle />
         </div>
       </nav>
     </header>

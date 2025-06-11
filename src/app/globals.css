@@ -12,6 +12,7 @@
   --navbar-input-border: oklch(1 0 0 / 40%);
   --navbar-button-bg: oklch(0.269 0 0);
   --navbar-button-hover: oklch(0.985 0 0 / 80%);
+  --navbar-skelenton: oklch(0.269 0 0);
 
   /* Home page specific variables */
   --home-page-bg: oklch(0.145 0 0);
@@ -29,6 +30,7 @@
   --font-roboto: var(--font-roboto);
   --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
+  --color-navbar-skelenton: var(--navbar-skelenton);
   --color-foreground-secondary: var(--foreground-secondary);
   --font-sans: var(--font-geist-sans);
   --animate-shine: shine 5s linear infinite;
@@ -181,4 +183,9 @@ video {
 html,
 body {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0px !important;
 }
