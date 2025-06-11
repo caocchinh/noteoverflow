@@ -155,7 +155,7 @@ const AuthPageClient = ({
   };
 
   const handleSignIn = async (
-    provider: "google" | "apple" | "microsoft" | "reddit" | "discord"
+    provider: "google" | "microsoft" | "reddit" | "discord"
   ) => {
     try {
       setIsNavigating(true);
@@ -301,37 +301,6 @@ const AuthPageClient = ({
                     height={20}
                   />
                   Sign in with Google
-                </Button>
-              </motion.div>
-
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0 },
-                }}
-                className="w-full flex items-center justify-center"
-              >
-                <Button
-                  variant="outline"
-                  className="!w-[200px] !h-[41px] border-1 border-black !font-semibold !font !rounded-[4px] flex items-center justify-center !gap-[3px] !px-[12px] hover:cursor-pointer hover:bg-white bg-white dark:hover:bg-black dark:bg-black dark:border-white dark:text-white text-black"
-                  onClick={() => handleSignIn("apple")}
-                  disabled={isNavigating}
-                >
-                  <Image
-                    src="/assets/apple-white.svg"
-                    alt="Apple Logo"
-                    width={20}
-                    height={20}
-                    className="dark:hidden"
-                  />
-                  <Image
-                    src="/assets/apple-black.svg"
-                    alt="Apple Logo"
-                    width={20}
-                    height={20}
-                    className="hidden dark:block"
-                  />
-                  Sign in with Apple
                 </Button>
               </motion.div>
 

@@ -3,10 +3,11 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Layers, Search, SquareUserRound } from "lucide-react";
+import { Layers, Search } from "lucide-react";
 import ShinyText from "@/components/ShinyText";
 import { ModeToggle } from "./ThemeToggle";
 import { usePathname } from "next/navigation";
+import User from "./User";
 
 const NavBar = () => {
   const pathname = usePathname();
@@ -81,16 +82,7 @@ const NavBar = () => {
               <ShinyText text="Topical" className="inline-block sm:hidden" />
             </Link>
           </Button>
-          <Button
-            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
-            asChild
-            title="Sign in to access all features"
-          >
-            <Link href="/authentication">
-              <SquareUserRound />
-              Sign in
-            </Link>
-          </Button>
+          <User />
           {pathname !== "/" && <ModeToggle />}
         </div>
       </nav>

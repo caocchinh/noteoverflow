@@ -6,6 +6,7 @@ import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import NavBar from "@/components/NavBar/NavBar";
+import { QueryProvider } from "@/context/QueryProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,20 +44,22 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <NextTopLoader
-            zIndex={99999999}
-            color={LOGO_MAIN_COLOR}
-            showSpinner={false}
-          />
-          <NavBar />
-          {children}
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <NextTopLoader
+              zIndex={99999999}
+              color={LOGO_MAIN_COLOR}
+              showSpinner={false}
+            />
+            <NavBar />
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
 
         <Toaster />
       </body>

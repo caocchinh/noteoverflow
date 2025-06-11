@@ -68,12 +68,7 @@ export const auth = () =>
         clientSecret: process.env.REDDIT_CLIENT_SECRET,
         scope: ["identity"],
       },
-      apple: {
-        clientId: process.env.APPLE_CLIENT_ID,
-        clientSecret: process.env.APPLE_CLIENT_SECRET,
-        // Optional
-        // appBundleIdentifier: process.env.APPLE_APP_BUNDLE_IDENTIFIER,
-      },
+
       microsoft: {
         clientId: process.env.MICROSOFT_CLIENT_ID,
         clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
