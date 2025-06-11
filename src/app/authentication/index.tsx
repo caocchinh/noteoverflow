@@ -2,7 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import Silk from "@/features/authentication/components/animation/Silk";
-import { LOADING_MESSAGES, LOGO_MAIN_COLOR } from "@/constants/constants";
+import {
+  FUNNY_VERIFICATION_MESSAGES,
+  LOADING_MESSAGES,
+  LOGO_MAIN_COLOR,
+} from "@/constants/constants";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
@@ -10,6 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { TurnstileOptions } from "@/constants/types";
 import VerifyingLoader from "@/features/authentication/components/VerifyingLoader/VerifyingLoader";
+import { RefreshCcw } from "lucide-react";
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -40,6 +45,8 @@ const AuthPageClient = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isInvisibleVerifying, setIsInvisibleVerifying] = useState(true);
+  const [isVerificationTimeout, setIsVerificationTimeout] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState("");
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -91,7 +98,17 @@ const AuthPageClient = ({
   }, [turnstileSiteKey]);
 
   useEffect(() => {
+    if (isVerificationTimeout) {
+      setIsVerificationTimeout(true);
+    }
+  }, [isVerificationTimeout]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsVerificationTimeout(true);
+    }, 15000);
     return () => {
+      clearTimeout(timeout);
       const scriptElement = document.getElementById("turnstile-script");
       if (scriptElement) {
         document.head.removeChild(scriptElement);
@@ -113,6 +130,13 @@ const AuthPageClient = ({
       }
     };
   }, [searchParams]);
+
+  useEffect(() => {
+    const randomIndex = Math.floor(
+      Math.random() * FUNNY_VERIFICATION_MESSAGES.length
+    );
+    setVerificationMessage(FUNNY_VERIFICATION_MESSAGES[randomIndex]);
+  }, []);
 
   const getRandomMessage = () => {
     const randomIndex = Math.floor(Math.random() * LOADING_MESSAGES.length);
@@ -204,9 +228,9 @@ const AuthPageClient = ({
             </motion.div>
 
             {isInvisibleVerifying && (
-              <div className="w-full flex flex-col gap-2 items-center justify-center">
+              <div className="w-full flex flex-col gap-2 items-center justify-center mt-2">
                 <div className="text-center text-sm text-foreground">
-                  Verifying you are human...
+                  {verificationMessage}
                 </div>
                 <VerifyingLoader />
               </div>
@@ -218,6 +242,19 @@ const AuthPageClient = ({
               data-sitekey={turnstileSiteKey}
               data-callback="handleTurnstileCallback"
             ></div>
+
+            {isVerificationTimeout && isInvisibleVerifying && (
+              <div className="w-full flex flex-col gap-2 items-center justify-center">
+                <Button
+                  variant="outline"
+                  className="w-max mt-5 cursor-pointer"
+                  onClick={() => window.location.reload()}
+                >
+                  Is this taking too long? Try to refresh the page.
+                  <RefreshCcw className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
 
             {error && (
               <motion.div

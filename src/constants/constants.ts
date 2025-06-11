@@ -52,3 +52,16 @@ export const LOADING_MESSAGES = [
   "Initializing maximum security mode...",
   "Activating VIP treatment...",
 ];
+
+export const FUNNY_VERIFICATION_MESSAGES = [
+  "Confirming you have a soul...",
+  "Scanning for signs of humanity...",
+  "Verifying emotional capacity...",
+  "Running empathy diagnostics...",
+  "Making sure you can't compress your thoughts into a zip file...",
+  "Confirming you don't automatically update overnight...",
+  "Confirming you don't speak fluent JavaScript...",
+  "Confirming you don't speak fluent C++...",
+  "Verifying you have feelings...",
+  "Confirming you don't run on lithium batteries...",
+];
