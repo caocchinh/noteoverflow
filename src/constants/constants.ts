@@ -27,3 +27,28 @@ export const LANGUAGE_LIST = [
     image_src: "/assets/ks-flag.webp",
   },
 ];
+
+export const LOADING_MESSAGES = [
+  "Destination in sight...",
+  "Bribing the login gods...",
+  "Untangling the internet cables...",
+  "Feeding the hamsters that power our servers...",
+  "Waiting for the Wi-Fi to wake up...",
+  "Convincing your browser to cooperate...",
+  "Googling 'how to login'...",
+  "Dusting off your account...",
+  "Waking up the login fairy...",
+  "Performing ancient login rituals...",
+  "Consulting the magic 8-ball...",
+  "Summoning your digital self...",
+  "Negotiating with the firewall...",
+  "Teaching robots to trust you...",
+  "Polishing your virtual doorknob...",
+  "Searching for your lost password in the couch cushions...",
+  "Reversing the polarity...",
+  "Spinning up the flux capacitor...",
+  "Loading your awesomeness...",
+  "Calibrating the cool factor...",
+  "Initializing maximum security mode...",
+  "Activating VIP treatment...",
+];

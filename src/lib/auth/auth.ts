@@ -1,6 +1,7 @@
 import { getAuthDb } from "@/drizzle/auth/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { captcha } from "better-auth/plugins";
 
 import * as schema from "@/drizzle/auth/schema";
 
@@ -15,6 +16,12 @@ export const auth = () =>
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: [process.env.BETTER_AUTH_URL],
 
+    plugins: [
+      captcha({
+        provider: "cloudflare-turnstile",
+        secretKey: process.env.TURNSTILE_SECRET_KEY,
+      }),
+    ],
     // databaseHooks:{
 
     // }

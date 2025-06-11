@@ -57,7 +57,7 @@ const NavBar = () => {
         <div className="hidden sm:flex items-center w-full max-w-md h-10">
           <Input
             placeholder="Enter paper code"
-            className="w-full rounded-xl max-w-md rounded-r-none h-full bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
+            className="w-full rounded-xl placeholder:text-white/50 max-w-md rounded-r-none h-full bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
           />
           <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)] hover:bg-[var(--navbar-border)]">
             <Search className="text-[var(--navbar-text)]" />

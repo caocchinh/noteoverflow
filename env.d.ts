@@ -17,5 +17,15 @@ declare namespace NodeJS {
     MICROSOFT_CLIENT_ID: string;
     MICROSOFT_CLIENT_SECRET: string;
     MICROSOFT_TENANT_ID: string;
+    TURNSTILE_SECRET_KEY: string;
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
+    TURNSTILE_SECRET_KEY_PASSES: string; //Development
+    TURNSTILE_SECRET_KEY_FAILED: string; //Development
+    TURNSTILE_SECRET_KEY_ERROR: string; //Development
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY_PASSES_VISIBLE: string; //Development
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY_FAILED_VISIBLE: string; //Development
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY_PASSES_INVISIBLE: string; //Development
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY_FAILED_INVISIBLE: string; //Development
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY_FORCE_INTERACTIVE: string; //Development
   }
 }
