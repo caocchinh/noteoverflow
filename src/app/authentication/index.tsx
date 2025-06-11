@@ -24,6 +24,7 @@ declare const turnstile: {
     options: TurnstileOptions
   ) => string;
   reset: (widgetId: string) => void;
+  remove: (widgetId: string) => void;
 };
 
 const AuthPageClient = ({
@@ -39,12 +40,12 @@ const AuthPageClient = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isInvisibleVerifying, setIsInvisibleVerifying] = useState(true);
-  const [widgetId, setWidgetId] = useState<string | null>(null);
+  // const [widgetId, setWidgetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.onloadTurnstileCallback = function () {
-        const id = turnstile.render("#cf-turnstile", {
+        turnstile.render("#cf-turnstile", {
           sitekey: turnstileSiteKey,
           callback: function (token: string) {
             setError(null);
@@ -73,7 +74,7 @@ const AuthPageClient = ({
           },
           retry: "never",
         });
-        setWidgetId(id);
+        // setWidgetId(id);
       };
     }
   }, [turnstileSiteKey]);
@@ -141,11 +142,6 @@ const AuthPageClient = ({
       setError("Something went wrong, please try again");
     } finally {
       setIsNavigating(false);
-      setIsInvisibleVerifying(true);
-      setTurnstileToken(null);
-      if (widgetId) {
-        turnstile.reset(widgetId);
-      }
     }
   };
 
