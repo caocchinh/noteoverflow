@@ -8,6 +8,8 @@ import {
   Loader2,
   LogOut,
   SquareUserRound,
+  AlertTriangle,
+  RefreshCcw,
 } from "lucide-react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
@@ -19,6 +21,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
+import GlareHover from "../GlazeHover";
 
 const User = () => {
   const [trigger, setTrigger] = useState(false);
@@ -45,10 +48,36 @@ const User = () => {
     }
   }
 
-  console.log(data);
-
   if (error) {
-    return <div>Error</div>;
+    return (
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            className="rounded-lg hover:opacity-90 bg-red-600 hover:bg-red-600 text-white cursor-pointer"
+            title="Error fetching data, please refresh"
+          >
+            <AlertTriangle />
+            Error!
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent className="relative z-[101] px-0 flex flex-col text-foreground bg-background">
+          <Button
+            variant="ghost"
+            className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+            onClick={() => {
+              setIsMenuOpen(false);
+              if (typeof window !== "undefined") {
+                window.location.reload();
+              }
+            }}
+          >
+            Refresh
+            <RefreshCcw />
+          </Button>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
   }
 
   if (isPending) {
@@ -70,10 +99,15 @@ const User = () => {
   }
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-max h-max !p-0 cursor-pointer rounded-full overflow-hidden"
+      <DropdownMenuTrigger>
+        <GlareHover
+          glareColor="#ffffff"
+          glareOpacity={0.3}
+          glareAngle={-30}
+          glareSize={300}
+          transitionDuration={800}
+          playOnce={false}
+          className="w-max h-max rounded-full"
           title="Account Settings"
         >
           <Image
@@ -83,7 +117,7 @@ const User = () => {
             width={32}
             height={32}
           />
-        </Button>
+        </GlareHover>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="relative z-[101] px-0 flex flex-col text-foreground bg-background">
@@ -103,6 +137,7 @@ const User = () => {
         <Button
           variant="ghost"
           className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+          asChild
         >
           <Link
             href="/dashboard"
