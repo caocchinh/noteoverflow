@@ -19,6 +19,7 @@ import { updateUserAvatar } from "@/server/actions";
 import { useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
+import { ScrollArea } from "../ui/scroll-area";
 
 // Infer the return type from authClient.getSession()
 type SessionData = Awaited<ReturnType<typeof authClient.getSession>>;
@@ -89,7 +90,7 @@ const AvatarChange = ({
     <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <AlertDialogContent className="border-foreground/50 bg-[#222222]  max-w-[90vw] sm:!max-w-[600px]">
         <Button
-          className="absolute right-[10px] top-[10px] p-0 !bg-transparent cursor-pointer"
+          className="absolute right-0 top-0 p-0 !bg-transparent cursor-pointer"
           title="Cancel"
           disabled={isSaving}
           onClick={() => {
@@ -99,7 +100,7 @@ const AvatarChange = ({
         >
           <X className="text-red-500 hover:text-red-600 !w-[20px] !h-[20px]" />
         </Button>
-        <AlertDialogHeader className="flex flex-row gap-2 items-center justify-center">
+        <AlertDialogHeader className="flex flex-row gap-2 items-center justify-center flex-wrap">
           <AlertDialogTitle className="text-2xl font-semibold text-center">
             Choose your avatar
           </AlertDialogTitle>
@@ -117,32 +118,34 @@ const AvatarChange = ({
             Error updating avatar
           </p>
         )}
-        <div className="flex flex-row flex-wrap gap-4 justify-center">
-          {AVATARS.map((avatar, index) => (
-            <Button
-              className={cn(
-                "flex bg-background text-foreground hover:bg-background h-max p-0 items-center flex-col justify-center border-2 border-foreground cursor-pointer rounded-md overflow-hidden",
-                "dark:bg-[#222222] dark:text-foreground ",
-                selectedAvatar === avatar.src && "border-2 border-red-500",
-                selectedAvatar != avatar.src && "hover:border-amber-500"
-              )}
-              key={index}
-              onClick={() => {
-                setSelectedAvatar(avatar.src);
-                setSelectedAvatarColor(avatar.color);
-              }}
-            >
-              <Image
-                src={avatar.src}
-                alt="avatar"
-                width={100}
-                height={100}
-                className="pointer-events-none"
-              />
-              <p className="text-sm text-center p-1">{avatar.name}</p>
-            </Button>
-          ))}
-        </div>
+        <ScrollArea className=" h-[300px]">
+          <div className="flex flex-row flex-wrap gap-4 justify-center">
+            {AVATARS.map((avatar, index) => (
+              <Button
+                className={cn(
+                  "flex bg-background text-foreground hover:bg-background h-max p-0 items-center flex-col justify-center border-2 border-foreground cursor-pointer rounded-md overflow-hidden",
+                  "dark:bg-[#222222] dark:text-foreground ",
+                  selectedAvatar === avatar.src && "border-2 border-red-500",
+                  selectedAvatar != avatar.src && "hover:border-amber-500"
+                )}
+                key={index}
+                onClick={() => {
+                  setSelectedAvatar(avatar.src);
+                  setSelectedAvatarColor(avatar.color);
+                }}
+              >
+                <Image
+                  src={avatar.src}
+                  alt="avatar"
+                  width={100}
+                  height={100}
+                  className="pointer-events-none"
+                />
+                <p className="text-sm text-center p-1">{avatar.name}</p>
+              </Button>
+            ))}
+          </div>
+        </ScrollArea>
         <AlertDialogFooter>
           <AlertDialogCancel
             className="cursor-pointer"

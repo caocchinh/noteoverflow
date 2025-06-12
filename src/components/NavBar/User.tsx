@@ -97,7 +97,7 @@ const User = () => {
   if (isPending) {
     return <Skeleton className="h-8 w-8 rounded-full !bg-navbar-skelenton" />;
   }
-  if (!data.data) {
+  if (!data || !data.data) {
     return (
       <Button
         className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
@@ -132,7 +132,7 @@ const User = () => {
             title="Account Settings"
           >
             <Image
-              src={data.data?.user.image || "/assets/avatar/blue.png"}
+              src={data.data.user.image || "/assets/avatar/blue.png"}
               alt="user avatar"
               className="object-cover"
               width={32}
