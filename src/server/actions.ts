@@ -5,21 +5,17 @@ import { eq } from "drizzle-orm";
 
 export const updateUserAvatar = async (userId: string, avatar: string) => {
   if (!userId || !avatar) {
-    return { error: "User ID and avatar are required", success: false };
+    throw new Error("User ID and avatar are required");
   }
 
   if (typeof userId !== "string" || typeof avatar !== "string") {
-    return { error: "User ID and avatar must be strings", success: false };
+    throw new Error("User ID and avatar must be strings");
   }
-
-  try {
-    await getAuthDb()
-      .update(schema.user)
-      .set({ image: avatar })
-      .where(eq(schema.user.id, userId));
-
-    return { success: true, error: null };
-  } catch (error) {
-    return { error: error, success: false };
+  const response = await getAuthDb()
+    .update(schema.user)
+    .set({ image: avatar })
+    .where(eq(schema.user.id, userId));
+  if (response.rowCount === 0) {
+    throw new Error("User not found");
   }
 };

@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { updateUserAvatar } from "@/server/actions";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { ScrollArea } from "../ui/scroll-area";
@@ -39,8 +39,6 @@ const AvatarChange = ({
   const [selectedAvatarColor, setSelectedAvatarColor] = useState<string>(
     AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ""
   );
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isError, setIsError] = useState<boolean>(false);
   const queryClient = useQueryClient();
 
   const resetDefault = () => {
@@ -50,21 +48,14 @@ const AvatarChange = ({
     );
   };
 
-  const handleSave = async () => {
-    if (selectedAvatar === currentAvatar) {
-      setIsDialogOpen(false);
-      toast.info("You are already using this avatar");
-      return;
-    }
-    setIsSaving(true);
-    const { error, success } = await updateUserAvatar(userId, selectedAvatar);
-    if (error) {
-      setIsError(true);
-      setIsSaving(false);
-      toast.error("Unexpected error, unable to update avatar");
-      return;
-    }
-    if (success) {
+  const updateAvatarMutation = useMutation({
+    mutationFn: () => updateUserAvatar(userId, selectedAvatar),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["user"] });
+      // Get the previous data so we can roll back to it if the mutation fails
+      const previousData = queryClient.getQueryData<SessionData>(["user"]);
+
+      // Optimistically update to the new value
       queryClient.setQueryData<SessionData>(
         ["user"],
         (oldData: SessionData | undefined) => {
@@ -80,10 +71,32 @@ const AvatarChange = ({
           };
         }
       );
+      return { previousData };
+    },
+    onError: (error, _variables, context: SessionData) => {
+      // If the mutation fails, roll back to the previous value
+      if (context?.previousData) {
+        queryClient.setQueryData(["user"], context.previousData);
+      }
+      toast.error(
+        `Failed to update avatar: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+    onSuccess: () => {
+      toast.success("Avatar updated successfully");
+      setIsDialogOpen(false);
+    },
+  });
+
+  const handleSave = () => {
+    if (selectedAvatar === currentAvatar) {
+      setIsDialogOpen(false);
+      toast.info("You are already using this avatar");
+      return;
     }
-    toast.success("Avatar updated successfully");
-    setIsDialogOpen(false);
-    setIsSaving(false);
+    updateAvatarMutation.mutate();
   };
 
   return (
@@ -92,7 +105,7 @@ const AvatarChange = ({
         <Button
           className="absolute right-0 top-0 p-0 !bg-transparent cursor-pointer"
           title="Cancel"
-          disabled={isSaving}
+          disabled={updateAvatarMutation.isPending}
           onClick={() => {
             setIsDialogOpen(false);
             resetDefault();
@@ -113,7 +126,7 @@ const AvatarChange = ({
             Select an avatar from the list below.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {isError && (
+        {updateAvatarMutation.isError && (
           <p className="text-red-500 text-sm text-center -mt-4">
             Error updating avatar
           </p>
@@ -150,17 +163,19 @@ const AvatarChange = ({
           <AlertDialogCancel
             className="cursor-pointer"
             onClick={resetDefault}
-            disabled={isSaving}
+            disabled={updateAvatarMutation.isPending}
           >
             Cancel
           </AlertDialogCancel>
           <Button
             className="cursor-pointer"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={updateAvatarMutation.isPending}
           >
-            {isSaving ? "Saving..." : "Save"}
-            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {updateAvatarMutation.isPending ? "Saving..." : "Save"}
+            {updateAvatarMutation.isPending && (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
