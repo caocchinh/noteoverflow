@@ -88,7 +88,7 @@ const AvatarChange = ({
 
   return (
     <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <AlertDialogContent className="border-foreground/50 bg-[#222222]  max-w-[90vw] sm:!max-w-[600px]">
+      <AlertDialogContent className="border-foreground/50 bg-white dark:bg-[#222222]  max-w-[90vw] sm:!max-w-[600px]">
         <Button
           className="absolute right-0 top-0 p-0 !bg-transparent cursor-pointer"
           title="Cancel"
