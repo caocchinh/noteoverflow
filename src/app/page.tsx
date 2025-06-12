@@ -346,9 +346,9 @@ export default function Home() {
               title="Founder & Developer"
               handle="founder@noteoverflow.com"
             />
-            <p className="text-left text-xs sm:text-sm text-[var(--home-page-text-muted)] w-[350px]">
-              *This project is created with pride by a 12th grader Vietnamese
-              student at Vinschool Central Park.{" "}
+            <p className="text-left text-xs text-[var(--home-page-text-muted)] w-[350px]">
+              *This project is purely 100% created with pride by a 12th grader
+              Vietnamese student at Vinschool Central Park.{" "}
               <span>
                 <Image
                   src="/assets/vn.svg"

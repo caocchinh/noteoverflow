@@ -10,6 +10,7 @@ import {
   SquareUserRound,
   AlertTriangle,
   RefreshCcw,
+  ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
@@ -20,6 +21,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
+  DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import GlareHover from "../GlazeHover";
 
@@ -27,6 +33,7 @@ const User = () => {
   const [trigger, setTrigger] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
 
   const { data, isPending, error } = useQuery({
     queryKey: ["user", trigger],
@@ -62,19 +69,21 @@ const User = () => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="relative z-[101] px-0 flex flex-col text-foreground bg-background">
-          <Button
-            variant="ghost"
-            className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
-            onClick={() => {
-              setIsMenuOpen(false);
-              if (typeof window !== "undefined") {
-                window.location.reload();
-              }
-            }}
-          >
-            Refresh
-            <RefreshCcw />
-          </Button>
+          <DropdownMenuItem asChild>
+            <Button
+              variant="ghost"
+              className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+              onClick={() => {
+                setIsMenuOpen(false);
+                if (typeof window !== "undefined") {
+                  window.location.reload();
+                }
+              }}
+            >
+              Refresh
+              <RefreshCcw />
+            </Button>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -120,54 +129,79 @@ const User = () => {
         </GlareHover>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="relative z-[101] px-0 flex flex-col text-foreground bg-background">
-        <div className="flex items-center gap-2 justify-start w-full px-4 py-2 hover:bg-muted">
-          <Image
-            src={data.data?.user.image || "/assets/avatar/blue.png"}
-            alt="user avatar"
-            className="object-cover rounded-full overflow-hidden"
-            width={32}
-            height={32}
-          />
-          <div className="flex flex-col">
-            <p className="text-sm font-medium">{data.data?.user.name}</p>
-          </div>
-        </div>
+      <DropdownMenuContent className="relative z-[101] p-0 flex flex-col text-foreground bg-background border-white/50">
+        <DropdownMenuSub open={isSubMenuOpen} onOpenChange={setIsSubMenuOpen}>
+          <DropdownMenuSubTrigger asChild disabled={true} title="Preferences">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 justify-start w-full px-4 p-2 h-full hover:bg-muted cursor-pointer"
+              onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
+            >
+              <Image
+                src={data.data?.user.image || "/assets/avatar/blue.png"}
+                alt="user avatar"
+                className="object-cover rounded-full overflow-hidden"
+                width={32}
+                height={32}
+              />
+              <div className="flex flex-col">
+                <p className="text-sm font-medium">{data.data?.user.name}</p>
+              </div>
+            </Button>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="relative z-[102] border-white/60">
+              <DropdownMenuItem asChild title="Change avatar">
+                <Button
+                  variant="ghost"
+                  className="w-full px-4 py-2 hover:bg-muted flex items-center gap-2 cursor-pointer"
+                >
+                  Change avatar
+                  <ImageIcon />
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+
         <DropdownMenuSeparator className="!mx-0 !my-0" />
-        <Button
-          variant="ghost"
-          className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
-          asChild
-        >
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 w-full justify-start"
-            onClick={() => setIsMenuOpen(false)}
+        <DropdownMenuItem asChild title="Dashboard">
+          <Button
+            variant="ghost"
+            className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+            asChild
           >
-            <LayoutDashboard />
-            Dashboard
-          </Link>
-        </Button>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 w-full justify-start"
+            >
+              <LayoutDashboard />
+              Dashboard
+            </Link>
+          </Button>
+        </DropdownMenuItem>
         <DropdownMenuSeparator className="!mx-0 !my-0" />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSignOut}
-          className="w-full flex justify-start items-center  px-4 py-2 hover:bg-muted cursor-pointer"
-        >
-          {isSigningOut ? (
-            <>
-              <Loader2 className="animate-spin" />
-              Signing out...
-            </>
-          ) : (
-            <>
-              <LogOut />
-              Sign out
-            </>
-          )}
-        </Button>
+        <DropdownMenuItem asChild title="Sign out">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSignOut}
+            className="w-full flex justify-start items-center  px-4 py-2 hover:bg-muted cursor-pointer"
+          >
+            {isSigningOut ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Signing out...
+              </>
+            ) : (
+              <>
+                <LogOut />
+                Sign out
+              </>
+            )}
+          </Button>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
