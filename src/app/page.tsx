@@ -6,6 +6,7 @@ import {
   Code,
   Dna,
   FlaskConical,
+  Github,
   HandCoins,
   Pi,
   RectangleEllipsis,
@@ -307,8 +308,8 @@ export default function Home() {
               className="text-6xl -mt-24 sm:text-7xl font-semibold text-center relative z-10 text-[var(--home-page-text)]"
               as="span"
               trigger={isTrigger}
-              duration={1.7}
-              delay={300}
+              duration={1.5}
+              delay={270}
             >
               FREE. FOREVER.
             </TextScramble>
@@ -359,6 +360,14 @@ export default function Home() {
                 />
               </span>
             </p>
+            <a
+              href="https://github.com/caocchinh"
+              target="_blank"
+              title="Visit founder's GitHub"
+              className="text-white"
+            >
+              <Github />
+            </a>
           </div>
 
           <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative z-20">

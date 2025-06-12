@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import {
@@ -28,31 +28,34 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import GlareHover from "../GlazeHover";
+import styles from "./Navbar.module.css";
 
 const User = () => {
-  const [trigger, setTrigger] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+
   const { data, isPending, error } = useQuery({
-    queryKey: ["user", trigger],
+    queryKey: ["user"],
     queryFn: async () => {
-      console.log("fetching user");
       return await authClient.getSession();
     },
   });
 
-  async function handleSignOut() {
-    try {
-      setIsSigningOut(true);
-      await authClient.signOut();
-      setTrigger((prev) => !prev);
-    } catch (error) {
+  const signOutMutation = useMutation({
+    mutationFn: () => authClient.signOut(),
+    onSuccess: () => {
+      queryClient.setQueryData(["user"], null);
+      setIsMenuOpen(false);
+    },
+    onError: (error) => {
       console.error(error);
-    } finally {
-      setIsSigningOut(false);
-    }
+    },
+  });
+
+  function handleSignOut() {
+    signOutMutation.mutate();
   }
 
   if (error) {
@@ -68,7 +71,7 @@ const User = () => {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="relative z-[101] px-0 flex flex-col text-foreground bg-background">
+        <DropdownMenuContent className="relative z-[100001] px-0 flex flex-col text-foreground bg-background">
           <DropdownMenuItem asChild>
             <Button
               variant="ghost"
@@ -129,7 +132,10 @@ const User = () => {
         </GlareHover>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="relative z-[101] p-0 flex flex-col text-foreground bg-background border-white/50">
+      <DropdownMenuContent
+        className="relative z-[100001] w-[200px] px-1 flex flex-col text-foreground bg-background border-white/50"
+        align="end"
+      >
         <DropdownMenuSub open={isSubMenuOpen} onOpenChange={setIsSubMenuOpen}>
           <DropdownMenuSubTrigger asChild disabled={true} title="Preferences">
             <Button
@@ -144,13 +150,15 @@ const User = () => {
                 width={32}
                 height={32}
               />
-              <div className="flex flex-col">
-                <p className="text-sm font-medium">{data.data?.user.name}</p>
-              </div>
+              <p className="text-sm font-medium whitespace-pre-line w-max max-w-[120px]">
+                {data.data?.user.name}
+              </p>
             </Button>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuSubContent className="relative z-[102] border-white/60">
+            <DropdownMenuSubContent
+              className={`z-[100002] border-white/60 ${styles.subUserMenuContent}`}
+            >
               <DropdownMenuItem asChild title="Change avatar">
                 <Button
                   variant="ghost"
@@ -182,14 +190,21 @@ const User = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator className="!mx-0 !my-0" />
 
-        <DropdownMenuItem asChild title="Sign out">
+        <DropdownMenuItem
+          asChild
+          title="Sign out"
+          onSelect={(e) => {
+            e.preventDefault();
+            setIsMenuOpen(true);
+          }}
+        >
           <Button
             variant="ghost"
             size="icon"
             onClick={handleSignOut}
             className="w-full flex justify-start items-center  px-4 py-2 hover:bg-muted cursor-pointer"
           >
-            {isSigningOut ? (
+            {signOutMutation.isPending ? (
               <>
                 <Loader2 className="animate-spin" />
                 Signing out...

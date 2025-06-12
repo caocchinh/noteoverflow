@@ -13,7 +13,7 @@ const NavBar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[100] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
+    <header className="flex justify-between min-w-screen items-center px-1 sm:px-10 lg:px-20 py-3 fixed top-0 left-0 right-0 z-[100000] bg-[var(--navbar-bg)] border-b border-[var(--navbar-border)]">
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
         {pathname !== "/" ? (
           <>
