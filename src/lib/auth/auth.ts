@@ -4,6 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { captcha } from "better-auth/plugins";
 import * as schema from "@/drizzle/auth/schema";
 import { type User } from "better-auth";
+import { AVATARS } from "@/constants/constants";
 
 export const auth = () =>
   betterAuth({
@@ -27,21 +28,10 @@ export const auth = () =>
       user: {
         create: {
           before: async (user: User) => {
-            const avatars = [
-              "/assets/avatar/blue.png",
-              "/assets/avatar/coffee.png",
-              "/assets/avatar/green.png",
-              "/assets/avatar/indigo.png",
-              "/assets/avatar/magenta.png",
-              "/assets/avatar/orange.png",
-              "/assets/avatar/purple.png",
-              "/assets/avatar/red.png",
-            ];
-
             return {
               data: {
                 ...user,
-                image: avatars[Math.floor(Math.random() * avatars.length)],
+                image: AVATARS[Math.floor(Math.random() * AVATARS.length)].src,
               },
             };
           },

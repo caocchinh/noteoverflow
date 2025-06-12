@@ -360,14 +360,22 @@ export default function Home() {
                 />
               </span>
             </p>
-            <a
+            <motion.a
               href="https://github.com/caocchinh"
               target="_blank"
               title="Visit founder's GitHub"
-              className="text-white"
+              className="text-white -mt-2"
+              whileHover={{
+                rotateZ: -10,
+                transition: {
+                  duration: 0.2,
+                  ease: "easeOut",
+                },
+              }}
+              whileTap={{ scale: 0.95 }}
             >
               <Github />
-            </a>
+            </motion.a>
           </div>
 
           <div className="flex flex-col items-center justify-center w-[90%] md:w-[450px] relative z-20">
