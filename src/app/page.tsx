@@ -38,7 +38,7 @@ const items = Array.from({ length: 22 }, (_, i) => {
   return (
     <Image
       key={`logo${num}`}
-      src={`/assets/demo/${num}.png`}
+      src={`/assets/demo/${num}.webp`}
       alt="NoteOverflow"
       className="w-full !h-full object-contain object-left rounded-lg"
       width={65}
@@ -177,7 +177,7 @@ export default function Home() {
             className="mb-8"
           >
             <Image
-              src="/assets/logo-bg-colorised-modified-small.png"
+              src="/assets/logo-bg-colorised-modified-small.webp"
               alt="NoteOverflow"
               className="relative z-10"
               width={65}
@@ -340,8 +340,8 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center justify-center gap-4 order-1 md:order-0 z-20">
             <ProfileCard
-              avatarUrl="/assets/founder.png"
-              iconUrl="/assets/logo-bg.png"
+              avatarUrl="/assets/founder.webp"
+              iconUrl="/assets/logo-bg.webp"
               grainUrl="/assets/grain.webp"
               name="Mr. Cao Cự Chính"
               title="Founder & Developer"

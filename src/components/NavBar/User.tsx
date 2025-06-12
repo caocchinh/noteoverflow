@@ -116,7 +116,7 @@ const User = () => {
       <AvatarChange
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        currentAvatar={data.data.user.image || "/assets/avatar/blue.png"}
+        currentAvatar={data.data.user.image || "/assets/avatar/blue.webp"}
         userId={data.data.user.id}
       />
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -132,7 +132,7 @@ const User = () => {
             title="Account Settings"
           >
             <Image
-              src={data.data.user.image || "/assets/avatar/blue.png"}
+              src={data.data.user.image || "/assets/avatar/blue.webp"}
               alt="user avatar"
               className="object-cover"
               width={32}
@@ -153,7 +153,7 @@ const User = () => {
                 onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
               >
                 <Image
-                  src={data.data?.user.image || "/assets/avatar/blue.png"}
+                  src={data.data?.user.image || "/assets/avatar/blue.webp"}
                   alt="user avatar"
                   className="object-cover rounded-full overflow-hidden"
                   width={32}

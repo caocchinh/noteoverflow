@@ -218,7 +218,7 @@ const AuthPageClient = ({
                 {isNavigating ? loadingText : "Sign In"}
               </h1>
               <Image
-                src="/assets/logo-bg-colorised-modified-small.png"
+                src="/assets/logo-bg-colorised-modified-small.webp"
                 alt="logo"
                 width={35}
                 height={35}

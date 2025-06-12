@@ -172,7 +172,7 @@ const AvatarChange = ({
             onClick={handleSave}
             disabled={updateAvatarMutation.isPending}
           >
-            {updateAvatarMutation.isPending ? "Saving..." : "Save"}
+            {updateAvatarMutation.isPending ? "Saving" : "Save"}
             {updateAvatarMutation.isPending && (
               <Loader2 className="w-4 h-4 animate-spin" />
             )}

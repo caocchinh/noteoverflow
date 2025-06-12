@@ -19,7 +19,7 @@ const NavBar = () => {
           <>
             <Link href="/" className="hidden lg:block">
               <Image
-                src="/assets/logo-full-colorised-white.png"
+                src="/assets/logo-full-colorised-white.webp"
                 alt="logo"
                 width={245}
                 height={28}
@@ -27,7 +27,7 @@ const NavBar = () => {
             </Link>
             <Link href="/" className="lg:hidden block">
               <Image
-                src="/assets/logo-bg-colorised-modified-small.png"
+                src="/assets/logo-bg-colorised-modified-small.webp"
                 alt="logo"
                 width={40}
                 height={40}
@@ -38,7 +38,7 @@ const NavBar = () => {
           <>
             <a href="#" className="hidden lg:block">
               <Image
-                src="/assets/logo-full-colorised-white.png"
+                src="/assets/logo-full-colorised-white.webp"
                 alt="logo"
                 width={245}
                 height={28}
@@ -46,7 +46,7 @@ const NavBar = () => {
             </a>
             <a href="#" className="lg:hidden block">
               <Image
-                src="/assets/logo-bg-colorised-modified-small.png"
+                src="/assets/logo-bg-colorised-modified-small.webp"
                 alt="logo"
                 width={40}
                 height={40}
