@@ -10,6 +10,7 @@
     "db:generate:auth": "drizzle-kit generate --config drizzle-auth.config.ts",
     "db:generate:main": "drizzle-kit generate --config drizzle-main.config.ts",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --keep-vars",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },
