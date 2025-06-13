@@ -24,11 +24,6 @@
   },
   "d1_databases": [
     {
-      "binding": "AUTH_DB",
-      "database_name": "nfauth",
-      "database_id": "cbac6972-6904-4a66-b042-c099901358e9"
-    },
-    {
       "binding": "MAIN_DB",
       "database_name": "noteoverflow",
       "database_id": "0b76f3c9-07ac-41ac-aabd-9d155d22482e"
