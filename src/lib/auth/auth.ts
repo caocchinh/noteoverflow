@@ -1,14 +1,14 @@
-import { getAuthDb } from "@/drizzle/auth/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { captcha } from "better-auth/plugins";
-import * as schema from "@/drizzle/auth/schema";
 import { type User } from "better-auth";
 import { AVATARS } from "@/constants/constants";
+import { getDb } from "@/drizzle/db";
+import * as schema from "@/drizzle/schema";
 
 export const auth = () =>
   betterAuth({
-    database: drizzleAdapter(getAuthDb(), {
+    database: drizzleAdapter(getDb(), {
       provider: "sqlite",
       schema: schema,
     }),

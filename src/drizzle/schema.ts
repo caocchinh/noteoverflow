@@ -79,15 +79,25 @@ export const topic = sqliteTable("topic", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   subjectId: text("subject_id").references(() => subject.id),
+  curriculumId: text("curriculum_id").references(() => curriculum.id),
 });
-
-export const;
 
 export const question = sqliteTable("question", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" })
-    .$defaultFn(() => false)
-    .notNull(),
+  year: integer("year"),
+  season: text("season"),
+  paperId: text("paper_id"),
+  subjectId: text("subject_id").references(() => subject.id),
+  topicId: text("topic_id").references(() => topic.id),
+  curriculumId: text("curriculum_id").references(() => curriculum.id),
+  questionNumber: integer("question_number").notNull(),
+  questionOrder: integer("question_order").notNull(),
+  questionImageSrc: text("question_image_src"),
+});
+
+export const answer = sqliteTable("answer", {
+  id: text("id").primaryKey(),
+  questionId: text("question_id").references(() => question.id),
+  answerImageSrc: text("answer_image_src"),
 });
