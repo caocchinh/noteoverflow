@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+"use client";
+import { useEffect, useRef, Children } from "react";
 
 interface FuzzyTextProps {
   children: React.ReactNode;
@@ -59,7 +60,7 @@ const FuzzyText: React.FC<FuzzyTextProps> = ({
         document.body.removeChild(temp);
       }
 
-      const text = React.Children.toArray(children).join("");
+      const text = Children.toArray(children).join("");
 
       const offscreen = document.createElement("canvas");
       const offCtx = offscreen.getContext("2d");

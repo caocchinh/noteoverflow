@@ -30,6 +30,7 @@ import {
 import GlareHover from "../GlazeHover";
 import styles from "./Navbar.module.css";
 import AvatarChange from "./AvatarChange";
+import { motion, AnimatePresence } from "framer-motion";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,16 +100,27 @@ const User = () => {
   }
   if (!data || !data.data) {
     return (
-      <Button
-        className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
-        asChild
-        title="Sign in to access all features"
-      >
-        <Link href="/authentication">
-          <SquareUserRound />
-          Sign in
-        </Link>
-      </Button>
+      <AnimatePresence mode="wait">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 0.3,
+            ease: "easeInOut",
+          }}
+        >
+          <Button
+            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
+            asChild
+            title="Sign in to access all features"
+          >
+            <Link href="/authentication">
+              <SquareUserRound />
+              Sign in
+            </Link>
+          </Button>
+        </motion.div>
+      </AnimatePresence>
     );
   }
   return (
@@ -119,26 +131,46 @@ const User = () => {
         currentAvatar={data.data.user.image || "/assets/avatar/blue.webp"}
         userId={data.data.user.id}
       />
+
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger>
-          <GlareHover
-            glareColor="#ffffff"
-            glareOpacity={0.3}
-            glareAngle={-30}
-            glareSize={300}
-            transitionDuration={800}
-            playOnce={false}
-            className="w-max h-max rounded-full"
-            title="Account Settings"
+        <DropdownMenuTrigger asChild>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <Image
-              src={data.data.user.image || "/assets/avatar/blue.webp"}
-              alt="user avatar"
-              className="object-cover"
-              width={32}
-              height={32}
-            />
-          </GlareHover>
+            <GlareHover
+              glareColor="#ffffff"
+              glareOpacity={0.3}
+              glareAngle={-30}
+              glareSize={300}
+              transitionDuration={800}
+              playOnce={false}
+              className="w-max h-max rounded-full"
+              title="Account Settings"
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={data.data.user.image}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <Image
+                    src={data.data.user.image || "/assets/avatar/blue.webp"}
+                    alt="user avatar"
+                    className="object-cover rounded-full"
+                    width={32}
+                    height={32}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </GlareHover>
+          </motion.div>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent

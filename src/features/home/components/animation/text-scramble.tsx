@@ -1,7 +1,7 @@
 "use client";
 import { type JSX, useEffect, useState } from "react";
 import { motion, MotionProps } from "motion/react";
-import FuzzyText from "./FuzzyText";
+import FuzzyText from "../../../../components/animation/FuzzyText";
 import { AnimatePresence } from "framer-motion";
 
 export type TextScrambleProps = {
