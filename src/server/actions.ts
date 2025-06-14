@@ -1,7 +1,8 @@
 "use server";
-import { getAuthDb } from "@/drizzle/auth/db";
-import * as schema from "@/drizzle/auth/schema";
+
 import { eq } from "drizzle-orm";
+import { getDb } from "@/drizzle/db";
+import * as schema from "@/drizzle/schema";
 
 export const updateUserAvatar = async (userId: string, avatar: string) => {
   if (!userId || !avatar) {
@@ -11,7 +12,7 @@ export const updateUserAvatar = async (userId: string, avatar: string) => {
   if (typeof userId !== "string" || typeof avatar !== "string") {
     throw new Error("User ID and avatar must be strings");
   }
-  const response = await getAuthDb()
+  const response = await getDb()
     .update(schema.user)
     .set({ image: avatar })
     .where(eq(schema.user.id, userId));

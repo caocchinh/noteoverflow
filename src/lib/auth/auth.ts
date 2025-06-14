@@ -5,6 +5,9 @@ import { type User } from "better-auth";
 import { AVATARS } from "@/constants/constants";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
+import { admin } from "better-auth/plugins";
+
+//npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
 export const auth = () =>
   betterAuth({
@@ -18,6 +21,7 @@ export const auth = () =>
     trustedOrigins: [process.env.BETTER_AUTH_URL],
 
     plugins: [
+      admin(),
       captcha({
         provider: "cloudflare-turnstile",
         secretKey: process.env.TURNSTILE_SECRET_KEY,
