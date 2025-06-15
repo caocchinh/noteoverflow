@@ -77,7 +77,7 @@ export const curriculum = sqliteTable("curriculum", {
 });
 
 export const subject = sqliteTable("subject", {
-  name: text("name").notNull().primaryKey(),
+  name: text("name").notNull(),
   subjectCode: integer("subject_code").notNull().primaryKey().unique(),
   curriculumName: text("curriculum_name")
     .references(() => curriculum.name)
@@ -114,7 +114,6 @@ export const question = sqliteTable("question", {
   questionImageSrc: text("question_image_src").notNull(),
   ratingSum: integer("rating_sum").notNull().default(0),
   ratingCount: integer("rating_count").notNull().default(0),
-  averageRating: integer("average_rating", { mode: "number" }),
 });
 
 export const answer = sqliteTable("answer", {
@@ -137,34 +136,10 @@ export const questionRating = sqliteTable("question_rating", {
   rating: integer("rating").notNull(),
 });
 
-export const questionComment = sqliteTable("question_comment", {
-  id: text("id").primaryKey(),
-  questionId: text("question_id")
-    .references(() => question.id)
-    .notNull(),
-  userId: text("user_id")
-    .references(() => user.id)
-    .notNull(),
-  comment: text("comment").notNull(),
-});
-
-export const questionCommentReply = sqliteTable("question_comment_reply", {
-  id: text("id").primaryKey(),
-  commentId: text("comment_id")
-    .references(() => questionComment.id)
-    .notNull(),
-  userId: text("user_id")
-    .references(() => user.id)
-    .notNull(),
-});
-
-// Relations definitions
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   ratings: many(questionRating),
-  comments: many(questionComment),
-  commentReplies: many(questionCommentReply),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -227,7 +202,6 @@ export const questionRelations = relations(question, ({ one, many }) => ({
   }),
   answers: many(answer),
   ratings: many(questionRating),
-  comments: many(questionComment),
 }));
 
 export const answerRelations = relations(answer, ({ one }) => ({
@@ -247,32 +221,3 @@ export const questionRatingRelations = relations(questionRating, ({ one }) => ({
     references: [user.id],
   }),
 }));
-
-export const questionCommentRelations = relations(
-  questionComment,
-  ({ one, many }) => ({
-    question: one(question, {
-      fields: [questionComment.questionId],
-      references: [question.id],
-    }),
-    user: one(user, {
-      fields: [questionComment.userId],
-      references: [user.id],
-    }),
-    replies: many(questionCommentReply),
-  })
-);
-
-export const questionCommentReplyRelations = relations(
-  questionCommentReply,
-  ({ one }) => ({
-    comment: one(questionComment, {
-      fields: [questionCommentReply.commentId],
-      references: [questionComment.id],
-    }),
-    user: one(user, {
-      fields: [questionCommentReply.userId],
-      references: [user.id],
-    }),
-  })
-);

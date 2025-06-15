@@ -1,13 +1,13 @@
 "use client";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Layers, Search } from "lucide-react";
+import { Layers } from "lucide-react";
 import ShinyText from "@/components/ShinyText";
 import { ModeToggle } from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 import User from "./User";
+import Search from "./Search";
 
 const NavBar = () => {
   const pathname = usePathname();
@@ -55,19 +55,8 @@ const NavBar = () => {
           </>
         )}
 
-        <div className="hidden sm:flex items-center w-full max-w-md h-10">
-          <Input
-            placeholder="Enter paper code"
-            className="w-full rounded-xl placeholder:text-white/50 max-w-md rounded-r-none h-full dark:bg-[var(--navbar-bg)] bg-[var(--navbar-bg)] border border-[var(--navbar-input-border)] text-[var(--navbar-text)]"
-          />
-          <Button className="rounded-xl rounded-l-none hover:cursor-pointer h-full lg:w-14 w-10 bg-[var(--navbar-button-bg)] border border-[var(--navbar-input-border)] hover:bg-[var(--navbar-border)]">
-            <Search className="text-[var(--navbar-text)]" />
-          </Button>
-        </div>
+        <Search />
         <div className="flex items-center header-content-group gap-4">
-          <Button className="sm:hidden bg-transparent hover:cursor-pointer w-9 p-2 h-full flex items-center justify-center border border-[var(--navbar-border)] text-[var(--navbar-text)] hover:bg-[var(--navbar-border)]">
-            <Search />
-          </Button>
           <Button
             className="bg-transparent  dark:hover:bg-white/5 rounded-lg border border-[var(--navbar-border)] text-[var(--navbar-text)]"
             asChild
