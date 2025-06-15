@@ -12,7 +12,6 @@ import {
   RefreshCcw,
   ImageIcon,
 } from "lucide-react";
-import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
 import { useState } from "react";
 import { Skeleton } from "../ui/skeleton";
@@ -31,6 +30,7 @@ import GlareHover from "../GlazeHover";
 import styles from "./Navbar.module.css";
 import AvatarChange from "./AvatarChange";
 import { motion, AnimatePresence } from "framer-motion";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -133,69 +133,74 @@ const User = () => {
       />
 
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger asChild>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <GlareHover
-              glareColor="#ffffff"
-              glareOpacity={0.3}
-              glareAngle={-30}
-              glareSize={300}
-              transitionDuration={800}
-              playOnce={false}
-              className="w-max h-max rounded-full"
-              title="Account Settings"
+        <DropdownMenuTrigger>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={data.data.user.image}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+              }}
             >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={data.data.user.image}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: "easeInOut",
-                  }}
-                >
-                  <Image
+              <GlareHover
+                glareColor="#ffffff"
+                glareOpacity={0.3}
+                glareAngle={-30}
+                glareSize={300}
+                transitionDuration={800}
+                playOnce={false}
+                className="w-max h-max rounded-full"
+                title="Account Settings"
+              >
+                <Avatar>
+                  <AvatarImage
                     src={data.data.user.image || "/assets/avatar/blue.webp"}
-                    alt="user avatar"
-                    className="object-cover rounded-full"
-                    width={32}
-                    height={32}
                   />
-                </motion.div>
-              </AnimatePresence>
-            </GlareHover>
-          </motion.div>
+                  <AvatarFallback>
+                    {data.data.user.name?.charAt(0) +
+                      data.data.user.name?.charAt(1)}
+                  </AvatarFallback>
+                </Avatar>
+              </GlareHover>
+            </motion.div>
+          </AnimatePresence>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
           className="relative z-[100001] w-[200px] px-1 flex flex-col text-foreground bg-background border-white/50"
           align="end"
         >
-          <DropdownMenuSub open={isSubMenuOpen} onOpenChange={setIsSubMenuOpen}>
-            <DropdownMenuSubTrigger asChild disabled={true} title="Preferences">
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 justify-start w-full px-4 p-2 h-full hover:bg-muted cursor-pointer"
-                onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
+          <DropdownMenuSub
+            open={isSubMenuOpen}
+            onOpenChange={setIsSubMenuOpen}
+            defaultOpen={false}
+          >
+            <Button
+              variant="ghost"
+              className="flex items-center !p-0 justify-start w-full h-full  cursor-pointer"
+              onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
+            >
+              <DropdownMenuSubTrigger
+                title="Preferences"
+                className="w-full flex px-4 py-2  items-center gap-2 justify-start pointer-events-none"
               >
-                <Image
-                  src={data.data?.user.image || "/assets/avatar/blue.webp"}
-                  alt="user avatar"
-                  className="object-cover rounded-full overflow-hidden"
-                  width={32}
-                  height={32}
-                />
+                <Avatar>
+                  <AvatarImage
+                    src={data.data?.user.image || "/assets/avatar/blue.webp"}
+                  />
+                  <AvatarFallback>
+                    {data.data.user.name?.charAt(0) +
+                      data.data.user.name?.charAt(1)}
+                  </AvatarFallback>
+                </Avatar>
                 <p className="text-sm font-medium whitespace-pre-line w-max max-w-[120px]">
                   {data.data.user.name}
                 </p>
-              </Button>
-            </DropdownMenuSubTrigger>
+              </DropdownMenuSubTrigger>
+            </Button>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 className={`z-[100002] border-white/60 ${styles.subUserMenuContent}`}
