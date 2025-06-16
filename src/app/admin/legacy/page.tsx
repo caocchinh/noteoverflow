@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Upload, Trash2, X, File, Check, FolderUp } from "lucide-react";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -129,22 +131,11 @@ const LegacyUploadPage = () => {
           style={{ minHeight: "200px" }}
         >
           <div className="flex flex-col items-center text-center">
-            <svg
+            <FolderUp
               className={`w-16 h-16 mb-4 ${
                 isDragging ? "text-blue-500" : "text-gray-400"
               }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
+            />
             <p className="text-lg mb-2 font-medium text-gray-700">
               Drag & drop your directory here
             </p>
@@ -152,8 +143,11 @@ const LegacyUploadPage = () => {
               Or select files using the button below
             </p>
 
-            <label className="relative cursor-pointer bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg shadow transition-colors">
-              <span>Select Directory</span>
+            <label className="relative cursor-pointer">
+              <Button>
+                <Upload className="mr-2" size={18} />
+                Select Directory
+              </Button>
               <input
                 type="file"
                 webkitdirectory=""
@@ -180,36 +174,25 @@ const LegacyUploadPage = () => {
 
               <div className="flex items-center space-x-3">
                 {selectedFiles.size > 0 && (
-                  <button
-                    onClick={handleRemoveSelected}
-                    className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex items-center"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+                  <Button variant="destructive" onClick={handleRemoveSelected}>
+                    <Trash2 size={16} />
                     Remove Selected ({selectedFiles.size})
-                  </button>
+                  </Button>
                 )}
 
-                <button
-                  onClick={handleSelectAll}
-                  className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-                >
-                  {selectedFiles.size === files.length
-                    ? "Deselect All"
-                    : "Select All"}
-                </button>
+                <Button variant="outline" onClick={handleSelectAll}>
+                  {selectedFiles.size === files.length ? (
+                    <>
+                      <X size={16} className="mr-1" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} className="mr-1" />
+                      Select All
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
@@ -232,20 +215,7 @@ const LegacyUploadPage = () => {
                         />
                       </div>
                       <div className="flex-shrink-0 mr-3">
-                        <svg
-                          className="w-6 h-6 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
+                        <File className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 truncate">
@@ -256,26 +226,15 @@ const LegacyUploadPage = () => {
                         </p>
                       </div>
                       <div>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleRemoveFile(index)}
-                          className="text-red-500 hover:text-red-700 transition-colors p-1"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Remove file"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
+                          <X size={18} />
+                        </Button>
                       </div>
                     </div>
                   </li>
