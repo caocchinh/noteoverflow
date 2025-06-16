@@ -19,7 +19,7 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="w-full flex items-start justify-center pt-20 p-6 flex-col">
-      <div className="flex items-center justify-start w-full gap-10 border-b border-gray-600 pb-4">
+      <div className="flex items-start md:items-center justify-start w-full border-b border-gray-600 pb-4 flex-col md:flex-row gap-4 md:gap-10">
         <div className="flex items-start justify-center flex-col gap-2 w-max">
           <h1 className="text-3xl font-semibold w-full text-logo-main">
             Admin Panel
@@ -33,8 +33,8 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
             </h3>
           </div>
         </div>
-        <div className="h-[35px] border-l border-gray-500 w-[1px]"></div>
-        <Navigation />
+        <div className="h-[35px] border-l border-gray-500 w-[1px] hidden md:block"></div>
+        {session && <Navigation isOwner={session.user.role === "owner"} />}
       </div>
       {children}
     </div>
