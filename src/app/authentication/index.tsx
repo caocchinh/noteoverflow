@@ -120,10 +120,13 @@ const AuthPageClient = ({
     if (Object.keys(searchParams).includes("error")) {
       if (searchParams.error === "access_denied") {
         setError("Access denied. Please try again.");
+      } else if (searchParams.error === "banned") {
+        setError(searchParams.error_description as string);
       } else {
         setError("Login failed, please try again");
       }
     }
+
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

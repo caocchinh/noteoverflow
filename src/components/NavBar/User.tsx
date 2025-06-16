@@ -32,12 +32,13 @@ import styles from "./Navbar.module.css";
 import AvatarChange from "./AvatarChange";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { useRouter } from "next/navigation";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data, isPending, error } = useQuery({
@@ -52,6 +53,7 @@ const User = () => {
     onSuccess: () => {
       queryClient.setQueryData(["user"], null);
       setIsMenuOpen(false);
+      router.push("/authentication");
     },
     onError: (error) => {
       console.error(error);
@@ -146,17 +148,17 @@ const User = () => {
                 ease: "easeInOut",
               }}
             >
-              <GlareHover
-                glareColor="#ffffff"
-                glareOpacity={0.3}
-                glareAngle={-30}
-                glareSize={300}
-                transitionDuration={800}
-                playOnce={false}
-                className="w-max h-max rounded-full"
-                title="Account Settings"
-              >
-                <Avatar>
+              <Avatar>
+                <GlareHover
+                  glareColor="#ffffff"
+                  glareOpacity={0.3}
+                  glareAngle={-30}
+                  glareSize={300}
+                  transitionDuration={800}
+                  playOnce={false}
+                  className="w-max h-max rounded-full"
+                  title="Account Settings"
+                >
                   <AvatarImage
                     src={data.data.user.image || "/assets/avatar/blue.webp"}
                   />
@@ -164,8 +166,8 @@ const User = () => {
                     {data.data.user.name?.charAt(0) +
                       data.data.user.name?.charAt(1)}
                   </AvatarFallback>
-                </Avatar>
-              </GlareHover>
+                </GlareHover>
+              </Avatar>
             </motion.div>
           </AnimatePresence>
         </DropdownMenuTrigger>

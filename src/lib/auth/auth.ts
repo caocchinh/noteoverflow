@@ -40,7 +40,7 @@ export const auth = () =>
         defaultRole: ROLE_USER,
 
         bannedUserMessage:
-          "Congratulations on your promotion to 'former user'—your dedication to breaking rules was truly inspirational.",
+          "You are banned from the platform. Congratulations on your promotion to 'former user'.",
       }),
       captcha({
         provider: "cloudflare-turnstile",
