@@ -3,8 +3,8 @@ import { cache } from "react";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "./schema";
 
-//  npx wrangler d1 execute nfauth --file=./src/drizzle/migrations/{$filename} --> Local development
-//  npx wrangler d1 execute nfauth --file=./src/drizzle/migrations/{$filename} --remote --> Remote development
+//  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --> Local development
+//  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --remote --> Remote development
 
 export const getDb = cache(() => {
   const { env } = getCloudflareContext();

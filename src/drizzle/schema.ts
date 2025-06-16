@@ -100,6 +100,15 @@ export const question = sqliteTable("question", {
   year: integer("year").notNull(),
   season: text("season").notNull(),
   paperId: text("paper_id").notNull(),
+  uploadedBy: text("uploaded_by")
+    .references(() => user.id)
+    .notNull(),
+  uploadedAt: integer("uploaded_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
   subjectCode: integer("subject_code")
     .references(() => subject.subjectCode)
     .notNull(),
