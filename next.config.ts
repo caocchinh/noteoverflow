@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       new URL("https://localhost:3000/**"),
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/admin",
+        destination: "/admin/content",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
