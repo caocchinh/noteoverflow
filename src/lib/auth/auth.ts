@@ -6,6 +6,15 @@ import { AVATARS } from "@/constants/constants";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { admin } from "better-auth/plugins";
+import {
+  ac,
+  AdminRole,
+  OwnerRole,
+  UserRole,
+  ROLE_ADMIN,
+  ROLE_OWNER,
+  ROLE_USER,
+} from "./permission";
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
@@ -21,7 +30,18 @@ export const auth = () =>
     trustedOrigins: [process.env.BETTER_AUTH_URL],
 
     plugins: [
-      admin(),
+      admin({
+        ac,
+        roles: {
+          [ROLE_ADMIN]: AdminRole,
+          [ROLE_OWNER]: OwnerRole,
+          [ROLE_USER]: UserRole,
+        },
+        defaultRole: ROLE_USER,
+
+        bannedUserMessage:
+          "Congratulations on your promotion to 'former user'—your dedication to breaking rules was truly inspirational.",
+      }),
       captcha({
         provider: "cloudflare-turnstile",
         secretKey: process.env.TURNSTILE_SECRET_KEY,

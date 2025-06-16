@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   RefreshCcw,
   ImageIcon,
+  ShieldUser,
 } from "lucide-react";
 import { authClient } from "@/lib/auth/auth-client";
 import { useState } from "react";
@@ -220,6 +221,28 @@ const User = () => {
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
+
+          {(data.data.user.role === "admin" ||
+            data.data.user.role === "owner") && (
+            <>
+              <DropdownMenuSeparator className="!mx-0 !my-0" />
+              <DropdownMenuItem asChild title="Admin Panel">
+                <Button
+                  variant="ghost"
+                  className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+                  asChild
+                >
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <ShieldUser />
+                    Admin Panel
+                  </Link>
+                </Button>
+              </DropdownMenuItem>{" "}
+            </>
+          )}
 
           <DropdownMenuSeparator className="!mx-0 !my-0" />
           <DropdownMenuItem asChild title="Dashboard">

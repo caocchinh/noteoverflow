@@ -3,6 +3,7 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
+import { auth } from "@/lib/auth/auth";
 
 export const updateUserAvatar = async (userId: string, avatar: string) => {
   if (!userId || !avatar) {
@@ -19,4 +20,43 @@ export const updateUserAvatar = async (userId: string, avatar: string) => {
   if (response.rowCount === 0) {
     throw new Error("User not found");
   }
+};
+
+export const isAdmin = async (userId: string): Promise<boolean> => {
+  const response = await auth().api.userHasPermission({
+    body: {
+      userId,
+      permission: {
+        project: ["create", "update", "delete"],
+      },
+    },
+  });
+  if (response.error) {
+    throw new Error("Failed to check admin status");
+  }
+  return response.success;
+};
+
+export const isOwner = async (userId: string): Promise<boolean> => {
+  const response = await auth().api.userHasPermission({
+    body: {
+      userId,
+      permission: {
+        project: ["create", "update", "delete"],
+        user: [
+          "create",
+          "list",
+          "set-role",
+          "ban",
+          "impersonate",
+          "delete",
+          "set-password",
+        ],
+      },
+    },
+  });
+  if (response.error) {
+    throw new Error("Failed to check admin status");
+  }
+  return response.success;
 };
