@@ -63,24 +63,24 @@ export const isOwner = async (userId: string): Promise<boolean> => {
 
 export const uploadQuestion = async ({
   userId,
-  yearId,
-  seasonId,
-  paperTypeId,
+  year,
+  season,
+  paperType,
   paperVariant,
   subjectId,
-  topicName,
+  topic,
   questionNumber,
   questionOrder,
   questionImageSrc,
   questionId,
 }: {
   userId: string;
-  yearId: string;
-  seasonId: string;
-  paperTypeId: string;
+  year: number;
+  season: string;
+  paperType: number;
   paperVariant: string;
   subjectId: string;
-  topicName: string;
+  topic: string;
   questionNumber: number;
   questionOrder: number;
   questionImageSrc: string;
@@ -92,13 +92,13 @@ export const uploadQuestion = async ({
     .insert(schema.question)
     .values({
       id: questionId,
-      yearId,
-      seasonId,
-      paperTypeId,
+      year,
+      season,
+      paperType,
       paperVariant,
       uploadedBy: userId,
       subjectId,
-      topicName,
+      topic,
       questionNumber,
       questionOrder,
       questionImageSrc,
@@ -106,13 +106,13 @@ export const uploadQuestion = async ({
     .onConflictDoUpdate({
       target: schema.question.id,
       set: {
-        yearId,
-        seasonId,
-        paperTypeId,
+        year,
+        season,
+        paperType,
         paperVariant,
         uploadedBy: userId,
         subjectId,
-        topicName,
+        topic,
         questionNumber,
         questionOrder,
         questionImageSrc,

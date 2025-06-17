@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { uploadAnswer } from "@/server/actions";
 import { uploadQuestion } from "@/server/actions";
+import { authClient } from "@/lib/auth/auth-client";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -147,17 +148,18 @@ const LegacyUploadPage = () => {
       const topic = file.webkitRelativePath.split("/")[2];
       const season: "Summer" | "Winter" | "Spring" =
         file.webkitRelativePath.split("/")[4] as "Summer" | "Winter" | "Spring";
-      const subjectName = file.webkitRelativePath.split("/")[0].split("(")[0];
-      const subjectCode = file.webkitRelativePath
-        .split("/")[0]
-        .split("(")[1]
-        .split(")")[0];
+      const paperCode = file.webkitRelativePath.split("/")[6];
+      // const subjectName = file.webkitRelativePath.split("/")[0].split("(")[0];
+      // const subjectCode = file.webkitRelativePath
+      //   .split("/")[0]
+      //   .split("(")[1]
+      //   .split(")")[0];
       const year = file.webkitRelativePath.split("/")[3];
       const formData = new FormData();
       formData.append("file", file);
       formData.append(
         "filename",
-        `${subjectFullName}_${contentType}_${questionNumber}_${order}${file.type}`
+        `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`
       );
       formData.append("contentType", file.type);
 
@@ -176,20 +178,26 @@ const LegacyUploadPage = () => {
       }
 
       const questionImageSrc = result.url;
-
-      if (contentType === "questions") {
+      const session = await authClient.getSession();
+      if (contentType === "questions" && session?.data?.user) {
         await uploadQuestion({
-          userId: "1",
-          yearId: `${subjectFullName}_${year}`,
-          seasonId: `${subjectFullName}_${season}`,
-          paperTypeId: `${subjectFullName}_${}`,
+          userId: session.data.user.id,
+          year: parseInt(year),
+          season: season,
+          paperType: parseInt(paperCode),
           paperVariant: "A",
           subjectId: subjectFullName,
-          topicName: "1",
-          questionNumber: 1,
-          questionOrder: 1,
-          questionImageSrc : questionImageSrc,
-          questionId: `${subjectFullName}_`,
+          topic: topic,
+          questionNumber: parseInt(questionNumber),
+          questionOrder: parseInt(order),
+          questionImageSrc: questionImageSrc,
+          questionId: `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`,
+        });
+      } else if (contentType === "answers" && session?.data?.user) {
+        await uploadAnswer({
+          questionId: `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`,
+          answerImageSrc: questionImageSrc,
+          answerOrder: parseInt(order),
         });
       }
       return true;
