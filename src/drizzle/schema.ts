@@ -146,7 +146,7 @@ export const question = sqliteTable(
     year: integer("year").notNull(),
     season: text("season").notNull(),
     paperType: integer("paper_type").notNull(),
-    paperVariant: text("paper_variant").notNull(),
+    paperVariant: integer("paper_variant").notNull(),
     topic: text("topic").notNull(),
     uploadedBy: text("uploaded_by")
       .references(() => user.id)

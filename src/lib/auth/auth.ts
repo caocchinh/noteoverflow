@@ -37,7 +37,7 @@ export const auth = () =>
           [ROLE_OWNER]: OwnerRole,
           [ROLE_USER]: UserRole,
         },
-        defaultRole: ROLE_OWNER,
+        defaultRole: ROLE_USER,
 
         bannedUserMessage:
           "You are banned from the platform. Congratulations on your promotion to 'former user'.",

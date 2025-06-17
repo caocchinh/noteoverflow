@@ -31,6 +31,9 @@ yarn-error.log*
 .env.*
 .env
 
+# drizzle
+/src/drizzle/migrations
+
 # vercel
 .vercel
 
