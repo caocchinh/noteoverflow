@@ -18,8 +18,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { uploadAnswer } from "@/server/actions";
-import { uploadQuestion } from "@/server/actions";
+import {
+  createCurriculum,
+  isCurriculumExists,
+  isSubjectExists,
+  createSubject,
+  uploadAnswer,
+  uploadQuestion,
+  isYearExists,
+  createYear,
+  isSeasonExists,
+  createSeason,
+  isPaperTypeExists,
+  createPaperType,
+  isTopicExists,
+  createTopic,
+  uploadQuestionImage,
+} from "@/server/actions";
 import { authClient } from "@/lib/auth/auth-client";
 
 // Add type declaration for directory input
@@ -154,48 +169,97 @@ const LegacyUploadPage = () => {
       //   .split("/")[0]
       //   .split("(")[1]
       //   .split(")")[0];
+      const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
+      const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);
       const year = file.webkitRelativePath.split("/")[3];
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append(
-        "filename",
-        `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`
-      );
-      formData.append("contentType", file.type);
 
-      const response = await fetch("/api/r2", {
-        method: "POST",
-        body: formData,
-      });
+      let questionImageSrc = "";
+      if (file.type.includes("text")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          questionImageSrc = content;
+        };
+        reader.readAsText(file);
+      } else {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append(
+          "filename",
+          `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`
+        );
+        formData.append("contentType", file.type);
 
-      if (!response.ok) {
-        throw new Error("Failed to upload file");
+        const response = await fetch("/api/r2", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload file");
+        }
+        const result = await response.json();
+
+        if (!result || !result.url) {
+          throw new Error("Failed to upload file");
+        }
+        questionImageSrc = result.url;
       }
-      const result = await response.json();
 
-      if (!result || !result.url) {
-        throw new Error("Failed to upload file");
-      }
-
-      const questionImageSrc = result.url;
       const session = await authClient.getSession();
+      if (!(await isCurriculumExists(curriculum))) {
+        await createCurriculum({ name: curriculum });
+      }
+      if (!(await isSubjectExists(subjectFullName))) {
+        await createSubject({
+          id: subjectFullName,
+          curriculumName: curriculum,
+        });
+      }
+      if (!(await isYearExists(parseInt(year), subjectFullName))) {
+        await createYear({
+          year: parseInt(year),
+          subjectId: subjectFullName,
+        });
+      }
+      if (!(await isSeasonExists(season, subjectFullName))) {
+        await createSeason({
+          season: season,
+          subjectId: subjectFullName,
+        });
+      }
+      if (!(await isPaperTypeExists(paperType, subjectFullName))) {
+        await createPaperType({
+          paperType: paperType,
+          subjectId: subjectFullName,
+        });
+      }
+      if (!(await isTopicExists(topic, subjectFullName))) {
+        await createTopic({
+          topic: topic,
+          subjectId: subjectFullName,
+        });
+      }
       if (contentType === "questions" && session?.data?.user) {
         await uploadQuestion({
           userId: session.data.user.id,
           year: parseInt(year),
           season: season,
-          paperType: parseInt(paperCode),
-          paperVariant: "A",
+          paperType: paperType,
+          paperVariant: paperVariant,
           subjectId: subjectFullName,
           topic: topic,
           questionNumber: parseInt(questionNumber[1]),
-          questionOrder: parseInt(order),
-          questionImageSrc: questionImageSrc,
-          questionId: `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`,
+          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
+        });
+        await uploadQuestionImage({
+          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
+          imageSrc: questionImageSrc,
+          order: parseInt(order),
         });
       } else if (contentType === "answers" && session?.data?.user) {
         await uploadAnswer({
-          questionId: `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`,
+          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
           answerImageSrc: questionImageSrc,
           answerOrder: parseInt(order),
         });
@@ -217,10 +281,19 @@ const LegacyUploadPage = () => {
     const newFailedUploads: File[] = [];
     let completedUploads = 0;
 
-    for (let i = 0; i < 1; i++) {
-      const file = files[i];
-      const success = await uploadFile(file);
+    // Sort files so that "questions" come before "answers"
+    const sortedFiles = [...files].sort((a, b) => {
+      const aType = a.webkitRelativePath.split("/")[1];
+      const bType = b.webkitRelativePath.split("/")[1];
 
+      if (aType === "questions" && bType === "answers") return -1;
+      if (aType === "answers" && bType === "questions") return 1;
+      return 0;
+    });
+
+    for (let i = 0; i < 1; i++) {
+      const file = sortedFiles[i];
+      const success = await uploadFile(file);
       completedUploads++;
       const progress = Math.round((completedUploads / files.length) * 100);
       setUploadProgress(progress);

@@ -165,8 +165,6 @@ export const question = sqliteTable(
       .notNull(),
 
     questionNumber: integer("question_number").notNull(),
-    questionOrder: integer("question_order").notNull().default(0),
-    questionImageSrc: text("question_image_src").notNull(),
     ratingSum: integer("rating_sum").notNull().default(0),
     ratingCount: integer("rating_count").notNull().default(0),
   },
@@ -188,6 +186,20 @@ export const question = sqliteTable(
       foreignColumns: [topic.subjectId, topic.topic],
     }),
   ]
+);
+
+export const questionImage = sqliteTable(
+  "question_image",
+  {
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    imageSrc: text("image_src").notNull(),
+    order: integer("order").notNull().default(0),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.questionId, table.order] })];
+  }
 );
 
 export const answer = sqliteTable(
@@ -280,8 +292,16 @@ export const questionRelations = relations(question, ({ one, many }) => ({
     fields: [question.subjectId, question.year],
     references: [year.subjectId, year.year],
   }),
+  questionImages: many(questionImage),
   answers: many(answer),
   ratings: many(questionRating),
+}));
+
+export const questionImageRelations = relations(questionImage, ({ one }) => ({
+  question: one(question, {
+    fields: [questionImage.questionId],
+    references: [question.id],
+  }),
 }));
 
 export const answerRelations = relations(answer, ({ one }) => ({

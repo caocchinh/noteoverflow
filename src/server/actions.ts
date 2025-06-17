@@ -217,20 +217,18 @@ export const uploadQuestion = async ({
   subjectId,
   topic,
   questionNumber,
-  questionOrder,
-  questionImageSrc,
+
   questionId,
 }: {
   userId: string;
   year: number;
   season: string;
   paperType: number;
-  paperVariant: string;
+  paperVariant: number;
   subjectId: string;
   topic: string;
   questionNumber: number;
-  questionOrder: number;
-  questionImageSrc: string;
+
   questionId: string;
 }) => {
   const db = getDb();
@@ -247,8 +245,6 @@ export const uploadQuestion = async ({
       subjectId,
       topic,
       questionNumber,
-      questionOrder,
-      questionImageSrc,
     })
     .onConflictDoUpdate({
       target: schema.question.id,
@@ -261,9 +257,33 @@ export const uploadQuestion = async ({
         subjectId,
         topic,
         questionNumber,
-        questionOrder,
-        questionImageSrc,
         updatedAt: new Date(),
+      },
+    });
+};
+
+export const uploadQuestionImage = async ({
+  questionId,
+  imageSrc,
+  order,
+}: {
+  questionId: string;
+  imageSrc: string;
+  order: number;
+}) => {
+  const db = getDb();
+
+  await db
+    .insert(schema.questionImage)
+    .values({
+      questionId,
+      imageSrc,
+      order,
+    })
+    .onConflictDoUpdate({
+      target: [schema.questionImage.questionId, schema.questionImage.order],
+      set: {
+        imageSrc,
       },
     });
 };
