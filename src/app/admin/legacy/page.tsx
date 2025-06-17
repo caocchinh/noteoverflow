@@ -159,7 +159,7 @@ const LegacyUploadPage = () => {
       formData.append("file", file);
       formData.append(
         "filename",
-        `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`
+        `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`
       );
       formData.append("contentType", file.type);
 
@@ -188,14 +188,14 @@ const LegacyUploadPage = () => {
           paperVariant: "A",
           subjectId: subjectFullName,
           topic: topic,
-          questionNumber: parseInt(questionNumber),
+          questionNumber: parseInt(questionNumber[1]),
           questionOrder: parseInt(order),
           questionImageSrc: questionImageSrc,
-          questionId: `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`,
+          questionId: `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`,
         });
       } else if (contentType === "answers" && session?.data?.user) {
         await uploadAnswer({
-          questionId: `${subjectFullName}_${paperCode}_${contentType}_Q${questionNumber}_${order}`,
+          questionId: `${subjectFullName}_${paperCode}_${contentType}_${questionNumber}_${order}`,
           answerImageSrc: questionImageSrc,
           answerOrder: parseInt(order),
         });

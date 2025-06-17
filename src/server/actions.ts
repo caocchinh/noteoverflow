@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
@@ -59,6 +59,153 @@ export const isOwner = async (userId: string): Promise<boolean> => {
     throw new Error("Failed to check admin status");
   }
   return response.success;
+};
+
+export const createCurriculum = async ({ name }: { name: string }) => {
+  const db = getDb();
+  await db.insert(schema.curriculum).values({ name });
+};
+
+export const isCurriculumExists = async (name: string): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.curriculum)
+    .where(eq(schema.curriculum.name, name))
+    .limit(1);
+
+  return result.length > 0;
+};
+
+export const createSubject = async ({
+  id,
+  curriculumName,
+}: {
+  id: string;
+  curriculumName: string;
+}) => {
+  const db = getDb();
+  await db.insert(schema.subject).values({ id, curriculumName });
+};
+
+export const isSubjectExists = async (id: string): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.subject)
+    .where(eq(schema.subject.id, id))
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createYear = async ({
+  year,
+  subjectId,
+}: {
+  year: number;
+  subjectId: string;
+}) => {
+  const db = getDb();
+  await db.insert(schema.year).values({ year, subjectId });
+};
+
+export const isYearExists = async (
+  year: number,
+  subjectId: string
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.year)
+    .where(
+      and(eq(schema.year.year, year), eq(schema.year.subjectId, subjectId))
+    )
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createSeason = async ({
+  season,
+  subjectId,
+}: {
+  season: string;
+  subjectId: string;
+}) => {
+  const db = getDb();
+  await db.insert(schema.season).values({ season, subjectId });
+};
+
+export const isSeasonExists = async (
+  season: string,
+  subjectId: string
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.season)
+    .where(
+      and(
+        eq(schema.season.season, season),
+        eq(schema.season.subjectId, subjectId)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createPaperType = async ({
+  paperType,
+  subjectId,
+}: {
+  paperType: number;
+  subjectId: string;
+}) => {
+  const db = getDb();
+  await db.insert(schema.paperType).values({ paperType, subjectId });
+};
+
+export const isPaperTypeExists = async (
+  paperType: number,
+  subjectId: string
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.paperType)
+    .where(
+      and(
+        eq(schema.paperType.paperType, paperType),
+        eq(schema.paperType.subjectId, subjectId)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createTopic = async ({
+  topic,
+  subjectId,
+}: {
+  topic: string;
+  subjectId: string;
+}) => {
+  const db = getDb();
+  await db.insert(schema.topic).values({ topic, subjectId });
+};
+
+export const isTopicExists = async (
+  topic: string,
+  subjectId: string
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.topic)
+    .where(
+      and(eq(schema.topic.topic, topic), eq(schema.topic.subjectId, subjectId))
+    )
+    .limit(1);
+  return result.length > 0;
 };
 
 export const uploadQuestion = async ({
