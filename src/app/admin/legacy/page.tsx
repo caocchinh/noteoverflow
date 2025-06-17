@@ -250,16 +250,16 @@ const LegacyUploadPage = () => {
           subjectId: subjectFullName,
           topic: topic,
           questionNumber: parseInt(questionNumber[1]),
-          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
         });
         await uploadQuestionImage({
-          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
           imageSrc: questionImageSrc,
           order: parseInt(order),
         });
       } else if (contentType === "answers" && session?.data?.user) {
         await uploadAnswer({
-          questionId: `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`,
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
           answerImageSrc: questionImageSrc,
           answerOrder: parseInt(order),
         });
@@ -291,7 +291,7 @@ const LegacyUploadPage = () => {
       return 0;
     });
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < sortedFiles.length; i++) {
       const file = sortedFiles[i];
       const success = await uploadFile(file);
       completedUploads++;
