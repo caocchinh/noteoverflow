@@ -16,11 +16,11 @@ CREATE TABLE `account` (
 );
 --> statement-breakpoint
 CREATE TABLE `answer` (
-	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
 	`answer_image_src` text NOT NULL,
 	`answer_order` integer DEFAULT 0 NOT NULL,
-	FOREIGN KEY (`question_id`) REFERENCES `question`(`id`) ON UPDATE no action ON DELETE no action
+	PRIMARY KEY(`question_id`, `answer_order`),
+	FOREIGN KEY (`question_id`) REFERENCES `question`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `curriculum` (
@@ -28,32 +28,50 @@ CREATE TABLE `curriculum` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `curriculum_name_unique` ON `curriculum` (`name`);--> statement-breakpoint
+CREATE TABLE `paper_type` (
+	`paper_type_id` integer PRIMARY KEY NOT NULL,
+	`subject_id` text NOT NULL,
+	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `question` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`year` integer NOT NULL,
-	`season` text NOT NULL,
-	`paper_id` text NOT NULL,
-	`subject_code` integer NOT NULL,
+	`year_id` integer NOT NULL,
+	`season_id` text NOT NULL,
+	`paper_type_id` integer NOT NULL,
+	`paper_variant` text NOT NULL,
+	`uploaded_by` text NOT NULL,
+	`uploaded_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	`subject_id` text NOT NULL,
 	`topic_name` text NOT NULL,
-	`curriculum_name` text NOT NULL,
 	`question_number` integer NOT NULL,
 	`question_order` integer DEFAULT 0 NOT NULL,
 	`question_image_src` text NOT NULL,
 	`rating_sum` integer DEFAULT 0 NOT NULL,
 	`rating_count` integer DEFAULT 0 NOT NULL,
-	FOREIGN KEY (`subject_code`) REFERENCES `subject`(`subject_code`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`topic_name`) REFERENCES `topic`(`name`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`curriculum_name`) REFERENCES `curriculum`(`name`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`year_id`) REFERENCES `year`(`year_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`season_id`) REFERENCES `season`(`season_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`paper_type_id`) REFERENCES `paper_type`(`paper_type_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`uploaded_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`topic_name`) REFERENCES `topic`(`name`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `question_id_unique` ON `question` (`id`);--> statement-breakpoint
 CREATE TABLE `question_rating` (
-	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
 	`user_id` text NOT NULL,
 	`rating` integer NOT NULL,
-	FOREIGN KEY (`question_id`) REFERENCES `question`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
+	PRIMARY KEY(`question_id`, `user_id`),
+	FOREIGN KEY (`question_id`) REFERENCES `question`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `season` (
+	`season_id` text PRIMARY KEY NOT NULL,
+	`subject_id` text NOT NULL,
+	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `session` (
@@ -72,19 +90,15 @@ CREATE TABLE `session` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
 CREATE TABLE `subject` (
-	`name` text NOT NULL,
-	`subject_code` integer PRIMARY KEY NOT NULL,
+	`subject_id` text PRIMARY KEY NOT NULL,
 	`curriculum_name` text NOT NULL,
-	FOREIGN KEY (`curriculum_name`) REFERENCES `curriculum`(`name`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`curriculum_name`) REFERENCES `curriculum`(`name`) ON UPDATE no action ON DELETE restrict
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `subject_subject_code_unique` ON `subject` (`subject_code`);--> statement-breakpoint
 CREATE TABLE `topic` (
 	`name` text PRIMARY KEY NOT NULL,
-	`subject_code` integer NOT NULL,
-	`curriculum_name` text NOT NULL,
-	FOREIGN KEY (`subject_code`) REFERENCES `subject`(`subject_code`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`curriculum_name`) REFERENCES `curriculum`(`name`) ON UPDATE no action ON DELETE no action
+	`subject_id` text NOT NULL,
+	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `topic_name_unique` ON `topic` (`name`);--> statement-breakpoint
@@ -110,4 +124,10 @@ CREATE TABLE `verification` (
 	`expires_at` integer NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
+);
+--> statement-breakpoint
+CREATE TABLE `year` (
+	`year_id` integer PRIMARY KEY NOT NULL,
+	`subject_id` text NOT NULL,
+	FOREIGN KEY (`subject_id`) REFERENCES `subject`(`subject_id`) ON UPDATE no action ON DELETE cascade
 );

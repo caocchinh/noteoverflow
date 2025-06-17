@@ -60,3 +60,89 @@ export const isOwner = async (userId: string): Promise<boolean> => {
   }
   return response.success;
 };
+
+export const uploadQuestion = async ({
+  userId,
+  yearId,
+  seasonId,
+  paperTypeId,
+  paperVariant,
+  subjectId,
+  topicName,
+  questionNumber,
+  questionOrder,
+  questionImageSrc,
+  questionId,
+}: {
+  userId: string;
+  yearId: string;
+  seasonId: string;
+  paperTypeId: string;
+  paperVariant: string;
+  subjectId: string;
+  topicName: string;
+  questionNumber: number;
+  questionOrder: number;
+  questionImageSrc: string;
+  questionId: string;
+}) => {
+  const db = getDb();
+
+  await db
+    .insert(schema.question)
+    .values({
+      id: questionId,
+      yearId,
+      seasonId,
+      paperTypeId,
+      paperVariant,
+      uploadedBy: userId,
+      subjectId,
+      topicName,
+      questionNumber,
+      questionOrder,
+      questionImageSrc,
+    })
+    .onConflictDoUpdate({
+      target: schema.question.id,
+      set: {
+        yearId,
+        seasonId,
+        paperTypeId,
+        paperVariant,
+        uploadedBy: userId,
+        subjectId,
+        topicName,
+        questionNumber,
+        questionOrder,
+        questionImageSrc,
+        updatedAt: new Date(),
+      },
+    });
+};
+
+export const uploadAnswer = async ({
+  questionId,
+  answerImageSrc,
+  answerOrder,
+}: {
+  questionId: string;
+  answerImageSrc: string;
+  answerOrder: number;
+}) => {
+  const db = getDb();
+
+  await db
+    .insert(schema.answer)
+    .values({
+      questionId,
+      answerImageSrc,
+      answerOrder,
+    })
+    .onConflictDoUpdate({
+      target: [schema.answer.questionId, schema.answer.answerOrder],
+      set: {
+        answerImageSrc,
+      },
+    });
+};

@@ -31,10 +31,6 @@
   ],
   "r2_buckets": [
     {
-      "binding": "MAIN_BUCKET",
-      "bucket_name": "noteoverflow"
-    },
-    {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "nfcache"
     }

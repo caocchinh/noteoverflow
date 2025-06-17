@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6bd97480-a3e7-4e60-b299-18fd275277d3",
+  "id": "c6c7daef-f455-4607-8ac2-840d1dd69594",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -122,13 +122,6 @@
     "answer": {
       "name": "answer",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "question_id": {
           "name": "question_id",
           "type": "text",
@@ -164,11 +157,19 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "answer_question_id_answer_order_pk": {
+          "columns": [
+            "question_id",
+            "answer_order"
+          ],
+          "name": "answer_question_id_answer_order_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -197,6 +198,44 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "paper_type": {
+      "name": "paper_type",
+      "columns": {
+        "paper_type_id": {
+          "name": "paper_type_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "paper_type_subject_id_subject_subject_id_fk": {
+          "name": "paper_type_subject_id_subject_subject_id_fk",
+          "tableFrom": "paper_type",
+          "tableTo": "subject",
+          "columnsFrom": [
+            "subject_id"
+          ],
+          "columnsTo": [
+            "subject_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "question": {
       "name": "question",
       "columns": {
@@ -207,50 +246,64 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "year": {
-          "name": "year",
+        "year_id": {
+          "name": "year_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "season": {
-          "name": "season",
+        "season_id": {
+          "name": "season_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "paper_id": {
-          "name": "paper_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "subject_code": {
-          "name": "subject_code",
+        "paper_type_id": {
+          "name": "paper_type_id",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "paper_variant": {
+          "name": "paper_variant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uploaded_by": {
+          "name": "uploaded_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uploaded_at": {
+          "name": "uploaded_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "topic_name": {
           "name": "topic_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "curriculum_name": {
-          "name": "curriculum_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -295,19 +348,79 @@
           "default": 0
         }
       },
-      "indexes": {},
+      "indexes": {
+        "question_id_unique": {
+          "name": "question_id_unique",
+          "columns": [
+            "id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "question_subject_code_subject_subject_code_fk": {
-          "name": "question_subject_code_subject_subject_code_fk",
+        "question_year_id_year_year_id_fk": {
+          "name": "question_year_id_year_year_id_fk",
+          "tableFrom": "question",
+          "tableTo": "year",
+          "columnsFrom": [
+            "year_id"
+          ],
+          "columnsTo": [
+            "year_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_season_id_season_season_id_fk": {
+          "name": "question_season_id_season_season_id_fk",
+          "tableFrom": "question",
+          "tableTo": "season",
+          "columnsFrom": [
+            "season_id"
+          ],
+          "columnsTo": [
+            "season_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_paper_type_id_paper_type_paper_type_id_fk": {
+          "name": "question_paper_type_id_paper_type_paper_type_id_fk",
+          "tableFrom": "question",
+          "tableTo": "paper_type",
+          "columnsFrom": [
+            "paper_type_id"
+          ],
+          "columnsTo": [
+            "paper_type_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_uploaded_by_user_id_fk": {
+          "name": "question_uploaded_by_user_id_fk",
+          "tableFrom": "question",
+          "tableTo": "user",
+          "columnsFrom": [
+            "uploaded_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "question_subject_id_subject_subject_id_fk": {
+          "name": "question_subject_id_subject_subject_id_fk",
           "tableFrom": "question",
           "tableTo": "subject",
           "columnsFrom": [
-            "subject_code"
+            "subject_id"
           ],
           "columnsTo": [
-            "subject_code"
+            "subject_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "question_topic_name_topic_name_fk": {
@@ -316,19 +429,6 @@
           "tableTo": "topic",
           "columnsFrom": [
             "topic_name"
-          ],
-          "columnsTo": [
-            "name"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "question_curriculum_name_curriculum_name_fk": {
-          "name": "question_curriculum_name_curriculum_name_fk",
-          "tableFrom": "question",
-          "tableTo": "curriculum",
-          "columnsFrom": [
-            "curriculum_name"
           ],
           "columnsTo": [
             "name"
@@ -344,13 +444,6 @@
     "question_rating": {
       "name": "question_rating",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "question_id": {
           "name": "question_id",
           "type": "text",
@@ -385,7 +478,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "question_rating_user_id_user_id_fk": {
@@ -398,7 +491,53 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "question_rating_question_id_user_id_pk": {
+          "columns": [
+            "question_id",
+            "user_id"
+          ],
+          "name": "question_rating_question_id_user_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "season": {
+      "name": "season",
+      "columns": {
+        "season_id": {
+          "name": "season_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "season_subject_id_subject_subject_id_fk": {
+          "name": "season_subject_id_subject_subject_id_fk",
+          "tableFrom": "season",
+          "tableTo": "subject",
+          "columnsFrom": [
+            "subject_id"
+          ],
+          "columnsTo": [
+            "subject_id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -517,16 +656,9 @@
     "subject": {
       "name": "subject",
       "columns": {
-        "name": {
-          "name": "name",
+        "subject_id": {
+          "name": "subject_id",
           "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "subject_code": {
-          "name": "subject_code",
-          "type": "integer",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
@@ -539,15 +671,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "subject_subject_code_unique": {
-          "name": "subject_subject_code_unique",
-          "columns": [
-            "subject_code"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "subject_curriculum_name_curriculum_name_fk": {
           "name": "subject_curriculum_name_curriculum_name_fk",
@@ -559,7 +683,7 @@
           "columnsTo": [
             "name"
           ],
-          "onDelete": "no action",
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -577,15 +701,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "subject_code": {
-          "name": "subject_code",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "curriculum_name": {
-          "name": "curriculum_name",
+        "subject_id": {
+          "name": "subject_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -602,30 +719,17 @@
         }
       },
       "foreignKeys": {
-        "topic_subject_code_subject_subject_code_fk": {
-          "name": "topic_subject_code_subject_subject_code_fk",
+        "topic_subject_id_subject_subject_id_fk": {
+          "name": "topic_subject_id_subject_subject_id_fk",
           "tableFrom": "topic",
           "tableTo": "subject",
           "columnsFrom": [
-            "subject_code"
+            "subject_id"
           ],
           "columnsTo": [
-            "subject_code"
+            "subject_id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "topic_curriculum_name_curriculum_name_fk": {
-          "name": "topic_curriculum_name_curriculum_name_fk",
-          "tableFrom": "topic",
-          "tableTo": "curriculum",
-          "columnsFrom": [
-            "curriculum_name"
-          ],
-          "columnsTo": [
-            "name"
-          ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -777,6 +881,44 @@
       },
       "indexes": {},
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "year": {
+      "name": "year",
+      "columns": {
+        "year_id": {
+          "name": "year_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "year_subject_id_subject_subject_id_fk": {
+          "name": "year_subject_id_subject_subject_id_fk",
+          "tableFrom": "year",
+          "tableTo": "subject",
+          "columnsFrom": [
+            "subject_id"
+          ],
+          "columnsTo": [
+            "subject_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}

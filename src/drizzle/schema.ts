@@ -1,4 +1,9 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 export const user = sqliteTable("user", {
@@ -77,29 +82,52 @@ export const curriculum = sqliteTable("curriculum", {
 });
 
 export const subject = sqliteTable("subject", {
-  name: text("name").notNull(),
-  subjectCode: integer("subject_code").notNull().primaryKey().unique(),
+  id: text("subject_id").notNull().primaryKey(),
   curriculumName: text("curriculum_name")
-    .references(() => curriculum.name)
+    .references(() => curriculum.name, { onDelete: "restrict" })
+    .notNull(),
+});
+
+export const season = sqliteTable("season", {
+  id: text("season_id").primaryKey(),
+  subjectId: text("subject_id")
+    .references(() => subject.id, { onDelete: "cascade" })
+    .notNull(),
+});
+
+export const paperType = sqliteTable("paper_type", {
+  id: text("paper_type_id").primaryKey(),
+  subjectId: text("subject_id")
+    .references(() => subject.id, { onDelete: "cascade" })
+    .notNull(),
+});
+
+export const year = sqliteTable("year", {
+  id: text("year_id").primaryKey(),
+  subjectId: text("subject_id")
+    .references(() => subject.id, { onDelete: "cascade" })
     .notNull(),
 });
 
 export const topic = sqliteTable("topic", {
   name: text("name").notNull().primaryKey().unique(),
-  subjectCode: integer("subject_code")
-    .references(() => subject.subjectCode)
-    .notNull(),
-  curriculumName: text("curriculum_name")
-    .references(() => curriculum.name)
+  subjectId: text("subject_id")
+    .references(() => subject.id, { onDelete: "cascade" })
     .notNull(),
 });
 
 export const question = sqliteTable("question", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  year: integer("year").notNull(),
-  season: text("season").notNull(),
-  paperId: text("paper_id").notNull(),
+  id: text("id").primaryKey().unique(),
+  yearId: integer("year_id")
+    .references(() => year.id, { onDelete: "cascade" })
+    .notNull(),
+  seasonId: text("season_id")
+    .references(() => season.id, { onDelete: "cascade" })
+    .notNull(),
+  paperTypeId: integer("paper_type_id")
+    .references(() => paperType.id, { onDelete: "cascade" })
+    .notNull(),
+  paperVariant: text("paper_variant").notNull(),
   uploadedBy: text("uploaded_by")
     .references(() => user.id)
     .notNull(),
@@ -109,15 +137,13 @@ export const question = sqliteTable("question", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  subjectCode: integer("subject_code")
-    .references(() => subject.subjectCode)
+  subjectId: text("subject_id")
+    .references(() => subject.id, { onDelete: "cascade" })
     .notNull(),
   topicName: text("topic_name")
     .references(() => topic.name)
     .notNull(),
-  curriculumName: text("curriculum_name")
-    .references(() => curriculum.name)
-    .notNull(),
+
   questionNumber: integer("question_number").notNull(),
   questionOrder: integer("question_order").notNull().default(0),
   questionImageSrc: text("question_image_src").notNull(),
@@ -125,25 +151,35 @@ export const question = sqliteTable("question", {
   ratingCount: integer("rating_count").notNull().default(0),
 });
 
-export const answer = sqliteTable("answer", {
-  id: text("id").primaryKey(),
-  questionId: text("question_id")
-    .references(() => question.id)
-    .notNull(),
-  answerImageSrc: text("answer_image_src").notNull(),
-  answerOrder: integer("answer_order").notNull().default(0),
-});
+export const answer = sqliteTable(
+  "answer",
+  {
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    answerImageSrc: text("answer_image_src").notNull(),
+    answerOrder: integer("answer_order").notNull().default(0),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.questionId, table.answerOrder] })];
+  }
+);
 
-export const questionRating = sqliteTable("question_rating", {
-  id: text("id").primaryKey(),
-  questionId: text("question_id")
-    .references(() => question.id)
-    .notNull(),
-  userId: text("user_id")
-    .references(() => user.id)
-    .notNull(),
-  rating: integer("rating").notNull(),
-});
+export const questionRating = sqliteTable(
+  "question_rating",
+  {
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    rating: integer("rating").notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.questionId, table.userId] })];
+  }
+);
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
@@ -186,28 +222,33 @@ export const subjectRelations = relations(subject, ({ one, many }) => ({
 
 export const topicRelations = relations(topic, ({ one, many }) => ({
   subject: one(subject, {
-    fields: [topic.subjectCode],
-    references: [subject.subjectCode],
+    fields: [topic.subjectId],
+    references: [subject.id],
   }),
-  curriculum: one(curriculum, {
-    fields: [topic.curriculumName],
-    references: [curriculum.name],
-  }),
+
   questions: many(question),
 }));
 
 export const questionRelations = relations(question, ({ one, many }) => ({
   subject: one(subject, {
-    fields: [question.subjectCode],
-    references: [subject.subjectCode],
+    fields: [question.subjectId],
+    references: [subject.id],
   }),
   topic: one(topic, {
     fields: [question.topicName],
     references: [topic.name],
   }),
-  curriculum: one(curriculum, {
-    fields: [question.curriculumName],
-    references: [curriculum.name],
+  season: one(season, {
+    fields: [question.seasonId],
+    references: [season.id],
+  }),
+  paperType: one(paperType, {
+    fields: [question.paperTypeId],
+    references: [paperType.id],
+  }),
+  year: one(year, {
+    fields: [question.yearId],
+    references: [year.id],
   }),
   answers: many(answer),
   ratings: many(questionRating),
@@ -229,4 +270,28 @@ export const questionRatingRelations = relations(questionRating, ({ one }) => ({
     fields: [questionRating.userId],
     references: [user.id],
   }),
+}));
+
+export const seasonRelations = relations(season, ({ one, many }) => ({
+  subject: one(subject, {
+    fields: [season.subjectId],
+    references: [subject.id],
+  }),
+  questions: many(question),
+}));
+
+export const paperTypeRelations = relations(paperType, ({ one, many }) => ({
+  subject: one(subject, {
+    fields: [paperType.subjectId],
+    references: [subject.id],
+  }),
+  questions: many(question),
+}));
+
+export const yearRelations = relations(year, ({ one, many }) => ({
+  subject: one(subject, {
+    fields: [year.subjectId],
+    references: [subject.id],
+  }),
+  questions: many(question),
 }));
