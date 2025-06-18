@@ -10,7 +10,13 @@ const Navigation = ({ isOwner }: { isOwner: boolean }) => {
   return (
     <div className="flex items-center justify-start md:justify-center gap-4 flex-wrap">
       <Button
-        variant={pathname === "/admin/content" ? "default" : "outline"}
+        variant={
+          pathname === "/admin/content/upload" ||
+          pathname === "/admin/content/delete" ||
+          pathname === "/admin/content/update"
+            ? "default"
+            : "outline"
+        }
         asChild
       >
         <Link href="/admin/content">Content management</Link>

@@ -368,7 +368,7 @@ export const overwriteQuestionImage = async ({
 
 export const isAnswerExists = async (
   questionId: string,
-  answerOrder: number
+  answerImageSrc: string
 ): Promise<boolean> => {
   const db = getDb();
   const result = await db
@@ -377,7 +377,7 @@ export const isAnswerExists = async (
     .where(
       and(
         eq(schema.answer.questionId, questionId),
-        eq(schema.answer.answerOrder, answerOrder)
+        eq(schema.answer.answerImageSrc, answerImageSrc)
       )
     )
     .limit(1);
@@ -418,7 +418,7 @@ export const overwriteAnswer = async ({
       answerOrder,
     })
     .onConflictDoUpdate({
-      target: [schema.answer.questionId, schema.answer.answerOrder],
+      target: [schema.answer.questionId, schema.answer.answerImageSrc],
       set: {
         answerImageSrc,
       },

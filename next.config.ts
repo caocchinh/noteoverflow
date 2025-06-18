@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/admin",
-        destination: "/admin/content",
+        destination: "/admin/content/upload",
+        permanent: true,
+      },
+      {
+        source: "/admin/content",
+        destination: "/admin/content/upload",
         permanent: true,
       },
     ];

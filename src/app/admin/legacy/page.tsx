@@ -1,14 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Upload,
-  Trash2,
   X,
   File,
-  Check,
-  FolderUp,
   RefreshCw,
+  FolderUp,
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -48,7 +46,6 @@ declare module "react" {
 const LegacyUploadPage = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
   const [failedUploads, setFailedUploads] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -58,7 +55,6 @@ const LegacyUploadPage = () => {
     if (e.target.files) {
       const fileArray = Array.from(e.target.files);
       setFiles(fileArray);
-      setSelectedFiles(new Set()); // Clear selections when new files are added
       console.log("Selected files:", fileArray);
     }
   };
@@ -88,7 +84,6 @@ const LegacyUploadPage = () => {
     if (e.dataTransfer.files) {
       const fileArray = Array.from(e.dataTransfer.files);
       setFiles(fileArray);
-      setSelectedFiles(new Set()); // Clear selections when new files are added
       console.log("Dropped files:", fileArray);
     }
   };
@@ -97,54 +92,6 @@ const LegacyUploadPage = () => {
     const newFiles = [...files];
     newFiles.splice(index, 1);
     setFiles(newFiles);
-
-    // Update selected files set
-    const newSelectedFiles = new Set(selectedFiles);
-    newSelectedFiles.delete(index);
-
-    // Adjust indices for files after the removed one
-    const adjustedSelectedFiles = new Set<number>();
-    newSelectedFiles.forEach((idx) => {
-      if (idx > index) {
-        adjustedSelectedFiles.add(idx - 1);
-      } else {
-        adjustedSelectedFiles.add(idx);
-      }
-    });
-
-    setSelectedFiles(adjustedSelectedFiles);
-  };
-
-  const handleSelectFile = (index: number) => {
-    const newSelectedFiles = new Set(selectedFiles);
-    if (newSelectedFiles.has(index)) {
-      newSelectedFiles.delete(index);
-    } else {
-      newSelectedFiles.add(index);
-    }
-    setSelectedFiles(newSelectedFiles);
-  };
-
-  const handleSelectAll = () => {
-    if (selectedFiles.size === files.length) {
-      setSelectedFiles(new Set());
-    } else {
-      setSelectedFiles(new Set(files.map((_, i) => i)));
-    }
-  };
-
-  const handleRemoveSelected = () => {
-    if (selectedFiles.size === 0) return;
-
-    const selectedIndices = Array.from(selectedFiles).sort((a, b) => b - a);
-    const newFiles = [...files];
-
-    selectedIndices.forEach((index) => {
-      newFiles.splice(index, 1);
-    });
-
-    setFiles(newFiles);
-    setSelectedFiles(new Set());
   };
 
   const uploadFile = async (file: File): Promise<boolean> => {
@@ -160,15 +107,11 @@ const LegacyUploadPage = () => {
       const contentType: "questions" | "answers" =
         file.webkitRelativePath.split("/")[1] as "questions" | "answers";
 
-      const topic = file.webkitRelativePath.split("/")[2];
+      const topic = file.webkitRelativePath.split("/")[2].toUpperCase();
       const season: "Summer" | "Winter" | "Spring" =
         file.webkitRelativePath.split("/")[4] as "Summer" | "Winter" | "Spring";
       const paperCode = file.webkitRelativePath.split("/")[6];
-      // const subjectName = file.webkitRelativePath.split("/")[0].split("(")[0];
-      // const subjectCode = file.webkitRelativePath
-      //   .split("/")[0]
-      //   .split("(")[1]
-      //   .split(")")[0];
+
       const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
       const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);
       const year = file.webkitRelativePath.split("/")[3];
@@ -337,36 +280,53 @@ const LegacyUploadPage = () => {
     await handleUpload();
   };
 
-  return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Legacy Upload</h1>
+  // Add useEffect to prevent navigation during upload
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isUploading) {
+        e.preventDefault();
+      }
+    };
 
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Settings</h3>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                Curriculum
-              </label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-36">
-                    {curriculum} <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setCurriculum("A-LEVEL")}>
-                    A-LEVEL
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCurriculum("IGCSE")}>
-                    IGCSE
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+    if (isUploading) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isUploading]);
+
+  return (
+    <div className="w-full min-h-screen bg-background p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-foreground mb-6">
+          Legacy Upload
+        </h1>
+
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground">Settings</h3>
+        </div>
+        <div className="flex items-center gap-4 mb-5">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-foreground-muted">
+              Curriculum
+            </label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-36">
+                  {curriculum} <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setCurriculum("A-LEVEL")}>
+                  A-LEVEL
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCurriculum("IGCSE")}>
+                  IGCSE
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -374,8 +334,8 @@ const LegacyUploadPage = () => {
           className={`w-full p-8 mb-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all
             ${
               isDragging
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300 hover:border-blue-400 bg-white"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary bg-card"
             }`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
@@ -386,10 +346,10 @@ const LegacyUploadPage = () => {
           <div className="flex flex-col items-center text-center">
             <FolderUp
               className={`w-16 h-16 mb-4 ${
-                isDragging ? "text-blue-500" : "text-gray-400"
+                isDragging ? "text-primary" : "text-muted-foreground"
               }`}
             />
-            <p className="text-lg mb-2 font-medium text-gray-700">
+            <p className="text-lg mb-2 font-medium text-foreground">
               Drag & drop your directory here
             </p>
             <p className="text-sm text-gray-500 mb-4">
@@ -414,15 +374,15 @@ const LegacyUploadPage = () => {
         </div>
 
         {isUploading && (
-          <div className="mb-6 bg-white rounded-xl shadow-md p-6 border border-gray-100">
+          <div className="mb-6 bg-card rounded-xl shadow-md p-6 border border-border">
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Upload Progress</h3>
                 <span className="text-sm font-medium">{uploadProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-muted rounded-full h-2.5">
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                  className="bg-primary h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
@@ -431,56 +391,26 @@ const LegacyUploadPage = () => {
         )}
 
         {files.length > 0 && (
-          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <h3 className="text-xl font-semibold text-gray-800 mr-4">
+          <div className="bg-card rounded-xl shadow-md p-6 border border-border mb-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+              <div className="flex items-center flex-wrap gap-1">
+                <h3 className="text-xl font-semibold text-foreground mr-4">
                   Selected Files
                 </h3>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                   {files.length} files
                 </span>
               </div>
 
-              <div className="flex items-center space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={handleUpload}
-                  disabled={isUploading}
-                >
-                  <Upload size={16} className="mr-2" />
-                  {isUploading ? "Uploading..." : "Upload"}
-                </Button>
-
-                {selectedFiles.size > 0 && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleRemoveSelected}
-                    disabled={isUploading}
-                  >
-                    <Trash2 size={16} className="mr-2" />
-                    Remove Selected ({selectedFiles.size})
-                  </Button>
-                )}
-
-                <Button
-                  variant="outline"
-                  onClick={handleSelectAll}
-                  disabled={isUploading}
-                >
-                  {selectedFiles.size === files.length ? (
-                    <>
-                      <X size={16} className="mr-2" />
-                      Deselect All
-                    </>
-                  ) : (
-                    <>
-                      <Check size={16} className="mr-2" />
-                      Select All
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
+                <Upload size={16} className="mr-2" />
+                {isUploading ? "Uploading..." : "Upload"}
+              </Button>
             </div>
 
             <div className="max-h-96 overflow-auto">
@@ -488,28 +418,17 @@ const LegacyUploadPage = () => {
                 {files.map((file, index) => (
                   <li
                     key={index}
-                    className={`py-3 hover:bg-gray-50 transition-colors rounded px-2 ${
-                      selectedFiles.has(index) ? "bg-blue-50" : ""
-                    }`}
+                    className="py-3 hover:bg-muted transition-colors rounded px-2"
                   >
                     <div className="flex items-center">
-                      <div className="mr-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedFiles.has(index)}
-                          onChange={() => handleSelectFile(index)}
-                          className="h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                          disabled={isUploading}
-                        />
-                      </div>
                       <div className="flex-shrink-0 mr-3">
-                        <File className="w-6 h-6 text-gray-400" />
+                        <File className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {file.name}
                         </p>
-                        <p className="text-xs text-gray-500 truncate mt-1">
+                        <p className="text-xs text-muted-foreground truncate mt-1">
                           {file.webkitRelativePath || "No path available"}
                         </p>
                       </div>
@@ -518,7 +437,7 @@ const LegacyUploadPage = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleRemoveFile(index)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                           title="Remove file"
                           disabled={isUploading}
                         >
@@ -548,7 +467,7 @@ const LegacyUploadPage = () => {
               <Button
                 onClick={handleRetryFailed}
                 variant="outline"
-                className="border-red-200 text-red-700 hover:bg-red-50"
+                className="border-red-200 text-red-700 hover:bg-red-50 dark:text-red-500 dark:hover:text-red-500 dark:hover:bg-red-500/10 hover:text-red-500"
               >
                 <RefreshCw size={16} className="mr-2" />
                 Retry All
