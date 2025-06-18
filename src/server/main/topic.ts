@@ -14,6 +14,15 @@ export const createTopic = async ({
   await db.insert(schema.topic).values({ topic, subjectId });
 };
 
+export const getTopic = async (subjectId: string): Promise<string[]> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.topic)
+    .where(eq(schema.topic.subjectId, subjectId));
+  return result.map((item) => item.topic);
+};
+
 export const isTopicExists = async (
   topic: string,
   subjectId: string

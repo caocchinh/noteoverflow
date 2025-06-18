@@ -14,6 +14,15 @@ export const createPaperType = async ({
   await db.insert(schema.paperType).values({ paperType, subjectId });
 };
 
+export const getPaperType = async (subjectId: string): Promise<number[]> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.paperType)
+    .where(eq(schema.paperType.subjectId, subjectId));
+  return result.map((item) => item.paperType);
+};
+
 export const isPaperTypeExists = async (
   paperType: number,
   subjectId: string

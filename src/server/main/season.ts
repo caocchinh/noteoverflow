@@ -14,6 +14,15 @@ export const createSeason = async ({
   await db.insert(schema.season).values({ season, subjectId });
 };
 
+export const getSeason = async (subjectId: string): Promise<string[]> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.season)
+    .where(eq(schema.season.subjectId, subjectId));
+  return result.map((item) => item.season);
+};
+
 export const isSeasonExists = async (
   season: string,
   subjectId: string

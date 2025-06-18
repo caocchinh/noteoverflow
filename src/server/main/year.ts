@@ -14,6 +14,15 @@ export const createYear = async ({
   await db.insert(schema.year).values({ year, subjectId });
 };
 
+export const getYear = async (subjectId: string): Promise<number[]> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.year)
+    .where(eq(schema.year.subjectId, subjectId));
+  return result.map((item) => item.year);
+};
+
 export const isYearExists = async (
   year: number,
   subjectId: string
