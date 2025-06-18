@@ -16,7 +16,7 @@ interface CustomSelectProps {
   onValueChange: (value: string) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  existingItems: Array<{ id?: string; name: string }>;
+  existingItems: string[];
   newItems: string[];
   onAddNewItem: (item: string) => void;
   onRemoveNewItem: (index: number) => void;
@@ -51,8 +51,6 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   existingItemsLabel,
   newItemsLabel,
   inputPlaceholder,
-  valueKey = "name",
-  nameKey = "name",
   className = "w-max",
   disabled = false,
 }) => {
@@ -73,11 +71,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <SelectGroup>
           <SelectLabel>{existingItemsLabel}</SelectLabel>
           {existingItems?.map((item) => (
-            <SelectItem
-              key={item[valueKey as keyof typeof item] as string}
-              value={item[valueKey as keyof typeof item] as string}
-            >
-              {item[nameKey as keyof typeof item] as string}
+            <SelectItem key={item} value={item}>
+              {item}
             </SelectItem>
           ))}
         </SelectGroup>
@@ -131,9 +126,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               if (e.key === "Enter" && newItemInputValue !== "") {
                 const allItems = [
                   ...newItems,
-                  ...existingItems.map(
-                    (item) => item[valueKey as keyof typeof item] as string
-                  ),
+                  ...existingItems.map((item) => item),
                 ];
 
                 if (!allItems.includes(newItemInputValue)) {
