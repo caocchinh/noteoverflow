@@ -208,7 +208,54 @@ export const isTopicExists = async (
   return result.length > 0;
 };
 
-export const uploadQuestion = async ({
+export const isQuestionExists = async (
+  questionId: string
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.question)
+    .where(eq(schema.question.id, questionId))
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createQuestion = async ({
+  questionId,
+  year,
+  season,
+  paperType,
+  paperVariant,
+  userId,
+  subjectId,
+  topic,
+  questionNumber,
+}: {
+  questionId: string;
+  year: number;
+  season: string;
+  paperType: number;
+  paperVariant: number;
+  userId: string;
+  subjectId: string;
+  topic: string;
+  questionNumber: number;
+}) => {
+  const db = getDb();
+  await db.insert(schema.question).values({
+    id: questionId,
+    year,
+    season,
+    paperType,
+    paperVariant,
+    uploadedBy: userId,
+    subjectId,
+    topic,
+    questionNumber,
+  });
+};
+
+export const overwriteQuestion = async ({
   userId,
   year,
   season,
@@ -262,7 +309,38 @@ export const uploadQuestion = async ({
     });
 };
 
-export const uploadQuestionImage = async ({
+export const isQuestionImageExists = async (
+  questionId: string,
+  order: number
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.questionImage)
+    .where(
+      and(
+        eq(schema.questionImage.questionId, questionId),
+        eq(schema.questionImage.order, order)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createQuestionImage = async ({
+  questionId,
+  imageSrc,
+  order,
+}: {
+  questionId: string;
+  imageSrc: string;
+  order: number;
+}) => {
+  const db = getDb();
+  await db.insert(schema.questionImage).values({ questionId, imageSrc, order });
+};
+
+export const overwriteQuestionImage = async ({
   questionId,
   imageSrc,
   order,
@@ -288,7 +366,40 @@ export const uploadQuestionImage = async ({
     });
 };
 
-export const uploadAnswer = async ({
+export const isAnswerExists = async (
+  questionId: string,
+  answerOrder: number
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.answer)
+    .where(
+      and(
+        eq(schema.answer.questionId, questionId),
+        eq(schema.answer.answerOrder, answerOrder)
+      )
+    )
+    .limit(1);
+  return result.length > 0;
+};
+
+export const createAnswer = async ({
+  questionId,
+  answerImageSrc,
+  answerOrder,
+}: {
+  questionId: string;
+  answerImageSrc: string;
+  answerOrder: number;
+}) => {
+  const db = getDb();
+  await db
+    .insert(schema.answer)
+    .values({ questionId, answerImageSrc, answerOrder });
+};
+
+export const overwriteAnswer = async ({
   questionId,
   answerImageSrc,
   answerOrder,

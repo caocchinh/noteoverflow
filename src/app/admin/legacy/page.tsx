@@ -23,8 +23,8 @@ import {
   isCurriculumExists,
   isSubjectExists,
   createSubject,
-  uploadAnswer,
-  uploadQuestion,
+  overwriteAnswer,
+  overwriteQuestion,
   isYearExists,
   createYear,
   isSeasonExists,
@@ -33,7 +33,7 @@ import {
   createPaperType,
   isTopicExists,
   createTopic,
-  uploadQuestionImage,
+  overwriteQuestionImage,
 } from "@/server/actions";
 import { authClient } from "@/lib/auth/auth-client";
 
@@ -241,7 +241,7 @@ const LegacyUploadPage = () => {
         });
       }
       if (contentType === "questions" && session?.data?.user) {
-        await uploadQuestion({
+        await overwriteQuestion({
           userId: session.data.user.id,
           year: parseInt(year),
           season: season,
@@ -250,16 +250,16 @@ const LegacyUploadPage = () => {
           subjectId: subjectFullName,
           topic: topic,
           questionNumber: parseInt(questionNumber[1]),
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
         });
-        await uploadQuestionImage({
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
+        await overwriteQuestionImage({
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
           imageSrc: questionImageSrc,
           order: parseInt(order),
         });
       } else if (contentType === "answers" && session?.data?.user) {
-        await uploadAnswer({
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}-${order}`,
+        await overwriteAnswer({
+          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
           answerImageSrc: questionImageSrc,
           answerOrder: parseInt(order),
         });
