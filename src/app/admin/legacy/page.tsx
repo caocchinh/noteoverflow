@@ -16,23 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  createCurriculum,
-  isCurriculumExists,
-  isSubjectExists,
-  createSubject,
-  overwriteAnswer,
-  overwriteQuestion,
-  isYearExists,
-  createYear,
-  isSeasonExists,
-  createSeason,
-  isPaperTypeExists,
-  createPaperType,
-  isTopicExists,
-  createTopic,
-  overwriteQuestionImage,
-} from "@/server/actions";
+import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
+import { createSubject, isSubjectExists } from "@/server/main/subject";
+import { overwriteAnswer } from "@/server/main/answer";
+import { overwriteQuestion } from "@/server/main/question";
+import { createYear, isYearExists } from "@/server/main/year";
+import { createSeason, isSeasonExists } from "@/server/main/season";
+import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
+import { createTopic, isTopicExists } from "@/server/main/topic";
+import { overwriteQuestionImage } from "@/server/main/question";
 import { authClient } from "@/lib/auth/auth-client";
 
 // Add type declaration for directory input

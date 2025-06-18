@@ -15,7 +15,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { updateUserAvatar } from "@/server/actions";
+import { updateUserAvatar } from "@/server/auth";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
