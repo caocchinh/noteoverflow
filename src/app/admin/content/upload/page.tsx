@@ -8,7 +8,7 @@ import {
   CurriculumType,
   SubjectType,
 } from "@/features/admin/content/constants/types";
-import CustomSelect from "@/features/admin/content/components/custom-select";
+import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
 import { getPaperType } from "@/server/main/paperType";
 import { getSeason } from "@/server/main/season";
 import { getYear } from "@/server/main/year";
@@ -18,6 +18,11 @@ import {
   validateSeason,
   validateYear,
 } from "@/features/admin/content/lib/utils";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import FileDrop from "@/features/admin/content/components/FileDrop";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -64,8 +69,13 @@ const UploadPage = () => {
   const [isYearSelectOpen, setIsYearSelectOpen] = useState<boolean>(false);
   const [newYear, setNewYear] = useState<string[]>([]);
   const [newYearInput, setNewYearInput] = useState<string>("");
+  const [questionNumber, setQuestionNumber] = useState<string>("");
+  const [questionNumberError, setQuestionNumberError] = useState<string>("");
+  const [isMultipleChoice, setIsMultipleChoice] = useState<boolean>(false);
+  const [questionImages, setQuestionImages] = useState<File[]>([]);
+  const [answerImages, setAnswerImages] = useState<File[]>([]);
 
-  const { data: curriculumData, isPending: isCurriculumPending } = useQuery({
+  const { data: curriculumData, isFetching: isCurriculumFetching } = useQuery({
     queryKey: ["curriculum"],
     queryFn: async (): Promise<CurriculumType[]> => {
       const data = await getCurriculum();
@@ -87,7 +97,7 @@ const UploadPage = () => {
     enabled: !!selectedCurriculum,
   });
 
-  const { data: subjectInfo, isPending: isSubjectInfoPending } = useQuery({
+  const { data: subjectInfo, isFetching: isSubjectInfoFetching } = useQuery({
     queryKey: ["subjectInfo", selectedSubject],
     queryFn: async () => {
       const [topicData, paperTypeData, seasonData, yearData] =
@@ -190,145 +200,247 @@ const UploadPage = () => {
       setSelectedYear("");
     }
   };
-  console.log("rerendering");
+
+  const handleQuestionNumberChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setQuestionNumber(value);
+
+    if (value === "") {
+      setQuestionNumberError("");
+    } else {
+      const num = parseInt(value);
+      if (isNaN(num) || num < 1 || num > 100) {
+        setQuestionNumberError("Question number must be between 1 and 100");
+      } else {
+        setQuestionNumberError("");
+      }
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, type: "question" | "answer") => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (type === "question") {
+      setQuestionImages((prev) => [...prev, ...files]);
+    } else {
+      setAnswerImages((prev) => [...prev, ...files]);
+    }
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "question" | "answer"
+  ) => {
+    const files = e.target.files;
+    if (type === "question") {
+      setQuestionImages((prev) => [...prev, ...Array.from(files ?? [])]);
+    } else {
+      setAnswerImages((prev) => [...prev, ...Array.from(files ?? [])]);
+    }
+  };
 
   return (
-    <div className="flex flex-row flex-wrap gap-4 items-center justify-center">
-      <CustomSelect
-        selectedValue={selectedCurriculum}
-        onValueChange={handleCurriculumChange}
-        isOpen={isCurriculumSelectOpen}
-        onOpenChange={setIsCurriculumSelectOpen}
-        existingItems={curriculumData?.map((item) => item.name) ?? []}
-        newItems={newCurriculum}
-        onAddNewItem={handleAddNewCurriculum}
-        onRemoveNewItem={handleRemoveNewCurriculum}
-        placeholder="Select a curriculum"
-        loadingPlaceholder="Fetching existing curriculums..."
-        isLoading={isCurriculumPending}
-        newItemInputValue={newCurriculumInput}
-        onNewItemInputChange={setNewCurriculumInput}
-        existingItemsLabel="Existing Curriculum"
-        newItemsLabel="New Curriculum"
-        inputPlaceholder="Enter new curriculum name"
-        className="w-max mt-4"
-      />
+    <div className="flex flex-row gap-8 items-start justify-around w-full">
+      <div className="flex flex-col flex-wrap gap-4 items-start justify-start border-2 border-foreground-muted rounded-md p-4 w-[95%] sm:w-[350px]">
+        <h1 className="text-xl font-semibold text-center w-full">
+          Information
+        </h1>
+        <EnhancedSelect
+          selectedValue={selectedCurriculum}
+          onValueChange={handleCurriculumChange}
+          isOpen={isCurriculumSelectOpen}
+          onOpenChange={setIsCurriculumSelectOpen}
+          existingItems={curriculumData?.map((item) => item.name) ?? []}
+          newItems={newCurriculum}
+          onAddNewItem={handleAddNewCurriculum}
+          onRemoveNewItem={handleRemoveNewCurriculum}
+          placeholder="Select a curriculum"
+          loadingPlaceholder="Fetching existing curriculums..."
+          isLoading={isCurriculumFetching}
+          newItemInputValue={newCurriculumInput}
+          onNewItemInputChange={setNewCurriculumInput}
+          existingItemsLabel="Existing Curriculum"
+          newItemsLabel="New Curriculum"
+          inputPlaceholder="Enter new curriculum name"
+          className="w-full"
+          label="Curriculum"
+        />
 
-      <CustomSelect
-        selectedValue={selectedSubject}
-        onValueChange={handleSubjectChange}
-        isOpen={isSubjectSelectOpen}
-        onOpenChange={setIsSubjectSelectOpen}
-        existingItems={subject?.map((item) => item.id) ?? []}
-        newItems={newSubject}
-        onAddNewItem={handleAddNewSubject}
-        onRemoveNewItem={handleRemoveNewSubject}
-        placeholder={
-          !selectedCurriculum ? "Select a curriculum first" : "Select a subject"
-        }
-        newItemInputValue={newSubjectInput}
-        onNewItemInputChange={setNewSubjectInput}
-        existingItemsLabel="Existing Subjects"
-        newItemsLabel="New Subjects"
-        inputPlaceholder="Enter new subject name"
-        className="w-max mt-4"
-        disabled={!selectedCurriculum}
-      />
+        <EnhancedSelect
+          selectedValue={selectedSubject}
+          onValueChange={handleSubjectChange}
+          isOpen={isSubjectSelectOpen}
+          onOpenChange={setIsSubjectSelectOpen}
+          existingItems={subject?.map((item) => item.id) ?? []}
+          newItems={newSubject}
+          onAddNewItem={handleAddNewSubject}
+          onRemoveNewItem={handleRemoveNewSubject}
+          placeholder={
+            !selectedCurriculum
+              ? "Select a curriculum first"
+              : "Select a subject"
+          }
+          newItemInputValue={newSubjectInput}
+          onNewItemInputChange={setNewSubjectInput}
+          existingItemsLabel="Existing Subjects"
+          newItemsLabel="New Subjects"
+          inputPlaceholder="Enter new subject name"
+          className="w-full"
+          disabled={!selectedCurriculum}
+          label="Subject"
+        />
 
-      <CustomSelect
-        selectedValue={selectedTopic}
-        onValueChange={setSelectedTopic}
-        isOpen={isTopicSelectOpen}
-        onOpenChange={setIsTopicSelectOpen}
-        existingItems={subjectInfo?.topicData ?? []}
-        newItems={newTopic}
-        onAddNewItem={handleAddNewTopic}
-        onRemoveNewItem={handleRemoveNewTopic}
-        placeholder={!subjectInfo ? "Select a subject first" : "Select a topic"}
-        loadingPlaceholder="Fetching existing topics..."
-        isLoading={isSubjectInfoPending && !!selectedSubject}
-        newItemInputValue={newTopicInput}
-        onNewItemInputChange={setNewTopicInput}
-        existingItemsLabel="Existing Topics"
-        newItemsLabel="New Topics"
-        inputPlaceholder="Enter new topic name"
-        className="w-max mt-4"
-        disabled={!selectedSubject}
-      />
+        <EnhancedSelect
+          selectedValue={selectedTopic}
+          onValueChange={setSelectedTopic}
+          isOpen={isTopicSelectOpen}
+          onOpenChange={setIsTopicSelectOpen}
+          existingItems={subjectInfo?.topicData ?? []}
+          newItems={newTopic}
+          onAddNewItem={handleAddNewTopic}
+          onRemoveNewItem={handleRemoveNewTopic}
+          placeholder={
+            !subjectInfo ? "Select a subject first" : "Select a topic"
+          }
+          loadingPlaceholder="Fetching existing topics..."
+          isLoading={isSubjectInfoFetching && !!selectedSubject}
+          newItemInputValue={newTopicInput}
+          onNewItemInputChange={setNewTopicInput}
+          existingItemsLabel="Existing Topics"
+          newItemsLabel="New Topics"
+          inputPlaceholder="Enter new topic name"
+          className="w-full"
+          disabled={!selectedSubject}
+          label="Topic"
+        />
 
-      <CustomSelect
-        selectedValue={selectedPaperType}
-        onValueChange={setSelectedPaperType}
-        isOpen={isPaperTypeSelectOpen}
-        onOpenChange={setIsPaperTypeSelectOpen}
-        existingItems={
-          subjectInfo?.paperTypeData?.map((item) => item.toString()) ?? []
-        }
-        newItems={newPaperType}
-        onAddNewItem={handleAddNewPaperType}
-        onRemoveNewItem={handleRemoveNewPaperType}
-        placeholder={
-          !subjectInfo ? "Select a subject first" : "Select a paper type"
-        }
-        loadingPlaceholder="Fetching existing paper types..."
-        isLoading={isSubjectInfoPending && !!selectedSubject}
-        newItemInputValue={newPaperTypeInput}
-        onNewItemInputChange={setNewPaperTypeInput}
-        existingItemsLabel="Existing Paper Types"
-        newItemsLabel="New Paper Types"
-        inputPlaceholder="Enter new paper type"
-        className="w-max mt-4"
-        disabled={!selectedSubject}
-        validator={validatePaperType}
-      />
+        <EnhancedSelect
+          selectedValue={selectedPaperType}
+          onValueChange={setSelectedPaperType}
+          isOpen={isPaperTypeSelectOpen}
+          onOpenChange={setIsPaperTypeSelectOpen}
+          existingItems={
+            subjectInfo?.paperTypeData?.map((item) => item.toString()) ?? []
+          }
+          newItems={newPaperType}
+          onAddNewItem={handleAddNewPaperType}
+          onRemoveNewItem={handleRemoveNewPaperType}
+          placeholder={
+            !subjectInfo ? "Select a subject first" : "Select a paper type"
+          }
+          loadingPlaceholder="Fetching existing paper types..."
+          isLoading={isSubjectInfoFetching && !!selectedSubject}
+          newItemInputValue={newPaperTypeInput}
+          onNewItemInputChange={setNewPaperTypeInput}
+          existingItemsLabel="Existing Paper Types"
+          newItemsLabel="New Paper Types"
+          inputPlaceholder="Enter new paper type"
+          className="w-full"
+          disabled={!selectedSubject}
+          validator={validatePaperType}
+          label="Paper Type"
+        />
 
-      <CustomSelect
-        selectedValue={selectedSeason}
-        onValueChange={setSelectedSeason}
-        isOpen={isSeasonSelectOpen}
-        onOpenChange={setIsSeasonSelectOpen}
-        existingItems={subjectInfo?.seasonData ?? []}
-        newItems={newSeason}
-        onAddNewItem={handleAddNewSeason}
-        onRemoveNewItem={handleRemoveNewSeason}
-        placeholder={
-          !subjectInfo ? "Select a subject first" : "Select a season"
-        }
-        loadingPlaceholder="Fetching existing seasons..."
-        isLoading={isSubjectInfoPending && !!selectedSubject}
-        newItemInputValue={newSeasonInput}
-        onNewItemInputChange={setNewSeasonInput}
-        existingItemsLabel="Existing Seasons"
-        newItemsLabel="New Seasons"
-        inputPlaceholder="Enter new season"
-        className="w-max mt-4"
-        disabled={!selectedSubject}
-        validator={validateSeason}
-      />
+        <EnhancedSelect
+          selectedValue={selectedSeason}
+          onValueChange={setSelectedSeason}
+          isOpen={isSeasonSelectOpen}
+          onOpenChange={setIsSeasonSelectOpen}
+          existingItems={subjectInfo?.seasonData ?? []}
+          newItems={newSeason}
+          onAddNewItem={handleAddNewSeason}
+          onRemoveNewItem={handleRemoveNewSeason}
+          placeholder={
+            !subjectInfo ? "Select a subject first" : "Select a season"
+          }
+          loadingPlaceholder="Fetching existing seasons..."
+          isLoading={isSubjectInfoFetching && !!selectedSubject}
+          newItemInputValue={newSeasonInput}
+          onNewItemInputChange={setNewSeasonInput}
+          existingItemsLabel="Existing Seasons"
+          newItemsLabel="New Seasons"
+          inputPlaceholder="Enter new season"
+          className="w-full"
+          disabled={!selectedSubject}
+          validator={validateSeason}
+          label="Season"
+        />
 
-      <CustomSelect
-        selectedValue={selectedYear}
-        onValueChange={setSelectedYear}
-        isOpen={isYearSelectOpen}
-        onOpenChange={setIsYearSelectOpen}
-        existingItems={
-          subjectInfo?.yearData?.map((item) => item.toString()) ?? []
-        }
-        newItems={newYear}
-        onAddNewItem={handleAddNewYear}
-        onRemoveNewItem={handleRemoveNewYear}
-        placeholder={!subjectInfo ? "Select a subject first" : "Select a year"}
-        loadingPlaceholder="Fetching existing years..."
-        isLoading={isSubjectInfoPending && !!selectedSubject}
-        newItemInputValue={newYearInput}
-        onNewItemInputChange={setNewYearInput}
-        existingItemsLabel="Existing Years"
-        newItemsLabel="New Years"
-        inputPlaceholder="Enter new year"
-        className="w-max mt-4"
-        disabled={!selectedSubject}
-        validator={validateYear}
-      />
+        <EnhancedSelect
+          selectedValue={selectedYear}
+          onValueChange={setSelectedYear}
+          isOpen={isYearSelectOpen}
+          onOpenChange={setIsYearSelectOpen}
+          existingItems={
+            subjectInfo?.yearData?.map((item) => item.toString()) ?? []
+          }
+          newItems={newYear}
+          onAddNewItem={handleAddNewYear}
+          onRemoveNewItem={handleRemoveNewYear}
+          placeholder={
+            !subjectInfo ? "Select a subject first" : "Select a year"
+          }
+          loadingPlaceholder="Fetching existing years..."
+          isLoading={isSubjectInfoFetching && !!selectedSubject}
+          newItemInputValue={newYearInput}
+          onNewItemInputChange={setNewYearInput}
+          existingItemsLabel="Existing Years"
+          newItemsLabel="New Years"
+          inputPlaceholder="Enter new year"
+          className="w-full"
+          disabled={!selectedSubject}
+          validator={validateYear}
+          label="Year"
+        />
+        <div className="flex flex-col w-full">
+          <Label htmlFor="questionNumber" className="mb-2">
+            Question Number
+          </Label>
+          <Input
+            type="number"
+            placeholder="Enter question number"
+            value={questionNumber}
+            onChange={handleQuestionNumberChange}
+            className={cn(
+              "w-full",
+              questionNumberError ? "border-red-500" : ""
+            )}
+            id="questionNumber"
+          />
+          {questionNumberError && (
+            <span className="text-red-500 text-sm mt-1">
+              {questionNumberError}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-row w-full items-center justify-start gap-2">
+          <Label htmlFor="isMultipleChoice">Is Multiple Choice?</Label>
+          <Switch
+            id="isMultipleChoice"
+            className="cursor-pointer"
+            checked={isMultipleChoice}
+            onCheckedChange={setIsMultipleChoice}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col w-max gap-4 items-center justify-center">
+        <h1 className="text-xl font-semibold text-center w-full">Question</h1>
+        <FileDrop
+          handleDrop={(e) => handleDrop(e, "question")}
+          handleInputChange={(e) => handleInputChange(e, "question")}
+        />
+      </div>
+      {!isMultipleChoice && (
+        <div className="flex flex-col w-max gap-4 items-center justify-center">
+          <h1 className="text-xl font-semibold text-center w-full">Answer</h1>
+          <FileDrop
+            handleDrop={(e) => handleDrop(e, "answer")}
+            handleInputChange={(e) => handleInputChange(e, "answer")}
+          />
+        </div>
+      )}
     </div>
   );
 };

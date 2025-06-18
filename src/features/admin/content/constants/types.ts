@@ -1,19 +1,31 @@
-import { z } from "zod";
 import { InferSelectModel } from "drizzle-orm";
-import * as schema from "@/drizzle/schema";
+import { curriculum, subject } from "@/drizzle/schema";
 
-export type CurriculumType = InferSelectModel<typeof schema.curriculum>;
-export type SubjectType = InferSelectModel<typeof schema.subject>;
-export type YearType = InferSelectModel<typeof schema.year>;
-export type SeasonType = InferSelectModel<typeof schema.season>;
-export type PaperTypeType = InferSelectModel<typeof schema.paperType>;
-export type TopicType = InferSelectModel<typeof schema.topic>;
+export type CurriculumType = InferSelectModel<typeof curriculum>;
+export type SubjectType = InferSelectModel<typeof subject>;
 
-export const formSchema = z.object({
-  curriculumName: z.string(),
-  subjectId: z.string(),
-  year: z.string(),
-  season: z.string(),
-  paperType: z.number(),
-  topic: z.string(),
-});
+export interface EnhancedSelectProps {
+  selectedValue: string | undefined;
+  onValueChange: (value: string) => void;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  existingItems: string[];
+  newItems: string[];
+  onAddNewItem: (item: string) => void;
+  onRemoveNewItem: (index: number) => void;
+  placeholder: string;
+  loadingPlaceholder?: string;
+  isLoading?: boolean;
+  newItemInputValue: string;
+  onNewItemInputChange: (value: string) => void;
+  existingItemsLabel: string;
+  newItemsLabel: string;
+  inputPlaceholder: string;
+  valueKey?: string;
+  nameKey?: string;
+  className?: string;
+  disabled?: boolean;
+  error?: string | null;
+  validator?: (value: string) => string | null;
+  label: string;
+}
