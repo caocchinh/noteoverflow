@@ -60,7 +60,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       value={selectedValue}
       open={isOpen}
       onOpenChange={onOpenChange}
-      disabled={disabled}
+      disabled={disabled || isLoading}
     >
       <SelectTrigger className={className}>
         <SelectValue
@@ -70,8 +70,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       <SelectContent>
         <SelectGroup>
           <SelectLabel>{existingItemsLabel}</SelectLabel>
-          {existingItems?.map((item) => (
-            <SelectItem key={item} value={item}>
+          {existingItems.map((item, index) => (
+            <SelectItem key={index} value={item}>
               {item}
             </SelectItem>
           ))}

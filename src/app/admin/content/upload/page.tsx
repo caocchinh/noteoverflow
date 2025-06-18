@@ -87,10 +87,10 @@ const UploadPage = () => {
     queryFn: async () => {
       const [topicData, paperTypeData, seasonData, yearData] =
         await Promise.all([
-          getTopic(selectedSubject!),
-          getPaperType(selectedSubject!),
-          getSeason(selectedSubject!),
-          getYear(selectedSubject!),
+          getTopic(selectedSubject ?? ""),
+          getPaperType(selectedSubject ?? ""),
+          getSeason(selectedSubject ?? ""),
+          getYear(selectedSubject ?? ""),
         ]);
       return { topicData, paperTypeData, seasonData, yearData };
     },
@@ -100,6 +100,23 @@ const UploadPage = () => {
   const handleAddNewCurriculum = (item: string) => {
     setNewCurriculum([...newCurriculum, item]);
     setNewCurriculumInput("");
+  };
+
+  const handleCurriculumChange = (item: string) => {
+    setSelectedCurriculum(item);
+    setSelectedSubject("");
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
+  };
+
+  const handleSubjectChange = (item: string) => {
+    setSelectedSubject(item);
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
   };
 
   const handleRemoveNewCurriculum = (index: number) => {
@@ -170,10 +187,10 @@ const UploadPage = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-row flex-wrap gap-4 items-center justify-center">
       <CustomSelect
         selectedValue={selectedCurriculum}
-        onValueChange={setSelectedCurriculum}
+        onValueChange={handleCurriculumChange}
         isOpen={isCurriculumSelectOpen}
         onOpenChange={setIsCurriculumSelectOpen}
         existingItems={curriculumData?.map((item) => item.name) ?? []}
@@ -188,11 +205,12 @@ const UploadPage = () => {
         existingItemsLabel="Existing Curriculum"
         newItemsLabel="New Curriculum"
         inputPlaceholder="Enter new curriculum name"
+        className="w-max mt-4"
       />
 
       <CustomSelect
         selectedValue={selectedSubject}
-        onValueChange={setSelectedSubject}
+        onValueChange={handleSubjectChange}
         isOpen={isSubjectSelectOpen}
         onOpenChange={setIsSubjectSelectOpen}
         existingItems={subject?.map((item) => item.id) ?? []}
@@ -209,7 +227,6 @@ const UploadPage = () => {
         inputPlaceholder="Enter new subject name"
         className="w-max mt-4"
         disabled={!selectedCurriculum}
-        valueKey="id"
       />
 
       <CustomSelect
@@ -221,11 +238,9 @@ const UploadPage = () => {
         newItems={newTopic}
         onAddNewItem={handleAddNewTopic}
         onRemoveNewItem={handleRemoveNewTopic}
-        placeholder={
-          !selectedSubject ? "Select a subject first" : "Select a topic"
-        }
+        placeholder={!subjectInfo ? "Select a subject first" : "Select a topic"}
         loadingPlaceholder="Fetching existing topics..."
-        isLoading={isSubjectInfoPending}
+        isLoading={isSubjectInfoPending && !!selectedSubject}
         newItemInputValue={newTopicInput}
         onNewItemInputChange={setNewTopicInput}
         existingItemsLabel="Existing Topics"
@@ -247,10 +262,10 @@ const UploadPage = () => {
         onAddNewItem={handleAddNewPaperType}
         onRemoveNewItem={handleRemoveNewPaperType}
         placeholder={
-          !selectedSubject ? "Select a subject first" : "Select a paper type"
+          !subjectInfo ? "Select a subject first" : "Select a paper type"
         }
         loadingPlaceholder="Fetching existing paper types..."
-        isLoading={isSubjectInfoPending}
+        isLoading={isSubjectInfoPending && !!selectedSubject}
         newItemInputValue={newPaperTypeInput}
         onNewItemInputChange={setNewPaperTypeInput}
         existingItemsLabel="Existing Paper Types"
@@ -270,10 +285,10 @@ const UploadPage = () => {
         onAddNewItem={handleAddNewSeason}
         onRemoveNewItem={handleRemoveNewSeason}
         placeholder={
-          !selectedSubject ? "Select a subject first" : "Select a season"
+          !subjectInfo ? "Select a subject first" : "Select a season"
         }
         loadingPlaceholder="Fetching existing seasons..."
-        isLoading={isSubjectInfoPending}
+        isLoading={isSubjectInfoPending && !!selectedSubject}
         newItemInputValue={newSeasonInput}
         onNewItemInputChange={setNewSeasonInput}
         existingItemsLabel="Existing Seasons"
@@ -294,11 +309,9 @@ const UploadPage = () => {
         newItems={newYear}
         onAddNewItem={handleAddNewYear}
         onRemoveNewItem={handleRemoveNewYear}
-        placeholder={
-          !selectedSubject ? "Select a subject first" : "Select a year"
-        }
+        placeholder={!subjectInfo ? "Select a subject first" : "Select a year"}
         loadingPlaceholder="Fetching existing years..."
-        isLoading={isSubjectInfoPending}
+        isLoading={isSubjectInfoPending && !!selectedSubject}
         newItemInputValue={newYearInput}
         onNewItemInputChange={setNewYearInput}
         existingItemsLabel="Existing Years"
