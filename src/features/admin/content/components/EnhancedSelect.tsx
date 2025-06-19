@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, X, Search } from "lucide-react";
 import { EnhancedSelectProps } from "../constants/types";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,7 @@ const EnhancedSelect = ({
 }: EnhancedSelectProps) => {
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isItemDuplicate = (value: string) => {
@@ -122,6 +122,22 @@ const EnhancedSelect = ({
     onOpenChange(true);
   };
 
+  const filteredExistingItems = useMemo(() => {
+    return searchQuery
+      ? existingItems.filter((item) =>
+          item.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : existingItems;
+  }, [existingItems, searchQuery]);
+
+  const filteredNewItems = useMemo(() => {
+    return searchQuery
+      ? newItems.filter((item) =>
+          item.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : newItems;
+  }, [newItems, searchQuery]);
+
   return (
     <div className="w-full" ref={wrapperRef} onClick={handleWrapperClick}>
       <h5 className="block text-sm font-medium mb-1">{label}</h5>
@@ -139,17 +155,44 @@ const EnhancedSelect = ({
               "cursor-pointer",
               error || duplicateError || validationError ? "border-red-500" : ""
             )}
-            ref={triggerRef}
           >
             <SelectValue
               placeholder={isLoading ? loadingPlaceholder : placeholder}
             />
           </SelectTrigger>
           <SelectContent>
+            <div className="flex items-center border-b p-2 sticky top-0 bg-background z-10">
+              <Search className="w-4 h-4 mr-2 text-muted-foreground" />
+              <Input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                }}
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 pl-0"
+              />
+              {searchQuery && (
+                <X
+                  className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearchQuery("")}
+                />
+              )}
+            </div>
+
             <SelectGroup>
               <SelectLabel>{existingItemsLabel}</SelectLabel>
               {existingItems.map((item, index) => (
-                <SelectItem key={`existing-${index}-${item}`} value={item}>
+                <SelectItem
+                  key={index}
+                  value={item}
+                  className={cn(
+                    "hidden",
+                    filteredExistingItems.includes(item) && "block"
+                  )}
+                >
                   {item}
                 </SelectItem>
               ))}
@@ -158,8 +201,11 @@ const EnhancedSelect = ({
               <SelectLabel>{newItemsLabel}</SelectLabel>
               {newItems.map((item, index) => (
                 <div
-                  key={`new-${index}-${item}`}
-                  className="p-2 hover:bg-muted group cursor-pointer flex items-center justify-between rounded-md w-full"
+                  key={index}
+                  className={cn(
+                    "p-2 hover:bg-muted group cursor-pointer items-center justify-between rounded-md w-full",
+                    filteredNewItems.includes(item) ? "flex" : "hidden"
+                  )}
                 >
                   <div
                     className="flex-1"
@@ -191,13 +237,8 @@ const EnhancedSelect = ({
               ))}
             </SelectGroup>
 
-            {/* These hidden items ensure new items are properly registered in the Select */}
             {newItems.map((item, index) => (
-              <SelectItem
-                key={`hidden-${index}-${item}`}
-                value={item}
-                className="hidden"
-              >
+              <SelectItem key={index} value={item} className="hidden">
                 {item}
               </SelectItem>
             ))}
