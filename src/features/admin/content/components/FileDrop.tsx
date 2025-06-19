@@ -20,7 +20,7 @@ const FileDrop = ({
 
   return (
     <div
-      className="w-[90%] sm:w-max p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center border-primary bg-primary/10 transition-all"
+      className="w-[90%] sm:w-max p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center border-primary bg-background transition-all"
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -30,7 +30,7 @@ const FileDrop = ({
         <p className="text-lg mb-2 font-medium text-foreground">
           Drag & drop your image here
         </p>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           Or select using the button below
         </p>
 

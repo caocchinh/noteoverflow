@@ -17,6 +17,9 @@ import {
   validatePaperType,
   validateSeason,
   validateYear,
+  validateQuestionNumber,
+  validateSubject,
+  validatePaperVariant,
 } from "@/features/admin/content/lib/utils";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -101,6 +104,8 @@ const UploadPage = () => {
   );
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [paperVariantInput, setPaperVariantInput] = useState<string>("");
+  const [paperVariantError, setPaperVariantError] = useState<string>("");
   const canUpload = useMemo(() => {
     return (
       isUploading ||
@@ -264,6 +269,16 @@ const UploadPage = () => {
     }
   };
 
+  const handlePaperVariantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPaperVariantInput(value);
+    if (value === "") {
+      setPaperVariantError("");
+    } else {
+      setPaperVariantError(validatePaperVariant(value));
+    }
+  };
+
   const handleQuestionNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -273,12 +288,7 @@ const UploadPage = () => {
     if (value === "") {
       setQuestionNumberError("");
     } else {
-      const num = parseInt(value);
-      if (isNaN(num) || num < 1 || num > 100) {
-        setQuestionNumberError("Question number must be between 1 and 100");
-      } else {
-        setQuestionNumberError("");
-      }
+      setQuestionNumberError(validateQuestionNumber(value));
     }
   };
 
@@ -373,7 +383,7 @@ const UploadPage = () => {
           />
         </DialogContent>
       </Dialog>
-      <div className="flex flex-row gap-8 items-start justify-evenly w-full flex-wrap">
+      <div className="flex flex-row gap-8 items-start justify-evenly mt-4 w-full flex-wrap">
         <div className="flex flex-col flex-wrap gap-4 items-start justify-start border-2 border-foreground-muted rounded-md p-4 w-full sm:w-[350px]">
           <h1 className="text-xl font-semibold text-center w-full">
             Information
@@ -425,6 +435,7 @@ const UploadPage = () => {
               isCurriculumFetching
             }
             label="Subject"
+            validator={validateSubject}
           />
 
           <EnhancedSelect
@@ -550,6 +561,27 @@ const UploadPage = () => {
               </span>
             )}
           </div>
+          <div className="flex flex-col w-full">
+            <Label htmlFor="paperVariant" className="mb-2">
+              Paper Variant
+            </Label>
+            <Input
+              type="number"
+              placeholder="Enter paper variant"
+              value={paperVariantInput}
+              onChange={handlePaperVariantChange}
+              className={cn(
+                "w-full",
+                paperVariantError ? "border-red-500" : ""
+              )}
+              id="paperVariant"
+            />
+            {paperVariantError && (
+              <span className="text-red-500 text-sm mt-1">
+                {paperVariantError}
+              </span>
+            )}
+          </div>
           <div className="flex flex-row w-full items-center justify-start gap-2">
             <Label htmlFor="isMultipleChoice">Is Multiple Choice?</Label>
             <Switch
@@ -669,7 +701,11 @@ const UploadPage = () => {
               onOpenChange={setIsResetDialogOpen}
             >
               <AlertDialogTrigger asChild>
-                <Button variant="outline" className="flex-1 cursor-pointer">
+                <Button
+                  variant="outline"
+                  className="flex-1 cursor-pointer"
+                  disabled={isCurriculumFetching}
+                >
                   Reset all inputs
                 </Button>
               </AlertDialogTrigger>
