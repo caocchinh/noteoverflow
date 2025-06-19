@@ -28,7 +28,7 @@ const ReorderableImageList = ({
       >
         {images.map((image, index) => (
           <Reorder.Item
-            key={index}
+            key={image.name + image.size + image.lastModified}
             value={image}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={() => setIsDragging(false)}

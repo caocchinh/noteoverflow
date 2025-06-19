@@ -259,8 +259,20 @@ const UploadPage = () => {
       }
     }
     if (type === "question") {
+      for (const file of files) {
+        if (questionImages.some((image) => image.name === file.name)) {
+          toast.error("Image already exists");
+          return;
+        }
+      }
       setQuestionImages((prev) => [...prev, ...files]);
     } else {
+      for (const file of files) {
+        if (answerImages.some((image) => image.name === file.name)) {
+          toast.error("Image already exists");
+          return;
+        }
+      }
       setAnswerImages((prev) => [...prev, ...files]);
     }
   };
@@ -276,10 +288,29 @@ const UploadPage = () => {
         return;
       }
     }
+    if (files.length === 0) {
+      toast.error("No files selected");
+      return;
+    }
+
     if (type === "question") {
-      setQuestionImages((prev) => [...prev, files?.[0] ?? new File([], "")]);
+      for (const file of files) {
+        console.log(file.name);
+        if (questionImages.some((image) => image.name === file.name)) {
+          console.log("Image already exists");
+          toast.error("Image already exists");
+          return;
+        }
+      }
+      setQuestionImages((prev) => [...prev, ...files]);
     } else {
-      setAnswerImages((prev) => [...prev, files?.[0] ?? new File([], "")]);
+      for (const file of files) {
+        if (answerImages.some((image) => image.name === file.name)) {
+          toast.error("Image already exists");
+          return;
+        }
+      }
+      setAnswerImages((prev) => [...prev, ...files]);
     }
   };
 
