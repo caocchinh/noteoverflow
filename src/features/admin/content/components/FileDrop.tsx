@@ -20,7 +20,7 @@ const FileDrop = ({
 
   return (
     <div
-      className="w-max p-8 mb-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center border-primary bg-primary/10 transition-all"
+      className="w-[90%] sm:w-max p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center border-primary bg-primary/10 transition-all"
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
