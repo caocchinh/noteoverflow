@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCurriculum } from "@/server/main/curriculum";
 import { getSubjectByCurriculum } from "@/server/main/subject";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
@@ -100,6 +100,39 @@ const UploadPage = () => {
     undefined
   );
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const canUpload = useMemo(() => {
+    return (
+      isUploading ||
+      !selectedCurriculum ||
+      !selectedSubject ||
+      !selectedTopic ||
+      !selectedPaperType ||
+      !selectedSeason ||
+      !selectedYear ||
+      questionNumber == "" ||
+      questionNumberError != "" ||
+      questionImages.length === 0 ||
+      (isMultipleChoice && multipleChoiceInput === "") ||
+      questionImages.length === 0 ||
+      (answerImages.length === 0 && !isMultipleChoice)
+    );
+  }, [
+    answerImages.length,
+    isMultipleChoice,
+    isUploading,
+    multipleChoiceInput,
+    questionImages.length,
+    questionNumber,
+    questionNumberError,
+    selectedCurriculum,
+    selectedPaperType,
+    selectedSeason,
+    selectedSubject,
+    selectedTopic,
+    selectedYear,
+  ]);
+
   const {
     data: curriculumData,
     isFetching: isCurriculumFetching,
@@ -249,39 +282,7 @@ const UploadPage = () => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent, type: "question" | "answer") => {
-    e.preventDefault();
-    const files = e.dataTransfer.files;
-    for (const file of files) {
-      if (file.type != "image/webp") {
-        toast.error("Only .webp files are allowed");
-        return;
-      }
-    }
-    if (type === "question") {
-      for (const file of files) {
-        if (questionImages.some((image) => image.name === file.name)) {
-          toast.error("Image already exists");
-          return;
-        }
-      }
-      setQuestionImages((prev) => [...prev, ...files]);
-    } else {
-      for (const file of files) {
-        if (answerImages.some((image) => image.name === file.name)) {
-          toast.error("Image already exists");
-          return;
-        }
-      }
-      setAnswerImages((prev) => [...prev, ...files]);
-    }
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "question" | "answer"
-  ) => {
-    const files = e.target.files ?? [];
+  const handleFileInput = (files: FileList, type: "question" | "answer") => {
     for (const file of files) {
       if (file.type != "image/webp") {
         toast.error("Only .webp files are allowed");
@@ -294,16 +295,22 @@ const UploadPage = () => {
     }
 
     if (type === "question") {
+      if (questionImages.length + files.length > 9) {
+        toast.error("You can only upload up to 9 images");
+        return;
+      }
       for (const file of files) {
-        console.log(file.name);
         if (questionImages.some((image) => image.name === file.name)) {
-          console.log("Image already exists");
           toast.error("Image already exists");
           return;
         }
       }
       setQuestionImages((prev) => [...prev, ...files]);
     } else {
+      if (answerImages.length + files.length > 9) {
+        toast.error("You can only upload up to 9 images");
+        return;
+      }
       for (const file of files) {
         if (answerImages.some((image) => image.name === file.name)) {
           toast.error("Image already exists");
@@ -343,6 +350,10 @@ const UploadPage = () => {
     queryClient.setQueryData(["year"], []);
     await refetchCurriculum();
     setIsResetDialogOpen(false);
+  };
+
+  const handleUpload = () => {
+    setIsUploading(true);
   };
 
   return (
@@ -565,8 +576,14 @@ const UploadPage = () => {
                 }}
               />
               <FileDrop
-                handleDrop={(e) => handleDrop(e, "question")}
-                handleInputChange={(e) => handleInputChange(e, "question")}
+                handleDrop={(e) => {
+                  e.preventDefault();
+                  handleFileInput(e.dataTransfer.files, "question");
+                }}
+                handleInputChange={(e) => {
+                  e.preventDefault();
+                  handleFileInput(e.target.files ?? new FileList(), "question");
+                }}
               />
             </div>
             {!isMultipleChoice ? (
@@ -584,8 +601,14 @@ const UploadPage = () => {
                   }}
                 />
                 <FileDrop
-                  handleDrop={(e) => handleDrop(e, "answer")}
-                  handleInputChange={(e) => handleInputChange(e, "answer")}
+                  handleDrop={(e) => {
+                    e.preventDefault();
+                    handleFileInput(e.dataTransfer.files, "answer");
+                  }}
+                  handleInputChange={(e) => {
+                    e.preventDefault();
+                    handleFileInput(e.target.files ?? new FileList(), "answer");
+                  }}
                 />
               </div>
             ) : (
@@ -630,7 +653,17 @@ const UploadPage = () => {
             )}
           </div>
           <div className="flex flex-row gap-4 mt-4 w-full items-center justify-center">
-            <Button className="flex-1 cursor-pointer">Upload</Button>
+            <Button
+              className="flex-1 cursor-pointer"
+              disabled={canUpload}
+              onClick={handleUpload}
+            >
+              {isUploading
+                ? "Uploading..."
+                : !canUpload
+                ? "Upload"
+                : "Complete required fields"}
+            </Button>
             <AlertDialog
               open={isResetDialogOpen}
               onOpenChange={setIsResetDialogOpen}
