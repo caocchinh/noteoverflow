@@ -82,25 +82,33 @@ export const validatePaperVariant = (value: string): string => {
   return "";
 };
 
-export const paperCodeParser = (
-  subjectCode: string,
-  paperType: number,
-  variant: number,
-  season: "Summer" | "Winter" | "Spring",
-  year: number
+export const seasonToCode = (
+  season: "Summer" | "Winter" | "Spring"
 ): string => {
-  let seasonCode: string;
   switch (season) {
     case "Summer":
-      seasonCode = "MJ";
-      break;
+      return "MJ";
     case "Winter":
-      seasonCode = "ON";
-      break;
+      return "ON";
     case "Spring":
-      seasonCode = "FM";
-      break;
+      return "FM";
   }
+};
+
+export const paperCodeParser = ({
+  subjectCode,
+  paperType,
+  variant,
+  season,
+  year,
+}: {
+  subjectCode: string;
+  paperType: string;
+  variant: string;
+  season: "Summer" | "Winter" | "Spring";
+  year: string;
+}): string => {
+  const seasonCode = seasonToCode(season);
 
   const yearCode = String(year).slice(-2);
 

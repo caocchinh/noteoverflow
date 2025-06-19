@@ -20,6 +20,8 @@ import {
   validateQuestionNumber,
   validateSubject,
   validatePaperVariant,
+  paperCodeParser,
+  seasonToCode,
 } from "@/features/admin/content/lib/utils";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -43,7 +45,8 @@ import {
   AlertDialogTrigger,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
+import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -77,9 +80,9 @@ const UploadPage = () => {
   const [newPaperType, setNewPaperType] = useState<string[]>([]);
   const [newPaperTypeInput, setNewPaperTypeInput] = useState<string>("");
 
-  const [selectedSeason, setSelectedSeason] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedSeason, setSelectedSeason] = useState<
+    "Summer" | "Winter" | "Spring" | ""
+  >("");
   const [isSeasonSelectOpen, setIsSeasonSelectOpen] = useState<boolean>(false);
   const [newSeason, setNewSeason] = useState<string[]>([]);
   const [newSeasonInput, setNewSeasonInput] = useState<string>("");
@@ -102,6 +105,10 @@ const UploadPage = () => {
   const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
     undefined
   );
+  const [currentTab, setCurrentTab] = useState<"information" | "image-preview">(
+    "information"
+  );
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [paperVariantInput, setPaperVariantInput] = useState<string>("");
@@ -117,6 +124,8 @@ const UploadPage = () => {
       !selectedYear ||
       questionNumber == "" ||
       questionNumberError != "" ||
+      paperVariantInput == "" ||
+      paperVariantError != "" ||
       questionImages.length === 0 ||
       (isMultipleChoice && multipleChoiceInput === "") ||
       questionImages.length === 0 ||
@@ -136,6 +145,8 @@ const UploadPage = () => {
     selectedSubject,
     selectedTopic,
     selectedYear,
+    paperVariantInput,
+    paperVariantError,
   ]);
 
   const {
@@ -363,7 +374,17 @@ const UploadPage = () => {
   };
 
   const handleUpload = () => {
-    setIsUploading(true);
+    setCurrentTab("information");
+    console.log(
+      paperCodeParser({
+        subjectCode: selectedSubject!.split("(")[1],
+        paperType: selectedPaperType!,
+        variant: paperVariantInput!,
+        season: selectedSeason as "Summer" | "Winter" | "Spring",
+        year: selectedYear!,
+      })
+    );
+    // setIsUploading(true);
   };
 
   return (
@@ -384,7 +405,7 @@ const UploadPage = () => {
         </DialogContent>
       </Dialog>
       <div className="flex flex-row gap-8 items-start justify-evenly mt-4 w-full flex-wrap">
-        <div className="flex flex-col flex-wrap gap-4 items-start justify-start border-2 border-foreground-muted rounded-md p-4 w-full sm:w-[350px]">
+        <div className="flex flex-col flex-wrap gap-4 items-start justify-start border-2 border-foreground-muted rounded-md p-4 w-full sm:w-[350px] bg-card">
           <h1 className="text-xl font-semibold text-center w-full">
             Information
           </h1>
@@ -491,7 +512,9 @@ const UploadPage = () => {
 
           <EnhancedSelect
             selectedValue={selectedSeason}
-            onValueChange={setSelectedSeason}
+            onValueChange={(item) =>
+              setSelectedSeason(item as "Summer" | "Winter" | "Spring")
+            }
             isOpen={isSeasonSelectOpen}
             onOpenChange={setIsSeasonSelectOpen}
             existingItems={subjectInfo?.seasonData ?? []}
@@ -685,17 +708,162 @@ const UploadPage = () => {
             )}
           </div>
           <div className="flex flex-row gap-4 mt-4 w-full items-center justify-center">
-            <Button
-              className="flex-1 cursor-pointer"
-              disabled={canUpload}
-              onClick={handleUpload}
+            <AlertDialog
+              open={isUploadDialogOpen}
+              onOpenChange={setIsUploadDialogOpen}
             >
-              {isUploading
-                ? "Uploading..."
-                : !canUpload
-                ? "Upload"
-                : "Complete required fields"}
-            </Button>
+              <AlertDialogTrigger asChild>
+                <Button
+                  className="flex-1 cursor-pointer"
+                  disabled={canUpload}
+                  onClick={handleUpload}
+                >
+                  {isUploading
+                    ? "Uploading..."
+                    : !canUpload
+                    ? "Upload"
+                    : "Complete required fields"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Question Upload</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please review the following information before uploading
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Tabs
+                  defaultValue="information"
+                  className="w-full"
+                  value={currentTab}
+                  onValueChange={(value) =>
+                    setCurrentTab(value as "information" | "image-preview")
+                  }
+                >
+                  <TabsList>
+                    <TabsTrigger value="information">Information</TabsTrigger>
+                    <TabsTrigger value="image-preview">
+                      Image Preview
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="information">
+                    <div className="grid grid-cols-2 gap-2 my-4">
+                      <div className="font-semibold">Curriculum:</div>
+                      <div>{selectedCurriculum}</div>
+                      <div className="font-semibold">Subject:</div>
+                      <div>{selectedSubject}</div>
+                      <div className="font-semibold">Topic:</div>
+                      <div>{selectedTopic}</div>
+                      <div className="font-semibold">Paper Type:</div>
+                      <div>{selectedPaperType}</div>
+                      <div className="font-semibold">Season:</div>
+                      <div>
+                        {selectedSeason} {"("}
+                        {seasonToCode(
+                          selectedSeason as "Summer" | "Winter" | "Spring"
+                        )}
+                        {")"}
+                      </div>
+                      <div className="font-semibold">Year:</div>
+                      <div>{selectedYear}</div>
+                      <div className="font-semibold">Question Number:</div>
+                      <div>{questionNumber}</div>
+                      <div className="font-semibold">Paper Variant:</div>
+                      <div>{paperVariantInput}</div>
+                      <div className="font-semibold">Question Type:</div>
+                      <div>
+                        {isMultipleChoice ? "Multiple Choice" : "Theory (FRQ)"}
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full cursor-pointer"
+                      onClick={() => setCurrentTab("image-preview")}
+                    >
+                      Next <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="image-preview">
+                    <div className="flex flex-col gap-2 mt-2 w-full items-start justify-center">
+                      <h4 className="font-semibold">
+                        Question (ordered by order)
+                      </h4>
+                      <div className="w-full">
+                        {questionImages.map((image, index) => (
+                          <div
+                            className="flex flex-row w-full gap-2 items-center justify-center"
+                            key={index}
+                          >
+                            <p>{index + 1}.</p>
+                            <Button
+                              className="flex-1 cursor-pointer"
+                              variant="outline"
+                              onClick={() => {
+                                setImageDialogOpen(true);
+                                setImageDialogImage(URL.createObjectURL(image));
+                              }}
+                            >
+                              {image.name}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <h4 className="font-semibold mt-6">
+                        Answer {!isMultipleChoice ? "(ordered by order)" : ""}
+                      </h4>
+                      {isMultipleChoice ? (
+                        <div className="w-full">
+                          <p>Answer: {multipleChoiceInput}</p>
+                        </div>
+                      ) : (
+                        <div className="w-full">
+                          {answerImages.map((image, index) => (
+                            <div
+                              className="flex flex-row w-full gap-2 items-center justify-center"
+                              key={index}
+                            >
+                              <p>{index + 1}.</p>
+                              <Button
+                                className="flex-1 cursor-pointer"
+                                variant="outline"
+                                onClick={() => {
+                                  setImageDialogOpen(true);
+                                  setImageDialogImage(
+                                    URL.createObjectURL(image)
+                                  );
+                                }}
+                              >
+                                {image.name}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-row gap-4 mt-5 items-center justify-center">
+                      <Button
+                        className="flex-1 cursor-pointer"
+                        onClick={() => setCurrentTab("information")}
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back
+                      </Button>
+                      <Button
+                        className="flex-1 cursor-pointer"
+                        disabled={canUpload}
+                      >
+                        Upload <Upload className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <AlertDialogFooter className="flex flex-row gap-4 items-center justify-center">
+                  <AlertDialogCancel className="flex-1 cursor-pointer">
+                    Cancel
+                  </AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <AlertDialog
               open={isResetDialogOpen}
               onOpenChange={setIsResetDialogOpen}

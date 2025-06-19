@@ -161,7 +161,7 @@ const EnhancedSelect = ({
             />
           </SelectTrigger>
           <SelectContent>
-            <div className="flex items-center border-b p-2 sticky top-0 bg-background z-10">
+            <div className="flex items-center border-b p-2 sticky top-0  z-10">
               <Search className="w-4 h-4 mr-2 text-muted-foreground" />
               <Input
                 placeholder="Search"
@@ -172,7 +172,7 @@ const EnhancedSelect = ({
                 onKeyDown={(e) => {
                   e.stopPropagation();
                 }}
-                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 pl-0"
+                className="border-0 focus-visible:ring-0 !px-3 focus-visible:ring-offset-0 h-8 "
               />
               {searchQuery && (
                 <div
