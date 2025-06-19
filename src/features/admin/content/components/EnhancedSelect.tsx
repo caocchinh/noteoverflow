@@ -175,10 +175,13 @@ const EnhancedSelect = ({
                 className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 pl-0"
               />
               {searchQuery && (
-                <X
-                  className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground"
+                <div
+                  className="cursor-pointer "
+                  title="Clear search"
                   onClick={() => setSearchQuery("")}
-                />
+                >
+                  <X className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-red-500" />
+                </div>
               )}
             </div>
 

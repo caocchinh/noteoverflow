@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCurriculum } from "@/server/main/curriculum";
 import { getSubjectByCurriculum } from "@/server/main/subject";
 import { useState } from "react";
@@ -30,6 +30,17 @@ import { toast } from "sonner";
 import ReorderableImageList from "@/features/admin/content/components/ReorderableImageList";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -73,21 +84,28 @@ const UploadPage = () => {
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
     undefined
   );
+  const queryClient = useQueryClient();
+
   const [isYearSelectOpen, setIsYearSelectOpen] = useState<boolean>(false);
   const [newYear, setNewYear] = useState<string[]>([]);
   const [newYearInput, setNewYearInput] = useState<string>("");
   const [questionNumber, setQuestionNumber] = useState<string>("");
   const [questionNumberError, setQuestionNumberError] = useState<string>("");
   const [isMultipleChoice, setIsMultipleChoice] = useState<boolean>(false);
-  const [multipleChoiceInput, setMultipleChoiceInput] = useState<string>("");
+  const [multipleChoiceInput, setMultipleChoiceInput] = useState<string>("A");
   const [questionImages, setQuestionImages] = useState<File[]>([]);
   const [answerImages, setAnswerImages] = useState<File[]>([]);
   const [imageDialogOpen, setImageDialogOpen] = useState<boolean>(false);
   const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
     undefined
   );
-
-  const { data: curriculumData, isFetching: isCurriculumFetching } = useQuery({
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
+  const {
+    data: curriculumData,
+    isFetching: isCurriculumFetching,
+    refetch: refetchCurriculum,
+    isRefetching: isCurriculumRefetching,
+  } = useQuery({
     queryKey: ["curriculum"],
     queryFn: async (): Promise<CurriculumType[]> => {
       const data = await getCurriculum();
@@ -273,6 +291,29 @@ const UploadPage = () => {
     setAnswerImages(answerImages.filter((_, i) => i !== index));
   };
 
+  const resetAllInputs = async () => {
+    setSelectedCurriculum("");
+    setSelectedSubject("");
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
+    setQuestionNumber("");
+    setQuestionNumberError("");
+    setIsMultipleChoice(false);
+    setMultipleChoiceInput("A");
+    setQuestionImages([]);
+    setAnswerImages([]);
+    queryClient.setQueryData(["curriculum"], []);
+    queryClient.setQueryData(["subject"], []);
+    queryClient.setQueryData(["topic"], []);
+    queryClient.setQueryData(["paperType"], []);
+    queryClient.setQueryData(["season"], []);
+    queryClient.setQueryData(["year"], []);
+    await refetchCurriculum();
+    setIsResetDialogOpen(false);
+  };
+
   return (
     <>
       <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
@@ -306,7 +347,7 @@ const UploadPage = () => {
             onRemoveNewItem={handleRemoveNewCurriculum}
             placeholder="Select a curriculum"
             loadingPlaceholder="Fetching existing curriculums..."
-            isLoading={isCurriculumFetching}
+            isLoading={isCurriculumFetching || isCurriculumRefetching}
             newItemInputValue={newCurriculumInput}
             onNewItemInputChange={setNewCurriculumInput}
             existingItemsLabel="Existing Curriculum"
@@ -336,7 +377,11 @@ const UploadPage = () => {
             newItemsLabel="New Subjects"
             inputPlaceholder="Enter new subject name"
             className="w-full"
-            disabled={!selectedCurriculum}
+            disabled={
+              !selectedCurriculum ||
+              isCurriculumRefetching ||
+              isCurriculumFetching
+            }
             label="Subject"
           />
 
@@ -554,10 +599,50 @@ const UploadPage = () => {
             )}
           </div>
           <div className="flex flex-row gap-4 mt-4 w-full items-center justify-center">
-            <Button className="flex-1">Upload</Button>
-            <Button variant="outline" className="flex-1" onClick={() => {}}>
-              Reset all inputs
-            </Button>
+            <Button className="flex-1 cursor-pointer">Upload</Button>
+            <AlertDialog
+              open={isResetDialogOpen}
+              onOpenChange={setIsResetDialogOpen}
+            >
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="flex-1 cursor-pointer">
+                  Reset all inputs
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-center">
+                    Reset all inputs
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-center">
+                    Are you absolutely sure you want to reset all inputs? New
+                    values will be kept for the new items you have added.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex flex-row gap-4 items-center justify-center">
+                  <AlertDialogCancel
+                    className="flex-1 cursor-pointer"
+                    disabled={isCurriculumRefetching}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <Button
+                    className="flex-1 cursor-pointer"
+                    onClick={resetAllInputs}
+                    disabled={isCurriculumRefetching}
+                  >
+                    {isCurriculumRefetching ? (
+                      <>
+                        Resetting...
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      </>
+                    ) : (
+                      "Reset"
+                    )}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
