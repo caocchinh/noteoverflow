@@ -1,7 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { getDb } from "@/drizzle/db";
+import { getDb, getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
 
@@ -23,7 +23,8 @@ export const updateUserAvatar = async (userId: string, avatar: string) => {
 };
 
 export const isAdmin = async (userId: string): Promise<boolean> => {
-  const response = await auth().api.userHasPermission({
+  const db = await auth(getDbAsync);
+  const response = await db.api.userHasPermission({
     body: {
       userId,
       permission: {
@@ -38,7 +39,8 @@ export const isAdmin = async (userId: string): Promise<boolean> => {
 };
 
 export const isOwner = async (userId: string): Promise<boolean> => {
-  const response = await auth().api.userHasPermission({
+  const db = await auth(getDbAsync);
+  const response = await db.api.userHasPermission({
     body: {
       userId,
       permission: {

@@ -1,3 +1,5 @@
+import { UploadToR2 } from "@/server/r2";
+
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
     return "Curriculum cannot be empty";
@@ -181,28 +183,25 @@ export const uploadImage = async ({
   questionNumber: string;
   order: number;
 }): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append(
-    "filename",
-    `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`
-  );
-  formData.append("contentType", file.type);
+  const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
+  const fileBuffer = await file.arrayBuffer();
 
-  const response = await fetch("/api/r2", {
-    method: "POST",
-    body: formData,
+  const response = await UploadToR2({
+    key: filename,
+    body: fileBuffer,
+    options: {
+      httpMetadata: {
+        contentType: file.type,
+      },
+    },
   });
 
-  if (!response.ok) {
+  if (!response || !response.key) {
     throw new Error("Failed to upload file");
   }
-  const result = await response.json();
 
-  if (!result || !result.url) {
-    throw new Error("Failed to upload file");
-  }
-  return result.url;
+  // Return a URL or path to the uploaded file
+  return `https://storage.noteoverflow.com/${filename}`;
 };
 
 export const parseQuestionId = ({

@@ -3,7 +3,6 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { captcha } from "better-auth/plugins";
 import { type User } from "better-auth";
 import { AVATARS } from "@/constants/constants";
-import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { admin } from "better-auth/plugins";
 import {
@@ -18,9 +17,10 @@ import {
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
-export const auth = () =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const auth = async (database: any) =>
   betterAuth({
-    database: drizzleAdapter(getDb(), {
+    database: drizzleAdapter(await database(), {
       provider: "sqlite",
       schema: schema,
     }),

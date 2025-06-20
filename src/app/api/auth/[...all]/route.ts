@@ -1,8 +1,10 @@
 import { auth } from "@/lib/auth/auth";
+import { getDb } from "@/drizzle/db";
 
 function toNextJsHandler() {
   const handler = async (request: Request) => {
-    return auth().handler(request);
+    const db = await auth(getDb);
+    return db.handler(request);
   };
   return {
     GET: handler,

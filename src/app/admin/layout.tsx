@@ -4,9 +4,11 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Loader from "@/components/Loader/Loader";
 import Navigation from "@/features/admin/components/Navigation";
+import { getDbAsync } from "@/drizzle/db";
 
 const AdminContent = async ({ children }: { children: React.ReactNode }) => {
-  const session = await auth().api.getSession({
+  const db = await auth(getDbAsync);
+  const session = await db.api.getSession({
     headers: await headers(),
   });
 
