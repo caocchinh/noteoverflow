@@ -26,6 +26,7 @@ import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
 import { createTopic, isTopicExists } from "@/server/main/topic";
 import { overwriteQuestionImage } from "@/server/main/question";
 import { authClient } from "@/lib/auth/auth-client";
+import { uploadImage } from "@/features/admin/content/lib/utils";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -117,28 +118,14 @@ const LegacyUploadPage = () => {
         };
         reader.readAsText(file);
       } else {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append(
-          "filename",
-          `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`
-        );
-        formData.append("contentType", file.type);
-
-        const response = await fetch("/api/r2", {
-          method: "POST",
-          body: formData,
+        questionImageSrc = await uploadImage({
+          file,
+          subjectFullName,
+          paperCode,
+          contentType,
+          questionNumber,
+          order: parseInt(order),
         });
-
-        if (!response.ok) {
-          throw new Error("Failed to upload file");
-        }
-        const result = await response.json();
-
-        if (!result || !result.url) {
-          throw new Error("Failed to upload file");
-        }
-        questionImageSrc = result.url;
       }
 
       const session = await authClient.getSession();

@@ -36,6 +36,8 @@ import {
   validatePaperVariant,
   paperCodeParser,
   seasonToCode,
+  uploadImage,
+  parseQuestionId,
 } from "@/features/admin/content/lib/utils";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -437,7 +439,12 @@ const UploadPage = () => {
         year: selectedYear!,
       });
       const isQuestionAlreadyExists = await isQuestionExists(
-        `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`
+        parseQuestionId({
+          subject: selectedSubject!,
+          paperCode: paperCode,
+          questionNumber: questionNumber!,
+          contentType: "questions",
+        })
       );
       if (isQuestionAlreadyExists) {
         toast.error(
@@ -508,7 +515,12 @@ const UploadPage = () => {
           })(),
         ]);
         await createQuestion({
-          questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+          questionId: parseQuestionId({
+            subject: selectedSubject!,
+            paperCode: paperCode,
+            questionNumber: questionNumber!,
+            contentType: "questions",
+          }),
           questionNumber: parseInt(questionNumber!),
           year: parseInt(selectedYear!),
           season: selectedSeason!,
@@ -519,27 +531,64 @@ const UploadPage = () => {
           topic: selectedTopic!,
         });
 
-        for (const image of questionImages) {
-          await createQuestionImage({
-            questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
-            imageSrc: image.name,
-            order: questionImages.indexOf(image),
-          });
-        }
+        // Upload and create all question images in parallel
+        await Promise.all(
+          questionImages.map(async (image, index) => {
+            const imageSrc = await uploadImage({
+              file: image,
+              subjectFullName: selectedSubject!,
+              paperCode: paperCode,
+              contentType: "questions",
+              questionNumber: questionNumber!,
+              order: index,
+            });
+            await createQuestionImage({
+              questionId: parseQuestionId({
+                subject: selectedSubject!,
+                paperCode: paperCode,
+                questionNumber: questionNumber!,
+                contentType: "questions",
+              }),
+              imageSrc: imageSrc,
+              order: index,
+            });
+          })
+        );
         if (isMultipleChoice) {
           await createAnswer({
-            questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+            questionId: parseQuestionId({
+              subject: selectedSubject!,
+              paperCode: paperCode,
+              questionNumber: questionNumber!,
+              contentType: "questions",
+            }),
             answerImageSrc: multipleChoiceInput,
             answerOrder: 0,
           });
         } else {
-          for (const image of answerImages) {
-            await createAnswer({
-              questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
-              answerImageSrc: image.name,
-              answerOrder: answerImages.indexOf(image),
-            });
-          }
+          // Upload and create all answer images in parallel
+          await Promise.all(
+            answerImages.map(async (image, index) => {
+              const imageSrc = await uploadImage({
+                file: image,
+                subjectFullName: selectedSubject!,
+                paperCode: paperCode,
+                contentType: "answers",
+                questionNumber: questionNumber!,
+                order: index,
+              });
+              await createAnswer({
+                questionId: parseQuestionId({
+                  subject: selectedSubject!,
+                  paperCode: paperCode,
+                  questionNumber: questionNumber!,
+                  contentType: "answers",
+                }),
+                answerImageSrc: imageSrc,
+                answerOrder: index,
+              });
+            })
+          );
         }
 
         await resetAllInputs();

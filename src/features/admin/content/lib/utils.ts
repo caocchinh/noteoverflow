@@ -116,3 +116,56 @@ export const paperCodeParser = ({
 
   return `${subjectCode}_${paperTypeVariant}_${seasonCode}_${yearCode}`;
 };
+
+export const uploadImage = async ({
+  file,
+  subjectFullName,
+  paperCode,
+  contentType,
+  questionNumber,
+  order,
+}: {
+  file: File;
+  subjectFullName: string;
+  paperCode: string;
+  contentType: "questions" | "answers";
+  questionNumber: string;
+  order: number;
+}): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append(
+    "filename",
+    `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`
+  );
+  formData.append("contentType", file.type);
+
+  const response = await fetch("/api/r2", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to upload file");
+  }
+  const result = await response.json();
+
+  if (!result || !result.url) {
+    throw new Error("Failed to upload file");
+  }
+  return result.url;
+};
+
+export const parseQuestionId = ({
+  subject,
+  paperCode,
+  questionNumber,
+  contentType,
+}: {
+  subject: string;
+  paperCode: string;
+  questionNumber: string;
+  contentType: "questions" | "answers";
+}): string => {
+  return `${subject}-${paperCode}-${contentType}-Q${questionNumber}`;
+};
