@@ -445,7 +445,6 @@ const UploadPage = () => {
           subject: selectedSubject!,
           paperCode: paperCode,
           questionNumber: questionNumber!,
-          contentType: "questions",
         })
       );
       if (isQuestionAlreadyExists) {
@@ -521,7 +520,6 @@ const UploadPage = () => {
             subject: selectedSubject!,
             paperCode: paperCode,
             questionNumber: questionNumber!,
-            contentType: "questions",
           }),
           questionNumber: parseInt(questionNumber!),
           year: parseInt(selectedYear!),
@@ -549,7 +547,6 @@ const UploadPage = () => {
                 subject: selectedSubject!,
                 paperCode: paperCode,
                 questionNumber: questionNumber!,
-                contentType: "questions",
               }),
               imageSrc: imageSrc,
               order: index,
@@ -562,7 +559,6 @@ const UploadPage = () => {
               subject: selectedSubject!,
               paperCode: paperCode,
               questionNumber: questionNumber!,
-              contentType: "questions",
             }),
             answerImageSrc: multipleChoiceInput,
             answerOrder: 0,
@@ -584,7 +580,6 @@ const UploadPage = () => {
                   subject: selectedSubject!,
                   paperCode: paperCode,
                   questionNumber: questionNumber!,
-                  contentType: "answers",
                 }),
                 answerImageSrc: imageSrc,
                 answerOrder: index,
@@ -592,6 +587,16 @@ const UploadPage = () => {
             })
           );
         }
+        setNewCurriculum(
+          newCurriculum.filter((item) => item !== selectedCurriculum)
+        );
+        setNewSubject(newSubject.filter((item) => item !== selectedSubject));
+        setNewTopic(newTopic.filter((item) => item !== selectedTopic));
+        setNewPaperType(
+          newPaperType.filter((item) => item !== selectedPaperType)
+        );
+        setNewSeason(newSeason.filter((item) => item !== selectedSeason));
+        setNewYear(newYear.filter((item) => item !== selectedYear));
 
         await resetAllInputs();
         toast.success("Question uploaded successfully");

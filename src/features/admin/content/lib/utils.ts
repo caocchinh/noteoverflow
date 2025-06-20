@@ -209,12 +209,10 @@ export const parseQuestionId = ({
   subject,
   paperCode,
   questionNumber,
-  contentType,
 }: {
   subject: string;
   paperCode: string;
   questionNumber: string;
-  contentType: "questions" | "answers";
 }): string => {
-  return `${subject}-${paperCode}-${contentType}-Q${questionNumber}`;
+  return `${subject}-${paperCode}-questions-Q${questionNumber}`;
 };
