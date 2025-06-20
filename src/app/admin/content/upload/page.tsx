@@ -1,18 +1,32 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCurriculum } from "@/server/main/curriculum";
-import { getSubjectByCurriculum } from "@/server/main/subject";
+import {
+  createCurriculum,
+  getCurriculum,
+  isCurriculumExists,
+} from "@/server/main/curriculum";
+import { createAnswer } from "@/server/main/answer";
+import { createQuestion, createQuestionImage } from "@/server/main/question";
+import {
+  createSubject,
+  getSubjectByCurriculum,
+  isSubjectExists,
+} from "@/server/main/subject";
 import { useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
 } from "@/features/admin/content/constants/types";
 import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
-import { getPaperType } from "@/server/main/paperType";
-import { getSeason } from "@/server/main/season";
-import { getYear } from "@/server/main/year";
-import { getTopic } from "@/server/main/topic";
+import {
+  createPaperType,
+  getPaperType,
+  isPaperTypeExists,
+} from "@/server/main/paperType";
+import { createSeason, getSeason, isSeasonExists } from "@/server/main/season";
+import { createYear, getYear, isYearExists } from "@/server/main/year";
+import { createTopic, getTopic, isTopicExists } from "@/server/main/topic";
 import {
   validatePaperType,
   validateSeason,
@@ -29,7 +43,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import FileDrop from "@/features/admin/content/components/FileDrop";
 import Image from "next/image";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import ReorderableImageList from "@/features/admin/content/components/ReorderableImageList";
@@ -48,6 +66,8 @@ import {
 import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { isQuestionExists } from "@/server/main/question";
+import { authClient } from "@/lib/auth/auth-client";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -155,11 +175,18 @@ const UploadPage = () => {
     isFetching: isCurriculumFetching,
     refetch: refetchCurriculum,
     isRefetching: isCurriculumRefetching,
+    error: curriculumError,
+    isError: isCurriculumError,
   } = useQuery({
     queryKey: ["curriculum"],
     queryFn: async (): Promise<CurriculumType[]> => {
-      const data = await getCurriculum();
-      return data;
+      try {
+        const data = await getCurriculum();
+        return data;
+      } catch (error) {
+        toast.error("Failed to fetch curriculum data");
+        throw error;
+      }
     },
     select: (data) => {
       if (data.length > 0 && !selectedCurriculum) {
@@ -167,29 +194,54 @@ const UploadPage = () => {
       }
       return data;
     },
+    retry: false,
   });
 
-  const { data: subject } = useQuery({
+  const {
+    data: subject,
+    error: subjectError,
+    isError: isSubjectError,
+    refetch: refetchSubject,
+    isFetching: isSubjectFetching,
+  } = useQuery({
     queryKey: ["subject", selectedCurriculum],
     queryFn: async (): Promise<SubjectType[]> => {
-      return await getSubjectByCurriculum(selectedCurriculum ?? "");
+      try {
+        return await getSubjectByCurriculum(selectedCurriculum ?? "");
+      } catch (error) {
+        toast.error("Failed to fetch subject data");
+        throw error;
+      }
     },
     enabled: !!selectedCurriculum,
+    retry: false,
   });
 
-  const { data: subjectInfo, isFetching: isSubjectInfoFetching } = useQuery({
+  const {
+    data: subjectInfo,
+    isFetching: isSubjectInfoFetching,
+    error: subjectInfoError,
+    isError: isSubjectInfoError,
+    refetch: refetchSubjectInfo,
+  } = useQuery({
     queryKey: ["subjectInfo", selectedSubject],
     queryFn: async () => {
-      const [topicData, paperTypeData, seasonData, yearData] =
-        await Promise.all([
-          getTopic(selectedSubject ?? ""),
-          getPaperType(selectedSubject ?? ""),
-          getSeason(selectedSubject ?? ""),
-          getYear(selectedSubject ?? ""),
-        ]);
-      return { topicData, paperTypeData, seasonData, yearData };
+      try {
+        const [topicData, paperTypeData, seasonData, yearData] =
+          await Promise.all([
+            getTopic(selectedSubject ?? ""),
+            getPaperType(selectedSubject ?? ""),
+            getSeason(selectedSubject ?? ""),
+            getYear(selectedSubject ?? ""),
+          ]);
+        return { topicData, paperTypeData, seasonData, yearData };
+      } catch (error) {
+        toast.error("Failed to fetch subject information");
+        throw error;
+      }
     },
     enabled: !!selectedSubject,
+    retry: false,
   });
 
   const handleAddNewCurriculum = (item: string) => {
@@ -374,23 +426,138 @@ const UploadPage = () => {
     setIsResetDialogOpen(false);
   };
 
-  const handleUpload = () => {
-    setCurrentTab("information");
-    console.log(
-      paperCodeParser({
-        subjectCode: selectedSubject!.split("(")[1],
+  const handleUpload = async () => {
+    try {
+      setIsUploading(true);
+      const paperCode = paperCodeParser({
+        subjectCode: selectedSubject!.split("(")[1].slice(0, -1),
         paperType: selectedPaperType!,
         variant: paperVariantInput!,
         season: selectedSeason as "Summer" | "Winter" | "Spring",
         year: selectedYear!,
-      })
-    );
-    // setIsUploading(true);
+      });
+      const isQuestionAlreadyExists = await isQuestionExists(
+        `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`
+      );
+      if (isQuestionAlreadyExists) {
+        toast.error(
+          "Question already exists! If you want to overwrite it, please use the update page."
+        );
+        setIsUploading(false);
+        setIsUploadDialogOpen(false);
+        return;
+      }
+      const session = await authClient.getSession();
+      if (session?.data?.user) {
+        // Run all existence checks and creation operations in parallel
+        if (!(await isCurriculumExists(selectedCurriculum!))) {
+          await createCurriculum({ name: selectedCurriculum! });
+        }
+        if (!(await isSubjectExists(selectedSubject!))) {
+          await createSubject({
+            id: selectedSubject!,
+            curriculumName: selectedCurriculum!,
+          });
+        }
+        await Promise.all([
+          // Year check and create
+          (async () => {
+            if (
+              !(await isYearExists(parseInt(selectedYear!), selectedSubject!))
+            ) {
+              await createYear({
+                year: parseInt(selectedYear!),
+                subjectId: selectedSubject!,
+              });
+            }
+          })(),
+
+          // Season check and create
+          (async () => {
+            if (!(await isSeasonExists(selectedSeason, selectedSubject!))) {
+              await createSeason({
+                season: selectedSeason,
+                subjectId: selectedSubject!,
+              });
+            }
+          })(),
+
+          // PaperType check and create
+          (async () => {
+            if (
+              !(await isPaperTypeExists(
+                parseInt(selectedPaperType!),
+                selectedSubject!
+              ))
+            ) {
+              await createPaperType({
+                paperType: parseInt(selectedPaperType!),
+                subjectId: selectedSubject!,
+              });
+            }
+          })(),
+
+          // Topic check and create
+          (async () => {
+            if (!(await isTopicExists(selectedTopic!, selectedSubject!))) {
+              await createTopic({
+                topic: selectedTopic!,
+                subjectId: selectedSubject!,
+              });
+            }
+          })(),
+        ]);
+        await createQuestion({
+          questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+          questionNumber: parseInt(questionNumber!),
+          year: parseInt(selectedYear!),
+          season: selectedSeason!,
+          paperType: parseInt(selectedPaperType!),
+          paperVariant: parseInt(paperVariantInput!),
+          userId: session.data.user.id,
+          subjectId: selectedSubject!,
+          topic: selectedTopic!,
+        });
+
+        for (const image of questionImages) {
+          await createQuestionImage({
+            questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+            imageSrc: image.name,
+            order: questionImages.indexOf(image),
+          });
+        }
+        if (isMultipleChoice) {
+          await createAnswer({
+            questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+            answerImageSrc: multipleChoiceInput,
+            answerOrder: 0,
+          });
+        } else {
+          for (const image of answerImages) {
+            await createAnswer({
+              questionId: `${selectedSubject}-${paperCode}-questions-Q${questionNumber}`,
+              answerImageSrc: image.name,
+              answerOrder: answerImages.indexOf(image),
+            });
+          }
+        }
+
+        await resetAllInputs();
+        toast.success("Question uploaded successfully");
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Failed to upload question");
+    } finally {
+      setIsUploadDialogOpen(false);
+      setIsUploading(false);
+    }
   };
 
   return (
     <>
       <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogDescription className="sr-only">Preview Image</DialogDescription>
         <DialogContent
           onClick={() => setImageDialogOpen(false)}
           className="max-h-[70vh] overflow-y-auto"
@@ -410,6 +577,21 @@ const UploadPage = () => {
           <h1 className="text-xl font-semibold text-center w-full">
             Information
           </h1>
+          {isCurriculumError && (
+            <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2">
+              <p className="text-sm">
+                Error loading curriculum: {curriculumError?.message}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => refetchCurriculum()}
+                className="mt-1 cursor-pointer"
+                variant="outline"
+              >
+                Retry
+              </Button>
+            </div>
+          )}
           <EnhancedSelect
             selectedValue={selectedCurriculum}
             onValueChange={handleCurriculumChange}
@@ -440,12 +622,16 @@ const UploadPage = () => {
             newItems={newSubject}
             onAddNewItem={handleAddNewSubject}
             onRemoveNewItem={handleRemoveNewSubject}
+            loadingPlaceholder="Fetching existing subjects..."
             placeholder={
               !selectedCurriculum
                 ? "Select a curriculum first"
+                : isSubjectError
+                ? "Failed to load subjects"
                 : "Select a subject"
             }
             newItemInputValue={newSubjectInput}
+            isLoading={isSubjectFetching}
             onNewItemInputChange={setNewSubjectInput}
             existingItemsLabel="Existing Subjects"
             newItemsLabel="New Subjects"
@@ -454,11 +640,44 @@ const UploadPage = () => {
             disabled={
               !selectedCurriculum ||
               isCurriculumRefetching ||
-              isCurriculumFetching
+              isCurriculumFetching ||
+              isSubjectFetching
             }
             label="Subject"
             validator={validateSubject}
           />
+
+          {isSubjectError && (
+            <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2">
+              <p className="text-sm">
+                Error loading subjects: {subjectError?.message}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => refetchSubject()}
+                className="mt-1 cursor-pointer"
+                variant="outline"
+              >
+                Retry
+              </Button>
+            </div>
+          )}
+
+          {isSubjectInfoError && (
+            <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2">
+              <p className="text-sm">
+                Error loading subject information: {subjectInfoError?.message}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => refetchSubjectInfo()}
+                className="mt-1 cursor-pointer"
+                variant="outline"
+              >
+                Retry
+              </Button>
+            </div>
+          )}
 
           <EnhancedSelect
             selectedValue={selectedTopic}
@@ -717,7 +936,7 @@ const UploadPage = () => {
                 <Button
                   className="flex-1 cursor-pointer"
                   disabled={canUpload}
-                  onClick={handleUpload}
+                  onClick={() => setCurrentTab("information")}
                 >
                   {isUploading
                     ? "Uploading..."
@@ -867,15 +1086,28 @@ const UploadPage = () => {
                       <Button
                         className="flex-1 cursor-pointer"
                         disabled={canUpload}
+                        onClick={handleUpload}
                       >
-                        Upload <Upload className="w-4 h-4" />
+                        {isUploading ? (
+                          <>
+                            Uploading...
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          </>
+                        ) : (
+                          <>
+                            Upload <Upload className="w-4 h-4" />
+                          </>
+                        )}
                       </Button>
                     </div>
                   </TabsContent>
                 </Tabs>
 
                 <AlertDialogFooter className="flex flex-row gap-4 items-center justify-center">
-                  <AlertDialogCancel className="flex-1 cursor-pointer">
+                  <AlertDialogCancel
+                    className="flex-1 cursor-pointer"
+                    disabled={isUploading}
+                  >
                     Cancel
                   </AlertDialogCancel>
                 </AlertDialogFooter>
