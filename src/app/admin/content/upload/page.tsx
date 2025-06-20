@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -741,8 +742,13 @@ const UploadPage = () => {
                   }
                 >
                   <TabsList>
-                    <TabsTrigger value="information">Information</TabsTrigger>
-                    <TabsTrigger value="image-preview">
+                    <TabsTrigger value="information" className="cursor-pointer">
+                      Information
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="image-preview"
+                      className="cursor-pointer"
+                    >
                       Image Preview
                     </TabsTrigger>
                   </TabsList>
@@ -787,36 +793,14 @@ const UploadPage = () => {
                       <h4 className="font-semibold">
                         Question (ordered by order)
                       </h4>
-                      <div className="w-full">
-                        {questionImages.map((image, index) => (
-                          <div
-                            className="flex flex-row w-full gap-2 items-center justify-center"
-                            key={index}
-                          >
-                            <p>{index + 1}.</p>
-                            <Button
-                              className="flex-1 cursor-pointer"
-                              variant="outline"
-                              onClick={() => {
-                                setImageDialogOpen(true);
-                                setImageDialogImage(URL.createObjectURL(image));
-                              }}
-                            >
-                              {image.name}
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                      <h4 className="font-semibold mt-6">
-                        Answer {!isMultipleChoice ? "(ordered by order)" : ""}
-                      </h4>
-                      {isMultipleChoice ? (
-                        <div className="w-full">
-                          <p>Answer: {multipleChoiceInput}</p>
-                        </div>
-                      ) : (
-                        <div className="w-full">
-                          {answerImages.map((image, index) => (
+                      <ScrollArea
+                        className={cn(
+                          "w-full",
+                          isMultipleChoice ? "h-[150px]" : "h-[100px]"
+                        )}
+                      >
+                        <div className="w-full flex flex-col gap-2 items-start justify-center ">
+                          {questionImages.map((image, index) => (
                             <div
                               className="flex flex-row w-full gap-2 items-center justify-center"
                               key={index}
@@ -837,6 +821,39 @@ const UploadPage = () => {
                             </div>
                           ))}
                         </div>
+                      </ScrollArea>
+                      <h4 className="font-semibold mt-6">
+                        Answer {!isMultipleChoice ? "(ordered by order)" : ""}
+                      </h4>
+                      {isMultipleChoice ? (
+                        <div className="w-full">
+                          <p>Answer: {multipleChoiceInput}</p>
+                        </div>
+                      ) : (
+                        <ScrollArea className="w-full h-[100px]">
+                          <div className="w-full flex flex-col gap-2 items-start justify-center">
+                            {answerImages.map((image, index) => (
+                              <div
+                                className="flex flex-row w-full gap-2 items-center justify-center"
+                                key={index}
+                              >
+                                <p>{index + 1}.</p>
+                                <Button
+                                  className="flex-1 cursor-pointer"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setImageDialogOpen(true);
+                                    setImageDialogImage(
+                                      URL.createObjectURL(image)
+                                    );
+                                  }}
+                                >
+                                  {image.name}
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
                       )}
                     </div>
                     <div className="flex flex-row gap-4 mt-5 items-center justify-center">
