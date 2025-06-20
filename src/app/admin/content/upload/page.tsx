@@ -38,6 +38,8 @@ import {
   seasonToCode,
   uploadImage,
   parseQuestionId,
+  validateTopic,
+  validateCurriculum,
 } from "@/features/admin/content/lib/utils";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -660,6 +662,7 @@ const UploadPage = () => {
             inputPlaceholder="Enter new curriculum name"
             className="w-full"
             label="Curriculum"
+            validator={validateCurriculum}
           />
 
           <EnhancedSelect
@@ -736,6 +739,7 @@ const UploadPage = () => {
             existingItems={subjectInfo?.topicData ?? []}
             newItems={newTopic}
             onAddNewItem={handleAddNewTopic}
+            validator={validateTopic}
             onRemoveNewItem={handleRemoveNewTopic}
             placeholder={
               !subjectInfo ? "Select a subject first" : "Select a topic"
@@ -777,6 +781,7 @@ const UploadPage = () => {
             disabled={!selectedSubject}
             validator={validatePaperType}
             label="Paper Type"
+            inputType="number"
           />
 
           <EnhancedSelect
@@ -831,6 +836,7 @@ const UploadPage = () => {
             disabled={!selectedSubject}
             validator={validateYear}
             label="Year"
+            inputType="number"
           />
           <div className="flex flex-col w-full">
             <Label htmlFor="questionNumber" className="mb-2">

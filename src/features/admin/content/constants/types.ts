@@ -28,4 +28,5 @@ export interface EnhancedSelectProps {
   error?: string | null;
   validator?: (value: string) => string | null;
   label: string;
+  inputType?: "text" | "number";
 }

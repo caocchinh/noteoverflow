@@ -35,6 +35,7 @@ const EnhancedSelect = ({
   error = null,
   validator,
   label,
+  inputType = "text",
 }: EnhancedSelectProps) => {
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -251,6 +252,7 @@ const EnhancedSelect = ({
                 <Input
                   placeholder={inputPlaceholder}
                   value={newItemInputValue}
+                  type={inputType}
                   onChange={(e) => handleInputChange(e.target.value)}
                   className={
                     error || duplicateError || validationError

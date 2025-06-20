@@ -1,4 +1,33 @@
+export const validateCurriculum = (value: string): string | null => {
+  if (!value) {
+    return "Curriculum cannot be empty";
+  }
+  if (value !== value.trim()) {
+    return "Curriculum cannot have leading or trailing whitespace";
+  }
+  if (value.trim() === "") {
+    return "Curriculum cannot be empty";
+  }
+  return null;
+};
+
+export const validateTopic = (value: string): string | null => {
+  if (!value) {
+    return "Topic cannot be empty";
+  }
+  if (value !== value.trim()) {
+    return "Topic cannot have leading or trailing whitespace";
+  }
+  if (value.trim() === "") {
+    return "Topic cannot be empty";
+  }
+  return null;
+};
+
 export const validatePaperType = (value: string): string | null => {
+  if (value !== value.trim()) {
+    return "Paper type cannot have leading or trailing whitespace";
+  }
   const paperTypeNumber = Number(value);
   if (isNaN(paperTypeNumber) || paperTypeNumber < 1 || paperTypeNumber > 9) {
     return "Paper type must be a number between 1 and 9";
@@ -7,6 +36,9 @@ export const validatePaperType = (value: string): string | null => {
 };
 
 export const validateYear = (value: string): string | null => {
+  if (value !== value.trim()) {
+    return "Year cannot have leading or trailing whitespace";
+  }
   const yearNumber = Number(value);
   const currentYear = new Date().getFullYear();
 
@@ -26,6 +58,9 @@ export const validateYear = (value: string): string | null => {
 };
 
 export const validateSeason = (value: string): string | null => {
+  if (value !== value.trim()) {
+    return "Season cannot have leading or trailing whitespace";
+  }
   const validSeasons = ["Summer", "Winter", "Spring"];
 
   if (!validSeasons.includes(value)) {
@@ -36,6 +71,9 @@ export const validateSeason = (value: string): string | null => {
 };
 
 export const validateQuestionNumber = (value: string): string => {
+  if (value !== value.trim()) {
+    return "Question number cannot have leading or trailing whitespace";
+  }
   const questionNumber = Number(value);
   if (isNaN(questionNumber) || questionNumber < 1 || questionNumber > 100) {
     return "Question number must be between 1 and 100";
@@ -44,7 +82,15 @@ export const validateQuestionNumber = (value: string): string => {
 };
 
 export const validateSubject = (value: string): string | null => {
-  if (!value || value.trim() === "") {
+  if (!value) {
+    return "Subject cannot be empty";
+  }
+
+  if (value !== value.trim()) {
+    return "Subject cannot have leading or trailing whitespace";
+  }
+
+  if (value.trim() === "") {
     return "Subject cannot be empty";
   }
 
@@ -70,6 +116,9 @@ export const validateSubject = (value: string): string | null => {
 };
 
 export const validatePaperVariant = (value: string): string => {
+  if (value !== value.trim()) {
+    return "Paper variant cannot have leading or trailing whitespace";
+  }
   const paperVariant = Number(value);
 
   if (value === "") {
