@@ -27,7 +27,6 @@ export async function UploadToR2({
 }) {
   const { env } = getCloudflareContext();
 
-  const response = await env.MAIN_BUCKET.put(key, body, options);
-
-  return response;
+  await env.MAIN_BUCKET.put(key, body, options);
+  return process.env.MAIN_R2_BUCKET_PRESIGNED_URL;
 }

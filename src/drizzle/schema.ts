@@ -209,10 +209,10 @@ export const answer = sqliteTable(
       .references(() => question.id, { onDelete: "cascade" })
       .notNull(),
     answerImageSrc: text("answer_image_src").notNull(),
-    answerOrder: integer("answer_order").notNull().default(0),
+    order: integer("order").notNull().default(0),
   },
   (table) => {
-    return [primaryKey({ columns: [table.questionId, table.answerOrder] })];
+    return [primaryKey({ columns: [table.questionId, table.order] })];
   }
 );
 

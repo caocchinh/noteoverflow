@@ -33,7 +33,7 @@ export const createAnswer = async ({
   const db = getDb();
   await db
     .insert(schema.answer)
-    .values({ questionId, answerImageSrc, answerOrder });
+    .values({ questionId, answerImageSrc, order: answerOrder });
 };
 
 export const overwriteAnswer = async ({
@@ -52,7 +52,7 @@ export const overwriteAnswer = async ({
     .values({
       questionId,
       answerImageSrc,
-      answerOrder,
+      order: answerOrder,
     })
     .onConflictDoUpdate({
       target: [schema.answer.questionId, schema.answer.answerImageSrc],

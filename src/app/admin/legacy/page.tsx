@@ -16,17 +16,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
-import { createSubject, isSubjectExists } from "@/server/main/subject";
-import { overwriteAnswer } from "@/server/main/answer";
-import { overwriteQuestion } from "@/server/main/question";
-import { createYear, isYearExists } from "@/server/main/year";
-import { createSeason, isSeasonExists } from "@/server/main/season";
-import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
-import { createTopic, isTopicExists } from "@/server/main/topic";
-import { overwriteQuestionImage } from "@/server/main/question";
 import { authClient } from "@/lib/auth/auth-client";
 import { uploadImage } from "@/features/admin/content/lib/utils";
+import { processCurriculumData } from "@/server/main/legacy";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -129,64 +121,32 @@ const LegacyUploadPage = () => {
       }
 
       const session = await authClient.getSession();
-      if (!(await isCurriculumExists(curriculum))) {
-        await createCurriculum({ name: curriculum });
+
+      if (!session?.data?.user) {
+        console.error("No user session found");
+        return false;
       }
-      if (!(await isSubjectExists(subjectFullName))) {
-        await createSubject({
-          id: subjectFullName,
-          curriculumName: curriculum,
-        });
-      }
-      if (!(await isYearExists(parseInt(year), subjectFullName))) {
-        await createYear({
-          year: parseInt(year),
-          subjectId: subjectFullName,
-        });
-      }
-      if (!(await isSeasonExists(season, subjectFullName))) {
-        await createSeason({
-          season: season,
-          subjectId: subjectFullName,
-        });
-      }
-      if (!(await isPaperTypeExists(paperType, subjectFullName))) {
-        await createPaperType({
-          paperType: paperType,
-          subjectId: subjectFullName,
-        });
-      }
-      if (!(await isTopicExists(topic, subjectFullName))) {
-        await createTopic({
-          topic: topic,
-          subjectId: subjectFullName,
-        });
-      }
-      if (contentType === "questions" && session?.data?.user) {
-        await overwriteQuestion({
-          userId: session.data.user.id,
-          year: parseInt(year),
-          season: season,
-          paperType: paperType,
-          paperVariant: paperVariant,
-          subjectId: subjectFullName,
-          topic: topic,
-          questionNumber: parseInt(questionNumber[1]),
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
-        });
-        await overwriteQuestionImage({
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
-          imageSrc: questionImageSrc,
-          order: parseInt(order),
-        });
-      } else if (contentType === "answers" && session?.data?.user) {
-        await overwriteAnswer({
-          questionId: `${subjectFullName}-${paperCode}-questions-${questionNumber}`,
-          answerImageSrc: questionImageSrc,
-          answerOrder: parseInt(order),
-        });
-      }
-      return true;
+
+      const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
+
+      return await processCurriculumData({
+        curriculum,
+        subjectFullName,
+        year,
+        season,
+        paperType,
+        paperVariant,
+        topic,
+        userId: session.data.user.id,
+        questionId,
+        questionNumber,
+        contentType,
+        questionImageSrc:
+          contentType === "questions" ? questionImageSrc : undefined,
+        answerImageSrc:
+          contentType === "answers" ? questionImageSrc : undefined,
+        order: parseInt(order),
+      });
     } catch (error) {
       console.error("Error uploading file:", error);
       return false;

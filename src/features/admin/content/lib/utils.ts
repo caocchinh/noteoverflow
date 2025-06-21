@@ -186,7 +186,7 @@ export const uploadImage = async ({
   const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
   const fileBuffer = await file.arrayBuffer();
 
-  const response = await UploadToR2({
+  const url = await UploadToR2({
     key: filename,
     body: fileBuffer,
     options: {
@@ -196,12 +196,7 @@ export const uploadImage = async ({
     },
   });
 
-  if (!response || !response.key) {
-    throw new Error("Failed to upload file");
-  }
-
-  // Return a URL or path to the uploaded file
-  return `https://storage.noteoverflow.com/${filename}`;
+  return `${url}/${filename}`;
 };
 
 export const parseQuestionId = ({
@@ -215,3 +210,7 @@ export const parseQuestionId = ({
 }): string => {
   return `${subject}-${paperCode}-questions-Q${questionNumber}`;
 };
+
+/**
+ * Server action to create or update curriculum-related data in a single transaction
+ */
