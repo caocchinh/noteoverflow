@@ -7,9 +7,9 @@ async function POST(request: NextRequest) {
   const key = formData.get("key") as string;
   const body = formData.get("body") as File;
   const options = JSON.parse(formData.get("options") as string);
-  await env.MAIN_BUCKET.put(key, body.arrayBuffer(), options);
+  await env.MAIN_BUCKET.put(key, await body.arrayBuffer(), options);
   return NextResponse.json({
-    url: `${process.env.MAIN_R2_BUCKET_PRESIGNED_URL}/${key}`,
+    imageSrc: `${process.env.MAIN_R2_BUCKET_PUBLIC_URL}/${key}`,
   });
 }
 

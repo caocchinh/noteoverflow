@@ -199,7 +199,9 @@ export const uploadImage = async ({
     body: form,
   });
 
-  return response.url;
+  const data = await response.json();
+
+  return data.imageSrc;
 };
 
 export const parseQuestionId = ({

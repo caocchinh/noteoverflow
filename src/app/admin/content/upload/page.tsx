@@ -61,6 +61,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { isQuestionExists } from "@/server/main/question";
 import { authClient } from "@/lib/auth/auth-client";
 import { createMetadataRecords } from "@/server/main/upload";
+import { redirect } from "next/navigation";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -532,6 +533,8 @@ const UploadPage = () => {
 
         await resetAllInputs();
         toast.success("Question uploaded successfully");
+      } else {
+        redirect("/authentication");
       }
     } catch (error) {
       console.error("Upload failed:", error);

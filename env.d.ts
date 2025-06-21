@@ -27,6 +27,6 @@ declare namespace NodeJS {
     CLOUDFLARE_ACCOUNT_ID: string;
     MAIN_R2_BUCKET_ACCESS_KEY_ID: string;
     MAIN_R2_BUCKET_SECRET_ACCESS_KEY: string;
-    MAIN_R2_BUCKET_PRESIGNED_URL: string;
+    MAIN_R2_BUCKET_PUBLIC_URL: string;
   }
 }

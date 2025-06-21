@@ -19,6 +19,7 @@ import {
 import { authClient } from "@/lib/auth/auth-client";
 import { uploadImage } from "@/features/admin/content/lib/utils";
 import { processCurriculumData } from "@/server/main/legacy";
+import { redirect } from "next/navigation";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -101,16 +102,23 @@ const LegacyUploadPage = () => {
       const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);
       const year = file.webkitRelativePath.split("/")[3];
 
-      let questionImageSrc = "";
+      let imageSrc = "";
+
+      const session = await authClient.getSession();
+
+      if (!session?.data?.user) {
+        console.error("No user session found");
+        redirect("/authentication");
+      }
       if (file.type.includes("text")) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const content = e.target?.result as string;
-          questionImageSrc = content;
+          imageSrc = content;
         };
         reader.readAsText(file);
       } else {
-        questionImageSrc = await uploadImage({
+        imageSrc = await uploadImage({
           file,
           subjectFullName,
           paperCode,
@@ -118,13 +126,6 @@ const LegacyUploadPage = () => {
           questionNumber,
           order: parseInt(order),
         });
-      }
-
-      const session = await authClient.getSession();
-
-      if (!session?.data?.user) {
-        console.error("No user session found");
-        return false;
       }
 
       const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
@@ -141,10 +142,7 @@ const LegacyUploadPage = () => {
         questionId,
         questionNumber,
         contentType,
-        questionImageSrc:
-          contentType === "questions" ? questionImageSrc : undefined,
-        answerImageSrc:
-          contentType === "answers" ? questionImageSrc : undefined,
+        imageSrc,
         order: parseInt(order),
       });
     } catch (error) {

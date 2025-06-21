@@ -16,8 +16,7 @@ export const processCurriculumData = async ({
   questionId,
   questionNumber,
   contentType,
-  questionImageSrc,
-  answerImageSrc,
+  imageSrc,
   order,
 }: {
   curriculum: string;
@@ -31,8 +30,7 @@ export const processCurriculumData = async ({
   questionId: string;
   questionNumber: string;
   contentType: "questions" | "answers";
-  questionImageSrc?: string;
-  answerImageSrc?: string;
+  imageSrc: string;
   order: number;
 }): Promise<boolean> => {
   try {
@@ -153,7 +151,7 @@ export const processCurriculumData = async ({
       ]);
 
       // Create or overwrite question/answer based on content type
-      if (contentType === "questions" && questionImageSrc) {
+      if (contentType === "questions") {
         await db
           .insert(schema.question)
           .values({
@@ -185,7 +183,7 @@ export const processCurriculumData = async ({
           .insert(schema.questionImage)
           .values({
             questionId: questionId,
-            imageSrc: questionImageSrc,
+            imageSrc: imageSrc,
             order: order,
           })
           .onConflictDoUpdate({
@@ -193,19 +191,19 @@ export const processCurriculumData = async ({
               schema.questionImage.questionId,
               schema.questionImage.order,
             ],
-            set: { imageSrc: questionImageSrc },
+            set: { imageSrc: imageSrc },
           });
-      } else if (contentType === "answers" && answerImageSrc) {
+      } else if (contentType === "answers") {
         await db
           .insert(schema.answer)
           .values({
             questionId: questionId,
-            answerImageSrc: answerImageSrc,
+            answerImageSrc: imageSrc,
             order: order,
           })
           .onConflictDoUpdate({
             target: [schema.answer.questionId, schema.answer.order],
-            set: { answerImageSrc: answerImageSrc },
+            set: { answerImageSrc: imageSrc },
           });
       }
 
