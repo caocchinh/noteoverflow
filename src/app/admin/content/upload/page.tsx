@@ -59,7 +59,6 @@ import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isQuestionExists } from "@/server/main/question";
-import { authClient } from "@/lib/auth/auth-client";
 import { createMetadataRecords } from "@/server/main/upload";
 import { redirect } from "next/navigation";
 
@@ -421,8 +420,8 @@ const UploadPage = () => {
   };
 
   const handleUpload = async () => {
+    setIsUploading(true);
     try {
-      setIsUploading(true);
       const paperCode = paperCodeParser({
         subjectCode: selectedSubject!.split("(")[1].slice(0, -1),
         paperType: selectedPaperType!,
@@ -430,115 +429,175 @@ const UploadPage = () => {
         season: selectedSeason as "Summer" | "Winter" | "Spring",
         year: selectedYear!,
       });
-      const isQuestionAlreadyExists = await isQuestionExists(
+      const { success, data, error } = await isQuestionExists(
         parseQuestionId({
           subject: selectedSubject!,
           paperCode: paperCode,
           questionNumber: questionNumber!,
         })
       );
-      if (isQuestionAlreadyExists) {
-        toast.error(
+      if (!success) {
+        if (error === "Unauthorized") {
+          redirect("/authentication");
+        } else if (error === "Internal Server Error") {
+          throw new Error("Internal Server Error");
+        } else {
+          throw new Error(error || "Unknown error");
+        }
+      }
+      if (data) {
+        throw new Error(
           "Question already exists! If you want to overwrite it, please use the update page."
         );
-        setIsUploading(false);
-        setIsUploadDialogOpen(false);
-        return;
       }
-      const session = await authClient.getSession();
-      if (session?.data?.user) {
-        createMetadataRecords({
-          questionId: parseQuestionId({
-            subject: selectedSubject!,
-            paperCode: paperCode,
-            questionNumber: questionNumber!,
-          }),
-          year: parseInt(selectedYear!),
-          season: selectedSeason as "Summer" | "Winter" | "Spring",
-          paperType: parseInt(selectedPaperType!),
-          paperVariant: parseInt(paperVariantInput!),
-          userId: session.data.user.id,
-          curriculumName: selectedCurriculum!,
-          subjectId: selectedSubject!,
-          topic: selectedTopic!,
-          questionNumber: parseInt(questionNumber!),
-        });
+      const { success: success2, error: error2 } = await createMetadataRecords({
+        questionId: parseQuestionId({
+          subject: selectedSubject!,
+          paperCode: paperCode,
+          questionNumber: questionNumber!,
+        }),
+        year: parseInt(selectedYear!),
+        season: selectedSeason as "Summer" | "Winter" | "Spring",
+        paperType: parseInt(selectedPaperType!),
+        paperVariant: parseInt(paperVariantInput!),
+        curriculumName: selectedCurriculum!,
+        subjectId: selectedSubject!,
+        topic: selectedTopic!,
+        questionNumber: parseInt(questionNumber!),
+      });
+      if (!success2) {
+        if (error2 === "Unauthorized") {
+          redirect("/authentication");
+        } else if (error2 === "Internal Server Error") {
+          throw new Error("Internal Server Error");
+        } else {
+          throw new Error(error2 || "Unknown error");
+        }
+      }
 
-        // Upload and create all question images in parallel
-        await Promise.all(
-          questionImages.map(async (image, index) => {
-            const imageSrc = await uploadImage({
-              file: image,
-              subjectFullName: selectedSubject!,
-              paperCode: paperCode,
-              contentType: "questions",
-              questionNumber: questionNumber!,
-              order: index,
-            });
+      // Upload and create all question images in parallel
+      await Promise.all(
+        questionImages.map(async (image, index) => {
+          const { success, data, error } = await uploadImage({
+            file: image,
+            subjectFullName: selectedSubject!,
+            paperCode: paperCode,
+            contentType: "questions",
+            questionNumber: questionNumber!,
+            order: index,
+          });
+          if (!success) {
+            if (error === "Unauthorized") {
+              redirect("/authentication");
+            } else if (error === "Internal Server Error") {
+              throw new Error("Internal Server Error");
+            } else {
+              throw new Error("Failed to upload image");
+            }
+          }
+          const { success: success2, error: error2 } =
             await createQuestionImage({
               questionId: parseQuestionId({
                 subject: selectedSubject!,
                 paperCode: paperCode,
                 questionNumber: questionNumber!,
               }),
-              imageSrc: imageSrc,
+              imageSrc: data!.imageSrc,
               order: index,
             });
+          if (!success2) {
+            if (error2 === "Unauthorized") {
+              redirect("/authentication");
+            } else if (error2 === "Internal Server Error") {
+              throw new Error("Internal Server Error");
+            } else {
+              throw new Error(
+                error2 || "Unknown error creating question image"
+              );
+            }
+          }
+        })
+      );
+      if (isMultipleChoice) {
+        const { success: success2, error: error2 } = await createAnswer({
+          questionId: parseQuestionId({
+            subject: selectedSubject!,
+            paperCode: paperCode,
+            questionNumber: questionNumber!,
+          }),
+          answerImageSrc: multipleChoiceInput,
+          answerOrder: 0,
+        });
+        if (!success2) {
+          if (error2 === "Unauthorized") {
+            redirect("/authentication");
+          } else if (error2 === "Internal Server Error") {
+            throw new Error("Internal Server Error");
+          } else {
+            throw new Error(error2 || "Unknown error creating answer");
+          }
+        }
+      } else {
+        // Upload and create all answer images in parallel
+        await Promise.all(
+          answerImages.map(async (image, index) => {
+            const { success, data, error } = await uploadImage({
+              file: image,
+              subjectFullName: selectedSubject!,
+              paperCode: paperCode,
+              contentType: "answers",
+              questionNumber: questionNumber!,
+              order: index,
+            });
+            if (!success) {
+              if (error === "Unauthorized") {
+                redirect("/authentication");
+              } else if (error === "Internal Server Error") {
+                throw new Error("Internal Server Error");
+              } else {
+                throw new Error("Failed to upload image");
+              }
+            }
+
+            const { success: success2, error: error2 } = await createAnswer({
+              questionId: parseQuestionId({
+                subject: selectedSubject!,
+                paperCode: paperCode,
+                questionNumber: questionNumber!,
+              }),
+              answerImageSrc: data!.imageSrc,
+              answerOrder: index,
+            });
+            if (!success2) {
+              if (error2 === "Unauthorized") {
+                redirect("/authentication");
+              } else if (error2 === "Internal Server Error") {
+                throw new Error("Internal Server Error");
+              } else {
+                throw new Error(error2 || "Unknown error creating answer");
+              }
+            }
           })
         );
-        if (isMultipleChoice) {
-          await createAnswer({
-            questionId: parseQuestionId({
-              subject: selectedSubject!,
-              paperCode: paperCode,
-              questionNumber: questionNumber!,
-            }),
-            answerImageSrc: multipleChoiceInput,
-            answerOrder: 0,
-          });
-        } else {
-          // Upload and create all answer images in parallel
-          await Promise.all(
-            answerImages.map(async (image, index) => {
-              const imageSrc = await uploadImage({
-                file: image,
-                subjectFullName: selectedSubject!,
-                paperCode: paperCode,
-                contentType: "answers",
-                questionNumber: questionNumber!,
-                order: index,
-              });
-              await createAnswer({
-                questionId: parseQuestionId({
-                  subject: selectedSubject!,
-                  paperCode: paperCode,
-                  questionNumber: questionNumber!,
-                }),
-                answerImageSrc: imageSrc,
-                answerOrder: index,
-              });
-            })
-          );
-        }
-        setNewCurriculum(
-          newCurriculum.filter((item) => item !== selectedCurriculum)
-        );
-        setNewSubject(newSubject.filter((item) => item !== selectedSubject));
-        setNewTopic(newTopic.filter((item) => item !== selectedTopic));
-        setNewPaperType(
-          newPaperType.filter((item) => item !== selectedPaperType)
-        );
-        setNewSeason(newSeason.filter((item) => item !== selectedSeason));
-        setNewYear(newYear.filter((item) => item !== selectedYear));
-
-        await resetAllInputs();
-        toast.success("Question uploaded successfully");
-      } else {
-        redirect("/authentication");
       }
+
+      setNewCurriculum(
+        newCurriculum.filter((item) => item !== selectedCurriculum)
+      );
+      setNewSubject(newSubject.filter((item) => item !== selectedSubject));
+      setNewTopic(newTopic.filter((item) => item !== selectedTopic));
+      setNewPaperType(
+        newPaperType.filter((item) => item !== selectedPaperType)
+      );
+      setNewSeason(newSeason.filter((item) => item !== selectedSeason));
+      setNewYear(newYear.filter((item) => item !== selectedYear));
+
+      await resetAllInputs();
+      toast.success("Question uploaded successfully");
     } catch (error) {
-      console.error("Upload failed:", error);
-      toast.error("Failed to upload question");
+      toast.error(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
     } finally {
       setIsUploadDialogOpen(false);
       setIsUploading(false);

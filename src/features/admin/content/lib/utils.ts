@@ -180,7 +180,11 @@ export const uploadImage = async ({
   contentType: "questions" | "answers";
   questionNumber: string;
   order: number;
-}): Promise<string> => {
+}): Promise<{
+  success: boolean;
+  error: string | undefined;
+  data: { imageSrc: string } | undefined;
+}> => {
   const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
   const form = new FormData();
   form.append("key", filename);
@@ -199,9 +203,37 @@ export const uploadImage = async ({
     body: form,
   });
 
+  if (!response.ok) {
+    if (response.status === 401) {
+      return {
+        success: false,
+        error: "Unauthorized",
+        data: undefined,
+      };
+    } else if (response.status === 500) {
+      return {
+        success: false,
+        error: "Internal Server Error",
+        data: undefined,
+      };
+    } else {
+      return {
+        success: false,
+        error: "Failed to upload image",
+        data: undefined,
+      };
+    }
+  }
+
   const data = await response.json();
 
-  return data.imageSrc;
+  return {
+    success: true,
+    error: undefined,
+    data: {
+      imageSrc: data.imageSrc,
+    },
+  };
 };
 
 export const parseQuestionId = ({

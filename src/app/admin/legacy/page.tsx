@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth/auth-client";
 import { uploadImage } from "@/features/admin/content/lib/utils";
 import { processCurriculumData } from "@/server/main/legacy";
 import { redirect } from "next/navigation";
@@ -81,74 +80,83 @@ const LegacyUploadPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<boolean> => {
-    try {
-      const subjectFullName = file.webkitRelativePath.split("/")[0];
-      const questionNumber = file.webkitRelativePath
-        .split("/")[7]
-        .split("_")[0];
-      const order = file.webkitRelativePath
-        .split("/")[7]
-        .split("_")[1]
-        .split(".")[0];
-      const contentType: "questions" | "answers" =
-        file.webkitRelativePath.split("/")[1] as "questions" | "answers";
+    const subjectFullName = file.webkitRelativePath.split("/")[0];
+    const questionNumber = file.webkitRelativePath.split("/")[7].split("_")[0];
+    const order = file.webkitRelativePath
+      .split("/")[7]
+      .split("_")[1]
+      .split(".")[0];
+    const contentType: "questions" | "answers" = file.webkitRelativePath.split(
+      "/"
+    )[1] as "questions" | "answers";
 
-      const topic = file.webkitRelativePath.split("/")[2].toUpperCase();
-      const season: "Summer" | "Winter" | "Spring" =
-        file.webkitRelativePath.split("/")[4] as "Summer" | "Winter" | "Spring";
-      const paperCode = file.webkitRelativePath.split("/")[6];
+    const topic = file.webkitRelativePath.split("/")[2].toUpperCase();
+    const season: "Summer" | "Winter" | "Spring" =
+      file.webkitRelativePath.split("/")[4] as "Summer" | "Winter" | "Spring";
+    const paperCode = file.webkitRelativePath.split("/")[6];
 
-      const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
-      const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);
-      const year = file.webkitRelativePath.split("/")[3];
+    const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
+    const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);
+    const year = file.webkitRelativePath.split("/")[3];
 
-      let imageSrc = "";
+    let imageSrc = "";
 
-      const session = await authClient.getSession();
-
-      if (!session?.data?.user) {
-        console.error("No user session found");
-        redirect("/authentication");
-      }
-      if (file.type.includes("text")) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          imageSrc = content;
-        };
-        reader.readAsText(file);
-      } else {
-        imageSrc = await uploadImage({
-          file,
-          subjectFullName,
-          paperCode,
-          contentType,
-          questionNumber,
-          order: parseInt(order),
-        });
-      }
-
-      const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
-
-      return await processCurriculumData({
-        curriculum,
+    if (file.type.includes("text")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        imageSrc = content;
+      };
+      reader.readAsText(file);
+    } else {
+      const { success, data, error } = await uploadImage({
+        file,
         subjectFullName,
-        year,
-        season,
-        paperType,
-        paperVariant,
-        topic,
-        userId: session.data.user.id,
-        questionId,
-        questionNumber,
+        paperCode,
         contentType,
-        imageSrc,
+        questionNumber,
         order: parseInt(order),
       });
-    } catch (error) {
-      console.error("Error uploading file:", error);
+      if (!success) {
+        if (error === "Unauthorized") {
+          redirect("/authentication");
+        } else if (error === "Internal Server Error") {
+          toast.error("Internal Server Error");
+        } else {
+          toast.error("Failed to upload image");
+        }
+        return false;
+      }
+      imageSrc = data!.imageSrc;
+    }
+
+    const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
+
+    const { success, error } = await processCurriculumData({
+      curriculum,
+      subjectFullName,
+      year,
+      season,
+      paperType,
+      paperVariant,
+      topic,
+      questionId,
+      questionNumber,
+      contentType,
+      imageSrc,
+      order: parseInt(order),
+    });
+
+    if (!success) {
+      if (error === "Unauthorized") {
+        redirect("/authentication");
+      } else if (error === "Internal Server Error") {
+        toast.error("Internal Server Error");
+      }
       return false;
     }
+
+    return true;
   };
 
   const handleUpload = async () => {

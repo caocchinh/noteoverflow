@@ -1,18 +1,51 @@
 "use server";
-import { getDb } from "@/drizzle/db";
+import { getDb, getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
 
 export const isQuestionExists = async (
   questionId: string
-): Promise<boolean> => {
-  const db = getDb();
-  const result = await db
-    .select()
-    .from(schema.question)
-    .where(eq(schema.question.id, questionId))
-    .limit(1);
-  return result.length > 0;
+): Promise<{
+  success: boolean;
+  data: boolean;
+  error: string | undefined;
+}> => {
+  try {
+    const authInstance = await auth(getDbAsync);
+    const session = await authInstance.api.getSession({
+      headers: await headers(),
+    });
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "owner")
+    ) {
+      return {
+        success: false,
+        data: false,
+        error: "Unauthorized",
+      };
+    }
+    const db = getDb();
+    const result = await db
+      .select()
+      .from(schema.question)
+      .where(eq(schema.question.id, questionId))
+      .limit(1);
+    return {
+      success: true,
+      data: result.length > 0,
+      error: undefined,
+    };
+  } catch (error) {
+    console.error("Error checking if question exists:", error);
+    return {
+      success: false,
+      data: false,
+      error: "Internal Server Error",
+    };
+  }
 };
 
 export const createQuestion = async ({
@@ -130,9 +163,39 @@ export const createQuestionImage = async ({
   questionId: string;
   imageSrc: string;
   order: number;
-}) => {
-  const db = getDb();
-  await db.insert(schema.questionImage).values({ questionId, imageSrc, order });
+}): Promise<{
+  success: boolean;
+  error: string | undefined;
+}> => {
+  try {
+    const authInstance = await auth(getDbAsync);
+    const session = await authInstance.api.getSession({
+      headers: await headers(),
+    });
+    if (
+      !session ||
+      (session.user.role !== "admin" && session.user.role !== "owner")
+    ) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+    const db = getDb();
+    await db
+      .insert(schema.questionImage)
+      .values({ questionId, imageSrc, order });
+    return {
+      success: true,
+      error: undefined,
+    };
+  } catch (error) {
+    console.error("Error creating question image:", error);
+    return {
+      success: false,
+      error: "Internal Server Error",
+    };
+  }
 };
 
 export const overwriteQuestionImage = async ({
