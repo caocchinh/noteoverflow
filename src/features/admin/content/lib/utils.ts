@@ -1,5 +1,3 @@
-import { UploadToR2 } from "@/server/r2";
-
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
     return "Curriculum cannot be empty";
@@ -184,19 +182,24 @@ export const uploadImage = async ({
   order: number;
 }): Promise<string> => {
   const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
-  const fileBuffer = await file.arrayBuffer();
-
-  const url = await UploadToR2({
-    key: filename,
-    body: fileBuffer,
-    options: {
+  const form = new FormData();
+  form.append("key", filename);
+  form.append("body", file);
+  form.append(
+    "options",
+    JSON.stringify({
       httpMetadata: {
         contentType: file.type,
       },
-    },
+    })
+  );
+
+  const response = await fetch("/api/r2", {
+    method: "POST",
+    body: form,
   });
 
-  return `${url}/${filename}`;
+  return response.url;
 };
 
 export const parseQuestionId = ({
@@ -210,7 +213,3 @@ export const parseQuestionId = ({
 }): string => {
   return `${subject}-${paperCode}-questions-Q${questionNumber}`;
 };
-
-/**
- * Server action to create or update curriculum-related data in a single transaction
- */

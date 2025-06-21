@@ -65,81 +65,92 @@ export const processCurriculumData = async ({
         });
       }
 
-      // Check and create year if needed
-      const yearExists = await db
-        .select()
-        .from(schema.year)
-        .where(
-          and(
-            eq(schema.year.year, parseInt(year)),
-            eq(schema.year.subjectId, subjectFullName)
-          )
-        )
-        .limit(1);
+      // Check and create year, season, paperType, and topic concurrently
+      await Promise.all([
+        // Check and create year if needed
+        (async () => {
+          const yearExists = await db
+            .select()
+            .from(schema.year)
+            .where(
+              and(
+                eq(schema.year.year, parseInt(year)),
+                eq(schema.year.subjectId, subjectFullName)
+              )
+            )
+            .limit(1);
 
-      if (yearExists.length === 0) {
-        await db.insert(schema.year).values({
-          year: parseInt(year),
-          subjectId: subjectFullName,
-        });
-      }
+          if (yearExists.length === 0) {
+            await db.insert(schema.year).values({
+              year: parseInt(year),
+              subjectId: subjectFullName,
+            });
+          }
+        })(),
 
-      // Check and create season if needed
-      const seasonExists = await db
-        .select()
-        .from(schema.season)
-        .where(
-          and(
-            eq(schema.season.season, season),
-            eq(schema.season.subjectId, subjectFullName)
-          )
-        )
-        .limit(1);
+        // Check and create season if needed
+        (async () => {
+          const seasonExists = await db
+            .select()
+            .from(schema.season)
+            .where(
+              and(
+                eq(schema.season.season, season),
+                eq(schema.season.subjectId, subjectFullName)
+              )
+            )
+            .limit(1);
 
-      if (seasonExists.length === 0) {
-        await db.insert(schema.season).values({
-          season: season,
-          subjectId: subjectFullName,
-        });
-      }
+          if (seasonExists.length === 0) {
+            await db.insert(schema.season).values({
+              season: season,
+              subjectId: subjectFullName,
+            });
+          }
+        })(),
 
-      // Check and create paperType if needed
-      const paperTypeExists = await db
-        .select()
-        .from(schema.paperType)
-        .where(
-          and(
-            eq(schema.paperType.paperType, paperType),
-            eq(schema.paperType.subjectId, subjectFullName)
-          )
-        )
-        .limit(1);
+        // Check and create paperType if needed
+        (async () => {
+          const paperTypeExists = await db
+            .select()
+            .from(schema.paperType)
+            .where(
+              and(
+                eq(schema.paperType.paperType, paperType),
+                eq(schema.paperType.subjectId, subjectFullName)
+              )
+            )
+            .limit(1);
 
-      if (paperTypeExists.length === 0) {
-        await db.insert(schema.paperType).values({
-          paperType: paperType,
-          subjectId: subjectFullName,
-        });
-      }
+          if (paperTypeExists.length === 0) {
+            await db.insert(schema.paperType).values({
+              paperType: paperType,
+              subjectId: subjectFullName,
+            });
+          }
+        })(),
 
-      // Check and create topic if needed
-      const topicExists = await db
-        .select()
-        .from(schema.topic)
-        .where(
-          and(
-            eq(schema.topic.topic, topic),
-            eq(schema.topic.subjectId, subjectFullName)
-          )
-        )
-        .limit(1);
+        // Check and create topic if needed
+        (async () => {
+          const topicExists = await db
+            .select()
+            .from(schema.topic)
+            .where(
+              and(
+                eq(schema.topic.topic, topic),
+                eq(schema.topic.subjectId, subjectFullName)
+              )
+            )
+            .limit(1);
 
-      if (topicExists.length === 0) {
-        await db.insert(schema.topic).values({
-          topic: topic,
-          subjectId: subjectFullName,
-        });
-      }
+          if (topicExists.length === 0) {
+            await db.insert(schema.topic).values({
+              topic: topic,
+              subjectId: subjectFullName,
+            });
+          }
+        })(),
+      ]);
 
       // Create or overwrite question/answer based on content type
       if (contentType === "questions" && questionImageSrc) {

@@ -195,6 +195,7 @@ const LegacyUploadPage = () => {
         description: "Check the failed uploads section to retry",
       });
     }
+    setFiles([]);
   };
 
   const handleRetryFailed = async () => {

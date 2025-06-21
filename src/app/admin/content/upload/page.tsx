@@ -1,32 +1,20 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createCurriculum,
-  getCurriculum,
-  isCurriculumExists,
-} from "@/server/main/curriculum";
+import { getCurriculum } from "@/server/main/curriculum";
 import { createAnswer } from "@/server/main/answer";
-import { createQuestion, createQuestionImage } from "@/server/main/question";
-import {
-  createSubject,
-  getSubjectByCurriculum,
-  isSubjectExists,
-} from "@/server/main/subject";
+import { createQuestionImage } from "@/server/main/question";
+import { getSubjectByCurriculum } from "@/server/main/subject";
 import { useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
 } from "@/features/admin/content/constants/types";
 import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
-import {
-  createPaperType,
-  getPaperType,
-  isPaperTypeExists,
-} from "@/server/main/paperType";
-import { createSeason, getSeason, isSeasonExists } from "@/server/main/season";
-import { createYear, getYear, isYearExists } from "@/server/main/year";
-import { createTopic, getTopic, isTopicExists } from "@/server/main/topic";
+import { getPaperType } from "@/server/main/paperType";
+import { getSeason } from "@/server/main/season";
+import { getYear } from "@/server/main/year";
+import { getTopic } from "@/server/main/topic";
 import {
   validatePaperType,
   validateSeason,
@@ -72,6 +60,7 @@ import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isQuestionExists } from "@/server/main/question";
 import { authClient } from "@/lib/auth/auth-client";
+import { createMetadataRecords } from "@/server/main/upload";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -457,78 +446,21 @@ const UploadPage = () => {
       }
       const session = await authClient.getSession();
       if (session?.data?.user) {
-        // Run all existence checks and creation operations in parallel
-        if (!(await isCurriculumExists(selectedCurriculum!))) {
-          await createCurriculum({ name: selectedCurriculum! });
-        }
-        if (!(await isSubjectExists(selectedSubject!))) {
-          await createSubject({
-            id: selectedSubject!,
-            curriculumName: selectedCurriculum!,
-          });
-        }
-        await Promise.all([
-          // Year check and create
-          (async () => {
-            if (
-              !(await isYearExists(parseInt(selectedYear!), selectedSubject!))
-            ) {
-              await createYear({
-                year: parseInt(selectedYear!),
-                subjectId: selectedSubject!,
-              });
-            }
-          })(),
-
-          // Season check and create
-          (async () => {
-            if (!(await isSeasonExists(selectedSeason, selectedSubject!))) {
-              await createSeason({
-                season: selectedSeason,
-                subjectId: selectedSubject!,
-              });
-            }
-          })(),
-
-          // PaperType check and create
-          (async () => {
-            if (
-              !(await isPaperTypeExists(
-                parseInt(selectedPaperType!),
-                selectedSubject!
-              ))
-            ) {
-              await createPaperType({
-                paperType: parseInt(selectedPaperType!),
-                subjectId: selectedSubject!,
-              });
-            }
-          })(),
-
-          // Topic check and create
-          (async () => {
-            if (!(await isTopicExists(selectedTopic!, selectedSubject!))) {
-              await createTopic({
-                topic: selectedTopic!,
-                subjectId: selectedSubject!,
-              });
-            }
-          })(),
-        ]);
-        await createQuestion({
+        createMetadataRecords({
           questionId: parseQuestionId({
             subject: selectedSubject!,
             paperCode: paperCode,
             questionNumber: questionNumber!,
           }),
-          questionNumber: parseInt(questionNumber!),
           year: parseInt(selectedYear!),
-          season: selectedSeason!,
+          season: selectedSeason as "Summer" | "Winter" | "Spring",
           paperType: parseInt(selectedPaperType!),
           paperVariant: parseInt(paperVariantInput!),
           userId: session.data.user.id,
+          curriculumName: selectedCurriculum!,
           subjectId: selectedSubject!,
           topic: selectedTopic!,
+          questionNumber: parseInt(questionNumber!),
         });
 
         // Upload and create all question images in parallel
