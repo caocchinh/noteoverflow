@@ -1,20 +1,12 @@
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Loader from "@/components/Loader/Loader";
 import Navigation from "@/features/admin/components/Navigation";
-import { getDbAsync } from "@/drizzle/db";
+import { verifySession } from "@/dal/verifySession";
 
 const AdminContent = async ({ children }: { children: React.ReactNode }) => {
-  const db = await auth(getDbAsync);
-  const session = await db.api.getSession({
-    headers: await headers(),
-  });
+  const session = await verifySession();
 
-  if (!session) {
-    return redirect("/authentication");
-  }
   if (session.user.role !== "admin" && session.user.role !== "owner") {
     return redirect("/app");
   }

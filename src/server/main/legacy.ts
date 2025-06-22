@@ -3,8 +3,8 @@
 import { getDbAsync } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 import * as schema from "@/drizzle/schema";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
+import { verifySession } from "@/dal/verifySession";
+import { redirect } from "next/navigation";
 
 export const processCurriculumData = async ({
   curriculum,
@@ -37,18 +37,9 @@ export const processCurriculumData = async ({
   error: string | undefined;
 }> => {
   try {
-    const authInstance = await auth(getDbAsync);
-    const session = await authInstance.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "owner")
-    ) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
+    const session = await verifySession();
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
     }
     const userId = session.user.id;
     const db = await getDbAsync();

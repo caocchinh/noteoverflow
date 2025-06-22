@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (session.user.role !== "admin" && session.user.role !== "owner") {
-      return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
+      return NextResponse.json({ error: UNAUTHORIZED }, { status: 403 });
     }
 
     const { env } = getCloudflareContext();

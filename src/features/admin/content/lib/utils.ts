@@ -1,8 +1,8 @@
 import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
-  UNAUTHORIZED,
 } from "@/constants/constants";
+import { redirect } from "next/navigation";
 
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
@@ -211,11 +211,9 @@ export const uploadImage = async ({
 
   if (!response.ok) {
     if (response.status === 401) {
-      return {
-        success: false,
-        error: UNAUTHORIZED,
-        data: undefined,
-      };
+      redirect("/authentication");
+    } else if (response.status === 403) {
+      redirect("/app");
     } else if (response.status === 500) {
       return {
         success: false,

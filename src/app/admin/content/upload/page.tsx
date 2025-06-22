@@ -60,11 +60,9 @@ import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isQuestionExists } from "@/server/main/question";
 import { createMetadataRecords } from "@/server/main/upload";
-import { redirect } from "next/navigation";
 import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
-  UNAUTHORIZED,
 } from "@/constants/constants";
 
 const UploadPage = () => {
@@ -443,9 +441,7 @@ const UploadPage = () => {
         })
       );
       if (!success) {
-        if (error === UNAUTHORIZED) {
-          redirect("/authentication");
-        } else if (error === INTERNAL_SERVER_ERROR) {
+        if (error === INTERNAL_SERVER_ERROR) {
           throw new Error(INTERNAL_SERVER_ERROR);
         } else {
           throw new Error(error || "Unknown error");
@@ -472,9 +468,7 @@ const UploadPage = () => {
         questionNumber: parseInt(questionNumber!),
       });
       if (!success2) {
-        if (error2 === UNAUTHORIZED) {
-          redirect("/authentication");
-        } else if (error2 === INTERNAL_SERVER_ERROR) {
+        if (error2 === INTERNAL_SERVER_ERROR) {
           throw new Error(INTERNAL_SERVER_ERROR);
         } else {
           throw new Error(error2 || "Unknown error");
@@ -493,9 +487,7 @@ const UploadPage = () => {
             order: index,
           });
           if (!success) {
-            if (error === UNAUTHORIZED) {
-              redirect("/authentication");
-            } else if (error === INTERNAL_SERVER_ERROR) {
+            if (error === INTERNAL_SERVER_ERROR) {
               throw new Error(INTERNAL_SERVER_ERROR);
             } else {
               throw new Error("Failed to upload image");
@@ -512,9 +504,7 @@ const UploadPage = () => {
               order: index,
             });
           if (!success2) {
-            if (error2 === UNAUTHORIZED) {
-              redirect("/authentication");
-            } else if (error2 === INTERNAL_SERVER_ERROR) {
+            if (error2 === INTERNAL_SERVER_ERROR) {
               throw new Error(INTERNAL_SERVER_ERROR);
             } else {
               throw new Error(
@@ -535,9 +525,7 @@ const UploadPage = () => {
           answerOrder: 0,
         });
         if (!success2) {
-          if (error2 === UNAUTHORIZED) {
-            redirect("/authentication");
-          } else if (error2 === INTERNAL_SERVER_ERROR) {
+          if (error2 === INTERNAL_SERVER_ERROR) {
             throw new Error(INTERNAL_SERVER_ERROR);
           } else {
             throw new Error(error2 || "Unknown error creating answer");
@@ -556,9 +544,7 @@ const UploadPage = () => {
               order: index,
             });
             if (!success) {
-              if (error === UNAUTHORIZED) {
-                redirect("/authentication");
-              } else if (error === INTERNAL_SERVER_ERROR) {
+              if (error === INTERNAL_SERVER_ERROR) {
                 throw new Error(INTERNAL_SERVER_ERROR);
               } else {
                 throw new Error(FAILED_TO_UPLOAD_IMAGE);
@@ -575,9 +561,7 @@ const UploadPage = () => {
               answerOrder: index,
             });
             if (!success2) {
-              if (error2 === UNAUTHORIZED) {
-                redirect("/authentication");
-              } else if (error2 === INTERNAL_SERVER_ERROR) {
+              if (error2 === INTERNAL_SERVER_ERROR) {
                 throw new Error(INTERNAL_SERVER_ERROR);
               } else {
                 throw new Error(error2 || "Unknown error creating answer");

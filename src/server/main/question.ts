@@ -1,9 +1,9 @@
 "use server";
-import { getDb, getDbAsync } from "@/drizzle/db";
+import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
+import { verifySession } from "@/dal/verifySession";
+import { redirect } from "next/navigation";
 
 export const isQuestionExists = async (
   questionId: string
@@ -13,19 +13,10 @@ export const isQuestionExists = async (
   error: string | undefined;
 }> => {
   try {
-    const authInstance = await auth(getDbAsync);
-    const session = await authInstance.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "owner")
-    ) {
-      return {
-        success: false,
-        data: false,
-        error: "Unauthorized",
-      };
+    const session = await verifySession();
+
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
     }
     const db = getDb();
     const result = await db
@@ -168,14 +159,8 @@ export const createQuestionImage = async ({
   error: string | undefined;
 }> => {
   try {
-    const authInstance = await auth(getDbAsync);
-    const session = await authInstance.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "owner")
-    ) {
+    const session = await verifySession();
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
       return {
         success: false,
         error: "Unauthorized",

@@ -7,9 +7,8 @@ import { createPaperType, isPaperTypeExists } from "./paperType";
 import { createSeason, isSeasonExists } from "./season";
 import { createYear, isYearExists } from "./year";
 import { createQuestion } from "./question";
-import { auth } from "@/lib/auth/auth";
-import { getDbAsync } from "@/drizzle/db";
-import { headers } from "next/headers";
+import { verifySession } from "@/dal/verifySession";
+import { redirect } from "next/navigation";
 
 type BatchUploadPayload = {
   curriculumName: string;
@@ -30,18 +29,10 @@ export async function createMetadataRecords(
   error: string | undefined;
 }> {
   try {
-    const authInstance = await auth(getDbAsync);
-    const session = await authInstance.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "owner")
-    ) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
+    const session = await verifySession();
+
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
     }
     // Check and create curriculum if needed
     if (!(await isCurriculumExists(payload.curriculumName))) {
