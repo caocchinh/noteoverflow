@@ -1,3 +1,9 @@
+import {
+  FAILED_TO_UPLOAD_IMAGE,
+  INTERNAL_SERVER_ERROR,
+  UNAUTHORIZED,
+} from "@/constants/constants";
+
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
     return "Curriculum cannot be empty";
@@ -207,19 +213,19 @@ export const uploadImage = async ({
     if (response.status === 401) {
       return {
         success: false,
-        error: "Unauthorized",
+        error: UNAUTHORIZED,
         data: undefined,
       };
     } else if (response.status === 500) {
       return {
         success: false,
-        error: "Internal Server Error",
+        error: INTERNAL_SERVER_ERROR,
         data: undefined,
       };
     } else {
       return {
         success: false,
-        error: "Failed to upload image",
+        error: FAILED_TO_UPLOAD_IMAGE,
         data: undefined,
       };
     }

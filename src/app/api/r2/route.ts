@@ -3,20 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { getDbAsync } from "@/drizzle/db";
+import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 
 export async function POST(request: NextRequest) {
-  const db = await auth(getDbAsync);
-  const session = await db.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (session.user.role !== "admin" && session.user.role !== "owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   try {
+    const db = await auth(getDbAsync);
+    const session = await db.api.getSession({
+      headers: await headers(),
+    });
+    if (!session) {
+      return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
+    }
+
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
+    }
+
     const { env } = getCloudflareContext();
     const formData = await request.formData();
     const key = formData.get("key") as string;
@@ -32,9 +34,6 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: INTERNAL_SERVER_ERROR }, { status: 500 });
   }
 }

@@ -38,3 +38,7 @@ export const AVATARS = [
   { src: "/assets/avatar/purple.webp", name: "Purple", color: "#662d91" },
   { src: "/assets/avatar/red.webp", name: "Red", color: "#ed1c24" },
 ];
+
+export const INTERNAL_SERVER_ERROR = "Internal Server Error";
+export const UNAUTHORIZED = "Unauthorized";
+export const FAILED_TO_UPLOAD_IMAGE = "Failed to upload image";

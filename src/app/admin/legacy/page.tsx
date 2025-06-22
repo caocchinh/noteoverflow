@@ -19,6 +19,11 @@ import {
 import { uploadImage } from "@/features/admin/content/lib/utils";
 import { processCurriculumData } from "@/server/main/legacy";
 import { redirect } from "next/navigation";
+import {
+  FAILED_TO_UPLOAD_IMAGE,
+  INTERNAL_SERVER_ERROR,
+  UNAUTHORIZED,
+} from "@/constants/constants";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -118,12 +123,12 @@ const LegacyUploadPage = () => {
         order: parseInt(order),
       });
       if (!success) {
-        if (error === "Unauthorized") {
+        if (error === UNAUTHORIZED) {
           redirect("/authentication");
-        } else if (error === "Internal Server Error") {
-          toast.error("Internal Server Error");
+        } else if (error === INTERNAL_SERVER_ERROR) {
+          toast.error(INTERNAL_SERVER_ERROR);
         } else {
-          toast.error("Failed to upload image");
+          toast.error(FAILED_TO_UPLOAD_IMAGE);
         }
         return false;
       }
@@ -148,10 +153,10 @@ const LegacyUploadPage = () => {
     });
 
     if (!success) {
-      if (error === "Unauthorized") {
+      if (error === UNAUTHORIZED) {
         redirect("/authentication");
-      } else if (error === "Internal Server Error") {
-        toast.error("Internal Server Error");
+      } else if (error === INTERNAL_SERVER_ERROR) {
+        toast.error(INTERNAL_SERVER_ERROR);
       }
       return false;
     }
