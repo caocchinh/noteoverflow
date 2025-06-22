@@ -124,9 +124,9 @@ const UploadPage = () => {
   const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
     undefined
   );
-  const [currentTab, setCurrentTab] = useState<"information" | "image-preview">(
-    "information"
-  );
+  const [currentTab, setCurrentTab] = useState<
+    "information" | "image-preview" | "refetching"
+  >("information");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -403,6 +403,7 @@ const UploadPage = () => {
 
   const resetAllInputs = async () => {
     setSelectedCurriculum("");
+    setCurrentTab("refetching");
     setSelectedSubject("");
     setSelectedTopic("");
     setSelectedPaperType("");
@@ -1016,16 +1017,23 @@ const UploadPage = () => {
                   className="w-full"
                   value={currentTab}
                   onValueChange={(value) =>
-                    setCurrentTab(value as "information" | "image-preview")
+                    setCurrentTab(
+                      value as "information" | "image-preview" | "refetching"
+                    )
                   }
                 >
                   <TabsList>
-                    <TabsTrigger value="information" className="cursor-pointer">
+                    <TabsTrigger
+                      value="information"
+                      className="cursor-pointer"
+                      disabled={isCurriculumRefetching}
+                    >
                       Information
                     </TabsTrigger>
                     <TabsTrigger
                       value="image-preview"
                       className="cursor-pointer"
+                      disabled={isCurriculumRefetching}
                     >
                       Image Preview
                     </TabsTrigger>
@@ -1160,12 +1168,18 @@ const UploadPage = () => {
                       </Button>
                     </div>
                   </TabsContent>
+                  <TabsContent value="refetching">
+                    <div className="flex flex-col gap-2 mt-2 w-full items-center justify-center">
+                      <h4 className="font-semibold">Refetching...</h4>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  </TabsContent>
                 </Tabs>
 
                 <AlertDialogFooter className="flex flex-row gap-4 items-center justify-center">
                   <AlertDialogCancel
                     className="flex-1 cursor-pointer"
-                    disabled={isUploading}
+                    disabled={isUploading || isCurriculumRefetching}
                   >
                     Cancel
                   </AlertDialogCancel>

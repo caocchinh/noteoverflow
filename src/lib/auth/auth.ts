@@ -39,8 +39,7 @@ export const auth = async (database: any) =>
         },
         defaultRole: ROLE_USER,
 
-        bannedUserMessage:
-          "You are banned from the platform. Congratulations on your promotion to 'former user'.",
+        bannedUserMessage: "You are banned from the platform.",
       }),
       captcha({
         provider: "cloudflare-turnstile",

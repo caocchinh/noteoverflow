@@ -150,19 +150,13 @@ const EnhancedSelect = ({
           onValueChange={onValueChange}
           disabled={disabled || isLoading}
         >
-          <SelectTrigger
-            className={cn(
-              className,
-              "cursor-pointer",
-              error || duplicateError || validationError ? "border-red-500" : ""
-            )}
-          >
+          <SelectTrigger className={cn(className, "cursor-pointer")}>
             <SelectValue
               placeholder={isLoading ? loadingPlaceholder : placeholder}
             />
           </SelectTrigger>
-          <SelectContent>
-            <div className="flex items-center border-b p-2 sticky top-0  z-10">
+          <SelectContent className="!z-[99999999999999999] ">
+            <div className="flex items-center border-b p-2">
               <Search className="w-4 h-4 mr-2 text-muted-foreground" />
               <Input
                 placeholder="Search"
@@ -173,6 +167,10 @@ const EnhancedSelect = ({
                 onKeyDown={(e) => {
                   e.stopPropagation();
                 }}
+                onFocus={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
                 className="border-0 focus-visible:ring-0 !px-3 focus-visible:ring-offset-0 h-8 "
               />
               {searchQuery && (
@@ -181,7 +179,7 @@ const EnhancedSelect = ({
                   title="Clear search"
                   onClick={() => setSearchQuery("")}
                 >
-                  <X className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-red-500" />
+                  <X className="w-4 h-4 ml-2 cursor-pointer text-muted-foreground hover:text-red-500" />
                 </div>
               )}
             </div>
@@ -253,6 +251,10 @@ const EnhancedSelect = ({
                   placeholder={inputPlaceholder}
                   value={newItemInputValue}
                   type={inputType}
+                  onFocus={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
                   onChange={(e) => handleInputChange(e.target.value)}
                   className={
                     error || duplicateError || validationError

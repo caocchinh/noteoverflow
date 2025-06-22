@@ -157,6 +157,8 @@ const LegacyUploadPage = () => {
         redirect("/authentication");
       } else if (error === INTERNAL_SERVER_ERROR) {
         toast.error(INTERNAL_SERVER_ERROR);
+      } else {
+        toast.error(FAILED_TO_UPLOAD_IMAGE);
       }
       return false;
     }
@@ -186,14 +188,17 @@ const LegacyUploadPage = () => {
 
     for (let i = 0; i < sortedFiles.length; i++) {
       const file = sortedFiles[i];
-      const success = await uploadFile(file);
+      try {
+        const success = await uploadFile(file);
+        if (!success) {
+          newFailedUploads.push(file);
+        }
+      } catch {
+        newFailedUploads.push(file);
+      }
       completedUploads++;
       const progress = Math.round((completedUploads / files.length) * 100);
       setUploadProgress(progress);
-
-      if (!success) {
-        newFailedUploads.push(file);
-      }
     }
 
     setIsUploading(false);
