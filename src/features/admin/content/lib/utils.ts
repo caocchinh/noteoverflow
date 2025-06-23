@@ -2,7 +2,7 @@ import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
-import { ValidContentType } from "@/constants/types";
+import { ValidContentType, ValidSeason } from "@/constants/types";
 import { redirect } from "next/navigation";
 
 export const validateCurriculum = (value: string): string | null => {
@@ -138,9 +138,7 @@ export const validatePaperVariant = (value: string): string => {
   return "";
 };
 
-export const seasonToCode = (
-  season: "Summer" | "Winter" | "Spring"
-): string => {
+export const seasonToCode = (season: ValidSeason): string => {
   switch (season) {
     case "Summer":
       return "MJ";
@@ -161,7 +159,7 @@ export const paperCodeParser = ({
   subjectCode: string;
   paperType: string;
   variant: string;
-  season: "Summer" | "Winter" | "Spring";
+  season: ValidSeason;
   year: string;
 }): string => {
   const seasonCode = seasonToCode(season);

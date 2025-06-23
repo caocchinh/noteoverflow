@@ -1,14 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Upload,
-  X,
-  File,
-  RefreshCw,
-  FolderUp,
-  ChevronDown,
-} from "lucide-react";
+import { Upload, File, RefreshCw, FolderUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -25,6 +18,11 @@ import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
 import { ValidContentType } from "@/constants/types";
 import { ValidSeason } from "@/constants/types";
 import { parseQuestionId } from "@/lib/utils";
+import { AlertDialog } from "@radix-ui/react-alert-dialog";
+import {
+  AlertDialogContent,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -41,6 +39,7 @@ const LegacyUploadPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [curriculum, setCurriculum] = useState<"A-LEVEL" | "IGCSE">("A-LEVEL");
+  const [subjectCode, setSubjectCode] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -77,12 +76,6 @@ const LegacyUploadPage = () => {
       setFiles(fileArray);
       console.log("Dropped files:", fileArray);
     }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    const newFiles = [...files];
-    newFiles.splice(index, 1);
-    setFiles(newFiles);
   };
 
   const uploadFile = async (file: File): Promise<boolean> => {
@@ -177,6 +170,7 @@ const LegacyUploadPage = () => {
 
     const newFailedUploads: File[] = [];
     let completedUploads = 0;
+    setSubjectCode(files[0].webkitRelativePath.split("/")[0]);
 
     // Sort files so that "questions" come before "answers"
     const sortedFiles = [...files].sort((a, b) => {
@@ -331,22 +325,24 @@ const LegacyUploadPage = () => {
           </div>
         </div>
 
-        {isUploading && (
-          <div className="mb-6 bg-card rounded-xl shadow-md p-6 border border-border">
+        <AlertDialog open={isUploading}>
+          <AlertDialogContent>
+            <AlertDialogTitle>Upload Progress</AlertDialogTitle>
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Upload Progress</h3>
-                <span className="text-sm font-medium">{uploadProgress}%</span>
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium">Subject: {subjectCode}</p>
+                <p className="text-sm font-medium">Curriculum: {curriculum}</p>
               </div>
-              <div className="w-full bg-muted rounded-full h-2.5">
+              <div className="w-full bg-muted rounded-full">
                 <div
                   className="bg-primary h-2.5 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
+              <span className="text-sm font-medium">{uploadProgress}%</span>
             </div>
-          </div>
-        )}
+          </AlertDialogContent>
+        </AlertDialog>
 
         {files.length > 0 && (
           <div className="bg-card rounded-xl shadow-md p-6 border border-border mb-6">
@@ -389,18 +385,6 @@ const LegacyUploadPage = () => {
                         <p className="text-xs text-muted-foreground truncate mt-1">
                           {file.webkitRelativePath || "No path available"}
                         </p>
-                      </div>
-                      <div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveFile(index)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                          title="Remove file"
-                          disabled={isUploading}
-                        >
-                          <X size={18} />
-                        </Button>
                       </div>
                     </div>
                   </li>
