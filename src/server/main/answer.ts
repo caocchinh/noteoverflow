@@ -58,14 +58,14 @@ export const overwriteAnswer = async ({
   await db
     .insert(schema.answer)
     .values({
-      questionId,
-      answerImageSrc,
+      questionId: questionId,
+      answerImageSrc: answerImageSrc,
       order: answerOrder,
     })
     .onConflictDoUpdate({
-      target: [schema.answer.questionId, schema.answer.answerImageSrc],
+      target: [schema.answer.questionId, schema.answer.order],
       set: {
-        answerImageSrc,
+        answerImageSrc: answerImageSrc,
       },
     });
 };
