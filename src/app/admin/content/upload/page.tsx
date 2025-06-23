@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
+  ValidTabs,
 } from "@/features/admin/content/constants/types";
 import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
 import {
@@ -78,6 +79,11 @@ import {
   TOPIC_LABELS,
   TOPIC_PLACEHOLDERS,
 } from "@/features/admin/content/constants/constants";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -103,9 +109,7 @@ const UploadPage = () => {
 
   const [newPaperType, setNewPaperType] = useState<string[]>([]);
 
-  const [selectedSeason, setSelectedSeason] = useState<
-    "Summer" | "Winter" | "Spring" | ""
-  >("");
+  const [selectedSeason, setSelectedSeason] = useState<ValidSeason | "">("");
   const [newSeason, setNewSeason] = useState<string[]>([]);
 
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
@@ -124,9 +128,7 @@ const UploadPage = () => {
   const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
     undefined
   );
-  const [currentTab, setCurrentTab] = useState<
-    "information" | "image-preview" | "refetching"
-  >("information");
+  const [currentTab, setCurrentTab] = useState<ValidTabs>("information");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -614,14 +616,14 @@ const UploadPage = () => {
           )}
 
           {isSubjectInfoError && (
-            <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2">
+            <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2 ">
               <p className="text-sm">
                 Error loading subject information: {subjectInfoError?.message}
               </p>
               <Button
                 size="sm"
                 onClick={() => refetchSubjectInfo()}
-                className="mt-1 cursor-pointer"
+                className="mt-1 cursor-pointer !bg-white !text-red-700"
                 variant="outline"
               >
                 Retry
@@ -827,19 +829,30 @@ const UploadPage = () => {
               open={isUploadDialogOpen}
               onOpenChange={setIsUploadDialogOpen}
             >
-              <AlertDialogTrigger asChild>
-                <Button
-                  className="flex-1 cursor-pointer"
-                  disabled={canUpload}
-                  onClick={() => setCurrentTab("information")}
-                >
-                  {isUploading
-                    ? "Uploading..."
-                    : !canUpload
-                    ? "Upload"
-                    : "Complete required fields"}
-                </Button>
-              </AlertDialogTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex-1">
+                    {!canUpload ? (
+                      <Button
+                        className="w-full cursor-pointer"
+                        onClick={() => {
+                          setCurrentTab("information");
+                          setIsUploadDialogOpen(true);
+                        }}
+                      >
+                        {isUploading ? "Uploading..." : "Upload"}
+                      </Button>
+                    ) : (
+                      <Button className="w-full cursor-pointer" disabled={true}>
+                        Complete all fields
+                      </Button>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className={cn(!canUpload && "hidden")}>
+                  hi
+                </TooltipContent>
+              </Tooltip>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirm Question Upload</AlertDialogTitle>
@@ -851,11 +864,7 @@ const UploadPage = () => {
                   defaultValue="information"
                   className="w-full"
                   value={currentTab}
-                  onValueChange={(value) =>
-                    setCurrentTab(
-                      value as "information" | "image-preview" | "refetching"
-                    )
-                  }
+                  onValueChange={(value) => setCurrentTab(value as ValidTabs)}
                 >
                   <TabsList>
                     <TabsTrigger

@@ -40,3 +40,5 @@ export interface EnhancedSelectLabels {
   input: string;
   label: string;
 }
+
+export type ValidTabs = "information" | "image-preview" | "refetching";
