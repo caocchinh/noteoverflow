@@ -23,3 +23,21 @@ export interface TurnstileOptions {
   cData?: string;
   action?: string;
 }
+
+export type UploadPayload = {
+  curriculumName: string;
+  subjectId: string;
+  topic: string;
+  paperType: number;
+  season: "Summer" | "Winter" | "Spring";
+  year: number;
+  questionId: string;
+  questionNumber: number;
+  paperVariant: number;
+};
+
+export type ServerActionResponse<T> = {
+  success: boolean;
+  error?: string;
+  data?: T;
+};

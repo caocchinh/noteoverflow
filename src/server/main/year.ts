@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";

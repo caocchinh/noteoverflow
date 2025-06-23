@@ -1,9 +1,7 @@
-"use server";
-import { getDb, getDbAsync } from "@/drizzle/db";
+import "server-only";
+import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 
 export const isAnswerExists = async (
   questionId: string,
@@ -35,28 +33,6 @@ export const createAnswer = async ({
   success: boolean;
   error: string | undefined;
 }> => {
-  try {
-    const authInstance = await auth(getDbAsync);
-    const session = await authInstance.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "owner")
-    ) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
-    }
-  } catch (error) {
-    console.error("Error creating answer:", error);
-    return {
-      success: false,
-      error: "Internal Server Error",
-    };
-  }
-
   const db = getDb();
   await db
     .insert(schema.answer)

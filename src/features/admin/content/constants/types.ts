@@ -1,8 +1,19 @@
 import { InferSelectModel } from "drizzle-orm";
-import { curriculum, subject } from "@/drizzle/schema";
+import {
+  curriculum,
+  paperType,
+  topic,
+  season,
+  subject,
+  year,
+} from "@/drizzle/schema";
 
 export type CurriculumType = InferSelectModel<typeof curriculum>;
 export type SubjectType = InferSelectModel<typeof subject>;
+export type TopicType = InferSelectModel<typeof topic>;
+export type PaperTypeType = InferSelectModel<typeof paperType>;
+export type SeasonType = InferSelectModel<typeof season>;
+export type YearType = InferSelectModel<typeof year>;
 
 export interface EnhancedSelectProps {
   selectedValue: string | undefined;

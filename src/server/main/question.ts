@@ -1,42 +1,18 @@
-"use server";
+import "server-only";
 import { getDb } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { verifySession } from "@/dal/verifySession";
-import { redirect } from "next/navigation";
 
 export const isQuestionExists = async (
   questionId: string
-): Promise<{
-  success: boolean;
-  data: boolean;
-  error: string | undefined;
-}> => {
-  try {
-    const session = await verifySession();
-
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      redirect("/app");
-    }
-    const db = getDb();
-    const result = await db
-      .select()
-      .from(schema.question)
-      .where(eq(schema.question.id, questionId))
-      .limit(1);
-    return {
-      success: true,
-      data: result.length > 0,
-      error: undefined,
-    };
-  } catch (error) {
-    console.error("Error checking if question exists:", error);
-    return {
-      success: false,
-      data: false,
-      error: "Internal Server Error",
-    };
-  }
+): Promise<boolean> => {
+  const db = getDb();
+  const result = await db
+    .select()
+    .from(schema.question)
+    .where(eq(schema.question.id, questionId))
+    .limit(1);
+  return result.length > 0;
 };
 
 export const createQuestion = async ({
@@ -159,13 +135,6 @@ export const createQuestionImage = async ({
   error: string | undefined;
 }> => {
   try {
-    const session = await verifySession();
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
-    }
     const db = getDb();
     await db
       .insert(schema.questionImage)

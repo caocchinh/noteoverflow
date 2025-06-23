@@ -1,20 +1,14 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCurriculum } from "@/server/main/curriculum";
 import { createAnswer } from "@/server/main/answer";
 import { createQuestionImage } from "@/server/main/question";
-import { getSubjectByCurriculum } from "@/server/main/subject";
 import { useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
 } from "@/features/admin/content/constants/types";
 import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
-import { getPaperType } from "@/server/main/paperType";
-import { getSeason } from "@/server/main/season";
-import { getYear } from "@/server/main/year";
-import { getTopic } from "@/server/main/topic";
 import {
   validatePaperType,
   validateSeason,
@@ -58,12 +52,17 @@ import {
 import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { isQuestionExists } from "@/server/main/question";
-import { createMetadataRecords } from "@/server/main/upload";
 import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
+import {
+  getCurriculumAction,
+  getSubjectByCurriculumAction,
+  getSubjectInfoAction,
+  isQuestionExistsAction,
+  uploadAction,
+} from "@/server/actions";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -177,8 +176,11 @@ const UploadPage = () => {
     queryKey: ["curriculum"],
     queryFn: async (): Promise<CurriculumType[]> => {
       try {
-        const data = await getCurriculum();
-        return data;
+        const { success, data, error } = await getCurriculumAction();
+        if (!success) {
+          throw new Error(error || "Failed to fetch curriculum data");
+        }
+        return data!;
       } catch (error) {
         toast.error("Failed to fetch curriculum data");
         throw error;
@@ -203,7 +205,13 @@ const UploadPage = () => {
     queryKey: ["subject", selectedCurriculum],
     queryFn: async (): Promise<SubjectType[]> => {
       try {
-        return await getSubjectByCurriculum(selectedCurriculum ?? "");
+        const { success, data, error } = await getSubjectByCurriculumAction(
+          selectedCurriculum ?? ""
+        );
+        if (!success) {
+          throw new Error(error || "Failed to fetch subject data");
+        }
+        return data!;
       } catch (error) {
         toast.error("Failed to fetch subject data");
         throw error;
@@ -223,14 +231,13 @@ const UploadPage = () => {
     queryKey: ["subjectInfo", selectedSubject],
     queryFn: async () => {
       try {
-        const [topicData, paperTypeData, seasonData, yearData] =
-          await Promise.all([
-            getTopic(selectedSubject ?? ""),
-            getPaperType(selectedSubject ?? ""),
-            getSeason(selectedSubject ?? ""),
-            getYear(selectedSubject ?? ""),
-          ]);
-        return { topicData, paperTypeData, seasonData, yearData };
+        const { success, data, error } = await getSubjectInfoAction(
+          selectedSubject ?? ""
+        );
+        if (!success) {
+          throw new Error(error || "Failed to fetch subject information");
+        }
+        return data!;
       } catch (error) {
         toast.error("Failed to fetch subject information");
         throw error;
@@ -433,7 +440,7 @@ const UploadPage = () => {
         season: selectedSeason as "Summer" | "Winter" | "Spring",
         year: selectedYear!,
       });
-      const { success, data, error } = await isQuestionExists(
+      const { success, data, error } = await isQuestionExistsAction(
         parseQuestionId({
           subject: selectedSubject!,
           paperCode: paperCode,
@@ -452,7 +459,7 @@ const UploadPage = () => {
           "Question already exists! If you want to overwrite it, please use the update page."
         );
       }
-      const { success: success2, error: error2 } = await createMetadataRecords({
+      const { success: success2, error: error2 } = await uploadAction({
         questionId: parseQuestionId({
           subject: selectedSubject!,
           paperCode: paperCode,
