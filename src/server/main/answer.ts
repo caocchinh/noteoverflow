@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 
@@ -7,7 +7,7 @@ export const isAnswerExists = async (
   questionId: string,
   answerImageSrc: string
 ): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.answer)
@@ -33,7 +33,7 @@ export const createAnswer = async ({
   success: boolean;
   error: string | undefined;
 }> => {
-  const db = getDb();
+  const db = await getDbAsync();
   await db
     .insert(schema.answer)
     .values({ questionId, answerImageSrc, order: answerOrder });
@@ -53,7 +53,7 @@ export const overwriteAnswer = async ({
   answerImageSrc: string;
   answerOrder: number;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
 
   await db
     .insert(schema.answer)

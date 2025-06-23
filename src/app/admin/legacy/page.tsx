@@ -17,11 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { uploadImage } from "@/features/admin/content/lib/utils";
-import { processCurriculumData } from "@/server/main/legacy";
 import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
+import { legacyUploadAction } from "@/server/actions";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -133,7 +133,7 @@ const LegacyUploadPage = () => {
 
     const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
 
-    const { success, error } = await processCurriculumData({
+    const { success, error } = await legacyUploadAction({
       curriculum,
       subjectFullName,
       year,

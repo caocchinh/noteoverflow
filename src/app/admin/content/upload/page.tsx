@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAnswer } from "@/server/main/answer";
-import { createQuestionImage } from "@/server/main/question";
 import { useMemo, useState } from "react";
 import {
   CurriculumType,
@@ -62,6 +60,8 @@ import {
   getSubjectInfoAction,
   isQuestionExistsAction,
   uploadAction,
+  createQuestionImageAction,
+  createAnswerAction,
 } from "@/server/actions";
 
 const UploadPage = () => {
@@ -501,7 +501,7 @@ const UploadPage = () => {
             }
           }
           const { success: success2, error: error2 } =
-            await createQuestionImage({
+            await createQuestionImageAction({
               questionId: parseQuestionId({
                 subject: selectedSubject!,
                 paperCode: paperCode,
@@ -522,7 +522,7 @@ const UploadPage = () => {
         })
       );
       if (isMultipleChoice) {
-        const { success: success2, error: error2 } = await createAnswer({
+        const { success: success2, error: error2 } = await createAnswerAction({
           questionId: parseQuestionId({
             subject: selectedSubject!,
             paperCode: paperCode,
@@ -558,15 +558,16 @@ const UploadPage = () => {
               }
             }
 
-            const { success: success2, error: error2 } = await createAnswer({
-              questionId: parseQuestionId({
-                subject: selectedSubject!,
-                paperCode: paperCode,
-                questionNumber: questionNumber!,
-              }),
-              answerImageSrc: data!.imageSrc,
-              answerOrder: index,
-            });
+            const { success: success2, error: error2 } =
+              await createAnswerAction({
+                questionId: parseQuestionId({
+                  subject: selectedSubject!,
+                  paperCode: paperCode,
+                  questionNumber: questionNumber!,
+                }),
+                answerImageSrc: data!.imageSrc,
+                answerOrder: index,
+              });
             if (!success2) {
               if (error2 === INTERNAL_SERVER_ERROR) {
                 throw new Error(INTERNAL_SERVER_ERROR);

@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 
@@ -10,14 +10,14 @@ export const createSubject = async ({
   id: string;
   curriculumName: string;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
   await db.insert(schema.subject).values({ id, curriculumName });
 };
 
 export const getSubjectByCurriculum = async (
   curriculumName: string
 ): Promise<{ id: string; curriculumName: string }[]> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.subject)
@@ -26,7 +26,7 @@ export const getSubjectByCurriculum = async (
 };
 
 export const isSubjectExists = async (id: string): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.subject)

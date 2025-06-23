@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 
@@ -10,12 +10,12 @@ export const createPaperType = async ({
   paperType: number;
   subjectId: string;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
   await db.insert(schema.paperType).values({ paperType, subjectId });
 };
 
 export const getPaperType = async (subjectId: string): Promise<number[]> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.paperType)
@@ -27,7 +27,7 @@ export const isPaperTypeExists = async (
   paperType: number,
   subjectId: string
 ): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.paperType)

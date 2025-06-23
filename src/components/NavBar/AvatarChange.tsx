@@ -15,11 +15,11 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { updateUserAvatar } from "@/server/auth";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { ScrollArea } from "../ui/scroll-area";
+import { updateUserAvatarAction } from "@/server/actions";
 
 // Infer the return type from authClient.getSession()
 type SessionData = Awaited<ReturnType<typeof authClient.getSession>>;
@@ -49,7 +49,7 @@ const AvatarChange = ({
   };
 
   const updateAvatarMutation = useMutation({
-    mutationFn: () => updateUserAvatar(userId, selectedAvatar),
+    mutationFn: () => updateUserAvatarAction(userId, selectedAvatar),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["user"] });
       // Get the previous data so we can roll back to it if the mutation fails

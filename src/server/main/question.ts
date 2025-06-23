@@ -1,12 +1,12 @@
 import "server-only";
-import { getDb } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
 export const isQuestionExists = async (
   questionId: string
 ): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.question)
@@ -36,7 +36,7 @@ export const createQuestion = async ({
   topic: string;
   questionNumber: number;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
   await db.insert(schema.question).values({
     id: questionId,
     year,
@@ -73,7 +73,7 @@ export const overwriteQuestion = async ({
 
   questionId: string;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
 
   await db
     .insert(schema.question)
@@ -108,7 +108,7 @@ export const isQuestionImageExists = async (
   questionId: string,
   order: number
 ): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.questionImage)
@@ -135,7 +135,7 @@ export const createQuestionImage = async ({
   error: string | undefined;
 }> => {
   try {
-    const db = getDb();
+    const db = await getDbAsync();
     await db
       .insert(schema.questionImage)
       .values({ questionId, imageSrc, order });
@@ -161,7 +161,7 @@ export const overwriteQuestionImage = async ({
   imageSrc: string;
   order: number;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
 
   await db
     .insert(schema.questionImage)

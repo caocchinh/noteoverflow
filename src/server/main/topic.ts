@@ -1,5 +1,5 @@
 import "server-only";
-import { getDb } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db";
 import * as schema from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 
@@ -10,12 +10,12 @@ export const createTopic = async ({
   topic: string;
   subjectId: string;
 }) => {
-  const db = getDb();
+  const db = await getDbAsync();
   await db.insert(schema.topic).values({ topic, subjectId });
 };
 
 export const getTopic = async (subjectId: string): Promise<string[]> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.topic)
@@ -27,7 +27,7 @@ export const isTopicExists = async (
   topic: string,
   subjectId: string
 ): Promise<boolean> => {
-  const db = getDb();
+  const db = await getDbAsync();
   const result = await db
     .select()
     .from(schema.topic)

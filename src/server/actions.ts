@@ -22,8 +22,9 @@ import {
   createQuestion,
   overwriteQuestion,
   overwriteQuestionImage,
+  createQuestionImage,
 } from "./main/question";
-import { overwriteAnswer } from "./main/answer";
+import { createAnswer, overwriteAnswer } from "./main/answer";
 import {
   CurriculumType,
   SubjectType,
@@ -383,6 +384,68 @@ export const getSubjectInfoAction = async (
     };
   } catch (error) {
     console.error("Error getting subject info:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+export const createQuestionImageAction = async ({
+  questionId,
+  imageSrc,
+  order,
+}: {
+  questionId: string;
+  imageSrc: string;
+  order: number;
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    await createQuestionImage({
+      questionId: questionId,
+      imageSrc: imageSrc,
+      order: order,
+    });
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error creating question image:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+export const createAnswerAction = async ({
+  questionId,
+  answerImageSrc,
+  answerOrder,
+}: {
+  questionId: string;
+  answerImageSrc: string;
+  answerOrder: number;
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    await createAnswer({
+      questionId: questionId,
+      answerImageSrc: answerImageSrc,
+      answerOrder: answerOrder,
+    });
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Error creating answer:", error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,
