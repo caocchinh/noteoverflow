@@ -33,6 +33,7 @@ import AvatarChange from "./AvatarChange";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,8 +56,8 @@ const User = () => {
       setIsMenuOpen(false);
       router.push("/authentication");
     },
-    onError: (error) => {
-      console.error(error);
+    onError: () => {
+      toast.error("Error signing out, please try again.");
     },
   });
 
