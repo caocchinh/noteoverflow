@@ -180,6 +180,10 @@ const EnhancedSelect = ({
                   e.stopPropagation();
                   e.preventDefault();
                 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 className="border-0 focus-visible:ring-0 !px-3 focus-visible:ring-offset-0 h-8 "
               />
               {searchQuery && (
@@ -214,19 +218,15 @@ const EnhancedSelect = ({
                 <div
                   key={index}
                   className={cn(
-                    "p-2 hover:bg-muted group cursor-pointer items-center justify-between rounded-md w-full",
+                    "p-2 hover:bg-muted group cursor-pointer items-center justify-between rounded-md text-sm w-full",
                     filteredNewItems.includes(item) ? "flex" : "hidden"
                   )}
+                  onClick={() => {
+                    onValueChange(item);
+                    setIsOpen(false);
+                  }}
                 >
-                  <div
-                    className="flex-1"
-                    onClick={() => {
-                      onValueChange(item);
-                      setIsOpen(false);
-                    }}
-                  >
-                    {item}
-                  </div>
+                  {item}
                   <div className="flex items-center gap-2">
                     <X
                       className="w-4 h-4 group-hover:block hidden"
@@ -261,6 +261,10 @@ const EnhancedSelect = ({
                   value={newItemInputValue}
                   type={inputType}
                   onFocus={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                   }}

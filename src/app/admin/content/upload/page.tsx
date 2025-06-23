@@ -850,7 +850,21 @@ const UploadPage = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className={cn(!canUpload && "hidden")}>
-                  hi
+                  {!selectedCurriculum && <p>-Curriculumn</p>}
+                  {!selectedSubject && <p>-Subject</p>}
+                  {!selectedTopic && <p>-Topic</p>}
+                  {!selectedPaperType && <p>-Paper Type</p>}
+                  {!selectedSeason && <p>-Season</p>}
+                  {!selectedYear && <p>-Year</p>}
+                  {!questionNumber && <p>-Question Number</p>}
+                  {!paperVariantInput && <p>-Paper Variant</p>}
+                  {isMultipleChoice && !multipleChoiceInput && (
+                    <p>-Multiple Choice Answer</p>
+                  )}
+                  {!questionImages.length && <p>-Question Image</p>}
+                  {!answerImages.length && !isMultipleChoice && (
+                    <p>-Answer Image</p>
+                  )}
                 </TooltipContent>
               </Tooltip>
               <AlertDialogContent>
