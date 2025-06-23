@@ -21,7 +21,7 @@ import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
-import { legacyUploadAction } from "@/server/actions";
+import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
 
 // Add type declaration for directory input
 declare module "react" {

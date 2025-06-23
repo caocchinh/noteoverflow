@@ -59,10 +59,10 @@ import {
   getSubjectByCurriculumAction,
   getSubjectInfoAction,
   isQuestionExistsAction,
-  uploadAction,
   createQuestionImageAction,
   createAnswerAction,
 } from "@/server/actions";
+import { uploadAction } from "@/features/admin/content/server/actions";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
