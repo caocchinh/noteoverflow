@@ -22,6 +22,9 @@ import {
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
 import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
+import { ValidContentType } from "@/constants/types";
+import { ValidSeason } from "@/constants/types";
+import { parseQuestionId } from "@/lib/utils";
 
 // Add type declaration for directory input
 declare module "react" {
@@ -89,13 +92,14 @@ const LegacyUploadPage = () => {
       .split("/")[7]
       .split("_")[1]
       .split(".")[0];
-    const contentType: "questions" | "answers" = file.webkitRelativePath.split(
+    const contentType: ValidContentType = file.webkitRelativePath.split(
       "/"
-    )[1] as "questions" | "answers";
+    )[1] as ValidContentType;
 
     const topic = file.webkitRelativePath.split("/")[2].toUpperCase();
-    const season: "Summer" | "Winter" | "Spring" =
-      file.webkitRelativePath.split("/")[4] as "Summer" | "Winter" | "Spring";
+    const season: ValidSeason = file.webkitRelativePath.split(
+      "/"
+    )[4] as ValidSeason;
     const paperCode = file.webkitRelativePath.split("/")[6];
 
     const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
@@ -131,7 +135,11 @@ const LegacyUploadPage = () => {
       imageSrc = data!.imageSrc;
     }
 
-    const questionId = `${subjectFullName}-${paperCode}-questions-${questionNumber}`;
+    const questionId = parseQuestionId({
+      subject: subjectFullName,
+      paperCode,
+      questionNumber: questionNumber.slice(1),
+    });
 
     const { success, error } = await legacyUploadAction({
       curriculum,

@@ -17,7 +17,6 @@ import {
   paperCodeParser,
   seasonToCode,
   uploadImage,
-  parseQuestionId,
   validateTopic,
   validateCurriculum,
 } from "@/features/admin/content/lib/utils";
@@ -63,6 +62,8 @@ import {
   createAnswerAction,
 } from "@/server/actions";
 import { uploadAction } from "@/features/admin/content/server/actions";
+import { parseQuestionId } from "@/lib/utils";
+import { ValidSeason } from "@/constants/types";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -437,7 +438,7 @@ const UploadPage = () => {
         subjectCode: selectedSubject!.split("(")[1].slice(0, -1),
         paperType: selectedPaperType!,
         variant: paperVariantInput!,
-        season: selectedSeason as "Summer" | "Winter" | "Spring",
+        season: selectedSeason as ValidSeason,
         year: selectedYear!,
       });
       const { success, data, error } = await isQuestionExistsAction(
@@ -466,7 +467,7 @@ const UploadPage = () => {
           questionNumber: questionNumber!,
         }),
         year: parseInt(selectedYear!),
-        season: selectedSeason as "Summer" | "Winter" | "Spring",
+        season: selectedSeason as ValidSeason,
         paperType: parseInt(selectedPaperType!),
         paperVariant: parseInt(paperVariantInput!),
         curriculumName: selectedCurriculum!,

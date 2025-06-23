@@ -29,7 +29,7 @@ export type UploadPayload = {
   subjectId: string;
   topic: string;
   paperType: number;
-  season: "Summer" | "Winter" | "Spring";
+  season: ValidSeason;
   year: number;
   questionId: string;
   questionNumber: number;
@@ -41,3 +41,6 @@ export type ServerActionResponse<T> = {
   error?: string;
   data?: T;
 };
+
+export type ValidSeason = "Summer" | "Winter" | "Spring";
+export type ValidContentType = "questions" | "answers";

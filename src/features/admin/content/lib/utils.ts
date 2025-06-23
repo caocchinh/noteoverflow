@@ -2,6 +2,7 @@ import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
+import { ValidContentType } from "@/constants/types";
 import { redirect } from "next/navigation";
 
 export const validateCurriculum = (value: string): string | null => {
@@ -183,7 +184,7 @@ export const uploadImage = async ({
   file: File;
   subjectFullName: string;
   paperCode: string;
-  contentType: "questions" | "answers";
+  contentType: ValidContentType;
   questionNumber: string;
   order: number;
 }): Promise<{
@@ -238,16 +239,4 @@ export const uploadImage = async ({
       imageSrc: data.imageSrc,
     },
   };
-};
-
-export const parseQuestionId = ({
-  subject,
-  paperCode,
-  questionNumber,
-}: {
-  subject: string;
-  paperCode: string;
-  questionNumber: string;
-}): string => {
-  return `${subject}-${paperCode}-questions-Q${questionNumber}`;
 };

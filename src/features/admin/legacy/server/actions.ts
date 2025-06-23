@@ -1,6 +1,10 @@
 "use server";
 
-import { ServerActionResponse } from "@/constants/types";
+import {
+  ServerActionResponse,
+  ValidContentType,
+  ValidSeason,
+} from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
 import { redirect } from "next/navigation";
 import { isCurriculumExists } from "@/server/main/curriculum";
@@ -36,13 +40,13 @@ export const legacyUploadAction = async ({
   curriculum: string;
   subjectFullName: string;
   year: string;
-  season: "Summer" | "Winter" | "Spring";
+  season: ValidSeason;
   paperType: number;
   paperVariant: number;
   topic: string;
   questionId: string;
   questionNumber: string;
-  contentType: "questions" | "answers";
+  contentType: ValidContentType;
   imageSrc: string;
   order: number;
 }): Promise<ServerActionResponse<void>> => {
