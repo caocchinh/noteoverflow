@@ -18,26 +18,25 @@ export type YearType = InferSelectModel<typeof year>;
 export interface EnhancedSelectProps {
   selectedValue: string | undefined;
   onValueChange: (value: string) => void;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   existingItems: string[];
-  newItems: string[];
-  onAddNewItem: (item: string) => void;
-  onRemoveNewItem: (index: number) => void;
-  placeholder: string;
-  loadingPlaceholder?: string;
+  placeholders: EnhancedSelectPlaceholders;
+  labels: EnhancedSelectLabels;
   isLoading?: boolean;
-  newItemInputValue: string;
-  onNewItemInputChange: (value: string) => void;
-  existingItemsLabel: string;
-  newItemsLabel: string;
-  inputPlaceholder: string;
-  valueKey?: string;
-  nameKey?: string;
   className?: string;
   disabled?: boolean;
-  error?: string | null;
   validator?: (value: string) => string | null;
-  label: string;
   inputType?: "text" | "number";
+}
+
+export interface EnhancedSelectPlaceholders {
+  loading: string;
+  input: string;
+  first?: string;
+}
+
+export interface EnhancedSelectLabels {
+  existingItems: string;
+  newItems: string;
+  input: string;
+  label: string;
 }

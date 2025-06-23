@@ -16,31 +16,34 @@ import { cn } from "@/lib/utils";
 const EnhancedSelect = ({
   selectedValue,
   onValueChange,
-  isOpen,
-  onOpenChange,
   existingItems,
-  newItems,
-  onAddNewItem,
-  onRemoveNewItem,
-  placeholder,
-  loadingPlaceholder,
+  placeholders,
+  labels,
   isLoading,
-  newItemInputValue,
-  onNewItemInputChange,
-  existingItemsLabel,
-  newItemsLabel,
-  inputPlaceholder,
-  className = "",
+  className = "w-full",
   disabled = false,
-  error = null,
   validator,
-  label,
   inputType = "text",
 }: EnhancedSelectProps) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [newItemInputValue, setNewItemInputValue] = useState<string>("");
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [newItems, setNewItems] = useState<string[]>([]);
+
+  const handleAddNewItem = (item: string) => {
+    setNewItems([...newItems, item]);
+    setNewItemInputValue("");
+  };
+
+  const handleRemoveNewItem = (index: number) => {
+    setNewItems(newItems.filter((_, i) => i !== index));
+    if (selectedValue === newItems[index]) {
+      onValueChange("");
+    }
+  };
 
   const isItemDuplicate = (value: string) => {
     return [...existingItems, ...newItems].includes(value);
@@ -67,7 +70,7 @@ const EnhancedSelect = ({
       const validationResult = validateInput(newItemInputValue);
 
       if (!validationResult) {
-        onAddNewItem(newItemInputValue);
+        handleAddNewItem(newItemInputValue);
         setDuplicateError(null);
         setValidationError(null);
       } else {
@@ -87,7 +90,7 @@ const EnhancedSelect = ({
       const validationResult = validateInput(newItemInputValue);
 
       if (!validationResult) {
-        onAddNewItem(newItemInputValue);
+        handleAddNewItem(newItemInputValue);
         setDuplicateError(null);
         setValidationError(null);
       } else {
@@ -114,13 +117,13 @@ const EnhancedSelect = ({
       setValidationError(null);
     }
 
-    onNewItemInputChange(value);
+    setNewItemInputValue(value);
   };
 
   const handleWrapperClick = () => {
     if (isOpen || disabled || isLoading) return;
 
-    onOpenChange(true);
+    setIsOpen(true);
   };
 
   const filteredExistingItems = useMemo(() => {
@@ -141,18 +144,24 @@ const EnhancedSelect = ({
 
   return (
     <div className="w-full" ref={wrapperRef} onClick={handleWrapperClick}>
-      <h5 className="block text-sm font-medium mb-1">{label}</h5>
+      <h5 className="block text-sm font-medium mb-1">{labels.label}</h5>
       <div className="relative">
         <Select
           open={isOpen}
-          onOpenChange={onOpenChange}
+          onOpenChange={setIsOpen}
           value={selectedValue}
           onValueChange={onValueChange}
           disabled={disabled || isLoading}
         >
           <SelectTrigger className={cn(className, "cursor-pointer")}>
             <SelectValue
-              placeholder={isLoading ? loadingPlaceholder : placeholder}
+              placeholder={
+                isLoading
+                  ? placeholders.loading
+                  : disabled
+                  ? placeholders.first
+                  : placeholders.input
+              }
             />
           </SelectTrigger>
           <SelectContent className="!z-[99999999999999999] ">
@@ -185,7 +194,7 @@ const EnhancedSelect = ({
             </div>
 
             <SelectGroup>
-              <SelectLabel>{existingItemsLabel}</SelectLabel>
+              <SelectLabel>{labels.existingItems}</SelectLabel>
               {existingItems.map((item, index) => (
                 <SelectItem
                   key={index}
@@ -200,7 +209,7 @@ const EnhancedSelect = ({
               ))}
             </SelectGroup>
             <SelectGroup>
-              <SelectLabel>{newItemsLabel}</SelectLabel>
+              <SelectLabel>{labels.newItems}</SelectLabel>
               {newItems.map((item, index) => (
                 <div
                   key={index}
@@ -213,7 +222,7 @@ const EnhancedSelect = ({
                     className="flex-1"
                     onClick={() => {
                       onValueChange(item);
-                      onOpenChange(false);
+                      setIsOpen(false);
                     }}
                   >
                     {item}
@@ -223,7 +232,7 @@ const EnhancedSelect = ({
                       className="w-4 h-4 group-hover:block hidden"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRemoveNewItem(index);
+                        handleRemoveNewItem(index);
                       }}
                     />
                     <Check
@@ -248,7 +257,7 @@ const EnhancedSelect = ({
             <div className="flex items-start gap-2 p-2 mt-2 flex-col">
               <div className="flex items-center gap-2 w-full">
                 <Input
-                  placeholder={inputPlaceholder}
+                  placeholder={placeholders.input}
                   value={newItemInputValue}
                   type={inputType}
                   onFocus={(e) => {
@@ -257,32 +266,28 @@ const EnhancedSelect = ({
                   }}
                   onChange={(e) => handleInputChange(e.target.value)}
                   className={
-                    error || duplicateError || validationError
-                      ? "border-red-500"
-                      : ""
+                    duplicateError || validationError ? "border-red-500" : ""
                   }
                   onKeyDown={handleKeyDown}
                 />
                 <div
                   className="cursor-pointer"
-                  title={`Add new ${inputPlaceholder
+                  title={`Add new ${placeholders.input
                     .toLowerCase()
                     .replace("Enter new ", "")
                     .replace(" name", "")}`}
                 >
                   <Plus
                     className={`w-4 h-4 ${
-                      error || duplicateError || validationError
-                        ? "text-red-500"
-                        : ""
+                      duplicateError || validationError ? "text-red-500" : ""
                     }`}
                     onClick={handleAddItem}
                   />
                 </div>
               </div>
-              {(error || duplicateError || validationError) && (
+              {(duplicateError || validationError) && (
                 <p className="text-red-500 text-xs mt-1">
-                  {duplicateError || validationError || error}
+                  {duplicateError || validationError}
                 </p>
               )}
             </div>

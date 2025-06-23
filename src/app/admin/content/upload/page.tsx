@@ -64,54 +64,56 @@ import {
 import { uploadAction } from "@/features/admin/content/server/actions";
 import { parseQuestionId } from "@/lib/utils";
 import { ValidSeason } from "@/constants/types";
+import {
+  YEAR_LABELS,
+  YEAR_PLACEHOLDERS,
+  PAPER_TYPE_LABELS,
+  PAPER_TYPE_PLACEHOLDERS,
+  SEASON_LABELS,
+  SEASON_PLACEHOLDERS,
+  CURRICULUM_LABELS,
+  CURRICULUM_PLACEHOLDERS,
+  SUBJECT_LABELS,
+  SUBJECT_PLACEHOLDERS,
+  TOPIC_LABELS,
+  TOPIC_PLACEHOLDERS,
+} from "@/features/admin/content/constants/constants";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     string | undefined
   >(undefined);
-  const [isCurriculumSelectOpen, setIsCurriculumSelectOpen] =
-    useState<boolean>(false);
+
   const [newCurriculum, setNewCurriculum] = useState<string[]>([]);
-  const [newCurriculumInput, setNewCurriculumInput] = useState<string>("");
 
   const [selectedSubject, setSelectedSubject] = useState<string | undefined>(
     undefined
   );
-  const [isSubjectSelectOpen, setIsSubjectSelectOpen] =
-    useState<boolean>(false);
+
   const [newSubject, setNewSubject] = useState<string[]>([]);
-  const [newSubjectInput, setNewSubjectInput] = useState<string>("");
 
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>(
     undefined
   );
-  const [isTopicSelectOpen, setIsTopicSelectOpen] = useState<boolean>(false);
   const [newTopic, setNewTopic] = useState<string[]>([]);
-  const [newTopicInput, setNewTopicInput] = useState<string>("");
 
   const [selectedPaperType, setSelectedPaperType] = useState<
     string | undefined
   >(undefined);
-  const [isPaperTypeSelectOpen, setIsPaperTypeSelectOpen] =
-    useState<boolean>(false);
+
   const [newPaperType, setNewPaperType] = useState<string[]>([]);
-  const [newPaperTypeInput, setNewPaperTypeInput] = useState<string>("");
 
   const [selectedSeason, setSelectedSeason] = useState<
     "Summer" | "Winter" | "Spring" | ""
   >("");
-  const [isSeasonSelectOpen, setIsSeasonSelectOpen] = useState<boolean>(false);
   const [newSeason, setNewSeason] = useState<string[]>([]);
-  const [newSeasonInput, setNewSeasonInput] = useState<string>("");
 
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
     undefined
   );
   const queryClient = useQueryClient();
 
-  const [isYearSelectOpen, setIsYearSelectOpen] = useState<boolean>(false);
   const [newYear, setNewYear] = useState<string[]>([]);
-  const [newYearInput, setNewYearInput] = useState<string>("");
   const [questionNumber, setQuestionNumber] = useState<string>("");
   const [questionNumberError, setQuestionNumberError] = useState<string>("");
   const [isMultipleChoice, setIsMultipleChoice] = useState<boolean>(false);
@@ -248,11 +250,6 @@ const UploadPage = () => {
     retry: false,
   });
 
-  const handleAddNewCurriculum = (item: string) => {
-    setNewCurriculum([...newCurriculum, item]);
-    setNewCurriculumInput("");
-  };
-
   const handleCurriculumChange = (item: string) => {
     setSelectedCurriculum(item);
     setSelectedSubject("");
@@ -268,73 +265,6 @@ const UploadPage = () => {
     setSelectedPaperType("");
     setSelectedSeason("");
     setSelectedYear("");
-  };
-
-  const handleRemoveNewCurriculum = (index: number) => {
-    setNewCurriculum(newCurriculum.filter((_, i) => i !== index));
-    if (selectedCurriculum === newCurriculum[index]) {
-      setSelectedCurriculum("");
-    }
-  };
-
-  const handleAddNewSubject = (item: string) => {
-    setNewSubject([...newSubject, item]);
-    setNewSubjectInput("");
-  };
-
-  const handleRemoveNewSubject = (index: number) => {
-    setNewSubject(newSubject.filter((_, i) => i !== index));
-    if (selectedSubject === newSubject[index]) {
-      setSelectedSubject("");
-    }
-  };
-
-  const handleAddNewTopic = (item: string) => {
-    setNewTopic([...newTopic, item]);
-    setNewTopicInput("");
-  };
-
-  const handleRemoveNewTopic = (index: number) => {
-    setNewTopic(newTopic.filter((_, i) => i !== index));
-    if (selectedTopic === newTopic[index]) {
-      setSelectedTopic("");
-    }
-  };
-
-  const handleAddNewPaperType = (item: string) => {
-    setNewPaperType([...newPaperType, item]);
-    setNewPaperTypeInput("");
-  };
-
-  const handleRemoveNewPaperType = (index: number) => {
-    setNewPaperType(newPaperType.filter((_, i) => i !== index));
-    if (selectedPaperType === newPaperType[index]) {
-      setSelectedPaperType("");
-    }
-  };
-
-  const handleAddNewSeason = (item: string) => {
-    setNewSeason([...newSeason, item]);
-    setNewSeasonInput("");
-  };
-
-  const handleRemoveNewSeason = (index: number) => {
-    setNewSeason(newSeason.filter((_, i) => i !== index));
-    if (selectedSeason === newSeason[index]) {
-      setSelectedSeason("");
-    }
-  };
-
-  const handleAddNewYear = (item: string) => {
-    setNewYear([...newYear, item]);
-    setNewYearInput("");
-  };
-
-  const handleRemoveNewYear = (index: number) => {
-    setNewYear(newYear.filter((_, i) => i !== index));
-    if (selectedYear === newYear[index]) {
-      setSelectedYear("");
-    }
   };
 
   const handlePaperVariantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -644,56 +574,26 @@ const UploadPage = () => {
           <EnhancedSelect
             selectedValue={selectedCurriculum}
             onValueChange={handleCurriculumChange}
-            isOpen={isCurriculumSelectOpen}
-            onOpenChange={setIsCurriculumSelectOpen}
             existingItems={curriculumData?.map((item) => item.name) ?? []}
-            newItems={newCurriculum}
-            onAddNewItem={handleAddNewCurriculum}
-            onRemoveNewItem={handleRemoveNewCurriculum}
-            placeholder="Select a curriculum"
-            loadingPlaceholder="Fetching existing curriculums..."
+            placeholders={CURRICULUM_PLACEHOLDERS}
+            labels={CURRICULUM_LABELS}
             isLoading={isCurriculumFetching || isCurriculumRefetching}
-            newItemInputValue={newCurriculumInput}
-            onNewItemInputChange={setNewCurriculumInput}
-            existingItemsLabel="Existing Curriculum"
-            newItemsLabel="New Curriculum"
-            inputPlaceholder="Enter new curriculum name"
-            className="w-full"
-            label="Curriculum"
             validator={validateCurriculum}
           />
 
           <EnhancedSelect
             selectedValue={selectedSubject}
             onValueChange={handleSubjectChange}
-            isOpen={isSubjectSelectOpen}
-            onOpenChange={setIsSubjectSelectOpen}
             existingItems={subject?.map((item) => item.id) ?? []}
-            newItems={newSubject}
-            onAddNewItem={handleAddNewSubject}
-            onRemoveNewItem={handleRemoveNewSubject}
-            loadingPlaceholder="Fetching existing subjects..."
-            placeholder={
-              !selectedCurriculum
-                ? "Select a curriculum first"
-                : isSubjectError
-                ? "Failed to load subjects"
-                : "Select a subject"
-            }
-            newItemInputValue={newSubjectInput}
+            placeholders={SUBJECT_PLACEHOLDERS}
+            labels={SUBJECT_LABELS}
             isLoading={isSubjectFetching}
-            onNewItemInputChange={setNewSubjectInput}
-            existingItemsLabel="Existing Subjects"
-            newItemsLabel="New Subjects"
-            inputPlaceholder="Enter new subject name"
-            className="w-full"
             disabled={
               !selectedCurriculum ||
               isCurriculumRefetching ||
               isCurriculumFetching ||
               isSubjectFetching
             }
-            label="Subject"
             validator={validateSubject}
           />
 
@@ -732,108 +632,50 @@ const UploadPage = () => {
           <EnhancedSelect
             selectedValue={selectedTopic}
             onValueChange={setSelectedTopic}
-            isOpen={isTopicSelectOpen}
-            onOpenChange={setIsTopicSelectOpen}
             existingItems={subjectInfo?.topicData ?? []}
-            newItems={newTopic}
-            onAddNewItem={handleAddNewTopic}
             validator={validateTopic}
-            onRemoveNewItem={handleRemoveNewTopic}
-            placeholder={
-              !subjectInfo ? "Select a subject first" : "Select a topic"
-            }
-            loadingPlaceholder="Fetching existing topics..."
+            placeholders={TOPIC_PLACEHOLDERS}
+            labels={TOPIC_LABELS}
             isLoading={isSubjectInfoFetching && !!selectedSubject}
-            newItemInputValue={newTopicInput}
-            onNewItemInputChange={setNewTopicInput}
-            existingItemsLabel="Existing Topics"
-            newItemsLabel="New Topics"
-            inputPlaceholder="Enter new topic name"
-            className="w-full"
             disabled={!selectedSubject}
-            label="Topic"
           />
 
           <EnhancedSelect
             selectedValue={selectedPaperType}
             onValueChange={setSelectedPaperType}
-            isOpen={isPaperTypeSelectOpen}
-            onOpenChange={setIsPaperTypeSelectOpen}
             existingItems={
               subjectInfo?.paperTypeData?.map((item) => item.toString()) ?? []
             }
-            newItems={newPaperType}
-            onAddNewItem={handleAddNewPaperType}
-            onRemoveNewItem={handleRemoveNewPaperType}
-            placeholder={
-              !subjectInfo ? "Select a subject first" : "Select a paper type"
-            }
-            loadingPlaceholder="Fetching existing paper types..."
+            placeholders={PAPER_TYPE_PLACEHOLDERS}
+            labels={PAPER_TYPE_LABELS}
             isLoading={isSubjectInfoFetching && !!selectedSubject}
-            newItemInputValue={newPaperTypeInput}
-            onNewItemInputChange={setNewPaperTypeInput}
-            existingItemsLabel="Existing Paper Types"
-            newItemsLabel="New Paper Types"
-            inputPlaceholder="Enter new paper type"
-            className="w-full"
             disabled={!selectedSubject}
             validator={validatePaperType}
-            label="Paper Type"
             inputType="number"
           />
 
           <EnhancedSelect
             selectedValue={selectedSeason}
-            onValueChange={(item) =>
-              setSelectedSeason(item as "Summer" | "Winter" | "Spring")
-            }
-            isOpen={isSeasonSelectOpen}
-            onOpenChange={setIsSeasonSelectOpen}
+            onValueChange={(item) => setSelectedSeason(item as ValidSeason)}
             existingItems={subjectInfo?.seasonData ?? []}
-            newItems={newSeason}
-            onAddNewItem={handleAddNewSeason}
-            onRemoveNewItem={handleRemoveNewSeason}
-            placeholder={
-              !subjectInfo ? "Select a subject first" : "Select a season"
-            }
-            loadingPlaceholder="Fetching existing seasons..."
+            placeholders={SEASON_PLACEHOLDERS}
+            labels={SEASON_LABELS}
             isLoading={isSubjectInfoFetching && !!selectedSubject}
-            newItemInputValue={newSeasonInput}
-            onNewItemInputChange={setNewSeasonInput}
-            existingItemsLabel="Existing Seasons"
-            newItemsLabel="New Seasons"
-            inputPlaceholder="Enter new season"
-            className="w-full"
             disabled={!selectedSubject}
             validator={validateSeason}
-            label="Season"
           />
 
           <EnhancedSelect
             selectedValue={selectedYear}
             onValueChange={setSelectedYear}
-            isOpen={isYearSelectOpen}
-            onOpenChange={setIsYearSelectOpen}
             existingItems={
               subjectInfo?.yearData?.map((item) => item.toString()) ?? []
             }
-            newItems={newYear}
-            onAddNewItem={handleAddNewYear}
-            onRemoveNewItem={handleRemoveNewYear}
-            placeholder={
-              !subjectInfo ? "Select a subject first" : "Select a year"
-            }
-            loadingPlaceholder="Fetching existing years..."
+            placeholders={YEAR_PLACEHOLDERS}
+            labels={YEAR_LABELS}
             isLoading={isSubjectInfoFetching && !!selectedSubject}
-            newItemInputValue={newYearInput}
-            onNewItemInputChange={setNewYearInput}
-            existingItemsLabel="Existing Years"
-            newItemsLabel="New Years"
-            inputPlaceholder="Enter new year"
-            className="w-full"
             disabled={!selectedSubject}
             validator={validateYear}
-            label="Year"
             inputType="number"
           />
           <div className="flex flex-col w-full">
