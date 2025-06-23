@@ -51,6 +51,7 @@ import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  BAD_REQUEST,
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
@@ -383,6 +384,8 @@ const UploadPage = () => {
       if (!success) {
         if (error === INTERNAL_SERVER_ERROR) {
           throw new Error(INTERNAL_SERVER_ERROR);
+        } else if (error === BAD_REQUEST) {
+          throw new Error(BAD_REQUEST);
         } else {
           throw new Error(error || "Unknown error");
         }
@@ -410,6 +413,8 @@ const UploadPage = () => {
       if (!success2) {
         if (error2 === INTERNAL_SERVER_ERROR) {
           throw new Error(INTERNAL_SERVER_ERROR);
+        } else if (error2 === BAD_REQUEST) {
+          throw new Error(BAD_REQUEST);
         } else {
           throw new Error(error2 || "Unknown error");
         }
@@ -429,6 +434,8 @@ const UploadPage = () => {
           if (!success) {
             if (error === INTERNAL_SERVER_ERROR) {
               throw new Error(INTERNAL_SERVER_ERROR);
+            } else if (error === BAD_REQUEST) {
+              throw new Error(BAD_REQUEST);
             } else {
               throw new Error("Failed to upload image");
             }
@@ -467,6 +474,8 @@ const UploadPage = () => {
         if (!success2) {
           if (error2 === INTERNAL_SERVER_ERROR) {
             throw new Error(INTERNAL_SERVER_ERROR);
+          } else if (error2 === BAD_REQUEST) {
+            throw new Error(BAD_REQUEST);
           } else {
             throw new Error(error2 || "Unknown error creating answer");
           }
@@ -486,6 +495,8 @@ const UploadPage = () => {
             if (!success) {
               if (error === INTERNAL_SERVER_ERROR) {
                 throw new Error(INTERNAL_SERVER_ERROR);
+              } else if (error === BAD_REQUEST) {
+                throw new Error(BAD_REQUEST);
               } else {
                 throw new Error(FAILED_TO_UPLOAD_IMAGE);
               }
@@ -504,6 +515,8 @@ const UploadPage = () => {
             if (!success2) {
               if (error2 === INTERNAL_SERVER_ERROR) {
                 throw new Error(INTERNAL_SERVER_ERROR);
+              } else if (error2 === BAD_REQUEST) {
+                throw new Error(BAD_REQUEST);
               } else {
                 throw new Error(error2 || "Unknown error creating answer");
               }

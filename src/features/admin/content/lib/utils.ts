@@ -1,4 +1,5 @@
 import {
+  BAD_REQUEST,
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
 } from "@/constants/constants";
@@ -187,8 +188,8 @@ export const uploadImage = async ({
   order: number;
 }): Promise<{
   success: boolean;
-  error: string | undefined;
-  data: { imageSrc: string } | undefined;
+  error?: string;
+  data?: { imageSrc: string };
 }> => {
   const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
   const form = new FormData();
@@ -217,13 +218,16 @@ export const uploadImage = async ({
       return {
         success: false,
         error: INTERNAL_SERVER_ERROR,
-        data: undefined,
+      };
+    } else if (response.status === 400) {
+      return {
+        success: false,
+        error: BAD_REQUEST,
       };
     } else {
       return {
         success: false,
         error: FAILED_TO_UPLOAD_IMAGE,
-        data: undefined,
       };
     }
   }
@@ -232,7 +236,6 @@ export const uploadImage = async ({
 
   return {
     success: true,
-    error: undefined,
     data: {
       imageSrc: data.imageSrc,
     },

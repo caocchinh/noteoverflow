@@ -13,6 +13,7 @@ import { uploadImage } from "@/features/admin/content/lib/utils";
 import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
+  BAD_REQUEST,
 } from "@/constants/constants";
 import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
 import { ValidContentType } from "@/constants/types";
@@ -45,7 +46,6 @@ const LegacyUploadPage = () => {
     if (e.target.files) {
       const fileArray = Array.from(e.target.files);
       setFiles(fileArray);
-      console.log("Selected files:", fileArray);
     }
   };
 
@@ -74,7 +74,6 @@ const LegacyUploadPage = () => {
     if (e.dataTransfer.files) {
       const fileArray = Array.from(e.dataTransfer.files);
       setFiles(fileArray);
-      console.log("Dropped files:", fileArray);
     }
   };
 
@@ -120,6 +119,8 @@ const LegacyUploadPage = () => {
       if (!success) {
         if (error === INTERNAL_SERVER_ERROR) {
           toast.error(INTERNAL_SERVER_ERROR);
+        } else if (error === BAD_REQUEST) {
+          toast.error(BAD_REQUEST);
         } else {
           toast.error(FAILED_TO_UPLOAD_IMAGE);
         }
@@ -137,13 +138,13 @@ const LegacyUploadPage = () => {
     const { success, error } = await legacyUploadAction({
       curriculum,
       subjectFullName,
-      year,
+      year: parseInt(year),
       season,
       paperType,
       paperVariant,
       topic,
       questionId,
-      questionNumber,
+      questionNumber: parseInt(questionNumber[1]),
       contentType,
       imageSrc,
       order: parseInt(order),
@@ -152,6 +153,8 @@ const LegacyUploadPage = () => {
     if (!success) {
       if (error === INTERNAL_SERVER_ERROR) {
         toast.error(INTERNAL_SERVER_ERROR);
+      } else if (error === BAD_REQUEST) {
+        toast.error(BAD_REQUEST);
       } else {
         toast.error(FAILED_TO_UPLOAD_IMAGE);
       }

@@ -15,11 +15,53 @@ import { isPaperTypeExists } from "@/server/main/paperType";
 import { createPaperType } from "@/server/main/paperType";
 import { createTopic, isTopicExists } from "@/server/main/topic";
 import { createQuestion } from "@/server/main/question";
-import { INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import {
+  validateCurriculum,
+  validateSeason,
+  validateYear,
+  validatePaperType,
+  validateSubject,
+  validateTopic,
+  validateQuestionNumber,
+  validatePaperVariant,
+} from "../lib/utils";
+import { isValidQuestionId } from "@/lib/utils";
 
 export async function uploadAction(
   payload: UploadPayload
 ): Promise<ServerActionResponse<void>> {
+  if (
+    typeof payload.curriculumName !== "string" ||
+    typeof payload.subjectId !== "string" ||
+    typeof payload.year !== "number" ||
+    typeof payload.season !== "string" ||
+    typeof payload.paperType !== "number" ||
+    typeof payload.topic !== "string" ||
+    typeof payload.questionNumber !== "number" ||
+    typeof payload.paperVariant !== "number" ||
+    !payload.questionId ||
+    !payload.questionNumber ||
+    !payload.year ||
+    !payload.season ||
+    !payload.paperType ||
+    !payload.topic ||
+    !payload.paperVariant ||
+    validateSubject(payload.subjectId) ||
+    validateCurriculum(payload.curriculumName) ||
+    validateTopic(payload.topic) ||
+    validatePaperType(payload.paperType.toString()) ||
+    validateSeason(payload.season) ||
+    validateYear(payload.year.toString()) ||
+    validateQuestionNumber(payload.questionNumber.toString()) ||
+    validatePaperVariant(payload.paperVariant.toString()) ||
+    !isValidQuestionId(payload.questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
 

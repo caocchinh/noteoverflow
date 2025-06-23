@@ -42,7 +42,7 @@ const ReorderableImageList = ({
               </p>
               <Button
                 variant="outline"
-                className=" w-[200px] sm:w-[300px] text-sm wrap-anywhere whitespace-break-spaces h-max cursor-pointer"
+                className=" w-[200px] sm:w-[300px] text-sm wrap-anywhere whitespace-break-spaces h-max cursor-pointer dark:hover:bg-black dark:bg-black"
                 onClick={() => {
                   if (!isDragging) {
                     onViewImage(URL.createObjectURL(image));

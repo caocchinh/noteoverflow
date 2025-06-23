@@ -16,12 +16,17 @@ import {
   SubjectType,
 } from "@/features/admin/content/constants/types";
 import { isQuestionExists } from "./main/question";
-import { INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
 import { auth } from "@/lib/auth/auth";
 import { getDbAsync } from "@/drizzle/db";
 import { headers } from "next/headers";
 import * as schema from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import {
+  validateCurriculum,
+  validateSubject,
+} from "@/features/admin/content/lib/utils";
+import { isValidQuestionId } from "@/lib/utils";
 
 export const updateUserAvatarAction = async (
   userId: string,
@@ -79,6 +84,16 @@ export const getCurriculumAction = async (): Promise<
 export const isQuestionExistsAction = async (
   questionId: string
 ): Promise<ServerActionResponse<boolean>> => {
+  if (
+    typeof questionId !== "string" ||
+    !questionId ||
+    !isValidQuestionId(questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {
@@ -101,6 +116,15 @@ export const isQuestionExistsAction = async (
 export const getSubjectByCurriculumAction = async (
   curriculumName: string
 ): Promise<ServerActionResponse<SubjectType[]>> => {
+  if (
+    typeof curriculumName !== "string" ||
+    validateCurriculum(curriculumName)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {
@@ -130,6 +154,16 @@ export const getSubjectInfoAction = async (
     yearData: number[];
   }>
 > => {
+  if (
+    typeof subjectId !== "string" ||
+    !subjectId ||
+    validateSubject(subjectId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {
@@ -169,6 +203,20 @@ export const createQuestionImageAction = async ({
   imageSrc: string;
   order: number;
 }): Promise<ServerActionResponse<void>> => {
+  if (
+    typeof order !== "number" ||
+    typeof questionId !== "string" ||
+    typeof imageSrc !== "string" ||
+    !questionId ||
+    !imageSrc ||
+    order < 0 ||
+    !isValidQuestionId(questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {
@@ -200,6 +248,20 @@ export const createAnswerAction = async ({
   answerImageSrc: string;
   answerOrder: number;
 }): Promise<ServerActionResponse<void>> => {
+  if (
+    typeof answerOrder !== "number" ||
+    typeof questionId !== "string" ||
+    typeof answerImageSrc !== "string" ||
+    !questionId ||
+    !answerImageSrc ||
+    answerOrder < 0 ||
+    !isValidQuestionId(questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {

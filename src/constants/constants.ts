@@ -42,3 +42,4 @@ export const AVATARS = [
 export const INTERNAL_SERVER_ERROR = "Internal Server Error";
 export const UNAUTHORIZED = "Unauthorized";
 export const FAILED_TO_UPLOAD_IMAGE = "Failed to upload image";
+export const BAD_REQUEST = "Bad Request";

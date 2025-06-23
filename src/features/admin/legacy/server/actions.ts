@@ -21,7 +21,18 @@ import { createTopic, isTopicExists } from "@/server/main/topic";
 import { overwriteQuestion } from "@/server/main/question";
 import { overwriteQuestionImage } from "@/server/main/question";
 import { overwriteAnswer } from "@/server/main/answer";
-import { INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import {
+  validateCurriculum,
+  validatePaperType,
+  validateSubject,
+  validateYear,
+  validateQuestionNumber,
+  validatePaperVariant,
+  validateSeason,
+  validateTopic,
+} from "../../content/lib/utils";
+import { isValidQuestionId } from "@/lib/utils";
 
 export const legacyUploadAction = async ({
   curriculum,
@@ -39,17 +50,57 @@ export const legacyUploadAction = async ({
 }: {
   curriculum: string;
   subjectFullName: string;
-  year: string;
+  year: number;
   season: ValidSeason;
   paperType: number;
   paperVariant: number;
   topic: string;
   questionId: string;
-  questionNumber: string;
+  questionNumber: number;
   contentType: ValidContentType;
   imageSrc: string;
   order: number;
 }): Promise<ServerActionResponse<void>> => {
+  if (
+    typeof curriculum !== "string" ||
+    typeof subjectFullName !== "string" ||
+    typeof year !== "number" ||
+    typeof season !== "string" ||
+    typeof paperType !== "number" ||
+    typeof paperVariant !== "number" ||
+    typeof topic !== "string" ||
+    typeof questionId !== "string" ||
+    typeof questionNumber !== "number" ||
+    typeof contentType !== "string" ||
+    typeof imageSrc !== "string" ||
+    typeof order !== "number" ||
+    !questionId ||
+    !questionNumber ||
+    !year ||
+    !season ||
+    !paperType ||
+    !paperVariant ||
+    !topic ||
+    !contentType ||
+    !imageSrc ||
+    order < 0 ||
+    (contentType !== "questions" && contentType !== "answers") ||
+    validateCurriculum(curriculum) ||
+    validateSubject(subjectFullName) ||
+    validateYear(year.toString()) ||
+    validateSeason(season) ||
+    validatePaperType(paperType.toString()) ||
+    validatePaperVariant(paperVariant.toString()) ||
+    validateQuestionNumber(questionNumber.toString()) ||
+    validateTopic(topic) ||
+    !isValidQuestionId(questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
+
   try {
     const session = await verifySession();
     if (session.user.role !== "admin" && session.user.role !== "owner") {
@@ -72,9 +123,9 @@ export const legacyUploadAction = async ({
     await Promise.all([
       // Check and create year if needed
       (async () => {
-        if (!(await isYearExists(parseInt(year), subjectFullName))) {
+        if (!(await isYearExists(year, subjectFullName))) {
           await createYear({
-            year: parseInt(year),
+            year: year,
             subjectId: subjectFullName,
           });
         }
@@ -115,14 +166,14 @@ export const legacyUploadAction = async ({
     if (contentType === "questions") {
       await overwriteQuestion({
         questionId: questionId,
-        year: parseInt(year),
+        year: year,
         season: season,
         paperType: paperType,
         paperVariant: paperVariant,
         userId: userId,
         subjectId: subjectFullName,
         topic: topic,
-        questionNumber: parseInt(questionNumber[1]),
+        questionNumber: questionNumber,
       });
 
       await overwriteQuestionImage({
