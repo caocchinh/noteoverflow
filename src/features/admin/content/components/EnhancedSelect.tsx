@@ -174,25 +174,7 @@ const EnhancedSelect = ({
               }
             />
           </SelectTrigger>
-          <SelectContent
-            className="!z-[99999999999999999] max-w-[320px] sm:max-w-[620px]"
-            onCloseAutoFocus={(e) => {
-              if (isInputFocused) {
-                e.preventDefault();
-              }
-            }}
-            onEscapeKeyDown={(e) => {
-              if (isInputFocused) {
-                e.stopPropagation();
-                e.preventDefault();
-              }
-            }}
-            onPointerDownOutside={(e) => {
-              if (isInputFocused) {
-                e.preventDefault();
-              }
-            }}
-          >
+          <SelectContent className="!z-[99999999999999999] max-w-[320px] sm:max-w-[620px]">
             <div className="flex items-center border-b p-2 w-full">
               <Search className="w-4 h-4 mr-2 text-muted-foreground" />
               <Input
