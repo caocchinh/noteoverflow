@@ -727,9 +727,9 @@ const UploadPage = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col  gap-4 items-center justify-center w-full sm:w-max">
-          <div className="flex flex-row w-full gap-12 items-start justify-center flex-wrap">
-            <div className="flex flex-col w-max gap-4 items-center justify-center">
+        <div className="flex flex-col  gap-4 items-center justify-center w-max">
+          <div className="flex w-full gap-12 items-start justify-center flex-wrap">
+            <div className="flex flex-col w-[370px] gap-4 items-center justify-center">
               <h1 className="text-xl font-semibold text-center w-full">
                 Question
               </h1>
@@ -754,7 +754,7 @@ const UploadPage = () => {
               />
             </div>
             {!isMultipleChoice ? (
-              <div className="flex flex-col w-max gap-4 items-center justify-center">
+              <div className="flex flex-col w-[370px] gap-4 items-center justify-center">
                 <h1 className="text-xl font-semibold text-center w-full">
                   Answer
                 </h1>
