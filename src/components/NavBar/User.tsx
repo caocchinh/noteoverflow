@@ -30,7 +30,7 @@ import {
 import GlareHover from "../GlazeHover";
 import styles from "./Navbar.module.css";
 import AvatarChange from "./AvatarChange";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
