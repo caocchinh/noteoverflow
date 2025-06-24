@@ -148,6 +148,10 @@ const EnhancedSelect = ({
       : newItems;
   }, [newItems, searchQuery]);
 
+  const noneDuplicateItems = useMemo(() => {
+    return [...new Set([...existingItems, ...newItems])];
+  }, [existingItems, newItems]);
+
   return (
     <div className="w-full" ref={wrapperRef} onClick={handleWrapperClick}>
       <h5 className="block text-sm font-medium mb-1">{labels.label}</h5>
@@ -220,61 +224,70 @@ const EnhancedSelect = ({
 
             <SelectGroup>
               <SelectLabel>{labels.existingItems}</SelectLabel>
-              {existingItems.map((item, index) => (
-                <SelectItem
-                  key={index}
-                  value={item}
-                  className={cn(
-                    "hidden ",
-                    filteredExistingItems.includes(item) && "block"
-                  )}
-                >
-                  {item}
-                </SelectItem>
-              ))}
+              {noneDuplicateItems
+                .filter((item) => existingItems.includes(item))
+                .map((item, index) => (
+                  <SelectItem
+                    key={index}
+                    value={item}
+                    className={cn(
+                      "hidden ",
+                      filteredExistingItems.includes(item) && "block"
+                    )}
+                  >
+                    {item}
+                  </SelectItem>
+                ))}
             </SelectGroup>
             <SelectGroup>
               <SelectLabel>{labels.newItems}</SelectLabel>
-              {newItems.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "p-2 hover:bg-muted group cursor-pointer  wrap-anywhere items-center justify-between rounded-md text-sm w-full",
-                    filteredNewItems.includes(item) ? "flex" : "hidden"
-                  )}
-                  onClick={() => {
-                    onValueChange(item);
-                    setIsOpen(false);
-                  }}
-                >
-                  {item}
-                  <div className="flex items-center gap-2">
-                    <X
-                      className="w-4 h-4 group-hover:block hidden"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveNewItem(index);
-                      }}
-                    />
-                    <Check
-                      className={cn(
-                        "w-4 h-4 group-hover:hidden",
-                        selectedValue === item ? "block" : "hidden"
-                      )}
-                      onClick={() => {
-                        onValueChange(item);
-                      }}
-                    />
+              {noneDuplicateItems
+                .filter((item) => !existingItems.includes(item))
+                .map((item, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "p-2 hover:bg-muted group cursor-pointer  wrap-anywhere items-center justify-between rounded-md text-sm w-full",
+                      filteredNewItems.includes(item) ? "flex" : "hidden"
+                    )}
+                    onClick={() => {
+                      onValueChange(item);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {item}
+                    <div className="flex items-center gap-2">
+                      <X
+                        className="w-4 h-4 group-hover:block hidden"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveNewItem(index);
+                        }}
+                      />
+                      <Check
+                        className={cn(
+                          "w-4 h-4 group-hover:hidden",
+                          selectedValue === item ? "block" : "hidden"
+                        )}
+                        onClick={() => {
+                          onValueChange(item);
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </SelectGroup>
 
-            {newItems.map((item, index) => (
-              <SelectItem key={index} value={item} className="hidden">
-                {item}
-              </SelectItem>
-            ))}
+            {noneDuplicateItems
+              .filter(
+                (item) =>
+                  newItems.includes(item) && !existingItems.includes(item)
+              )
+              .map((item, index) => (
+                <SelectItem key={index} value={item} className="hidden">
+                  {item}
+                </SelectItem>
+              ))}
 
             <div className="flex items-start gap-2 p-2 mt-2 flex-col">
               <div className="flex items-center gap-2 w-full">

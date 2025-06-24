@@ -14,6 +14,8 @@ import {
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
   BAD_REQUEST,
+  FILE_SIZE_EXCEEDS_LIMIT,
+  ONLY_WEBP_FILES_ALLOWED,
 } from "@/constants/constants";
 import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
 import { ValidContentType } from "@/constants/types";
@@ -121,6 +123,10 @@ const LegacyUploadPage = () => {
           toast.error(INTERNAL_SERVER_ERROR);
         } else if (error === BAD_REQUEST) {
           toast.error(BAD_REQUEST);
+        } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
+          toast.error(FILE_SIZE_EXCEEDS_LIMIT);
+        } else if (error === ONLY_WEBP_FILES_ALLOWED) {
+          toast.error(ONLY_WEBP_FILES_ALLOWED);
         } else {
           toast.error(FAILED_TO_UPLOAD_IMAGE);
         }

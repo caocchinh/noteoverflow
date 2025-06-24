@@ -7,6 +7,9 @@ import {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
   UNAUTHORIZED,
+  FILE_SIZE_EXCEEDS_LIMIT,
+  MAX_FILE_SIZE,
+  ONLY_WEBP_FILES_ALLOWED,
 } from "@/constants/constants";
 
 export async function POST(request: NextRequest) {
@@ -30,6 +33,21 @@ export async function POST(request: NextRequest) {
     if (!key || !body) {
       return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
+
+    if (body.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: FILE_SIZE_EXCEEDS_LIMIT },
+        { status: 400 }
+      );
+    }
+
+    if (body.type != "image/webp") {
+      return NextResponse.json(
+        { error: ONLY_WEBP_FILES_ALLOWED },
+        { status: 400 }
+      );
+    }
+
     await env.MAIN_BUCKET.put(key, await body.arrayBuffer(), options);
     return NextResponse.json(
       {

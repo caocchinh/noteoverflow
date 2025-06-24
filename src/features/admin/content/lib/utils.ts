@@ -1,8 +1,4 @@
-import {
-  BAD_REQUEST,
-  FAILED_TO_UPLOAD_IMAGE,
-  INTERNAL_SERVER_ERROR,
-} from "@/constants/constants";
+import { FAILED_TO_UPLOAD_IMAGE } from "@/constants/constants";
 import { ValidContentType, ValidSeason } from "@/constants/types";
 import { redirect } from "next/navigation";
 
@@ -210,24 +206,15 @@ export const uploadImage = async ({
   });
 
   if (!response.ok) {
+    const error = await response.json();
     if (response.status === 401) {
       redirect("/authentication");
     } else if (response.status === 403) {
       redirect("/app");
-    } else if (response.status === 500) {
-      return {
-        success: false,
-        error: INTERNAL_SERVER_ERROR,
-      };
-    } else if (response.status === 400) {
-      return {
-        success: false,
-        error: BAD_REQUEST,
-      };
     } else {
       return {
         success: false,
-        error: FAILED_TO_UPLOAD_IMAGE,
+        error: error.error ?? FAILED_TO_UPLOAD_IMAGE,
       };
     }
   }

@@ -54,6 +54,9 @@ import {
   BAD_REQUEST,
   FAILED_TO_UPLOAD_IMAGE,
   INTERNAL_SERVER_ERROR,
+  MAX_FILE_SIZE,
+  FILE_SIZE_EXCEEDS_LIMIT,
+  ONLY_WEBP_FILES_ALLOWED,
 } from "@/constants/constants";
 import {
   getCurriculumAction,
@@ -90,35 +93,20 @@ const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     string | undefined
   >(undefined);
-
-  const [newCurriculum, setNewCurriculum] = useState<string[]>([]);
-
   const [selectedSubject, setSelectedSubject] = useState<string | undefined>(
     undefined
   );
-
-  const [newSubject, setNewSubject] = useState<string[]>([]);
-
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>(
     undefined
   );
-  const [newTopic, setNewTopic] = useState<string[]>([]);
-
   const [selectedPaperType, setSelectedPaperType] = useState<
     string | undefined
   >(undefined);
-
-  const [newPaperType, setNewPaperType] = useState<string[]>([]);
-
   const [selectedSeason, setSelectedSeason] = useState<ValidSeason | "">("");
-  const [newSeason, setNewSeason] = useState<string[]>([]);
-
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
     undefined
   );
   const queryClient = useQueryClient();
-
-  const [newYear, setNewYear] = useState<string[]>([]);
   const [questionNumber, setQuestionNumber] = useState<string>("");
   const [questionNumberError, setQuestionNumberError] = useState<string>("");
   const [isMultipleChoice, setIsMultipleChoice] = useState<boolean>(false);
@@ -296,7 +284,11 @@ const UploadPage = () => {
   const handleFileInput = (files: FileList, type: "question" | "answer") => {
     for (const file of files) {
       if (file.type != "image/webp") {
-        toast.error("Only .webp files are allowed");
+        toast.error(ONLY_WEBP_FILES_ALLOWED);
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(FILE_SIZE_EXCEEDS_LIMIT);
         return;
       }
     }
@@ -436,8 +428,12 @@ const UploadPage = () => {
               throw new Error(INTERNAL_SERVER_ERROR);
             } else if (error === BAD_REQUEST) {
               throw new Error(BAD_REQUEST);
+            } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
+              throw new Error(FILE_SIZE_EXCEEDS_LIMIT);
+            } else if (error === ONLY_WEBP_FILES_ALLOWED) {
+              throw new Error(ONLY_WEBP_FILES_ALLOWED);
             } else {
-              throw new Error("Failed to upload image");
+              throw new Error(FAILED_TO_UPLOAD_IMAGE);
             }
           }
           const { success: success2, error: error2 } =
@@ -497,6 +493,10 @@ const UploadPage = () => {
                 throw new Error(INTERNAL_SERVER_ERROR);
               } else if (error === BAD_REQUEST) {
                 throw new Error(BAD_REQUEST);
+              } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
+                throw new Error(FILE_SIZE_EXCEEDS_LIMIT);
+              } else if (error === ONLY_WEBP_FILES_ALLOWED) {
+                throw new Error(ONLY_WEBP_FILES_ALLOWED);
               } else {
                 throw new Error(FAILED_TO_UPLOAD_IMAGE);
               }
@@ -524,17 +524,6 @@ const UploadPage = () => {
           })
         );
       }
-
-      setNewCurriculum(
-        newCurriculum.filter((item) => item !== selectedCurriculum)
-      );
-      setNewSubject(newSubject.filter((item) => item !== selectedSubject));
-      setNewTopic(newTopic.filter((item) => item !== selectedTopic));
-      setNewPaperType(
-        newPaperType.filter((item) => item !== selectedPaperType)
-      );
-      setNewSeason(newSeason.filter((item) => item !== selectedSeason));
-      setNewYear(newYear.filter((item) => item !== selectedYear));
 
       await resetAllInputs();
       toast.success("Question uploaded successfully");
@@ -595,7 +584,6 @@ const UploadPage = () => {
             isLoading={isCurriculumFetching || isCurriculumRefetching}
             validator={validateCurriculum}
           />
-
           <EnhancedSelect
             selectedValue={selectedSubject}
             onValueChange={handleSubjectChange}
@@ -611,7 +599,6 @@ const UploadPage = () => {
             }
             validator={validateSubject}
           />
-
           {isSubjectError && (
             <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2">
               <p className="text-sm">
@@ -627,7 +614,6 @@ const UploadPage = () => {
               </Button>
             </div>
           )}
-
           {isSubjectInfoError && (
             <div className="w-full p-2 bg-red-100 border border-red-400 text-red-700 rounded mb-2 ">
               <p className="text-sm">
@@ -643,7 +629,6 @@ const UploadPage = () => {
               </Button>
             </div>
           )}
-
           <EnhancedSelect
             selectedValue={selectedTopic}
             onValueChange={setSelectedTopic}
@@ -654,7 +639,6 @@ const UploadPage = () => {
             isLoading={isSubjectInfoFetching && !!selectedSubject}
             disabled={!selectedSubject}
           />
-
           <EnhancedSelect
             selectedValue={selectedPaperType}
             onValueChange={setSelectedPaperType}
@@ -668,7 +652,6 @@ const UploadPage = () => {
             validator={validatePaperType}
             inputType="number"
           />
-
           <EnhancedSelect
             selectedValue={selectedSeason}
             onValueChange={(item) => setSelectedSeason(item as ValidSeason)}
@@ -679,7 +662,6 @@ const UploadPage = () => {
             disabled={!selectedSubject}
             validator={validateSeason}
           />
-
           <EnhancedSelect
             selectedValue={selectedYear}
             onValueChange={setSelectedYear}
