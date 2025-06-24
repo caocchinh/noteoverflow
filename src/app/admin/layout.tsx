@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Loader from "@/components/Loader/Loader";
 import Navigation from "@/features/admin/components/Navigation";
 import { verifySession } from "@/dal/verifySession";
+import { ADMIN_NAVIGATION_ITEMS } from "@/features/admin/constants/constants";
 
 const AdminContent = async ({ children }: { children: React.ReactNode }) => {
   const session = await verifySession();
@@ -28,7 +29,12 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         <div className="h-[35px] border-l border-gray-500 w-[1px] hidden md:block"></div>
-        {session && <Navigation isOwner={session.user.role === "owner"} />}
+        {session && (
+          <Navigation
+            isOwner={session.user.role === "owner"}
+            items={ADMIN_NAVIGATION_ITEMS}
+          />
+        )}
       </div>
       {children}
     </div>

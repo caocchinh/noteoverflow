@@ -1,40 +1,41 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { usePathname } from "next/navigation";
 
-const Navigation = ({ isOwner }: { isOwner: boolean }) => {
+const Navigation = ({
+  items,
+  isOwner,
+}: {
+  items: Array<{ label: string; path: string; isOwnerNeeded: boolean }>;
+  isOwner?: boolean;
+}) => {
   const pathname = usePathname();
-
   return (
-    <div className="flex items-center justify-start md:justify-center gap-4 flex-wrap">
-      <Button
-        variant={
-          pathname === "/admin/content/upload" ||
-          pathname === "/admin/content/delete" ||
-          pathname === "/admin/content/update"
-            ? "default"
-            : "outline"
-        }
-        asChild
+    <div className="flex items-center w-full h-max justify-start gap-4 mt-2 flex-wrap sm:flex-nowrap">
+      <AnimatedBackground
+        defaultValue={pathname}
+        className=" border-logo-main border-b-2 w-full h-full"
+        transition={{
+          type: "spring",
+          bounce: 0.1,
+          duration: 0.3,
+        }}
       >
-        <Link href="/admin/content">Content management</Link>
-      </Button>
-      <Button
-        variant={pathname === "/admin/legacy" ? "default" : "outline"}
-        asChild
-      >
-        <Link href="/admin/legacy">Legacy upload</Link>
-      </Button>
-      {isOwner && (
-        <Button
-          variant={pathname === "/admin/user" ? "default" : "outline"}
-          asChild
-        >
-          <Link href="/admin/user">User management</Link>
-        </Button>
-      )}
+        {items
+          .filter((item) => !(item.isOwnerNeeded && !isOwner))
+          .map((item) => (
+            <Link
+              href={item.path}
+              title={item.label}
+              data-id={pathname.includes(item.path) ? pathname : item.path}
+              key={item.path}
+              className="text-primary rounded-none p-2 bg-transparent shadow-none cursor-pointer hover:bg-transparent hover:text-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+      </AnimatedBackground>
     </div>
   );
 };
