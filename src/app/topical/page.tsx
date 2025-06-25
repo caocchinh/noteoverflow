@@ -27,6 +27,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -42,7 +44,7 @@ const TopicalPage = () => {
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
 
   return (
-    <div className="pt-24 min-h-screen p-6">
+    <div className="pt-24  p-6">
       <h1 className="text-4xl font-bold">Topical Questions</h1>
       <div className="mt-6  gap-6 flex items-center justify-start">
         <div className="flex flex-col gap-1">
@@ -128,33 +130,52 @@ const TopicalPage = () => {
               />
             </SelectTrigger>
             <SelectContent className="w-full">
-              <div className="flex items-center gap-2 px-2">
+              <div className="flex items-center gap-2 px-2 sticky w-full h-full ">
                 <SearchIcon className="w-4 h-4" />
                 <Input
                   placeholder="Search subject"
                   value={subjectSearchInput}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                  }}
                   onChange={(e) => setSubjectSearchInput(e.target.value)}
-                  className="w-full border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-max border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
-              <SelectSeparator />
-              {TOPICAL_DATA[
-                TOPICAL_DATA.findIndex(
-                  (item) => item.curriculum === selectedCurriculum
-                )!
-              ]?.subject
-                .filter((item) =>
+              <SelectSeparator className="w-full" />
+
+              <ScrollArea className="h-[250px] w-full">
+                {TOPICAL_DATA[
+                  TOPICAL_DATA.findIndex(
+                    (item) => item.curriculum === selectedCurriculum
+                  )!
+                ]?.subject.filter((item) =>
                   item.code
                     .toLowerCase()
                     .includes(subjectSearchInput.toLowerCase())
-                )
-                .map((item) => (
+                ).length == 0 && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    Nothing to show!
+                  </div>
+                )}
+                {TOPICAL_DATA[
+                  TOPICAL_DATA.findIndex(
+                    (item) => item.curriculum === selectedCurriculum
+                  )!
+                ]?.subject.map((item) => (
                   <HoverCard key={item.code} openDelay={0} closeDelay={0}>
                     <HoverCardTrigger asChild>
                       <SelectItem
                         key={item.code}
                         value={item.code}
-                        className="relative p-2"
+                        className={cn(
+                          "p-2",
+                          subjectSearchInput &&
+                            !item.code
+                              .toLowerCase()
+                              .includes(subjectSearchInput.toLowerCase()) &&
+                            "hidden"
+                        )}
                       >
                         <div key={item.code} className="w-full">
                           {item.code}
@@ -166,6 +187,7 @@ const TopicalPage = () => {
                       side="right"
                       sideOffset={-1}
                       align="start"
+                      avoidCollisions={true}
                     >
                       <div className="absolute top-0 left-3 bg-white rounded-md p-2 border">
                         <Image
@@ -178,6 +200,7 @@ const TopicalPage = () => {
                     </HoverCardContent>
                   </HoverCard>
                 ))}
+              </ScrollArea>
             </SelectContent>
           </Select>
         </div>
