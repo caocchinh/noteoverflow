@@ -208,7 +208,7 @@ export const answer = sqliteTable(
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
       .notNull(),
-    answerImageSrc: text("answer_image_src").notNull(),
+    answer: text("answer").notNull(),
     order: integer("order").notNull().default(0),
   },
   (table) => {

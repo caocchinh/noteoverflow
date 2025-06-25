@@ -141,7 +141,7 @@ export async function uploadAction(
       success: true,
     };
   } catch (error) {
-    console.error("Error creating metadata records:", error);
+    console.error("Content:: Error creating metadata records:", error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,

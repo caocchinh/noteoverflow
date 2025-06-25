@@ -138,11 +138,11 @@ export const validatePaperVariant = (value: string): string => {
 export const seasonToCode = (season: ValidSeason): string => {
   switch (season) {
     case "Summer":
-      return "MJ";
+      return "M_J";
     case "Winter":
-      return "ON";
+      return "O_N";
     case "Spring":
-      return "FM";
+      return "F_M";
   }
 };
 

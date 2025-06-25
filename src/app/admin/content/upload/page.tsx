@@ -16,7 +16,6 @@ import {
   validateSubject,
   validatePaperVariant,
   paperCodeParser,
-  seasonToCode,
   uploadImage,
   validateTopic,
   validateCurriculum,
@@ -464,7 +463,7 @@ const UploadPage = () => {
             paperCode: paperCode,
             questionNumber: questionNumber!,
           }),
-          answerImageSrc: multipleChoiceInput,
+          answer: multipleChoiceInput,
           answerOrder: 0,
         });
         if (!success2) {
@@ -509,7 +508,7 @@ const UploadPage = () => {
                   paperCode: paperCode,
                   questionNumber: questionNumber!,
                 }),
-                answerImageSrc: data!.imageSrc,
+                answer: data!.imageSrc,
                 answerOrder: index,
               });
             if (!success2) {
@@ -924,9 +923,18 @@ const UploadPage = () => {
                       <div className="font-semibold">Season:</div>
                       <div>
                         {selectedSeason} {"("}
-                        {seasonToCode(
-                          selectedSeason as "Summer" | "Winter" | "Spring"
-                        )}
+                        {(() => {
+                          switch (selectedSeason) {
+                            case "Summer":
+                              return "M/J";
+                            case "Winter":
+                              return "O/N";
+                            case "Spring":
+                              return "F/M";
+                            default:
+                              return "";
+                          }
+                        })()}
                         {")"}
                       </div>
                       <div className="font-semibold">Year:</div>

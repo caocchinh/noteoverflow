@@ -94,7 +94,10 @@ const LegacyUploadPage = () => {
     const season: ValidSeason = file.webkitRelativePath.split(
       "/"
     )[4] as ValidSeason;
-    const paperCode = file.webkitRelativePath.split("/")[6];
+    const tempCode = file.webkitRelativePath.split("/")[6];
+    const seasonPart = tempCode.split("_")[2];
+    const result = seasonPart.slice(0, 1) + "_" + seasonPart.slice(1);
+    const paperCode = tempCode.replace(seasonPart, result);
 
     const paperVariant = parseInt(paperCode.split("_")[1]) % 10;
     const paperType = Math.floor(parseInt(paperCode.split("_")[1]) / 10);

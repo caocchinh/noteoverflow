@@ -184,7 +184,7 @@ export const legacyUploadAction = async ({
     } else if (contentType === "answers") {
       await overwriteAnswer({
         questionId: questionId,
-        answerImageSrc: imageSrc,
+        answer: imageSrc,
         answerOrder: order,
       });
     }
@@ -193,7 +193,7 @@ export const legacyUploadAction = async ({
       success: true,
     };
   } catch (error) {
-    console.error("Error processing curriculum data:", error);
+    console.error("Legacy:: Error creating metadata records:", error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,

@@ -241,19 +241,19 @@ export const createQuestionImageAction = async ({
 
 export const createAnswerAction = async ({
   questionId,
-  answerImageSrc,
+  answer,
   answerOrder,
 }: {
   questionId: string;
-  answerImageSrc: string;
+  answer: string;
   answerOrder: number;
 }): Promise<ServerActionResponse<void>> => {
   if (
     typeof answerOrder !== "number" ||
     typeof questionId !== "string" ||
-    typeof answerImageSrc !== "string" ||
+    typeof answer !== "string" ||
     !questionId ||
-    !answerImageSrc ||
+    !answer ||
     answerOrder < 0 ||
     !isValidQuestionId(questionId)
   ) {
@@ -269,7 +269,7 @@ export const createAnswerAction = async ({
     }
     await createAnswer({
       questionId: questionId,
-      answerImageSrc: answerImageSrc,
+      answer: answer,
       answerOrder: answerOrder,
     });
     return {

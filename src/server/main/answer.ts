@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 
 export const isAnswerExists = async (
   questionId: string,
-  answerImageSrc: string
+  answer: string
 ): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
@@ -14,7 +14,7 @@ export const isAnswerExists = async (
     .where(
       and(
         eq(schema.answer.questionId, questionId),
-        eq(schema.answer.answerImageSrc, answerImageSrc)
+        eq(schema.answer.answer, answer)
       )
     )
     .limit(1);
@@ -23,11 +23,11 @@ export const isAnswerExists = async (
 
 export const createAnswer = async ({
   questionId,
-  answerImageSrc,
+  answer,
   answerOrder,
 }: {
   questionId: string;
-  answerImageSrc: string;
+  answer: string;
   answerOrder: number;
 }): Promise<{
   success: boolean;
@@ -36,7 +36,7 @@ export const createAnswer = async ({
   const db = await getDbAsync();
   await db
     .insert(schema.answer)
-    .values({ questionId, answerImageSrc, order: answerOrder });
+    .values({ questionId, answer, order: answerOrder });
 
   return {
     success: true,
@@ -46,11 +46,11 @@ export const createAnswer = async ({
 
 export const overwriteAnswer = async ({
   questionId,
-  answerImageSrc,
+  answer,
   answerOrder,
 }: {
   questionId: string;
-  answerImageSrc: string;
+  answer: string;
   answerOrder: number;
 }) => {
   const db = await getDbAsync();
@@ -59,13 +59,13 @@ export const overwriteAnswer = async ({
     .insert(schema.answer)
     .values({
       questionId: questionId,
-      answerImageSrc: answerImageSrc,
+      answer: answer,
       order: answerOrder,
     })
     .onConflictDoUpdate({
       target: [schema.answer.questionId, schema.answer.order],
       set: {
-        answerImageSrc: answerImageSrc,
+        answer: answer,
       },
     });
 };
