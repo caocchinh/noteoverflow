@@ -18,7 +18,7 @@ import {
   ONLY_WEBP_FILES_ALLOWED,
 } from "@/constants/constants";
 import { legacyUploadAction } from "@/features/admin/legacy/server/actions";
-import { ValidContentType } from "@/constants/types";
+import { ValidContentType, ValidCurriculum } from "@/constants/types";
 import { ValidSeason } from "@/constants/types";
 import { parseQuestionId } from "@/lib/utils";
 import { AlertDialog } from "@radix-ui/react-alert-dialog";
@@ -41,7 +41,7 @@ const LegacyUploadPage = () => {
   const [failedUploads, setFailedUploads] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [curriculum, setCurriculum] = useState<"A-LEVEL" | "IGCSE">("A-LEVEL");
+  const [curriculum, setCurriculum] = useState<ValidCurriculum>("A-LEVEL");
   const [subjectCode, setSubjectCode] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

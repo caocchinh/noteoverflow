@@ -1,8 +1,13 @@
 "use client";
 
-import { cn } from "../../lib/utils";
-import { Command, CommandList, CommandEmpty, CommandItem } from "./command";
-import { Badge } from "./badge";
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandItem,
+  CommandEmpty,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
 import { X as RemoveIcon, Check } from "lucide-react";
 import React, {
@@ -23,7 +28,8 @@ interface MultiSelectorProps
 
 interface MultiSelectContextProps {
   value: string[];
-  onValueChange: (value: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onValueChange: (value: any) => void;
   open: boolean;
   setOpen: (value: boolean) => void;
   inputValue: string;
@@ -265,7 +271,8 @@ MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 const MultiSelectorInput = forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(({ className, ...props }, ref) => {
   const {
     setOpen,
     inputValue,

@@ -236,7 +236,7 @@ export default function Home() {
               asChild
               className="p-6 !px-6 cursor-pointer rounded-lg transition-all shadow-lg bg-transparent text-[var(--home-page-text)] border border-[var(--home-page-text)] hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 w-[90%] md:w-[50%] active:scale-[0.99]"
             >
-              <Link href="/app">
+              <Link href="/topical">
                 Get Started
                 <SparklesIcon />
               </Link>
@@ -322,7 +322,7 @@ export default function Home() {
               asChild
               className="absolute hover:cursor-none top-0 left-0 w-full text-xl h-full bg-transparent hover:bg-transparent border-2 border-white/70 text-[var(--home-page-text)] active:scale-[0.98]"
             >
-              <Link href="/app">
+              <Link href="/topical">
                 Learn with zero cost
                 <HandCoins className="!w-6 !h-6" />
               </Link>

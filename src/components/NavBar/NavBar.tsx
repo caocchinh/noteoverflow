@@ -18,15 +18,7 @@ const NavBar = () => {
       <nav className="flex items-center justify-center sm:justify-between gap-3 sm:gap-8 w-full">
         {pathname !== "/" ? (
           <>
-            <Link href="/" className="hidden lg:block">
-              <Image
-                src="/assets/logo-full-colorised-white.webp"
-                alt="logo"
-                width={245}
-                height={28}
-              />
-            </Link>
-            <Link href="/" className="lg:hidden block">
+            <Link href="/" className="block">
               <Image
                 src="/assets/logo-bg-colorised-modified-small.webp"
                 alt="logo"

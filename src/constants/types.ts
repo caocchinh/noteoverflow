@@ -44,3 +44,4 @@ export type ServerActionResponse<T> = {
 
 export type ValidSeason = "Summer" | "Winter" | "Spring";
 export type ValidContentType = "questions" | "answers";
+export type ValidCurriculum = "IGCSE" | "A-LEVEL";
