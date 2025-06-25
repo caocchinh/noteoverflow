@@ -8,6 +8,7 @@ import { ModeToggle } from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 import User from "./User";
 import Search from "./Search";
+import { GlowEffect } from "../ui/glow-effect";
 
 const NavBar = () => {
   const pathname = usePathname();
@@ -58,17 +59,27 @@ const NavBar = () => {
         <Search />
         <div className="flex items-center header-content-group gap-4">
           <Button
-            className="bg-transparent  dark:hover:bg-white/5 rounded-lg border border-[var(--navbar-border)] text-[var(--navbar-text)]"
+            className="bg-[var(--navbar-bg)] hover:bg-[var(--navbar-bg)] rounded-lg border border-[var(--navbar-border)] group text-[var(--navbar-text)] relative "
             asChild
-            title="Access topical questions"
           >
-            <Link href="/app">
-              <Layers />
-              <ShinyText
-                text="Topical questions"
-                className="hidden sm:inline-block"
+            <Link className="relative" href="/topical">
+              <GlowEffect
+                colors={["#FF5733", "#33FF57", "#3357FF", "#F1C40F"]}
+                mode="colorShift"
+                blur="soft"
+                className="z-[-1] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                duration={3}
+                scale={1}
               />
-              <ShinyText text="Topical" className="inline-block sm:hidden" />
+
+              <div className="flex items-center gap-2 justify-center">
+                <Layers />
+                <ShinyText
+                  text="Topical questions"
+                  className="hidden sm:inline-block"
+                />
+                <ShinyText text="Topical" className="inline-block sm:hidden" />
+              </div>
             </Link>
           </Button>
           <User />
