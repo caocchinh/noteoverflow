@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CurriculumType,
   SubjectType,
@@ -537,24 +537,44 @@ const UploadPage = () => {
     }
   };
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (selectedCurriculum) {
+        e.preventDefault();
+      }
+    };
+
+    if (selectedCurriculum) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [selectedCurriculum]);
+
   return (
     <>
-      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
-        <DialogDescription className="sr-only">Preview Image</DialogDescription>
-        <DialogContent
-          onClick={() => setImageDialogOpen(false)}
-          className="max-h-[70vh] overflow-y-auto"
-        >
-          <DialogTitle className="sr-only">Upload Image</DialogTitle>
-          <Image
-            src={imageDialogImage!}
-            alt="Upload Image"
-            width={100}
-            height={100}
-            className="w-[100%] h-max object-contain border-2 border-transparent hover:border-red-500"
-          />
-        </DialogContent>
-      </Dialog>
+      <div>
+        <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+          <DialogDescription className="sr-only">
+            Preview Image
+          </DialogDescription>
+          <DialogContent
+            onClick={() => setImageDialogOpen(false)}
+            className="max-h-[70vh] overflow-y-auto"
+          >
+            <DialogTitle className="sr-only">Upload Image</DialogTitle>
+            <Image
+              src={imageDialogImage!}
+              alt="Upload Image"
+              width={100}
+              height={100}
+              className="w-[100%] h-max object-contain border-2 border-transparent hover:border-red-500"
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
       <div className="flex flex-row gap-8 items-start justify-evenly mt-4 w-full flex-wrap">
         <div className="flex flex-col flex-wrap gap-4 items-start justify-start border-2 border-foreground-muted rounded-md p-4 w-full sm:w-[350px] bg-card">
           <h1 className="text-xl font-semibold text-center w-full">
