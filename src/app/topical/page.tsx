@@ -120,7 +120,7 @@ const TopicalPage = () => {
             open={isSubjectSelectOpen}
             disabled={!selectedCurriculum}
           >
-            <SelectTrigger id="subject">
+            <SelectTrigger id="subject" className="cursor-pointer">
               <SelectValue
                 placeholder={
                   selectedCurriculum
@@ -129,6 +129,7 @@ const TopicalPage = () => {
                 }
               />
             </SelectTrigger>
+
             <SelectContent className="w-full">
               <div className="flex items-center gap-2 px-2 sticky w-full h-full ">
                 <SearchIcon className="w-4 h-4" />
@@ -154,8 +155,8 @@ const TopicalPage = () => {
                     .toLowerCase()
                     .includes(subjectSearchInput.toLowerCase())
                 ).length == 0 && (
-                  <div className="w-full h-full flex items-center justify-center">
-                    Nothing to show!
+                  <div className="w-full h-[250px] flex items-center justify-center">
+                    Nothing found!
                   </div>
                 )}
                 {TOPICAL_DATA[
@@ -183,13 +184,13 @@ const TopicalPage = () => {
                       </SelectItem>
                     </HoverCardTrigger>
                     <HoverCardContent
-                      className="w-max bg-transparent border-none shadow-none relative"
+                      className="w-max bg-transparent border-none shadow-none relative hidden sm:block"
                       side="right"
-                      sideOffset={-1}
+                      sideOffset={-10}
                       align="start"
                       avoidCollisions={true}
                     >
-                      <div className="absolute top-0 left-3 bg-white rounded-md p-2 border">
+                      <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
                         <Image
                           src={item.coverImage}
                           alt={item.code}
