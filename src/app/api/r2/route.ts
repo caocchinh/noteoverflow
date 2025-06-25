@@ -61,3 +61,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: INTERNAL_SERVER_ERROR }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const db = await auth(getDbAsync);
+    const session = await db.api.getSession({
+      headers: await headers(),
+    });
+    if (!session) {
+      return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
+    }
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      return NextResponse.json({ error: UNAUTHORIZED }, { status: 403 });
+    }
+    const { env } = getCloudflareContext();
+    const formData = await request.formData();
+    const key = formData.get("key") as string;
+    await env.MAIN_BUCKET.delete(key);
+    NextResponse.json(
+      {
+        success: true,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch {
+    return NextResponse.json({ error: INTERNAL_SERVER_ERROR }, { status: 500 });
+  }
+}

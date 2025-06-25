@@ -356,6 +356,20 @@ const UploadPage = () => {
   };
 
   const handleUpload = async () => {
+    const handleError = (error: string | undefined) => {
+      if (error === INTERNAL_SERVER_ERROR) {
+        throw new Error(INTERNAL_SERVER_ERROR);
+      } else if (error === BAD_REQUEST) {
+        throw new Error(BAD_REQUEST);
+      } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
+        throw new Error(FILE_SIZE_EXCEEDS_LIMIT);
+      } else if (error === ONLY_WEBP_FILES_ALLOWED) {
+        throw new Error(ONLY_WEBP_FILES_ALLOWED);
+      } else {
+        throw new Error(FAILED_TO_UPLOAD_IMAGE);
+      }
+    };
+
     setIsUploading(true);
     try {
       const paperCode = paperCodeParser({
@@ -373,13 +387,7 @@ const UploadPage = () => {
         })
       );
       if (!success) {
-        if (error === INTERNAL_SERVER_ERROR) {
-          throw new Error(INTERNAL_SERVER_ERROR);
-        } else if (error === BAD_REQUEST) {
-          throw new Error(BAD_REQUEST);
-        } else {
-          throw new Error(error || "Unknown error");
-        }
+        handleError(error);
       }
       if (data) {
         throw new Error(
@@ -402,13 +410,7 @@ const UploadPage = () => {
         questionNumber: parseInt(questionNumber!),
       });
       if (!success2) {
-        if (error2 === INTERNAL_SERVER_ERROR) {
-          throw new Error(INTERNAL_SERVER_ERROR);
-        } else if (error2 === BAD_REQUEST) {
-          throw new Error(BAD_REQUEST);
-        } else {
-          throw new Error(error2 || "Unknown error");
-        }
+        handleError(error2);
       }
 
       // Upload and create all question images in parallel
@@ -423,17 +425,7 @@ const UploadPage = () => {
             order: index,
           });
           if (!success) {
-            if (error === INTERNAL_SERVER_ERROR) {
-              throw new Error(INTERNAL_SERVER_ERROR);
-            } else if (error === BAD_REQUEST) {
-              throw new Error(BAD_REQUEST);
-            } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
-              throw new Error(FILE_SIZE_EXCEEDS_LIMIT);
-            } else if (error === ONLY_WEBP_FILES_ALLOWED) {
-              throw new Error(ONLY_WEBP_FILES_ALLOWED);
-            } else {
-              throw new Error(FAILED_TO_UPLOAD_IMAGE);
-            }
+            handleError(error);
           }
           const { success: success2, error: error2 } =
             await createQuestionImageAction({
@@ -446,13 +438,7 @@ const UploadPage = () => {
               order: index,
             });
           if (!success2) {
-            if (error2 === INTERNAL_SERVER_ERROR) {
-              throw new Error(INTERNAL_SERVER_ERROR);
-            } else {
-              throw new Error(
-                error2 || "Unknown error creating question image"
-              );
-            }
+            handleError(error2);
           }
         })
       );
@@ -467,13 +453,7 @@ const UploadPage = () => {
           answerOrder: 0,
         });
         if (!success2) {
-          if (error2 === INTERNAL_SERVER_ERROR) {
-            throw new Error(INTERNAL_SERVER_ERROR);
-          } else if (error2 === BAD_REQUEST) {
-            throw new Error(BAD_REQUEST);
-          } else {
-            throw new Error(error2 || "Unknown error creating answer");
-          }
+          handleError(error2);
         }
       } else {
         // Upload and create all answer images in parallel
@@ -488,17 +468,7 @@ const UploadPage = () => {
               order: index,
             });
             if (!success) {
-              if (error === INTERNAL_SERVER_ERROR) {
-                throw new Error(INTERNAL_SERVER_ERROR);
-              } else if (error === BAD_REQUEST) {
-                throw new Error(BAD_REQUEST);
-              } else if (error === FILE_SIZE_EXCEEDS_LIMIT) {
-                throw new Error(FILE_SIZE_EXCEEDS_LIMIT);
-              } else if (error === ONLY_WEBP_FILES_ALLOWED) {
-                throw new Error(ONLY_WEBP_FILES_ALLOWED);
-              } else {
-                throw new Error(FAILED_TO_UPLOAD_IMAGE);
-              }
+              handleError(error);
             }
 
             const { success: success2, error: error2 } =
@@ -512,13 +482,7 @@ const UploadPage = () => {
                 answerOrder: index,
               });
             if (!success2) {
-              if (error2 === INTERNAL_SERVER_ERROR) {
-                throw new Error(INTERNAL_SERVER_ERROR);
-              } else if (error2 === BAD_REQUEST) {
-                throw new Error(BAD_REQUEST);
-              } else {
-                throw new Error(error2 || "Unknown error creating answer");
-              }
+              handleError(error2);
             }
           })
         );
