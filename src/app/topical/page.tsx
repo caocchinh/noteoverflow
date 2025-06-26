@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TOPICAL_DATA } from "@/features/topical/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
@@ -51,6 +51,14 @@ const TopicalPage = () => {
       ?.season;
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
+  // const [cachedData, setCachedData] = useReducer(
+  //   (state: any, action: any) => {
+  //     return { ...state, ...action };
+  //   },
+  //   {
+  //     curriculum: "",
+  //   }
+  // );
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -60,6 +68,21 @@ const TopicalPage = () => {
     setSelectedPaperType([]);
     setSelectedSeason([]);
   };
+
+  useEffect(() => {
+    setSelectedSubject("");
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+  }, [selectedCurriculum]);
+
+  useEffect(() => {
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+  }, [selectedSubject]);
 
   return (
     <div className="pt-19 min-h-screen p-6">
@@ -117,10 +140,7 @@ const TopicalPage = () => {
               />
             </div>
           </div>
-          <Button className="cursor-pointer">
-            Search
-            <ScanText />
-          </Button>
+
           <Dialog
             open={isResetConfirmationOpen}
             onOpenChange={setIsResetConfirmationOpen}
@@ -158,6 +178,10 @@ const TopicalPage = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <Button className="cursor-pointer">
+            Search
+            <ScanText />
+          </Button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EnhancedMultiSelect

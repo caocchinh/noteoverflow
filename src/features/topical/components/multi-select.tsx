@@ -86,7 +86,6 @@ const MultiSelector = ({
 }: MultiSelectorProps) => {
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState<boolean>(false);
-
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
@@ -166,6 +165,12 @@ const MultiSelector = ({
       const target = inputRef.current;
 
       if (!target) return;
+      if (commandListRef.current) {
+        commandListRef.current.scrollTo({
+          top: 0,
+          behavior: "instant",
+        });
+      }
 
       const moveNext = () => {
         const nextIndex = activeIndex + 1;
@@ -235,6 +240,8 @@ const MultiSelector = ({
           break;
 
         case "Escape":
+          setInputValue("");
+          inputRef.current?.blur();
           if (activeIndex !== -1) {
             setActiveIndex(-1);
           } else if (open) {
@@ -440,7 +447,6 @@ const MultiSelectorInput = forwardRef<
     setActiveIndex,
     handleSelect,
     ref: inputRef,
-    commandListRef,
     isClickingScrollArea,
     setOpen,
   } = useMultiSelect();
@@ -450,17 +456,6 @@ const MultiSelectorInput = forwardRef<
       {...props}
       tabIndex={0}
       ref={inputRef}
-      onKeyDown={(e) => {
-        if (e.key !== "Enter") {
-          e.stopPropagation();
-        }
-        if (commandListRef.current) {
-          commandListRef.current.scrollTo({
-            top: 0,
-            behavior: "instant",
-          });
-        }
-      }}
       value={inputValue}
       onValueChange={activeIndex === -1 ? setInputValue : undefined}
       onSelect={handleSelect}
@@ -468,6 +463,7 @@ const MultiSelectorInput = forwardRef<
         // Only close if we're not clicking in the ScrollArea
         if (!isClickingScrollArea) {
           setOpen(false);
+          setInputValue("");
         }
       }}
       onFocus={() => {
@@ -503,7 +499,7 @@ const MultiSelectorList = forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, children }, ref) => {
-  const { value, onValueChange, commandListRef } = useMultiSelect();
+  const { value, onValueChange, commandListRef, inputValue } = useMultiSelect();
 
   return (
     <CommandList
@@ -519,7 +515,7 @@ const MultiSelectorList = forwardRef<
         className
       )}
     >
-      {value.length > 0 && (
+      {value.length > 0 && !inputValue && (
         <>
           <CommandGroup heading={`${value.length} selected`}>
             {value.map((item) => (
@@ -545,7 +541,11 @@ const MultiSelectorList = forwardRef<
       )}
 
       <CommandGroup
-        heading={`${React.Children.count(children)} available options`}
+        heading={
+          !!inputValue
+            ? "Search results"
+            : `${React.Children.count(children)} available options`
+        }
       >
         {children}
       </CommandGroup>
