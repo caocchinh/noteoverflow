@@ -36,7 +36,7 @@ const EnhancedMultiSelect = ({
             <Search className="h-4 w-4" />
             <MultiSelectorInput
               disabled={!data}
-              placeholder={`Select ${label.toLowerCase()}`}
+              placeholder={`Search ${label.toLowerCase()}`}
             />
           </div>
         </MultiSelectorTrigger>

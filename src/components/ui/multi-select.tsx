@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
-import { X as RemoveIcon, Check } from "lucide-react";
+import { X as RemoveIcon, Check, Trash2 } from "lucide-react";
 import React, {
   KeyboardEvent,
   createContext,
@@ -278,12 +278,12 @@ const MultiSelectorTrigger = forwardRef<
   }, []);
 
   useEffect(() => {
-    if (open && contentRef.current) {
+    if (contentRef.current) {
       const containerHeight = contentRef.current.clientHeight;
       const height = Math.min(containerHeight || 0, 120);
       setContentHeight(height);
     }
-  }, [open, value]);
+  }, [value]);
 
   return (
     <div
@@ -307,62 +307,64 @@ const MultiSelectorTrigger = forwardRef<
           setContentHeight(0);
         }}
       >
-        <RemoveIcon className="h-4 w-4" />
+        <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
       </div>
-      <ScrollArea
-        ref={scrollAreaRef}
-        className="w-full"
-        style={{ height: `${contentHeight}px` }}
-        onMouseDown={() => {
-          setIsClickingScrollArea(true);
-        }}
-        onMouseUp={() => {
-          setIsClickingScrollArea(false);
-        }}
-        onClick={() => {
-          if (!open && !isClickingRemove) {
-            setOpen(true);
-          }
-        }}
-      >
-        <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
-          {value.map((item, index) => (
-            <Badge
-              key={item}
-              className={cn(
-                "px-1 rounded-xl flex items-center gap-1",
-                activeIndex === index && "ring-2 ring-muted-foreground "
-              )}
-              variant={"secondary"}
-            >
-              <span className="text-xs">{item}</span>
-              <button
-                aria-label={`Remove ${item} option`}
-                aria-roledescription="button to remove option"
-                type="button"
-                onMouseDown={(e) => {
-                  mousePreventDefault(e);
-                  setIsClickingRemove(true);
-                }}
-                onClick={() => {
-                  onValueChange(item);
-                  if (value.length === 1) {
-                    setContentHeight(0);
-                  }
-                }}
-                onMouseUp={() => {
-                  setTimeout(() => {
-                    setIsClickingRemove(false);
-                  }, 100);
-                }}
+      {value.length > 0 && (
+        <ScrollArea
+          ref={scrollAreaRef}
+          className="w-full"
+          style={{ height: `${contentHeight}px` }}
+          onMouseDown={() => {
+            setIsClickingScrollArea(true);
+          }}
+          onMouseUp={() => {
+            setIsClickingScrollArea(false);
+          }}
+          onClick={() => {
+            if (!open && !isClickingRemove) {
+              setOpen(true);
+            }
+          }}
+        >
+          <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
+            {value.map((item, index) => (
+              <Badge
+                key={item}
+                className={cn(
+                  "px-1 rounded-xl flex items-center gap-1",
+                  activeIndex === index && "ring-2 ring-muted-foreground "
+                )}
+                variant={"secondary"}
               >
-                <span className="sr-only">Remove {item} option</span>
-                <RemoveIcon className="h-4 w-4 cursor-pointer" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      </ScrollArea>
+                <span className="text-xs">{item}</span>
+                <button
+                  aria-label={`Remove ${item} option`}
+                  aria-roledescription="button to remove option"
+                  type="button"
+                  onMouseDown={(e) => {
+                    mousePreventDefault(e);
+                    setIsClickingRemove(true);
+                  }}
+                  onClick={() => {
+                    onValueChange(item);
+                    if (value.length === 1) {
+                      setContentHeight(0);
+                    }
+                  }}
+                  onMouseUp={() => {
+                    setTimeout(() => {
+                      setIsClickingRemove(false);
+                    }, 100);
+                  }}
+                >
+                  <span className="sr-only">Remove {item} option</span>
+                  <RemoveIcon className="h-4 w-4 cursor-pointer" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
     </div>
   );
 });

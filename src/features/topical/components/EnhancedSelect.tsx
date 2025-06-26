@@ -19,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
+import styles from "./EnhancedSelect.module.css";
+
+// Add these styles globally only once
 
 const EnhancedSelect = ({
   label,
@@ -70,7 +73,7 @@ const EnhancedSelect = ({
       const height =
         filteredItems?.length === 0
           ? 250
-          : Math.min(filteredItems?.length * 40 || 0, 250);
+          : Math.min(filteredItems?.length * 40 || 0, 180);
       setContentHeight(height);
     }
   }, [isSelectOpen, searchInput, data, filterUtil]);
@@ -97,7 +100,7 @@ const EnhancedSelect = ({
       >
         <SelectTrigger
           id={`${label.toLowerCase()}-enhanced-topical-select`}
-          className="cursor-pointer"
+          className={`cursor-pointer w-[200px] !h-max ${styles.stubbornSelectValue}`}
         >
           <SelectValue
             placeholder={

@@ -1,0 +1,12 @@
+.stubbornSelectValue {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+}
+
+.stubbornSelectValue span[data-slot="select-value"] {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
