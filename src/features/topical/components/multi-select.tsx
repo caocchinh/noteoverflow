@@ -56,6 +56,8 @@ interface MultiSelectContextProps {
   commandListRef: React.RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   selectAllValues: () => void;
+  isCommandItemInteraction: boolean;
+  setIsCommandItemInteraction: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -94,6 +96,8 @@ const MultiSelector = ({
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
+  const [isCommandItemInteraction, setIsCommandItemInteraction] =
+    useState(false);
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -274,6 +278,8 @@ const MultiSelector = ({
         commandListRef,
         allAvailableOptions,
         selectAllValues,
+        isCommandItemInteraction,
+        setIsCommandItemInteraction,
       }}
     >
       <Command
@@ -306,6 +312,7 @@ const MultiSelectorTrigger = forwardRef<
     setOpen,
     scrollAreaRef,
     setIsClickingScrollArea,
+    setIsCommandItemInteraction,
     selectAllValues,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
@@ -381,6 +388,9 @@ const MultiSelectorTrigger = forwardRef<
           onMouseDown={() => {
             setIsClickingScrollArea(true);
           }}
+          onTouchStart={() => {
+            setIsCommandItemInteraction(true);
+          }}
           onMouseUp={() => {
             setIsClickingScrollArea(false);
           }}
@@ -444,12 +454,20 @@ const MultiSelectorInput = forwardRef<
     inputValue,
     setInputValue,
     activeIndex,
-    setActiveIndex,
     handleSelect,
     ref: inputRef,
     isClickingScrollArea,
     setOpen,
+    isCommandItemInteraction,
+    setIsCommandItemInteraction,
   } = useMultiSelect();
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  }, []);
 
   return (
     <CommandPrimitive.Input
@@ -457,19 +475,26 @@ const MultiSelectorInput = forwardRef<
       tabIndex={0}
       ref={inputRef}
       value={inputValue}
+      readOnly={isMobile && isCommandItemInteraction}
       onValueChange={activeIndex === -1 ? setInputValue : undefined}
       onSelect={handleSelect}
+      onTouchStart={(e) => {
+        if (isMobile && isCommandItemInteraction) {
+          e.preventDefault();
+        }
+      }}
+      onClick={() => {
+        setOpen(true);
+      }}
       onBlur={() => {
         // Only close if we're not clicking in the ScrollArea
         if (!isClickingScrollArea) {
           setOpen(false);
           setInputValue("");
+          // Reset the flag on blur
+          setIsCommandItemInteraction(false);
         }
       }}
-      onFocus={() => {
-        setOpen(true);
-      }}
-      onClick={() => setActiveIndex(-1)}
       className={cn(
         "bg-transparent text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0",
         className,
@@ -500,7 +525,13 @@ const MultiSelectorList = forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, children }, ref) => {
-  const { value, onValueChange, commandListRef, inputValue } = useMultiSelect();
+  const {
+    value,
+    onValueChange,
+    commandListRef,
+    inputValue,
+    setIsCommandItemInteraction,
+  } = useMultiSelect();
 
   return (
     <CommandList
@@ -523,6 +554,11 @@ const MultiSelectorList = forwardRef<
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsCommandItemInteraction(true);
                 }}
               >
                 {item}
@@ -560,12 +596,20 @@ const MultiSelectorItem = forwardRef<
     typeof CommandPrimitive.Item
   >
 >(({ className, value, children, ...props }, ref) => {
-  const { value: Options, onValueChange, setInputValue } = useMultiSelect();
+  const {
+    value: Options,
+    onValueChange,
+    setInputValue,
+    setIsCommandItemInteraction,
+  } = useMultiSelect();
 
-  const mousePreventDefault = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
+  const preventDefault = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    []
+  );
 
   const isIncluded = Options.includes(value);
   return (
@@ -582,7 +626,11 @@ const MultiSelectorItem = forwardRef<
         isIncluded && "opacity-50 cursor-default",
         props.disabled && "opacity-50 cursor-not-allowed"
       )}
-      onMouseDown={mousePreventDefault}
+      onMouseDown={preventDefault}
+      onClick={(e) => {
+        preventDefault(e);
+        setIsCommandItemInteraction(true);
+      }}
     >
       {children}
       {isIncluded && <Check className="h-4 w-4" />}
