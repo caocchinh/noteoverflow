@@ -23,10 +23,11 @@ const EnhancedMultiSelect = ({
   data?: string[] | number[];
 }) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <Label>{label}</Label>
       <MultiSelector
         values={values.map((item) => item.toString())}
+        allAvailableOptions={data?.map((item) => item.toString()) ?? []}
         onValuesChange={onValuesChange}
         loop={loop}
         className="w-[300px]"

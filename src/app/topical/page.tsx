@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { TOPICAL_DATA } from "@/features/topical/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
@@ -45,20 +46,34 @@ const TopicalPage = () => {
       <h1 className="text-4xl font-bold text-center md:text-left">
         Topical Questions
       </h1>
-      <div className="mt-6  gap-6 flex items-center md:items-start justify-center flex-col md:flex-row">
+      <div className="mt-6 gap-6 flex items-center justify-center flex-col md:flex-row">
         <div className="flex items-center gap-6 ">
-          {selectedSubject && (
-            <Image
-              src={
-                availableSubjects!.find((item) => item.code === selectedSubject)
-                  ?.coverImage ?? ""
-              }
-              alt="cover"
-              className="self-center"
-              width={100}
-              height={100}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {selectedSubject && (
+              <motion.div
+                key={selectedSubject}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{
+                  duration: 0.15,
+                  ease: "easeInOut",
+                }}
+              >
+                <Image
+                  src={
+                    availableSubjects!.find(
+                      (item) => item.code === selectedSubject
+                    )?.coverImage ?? ""
+                  }
+                  alt="cover"
+                  className="self-center"
+                  width={100}
+                  height={100}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="flex items-start gap-6 flex-col justify-start">
             <EnhancedSelect
               label="Curriculum"
@@ -97,7 +112,7 @@ const TopicalPage = () => {
             data={availableYears}
           />
           <EnhancedMultiSelect
-            label="Paper Type"
+            label="Paper"
             values={selectedPaperType}
             onValuesChange={(values) =>
               setSelectedPaperType(values as string[])

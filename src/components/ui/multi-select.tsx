@@ -29,6 +29,7 @@ interface MultiSelectorProps
   values: string[];
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
+  allAvailableOptions?: string[];
 }
 
 interface MultiSelectContextProps {
@@ -48,6 +49,8 @@ interface MultiSelectContextProps {
   isClickingScrollArea: boolean;
   setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
   commandListRef: React.RefObject<HTMLDivElement | null>;
+  allAvailableOptions?: string[];
+  selectAllValues: () => void;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -73,6 +76,7 @@ const MultiSelector = ({
   className,
   children,
   dir,
+  allAvailableOptions,
   ...props
 }: MultiSelectorProps) => {
   const [inputValue, setInputValue] = useState("");
@@ -119,6 +123,12 @@ const MultiSelector = ({
   const removeAllValues = useCallback(() => {
     onValueChange([]);
   }, [onValueChange]);
+
+  const selectAllValues = useCallback(() => {
+    if (allAvailableOptions) {
+      onValueChange(allAvailableOptions);
+    }
+  }, [allAvailableOptions, onValueChange]);
 
   const handleSelect = React.useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -240,6 +250,8 @@ const MultiSelector = ({
         isClickingScrollArea,
         setIsClickingScrollArea,
         commandListRef,
+        allAvailableOptions,
+        selectAllValues,
       }}
     >
       <Command
@@ -272,6 +284,7 @@ const MultiSelectorTrigger = forwardRef<
     setOpen,
     scrollAreaRef,
     setIsClickingScrollArea,
+    selectAllValues,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -306,10 +319,7 @@ const MultiSelectorTrigger = forwardRef<
           className=" cursor-pointer"
           title="Select all"
           onMouseDown={mousePreventDefault}
-          onClick={() => {
-            removeAllValues();
-            setContentHeight(0);
-          }}
+          onClick={selectAllValues}
         >
           <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
         </div>
