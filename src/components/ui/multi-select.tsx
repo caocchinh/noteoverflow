@@ -30,6 +30,8 @@ interface MultiSelectorProps
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
   allAvailableOptions?: string[];
+  open?: boolean;
+  isClickingLabel?: boolean;
 }
 
 interface MultiSelectContextProps {
@@ -51,6 +53,7 @@ interface MultiSelectContextProps {
   commandListRef: React.RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   selectAllValues: () => void;
+  isClickingLabel?: boolean;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -71,16 +74,22 @@ const useMultiSelect = () => {
 
 const MultiSelector = ({
   values: value,
+  open: openProp,
   onValuesChange: onValueChange,
   loop = false,
   className,
   children,
   dir,
   allAvailableOptions,
+  isClickingLabel,
   ...props
 }: MultiSelectorProps) => {
   const [inputValue, setInputValue] = useState("");
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(openProp ?? false);
+  useEffect(() => {
+    setOpen(openProp ?? false);
+  }, [openProp]);
+
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
@@ -90,15 +99,25 @@ const MultiSelector = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
 
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (newOpen !== open) {
+        setOpen(newOpen);
+      }
+    },
+    [open]
+  );
+
   // Add click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node) &&
+        !isClickingLabel &&
         open
       ) {
-        setOpen(false);
+        handleOpenChange(false);
       }
     };
 
@@ -106,7 +125,7 @@ const MultiSelector = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open]);
+  }, [open, handleOpenChange, isClickingLabel]);
 
   const onValueChangeHandler = useCallback(
     (val: string) => {
@@ -216,20 +235,20 @@ const MultiSelector = ({
           break;
 
         case "Enter":
-          setOpen(true);
+          handleOpenChange(true);
           break;
 
         case "Escape":
           if (activeIndex !== -1) {
             setActiveIndex(-1);
           } else if (open) {
-            setOpen(false);
+            handleOpenChange(false);
           }
           break;
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [value, inputValue, activeIndex, loop]
+    [value, inputValue, activeIndex, loop, handleOpenChange]
   );
 
   return (
@@ -238,8 +257,9 @@ const MultiSelector = ({
         value,
         onValueChange: onValueChangeHandler,
         open,
-        setOpen,
+        setOpen: handleOpenChange,
         inputValue,
+        isClickingLabel,
         setInputValue,
         activeIndex,
         setActiveIndex,
@@ -288,6 +308,7 @@ const MultiSelectorTrigger = forwardRef<
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
+  const [paddingRight, setPaddingRight] = useState<string>("initial");
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -297,6 +318,11 @@ const MultiSelectorTrigger = forwardRef<
     if (contentRef.current) {
       const containerHeight = contentRef.current.clientHeight;
       const height = Math.min(containerHeight || 0, 120);
+      if (height == 120) {
+        setPaddingRight("10px");
+      } else {
+        setPaddingRight("initial");
+      }
       setContentHeight(height);
     }
   }, [value]);
@@ -305,7 +331,7 @@ const MultiSelectorTrigger = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex flex-wrap gap-1 p-1 py-2 ring-1 ring-muted rounded-lg bg-background relative",
+        "flex flex-wrap gap-1 p-1 py-2 ring-1 ring-muted mb-0 rounded-lg bg-background relative",
         {
           "ring-1 focus-within:ring-ring": activeIndex === -1,
         },
@@ -338,8 +364,8 @@ const MultiSelectorTrigger = forwardRef<
       {value.length > 0 && (
         <ScrollArea
           ref={scrollAreaRef}
-          className="w-full"
-          style={{ height: `${contentHeight}px` }}
+          className="w-full overflow-hidden"
+          style={{ height: `${contentHeight}px`, paddingRight: paddingRight }}
           onMouseDown={() => {
             setIsClickingScrollArea(true);
           }}
@@ -403,7 +429,6 @@ const MultiSelectorInput = forwardRef<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, ...props }, ref) => {
   const {
-    setOpen,
     inputValue,
     setInputValue,
     activeIndex,
@@ -412,6 +437,8 @@ const MultiSelectorInput = forwardRef<
     ref: inputRef,
     commandListRef,
     isClickingScrollArea,
+    setOpen,
+    isClickingLabel,
   } = useMultiSelect();
 
   return (
@@ -435,7 +462,7 @@ const MultiSelectorInput = forwardRef<
       onSelect={handleSelect}
       onBlur={() => {
         // Only close if we're not clicking in the ScrollArea
-        if (!isClickingScrollArea) {
+        if (!isClickingScrollArea && !isClickingLabel) {
           setOpen(false);
         }
       }}
@@ -444,7 +471,7 @@ const MultiSelectorInput = forwardRef<
       }}
       onClick={() => setActiveIndex(-1)}
       className={cn(
-        "bg-transparent text-sm outline-none placeholder:text-muted-foreground flex-1",
+        "bg-transparent text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0",
         className,
         activeIndex !== -1 && "caret-transparent"
       )}

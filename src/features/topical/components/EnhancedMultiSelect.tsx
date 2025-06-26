@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/multi-select";
 import { Label } from "@/components/ui/label";
 import { Search } from "lucide-react";
+import { useState } from "react";
 
 const EnhancedMultiSelect = ({
   label,
@@ -22,18 +23,35 @@ const EnhancedMultiSelect = ({
   loop: boolean;
   data?: string[] | number[];
 }) => {
+  const [open, setOpen] = useState<boolean>(false);
+
+  const [isClickingLabel, setIsClickingLabel] = useState<boolean>(false);
   return (
-    <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+    <div className="flex flex-col gap-1">
+      <Label
+        onClick={() => {
+          setOpen(!open);
+        }}
+        onMouseDown={() => {
+          setIsClickingLabel(true);
+        }}
+        onMouseUp={() => {
+          setIsClickingLabel(false);
+        }}
+      >
+        {label}
+      </Label>
       <MultiSelector
         values={values.map((item) => item.toString())}
         allAvailableOptions={data?.map((item) => item.toString()) ?? []}
         onValuesChange={onValuesChange}
         loop={loop}
         className="w-[300px]"
+        open={open}
+        isClickingLabel={isClickingLabel}
       >
         <MultiSelectorTrigger>
-          <div className="basis-full flex items-center gap-2 px-4">
+          <div className="basis-[90%] flex items-center gap-2 px-4">
             <Search className="h-4 w-4" />
             <MultiSelectorInput
               disabled={!data}

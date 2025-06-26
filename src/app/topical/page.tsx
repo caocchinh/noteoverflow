@@ -46,8 +46,8 @@ const TopicalPage = () => {
       <h1 className="text-4xl font-bold text-center md:text-left">
         Topical Questions
       </h1>
-      <div className="mt-6 gap-6 flex items-center justify-center flex-col md:flex-row">
-        <div className="flex items-center gap-6 ">
+      <div className="mt-6 gap-6 flex items-center md:items-start justify-center flex-col md:flex-row">
+        <div className="flex items-center gap-6">
           <AnimatePresence mode="wait">
             {selectedSubject && (
               <motion.div

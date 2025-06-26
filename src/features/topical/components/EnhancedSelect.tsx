@@ -14,7 +14,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, WandSparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -131,8 +131,9 @@ const EnhancedSelect = ({
           >
             <div ref={contentRef}>
               {data?.filter(filterUtil).length == 0 && (
-                <div className="w-full h-[250px] flex items-center justify-center">
+                <div className="w-full h-[250px] flex items-center justify-center flex-col gap-2">
                   Nothing found!
+                  <WandSparkles size={25} />
                 </div>
               )}
               {data?.map((item) => (
