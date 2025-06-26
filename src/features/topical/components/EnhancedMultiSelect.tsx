@@ -5,7 +5,7 @@ import {
   MultiSelectorContent,
   MultiSelectorList,
   MultiSelectorItem,
-} from "@/components/ui/multi-select";
+} from "@/features/topical/components/multi-select";
 import { Label } from "@/components/ui/label";
 import { Search } from "lucide-react";
 import { useState } from "react";
@@ -13,31 +13,27 @@ import { useState } from "react";
 const EnhancedMultiSelect = ({
   label,
   values,
+  prerequisite,
   onValuesChange,
   loop,
   data,
 }: {
   label: string;
   values: string[] | number[];
+  prerequisite: string;
   onValuesChange: (values: string[] | number[]) => void;
   loop: boolean;
   data?: string[] | number[];
 }) => {
   const [open, setOpen] = useState<boolean>(false);
 
-  const [isClickingLabel, setIsClickingLabel] = useState<boolean>(false);
   return (
     <div className="flex flex-col gap-1">
       <Label
         onClick={() => {
           setOpen(!open);
         }}
-        onMouseDown={() => {
-          setIsClickingLabel(true);
-        }}
-        onMouseUp={() => {
-          setIsClickingLabel(false);
-        }}
+        className="w-max"
       >
         {label}
       </Label>
@@ -47,15 +43,17 @@ const EnhancedMultiSelect = ({
         onValuesChange={onValuesChange}
         loop={loop}
         className="w-[300px]"
-        open={open}
-        isClickingLabel={isClickingLabel}
       >
         <MultiSelectorTrigger>
           <div className="basis-[90%] flex items-center gap-2 px-4">
             <Search className="h-4 w-4" />
             <MultiSelectorInput
               disabled={!data}
-              placeholder={`Search ${label.toLowerCase()}`}
+              placeholder={
+                data
+                  ? `Search ${label.toLowerCase()}`
+                  : `Select ${prerequisite.toLowerCase()} first`
+              }
             />
           </div>
         </MultiSelectorTrigger>

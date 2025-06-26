@@ -82,9 +82,7 @@ const EnhancedSelect = ({
     <div className="flex flex-col gap-1">
       <Label
         htmlFor={`${label.toLowerCase()}-enhanced-topical-select`}
-        onClick={() => {
-          setIsSelectOpen(!isSelectOpen);
-        }}
+        className="w-max"
       >
         {label}
       </Label>
@@ -104,14 +102,15 @@ const EnhancedSelect = ({
         >
           <SelectValue
             placeholder={
-              !selectedValue &&
-              `Select ${label.toLowerCase()} ${prerequisite && "first"}`
+              selectedValue || !prerequisite
+                ? `Select ${label.toLowerCase()}`
+                : `Select ${prerequisite.toLowerCase()} first`
             }
           />
         </SelectTrigger>
 
         <SelectContent className="w-full">
-          <div className="flex items-center gap-2 px-2 sticky w-full h-full ">
+          <div className="flex items-center gap-2 p-2 sticky w-full h-full ">
             <SearchIcon className="w-4 h-4" />
             <Input
               placeholder={`Search ${label.toLowerCase()}`}
@@ -153,7 +152,7 @@ const EnhancedSelect = ({
                     </SelectItem>
                   </HoverCardTrigger>
                   <HoverCardContent
-                    className="w-max bg-transparent cursor-pointer border-none shadow-none relative hidden sm:block"
+                    className="w-max bg-transparent cursor-pointer border-none shadow-none relative hidden lg:block"
                     side="right"
                     sideOffset={-10}
                     align="start"

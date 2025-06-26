@@ -22,7 +22,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ScrollArea } from "./scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MultiSelectorProps
   extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
@@ -30,8 +35,6 @@ interface MultiSelectorProps
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
   allAvailableOptions?: string[];
-  open?: boolean;
-  isClickingLabel?: boolean;
 }
 
 interface MultiSelectContextProps {
@@ -53,7 +56,6 @@ interface MultiSelectContextProps {
   commandListRef: React.RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   selectAllValues: () => void;
-  isClickingLabel?: boolean;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -74,21 +76,16 @@ const useMultiSelect = () => {
 
 const MultiSelector = ({
   values: value,
-  open: openProp,
   onValuesChange: onValueChange,
   loop = false,
   className,
   children,
   dir,
   allAvailableOptions,
-  isClickingLabel,
   ...props
 }: MultiSelectorProps) => {
   const [inputValue, setInputValue] = useState("");
-  const [open, setOpen] = useState<boolean>(openProp ?? false);
-  useEffect(() => {
-    setOpen(openProp ?? false);
-  }, [openProp]);
+  const [open, setOpen] = useState<boolean>(false);
 
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -114,7 +111,6 @@ const MultiSelector = ({
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node) &&
-        !isClickingLabel &&
         open
       ) {
         handleOpenChange(false);
@@ -125,7 +121,7 @@ const MultiSelector = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open, handleOpenChange, isClickingLabel]);
+  }, [open, handleOpenChange]);
 
   const onValueChangeHandler = useCallback(
     (val: string) => {
@@ -259,7 +255,6 @@ const MultiSelector = ({
         open,
         setOpen: handleOpenChange,
         inputValue,
-        isClickingLabel,
         setInputValue,
         activeIndex,
         setActiveIndex,
@@ -341,25 +336,35 @@ const MultiSelectorTrigger = forwardRef<
     >
       {children}
       <div className="absolute top-3 flex items-center justify-center gap-1 right-2">
-        <div
-          className=" cursor-pointer"
-          title="Select all"
-          onMouseDown={mousePreventDefault}
-          onClick={selectAllValues}
-        >
-          <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
-        </div>
-        <div
-          className=" cursor-pointer"
-          title="Remove all"
-          onMouseDown={mousePreventDefault}
-          onClick={() => {
-            removeAllValues();
-            setContentHeight(0);
-          }}
-        >
-          <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className=" cursor-pointer"
+              title="Select all"
+              onMouseDown={mousePreventDefault}
+              onClick={selectAllValues}
+            >
+              <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Select all</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className=" cursor-pointer"
+              title="Remove all"
+              onMouseDown={mousePreventDefault}
+              onClick={() => {
+                removeAllValues();
+                setContentHeight(0);
+              }}
+            >
+              <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Remove all</TooltipContent>
+        </Tooltip>
       </div>
       {value.length > 0 && (
         <ScrollArea
@@ -438,7 +443,6 @@ const MultiSelectorInput = forwardRef<
     commandListRef,
     isClickingScrollArea,
     setOpen,
-    isClickingLabel,
   } = useMultiSelect();
 
   return (
@@ -462,7 +466,7 @@ const MultiSelectorInput = forwardRef<
       onSelect={handleSelect}
       onBlur={() => {
         // Only close if we're not clicking in the ScrollArea
-        if (!isClickingScrollArea && !isClickingLabel) {
+        if (!isClickingScrollArea) {
           setOpen(false);
         }
       }}
