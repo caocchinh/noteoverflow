@@ -6,6 +6,8 @@ import {
   CommandItem,
   CommandEmpty,
   CommandList,
+  CommandSeparator,
+  CommandGroup,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
@@ -16,8 +18,11 @@ import React, {
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react";
+import { ScrollArea } from "./scroll-area";
 
 interface MultiSelectorProps
   extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
@@ -38,6 +43,10 @@ interface MultiSelectContextProps {
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   ref: React.RefObject<HTMLInputElement | null>;
   handleSelect: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+  removeAllValues: () => void;
+  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  isClickingScrollArea: boolean;
+  setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -71,6 +80,27 @@ const MultiSelector = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState("");
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Add click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        open
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
 
   const onValueChangeHandler = useCallback(
     (val: string) => {
@@ -83,6 +113,10 @@ const MultiSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [value]
   );
+
+  const removeAllValues = useCallback(() => {
+    onValueChange([]);
+  }, [onValueChange]);
 
   const handleSelect = React.useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -199,9 +233,14 @@ const MultiSelector = ({
         setActiveIndex,
         ref: inputRef,
         handleSelect,
+        removeAllValues,
+        scrollAreaRef,
+        isClickingScrollArea,
+        setIsClickingScrollArea,
       }}
     >
       <Command
+        ref={containerRef}
         onKeyDown={handleKeyDown}
         className={cn(
           "overflow-visible bg-transparent flex flex-col space-y-2",
@@ -220,18 +259,37 @@ const MultiSelectorTrigger = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
-  const { value, onValueChange, activeIndex } = useMultiSelect();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const {
+    value,
+    onValueChange,
+    activeIndex,
+    open,
+    removeAllValues,
+    setOpen,
+    scrollAreaRef,
+    setIsClickingScrollArea,
+  } = useMultiSelect();
+  const [contentHeight, setContentHeight] = useState<number>(0);
 
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
+  useEffect(() => {
+    if (open && contentRef.current) {
+      const containerHeight = contentRef.current.clientHeight;
+      const height = Math.min(containerHeight || 0, 69);
+      setContentHeight(height);
+    }
+  }, [open, value]);
+
   return (
     <div
       ref={ref}
       className={cn(
-        "flex flex-wrap gap-1 p-1 py-2 ring-1 ring-muted rounded-lg bg-background",
+        "flex flex-wrap gap-1 p-1 py-2 ring-1 ring-muted rounded-lg bg-background relative",
         {
           "ring-1 focus-within:ring-ring": activeIndex === -1,
         },
@@ -239,29 +297,59 @@ const MultiSelectorTrigger = forwardRef<
       )}
       {...props}
     >
-      {value.map((item, index) => (
-        <Badge
-          key={item}
-          className={cn(
-            "px-1 rounded-xl flex items-center gap-1",
-            activeIndex === index && "ring-2 ring-muted-foreground "
-          )}
-          variant={"secondary"}
-        >
-          <span className="text-xs">{item}</span>
-          <button
-            aria-label={`Remove ${item} option`}
-            aria-roledescription="button to remove option"
-            type="button"
-            onMouseDown={mousePreventDefault}
-            onClick={() => onValueChange(item)}
-          >
-            <span className="sr-only">Remove {item} option</span>
-            <RemoveIcon className="h-4 w-4 hover:stroke-destructive" />
-          </button>
-        </Badge>
-      ))}
       {children}
+      <div
+        className="absolute top-3  right-2  cursor-pointer"
+        title="Remove all"
+        onMouseDown={mousePreventDefault}
+        onClick={() => {
+          removeAllValues();
+          setContentHeight(0);
+        }}
+      >
+        <RemoveIcon className="h-4 w-4" />
+      </div>
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="w-full"
+        style={{ height: `${contentHeight}px` }}
+        onMouseDown={() => {
+          setIsClickingScrollArea(true);
+        }}
+        onMouseUp={() => {
+          setIsClickingScrollArea(false);
+        }}
+        onClick={() => {
+          if (!open) {
+            setOpen(true);
+          }
+        }}
+      >
+        <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
+          {value.map((item, index) => (
+            <Badge
+              key={item}
+              className={cn(
+                "px-1 rounded-xl flex items-center gap-1",
+                activeIndex === index && "ring-2 ring-muted-foreground "
+              )}
+              variant={"secondary"}
+            >
+              <span className="text-xs">{item}</span>
+              <button
+                aria-label={`Remove ${item} option`}
+                aria-roledescription="button to remove option"
+                type="button"
+                onMouseDown={mousePreventDefault}
+                onClick={() => onValueChange(item)}
+              >
+                <span className="sr-only">Remove {item} option</span>
+                <RemoveIcon className="h-4 w-4 cursor-pointer" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 });
@@ -281,6 +369,7 @@ const MultiSelectorInput = forwardRef<
     setActiveIndex,
     handleSelect,
     ref: inputRef,
+    isClickingScrollArea,
   } = useMultiSelect();
 
   return (
@@ -291,11 +380,18 @@ const MultiSelectorInput = forwardRef<
       value={inputValue}
       onValueChange={activeIndex === -1 ? setInputValue : undefined}
       onSelect={handleSelect}
-      onBlur={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
+      onBlur={() => {
+        // Only close if we're not clicking in the ScrollArea
+        if (!isClickingScrollArea) {
+          setOpen(false);
+        }
+      }}
+      onFocus={() => {
+        setOpen(true);
+      }}
       onClick={() => setActiveIndex(-1)}
       className={cn(
-        "ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1",
+        "bg-transparent text-sm outline-none placeholder:text-muted-foreground flex-1",
         className,
         activeIndex !== -1 && "caret-transparent"
       )}
@@ -323,6 +419,7 @@ const MultiSelectorList = forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, children }, ref) => {
+  const { value, onValueChange } = useMultiSelect();
   return (
     <CommandList
       ref={ref}
@@ -331,7 +428,37 @@ const MultiSelectorList = forwardRef<
         className
       )}
     >
-      {children}
+      {value.length > 0 && (
+        <>
+          <CommandGroup heading={`${value.length} selected`}>
+            {value.map((item) => (
+              <CommandItem
+                key={item}
+                className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-between "
+                onSelect={() => {
+                  onValueChange(item);
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                {item}
+                <span className="hidden">skibidi toilet</span>
+                <RemoveIcon className="h-4 w-4  cursor-pointer" />
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandSeparator />
+        </>
+      )}
+
+      <CommandGroup
+        heading={`${React.Children.count(children)} available options`}
+      >
+        {children}
+      </CommandGroup>
+
       <CommandEmpty>
         <span className="text-muted-foreground">No results found</span>
       </CommandEmpty>

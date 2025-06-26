@@ -17,7 +17,7 @@ import {
 import { SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 const EnhancedSelect = ({
@@ -38,11 +38,33 @@ const EnhancedSelect = ({
   const [contentHeight, setContentHeight] = useState<number>(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  const filterUtil = useCallback(
+    (item: { code: string; coverImage: string }) => {
+      if (!searchInput) return true;
+
+      const code = item.code.toLowerCase();
+      const search = searchInput.toLowerCase();
+
+      // Simple fuzzy search - characters need to appear in order but don't need to be consecutive
+      let codeIndex = 0;
+      let searchIndex = 0;
+
+      while (codeIndex < code.length && searchIndex < search.length) {
+        if (code[codeIndex] === search[searchIndex]) {
+          searchIndex++;
+        }
+        codeIndex++;
+      }
+
+      // If we matched all search characters, return true
+      return searchIndex === search.length;
+    },
+    [searchInput]
+  );
+
   useEffect(() => {
     if (isSelectOpen && contentRef.current) {
-      const filteredItems = data?.filter((item) =>
-        item.code.toLowerCase().includes(searchInput.toLowerCase())
-      );
+      const filteredItems = data?.filter(filterUtil);
 
       // Set height based on content or fallback to 250px
       const height =
@@ -51,7 +73,7 @@ const EnhancedSelect = ({
           : Math.min(filteredItems?.length * 40 || 0, 250);
       setContentHeight(height);
     }
-  }, [isSelectOpen, searchInput, data]);
+  }, [isSelectOpen, searchInput, data, filterUtil]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -105,9 +127,7 @@ const EnhancedSelect = ({
             style={{ height: `${contentHeight}px` }}
           >
             <div ref={contentRef}>
-              {data?.filter((item) =>
-                item.code.toLowerCase().includes(searchInput.toLowerCase())
-              ).length == 0 && (
+              {data?.filter(filterUtil).length == 0 && (
                 <div className="w-full h-[250px] flex items-center justify-center">
                   Nothing found!
                 </div>
@@ -120,11 +140,7 @@ const EnhancedSelect = ({
                       value={item.code}
                       className={cn(
                         "p-2",
-                        searchInput &&
-                          !item.code
-                            .toLowerCase()
-                            .includes(searchInput.toLowerCase()) &&
-                          "hidden"
+                        searchInput && !filterUtil(item) && "hidden"
                       )}
                     >
                       <div key={item.code} className="w-full">
