@@ -498,18 +498,13 @@ MultiSelectorContent.displayName = "MultiSelectorContent";
 const MultiSelectorList = forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, children }, ref) => {
   const { value, onValueChange, commandListRef, inputValue } = useMultiSelect();
 
   return (
     <CommandList
-      ref={(element) => {
-        if (ref) {
-          if (typeof ref === "function") ref(element);
-          else ref.current = element;
-        }
-        if (commandListRef) commandListRef.current = element;
-      }}
+      ref={commandListRef}
       className={cn(
         "p-2 flex flex-col gap-2 rounded-md scrollbar-thin scrollbar-track-transparent transition-colors scrollbar-thumb-muted-foreground dark:scrollbar-thumb-muted scrollbar-thumb-rounded-lg w-full absolute bg-background shadow-md z-10 border border-muted top-0",
         className

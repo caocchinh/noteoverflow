@@ -12,6 +12,7 @@ import { useState } from "react";
 
 const EnhancedMultiSelect = ({
   label,
+  dropDownHeight,
   values,
   prerequisite,
   onValuesChange,
@@ -19,6 +20,7 @@ const EnhancedMultiSelect = ({
   data,
 }: {
   label: string;
+  dropDownHeight?: string;
   values: string[] | number[];
   prerequisite: string;
   onValuesChange: (values: string[] | number[]) => void;
@@ -58,7 +60,7 @@ const EnhancedMultiSelect = ({
           </div>
         </MultiSelectorTrigger>
         <MultiSelectorContent>
-          <MultiSelectorList>
+          <MultiSelectorList className={dropDownHeight}>
             {data?.map((item, i) => (
               <MultiSelectorItem key={i} value={item.toString()}>
                 {item}

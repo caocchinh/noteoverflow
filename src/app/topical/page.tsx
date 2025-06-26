@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TOPICAL_DATA } from "@/features/topical/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
@@ -85,7 +85,7 @@ const TopicalPage = () => {
   }, [selectedSubject]);
 
   return (
-    <div className="pt-19 min-h-screen p-6">
+    <div className="pt-19 min-h-[169vh] p-6">
       <h1 className="text-3xl font-bold text-center md:text-left">
         Topical Questions
       </h1>
@@ -207,6 +207,7 @@ const TopicalPage = () => {
               setSelectedPaperType(values as string[])
             }
             loop={true}
+            dropDownHeight="h-[190px]"
             prerequisite="Subject"
             data={availablePaperTypes}
           />
@@ -215,6 +216,7 @@ const TopicalPage = () => {
             values={selectedSeason}
             onValuesChange={(values) => setSelectedSeason(values as string[])}
             loop={true}
+            dropDownHeight="h-[190px]"
             prerequisite="Subject"
             data={availableSeasons}
           />
