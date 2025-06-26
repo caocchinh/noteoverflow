@@ -271,7 +271,7 @@ const MultiSelectorTrigger = forwardRef<
     setIsClickingScrollArea,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
-
+  const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -280,7 +280,7 @@ const MultiSelectorTrigger = forwardRef<
   useEffect(() => {
     if (open && contentRef.current) {
       const containerHeight = contentRef.current.clientHeight;
-      const height = Math.min(containerHeight || 0, 69);
+      const height = Math.min(containerHeight || 0, 120);
       setContentHeight(height);
     }
   }, [open, value]);
@@ -320,7 +320,7 @@ const MultiSelectorTrigger = forwardRef<
           setIsClickingScrollArea(false);
         }}
         onClick={() => {
-          if (!open) {
+          if (!open && !isClickingRemove) {
             setOpen(true);
           }
         }}
@@ -340,8 +340,21 @@ const MultiSelectorTrigger = forwardRef<
                 aria-label={`Remove ${item} option`}
                 aria-roledescription="button to remove option"
                 type="button"
-                onMouseDown={mousePreventDefault}
-                onClick={() => onValueChange(item)}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingRemove(true);
+                }}
+                onClick={() => {
+                  onValueChange(item);
+                  if (value.length === 1) {
+                    setContentHeight(0);
+                  }
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingRemove(false);
+                  }, 100);
+                }}
               >
                 <span className="sr-only">Remove {item} option</span>
                 <RemoveIcon className="h-4 w-4 cursor-pointer" />
