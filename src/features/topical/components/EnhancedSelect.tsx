@@ -17,7 +17,7 @@ import {
 import { SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 const EnhancedSelect = ({
@@ -35,6 +35,24 @@ const EnhancedSelect = ({
 }) => {
   const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>("");
+  const [contentHeight, setContentHeight] = useState<number>(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSelectOpen && contentRef.current) {
+      const filteredItems = data?.filter((item) =>
+        item.code.toLowerCase().includes(searchInput.toLowerCase())
+      );
+
+      // Set height based on content or fallback to 250px
+      const height =
+        filteredItems?.length === 0
+          ? 250
+          : Math.min(filteredItems?.length * 40 || 0, 250);
+      setContentHeight(height);
+    }
+  }, [isSelectOpen, searchInput, data]);
+
   return (
     <div className="flex flex-col gap-1">
       <Label
@@ -82,52 +100,61 @@ const EnhancedSelect = ({
           </div>
           <SelectSeparator className="w-full" />
 
-          <ScrollArea className="h-[250px] w-full">
-            {data?.filter((item) =>
-              item.code.toLowerCase().includes(searchInput.toLowerCase())
-            ).length == 0 && (
-              <div className="w-full h-[250px] flex items-center justify-center">
-                Nothing found!
-              </div>
-            )}
-            {data?.map((item) => (
-              <HoverCard key={item.code} openDelay={0} closeDelay={0}>
-                <HoverCardTrigger asChild>
-                  <SelectItem
-                    key={item.code}
-                    value={item.code}
-                    className={cn(
-                      "p-2",
-                      searchInput &&
-                        !item.code
-                          .toLowerCase()
-                          .includes(searchInput.toLowerCase()) &&
-                        "hidden"
-                    )}
+          <ScrollArea
+            className="w-full"
+            style={{ height: `${contentHeight}px` }}
+          >
+            <div ref={contentRef}>
+              {data?.filter((item) =>
+                item.code.toLowerCase().includes(searchInput.toLowerCase())
+              ).length == 0 && (
+                <div className="w-full h-[250px] flex items-center justify-center">
+                  Nothing found!
+                </div>
+              )}
+              {data?.map((item) => (
+                <HoverCard key={item.code} openDelay={0} closeDelay={0}>
+                  <HoverCardTrigger asChild>
+                    <SelectItem
+                      key={item.code}
+                      value={item.code}
+                      className={cn(
+                        "p-2",
+                        searchInput &&
+                          !item.code
+                            .toLowerCase()
+                            .includes(searchInput.toLowerCase()) &&
+                          "hidden"
+                      )}
+                    >
+                      <div key={item.code} className="w-full">
+                        {item.code}
+                      </div>
+                    </SelectItem>
+                  </HoverCardTrigger>
+                  <HoverCardContent
+                    className="w-max bg-transparent cursor-pointer border-none shadow-none relative hidden sm:block"
+                    side="right"
+                    sideOffset={-10}
+                    align="start"
+                    avoidCollisions={true}
+                    onClick={() => {
+                      setIsSelectOpen(false);
+                      setSelectedValue(item.code);
+                    }}
                   >
-                    <div key={item.code} className="w-full">
-                      {item.code}
+                    <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
+                      <Image
+                        src={item.coverImage}
+                        alt={item.code}
+                        width={100}
+                        height={100}
+                      />
                     </div>
-                  </SelectItem>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="w-max bg-transparent border-none shadow-none relative hidden sm:block"
-                  side="right"
-                  sideOffset={-10}
-                  align="start"
-                  avoidCollisions={true}
-                >
-                  <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
-                    <Image
-                      src={item.coverImage}
-                      alt={item.code}
-                      width={100}
-                      height={100}
-                    />
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            ))}
+                  </HoverCardContent>
+                </HoverCard>
+              ))}
+            </div>
           </ScrollArea>
         </SelectContent>
       </Select>
