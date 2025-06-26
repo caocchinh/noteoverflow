@@ -41,7 +41,7 @@ const TopicalPage = () => {
   }, [availableSubjects, selectedSubject]);
 
   return (
-    <div className="pt-20 min-h-screen p-6">
+    <div className="pt-19 min-h-screen p-6">
       <h1 className="text-4xl font-bold text-center md:text-left">
         Topical Questions
       </h1>

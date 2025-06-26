@@ -73,7 +73,7 @@ const EnhancedSelect = ({
       const height =
         filteredItems?.length === 0
           ? 250
-          : Math.min(filteredItems?.length * 40 || 0, 180);
+          : Math.min(filteredItems?.length * 40 || 0, 170);
       setContentHeight(height);
     }
   }, [isSelectOpen, searchInput, data, filterUtil]);

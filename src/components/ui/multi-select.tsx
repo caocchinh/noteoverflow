@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
-import { X as RemoveIcon, Check, Trash2 } from "lucide-react";
+import { X as RemoveIcon, Check, Trash2, Sparkles } from "lucide-react";
 import React, {
   KeyboardEvent,
   createContext,
@@ -47,6 +47,7 @@ interface MultiSelectContextProps {
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
   isClickingScrollArea: boolean;
   setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
+  commandListRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -83,6 +84,7 @@ const MultiSelector = ({
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const commandListRef = useRef<HTMLDivElement | null>(null);
 
   // Add click outside handler
   useEffect(() => {
@@ -237,6 +239,7 @@ const MultiSelector = ({
         scrollAreaRef,
         isClickingScrollArea,
         setIsClickingScrollArea,
+        commandListRef,
       }}
     >
       <Command
@@ -298,16 +301,29 @@ const MultiSelectorTrigger = forwardRef<
       {...props}
     >
       {children}
-      <div
-        className="absolute top-3  right-2  cursor-pointer"
-        title="Remove all"
-        onMouseDown={mousePreventDefault}
-        onClick={() => {
-          removeAllValues();
-          setContentHeight(0);
-        }}
-      >
-        <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
+      <div className="absolute top-3 flex items-center justify-center gap-1 right-2">
+        <div
+          className=" cursor-pointer"
+          title="Select all"
+          onMouseDown={mousePreventDefault}
+          onClick={() => {
+            removeAllValues();
+            setContentHeight(0);
+          }}
+        >
+          <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
+        </div>
+        <div
+          className=" cursor-pointer"
+          title="Remove all"
+          onMouseDown={mousePreventDefault}
+          onClick={() => {
+            removeAllValues();
+            setContentHeight(0);
+          }}
+        >
+          <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
+        </div>
       </div>
       {value.length > 0 && (
         <ScrollArea
@@ -331,7 +347,7 @@ const MultiSelectorTrigger = forwardRef<
               <Badge
                 key={item}
                 className={cn(
-                  "px-1 rounded-xl flex items-center gap-1",
+                  "px-1 rounded-xl flex items-center gap-1 whitespace-pre-wrap wrap-anywhere",
                   activeIndex === index && "ring-2 ring-muted-foreground "
                 )}
                 variant={"secondary"}
@@ -358,7 +374,7 @@ const MultiSelectorTrigger = forwardRef<
                   }}
                 >
                   <span className="sr-only">Remove {item} option</span>
-                  <RemoveIcon className="h-4 w-4 cursor-pointer" />
+                  <RemoveIcon className="h-4 w-4 cursor-pointer hover:stroke-destructive transition-colors duration-100 ease-in-out" />
                 </button>
               </Badge>
             ))}
@@ -384,6 +400,7 @@ const MultiSelectorInput = forwardRef<
     setActiveIndex,
     handleSelect,
     ref: inputRef,
+    commandListRef,
     isClickingScrollArea,
   } = useMultiSelect();
 
@@ -392,6 +409,17 @@ const MultiSelectorInput = forwardRef<
       {...props}
       tabIndex={0}
       ref={inputRef}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter") {
+          e.stopPropagation();
+        }
+        if (commandListRef.current) {
+          commandListRef.current.scrollTo({
+            top: 0,
+            behavior: "instant",
+          });
+        }
+      }}
       value={inputValue}
       onValueChange={activeIndex === -1 ? setInputValue : undefined}
       onSelect={handleSelect}
@@ -434,10 +462,17 @@ const MultiSelectorList = forwardRef<
   React.ElementRef<typeof CommandPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, children }, ref) => {
-  const { value, onValueChange } = useMultiSelect();
+  const { value, onValueChange, commandListRef } = useMultiSelect();
+
   return (
     <CommandList
-      ref={ref}
+      ref={(element) => {
+        if (ref) {
+          if (typeof ref === "function") ref(element);
+          else ref.current = element;
+        }
+        if (commandListRef) commandListRef.current = element;
+      }}
       className={cn(
         "p-2 flex flex-col gap-2 rounded-md scrollbar-thin scrollbar-track-transparent transition-colors scrollbar-thumb-muted-foreground dark:scrollbar-thumb-muted scrollbar-thumb-rounded-lg w-full absolute bg-background shadow-md z-10 border border-muted top-0",
         className
