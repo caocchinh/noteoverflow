@@ -391,6 +391,11 @@ const MultiSelectorTrigger = forwardRef<
           onTouchStart={() => {
             setIsCommandItemInteraction(true);
           }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              setIsCommandItemInteraction(false);
+            }, 50);
+          }}
           onMouseUp={() => {
             setIsClickingScrollArea(false);
           }}
@@ -558,6 +563,11 @@ const MultiSelectorList = forwardRef<
                 onTouchStart={() => {
                   setIsCommandItemInteraction(true);
                 }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setIsCommandItemInteraction(false);
+                  }, 100);
+                }}
               >
                 {item}
                 <span className="hidden">skibidi toilet</span>
@@ -627,6 +637,11 @@ const MultiSelectorItem = forwardRef<
       onMouseDown={preventDefault}
       onTouchStart={() => {
         setIsCommandItemInteraction(true);
+      }}
+      onTouchEnd={() => {
+        setTimeout(() => {
+          setIsCommandItemInteraction(false);
+        }, 100);
       }}
     >
       {children}
