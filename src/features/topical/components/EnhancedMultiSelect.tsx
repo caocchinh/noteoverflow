@@ -47,7 +47,7 @@ const EnhancedMultiSelect = ({
         className="w-[300px]"
       >
         <MultiSelectorTrigger>
-          <div className="basis-[90%] flex items-center gap-2 px-4">
+          <div className="flex items-center gap-2 px-4">
             <Search className="h-4 w-4" />
             <MultiSelectorInput
               disabled={!data}

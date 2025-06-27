@@ -349,7 +349,17 @@ const MultiSelectorTrigger = forwardRef<
       {...props}
     >
       {children}
-      <div className="absolute top-3 flex items-center justify-center gap-1 right-2">
+      <div className="absolute top-2 flex items-center justify-center gap-[5px] right-2">
+        <Badge
+          variant="default"
+          className="px-1 rounded-xl cursor-pointer flex items-center gap-1 whitespace-pre-wrap wrap-anywhere select-none"
+          onMouseDown={mousePreventDefault}
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          Select
+        </Badge>
         <Tooltip>
           <TooltipTrigger asChild>
             <div
@@ -467,24 +477,17 @@ const MultiSelectorInput = forwardRef<
     setIsCommandItemInteraction,
   } = useMultiSelect();
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check if device is mobile
-  useEffect(() => {
-    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-  }, []);
-
   return (
     <CommandPrimitive.Input
       {...props}
       tabIndex={0}
       ref={inputRef}
       value={inputValue}
-      readOnly={isMobile && isCommandItemInteraction}
+      readOnly={isCommandItemInteraction}
       onValueChange={activeIndex === -1 ? setInputValue : undefined}
       onSelect={handleSelect}
       onTouchStart={(e) => {
-        if (isMobile && isCommandItemInteraction) {
+        if (isCommandItemInteraction) {
           e.preventDefault();
         }
       }}
@@ -501,7 +504,7 @@ const MultiSelectorInput = forwardRef<
         }
       }}
       className={cn(
-        "bg-transparent text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0",
+        "bg-transparent w-[150px] text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0",
         className,
         activeIndex !== -1 && "caret-transparent"
       )}
