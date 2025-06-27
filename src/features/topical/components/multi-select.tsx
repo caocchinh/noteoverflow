@@ -324,7 +324,6 @@ const MultiSelectorTrigger = forwardRef<
     scrollAreaRef,
     setIsClickingScrollArea,
     selectAllValues,
-    setIsCommandItemInteraction,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -406,19 +405,12 @@ const MultiSelectorTrigger = forwardRef<
           ref={scrollAreaRef}
           className="w-full overflow-hidden"
           style={{ height: `${contentHeight}px`, paddingRight: paddingRight }}
-          onMouseDown={() => {
+          onMouseDown={(e) => {
+            mousePreventDefault(e);
             setIsClickingScrollArea(true);
           }}
           onMouseUp={() => {
             setIsClickingScrollArea(false);
-          }}
-          onTouchStart={() => {
-            setIsCommandItemInteraction(true);
-          }}
-          onTouchEnd={() => {
-            setTimeout(() => {
-              setIsCommandItemInteraction(false);
-            }, 100);
           }}
           onClick={() => {
             if (!open && !isClickingRemove) {
@@ -639,19 +631,21 @@ const MultiSelectorItem = forwardRef<
       ref={ref}
       {...props}
       onSelect={() => {
-        setIsCommandItemInteraction(true);
-        setTimeout(() => {
-          setIsCommandItemInteraction(false);
-        }, 100);
         onValueChange(value);
-        if (inputValue) {
+        if (!inputValue) {
+          setIsCommandItemInteraction(true);
           setTimeout(() => {
+            setIsCommandItemInteraction(false);
+          }, 100);
+        }
+        setTimeout(() => {
+          if (inputValue) {
             commandListRef.current?.scrollTo({
               top: 0,
               behavior: "instant",
             });
-          }, 100);
-        }
+          }
+        }, 100);
         setInputValue("");
       }}
       className={cn(
@@ -664,19 +658,6 @@ const MultiSelectorItem = forwardRef<
         e.preventDefault();
         e.stopPropagation();
       }}
-      // onTouchStart={(e) => {
-      //   e.preventDefault();
-      //   e.stopPropagation();
-      //   setIsCommandItemInteraction(true);
-      // }}
-      // onTouchEnd={(e) => {
-      //   e.preventDefault();
-      //   e.stopPropagation();
-      //   onValueChange(value);
-      //   setTimeout(() => {
-      //     setIsCommandItemInteraction(false);
-      //   }, 100);
-      // }}
     >
       <Checkbox
         checked={isIncluded}
