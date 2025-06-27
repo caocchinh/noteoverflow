@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
-import { X as RemoveIcon, Check, Trash2, Sparkles } from "lucide-react";
+import { X as RemoveIcon, Trash2, Sparkles } from "lucide-react";
 import React, {
   KeyboardEvent,
   createContext,
@@ -28,6 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MultiSelectorProps
   extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
@@ -58,6 +59,8 @@ interface MultiSelectContextProps {
   selectAllValues: () => void;
   isCommandItemInteraction: boolean;
   setIsCommandItemInteraction: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobileKeyboardOpen: boolean;
+  setIsMobileKeyboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -96,6 +99,7 @@ const MultiSelector = ({
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
+  const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
   const [isCommandItemInteraction, setIsCommandItemInteraction] =
     useState(false);
 
@@ -108,7 +112,6 @@ const MultiSelector = ({
     [open]
   );
 
-  // Add click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -241,6 +244,12 @@ const MultiSelector = ({
 
         case "Enter":
           handleOpenChange(true);
+          if (commandListRef.current) {
+            commandListRef.current.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+          }
           break;
 
         case "Escape":
@@ -280,6 +289,8 @@ const MultiSelector = ({
         selectAllValues,
         isCommandItemInteraction,
         setIsCommandItemInteraction,
+        isMobileKeyboardOpen,
+        setIsMobileKeyboardOpen,
       }}
     >
       <Command
@@ -312,8 +323,8 @@ const MultiSelectorTrigger = forwardRef<
     setOpen,
     scrollAreaRef,
     setIsClickingScrollArea,
-    setIsCommandItemInteraction,
     selectAllValues,
+    setIsCommandItemInteraction,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -398,16 +409,16 @@ const MultiSelectorTrigger = forwardRef<
           onMouseDown={() => {
             setIsClickingScrollArea(true);
           }}
+          onMouseUp={() => {
+            setIsClickingScrollArea(false);
+          }}
           onTouchStart={() => {
             setIsCommandItemInteraction(true);
           }}
           onTouchEnd={() => {
             setTimeout(() => {
               setIsCommandItemInteraction(false);
-            }, 50);
-          }}
-          onMouseUp={() => {
-            setIsClickingScrollArea(false);
+            }, 100);
           }}
           onClick={() => {
             if (!open && !isClickingRemove) {
@@ -469,12 +480,12 @@ const MultiSelectorInput = forwardRef<
     inputValue,
     setInputValue,
     activeIndex,
+    commandListRef,
     handleSelect,
     ref: inputRef,
     isClickingScrollArea,
     setOpen,
     isCommandItemInteraction,
-    setIsCommandItemInteraction,
   } = useMultiSelect();
 
   return (
@@ -483,24 +494,31 @@ const MultiSelectorInput = forwardRef<
       tabIndex={0}
       ref={inputRef}
       value={inputValue}
-      readOnly={isCommandItemInteraction}
-      onValueChange={activeIndex === -1 ? setInputValue : undefined}
-      onSelect={handleSelect}
-      onTouchStart={(e) => {
-        if (isCommandItemInteraction) {
-          e.preventDefault();
+      readOnly={isCommandItemInteraction && !inputValue}
+      onValueChange={(e) => {
+        if (activeIndex === -1) {
+          setInputValue(e);
+        }
+
+        if (!e) {
+          setTimeout(() => {
+            commandListRef.current?.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+          }, 100);
         }
       }}
+      onSelect={handleSelect}
       onClick={() => {
         setOpen(true);
       }}
       onBlur={() => {
         // Only close if we're not clicking in the ScrollArea
-        if (!isClickingScrollArea) {
+        if (!isClickingScrollArea && !isCommandItemInteraction) {
           setOpen(false);
           setInputValue("");
           // Reset the flag on blur
-          setIsCommandItemInteraction(false);
         }
       }}
       className={cn(
@@ -555,26 +573,25 @@ const MultiSelectorList = forwardRef<
             {value.map((item) => (
               <CommandItem
                 key={item}
-                className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-between "
+                className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
                 onSelect={() => {
+                  setIsCommandItemInteraction(true);
                   onValueChange(item);
+                  setTimeout(() => {
+                    setIsCommandItemInteraction(false);
+                  }, 100);
                 }}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
-                onTouchStart={() => {
-                  setIsCommandItemInteraction(true);
-                }}
-                onTouchEnd={() => {
-                  setTimeout(() => {
-                    setIsCommandItemInteraction(false);
-                  }, 100);
-                }}
               >
+                <Checkbox
+                  defaultChecked={true}
+                  className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                />
                 {item}
                 <span className="hidden">skibidi toilet</span>
-                <RemoveIcon className="h-4 w-4  cursor-pointer" />
               </CommandItem>
             ))}
           </CommandGroup>
@@ -610,17 +627,11 @@ const MultiSelectorItem = forwardRef<
   const {
     value: Options,
     onValueChange,
-    setInputValue,
     setIsCommandItemInteraction,
+    setInputValue,
+    inputValue,
+    commandListRef,
   } = useMultiSelect();
-
-  const preventDefault = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    []
-  );
 
   const isIncluded = Options.includes(value);
   return (
@@ -628,27 +639,50 @@ const MultiSelectorItem = forwardRef<
       ref={ref}
       {...props}
       onSelect={() => {
+        setIsCommandItemInteraction(true);
+        setTimeout(() => {
+          setIsCommandItemInteraction(false);
+        }, 100);
         onValueChange(value);
+        if (inputValue) {
+          setTimeout(() => {
+            commandListRef.current?.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+          }, 100);
+        }
         setInputValue("");
       }}
       className={cn(
-        "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-between ",
+        "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
         className,
         isIncluded && "opacity-50 cursor-default",
         props.disabled && "opacity-50 cursor-not-allowed"
       )}
-      onMouseDown={preventDefault}
-      onTouchStart={() => {
-        setIsCommandItemInteraction(true);
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
       }}
-      onTouchEnd={() => {
-        setTimeout(() => {
-          setIsCommandItemInteraction(false);
-        }, 100);
-      }}
+      // onTouchStart={(e) => {
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   setIsCommandItemInteraction(true);
+      // }}
+      // onTouchEnd={(e) => {
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   onValueChange(value);
+      //   setTimeout(() => {
+      //     setIsCommandItemInteraction(false);
+      //   }, 100);
+      // }}
     >
+      <Checkbox
+        checked={isIncluded}
+        className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main  "
+      />
       {children}
-      {isIncluded && <Check className="h-4 w-4" />}
     </CommandItem>
   );
 });
