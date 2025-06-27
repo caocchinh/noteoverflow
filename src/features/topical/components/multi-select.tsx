@@ -555,9 +555,7 @@ const MultiSelectorList = forwardRef<
                   e.preventDefault();
                   e.stopPropagation();
                 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+                onTouchStart={() => {
                   setIsCommandItemInteraction(true);
                 }}
               >
@@ -627,8 +625,7 @@ const MultiSelectorItem = forwardRef<
         props.disabled && "opacity-50 cursor-not-allowed"
       )}
       onMouseDown={preventDefault}
-      onClick={(e) => {
-        preventDefault(e);
+      onTouchStart={() => {
         setIsCommandItemInteraction(true);
       }}
     >
