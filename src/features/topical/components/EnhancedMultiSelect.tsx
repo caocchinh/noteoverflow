@@ -28,15 +28,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Command as CommandPrimitive } from "cmdk";
 import { Label } from "@/components/ui/label";
 
-interface MultiSelectorProps
-  extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
+interface MultiSelectorProps {
   values: string[];
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
   data?: string[];
+  dir?: string;
   label: string;
   prerequisite: string;
 }
@@ -86,8 +85,6 @@ export default function EnhancedMultiSelect({
   values: value,
   onValuesChange: onValueChange,
   loop = true,
-  className,
-  children,
   dir,
   data,
   ...props
@@ -305,13 +302,11 @@ export default function EnhancedMultiSelect({
         ref={containerRef}
         onKeyDown={handleKeyDown}
         className={cn(
-          "overflow-visible bg-transparent  flex flex-col space-y-2 relative !h-max",
-          className
+          "overflow-visible bg-transparent  flex flex-col space-y-2 relative !h-max"
         )}
         dir={dir}
         {...props}
       >
-        {children}
         <MultiSelectorTrigger />
         <MultiSelectorList />
       </Command>
@@ -332,7 +327,6 @@ const MultiSelectorTrigger = () => {
     setIsClickingScrollArea,
     selectAllValues,
     allAvailableOptions,
-    shouldOpenDrawer,
     label,
     prerequisite,
     inputValue,
@@ -342,7 +336,6 @@ const MultiSelectorTrigger = () => {
     isClickingScrollArea,
     handleSelect,
     commandListRef,
-    setIsDrawerOpen,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -473,11 +466,7 @@ const MultiSelectorTrigger = () => {
             }}
             onClick={() => {
               if (!open && !isClickingRemove) {
-                if (shouldOpenDrawer) {
-                  setIsDrawerOpen(true);
-                } else {
-                  setOpen(true);
-                }
+                setOpen(true);
               }
             }}
           >
@@ -556,7 +545,6 @@ const MultiSelectorList = () => {
     value,
     onValueChange,
     commandListRef,
-    shouldOpenDrawer,
     inputValue,
     setIsCommandItemInteraction,
     open,
@@ -570,8 +558,7 @@ const MultiSelectorList = () => {
         <CommandList
           ref={commandListRef}
           className={cn(
-            "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full  bg-background shadow-md border border-muted top-full",
-            !shouldOpenDrawer && "absolute"
+            "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full  bg-background shadow-md border border-muted top-full absolute"
           )}
           onMouseDown={(e) => {
             e.preventDefault();
@@ -579,7 +566,7 @@ const MultiSelectorList = () => {
           }}
         >
           <ScrollArea
-            className={cn("max-h-[300px]", shouldOpenDrawer && "max-h-[68vh]")}
+            className="max-h-[300px]"
             onTouchStart={() => {
               if (!inputValue) {
                 setIsCommandItemInteraction(true);
