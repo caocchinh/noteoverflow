@@ -233,9 +233,8 @@ const TopicalPage = () => {
               setSelectedPaperType(values as string[])
             }
             loop={true}
-            dropDownHeight="h-[190px]"
             prerequisite="Subject"
-            data={availablePaperTypes}
+            data={availablePaperTypes?.map((item) => item.toString())}
           />
           <EnhancedMultiSelect
             label="Year"
@@ -243,7 +242,7 @@ const TopicalPage = () => {
             onValuesChange={(values) => setSelectedYear(values as string[])}
             loop={true}
             prerequisite="Subject"
-            data={availableYears}
+            data={availableYears?.map((item) => item.toString())}
           />
 
           <EnhancedMultiSelect
@@ -251,7 +250,6 @@ const TopicalPage = () => {
             values={selectedSeason}
             onValuesChange={(values) => setSelectedSeason(values as string[])}
             loop={true}
-            dropDownHeight="h-[190px]"
             prerequisite="Subject"
             data={availableSeasons}
           />
