@@ -365,7 +365,7 @@ const MultiSelectorTrigger = forwardRef<
       <div className="absolute top-2 flex items-center justify-center gap-[5px] right-2">
         <Badge
           variant="default"
-          className="px-1 rounded-xl cursor-pointer flex items-center gap-1 whitespace-pre-wrap wrap-anywhere select-none"
+          className="px-1 rounded-xl w-[100px] cursor-pointer flex items-center gap-1 whitespace-pre-wrap wrap-anywhere select-none"
           onMouseDown={(e) => {
             mousePreventDefault(e);
           }}
@@ -520,16 +520,17 @@ const MultiSelectorInput = forwardRef<
       onClick={() => {
         setOpen(true);
       }}
+      onFocus={() => {
+        setOpen(true);
+      }}
       onBlur={() => {
-        // Only close if we're not clicking in the ScrollArea
         if (!isClickingScrollArea && !isCommandItemInteraction) {
           setOpen(false);
           setInputValue("");
-          // Reset the flag on blur
         }
       }}
       className={cn(
-        "bg-transparent w-[150px] text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0",
+        "bg-transparent w-[110px] text-sm outline-none placeholder:text-muted-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 placeholder:text-[12px]",
         className,
         activeIndex !== -1 && "caret-transparent"
       )}
@@ -564,7 +565,20 @@ const MultiSelectorList = forwardRef<
     commandListRef,
     inputValue,
     setIsCommandItemInteraction,
+    open,
   } = useMultiSelect();
+
+  // Simple solution to prevent auto-scrolling when dropdown appears
+  useEffect(() => {
+    if (open && commandListRef.current) {
+      const scrollPosition = window.scrollY;
+
+      // Force window to maintain the same scroll position after dropdown renders
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPosition);
+      });
+    }
+  }, [open, commandListRef]);
 
   return (
     <CommandList
@@ -573,6 +587,10 @@ const MultiSelectorList = forwardRef<
         "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full absolute bg-background shadow-md border border-muted top-0",
         className
       )}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
       <ScrollArea
         className="max-h-[300px]"

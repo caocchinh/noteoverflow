@@ -19,6 +19,62 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
+const ButtonUltility = ({
+  isResetConfirmationOpen,
+  setIsResetConfirmationOpen,
+  resetEverything,
+}: {
+  isResetConfirmationOpen: boolean;
+  setIsResetConfirmationOpen: (value: boolean) => void;
+  resetEverything: () => void;
+}) => {
+  return (
+    <>
+      <Dialog
+        open={isResetConfirmationOpen}
+        onOpenChange={setIsResetConfirmationOpen}
+      >
+        <DialogTrigger asChild>
+          <Button variant="outline" className="cursor-pointer w-full">
+            Clear
+            <BrushCleaning />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Clear all</DialogTitle>
+            <DialogDescription>
+              This will clear all the selected options and reset the form. Are
+              you sure you want to clear?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="cursor-pointer">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              className="cursor-pointer"
+              onClick={() => {
+                resetEverything();
+                setIsResetConfirmationOpen(false);
+              }}
+            >
+              Clear
+              <BrushCleaning />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Button className="cursor-pointer w-full">
+        Search
+        <ScanText />
+      </Button>
+    </>
+  );
+};
+
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     ValidCurriculum | ""
@@ -93,7 +149,7 @@ const TopicalPage = () => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-6">
             <AnimatePresence mode="wait">
-              {selectedSubject && (
+              {selectedSubject ? (
                 <motion.div
                   key={selectedSubject}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -116,22 +172,21 @@ const TopicalPage = () => {
                     height={100}
                   />
                 </motion.div>
+              ) : (
+                <div className="flex items-center flex-col justify-center">
+                  <Image
+                    src="/assets/pointing.png"
+                    alt="default subject"
+                    width={100}
+                    height={100}
+                    className="self-center"
+                  />
+                  <span className="text-sm text-logo-main">
+                    Select {!selectedCurriculum ? "curriculum" : "subject"}
+                  </span>
+                </div>
               )}
             </AnimatePresence>
-            {!selectedSubject && (
-              <div className="flex items-center flex-col justify-center">
-                <Image
-                  src="/assets/pointing.png"
-                  alt="default subject"
-                  width={100}
-                  height={100}
-                  className="self-center"
-                />
-                <span className="text-sm text-logo-main">
-                  Select {!selectedCurriculum ? "curriculum" : "subject"}
-                </span>
-              </div>
-            )}
             <div className="flex items-start gap-6 flex-col justify-start">
               <EnhancedSelect
                 label="Curriculum"
@@ -154,57 +209,22 @@ const TopicalPage = () => {
               />
             </div>
           </div>
-
-          <Dialog
-            open={isResetConfirmationOpen}
-            onOpenChange={setIsResetConfirmationOpen}
-          >
-            <DialogTrigger asChild>
-              <Button variant="outline" className="cursor-pointer">
-                Clear
-                <BrushCleaning />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Clear all</DialogTitle>
-                <DialogDescription>
-                  This will clear all the selected options and reset the form.
-                  Are you sure you want to clear?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" className="cursor-pointer">
-                    Cancel
-                  </Button>
-                </DialogClose>
-                <Button
-                  className="cursor-pointer"
-                  onClick={() => {
-                    resetEverything();
-                    setIsResetConfirmationOpen(false);
-                  }}
-                >
-                  Clear
-                  <BrushCleaning />
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button className="cursor-pointer">
-            Search
-            <ScanText />
-          </Button>
+          <div className="hidden md:flex w-full justify-center items-center flex-col gap-4">
+            <ButtonUltility
+              isResetConfirmationOpen={isResetConfirmationOpen}
+              setIsResetConfirmationOpen={setIsResetConfirmationOpen}
+              resetEverything={resetEverything}
+            />
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EnhancedMultiSelect
-            label="Year"
-            values={selectedYear}
-            onValuesChange={(values) => setSelectedYear(values as string[])}
+            label="Topic"
+            values={selectedTopic}
+            onValuesChange={(values) => setSelectedTopic(values as string[])}
             loop={true}
             prerequisite="Subject"
-            data={availableYears}
+            data={availableTopics}
           />
           <EnhancedMultiSelect
             label="Paper"
@@ -218,6 +238,15 @@ const TopicalPage = () => {
             data={availablePaperTypes}
           />
           <EnhancedMultiSelect
+            label="Year"
+            values={selectedYear}
+            onValuesChange={(values) => setSelectedYear(values as string[])}
+            loop={true}
+            prerequisite="Subject"
+            data={availableYears}
+          />
+
+          <EnhancedMultiSelect
             label="Season"
             values={selectedSeason}
             onValuesChange={(values) => setSelectedSeason(values as string[])}
@@ -226,13 +255,12 @@ const TopicalPage = () => {
             prerequisite="Subject"
             data={availableSeasons}
           />
-          <EnhancedMultiSelect
-            label="Topic"
-            values={selectedTopic}
-            onValuesChange={(values) => setSelectedTopic(values as string[])}
-            loop={true}
-            prerequisite="Subject"
-            data={availableTopics}
+        </div>
+        <div className="flex md:hidden w-[300px] justify-center items-center flex-col gap-4">
+          <ButtonUltility
+            isResetConfirmationOpen={isResetConfirmationOpen}
+            setIsResetConfirmationOpen={setIsResetConfirmationOpen}
+            resetEverything={resetEverything}
           />
         </div>
       </div>
