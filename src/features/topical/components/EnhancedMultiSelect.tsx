@@ -50,7 +50,7 @@ interface MultiSelectContextProps {
   setInputValue: React.Dispatch<React.SetStateAction<string>>;
   activeIndex: number;
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  ref: React.RefObject<HTMLInputElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   handleSelect: (e: React.SyntheticEvent<HTMLInputElement>) => void;
   removeAllValues: () => void;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
@@ -115,15 +115,6 @@ export default function EnhancedMultiSelect({
         navigator.userAgent
       ));
 
-  const handleOpenChange = useCallback(
-    (newOpen: boolean) => {
-      if (newOpen !== open) {
-        setOpen(newOpen);
-      }
-    },
-    [open]
-  );
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -131,7 +122,7 @@ export default function EnhancedMultiSelect({
         !containerRef.current.contains(event.target as Node) &&
         open
       ) {
-        handleOpenChange(false);
+        setOpen(false);
       }
     };
 
@@ -139,7 +130,7 @@ export default function EnhancedMultiSelect({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [open, handleOpenChange]);
+  }, [open]);
 
   const onValueChangeHandler = useCallback(
     (val: string) => {
@@ -255,7 +246,7 @@ export default function EnhancedMultiSelect({
           break;
 
         case "Enter":
-          handleOpenChange(true);
+          setOpen(true);
           if (commandListRef.current) {
             commandListRef.current.scrollTo({
               top: 0,
@@ -270,13 +261,13 @@ export default function EnhancedMultiSelect({
           if (activeIndex !== -1) {
             setActiveIndex(-1);
           } else if (open) {
-            handleOpenChange(false);
+            setOpen(false);
           }
           break;
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [value, inputValue, activeIndex, loop, handleOpenChange]
+    [value, inputValue, activeIndex, loop, setOpen]
   );
 
   return (
@@ -285,12 +276,12 @@ export default function EnhancedMultiSelect({
         value,
         onValueChange: onValueChangeHandler,
         open,
-        setOpen: handleOpenChange,
+        setOpen,
         inputValue,
         setInputValue,
         activeIndex,
         setActiveIndex,
-        ref: inputRef,
+        inputRef,
         handleSelect,
         removeAllValues,
         scrollAreaRef,
@@ -343,6 +334,14 @@ const MultiSelectorTrigger = () => {
     allAvailableOptions,
     shouldOpenDrawer,
     label,
+    prerequisite,
+    inputValue,
+    setInputValue,
+    inputRef,
+    isCommandItemInteraction,
+    isClickingScrollArea,
+    handleSelect,
+    commandListRef,
     setIsDrawerOpen,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
@@ -385,7 +384,49 @@ const MultiSelectorTrigger = () => {
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
-          <MultiSelectorInput />
+          <CommandInput
+            tabIndex={0}
+            ref={inputRef}
+            value={inputValue}
+            readOnly={isCommandItemInteraction && !inputValue}
+            placeholder={
+              !allAvailableOptions
+                ? `Select ${prerequisite.toLowerCase()} first`
+                : `${value.length} selected`
+            }
+            enterKeyHint="search"
+            onValueChange={(e) => {
+              if (activeIndex === -1) {
+                setInputValue(e);
+              }
+
+              if (!e) {
+                setTimeout(() => {
+                  commandListRef.current?.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
+                }, 100);
+              }
+            }}
+            onSelect={handleSelect}
+            onClick={() => {
+              setOpen(true);
+            }}
+            onFocus={() => {
+              setOpen(true);
+            }}
+            onBlur={() => {
+              if (!isClickingScrollArea && !isCommandItemInteraction) {
+                setOpen(false);
+                setInputValue("");
+              }
+            }}
+            className={cn(
+              "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-[205px] focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
+              activeIndex !== -1 && "caret-transparent"
+            )}
+          />
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -485,78 +526,6 @@ const MultiSelectorTrigger = () => {
 };
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
-
-const MultiSelectorInput = () => {
-  const {
-    inputValue,
-    setInputValue,
-    value,
-    activeIndex,
-    commandListRef,
-    handleSelect,
-    ref: inputRef,
-    isClickingScrollArea,
-    setOpen,
-    isCommandItemInteraction,
-    shouldOpenDrawer,
-    allAvailableOptions,
-    prerequisite,
-  } = useMultiSelect();
-
-  return (
-    <CommandInput
-      tabIndex={0}
-      ref={inputRef}
-      value={inputValue}
-      readOnly={isCommandItemInteraction && !inputValue}
-      placeholder={
-        !allAvailableOptions
-          ? `Select ${prerequisite.toLowerCase()} first`
-          : `${value.length} selected`
-      }
-      enterKeyHint="search"
-      onValueChange={(e) => {
-        if (activeIndex === -1) {
-          setInputValue(e);
-        }
-
-        if (!e) {
-          setTimeout(() => {
-            commandListRef.current?.scrollTo({
-              top: 0,
-              behavior: "instant",
-            });
-          }, 100);
-        }
-      }}
-      onSelect={handleSelect}
-      onClick={() => {
-        if (shouldOpenDrawer) {
-        } else {
-          setOpen(true);
-        }
-      }}
-      onFocus={() => {
-        if (shouldOpenDrawer) {
-        } else {
-          setOpen(true);
-        }
-      }}
-      onBlur={() => {
-        if (!isClickingScrollArea && !isCommandItemInteraction) {
-          setOpen(false);
-          setInputValue("");
-        }
-      }}
-      className={cn(
-        "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-[205px] focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
-        activeIndex !== -1 && "caret-transparent"
-      )}
-    />
-  );
-};
-
-MultiSelectorInput.displayName = "MultiSelectorInput";
 
 // const MultiSelectorContent = () => {
 //   const { open, shouldOpenDrawer, isDrawerOpen, setIsDrawerOpen } =
