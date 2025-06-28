@@ -1,13 +1,11 @@
 import {
   MultiSelector,
   MultiSelectorTrigger,
-  MultiSelectorInput,
   MultiSelectorContent,
   MultiSelectorList,
   MultiSelectorItem,
 } from "@/features/topical/components/multi-select";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
 import { useState } from "react";
 
 const EnhancedMultiSelect = ({
@@ -46,19 +44,7 @@ const EnhancedMultiSelect = ({
         loop={loop}
         className="w-[300px]"
       >
-        <MultiSelectorTrigger>
-          <div className="flex items-center gap-2 pl-2">
-            <Search className="h-4 w-4" />
-            <MultiSelectorInput
-              disabled={!data}
-              placeholder={
-                data
-                  ? `Search ${label.toLowerCase()}`
-                  : `Select ${prerequisite.toLowerCase()} first`
-              }
-            />
-          </div>
-        </MultiSelectorTrigger>
+        <MultiSelectorTrigger />
         <MultiSelectorContent>
           <MultiSelectorList className={dropDownHeight}>
             {data?.map((item, i) => (

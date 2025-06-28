@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
-import { X as RemoveIcon, Trash2, Sparkles } from "lucide-react";
+import { X as RemoveIcon, Trash2, Sparkles, Search } from "lucide-react";
 import React, {
   KeyboardEvent,
   createContext,
@@ -29,6 +29,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface MultiSelectorProps
   extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
@@ -61,6 +67,9 @@ interface MultiSelectContextProps {
   setIsCommandItemInteraction: React.Dispatch<React.SetStateAction<boolean>>;
   isMobileKeyboardOpen: boolean;
   setIsMobileKeyboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isDrawerOpen: boolean;
+  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  shouldOpenDrawer: boolean;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -102,6 +111,8 @@ const MultiSelector = ({
   const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
   const [isCommandItemInteraction, setIsCommandItemInteraction] =
     useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const shouldOpenDrawer = window.innerWidth <= 768;
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -291,6 +302,9 @@ const MultiSelector = ({
         setIsCommandItemInteraction,
         isMobileKeyboardOpen,
         setIsMobileKeyboardOpen,
+        isDrawerOpen,
+        setIsDrawerOpen,
+        shouldOpenDrawer,
       }}
     >
       <Command
@@ -327,10 +341,13 @@ const MultiSelectorTrigger = forwardRef<
     selectAllValues,
     setIsCommandItemInteraction,
     setInputValue,
+    shouldOpenDrawer,
+    setIsDrawerOpen,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
   const [paddingRight, setPaddingRight] = useState<string>("initial");
+
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -361,7 +378,6 @@ const MultiSelectorTrigger = forwardRef<
       )}
       {...props}
     >
-      {children}
       <div className="absolute top-2 flex items-center justify-center gap-[5px] right-2">
         <Badge
           variant="default"
@@ -371,7 +387,11 @@ const MultiSelectorTrigger = forwardRef<
           }}
           onClick={() => {
             setInputValue("");
-            setOpen(!open || isCommandItemInteraction);
+            if (shouldOpenDrawer) {
+              setIsDrawerOpen(true);
+            } else {
+              setOpen(!open || isCommandItemInteraction);
+            }
           }}
           onTouchStart={() => {
             setIsCommandItemInteraction(true);
@@ -414,6 +434,13 @@ const MultiSelectorTrigger = forwardRef<
           <TooltipContent>Remove all</TooltipContent>
         </Tooltip>
       </div>
+      {!shouldOpenDrawer && (
+        <div className="flex items-center gap-2 pl-2">
+          <Search className="h-4 w-4" />
+          <MultiSelectorInput />
+        </div>
+      )}
+
       {value.length > 0 && (
         <ScrollArea
           ref={scrollAreaRef}
@@ -428,7 +455,11 @@ const MultiSelectorTrigger = forwardRef<
           }}
           onClick={() => {
             if (!open && !isClickingRemove) {
-              setOpen(true);
+              if (shouldOpenDrawer) {
+                setIsDrawerOpen(true);
+              } else {
+                setOpen(true);
+              }
             }
           }}
         >
@@ -492,6 +523,8 @@ const MultiSelectorInput = forwardRef<
     isClickingScrollArea,
     setOpen,
     isCommandItemInteraction,
+    shouldOpenDrawer,
+    setIsDrawerOpen,
   } = useMultiSelect();
 
   return (
@@ -518,10 +551,16 @@ const MultiSelectorInput = forwardRef<
       }}
       onSelect={handleSelect}
       onClick={() => {
-        setOpen(true);
+        if (shouldOpenDrawer) {
+        } else {
+          setOpen(true);
+        }
       }}
       onFocus={() => {
-        setOpen(true);
+        if (shouldOpenDrawer) {
+        } else {
+          setOpen(true);
+        }
       }}
       onBlur={() => {
         if (!isClickingScrollArea && !isCommandItemInteraction) {
@@ -544,10 +583,19 @@ const MultiSelectorContent = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ children }, ref) => {
-  const { open } = useMultiSelect();
+  const { open, shouldOpenDrawer, isDrawerOpen, setIsDrawerOpen } =
+    useMultiSelect();
   return (
     <div ref={ref} className="relative">
-      {open && children}
+      {open && !shouldOpenDrawer && children}
+      {isDrawerOpen && (
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <DrawerContent className="h-[70vh] flex flex-col">
+            <MultiSelectorInput />
+            {children}
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 });
@@ -563,6 +611,7 @@ const MultiSelectorList = forwardRef<
     value,
     onValueChange,
     commandListRef,
+    shouldOpenDrawer,
     inputValue,
     setIsCommandItemInteraction,
     open,
@@ -584,7 +633,8 @@ const MultiSelectorList = forwardRef<
     <CommandList
       ref={commandListRef}
       className={cn(
-        "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full absolute bg-background shadow-md border border-muted top-0",
+        "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full  bg-background shadow-md border border-muted top-0",
+        !shouldOpenDrawer && "absolute",
         className
       )}
       onMouseDown={(e) => {
@@ -593,7 +643,7 @@ const MultiSelectorList = forwardRef<
       }}
     >
       <ScrollArea
-        className="max-h-[300px]"
+        className={cn("max-h-[300px]", shouldOpenDrawer && "max-h-[68vh]")}
         onTouchStart={() => {
           if (!inputValue) {
             setIsCommandItemInteraction(true);
