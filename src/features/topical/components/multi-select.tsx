@@ -320,10 +320,14 @@ const MultiSelectorTrigger = forwardRef<
     activeIndex,
     open,
     removeAllValues,
+    isCommandItemInteraction,
     setOpen,
     scrollAreaRef,
     setIsClickingScrollArea,
     selectAllValues,
+    setIsCommandItemInteraction,
+    setInputValue,
+    inputValue,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -363,9 +367,30 @@ const MultiSelectorTrigger = forwardRef<
         <Badge
           variant="default"
           className="px-1 rounded-xl cursor-pointer flex items-center gap-1 whitespace-pre-wrap wrap-anywhere select-none"
-          onMouseDown={mousePreventDefault}
+          onMouseDown={(e) => {
+            mousePreventDefault(e);
+            setIsCommandItemInteraction(true);
+          }}
+          onMouseUp={() => {
+            setTimeout(() => {
+              setIsCommandItemInteraction(false);
+            }, 0);
+          }}
           onClick={() => {
-            setOpen(!open);
+            const willOpen = !open && isCommandItemInteraction;
+            if (!willOpen && inputValue) {
+              setInputValue("");
+            } else {
+              setOpen(willOpen);
+            }
+          }}
+          onTouchStart={() => {
+            setIsCommandItemInteraction(true);
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              setIsCommandItemInteraction(false);
+            }, 0);
           }}
         >
           Select
@@ -555,52 +580,67 @@ const MultiSelectorList = forwardRef<
     <CommandList
       ref={commandListRef}
       className={cn(
-        "p-2 flex flex-col gap-2 rounded-md scrollbar-thin scrollbar-track-transparent transition-colors scrollbar-thumb-muted-foreground dark:scrollbar-thumb-muted scrollbar-thumb-rounded-lg w-full absolute bg-background shadow-md z-10 border border-muted top-0",
+        "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full absolute bg-background shadow-md border border-muted top-0",
         className
       )}
     >
-      {value.length > 0 && !inputValue && (
-        <>
-          <CommandGroup heading={`${value.length} selected`}>
-            {value.map((item) => (
-              <CommandItem
-                key={item}
-                className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
-                onSelect={() => {
-                  setIsCommandItemInteraction(true);
-                  onValueChange(item);
-                  setTimeout(() => {
-                    setIsCommandItemInteraction(false);
-                  }, 100);
-                }}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                <Checkbox
-                  defaultChecked={true}
-                  className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
-                />
-                {item}
-                <span className="hidden">skibidi toilet</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-          <CommandSeparator />
-        </>
-      )}
-
-      <CommandGroup
-        heading={
-          !!inputValue
-            ? "Search results"
-            : `${React.Children.count(children)} available options`
-        }
+      <ScrollArea
+        className="max-h-[300px]"
+        onTouchStart={() => {
+          if (!inputValue) {
+            setIsCommandItemInteraction(true);
+          }
+        }}
+        onTouchEnd={() => {
+          setTimeout(() => {
+            if (!inputValue) {
+              setIsCommandItemInteraction(false);
+            }
+          }, 100);
+        }}
       >
-        {children}
-      </CommandGroup>
+        {value.length > 0 && !inputValue && (
+          <>
+            <CommandGroup heading={`${value.length} selected`}>
+              {value.map((item) => (
+                <CommandItem
+                  key={item}
+                  className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
+                  onSelect={() => {
+                    setIsCommandItemInteraction(true);
+                    onValueChange(item);
+                    setTimeout(() => {
+                      setIsCommandItemInteraction(false);
+                    }, 100);
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <Checkbox
+                    defaultChecked={true}
+                    className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                  />
+                  {item}
+                  <span className="hidden">skibidi toilet</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
 
+        <CommandGroup
+          heading={
+            !!inputValue
+              ? "Search results"
+              : `${React.Children.count(children)} available options`
+          }
+        >
+          {children}
+        </CommandGroup>
+      </ScrollArea>
       <CommandEmpty>
         <span className="text-muted-foreground">No results found</span>
       </CommandEmpty>

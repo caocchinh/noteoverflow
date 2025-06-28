@@ -185,14 +185,6 @@ const TopicalPage = () => {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EnhancedMultiSelect
-            label="Topic"
-            values={selectedTopic}
-            onValuesChange={(values) => setSelectedTopic(values as string[])}
-            loop={true}
-            prerequisite="Subject"
-            data={availableTopics}
-          />
-          <EnhancedMultiSelect
             label="Year"
             values={selectedYear}
             onValuesChange={(values) => setSelectedYear(values as string[])}
@@ -219,6 +211,14 @@ const TopicalPage = () => {
             dropDownHeight="h-[190px]"
             prerequisite="Subject"
             data={availableSeasons}
+          />
+          <EnhancedMultiSelect
+            label="Topic"
+            values={selectedTopic}
+            onValuesChange={(values) => setSelectedTopic(values as string[])}
+            loop={true}
+            prerequisite="Subject"
+            data={availableTopics}
           />
         </div>
       </div>
