@@ -327,7 +327,6 @@ const MultiSelectorTrigger = forwardRef<
     selectAllValues,
     setIsCommandItemInteraction,
     setInputValue,
-    inputValue,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -369,20 +368,10 @@ const MultiSelectorTrigger = forwardRef<
           className="px-1 rounded-xl cursor-pointer flex items-center gap-1 whitespace-pre-wrap wrap-anywhere select-none"
           onMouseDown={(e) => {
             mousePreventDefault(e);
-            setIsCommandItemInteraction(true);
-          }}
-          onMouseUp={() => {
-            setTimeout(() => {
-              setIsCommandItemInteraction(false);
-            }, 0);
           }}
           onClick={() => {
-            const willOpen = !open && isCommandItemInteraction;
-            if (!willOpen && inputValue) {
-              setInputValue("");
-            } else {
-              setOpen(willOpen);
-            }
+            setInputValue("");
+            setOpen(!open || isCommandItemInteraction);
           }}
           onTouchStart={() => {
             setIsCommandItemInteraction(true);
@@ -390,7 +379,7 @@ const MultiSelectorTrigger = forwardRef<
           onTouchEnd={() => {
             setTimeout(() => {
               setIsCommandItemInteraction(false);
-            }, 0);
+            }, 100);
           }}
         >
           Select
@@ -512,6 +501,7 @@ const MultiSelectorInput = forwardRef<
       ref={inputRef}
       value={inputValue}
       readOnly={isCommandItemInteraction && !inputValue}
+      enterKeyHint="search"
       onValueChange={(e) => {
         if (activeIndex === -1) {
           setInputValue(e);
@@ -589,6 +579,14 @@ const MultiSelectorList = forwardRef<
         onTouchStart={() => {
           if (!inputValue) {
             setIsCommandItemInteraction(true);
+          }
+        }}
+        onClick={() => {
+          if (!inputValue) {
+            setIsCommandItemInteraction(true);
+            setTimeout(() => {
+              setIsCommandItemInteraction(false);
+            }, 100);
           }
         }}
         onTouchEnd={() => {

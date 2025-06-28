@@ -85,7 +85,7 @@ const TopicalPage = () => {
   }, [selectedSubject]);
 
   return (
-    <div className="pt-19 min-h-[130vh] p-6">
+    <div className="pt-19 min-h-[200vh] p-6">
       <h1 className="text-3xl font-bold text-center md:text-left">
         Topical Questions
       </h1>
@@ -118,6 +118,20 @@ const TopicalPage = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+            {!selectedSubject && (
+              <div className="flex items-center flex-col justify-center">
+                <Image
+                  src="/assets/pointing.png"
+                  alt="default subject"
+                  width={100}
+                  height={100}
+                  className="self-center"
+                />
+                <span className="text-sm text-logo-main">
+                  Select {!selectedCurriculum ? "curriculum" : "subject"}
+                </span>
+              </div>
+            )}
             <div className="flex items-start gap-6 flex-col justify-start">
               <EnhancedSelect
                 label="Curriculum"
@@ -133,7 +147,7 @@ const TopicalPage = () => {
               />
               <EnhancedSelect
                 label="Subject"
-                prerequisite="Curriculum"
+                prerequisite={!selectedCurriculum ? "Curriculum" : ""}
                 data={availableSubjects}
                 selectedValue={selectedSubject}
                 setSelectedValue={setSelectedSubject}
