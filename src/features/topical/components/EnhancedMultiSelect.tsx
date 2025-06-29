@@ -461,7 +461,7 @@ const MultiSelectorTrigger = () => {
                 <Badge
                   key={item}
                   className={cn(
-                    "px-1 rounded-xl text-left flex items-center gap-1 whitespace-pre-wrap wrap-anywhere",
+                    "px-1 rounded-xl text-left flex items-center gap-1 whitespace-pre-wrap wrap-anywhere dark:!border-white/25",
                     activeIndex === index && "ring-2 ring-muted-foreground "
                   )}
                   variant={"secondary"}
@@ -607,7 +607,10 @@ const MultiSelectorList = () => {
                 onOpenChange={setIsCollapsibleOpen}
               >
                 {!inputValue && (
-                  <CollapsibleTrigger className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer">
+                  <CollapsibleTrigger
+                    className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer"
+                    title="Toggle selected"
+                  >
                     <h3
                       className={cn(
                         "text-xs font-medium",

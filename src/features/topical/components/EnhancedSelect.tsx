@@ -44,6 +44,7 @@ const EnhancedSelect = ({
   setSelectedValue: (value: string) => void;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);
 
   return (
     <div className="flex flex-col gap-1">
@@ -53,7 +54,18 @@ const EnhancedSelect = ({
       >
         {label}
       </Label>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            setIsBlockingInput(true);
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 1000);
+          }
+          setIsOpen(open);
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -81,7 +93,8 @@ const EnhancedSelect = ({
             <CommandInput
               placeholder={`Search ${label.toLowerCase()}`}
               className="h-9 border-none"
-              wrapperClassName="w-full p-4 border-b"
+              wrapperClassName="w-full p-4 border-b py-6"
+              readOnly={isBlockingInput}
             />
             <CommandList>
               <ScrollArea className="max-h-[195px] md:max-h-[300px] ">

@@ -162,7 +162,7 @@ const TopicalPage = () => {
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
           <SidebarContent className="p-4 flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
                 <AnimatePresence mode="wait">
                   {selectedSubject && selectedCurriculum ? (
                     <motion.div
@@ -277,14 +277,21 @@ const TopicalPage = () => {
           <SidebarRail />
         </Sidebar>
         <SidebarInset>
-          <div className="p-4 pl-2 gap-6 flex items-center md:items-start justify-center flex-col ">
-            <SidebarTrigger className="flex fixed top-[73px] items-center gap-2 border cursor-pointer">
+          <div className="p-4 pl-2 gap-6 flex items-center md:items-start justify-center flex-col relative">
+            <SidebarTrigger className="flex fixed left-[10px] top-[73px] items-center gap-2 border cursor-pointer">
               Filters
               <SlidersHorizontal />
             </SidebarTrigger>
             <h1 className="text-2xl font-bold w-full  text-center ">
               Topical questions
             </h1>
+            <Image
+              src="/assets/funny4.png"
+              alt="default subject"
+              width={350}
+              height={350}
+              className="self-center rounded-md"
+            />
           </div>
         </SidebarInset>
       </SidebarProvider>
