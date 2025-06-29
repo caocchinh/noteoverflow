@@ -36,47 +36,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
-
-interface MultiSelectorProps {
-  values: string[];
-  onValuesChange: (value: string[]) => void;
-  loop?: boolean;
-  data?: string[];
-  dir?: string;
-  label: string;
-  prerequisite: string;
-}
-interface MultiSelectContextProps {
-  value: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValueChange: (value: any) => void;
-  open: boolean;
-  setOpen: (value: boolean) => void;
-  inputValue: string;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
-  activeIndex: number;
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  handleSelect: (e: React.SyntheticEvent<HTMLInputElement>) => void;
-  removeAllValues: () => void;
-  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
-  isClickingScrollArea: boolean;
-  setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
-  commandListRef: React.RefObject<HTMLDivElement | null>;
-  allAvailableOptions?: string[];
-  selectAllValues: () => void;
-  isCommandItemInteraction: boolean;
-  setIsCommandItemInteraction: React.Dispatch<React.SetStateAction<boolean>>;
-  isMobileKeyboardOpen: boolean;
-  setIsMobileKeyboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isDrawerOpen: boolean;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  shouldOpenDrawer: boolean;
-  label: string;
-  prerequisite: string;
-  isCollapsibleOpen: boolean;
-  setIsCollapsibleOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  MultiSelectorProps,
+  MultiSelectContextProps,
+} from "../constants/types";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
 
@@ -86,34 +55,6 @@ const useMultiSelect = () => {
     throw new Error("useMultiSelect must be used within MultiSelectProvider");
   }
   return context;
-};
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      try {
-        document.createEvent("TouchEvent");
-        return true;
-      } catch {
-        return false;
-      }
-    };
-
-    const isMobileDevice =
-      window.innerWidth <= 768 ||
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      checkMobile() ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
-
-    setIsMobile(isMobileDevice);
-  }, []);
-
-  return isMobile;
 };
 
 export default function EnhancedMultiSelect({
@@ -342,8 +283,18 @@ export default function EnhancedMultiSelect({
         dir={dir}
         {...props}
       >
-        <MultiSelectorTrigger />
-        <MultiSelectorList />
+        <Popover open={open}>
+          <PopoverTrigger>
+            <MultiSelectorTrigger />
+          </PopoverTrigger>
+          <PopoverContent
+            className="p-0 m-0 border-none shadow-none"
+            side="right"
+            align="center"
+          >
+            <MultiSelectorList />
+          </PopoverContent>
+        </Popover>
       </Command>
     </MultiSelectContext.Provider>
   );
@@ -378,14 +329,6 @@ const MultiSelectorTrigger = () => {
     selectAllValues,
     allAvailableOptions,
     label,
-    prerequisite,
-    inputValue,
-    setInputValue,
-    inputRef,
-    isCommandItemInteraction,
-    isClickingScrollArea,
-    handleSelect,
-    commandListRef,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
@@ -427,50 +370,6 @@ const MultiSelectorTrigger = () => {
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
-          <CommandInput
-            tabIndex={0}
-            ref={inputRef}
-            value={inputValue}
-            readOnly={isCommandItemInteraction && !inputValue}
-            placeholder={
-              !allAvailableOptions
-                ? `Select ${prerequisite.toLowerCase()} first`
-                : `${value.length} selected`
-            }
-            enterKeyHint="search"
-            onValueChange={(e) => {
-              if (activeIndex === -1) {
-                setInputValue(e);
-              }
-
-              if (!e) {
-                setTimeout(() => {
-                  commandListRef.current?.scrollTo({
-                    top: 0,
-                    behavior: "instant",
-                  });
-                }, 100);
-              }
-            }}
-            onSelect={handleSelect}
-            onClick={() => {
-              setOpen(true);
-            }}
-            onFocus={() => {
-              setOpen(true);
-            }}
-            onBlur={() => {
-              if (!isClickingScrollArea && !isCommandItemInteraction) {
-                setOpen(false);
-                setInputValue("");
-              }
-            }}
-            className={cn(
-              "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-[205px] focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
-              activeIndex !== -1 && "caret-transparent"
-            )}
-          />
-
           <Tooltip>
             <TooltipTrigger asChild>
               <div
@@ -525,7 +424,7 @@ const MultiSelectorTrigger = () => {
                 <Badge
                   key={item}
                   className={cn(
-                    "px-1 rounded-xl flex items-center gap-1 whitespace-pre-wrap wrap-anywhere",
+                    "px-1 rounded-xl text-left flex items-center gap-1 whitespace-pre-wrap wrap-anywhere",
                     activeIndex === index && "ring-2 ring-muted-foreground "
                   )}
                   variant={"secondary"}
@@ -579,140 +478,193 @@ const MultiSelectorList = () => {
     setInputValue,
     isCollapsibleOpen,
     setIsCollapsibleOpen,
+    prerequisite,
+    inputRef,
+    isCommandItemInteraction,
+    isClickingScrollArea,
+    handleSelect,
+    activeIndex,
+    setOpen,
   } = useMultiSelect();
 
   return (
     <>
       {open && (
-        <CommandList
-          ref={commandListRef}
-          className={cn(
-            "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full bg-background shadow-md border border-muted top-[110%] absolute",
-            (label === "Year" || label === "Season") && "max-h-[210px] "
-          )}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <ScrollArea
-            className="max-h-[300px]"
-            onTouchStart={() => {
-              if (!inputValue) {
-                setIsCommandItemInteraction(true);
+        <div className="flex flex-col gap-2  ">
+          <CommandInput
+            tabIndex={0}
+            ref={inputRef}
+            value={inputValue}
+            readOnly={isCommandItemInteraction && !inputValue}
+            placeholder={
+              !allAvailableOptions
+                ? `Select ${prerequisite.toLowerCase()} first`
+                : `Search ${label.toLowerCase()}`
+            }
+            enterKeyHint="search"
+            wrapperClassName="w-full p-4 border-b"
+            onValueChange={(e) => {
+              if (activeIndex === -1) {
+                setInputValue(e);
               }
-            }}
-            onClick={() => {
-              if (!inputValue) {
-                setIsCommandItemInteraction(true);
+
+              if (!e) {
                 setTimeout(() => {
-                  setIsCommandItemInteraction(false);
+                  commandListRef.current?.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
                 }, 100);
               }
             }}
-            onTouchEnd={() => {
-              setTimeout(() => {
-                if (!inputValue) {
-                  setIsCommandItemInteraction(false);
-                }
-              }, 100);
+            onSelect={handleSelect}
+            onClick={() => {
+              setOpen(true);
+            }}
+            onFocus={() => {
+              setOpen(true);
+            }}
+            onBlur={() => {
+              if (!isClickingScrollArea && !isCommandItemInteraction) {
+                setOpen(false);
+                setInputValue("");
+              }
+            }}
+            className={cn(
+              "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-[205px] focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
+              activeIndex !== -1 && "caret-transparent"
+            )}
+          />
+          <CommandList
+            ref={commandListRef}
+            className={cn(
+              "p-2 flex flex-col gap-2 z-[1000] w-full bg-background ",
+              (label === "Year" || label === "Season") && "max-h-[210px] "
+            )}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
             }}
           >
-            <Collapsible
-              open={isCollapsibleOpen}
-              onOpenChange={setIsCollapsibleOpen}
-            >
-              {!inputValue && (
-                <CollapsibleTrigger className="absolute top-1 right-0 cursor-pointer">
-                  <ChevronsUpDown className="h-4 w-4" />
-                </CollapsibleTrigger>
-              )}
-              <CommandGroup heading={`${value.length} selected`}>
-                <CollapsibleContent>
-                  {value.length > 0 && !inputValue && (
-                    <>
-                      {value.map((item) => (
-                        <CommandItem
-                          key={item}
-                          className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
-                          onSelect={() => {
-                            setIsCommandItemInteraction(true);
-                            onValueChange(item);
-                            setTimeout(() => {
-                              setIsCommandItemInteraction(false);
-                            }, 100);
-                          }}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Checkbox
-                            defaultChecked={true}
-                            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
-                          />
-                          {item}
-
-                          <span className="hidden">skibidi toilet</span>
-                        </CommandItem>
-                      ))}
-                    </>
-                  )}
-                </CollapsibleContent>
-              </CommandGroup>
-              <CommandSeparator />
-
-              <CommandGroup
-                heading={
-                  !!inputValue
-                    ? "Search results"
-                    : `${allAvailableOptions?.length} available options`
+            <ScrollArea
+              className="max-h-[300px]"
+              onTouchStart={() => {
+                if (!inputValue) {
+                  setIsCommandItemInteraction(true);
                 }
+              }}
+              onClick={() => {
+                if (!inputValue) {
+                  setIsCommandItemInteraction(true);
+                  setTimeout(() => {
+                    setIsCommandItemInteraction(false);
+                  }, 100);
+                }
+              }}
+              onTouchEnd={() => {
+                setTimeout(() => {
+                  if (!inputValue) {
+                    setIsCommandItemInteraction(false);
+                  }
+                }, 100);
+              }}
+            >
+              <Collapsible
+                open={isCollapsibleOpen}
+                onOpenChange={setIsCollapsibleOpen}
               >
-                {allAvailableOptions?.map((item) => (
-                  <CommandItem
-                    key={item}
-                    onSelect={() => {
-                      onValueChange(item);
-                      if (!inputValue) {
-                        setIsCommandItemInteraction(true);
-                        setTimeout(() => {
-                          setIsCommandItemInteraction(false);
-                        }, 100);
-                      }
-                      setTimeout(() => {
-                        if (inputValue) {
-                          commandListRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }, 100);
-                      setInputValue("");
-                    }}
-                    className={cn(
-                      "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
-                      value.includes(item) && "opacity-50 cursor-default"
+                {!inputValue && (
+                  <CollapsibleTrigger className="absolute top-1 right-0 cursor-pointer">
+                    <ChevronsUpDown className="h-4 w-4" />
+                  </CollapsibleTrigger>
+                )}
+                <CommandGroup heading={`${value.length} selected`}>
+                  <CollapsibleContent>
+                    {value.length > 0 && !inputValue && (
+                      <>
+                        {value.map((item) => (
+                          <CommandItem
+                            key={item}
+                            className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
+                            onSelect={() => {
+                              setIsCommandItemInteraction(true);
+                              onValueChange(item);
+                              setTimeout(() => {
+                                setIsCommandItemInteraction(false);
+                              }, 100);
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Checkbox
+                              defaultChecked={true}
+                              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                            />
+                            {item}
+
+                            <span className="hidden">skibidi toilet</span>
+                          </CommandItem>
+                        ))}
+                      </>
                     )}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    <Checkbox
-                      checked={value.includes(item)}
-                      className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main  "
-                    />
-                    {item}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Collapsible>
-          </ScrollArea>
-          <CommandEmpty>
-            <span className="text-muted-foreground">No results found</span>
-          </CommandEmpty>
-        </CommandList>
+                  </CollapsibleContent>
+                </CommandGroup>
+                <CommandSeparator />
+
+                <CommandGroup
+                  heading={
+                    !!inputValue
+                      ? "Search results"
+                      : `${allAvailableOptions?.length} available options`
+                  }
+                >
+                  {allAvailableOptions?.map((item) => (
+                    <CommandItem
+                      key={item}
+                      onSelect={() => {
+                        onValueChange(item);
+                        if (!inputValue) {
+                          setIsCommandItemInteraction(true);
+                          setTimeout(() => {
+                            setIsCommandItemInteraction(false);
+                          }, 100);
+                        }
+                        setTimeout(() => {
+                          if (inputValue) {
+                            commandListRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }, 100);
+                        setInputValue("");
+                      }}
+                      className={cn(
+                        "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
+                        value.includes(item) && "opacity-50 cursor-default"
+                      )}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Checkbox
+                        checked={value.includes(item)}
+                        className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main  "
+                      />
+                      {item}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Collapsible>
+            </ScrollArea>
+            <CommandEmpty>
+              <span className="text-muted-foreground">No results found</span>
+            </CommandEmpty>
+          </CommandList>
+        </div>
       )}
     </>
   );

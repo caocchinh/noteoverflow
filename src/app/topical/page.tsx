@@ -37,6 +37,10 @@ const ButtonUltility = ({
 }) => {
   return (
     <>
+      <Button className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90">
+        Search
+        <ScanText />
+      </Button>
       <Dialog
         open={isResetConfirmationOpen}
         onOpenChange={setIsResetConfirmationOpen}
@@ -74,10 +78,6 @@ const ButtonUltility = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Button className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90">
-        Search
-        <ScanText />
-      </Button>
     </>
   );
 };
@@ -158,7 +158,7 @@ const TopicalPage = () => {
       >
         <Sidebar variant="floating">
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
-          <SidebarContent className="p-4 flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
+          <SidebarContent className="p-4 flex flex-col gap-4 mt-2 items-center justify-start ">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-6">
                 <AnimatePresence mode="wait">
@@ -180,7 +180,7 @@ const TopicalPage = () => {
                           )?.coverImage ?? ""
                         }
                         alt="cover"
-                        className="self-center"
+                        className="self-center rounded-[1px]"
                         width={100}
                         height={100}
                       />

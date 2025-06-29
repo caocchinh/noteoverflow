@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  devIndicators: {
+    position: "bottom-right",
+  },
 };
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
