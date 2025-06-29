@@ -397,7 +397,7 @@ const MultiSelectorTrigger = () => {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2",
+        "flex flex-col gap-2 !m-0",
         !allAvailableOptions && "pointer-events-none "
       )}
     >
@@ -596,7 +596,7 @@ const MultiSelectorList = () => {
         <CommandList
           ref={commandListRef}
           className={cn(
-            "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full bg-background shadow-md border border-muted top-full absolute",
+            "p-2 flex flex-col gap-2 rounded-md z-[1000] w-full bg-background shadow-md border border-muted top-[110%] absolute",
             (label === "Year" || label === "Season") && "max-h-[210px] "
           )}
           onMouseDown={(e) => {

@@ -1,25 +1,32 @@
 "use client";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { SearchIcon, WandSparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { useState, useRef, useEffect, useCallback } from "react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
-import styles from "./EnhancedSelect.module.css";
+import { cn } from "@/lib/utils";
 
 // Add these styles globally only once
 
@@ -36,47 +43,7 @@ const EnhancedSelect = ({
   selectedValue: string;
   setSelectedValue: (value: string) => void;
 }) => {
-  const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
-  const [searchInput, setSearchInput] = useState<string>("");
-  const [contentHeight, setContentHeight] = useState<number>(0);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const filterUtil = useCallback(
-    (item: { code: string; coverImage: string }) => {
-      if (!searchInput) return true;
-
-      const code = item.code.toLowerCase();
-      const search = searchInput.toLowerCase();
-
-      // Simple fuzzy search - characters need to appear in order but don't need to be consecutive
-      let codeIndex = 0;
-      let searchIndex = 0;
-
-      while (codeIndex < code.length && searchIndex < search.length) {
-        if (code[codeIndex] === search[searchIndex]) {
-          searchIndex++;
-        }
-        codeIndex++;
-      }
-
-      // If we matched all search characters, return true
-      return searchIndex === search.length;
-    },
-    [searchInput]
-  );
-
-  useEffect(() => {
-    if (isSelectOpen && contentRef.current) {
-      const filteredItems = data?.filter(filterUtil);
-
-      // Set height based on content or fallback to 250px
-      const height =
-        filteredItems?.length === 0
-          ? 250
-          : Math.min(filteredItems?.length * 40 || 0, 170);
-      setContentHeight(height);
-    }
-  }, [isSelectOpen, searchInput, data, filterUtil]);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
     <div className="flex flex-col gap-1">
@@ -86,97 +53,88 @@ const EnhancedSelect = ({
       >
         {label}
       </Label>
-      <Select
-        onValueChange={setSelectedValue}
-        value={selectedValue}
-        onOpenChange={(open) => {
-          setIsSelectOpen(open);
-          setSearchInput("");
-        }}
-        open={isSelectOpen}
-        disabled={!data}
-      >
-        <SelectTrigger
-          id={`${label.toLowerCase()}-enhanced-topical-select`}
-          className={`cursor-pointer w-[200px] !h-max ${styles.stubbornSelectValue}`}
-        >
-          <SelectValue
-            placeholder={
-              selectedValue || !prerequisite
-                ? `Select ${label.toLowerCase()}`
-                : `Select ${prerequisite.toLowerCase()} first`
-            }
-          />
-        </SelectTrigger>
-
-        <SelectContent className="w-full">
-          <div className="flex items-center gap-2 p-2 sticky w-full h-full ">
-            <SearchIcon className="w-4 h-4" />
-            <Input
-              placeholder={`Search ${label.toLowerCase()}`}
-              value={searchInput}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-              }}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-max border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-          <SelectSeparator className="w-full" />
-
-          <ScrollArea
-            className="w-full"
-            style={{ height: `${contentHeight}px` }}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={isOpen}
+            className="w-[200px] justify-between h-max whitespace-pre-wrap"
           >
-            <div ref={contentRef}>
-              {data?.filter(filterUtil).length == 0 && (
-                <div className="w-full h-[250px] flex items-center justify-center flex-col gap-2">
-                  Nothing found!
-                  <WandSparkles size={25} />
-                </div>
-              )}
-              {data?.map((item) => (
-                <HoverCard key={item.code} openDelay={0} closeDelay={0}>
-                  <HoverCardTrigger asChild>
-                    <SelectItem
-                      key={item.code}
-                      value={item.code}
-                      className={cn(
-                        "p-2",
-                        searchInput && !filterUtil(item) && "hidden"
-                      )}
-                    >
-                      <div key={item.code} className="w-full">
-                        {item.code}
-                      </div>
-                    </SelectItem>
-                  </HoverCardTrigger>
-                  <HoverCardContent
-                    className="w-max bg-transparent cursor-pointer border-none shadow-none relative hidden lg:block"
-                    side="right"
-                    sideOffset={-10}
-                    align="start"
-                    avoidCollisions={true}
-                    onClick={() => {
-                      setIsSelectOpen(false);
-                      setSelectedValue(item.code);
-                    }}
-                  >
-                    <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
-                      <Image
-                        src={item.coverImage}
-                        alt={item.code}
-                        width={100}
-                        height={100}
-                      />
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-              ))}
-            </div>
-          </ScrollArea>
-        </SelectContent>
-      </Select>
+            {selectedValue
+              ? data?.find((item) => item.code === selectedValue)?.code
+              : !prerequisite
+              ? `Select ${label.toLowerCase()}`
+              : `Select ${prerequisite.toLowerCase()} first`}
+
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput
+              placeholder={`Search ${label.toLowerCase()}`}
+              className="h-9 border-none"
+              wrapperClassName="w-full p-4 border-b"
+            />
+            <CommandList>
+              <ScrollArea className="max-h-[300px]">
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {data &&
+                    data.map((item) => (
+                      <HoverCard key={item.code} openDelay={0} closeDelay={0}>
+                        <HoverCardTrigger asChild>
+                          <CommandItem
+                            key={item.code}
+                            value={item.code}
+                            onSelect={(currentValue) => {
+                              setSelectedValue(currentValue);
+                              setIsOpen(false);
+                            }}
+                            className={cn(
+                              "cursor-pointer",
+                              !isOpen && "pointer-events-none"
+                            )}
+                          >
+                            <Checkbox
+                              checked={selectedValue === item.code}
+                              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                            />
+                            {item.code}
+                          </CommandItem>
+                        </HoverCardTrigger>
+                        <HoverCardContent
+                          className={cn(
+                            "w-max bg-transparent cursor-pointer border-none shadow-none relative hidden lg:block",
+                            !isOpen && "!hidden"
+                          )}
+                          side="right"
+                          sideOffset={-10}
+                          align="start"
+                          avoidCollisions={true}
+                          onClick={() => {
+                            setIsOpen(false);
+                            setSelectedValue(item.code);
+                          }}
+                        >
+                          <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
+                            <Image
+                              src={item.coverImage}
+                              alt={item.code}
+                              width={100}
+                              height={100}
+                            />
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    ))}
+                </CommandGroup>
+              </ScrollArea>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

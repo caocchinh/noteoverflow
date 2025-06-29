@@ -67,7 +67,7 @@ const ButtonUltility = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Button className="cursor-pointer w-full">
+      <Button className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90">
         Search
         <ScanText />
       </Button>
@@ -149,7 +149,7 @@ const TopicalPage = () => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-6">
             <AnimatePresence mode="wait">
-              {selectedSubject ? (
+              {selectedSubject && selectedCurriculum ? (
                 <motion.div
                   key={selectedSubject}
                   initial={{ opacity: 0, scale: 0.95 }}

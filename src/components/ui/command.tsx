@@ -62,12 +62,15 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  wrapperClassName,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  wrapperClassName?: string;
+}) {
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-5 items-center gap-2"
+      className={cn("flex h-5 items-center gap-2", wrapperClassName)}
     >
       <SearchIcon className="size-4 shrink-0 opacity-75" />
       <CommandPrimitive.Input
