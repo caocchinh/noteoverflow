@@ -61,7 +61,7 @@ const EnhancedSelect = ({
             setIsBlockingInput(true);
             setTimeout(() => {
               setIsBlockingInput(false);
-            }, 1000);
+            }, 0);
           }
           setIsOpen(open);
         }}

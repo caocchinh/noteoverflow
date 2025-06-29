@@ -286,7 +286,7 @@ const TopicalPage = () => {
               Topical questions
             </h1>
             <Image
-              src="/assets/funny4.png"
+              src="/assets/funny5.png"
               alt="default subject"
               width={350}
               height={350}
