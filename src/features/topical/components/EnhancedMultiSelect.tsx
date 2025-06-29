@@ -94,6 +94,7 @@ export default function EnhancedMultiSelect({
         open
       ) {
         setOpen(false);
+        setInputValue("");
       }
     };
 
@@ -283,14 +284,18 @@ export default function EnhancedMultiSelect({
         dir={dir}
         {...props}
       >
+        <Label>{label}</Label>
+
         <Popover open={open}>
-          <PopoverTrigger>
-            <MultiSelectorTrigger />
+          <PopoverTrigger asChild>
+            <div>
+              <MultiSelectorTrigger />
+            </div>
           </PopoverTrigger>
           <PopoverContent
-            className="p-0 m-0 border-none shadow-none"
+            className="p-0 m-0 border-1 shadow-none z-[1000000000000]"
             side="right"
-            align="center"
+            align="end"
           >
             <MultiSelectorList />
           </PopoverContent>
@@ -329,9 +334,10 @@ const MultiSelectorTrigger = () => {
     selectAllValues,
     allAvailableOptions,
     label,
+    setInputValue,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
-  const [isClickingRemove, setIsClickingRemove] = useState<boolean>(false);
+  const [isClickingUltility, setIsClickingUltility] = useState<boolean>(false);
   const [paddingRight, setPaddingRight] = useState<string>("initial");
 
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
@@ -358,11 +364,16 @@ const MultiSelectorTrigger = () => {
         "flex flex-col gap-2 !m-0",
         !allAvailableOptions && "pointer-events-none "
       )}
+      onClick={() => {
+        if (!isClickingUltility) {
+          setInputValue("");
+          setOpen(!open);
+        }
+      }}
     >
-      <Label>{label}</Label>
       <div
         className={cn(
-          "flex flex-wrap gap-1 w-[300px] p-1 py-2 ring-1 ring-muted mb-0 rounded-lg bg-background relative",
+          "flex flex-wrap gap-1 w-[300px] p-1 py-2 ring-1 ring-muted mb-0 rounded-lg dark:bg-secondary bg-background relative flex-col",
           {
             "ring-1 focus-within:ring-ring": activeIndex === -1,
             "opacity-50": !allAvailableOptions,
@@ -370,12 +381,27 @@ const MultiSelectorTrigger = () => {
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
+          <Badge
+            variant="default"
+            className="text-xs flex-1 cursor-pointer"
+            onMouseDown={mousePreventDefault}
+          >
+            Select {label.toLowerCase()}
+          </Badge>
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className=" cursor-pointer"
                 title="Select all"
-                onMouseDown={mousePreventDefault}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingUltility(true);
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingUltility(false);
+                  }, 100);
+                }}
                 onClick={selectAllValues}
               >
                 <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
@@ -388,7 +414,15 @@ const MultiSelectorTrigger = () => {
               <div
                 className=" cursor-pointer"
                 title="Remove all"
-                onMouseDown={mousePreventDefault}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingUltility(true);
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingUltility(false);
+                  }, 100);
+                }}
                 onClick={() => {
                   removeAllValues();
                   setContentHeight(0);
@@ -413,11 +447,6 @@ const MultiSelectorTrigger = () => {
             onMouseUp={() => {
               setIsClickingScrollArea(false);
             }}
-            onClick={() => {
-              if (!open && !isClickingRemove) {
-                setOpen(true);
-              }
-            }}
           >
             <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
               {value.map((item, index) => (
@@ -436,7 +465,7 @@ const MultiSelectorTrigger = () => {
                     type="button"
                     onMouseDown={(e) => {
                       mousePreventDefault(e);
-                      setIsClickingRemove(true);
+                      setIsClickingUltility(true);
                     }}
                     onClick={() => {
                       onValueChange(item);
@@ -446,7 +475,7 @@ const MultiSelectorTrigger = () => {
                     }}
                     onMouseUp={() => {
                       setTimeout(() => {
-                        setIsClickingRemove(false);
+                        setIsClickingUltility(false);
                       }, 100);
                     }}
                   >
@@ -482,7 +511,6 @@ const MultiSelectorList = () => {
     inputRef,
     isCommandItemInteraction,
     isClickingScrollArea,
-    handleSelect,
     activeIndex,
     setOpen,
   } = useMultiSelect();
@@ -502,7 +530,11 @@ const MultiSelectorList = () => {
                 : `Search ${label.toLowerCase()}`
             }
             enterKeyHint="search"
-            wrapperClassName="w-full p-4 border-b"
+            wrapperClassName="w-full py-6 px-4 border-b"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             onValueChange={(e) => {
               if (activeIndex === -1) {
                 setInputValue(e);
@@ -516,13 +548,6 @@ const MultiSelectorList = () => {
                   });
                 }, 100);
               }
-            }}
-            onSelect={handleSelect}
-            onClick={() => {
-              setOpen(true);
-            }}
-            onFocus={() => {
-              setOpen(true);
             }}
             onBlur={() => {
               if (!isClickingScrollArea && !isCommandItemInteraction) {
@@ -539,7 +564,7 @@ const MultiSelectorList = () => {
             ref={commandListRef}
             className={cn(
               "p-2 flex flex-col gap-2 z-[1000] w-full bg-background ",
-              (label === "Year" || label === "Season") && "max-h-[210px] "
+              (label === "Year" || label === "Season") && "max-h-[50vh] "
             )}
             onMouseDown={(e) => {
               e.preventDefault();
@@ -547,7 +572,7 @@ const MultiSelectorList = () => {
             }}
           >
             <ScrollArea
-              className="max-h-[300px]"
+              className="max-h-[50vh]"
               onTouchStart={() => {
                 if (!inputValue) {
                   setIsCommandItemInteraction(true);
