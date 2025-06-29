@@ -141,10 +141,10 @@ const TopicalPage = () => {
   }, [selectedSubject]);
 
   return (
-    <div className="pt-19 min-h-[200vh] p-6">
-      <h1 className="text-3xl font-bold text-center md:text-left">
+    <div className="pt-14 min-h-[130vh] p-6">
+      {/* <h1 className="text-3xl font-bold text-center md:text-left">
         Topical Questions
-      </h1>
+      </h1> */}
       <div className="mt-6 gap-6 flex items-center md:items-start justify-center flex-col md:flex-row">
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-6">
