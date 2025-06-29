@@ -57,6 +57,7 @@ const EnhancedSelect = ({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
+            disabled={!!prerequisite}
             role="combobox"
             aria-expanded={isOpen}
             className="w-[200px] justify-between h-max whitespace-pre-wrap"
@@ -73,8 +74,8 @@ const EnhancedSelect = ({
         <PopoverContent
           className="p-0 z-[1000000000000000] w-[300px] sm:w-max "
           avoidCollisions={false}
-          side="bottom"
-          align="end"
+          side="right"
+          align="start"
         >
           <Command>
             <CommandInput

@@ -349,6 +349,21 @@ export default function EnhancedMultiSelect({
   );
 }
 
+//       {isDrawerOpen && (
+//         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+//           <DrawerContent className="h-[70vh] flex flex-col items-start justify-start">
+//             <div className="flex items-center gap-2 p-4 w-full">
+//               <Search className="h-4 w-4" />
+//               <MultiSelectorInput
+//                 className="flex-1 p-4 border border-white"
+//                 placeholder="Search"
+//               />
+//             </div>
+//             {children}
+//           </DrawerContent>
+//         </Drawer>
+//       )}
+
 const MultiSelectorTrigger = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const {
@@ -550,30 +565,6 @@ const MultiSelectorTrigger = () => {
 };
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
-
-// const MultiSelectorContent = () => {
-//   const { open, shouldOpenDrawer, isDrawerOpen, setIsDrawerOpen } =
-//     useMultiSelect();
-//   return (
-//     <div ref={ref} className="relative">
-//       {open && !shouldOpenDrawer && children}
-//       {isDrawerOpen && (
-//         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-//           <DrawerContent className="h-[70vh] flex flex-col items-start justify-start">
-//             <div className="flex items-center gap-2 p-4 w-full">
-//               <Search className="h-4 w-4" />
-//               <MultiSelectorInput
-//                 className="flex-1 p-4 border border-white"
-//                 placeholder="Search"
-//               />
-//             </div>
-//             {children}
-//           </DrawerContent>
-//         </Drawer>
-//       )}
-//     </div>
-//   );
-// });
 
 const MultiSelectorList = () => {
   const {

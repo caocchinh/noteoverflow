@@ -20,6 +20,14 @@
   --home-page-text-muted: oklch(0.985 0 0 / 50%);
   --home-page-border: oklch(0.985 0 0 / 20%);
   --home-page-hover-bg: oklch(0.985 0 0 / 10%);
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
 @theme inline {
