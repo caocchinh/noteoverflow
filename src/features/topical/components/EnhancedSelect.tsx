@@ -70,7 +70,12 @@ const EnhancedSelect = ({
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent
+          className="p-0 z-[1000000000000000] w-[300px] sm:w-max "
+          avoidCollisions={false}
+          side="bottom"
+          align="end"
+        >
           <Command>
             <CommandInput
               placeholder={`Search ${label.toLowerCase()}`}
@@ -78,7 +83,7 @@ const EnhancedSelect = ({
               wrapperClassName="w-full p-4 border-b"
             />
             <CommandList>
-              <ScrollArea className="max-h-[300px]">
+              <ScrollArea className="max-h-[195px] md:max-h-[300px] ">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   {data &&
