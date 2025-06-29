@@ -295,7 +295,7 @@ export default function EnhancedMultiSelect({
           <PopoverContent
             className="p-0 m-0 border-1 shadow-none z-[1000000000000]"
             side="right"
-            align="end"
+            align="center"
           >
             <MultiSelectorList />
           </PopoverContent>
@@ -361,7 +361,7 @@ const MultiSelectorTrigger = () => {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 !m-0",
+        "flex flex-col gap-2 !m-0 rounded-md",
         !allAvailableOptions && "pointer-events-none "
       )}
       onClick={() => {
@@ -386,7 +386,11 @@ const MultiSelectorTrigger = () => {
             className="text-xs flex-1 cursor-pointer"
             onMouseDown={mousePreventDefault}
           >
-            Select {label.toLowerCase()}
+            {value.length == 0
+              ? `Select ${label.toLowerCase()}`
+              : `${value.length} ${label.toLowerCase()}${
+                  value.length > 1 ? "s" : ""
+                } selected`}
           </Badge>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -407,7 +411,9 @@ const MultiSelectorTrigger = () => {
                 <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Select all</TooltipContent>
+            <TooltipContent className="z-[100000000000]">
+              Select all
+            </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -431,7 +437,9 @@ const MultiSelectorTrigger = () => {
                 <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Remove all</TooltipContent>
+            <TooltipContent className="z-[100000000000]">
+              Remove all
+            </TooltipContent>
           </Tooltip>
         </div>
 
@@ -563,7 +571,7 @@ const MultiSelectorList = () => {
           <CommandList
             ref={commandListRef}
             className={cn(
-              "p-2 flex flex-col gap-2 z-[1000] w-full bg-background ",
+              "p-2 flex flex-col gap-2 z-[1000] w-full bg-card ",
               (label === "Year" || label === "Season") && "max-h-[50vh] "
             )}
             onMouseDown={(e) => {
@@ -599,11 +607,21 @@ const MultiSelectorList = () => {
                 onOpenChange={setIsCollapsibleOpen}
               >
                 {!inputValue && (
-                  <CollapsibleTrigger className="absolute top-1 right-0 cursor-pointer">
+                  <CollapsibleTrigger className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer">
+                    <h3
+                      className={cn(
+                        "text-xs font-medium",
+                        value.length > 0
+                          ? "text-logo-main"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {`${value.length} selected`}
+                    </h3>
                     <ChevronsUpDown className="h-4 w-4" />
                   </CollapsibleTrigger>
                 )}
-                <CommandGroup heading={`${value.length} selected`}>
+                <CommandGroup value={`${value.length} selected`}>
                   <CollapsibleContent>
                     {value.length > 0 && !inputValue && (
                       <>

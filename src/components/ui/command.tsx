@@ -71,6 +71,10 @@ function CommandInput({
     <div
       data-slot="command-input-wrapper"
       className={cn("flex h-5 items-center gap-2", wrapperClassName)}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
       <SearchIcon className="size-4 shrink-0 opacity-75" />
       <CommandPrimitive.Input

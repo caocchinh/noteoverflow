@@ -25,6 +25,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 
 const ButtonUltility = ({
@@ -181,7 +182,7 @@ const TopicalPage = () => {
                           )?.coverImage ?? ""
                         }
                         alt="cover"
-                        className="self-center rounded-[1px]"
+                        className="self-center rounded-[2px]"
                         width={100}
                         height={100}
                       />
@@ -265,7 +266,7 @@ const TopicalPage = () => {
                 data={availableSeasons}
               />
             </div>
-            <div className="flex  w-[300px] justify-center items-center flex-col gap-4">
+            <div className="flex w-[300px] justify-center items-center flex-col gap-4">
               <ButtonUltility
                 isResetConfirmationOpen={isResetConfirmationOpen}
                 setIsResetConfirmationOpen={setIsResetConfirmationOpen}
@@ -273,10 +274,11 @@ const TopicalPage = () => {
               />
             </div>
           </SidebarContent>
+          <SidebarRail />
         </Sidebar>
         <SidebarInset>
-          <div className="mt-2 p-4 gap-6 flex items-center md:items-start justify-center flex-col ">
-            <SidebarTrigger className="flex items-center gap-2 border">
+          <div className="p-4 pl-2 gap-6 flex items-center md:items-start justify-center flex-col ">
+            <SidebarTrigger className="flex fixed top-[73px] items-center gap-2 border cursor-pointer">
               Filters
               <SlidersHorizontal />
             </SidebarTrigger>
