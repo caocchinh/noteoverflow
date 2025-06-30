@@ -84,7 +84,6 @@ export default function EnhancedMultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState("");
-  console.log(open);
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
@@ -598,7 +597,7 @@ const MultiSelectorList = () => {
   }, [inputRef, isBlockingInput, isMobileDevice, open]);
 
   return (
-    <div className="flex flex-col gap-2  ">
+    <div className="flex flex-col gap-2 h-full">
       <CommandInput
         tabIndex={0}
         ref={inputRef}
@@ -652,8 +651,8 @@ const MultiSelectorList = () => {
       <CommandList
         ref={commandListRef}
         className={cn(
-          "p-2 flex flex-col gap-2 z-[1000] w-full bg-card ",
-          (label === "Year" || label === "Season") && "max-h-[50vh] "
+          "p-2 flex flex-col gap-2 z-[1000] w-full bg-card h-full",
+          label === "Year" || label === "Season"
         )}
         onMouseDown={(e) => {
           e.preventDefault();
