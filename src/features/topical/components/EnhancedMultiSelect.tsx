@@ -33,7 +33,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { CollapsibleContent } from "@radix-ui/react-collapsible";
 import {
@@ -78,8 +77,7 @@ export default function EnhancedMultiSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
   const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
-  const [isCommandItemInteraction, setIsCommandItemInteraction] =
-    useState(false);
+  const [isBlockingInput, setIsBlockingInput] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const isMobileDevice = useIsMobile();
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
@@ -261,8 +259,8 @@ export default function EnhancedMultiSelect({
         setIsClickingScrollArea,
         commandListRef,
         selectAllValues,
-        isCommandItemInteraction,
-        setIsCommandItemInteraction,
+        isBlockingInput,
+        setIsBlockingInput,
         isMobileKeyboardOpen,
         setIsMobileKeyboardOpen,
         isDrawerOpen,
@@ -279,12 +277,13 @@ export default function EnhancedMultiSelect({
         ref={containerRef}
         onKeyDown={handleKeyDown}
         className={cn(
-          "overflow-visible bg-transparent  flex flex-col space-y-2 relative !h-max"
+          "overflow-visible bg-transparent flex flex-col space-y-2 relative !h-max"
         )}
         dir={dir}
         {...props}
+        label={label}
       >
-        <Label>{label}</Label>
+        <h3 className="text-sm font-medium w-max">{label}</h3>
 
         <Popover open={open}>
           <PopoverTrigger asChild>
@@ -335,6 +334,7 @@ const MultiSelectorTrigger = () => {
     allAvailableOptions,
     label,
     setInputValue,
+    setIsBlockingInput,
   } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingUltility, setIsClickingUltility] = useState<boolean>(false);
@@ -364,12 +364,6 @@ const MultiSelectorTrigger = () => {
         "flex flex-col gap-2 !m-0 rounded-md",
         !allAvailableOptions && "pointer-events-none "
       )}
-      onClick={() => {
-        if (!isClickingUltility) {
-          setInputValue("");
-          setOpen(!open);
-        }
-      }}
     >
       <div
         className={cn(
@@ -385,6 +379,20 @@ const MultiSelectorTrigger = () => {
             variant="default"
             className="text-xs flex-1 cursor-pointer"
             onMouseDown={mousePreventDefault}
+            onClick={() => {
+              if (!isClickingUltility) {
+                setInputValue("");
+                setOpen(!open);
+              }
+            }}
+            onTouchStart={() => {
+              setIsBlockingInput(true);
+            }}
+            onTouchEnd={() => {
+              setTimeout(() => {
+                setIsBlockingInput(false);
+              }, 0);
+            }}
           >
             {value.length == 0
               ? `Select ${label.toLowerCase()}`
@@ -404,9 +412,17 @@ const MultiSelectorTrigger = () => {
                 onMouseUp={() => {
                   setTimeout(() => {
                     setIsClickingUltility(false);
-                  }, 100);
+                  }, 0);
                 }}
                 onClick={selectAllValues}
+                onTouchStart={() => {
+                  setIsBlockingInput(true);
+                }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setIsBlockingInput(false);
+                  }, 0);
+                }}
               >
                 <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
               </div>
@@ -427,11 +443,16 @@ const MultiSelectorTrigger = () => {
                 onMouseUp={() => {
                   setTimeout(() => {
                     setIsClickingUltility(false);
-                  }, 100);
+                  }, 0);
                 }}
-                onClick={() => {
-                  removeAllValues();
-                  setContentHeight(0);
+                onClick={removeAllValues}
+                onTouchStart={() => {
+                  setIsBlockingInput(true);
+                }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setIsBlockingInput(false);
+                  }, 0);
                 }}
               >
                 <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
@@ -456,7 +477,24 @@ const MultiSelectorTrigger = () => {
               setIsClickingScrollArea(false);
             }}
           >
-            <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
+            <div
+              className="flex flex-wrap gap-2 p-1 w-full"
+              ref={contentRef}
+              onClick={() => {
+                if (!isClickingUltility) {
+                  setInputValue("");
+                  setOpen(!open);
+                }
+              }}
+              onTouchStart={() => {
+                setIsBlockingInput(true);
+              }}
+              onTouchEnd={() => {
+                setTimeout(() => {
+                  setIsBlockingInput(false);
+                }, 0);
+              }}
+            >
               {value.map((item, index) => (
                 <Badge
                   key={item}
@@ -465,6 +503,14 @@ const MultiSelectorTrigger = () => {
                     activeIndex === index && "ring-2 ring-muted-foreground "
                   )}
                   variant={"secondary"}
+                  onTouchStart={() => {
+                    setIsBlockingInput(true);
+                  }}
+                  onTouchEnd={() => {
+                    setTimeout(() => {
+                      setIsBlockingInput(false);
+                    }, 0);
+                  }}
                 >
                   <span className="text-xs">{item}</span>
                   <button
@@ -477,6 +523,7 @@ const MultiSelectorTrigger = () => {
                     }}
                     onClick={() => {
                       onValueChange(item);
+
                       if (value.length === 1) {
                         setContentHeight(0);
                       }
@@ -484,7 +531,7 @@ const MultiSelectorTrigger = () => {
                     onMouseUp={() => {
                       setTimeout(() => {
                         setIsClickingUltility(false);
-                      }, 100);
+                      }, 0);
                     }}
                   >
                     <span className="sr-only">Remove {item} option</span>
@@ -509,7 +556,7 @@ const MultiSelectorList = () => {
     commandListRef,
     inputValue,
     label,
-    setIsCommandItemInteraction,
+    setIsBlockingInput,
     open,
     allAvailableOptions,
     setInputValue,
@@ -517,7 +564,7 @@ const MultiSelectorList = () => {
     setIsCollapsibleOpen,
     prerequisite,
     inputRef,
-    isCommandItemInteraction,
+    isBlockingInput,
     isClickingScrollArea,
     activeIndex,
     setOpen,
@@ -531,7 +578,7 @@ const MultiSelectorList = () => {
             tabIndex={0}
             ref={inputRef}
             value={inputValue}
-            readOnly={isCommandItemInteraction && !inputValue}
+            readOnly={isBlockingInput}
             placeholder={
               !allAvailableOptions
                 ? `Select ${prerequisite.toLowerCase()} first`
@@ -558,7 +605,7 @@ const MultiSelectorList = () => {
               }
             }}
             onBlur={() => {
-              if (!isClickingScrollArea && !isCommandItemInteraction) {
+              if (!isClickingScrollArea && !isBlockingInput) {
                 setOpen(false);
                 setInputValue("");
               }
@@ -583,23 +630,15 @@ const MultiSelectorList = () => {
               className="max-h-[50vh]"
               onTouchStart={() => {
                 if (!inputValue) {
-                  setIsCommandItemInteraction(true);
-                }
-              }}
-              onClick={() => {
-                if (!inputValue) {
-                  setIsCommandItemInteraction(true);
-                  setTimeout(() => {
-                    setIsCommandItemInteraction(false);
-                  }, 100);
+                  setIsBlockingInput(true);
                 }
               }}
               onTouchEnd={() => {
                 setTimeout(() => {
                   if (!inputValue) {
-                    setIsCommandItemInteraction(false);
+                    setIsBlockingInput(false);
                   }
-                }, 100);
+                }, 0);
               }}
             >
               <Collapsible
@@ -633,11 +672,16 @@ const MultiSelectorList = () => {
                             key={item}
                             className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
                             onSelect={() => {
-                              setIsCommandItemInteraction(true);
                               onValueChange(item);
+                            }}
+                            onTouchStart={() => {
+                              setIsBlockingInput(true);
+                            }}
+                            onTouchEnd={() => {
                               setTimeout(() => {
-                                setIsCommandItemInteraction(false);
-                              }, 100);
+                                inputRef.current?.focus();
+                                setIsBlockingInput(false);
+                              }, 0);
                             }}
                             onMouseDown={(e) => {
                               e.preventDefault();
@@ -671,12 +715,6 @@ const MultiSelectorList = () => {
                       key={item}
                       onSelect={() => {
                         onValueChange(item);
-                        if (!inputValue) {
-                          setIsCommandItemInteraction(true);
-                          setTimeout(() => {
-                            setIsCommandItemInteraction(false);
-                          }, 100);
-                        }
                         setTimeout(() => {
                           if (inputValue) {
                             commandListRef.current?.scrollTo({
@@ -691,6 +729,17 @@ const MultiSelectorList = () => {
                         "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
                         value.includes(item) && "opacity-50 cursor-default"
                       )}
+                      onTouchStart={() => {
+                        if (!inputValue) {
+                          setIsBlockingInput(true);
+                        }
+                      }}
+                      onTouchEnd={() => {
+                        setTimeout(() => {
+                          inputRef.current?.focus();
+                          setIsBlockingInput(false);
+                        }, 0);
+                      }}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

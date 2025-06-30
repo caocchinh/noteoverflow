@@ -41,8 +41,8 @@ export interface MultiSelectContextProps {
   commandListRef: React.RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   selectAllValues: () => void;
-  isCommandItemInteraction: boolean;
-  setIsCommandItemInteraction: React.Dispatch<React.SetStateAction<boolean>>;
+  isBlockingInput: boolean;
+  setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
   isMobileKeyboardOpen: boolean;
   setIsMobileKeyboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isDrawerOpen: boolean;

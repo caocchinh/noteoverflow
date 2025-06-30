@@ -1,6 +1,4 @@
 "use client";
-import { Label } from "@/components/ui/label";
-
 import {
   HoverCard,
   HoverCardContent,
@@ -48,12 +46,7 @@ const EnhancedSelect = ({
 
   return (
     <div className="flex flex-col gap-1">
-      <Label
-        htmlFor={`${label.toLowerCase()}-enhanced-topical-select`}
-        className="w-max"
-      >
-        {label}
-      </Label>
+      <h3 className="w-max text-sm font-medium">{label}</h3>
       <Popover
         open={isOpen}
         onOpenChange={(open) => {
@@ -85,9 +78,8 @@ const EnhancedSelect = ({
         </PopoverTrigger>
         <PopoverContent
           className="p-0 z-[1000000000000000] w-[300px] sm:w-max "
-          avoidCollisions={false}
           side="right"
-          align="start"
+          align="center"
         >
           <Command>
             <CommandInput
