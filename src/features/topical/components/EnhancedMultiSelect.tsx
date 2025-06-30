@@ -294,7 +294,43 @@ export default function EnhancedMultiSelect({
                   <DrawerDescription></DrawerDescription>
                   Select {label}
                 </DrawerHeader>
-
+                <div
+                  className="flex flex-row gap-3 mt-2 p-2"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <Button
+                    className="flex-1/3 cursor-pointer"
+                    onClick={() => {
+                      onValueChange(data ?? []);
+                    }}
+                  >
+                    Select all
+                    <Sparkles className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1/3 cursor-pointer"
+                    onClick={() => {
+                      onValueChange([]);
+                    }}
+                  >
+                    Remove all
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1/3 cursor-pointer"
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                  >
+                    Close
+                    <RemoveIcon className="h-4 w-4" />
+                  </Button>
+                </div>
                 <MultiSelectorList />
               </DrawerContent>
             </Drawer>
