@@ -87,10 +87,8 @@ export default function EnhancedMultiSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const isMobileDevice = useIsMobile();
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
-  const shouldOpenDrawer = typeof window !== "undefined" && isMobileDevice;
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -261,10 +259,7 @@ export default function EnhancedMultiSelect({
         commandListRef,
         isBlockingInput,
         setIsBlockingInput,
-        isDrawerOpen,
-        setIsDrawerOpen,
         allAvailableOptions: data,
-        shouldOpenDrawer,
         label,
         prerequisite,
         isCollapsibleOpen,
@@ -288,7 +283,13 @@ export default function EnhancedMultiSelect({
           <>
             <MultiSelectorTrigger />
             <Drawer open={open} onOpenChange={setOpen}>
-              <DrawerContent className="h-[95vh] max-h-[95vh] pt-4 z-[100004]">
+              <DrawerContent
+                className="h-[95vh] max-h-[95vh] pt-4 z-[100004]"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
                 <DrawerHeader className="sr-only">
                   <DrawerTitle>Select</DrawerTitle>
                   <DrawerDescription></DrawerDescription>
@@ -296,9 +297,13 @@ export default function EnhancedMultiSelect({
                 </DrawerHeader>
                 <div
                   className="flex flex-row gap-3 mt-2 p-2"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                  onTouchStart={() => {
+                    setIsBlockingInput(true);
+                  }}
+                  onTouchEnd={() => {
+                    setTimeout(() => {
+                      setIsBlockingInput(false);
+                    }, 0);
                   }}
                 >
                   <Button

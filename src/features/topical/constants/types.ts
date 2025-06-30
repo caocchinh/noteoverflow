@@ -40,9 +40,6 @@ export interface MultiSelectContextProps {
   allAvailableOptions?: string[];
   isBlockingInput: boolean;
   setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
-  isDrawerOpen: boolean;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  shouldOpenDrawer: boolean;
   label: string;
   prerequisite: string;
   isCollapsibleOpen: boolean;
