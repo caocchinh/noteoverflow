@@ -20,7 +20,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
@@ -43,6 +43,7 @@ const EnhancedSelect = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <div className="flex flex-col gap-1">
@@ -87,6 +88,7 @@ const EnhancedSelect = ({
               className="h-9 border-none"
               wrapperClassName="w-full p-4 border-b py-6"
               readOnly={isBlockingInput}
+              ref={inputRef}
             />
             <CommandList>
               <ScrollArea className="max-h-[195px] md:max-h-[300px] ">
@@ -107,6 +109,15 @@ const EnhancedSelect = ({
                               "cursor-pointer",
                               !isOpen && "pointer-events-none"
                             )}
+                            onTouchStart={() => {
+                              setIsBlockingInput(true);
+                            }}
+                            onTouchEnd={() => {
+                              setTimeout(() => {
+                                inputRef.current?.focus();
+                                setIsBlockingInput(false);
+                              }, 0);
+                            }}
                           >
                             <Checkbox
                               checked={selectedValue === item.code}
