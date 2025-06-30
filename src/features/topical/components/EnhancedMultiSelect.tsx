@@ -55,7 +55,6 @@ import {
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
@@ -286,21 +285,20 @@ export default function EnhancedMultiSelect({
         <h3 className="text-sm font-medium w-max">{label}</h3>
 
         {isMobileDevice ? (
-          <Drawer open={open}>
-            <DrawerTrigger asChild>
-              <div>
-                <MultiSelectorTrigger />
-              </div>
-            </DrawerTrigger>
-            <DrawerContent className="h-[95vh] max-h-[95vh] pt-4">
-              <DrawerHeader className="sr-only">
-                <DrawerTitle>Select</DrawerTitle>
-                <DrawerDescription></DrawerDescription>
-                Select {label}
-              </DrawerHeader>
-              <MultiSelectorList />
-            </DrawerContent>
-          </Drawer>
+          <>
+            <MultiSelectorTrigger />
+            <Drawer open={open} onOpenChange={setOpen}>
+              <DrawerContent className="h-[95vh] max-h-[95vh] pt-4 z-[100004]">
+                <DrawerHeader className="sr-only">
+                  <DrawerTitle>Select</DrawerTitle>
+                  <DrawerDescription></DrawerDescription>
+                  Select {label}
+                </DrawerHeader>
+
+                <MultiSelectorList />
+              </DrawerContent>
+            </Drawer>
+          </>
         ) : (
           <Popover open={open} modal={false}>
             <PopoverTrigger asChild>
@@ -589,12 +587,14 @@ const MultiSelectorList = () => {
   } = useMultiSelect();
 
   useEffect(() => {
-    if (!isBlockingInput && isMobileDevice && open) {
+    if (isMobileDevice && open) {
       setTimeout(() => {
+        setIsBlockingInput(true);
         inputRef.current?.focus();
+        setTimeout(() => setIsBlockingInput(false), 100);
       }, 0);
     }
-  }, [inputRef, isBlockingInput, isMobileDevice, open]);
+  }, [inputRef, isMobileDevice, open, setIsBlockingInput]);
 
   return (
     <div className="flex flex-col gap-2 h-full">
@@ -613,15 +613,6 @@ const MultiSelectorList = () => {
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
-        }}
-        onFocus={() => {
-          // Make sure input is scrolled into view
-          if (inputRef.current) {
-            inputRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-          }
         }}
         onValueChange={(e) => {
           if (activeIndex === -1) {
@@ -658,22 +649,20 @@ const MultiSelectorList = () => {
           e.preventDefault();
           e.stopPropagation();
         }}
-      >
-        <ScrollArea
-          className="max-h-[50vh]"
-          onTouchStart={() => {
+        onTouchStart={() => {
+          if (!inputValue) {
+            setIsBlockingInput(true);
+          }
+        }}
+        onTouchEnd={() => {
+          setTimeout(() => {
             if (!inputValue) {
-              setIsBlockingInput(true);
+              setIsBlockingInput(false);
             }
-          }}
-          onTouchEnd={() => {
-            setTimeout(() => {
-              if (!inputValue) {
-                setIsBlockingInput(false);
-              }
-            }, 0);
-          }}
-        >
+          }, 0);
+        }}
+      >
+        <ScrollArea className="max-h-[50vh]">
           <Collapsible
             open={isCollapsibleOpen}
             onOpenChange={setIsCollapsibleOpen}
@@ -682,6 +671,9 @@ const MultiSelectorList = () => {
               <CollapsibleTrigger
                 className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer"
                 title="Toggle selected"
+                onTouchStart={() => {
+                  setIsBlockingInput(false);
+                }}
               >
                 <h3
                   className={cn(

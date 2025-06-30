@@ -153,7 +153,7 @@ const TopicalPage = () => {
       <SidebarProvider>
         <Sidebar variant="floating" key={sidebarKey}>
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
-          <SidebarContent className="p-4 w-full flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
+          <SidebarContent className="p-4 w-full flex flex-col gap-4 items-center justify-start overflow-x-hidden pt-2">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <AnimatePresence mode="wait">
