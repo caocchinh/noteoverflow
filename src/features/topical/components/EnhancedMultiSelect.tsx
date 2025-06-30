@@ -44,7 +44,7 @@ import {
   MultiSelectorProps,
   MultiSelectContextProps,
 } from "../constants/types";
-import { useIsMobile } from "../hooks/useIsMobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
 
@@ -285,7 +285,7 @@ export default function EnhancedMultiSelect({
       >
         <h3 className="text-sm font-medium w-max">{label}</h3>
 
-        <Popover open={open}>
+        <Popover open={open} modal={true}>
           <PopoverTrigger asChild>
             <div>
               <MultiSelectorTrigger />

@@ -25,8 +25,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-
-// Add these styles globally only once
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const EnhancedSelect = ({
   label,
@@ -44,11 +43,13 @@ const EnhancedSelect = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const isMobileDevice = useIsMobile();
 
   return (
     <div className="flex flex-col gap-1">
       <h3 className="w-max text-sm font-medium">{label}</h3>
       <Popover
+        modal={true}
         open={isOpen}
         onOpenChange={(open) => {
           if (open) {
@@ -79,7 +80,7 @@ const EnhancedSelect = ({
         </PopoverTrigger>
         <PopoverContent
           className="p-0 z-[1000000000000000] w-[300px] sm:w-max "
-          side="right"
+          side={isMobileDevice ? "bottom" : "right"}
           align="center"
         >
           <Command>
@@ -91,7 +92,7 @@ const EnhancedSelect = ({
               ref={inputRef}
             />
             <CommandList>
-              <ScrollArea className="max-h-[195px] md:max-h-[300px] ">
+              <ScrollArea className="max-h-[195px]">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   {data &&
@@ -128,7 +129,7 @@ const EnhancedSelect = ({
                         </HoverCardTrigger>
                         <HoverCardContent
                           className={cn(
-                            "w-max bg-transparent cursor-pointer border-none shadow-none relative hidden lg:block",
+                            "w-[100px] cursor-pointer bg-transparent border-none shadow-none relative hidden lg:block z-[999999999999999999999999999999]",
                             !isOpen && "!hidden"
                           )}
                           side="right"
@@ -140,12 +141,13 @@ const EnhancedSelect = ({
                             setSelectedValue(item.code);
                           }}
                         >
-                          <div className="absolute top-0 left-6 bg-white rounded-md p-2 border">
+                          <div className="absolute top-0 left-10 bg-card rounded-md p-2 border">
                             <Image
                               src={item.coverImage}
                               alt={item.code}
                               width={100}
                               height={100}
+                              className="rounded-[2px]"
                             />
                           </div>
                         </HoverCardContent>

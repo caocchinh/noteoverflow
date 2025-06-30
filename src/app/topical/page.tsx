@@ -151,16 +151,10 @@ const TopicalPage = () => {
 
   return (
     <div className="pt-16">
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "23rem",
-          } as React.CSSProperties
-        }
-      >
+      <SidebarProvider>
         <Sidebar variant="floating">
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
-          <SidebarContent className="p-4 flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
+          <SidebarContent className="p-4 w-full flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <AnimatePresence mode="wait">
@@ -232,7 +226,6 @@ const TopicalPage = () => {
                 onValuesChange={(values) =>
                   setSelectedTopic(values as string[])
                 }
-                loop={true}
                 prerequisite="Subject"
                 data={availableTopics}
               />
@@ -242,7 +235,6 @@ const TopicalPage = () => {
                 onValuesChange={(values) =>
                   setSelectedPaperType(values as string[])
                 }
-                loop={true}
                 prerequisite="Subject"
                 data={availablePaperTypes?.map((item) => item.toString())}
               />
@@ -250,7 +242,6 @@ const TopicalPage = () => {
                 label="Year"
                 values={selectedYear}
                 onValuesChange={(values) => setSelectedYear(values as string[])}
-                loop={true}
                 prerequisite="Subject"
                 data={availableYears?.map((item) => item.toString())}
               />
@@ -261,7 +252,6 @@ const TopicalPage = () => {
                 onValuesChange={(values) =>
                   setSelectedSeason(values as string[])
                 }
-                loop={true}
                 prerequisite="Subject"
                 data={availableSeasons}
               />
