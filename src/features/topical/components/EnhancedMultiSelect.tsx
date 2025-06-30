@@ -33,8 +33,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CollapsibleContent } from "@radix-ui/react-collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -46,6 +49,14 @@ import {
 } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
 
@@ -73,17 +84,15 @@ export default function EnhancedMultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState("");
+  console.log(open);
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
-  const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const isMobileDevice = useIsMobile();
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
-
   const shouldOpenDrawer = typeof window !== "undefined" && isMobileDevice;
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -254,8 +263,6 @@ export default function EnhancedMultiSelect({
         commandListRef,
         isBlockingInput,
         setIsBlockingInput,
-        isMobileKeyboardOpen,
-        setIsMobileKeyboardOpen,
         isDrawerOpen,
         setIsDrawerOpen,
         allAvailableOptions: data,
@@ -264,6 +271,7 @@ export default function EnhancedMultiSelect({
         prerequisite,
         isCollapsibleOpen,
         setIsCollapsibleOpen,
+        isMobileDevice,
       }}
     >
       <Command
@@ -278,39 +286,42 @@ export default function EnhancedMultiSelect({
       >
         <h3 className="text-sm font-medium w-max">{label}</h3>
 
-        <Popover open={open} modal={false}>
-          <PopoverTrigger asChild>
-            <div>
-              <MultiSelectorTrigger />
-            </div>
-          </PopoverTrigger>
-          <PopoverContent
-            className="p-0 m-0 border-1 shadow-none z-[1000000000000]"
-            side="right"
-            align="center"
-          >
-            <MultiSelectorList />
-          </PopoverContent>
-        </Popover>
+        {isMobileDevice ? (
+          <Drawer open={open}>
+            <DrawerTrigger asChild>
+              <div>
+                <MultiSelectorTrigger />
+              </div>
+            </DrawerTrigger>
+            <DrawerContent className="h-[95vh] max-h-[95vh] pt-4">
+              <DrawerHeader className="sr-only">
+                <DrawerTitle>Select</DrawerTitle>
+                <DrawerDescription></DrawerDescription>
+                Select {label}
+              </DrawerHeader>
+              <MultiSelectorList />
+            </DrawerContent>
+          </Drawer>
+        ) : (
+          <Popover open={open} modal={false}>
+            <PopoverTrigger asChild>
+              <div>
+                <MultiSelectorTrigger />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-0 m-0 border-1 shadow-none z-[1000000000000]"
+              side="right"
+              align="center"
+            >
+              <MultiSelectorList />
+            </PopoverContent>
+          </Popover>
+        )}
       </Command>
     </MultiSelectContext.Provider>
   );
 }
-
-//       {isDrawerOpen && (
-//         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-//           <DrawerContent className="h-[70vh] flex flex-col items-start justify-start">
-//             <div className="flex items-center gap-2 p-4 w-full">
-//               <Search className="h-4 w-4" />
-//               <MultiSelectorInput
-//                 className="flex-1 p-4 border border-white"
-//                 placeholder="Search"
-//               />
-//             </div>
-//             {children}
-//           </DrawerContent>
-//         </Drawer>
-//       )}
 
 const MultiSelectorTrigger = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -564,8 +575,8 @@ const MultiSelectorList = () => {
     inputValue,
     label,
     setIsBlockingInput,
-    open,
     allAvailableOptions,
+    open,
     setInputValue,
     isCollapsibleOpen,
     setIsCollapsibleOpen,
@@ -575,207 +586,221 @@ const MultiSelectorList = () => {
     isClickingScrollArea,
     activeIndex,
     setOpen,
+    isMobileDevice,
   } = useMultiSelect();
 
+  useEffect(() => {
+    if (!isBlockingInput && isMobileDevice && open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [inputRef, isBlockingInput, isMobileDevice, open]);
+
   return (
-    <>
-      {open && (
-        <div className="flex flex-col gap-2  ">
-          <CommandInput
-            tabIndex={0}
-            ref={inputRef}
-            value={inputValue}
-            readOnly={isBlockingInput}
-            placeholder={
-              !allAvailableOptions
-                ? `Select ${prerequisite.toLowerCase()} first`
-                : `Search ${label.toLowerCase()}`
+    <div className="flex flex-col gap-2  ">
+      <CommandInput
+        tabIndex={0}
+        ref={inputRef}
+        value={inputValue}
+        readOnly={isBlockingInput}
+        placeholder={
+          !allAvailableOptions
+            ? `Select ${prerequisite.toLowerCase()} first`
+            : `Search ${label.toLowerCase()}`
+        }
+        enterKeyHint="search"
+        wrapperClassName="w-full py-6 px-4 border-b"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onFocus={() => {
+          // Make sure input is scrolled into view
+          if (inputRef.current) {
+            inputRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }}
+        onValueChange={(e) => {
+          if (activeIndex === -1) {
+            setInputValue(e);
+          }
+
+          if (!e) {
+            setTimeout(() => {
+              commandListRef.current?.scrollTo({
+                top: 0,
+                behavior: "instant",
+              });
+            }, 100);
+          }
+        }}
+        onBlur={() => {
+          if (!isClickingScrollArea && !isBlockingInput) {
+            setOpen(false);
+            setInputValue("");
+          }
+        }}
+        className={cn(
+          "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-full focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
+          activeIndex !== -1 && "caret-transparent"
+        )}
+      />
+      <CommandList
+        ref={commandListRef}
+        className={cn(
+          "p-2 flex flex-col gap-2 z-[1000] w-full bg-card ",
+          (label === "Year" || label === "Season") && "max-h-[50vh] "
+        )}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <ScrollArea
+          className="max-h-[50vh]"
+          onTouchStart={() => {
+            if (!inputValue) {
+              setIsBlockingInput(true);
             }
-            enterKeyHint="search"
-            wrapperClassName="w-full py-6 px-4 border-b"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onValueChange={(e) => {
-              if (activeIndex === -1) {
-                setInputValue(e);
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              if (!inputValue) {
+                setIsBlockingInput(false);
               }
-
-              if (!e) {
-                setTimeout(() => {
-                  commandListRef.current?.scrollTo({
-                    top: 0,
-                    behavior: "instant",
-                  });
-                }, 100);
-              }
-            }}
-            onBlur={() => {
-              if (!isClickingScrollArea && !isBlockingInput) {
-                setOpen(false);
-                setInputValue("");
-              }
-            }}
-            className={cn(
-              "bg-transparent text-sm outline-none placeholder:text-muted-foreground w-[205px] focus-visible:ring-0 focus-visible:ring-offset-0  placeholder:text-[14px]",
-              activeIndex !== -1 && "caret-transparent"
-            )}
-          />
-          <CommandList
-            ref={commandListRef}
-            className={cn(
-              "p-2 flex flex-col gap-2 z-[1000] w-full bg-card ",
-              (label === "Year" || label === "Season") && "max-h-[50vh] "
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+            }, 0);
+          }}
+        >
+          <Collapsible
+            open={isCollapsibleOpen}
+            onOpenChange={setIsCollapsibleOpen}
           >
-            <ScrollArea
-              className="max-h-[50vh]"
-              onTouchStart={() => {
-                if (!inputValue) {
-                  setIsBlockingInput(true);
-                }
-              }}
-              onTouchEnd={() => {
-                setTimeout(() => {
-                  if (!inputValue) {
-                    setIsBlockingInput(false);
-                  }
-                }, 0);
-              }}
-            >
-              <Collapsible
-                open={isCollapsibleOpen}
-                onOpenChange={setIsCollapsibleOpen}
+            {!inputValue && (
+              <CollapsibleTrigger
+                className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer"
+                title="Toggle selected"
               >
-                {!inputValue && (
-                  <CollapsibleTrigger
-                    className="flex items-center gap-2 justify-between w-full px-3 cursor-pointer"
-                    title="Toggle selected"
-                  >
-                    <h3
-                      className={cn(
-                        "text-xs font-medium",
-                        value.length > 0
-                          ? "text-logo-main"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {`${value.length} selected`}
-                    </h3>
-                    <ChevronsUpDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                )}
-                <CommandGroup value={`${value.length} selected`}>
-                  <CollapsibleContent>
-                    {value.length > 0 && !inputValue && (
-                      <>
-                        {value.map((item) => (
-                          <CommandItem
-                            key={item}
-                            className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
-                            onSelect={() => {
-                              onValueChange(item);
-                            }}
-                            onTouchStart={() => {
-                              setIsBlockingInput(true);
-                            }}
-                            onTouchEnd={() => {
-                              setTimeout(() => {
-                                inputRef.current?.focus();
-                                setIsBlockingInput(false);
-                              }, 0);
-                            }}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
-                            <Checkbox
-                              defaultChecked={true}
-                              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
-                            />
-                            {item}
-
-                            <span className="hidden">skibidi toilet</span>
-                          </CommandItem>
-                        ))}
-                      </>
-                    )}
-                  </CollapsibleContent>
-                </CommandGroup>
-                <CommandSeparator />
-
-                <CommandGroup
-                  heading={
-                    !!inputValue
-                      ? "Search results"
-                      : `${
-                          allAvailableOptions?.length
-                        } available ${label.toLowerCase()}${
-                          allAvailableOptions?.length &&
-                          allAvailableOptions?.length > 1
-                            ? "s"
-                            : ""
-                        }`
-                  }
+                <h3
+                  className={cn(
+                    "text-xs font-medium",
+                    value.length > 0
+                      ? "text-logo-main"
+                      : "text-muted-foreground"
+                  )}
                 >
-                  {allAvailableOptions?.map((item) => (
-                    <CommandItem
-                      key={item}
-                      onSelect={() => {
-                        onValueChange(item);
-                        setTimeout(() => {
-                          if (inputValue) {
-                            commandListRef.current?.scrollTo({
-                              top: 0,
-                              behavior: "instant",
-                            });
-                          }
-                        }, 100);
-                        setInputValue("");
-                      }}
-                      className={cn(
-                        "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
-                        value.includes(item) && "opacity-50 cursor-default"
-                      )}
-                      onTouchStart={() => {
-                        if (!inputValue) {
+                  {`${value.length} selected`}
+                </h3>
+                <ChevronsUpDown className="h-4 w-4" />
+              </CollapsibleTrigger>
+            )}
+            <CommandGroup value={`${value.length} selected`}>
+              <CollapsibleContent>
+                {value.length > 0 && !inputValue && (
+                  <>
+                    {value.map((item) => (
+                      <CommandItem
+                        key={item}
+                        className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
+                        onSelect={() => {
+                          onValueChange(item);
+                        }}
+                        onTouchStart={() => {
                           setIsBlockingInput(true);
-                        }
-                      }}
-                      onTouchEnd={() => {
-                        setTimeout(() => {
-                          inputRef.current?.focus();
-                          setIsBlockingInput(false);
-                        }, 0);
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    >
-                      <Checkbox
-                        checked={value.includes(item)}
-                        className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main  "
-                      />
-                      {item}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Collapsible>
-            </ScrollArea>
-            <CommandEmpty>
-              <span className="text-muted-foreground">No results found</span>
-            </CommandEmpty>
-          </CommandList>
-        </div>
-      )}
-    </>
+                        }}
+                        onTouchEnd={() => {
+                          setTimeout(() => {
+                            inputRef.current?.focus();
+                            setIsBlockingInput(false);
+                          }, 0);
+                        }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <Checkbox
+                          defaultChecked={true}
+                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                        />
+                        {item}
+
+                        <span className="hidden">skibidi toilet</span>
+                      </CommandItem>
+                    ))}
+                  </>
+                )}
+              </CollapsibleContent>
+            </CommandGroup>
+            <CommandSeparator />
+
+            <CommandGroup
+              heading={
+                !!inputValue
+                  ? "Search results"
+                  : `${
+                      allAvailableOptions?.length
+                    } available ${label.toLowerCase()}${
+                      allAvailableOptions?.length &&
+                      allAvailableOptions?.length > 1
+                        ? "s"
+                        : ""
+                    }`
+              }
+            >
+              {allAvailableOptions?.map((item) => (
+                <CommandItem
+                  key={item}
+                  onSelect={() => {
+                    onValueChange(item);
+                    setTimeout(() => {
+                      if (inputValue) {
+                        commandListRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }, 100);
+                    setInputValue("");
+                  }}
+                  className={cn(
+                    "rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start",
+                    value.includes(item) && "opacity-50 cursor-default"
+                  )}
+                  onTouchStart={() => {
+                    if (!inputValue) {
+                      setIsBlockingInput(true);
+                    }
+                  }}
+                  onTouchEnd={() => {
+                    setTimeout(() => {
+                      inputRef.current?.focus();
+                      setIsBlockingInput(false);
+                    }, 0);
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <Checkbox
+                    checked={value.includes(item)}
+                    className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main  "
+                  />
+                  {item}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Collapsible>
+        </ScrollArea>
+        <CommandEmpty>
+          <span className="text-muted-foreground">No results found</span>
+        </CommandEmpty>
+      </CommandList>
+    </div>
   );
 };
 

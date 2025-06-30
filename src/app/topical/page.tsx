@@ -27,6 +27,7 @@ import {
   SidebarTrigger,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -117,6 +118,7 @@ const TopicalPage = () => {
       ?.season;
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
+  const isMobileDevice = useIsMobile();
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -125,7 +127,9 @@ const TopicalPage = () => {
     setSelectedYear([]);
     setSelectedPaperType([]);
     setSelectedSeason([]);
-    setSidebarKey((prev) => prev + 1);
+    if (!isMobileDevice) {
+      setSidebarKey((prev) => prev + 1);
+    }
     setIsResetConfirmationOpen(false);
   };
 
@@ -271,7 +275,7 @@ const TopicalPage = () => {
               Topical questions
             </h1>
             <Image
-              src="/assets/funny5.png"
+              src="/assets/funny2.png"
               alt="default subject"
               width={350}
               height={350}

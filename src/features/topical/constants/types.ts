@@ -40,8 +40,6 @@ export interface MultiSelectContextProps {
   allAvailableOptions?: string[];
   isBlockingInput: boolean;
   setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
-  isMobileKeyboardOpen: boolean;
-  setIsMobileKeyboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isDrawerOpen: boolean;
   setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   shouldOpenDrawer: boolean;
@@ -49,4 +47,5 @@ export interface MultiSelectContextProps {
   prerequisite: string;
   isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobileDevice: boolean;
 }
