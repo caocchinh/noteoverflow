@@ -89,6 +89,7 @@ const TopicalPage = () => {
     ValidCurriculum | ""
   >("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [sidebarKey, setSidebarKey] = useState(0);
 
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
@@ -116,14 +117,6 @@ const TopicalPage = () => {
       ?.season;
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
-  // const [cachedData, setCachedData] = useReducer(
-  //   (state: any, action: any) => {
-  //     return { ...state, ...action };
-  //   },
-  //   {
-  //     curriculum: "",
-  //   }
-  // );
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -132,6 +125,8 @@ const TopicalPage = () => {
     setSelectedYear([]);
     setSelectedPaperType([]);
     setSelectedSeason([]);
+    setSidebarKey((prev) => prev + 1);
+    setIsResetConfirmationOpen(false);
   };
 
   useEffect(() => {
@@ -152,7 +147,7 @@ const TopicalPage = () => {
   return (
     <div className="pt-16">
       <SidebarProvider>
-        <Sidebar variant="floating">
+        <Sidebar variant="floating" key={sidebarKey}>
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
           <SidebarContent className="p-4 w-full flex flex-col gap-4 mt-2 items-center justify-start overflow-x-hidden">
             <div className="flex flex-col gap-4">

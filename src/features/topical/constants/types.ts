@@ -25,7 +25,7 @@ export interface MultiSelectorProps {
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValueChange: (value: any) => void;
+  onValueChange: (value: any, option?: "selectAll" | "removeAll") => void;
   open: boolean;
   setOpen: (value: boolean) => void;
   inputValue: string;
@@ -34,13 +34,10 @@ export interface MultiSelectContextProps {
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   inputRef: React.RefObject<HTMLInputElement | null>;
   handleSelect: (e: React.SyntheticEvent<HTMLInputElement>) => void;
-  removeAllValues: () => void;
-  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
   isClickingScrollArea: boolean;
   setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
   commandListRef: React.RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
-  selectAllValues: () => void;
   isBlockingInput: boolean;
   setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
   isMobileKeyboardOpen: boolean;

@@ -45,6 +45,7 @@ import {
   MultiSelectContextProps,
 } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
 
@@ -72,7 +73,6 @@ export default function EnhancedMultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isValueSelected, setIsValueSelected] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState("");
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
@@ -103,26 +103,22 @@ export default function EnhancedMultiSelect({
   }, [open]);
 
   const onValueChangeHandler = useCallback(
-    (val: string) => {
-      if (value.includes(val)) {
-        onValueChange(value.filter((item) => item !== val));
+    (val: string, option?: "selectAll" | "removeAll") => {
+      if (option === "selectAll" && data) {
+        onValueChange(data);
+      } else if (option === "removeAll") {
+        onValueChange([]);
       } else {
-        onValueChange([...value, val]);
+        if (value.includes(val)) {
+          onValueChange(value.filter((item) => item !== val));
+        } else {
+          onValueChange([...value, val]);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [value]
   );
-
-  const removeAllValues = useCallback(() => {
-    onValueChange([]);
-  }, [onValueChange]);
-
-  const selectAllValues = useCallback(() => {
-    if (data) {
-      onValueChange(data);
-    }
-  }, [data, onValueChange]);
 
   const handleSelect = React.useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -253,12 +249,9 @@ export default function EnhancedMultiSelect({
         setActiveIndex,
         inputRef,
         handleSelect,
-        removeAllValues,
-        scrollAreaRef,
         isClickingScrollArea,
         setIsClickingScrollArea,
         commandListRef,
-        selectAllValues,
         isBlockingInput,
         setIsBlockingInput,
         isMobileKeyboardOpen,
@@ -285,7 +278,7 @@ export default function EnhancedMultiSelect({
       >
         <h3 className="text-sm font-medium w-max">{label}</h3>
 
-        <Popover open={open} modal={true}>
+        <Popover open={open} modal={false}>
           <PopoverTrigger asChild>
             <div>
               <MultiSelectorTrigger />
@@ -326,11 +319,8 @@ const MultiSelectorTrigger = () => {
     onValueChange,
     activeIndex,
     open,
-    removeAllValues,
     setOpen,
-    scrollAreaRef,
     setIsClickingScrollArea,
-    selectAllValues,
     allAvailableOptions,
     label,
     setInputValue,
@@ -361,129 +351,67 @@ const MultiSelectorTrigger = () => {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 !m-0 rounded-md",
+        "flex flex-wrap gap-1 w-[300px] p-1 py-2 ring-1 ring-muted mb-0 rounded-lg dark:bg-secondary bg-background relative flex-col",
+        {
+          "ring-1 focus-within:ring-ring": activeIndex === -1,
+          "opacity-50": !allAvailableOptions,
+        },
         !allAvailableOptions && "pointer-events-none "
       )}
     >
-      <div
-        className={cn(
-          "flex flex-wrap gap-1 w-[300px] p-1 py-2 ring-1 ring-muted mb-0 rounded-lg dark:bg-secondary bg-background relative flex-col",
-          {
-            "ring-1 focus-within:ring-ring": activeIndex === -1,
-            "opacity-50": !allAvailableOptions,
-          }
-        )}
-      >
-        <div className="flex items-center justify-center gap-2 px-1">
-          <Badge
-            variant="default"
-            className="text-xs flex-1 cursor-pointer"
-            onMouseDown={mousePreventDefault}
-            onClick={() => {
-              if (!isClickingUltility) {
-                setInputValue("");
-                setOpen(!open);
-              }
-            }}
-            onTouchStart={() => {
-              setIsBlockingInput(true);
-            }}
-            onTouchEnd={() => {
-              setTimeout(() => {
-                setIsBlockingInput(false);
-              }, 0);
-            }}
-          >
-            {value.length == 0
-              ? `Select ${label.toLowerCase()}`
-              : `${value.length} ${label.toLowerCase()}${
-                  value.length > 1 ? "s" : ""
-                } selected`}
-          </Badge>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className=" cursor-pointer"
-                title="Select all"
-                onMouseDown={(e) => {
-                  mousePreventDefault(e);
-                  setIsClickingUltility(true);
-                }}
-                onMouseUp={() => {
-                  setTimeout(() => {
-                    setIsClickingUltility(false);
-                  }, 0);
-                }}
-                onClick={selectAllValues}
-                onTouchStart={() => {
-                  setIsBlockingInput(true);
-                }}
-                onTouchEnd={() => {
-                  setTimeout(() => {
-                    setIsBlockingInput(false);
-                  }, 0);
-                }}
-              >
-                <Sparkles className="h-4 w-4 hover:stroke-yellow-500 transition-colors duration-100 ease-in-out" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
-              Select all
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className=" cursor-pointer"
-                title="Remove all"
-                onMouseDown={(e) => {
-                  mousePreventDefault(e);
-                  setIsClickingUltility(true);
-                }}
-                onMouseUp={() => {
-                  setTimeout(() => {
-                    setIsClickingUltility(false);
-                  }, 0);
-                }}
-                onClick={removeAllValues}
-                onTouchStart={() => {
-                  setIsBlockingInput(true);
-                }}
-                onTouchEnd={() => {
-                  setTimeout(() => {
-                    setIsBlockingInput(false);
-                  }, 0);
-                }}
-              >
-                <Trash2 className="h-4 w-4 hover:stroke-destructive transition-colors duration-100 ease-in-out" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
-              Remove all
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {value.length > 0 && (
-          <ScrollArea
-            ref={scrollAreaRef}
-            className="w-full overflow-hidden"
-            style={{ height: `${contentHeight}px`, paddingRight: paddingRight }}
-            onMouseDown={(e) => {
-              mousePreventDefault(e);
-              setIsClickingScrollArea(true);
-            }}
-            onMouseUp={() => {
-              setIsClickingScrollArea(false);
-            }}
-          >
-            <div
-              className="flex flex-wrap gap-2 p-1 w-full"
-              ref={contentRef}
+      <div className="flex items-center justify-center gap-2 px-1">
+        <Button
+          variant="default"
+          className="text-xs flex-1 cursor-pointer h-6"
+          onMouseDown={mousePreventDefault}
+          onClick={() => {
+            if (!isClickingUltility) {
+              setInputValue("");
+              setOpen(!open);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isClickingUltility) {
+              setInputValue("");
+              setOpen(!open);
+            }
+          }}
+          onTouchStart={() => {
+            setIsBlockingInput(true);
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
+          }}
+        >
+          {value.length == 0
+            ? `Select ${label.toLowerCase()}`
+            : `${value.length} ${label.toLowerCase()}${
+                value.length > 1 ? "s" : ""
+              } selected`}
+        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className=" cursor-pointer h-7 w-7 hover:text-yellow-500 transition-colors duration-100 ease-in-out"
+              title="Select all"
+              variant="outline"
+              onMouseDown={(e) => {
+                mousePreventDefault(e);
+                setIsClickingUltility(true);
+              }}
+              onMouseUp={() => {
+                setTimeout(() => {
+                  setIsClickingUltility(false);
+                }, 0);
+              }}
               onClick={() => {
-                if (!isClickingUltility) {
-                  setInputValue("");
-                  setOpen(!open);
+                onValueChange(allAvailableOptions, "selectAll");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onValueChange(allAvailableOptions, "selectAll");
                 }
               }}
               onTouchStart={() => {
@@ -495,54 +423,133 @@ const MultiSelectorTrigger = () => {
                 }, 0);
               }}
             >
-              {value.map((item, index) => (
-                <Badge
-                  key={item}
-                  className={cn(
-                    "px-1 rounded-xl text-left flex items-center gap-1 whitespace-pre-wrap wrap-anywhere dark:!border-white/25",
-                    activeIndex === index && "ring-2 ring-muted-foreground "
-                  )}
-                  variant={"secondary"}
-                  onTouchStart={() => {
-                    setIsBlockingInput(true);
+              <Sparkles className="h-4 w-4 " />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="z-[100000000000]">
+            Select all
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              className="cursor-pointer h-7 w-7 hover:text-destructive transition-colors duration-100 ease-in-out"
+              title="Remove all"
+              onMouseDown={(e) => {
+                mousePreventDefault(e);
+                setIsClickingUltility(true);
+              }}
+              onMouseUp={() => {
+                setTimeout(() => {
+                  setIsClickingUltility(false);
+                }, 0);
+              }}
+              onClick={() => {
+                onValueChange([], "removeAll");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onValueChange([], "removeAll");
+                }
+              }}
+              onTouchStart={() => {
+                setIsBlockingInput(true);
+              }}
+              onTouchEnd={() => {
+                setTimeout(() => {
+                  setIsBlockingInput(false);
+                }, 0);
+              }}
+            >
+              <Trash2 className="h-4 w-4 " />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="z-[100000000000]">
+            Remove all
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {value.length > 0 && (
+        <ScrollArea
+          className="w-full overflow-hidden"
+          style={{ height: `${contentHeight}px`, paddingRight: paddingRight }}
+          onMouseDown={(e) => {
+            mousePreventDefault(e);
+            setIsClickingScrollArea(true);
+          }}
+          onMouseUp={() => {
+            setIsClickingScrollArea(false);
+          }}
+          onClick={() => {
+            if (!isClickingUltility) {
+              setInputValue("");
+              setOpen(!open);
+            }
+          }}
+          onTouchStart={() => {
+            setIsBlockingInput(true);
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
+          }}
+        >
+          <div className="flex flex-wrap gap-2 p-1 w-full" ref={contentRef}>
+            {value.map((item, index) => (
+              <Badge
+                key={item}
+                className={cn(
+                  "px-1 rounded-xl text-left flex items-center gap-1 whitespace-pre-wrap wrap-anywhere dark:!border-white/25",
+                  activeIndex === index && "ring-2 ring-muted-foreground "
+                )}
+                variant={"secondary"}
+                onTouchStart={() => {
+                  setIsBlockingInput(true);
+                }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setIsBlockingInput(false);
+                  }, 0);
+                }}
+              >
+                <span className="text-xs">{item}</span>
+                <button
+                  aria-label={`Remove ${item} option`}
+                  aria-roledescription="button to remove option"
+                  type="button"
+                  onMouseDown={(e) => {
+                    mousePreventDefault(e);
+                    setIsClickingUltility(true);
                   }}
-                  onTouchEnd={() => {
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onValueChange(item);
+                    }
+                  }}
+                  onClick={() => {
+                    onValueChange(item);
+
+                    if (value.length === 1) {
+                      setContentHeight(0);
+                    }
+                  }}
+                  onMouseUp={() => {
                     setTimeout(() => {
-                      setIsBlockingInput(false);
+                      setIsClickingUltility(false);
                     }, 0);
                   }}
                 >
-                  <span className="text-xs">{item}</span>
-                  <button
-                    aria-label={`Remove ${item} option`}
-                    aria-roledescription="button to remove option"
-                    type="button"
-                    onMouseDown={(e) => {
-                      mousePreventDefault(e);
-                      setIsClickingUltility(true);
-                    }}
-                    onClick={() => {
-                      onValueChange(item);
-
-                      if (value.length === 1) {
-                        setContentHeight(0);
-                      }
-                    }}
-                    onMouseUp={() => {
-                      setTimeout(() => {
-                        setIsClickingUltility(false);
-                      }, 0);
-                    }}
-                  >
-                    <span className="sr-only">Remove {item} option</span>
-                    <RemoveIcon className="h-4 w-4 cursor-pointer hover:stroke-destructive transition-colors duration-100 ease-in-out" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-      </div>
+                  <span className="sr-only">Remove {item} option</span>
+                  <RemoveIcon className="h-4 w-4 cursor-pointer hover:stroke-destructive transition-colors duration-100 ease-in-out" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
     </div>
   );
 };
@@ -707,7 +714,14 @@ const MultiSelectorList = () => {
                   heading={
                     !!inputValue
                       ? "Search results"
-                      : `${allAvailableOptions?.length} available options`
+                      : `${
+                          allAvailableOptions?.length
+                        } available ${label.toLowerCase()}${
+                          allAvailableOptions?.length &&
+                          allAvailableOptions?.length > 1
+                            ? "s"
+                            : ""
+                        }`
                   }
                 >
                   {allAvailableOptions?.map((item) => (

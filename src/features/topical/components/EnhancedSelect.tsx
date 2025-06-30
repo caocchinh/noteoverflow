@@ -49,7 +49,7 @@ const EnhancedSelect = ({
     <div className="flex flex-col gap-1">
       <h3 className="w-max text-sm font-medium">{label}</h3>
       <Popover
-        modal={true}
+        modal={isMobileDevice}
         open={isOpen}
         onOpenChange={(open) => {
           if (open) {
