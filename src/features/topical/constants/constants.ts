@@ -1,4 +1,4 @@
-import { TopicalData } from "./types";
+import { InvalidInputs, TopicalData } from "./types";
 
 export const TOPICAL_DATA: TopicalData[] = [
   {
@@ -154,3 +154,12 @@ export const TOPICAL_DATA: TopicalData[] = [
     ],
   },
 ];
+
+export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
+  curriculum: false,
+  subject: false,
+  topic: false,
+  year: false,
+  paperType: false,
+  season: false,
+};

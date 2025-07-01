@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TOPICAL_DATA } from "@/features/topical/constants/constants";
+import {
+  INVALID_INPUTS_DEFAULT,
+  TOPICAL_DATA,
+} from "@/features/topical/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
@@ -30,6 +33,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { InvalidInputs } from "@/features/topical/constants/types";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -145,20 +149,8 @@ const TopicalPage = () => {
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [invalidInputs, setInvalidInputs] = useState<{
-    curriculum: boolean;
-    subject: boolean;
-    topic: boolean;
-    year: boolean;
-    paperType: boolean;
-    season: boolean;
-  }>({
-    curriculum: false,
-    subject: false,
-    topic: false,
-    year: false,
-    paperType: false,
-    season: false,
+  const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
+    ...INVALID_INPUTS_DEFAULT,
   });
   const curriculumRef = useRef<HTMLDivElement | null>(null);
   const subjectRef = useRef<HTMLDivElement | null>(null);
@@ -181,80 +173,110 @@ const TopicalPage = () => {
   };
 
   const isValidInputs = () => {
-    const invalidInputs = {
-      topic: { errorIndex: 0, isInvalid: false },
-      year: { errorIndex: 0, isInvalid: false },
-      paperType: { errorIndex: 0, isInvalid: false },
-      season: { errorIndex: 0, isInvalid: false },
-    };
-    let errorIndex = 0;
-    let flag = true;
-    if (!selectedCurriculum) {
-      setInvalidInputs((prev) => ({ ...prev, curriculum: true }));
-      curriculumRef.current?.scrollIntoView({ behavior: "instant" });
-      return false;
-    }
-    if (!selectedSubject) {
-      setInvalidInputs((prev) => ({ ...prev, subject: true }));
-      subjectRef.current?.scrollIntoView({ behavior: "instant" });
-      return false;
-    }
-    if (!selectedTopic.length) {
-      invalidInputs.topic.isInvalid = true;
-      invalidInputs.topic.errorIndex = errorIndex;
-      errorIndex++;
-      flag = false;
-    }
-    if (!selectedYear.length) {
-      invalidInputs.year.isInvalid = true;
-      invalidInputs.year.errorIndex = errorIndex;
-      errorIndex++;
-      flag = false;
-    }
-    if (!selectedPaperType.length) {
-      invalidInputs.paperType.isInvalid = true;
-      invalidInputs.paperType.errorIndex = errorIndex;
-      errorIndex++;
-      flag = false;
-    }
-    if (!selectedSeason.length) {
-      invalidInputs.season.isInvalid = true;
-      invalidInputs.season.errorIndex = errorIndex;
-      errorIndex++;
-      flag = false;
-    }
-    if (!flag) {
-      setInvalidInputs((prev) => {
-        return {
-          curriculum: prev.curriculum,
-          subject: prev.subject,
-          topic: invalidInputs.topic.isInvalid,
-          year: invalidInputs.year.isInvalid,
-          paperType: invalidInputs.paperType.isInvalid,
-          season: invalidInputs.season.isInvalid,
-        };
-      });
-      if (invalidInputs.topic.errorIndex == 0) {
-        topicRef.current?.scrollIntoView({ behavior: "instant" });
-      }
-      if (invalidInputs.year.errorIndex == 0) {
-        yearRef.current?.scrollIntoView({ behavior: "instant" });
-      }
-      if (invalidInputs.paperType.errorIndex == 0) {
-        paperTypeRef.current?.scrollIntoView({ behavior: "instant" });
-      }
-      if (invalidInputs.season.errorIndex == 0) {
-        seasonRef.current?.scrollIntoView({ behavior: "instant" });
+    const fieldsToValidate: {
+      name: keyof InvalidInputs;
+      value: string | string[];
+      ref: React.RefObject<HTMLDivElement | null>;
+      isInvalid: boolean;
+    }[] = [
+      {
+        name: "curriculum",
+        value: selectedCurriculum,
+        ref: curriculumRef,
+        isInvalid: !selectedCurriculum,
+      },
+      {
+        name: "subject",
+        value: selectedSubject,
+        ref: subjectRef,
+        isInvalid: !selectedSubject,
+      },
+      {
+        name: "topic",
+        value: selectedTopic,
+        ref: topicRef,
+        isInvalid: selectedTopic.length === 0,
+      },
+      {
+        name: "year",
+        value: selectedYear,
+        ref: yearRef,
+        isInvalid: selectedYear.length === 0,
+      },
+      {
+        name: "paperType",
+        value: selectedPaperType,
+        ref: paperTypeRef,
+        isInvalid: selectedPaperType.length === 0,
+      },
+      {
+        name: "season",
+        value: selectedSeason,
+        ref: seasonRef,
+        isInvalid: selectedSeason.length === 0,
+      },
+    ];
+
+    const newInvalidInputsState: InvalidInputs = INVALID_INPUTS_DEFAULT;
+
+    let isFormValid = true;
+    let firstInvalidRef: React.RefObject<HTMLDivElement | null> | null = null;
+
+    for (const field of fieldsToValidate) {
+      if (field.isInvalid) {
+        newInvalidInputsState[field.name] = true;
+        if (isFormValid) {
+          firstInvalidRef = field.ref;
+        }
+        isFormValid = false;
       }
     }
-    return flag;
+    console.log(newInvalidInputsState);
+    setInvalidInputs(newInvalidInputsState);
+
+    firstInvalidRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    return isFormValid;
   };
 
-  const search = () => {
-    if (isValidInputs()) {
-      console.log("search");
+  useEffect(() => {
+    if (invalidInputs.curriculum && selectedCurriculum) {
+      setInvalidInputs((prev) => ({ ...prev, curriculum: false }));
     }
-  };
+  }, [selectedCurriculum, invalidInputs.curriculum]);
+
+  useEffect(() => {
+    if (invalidInputs.subject && selectedSubject) {
+      setInvalidInputs((prev) => ({ ...prev, subject: false }));
+    }
+  }, [selectedSubject, invalidInputs.subject]);
+
+  useEffect(() => {
+    if (invalidInputs.topic && selectedTopic.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, topic: false }));
+    }
+  }, [selectedTopic, invalidInputs.topic]);
+
+  useEffect(() => {
+    if (invalidInputs.paperType && selectedPaperType.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
+    }
+  }, [selectedPaperType, invalidInputs.paperType]);
+
+  useEffect(() => {
+    if (invalidInputs.year && selectedYear.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, year: false }));
+    }
+  }, [selectedYear, invalidInputs.year]);
+
+  useEffect(() => {
+    if (invalidInputs.season && selectedSeason.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, season: false }));
+    }
+  }, [selectedSeason, invalidInputs.season]);
 
   useEffect(() => {
     setSelectedSubject("");
@@ -271,6 +293,10 @@ const TopicalPage = () => {
     setSelectedSeason([]);
   }, [selectedSubject]);
 
+  const search = () => {
+    if (isValidInputs()) return;
+  };
+
   return (
     <div className="pt-16">
       <SidebarProvider
@@ -278,6 +304,8 @@ const TopicalPage = () => {
         onOpenChange={setIsSidebarOpen}
         openMobile={isSidebarOpen}
         onOpenChangeMobile={setIsSidebarOpen}
+        defaultOpen={true}
+        defaultOpenMobile={true}
       >
         <Sidebar variant="floating" key={sidebarKey}>
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
@@ -305,7 +333,7 @@ const TopicalPage = () => {
                         alt="cover"
                         className="self-center rounded-[2px]"
                         width={100}
-                        height={100}
+                        height={126}
                       />
                     </motion.div>
                   ) : (

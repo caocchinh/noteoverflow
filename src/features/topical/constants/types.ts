@@ -13,14 +13,6 @@ export interface TopicalData {
   }[];
 }
 
-export type VALID_LABEL =
-  | "Curriculum"
-  | "Subject"
-  | "Topic"
-  | "Year"
-  | "Paper"
-  | "Season";
-
 export interface MultiSelectorProps {
   values: string[];
   onValuesChange: (value: string[]) => void;
@@ -29,6 +21,23 @@ export interface MultiSelectorProps {
   dir?: string;
   label: VALID_LABEL;
   prerequisite: string;
+}
+
+export type VALID_LABEL =
+  | "Curriculum"
+  | "Subject"
+  | "Topic"
+  | "Year"
+  | "Paper"
+  | "Season";
+
+export interface InvalidInputs {
+  curriculum: boolean;
+  subject: boolean;
+  topic: boolean;
+  year: boolean;
+  paperType: boolean;
+  season: boolean;
 }
 
 export interface MultiSelectContextProps {
