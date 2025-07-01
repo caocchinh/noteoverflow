@@ -284,7 +284,7 @@ export default function EnhancedMultiSelect({
             <MultiSelectorTrigger />
             <Drawer open={open} onOpenChange={setOpen}>
               <DrawerContent
-                className="h-[95vh] max-h-[95vh] pt-4 z-[100004]"
+                className="h-[95vh] max-h-[95vh] z-[100004]"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -296,7 +296,20 @@ export default function EnhancedMultiSelect({
                   Select {label}
                 </DrawerHeader>
                 <div
-                  className="flex flex-row gap-3 mt-2 p-2"
+                  className="w-full pt-2 pb-4"
+                  onTouchStart={() => {
+                    setIsBlockingInput(true);
+                  }}
+                  onTouchEnd={() => {
+                    setTimeout(() => {
+                      setIsBlockingInput(false);
+                    }, 0);
+                  }}
+                >
+                  <div className="bg-muted mx-auto hidden pt-2  h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+                </div>
+                <div
+                  className="flex flex-row gap-3 p-2 "
                   onTouchStart={() => {
                     setIsBlockingInput(true);
                   }}
