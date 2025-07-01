@@ -181,7 +181,16 @@ const TopicalPage = () => {
                       />
                     </motion.div>
                   ) : (
-                    <div className="flex items-center flex-col justify-center">
+                    <motion.div
+                      key={selectedSubject}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{
+                        duration: 0.15,
+                        ease: "easeInOut",
+                      }}
+                    >
                       <Image
                         src="/assets/pointing.png"
                         alt="default subject"
@@ -189,10 +198,7 @@ const TopicalPage = () => {
                         height={100}
                         className="self-center"
                       />
-                      <span className="text-sm text-center text-logo-main">
-                        Select {!selectedCurriculum ? "curriculum" : "subject"}
-                      </span>
-                    </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
                 <div className="flex items-start gap-6 flex-col justify-start">
@@ -265,23 +271,23 @@ const TopicalPage = () => {
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset>
-          <div className="p-4 pl-2 gap-6 flex items-center md:items-start justify-center flex-col relative">
-            <SidebarTrigger className="flex fixed left-[10px] top-[73px] items-center gap-2 border cursor-pointer">
+        <SidebarInset className="relative p-4  pl-2 gap-6 flex items-center md:items-start justify-start flex-col">
+          <div className="absolute">
+            <SidebarTrigger className="flex fixed top-[73px] items-center gap-2 border cursor-pointer">
               Filters
               <SlidersHorizontal />
             </SidebarTrigger>
-            <h1 className="text-2xl font-bold w-full  text-center ">
-              Topical questions
-            </h1>
-            <Image
-              src="/assets/funny2.png"
-              alt="default subject"
-              width={350}
-              height={350}
-              className="self-center rounded-md"
-            />
           </div>
+          <h1 className="text-2xl font-bold w-full  text-center ">
+            Topical questions
+          </h1>
+          <Image
+            src="/assets/funny2.png"
+            alt="default subject"
+            width={350}
+            height={350}
+            className="self-center rounded-md"
+          />
         </SidebarInset>
       </SidebarProvider>
     </div>

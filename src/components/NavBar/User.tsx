@@ -28,12 +28,12 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import GlareHover from "../GlazeHover";
-import styles from "./Navbar.module.css";
 import AvatarChange from "./AvatarChange";
 import { motion, AnimatePresence } from "motion/react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,6 +41,7 @@ const User = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile({ breakpoint: 515 });
 
   const { data, isPending, error } = useQuery({
     queryKey: ["user"],
@@ -209,7 +210,9 @@ const User = () => {
             </Button>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
-                className={`z-[100002] border-white/60 ${styles.subUserMenuContent}`}
+                className="z-[100002] border-white/60"
+                sideOffset={isMobile ? -95 : undefined}
+                alignOffset={isMobile ? 50 : undefined}
               >
                 <DropdownMenuItem asChild title="Change avatar">
                   <Button

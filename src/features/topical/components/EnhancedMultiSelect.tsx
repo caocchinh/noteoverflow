@@ -422,37 +422,6 @@ const MultiSelectorTrigger = () => {
       )}
     >
       <div className="flex items-center justify-center gap-2 px-1">
-        <Button
-          variant="default"
-          className="text-xs flex-1 cursor-pointer h-6"
-          onMouseDown={mousePreventDefault}
-          onClick={() => {
-            if (!isClickingUltility) {
-              setInputValue("");
-              setOpen(!open);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !isClickingUltility) {
-              setInputValue("");
-              setOpen(!open);
-            }
-          }}
-          onTouchStart={() => {
-            setIsBlockingInput(true);
-          }}
-          onTouchEnd={() => {
-            setTimeout(() => {
-              setIsBlockingInput(false);
-            }, 0);
-          }}
-        >
-          {value.length == 0
-            ? `Select ${label.toLowerCase()}`
-            : `${value.length} ${label.toLowerCase()}${
-                value.length > 1 ? "s" : ""
-              } selected`}
-        </Button>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -531,6 +500,37 @@ const MultiSelectorTrigger = () => {
             Remove all
           </TooltipContent>
         </Tooltip>
+        <Button
+          variant="default"
+          className="text-xs flex-1 cursor-pointer h-6"
+          onMouseDown={mousePreventDefault}
+          onClick={() => {
+            if (!isClickingUltility) {
+              setInputValue("");
+              setOpen(!open);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isClickingUltility) {
+              setInputValue("");
+              setOpen(!open);
+            }
+          }}
+          onTouchStart={() => {
+            setIsBlockingInput(true);
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
+          }}
+        >
+          {value.length == 0
+            ? `Select ${label.toLowerCase()}`
+            : `${value.length} ${label.toLowerCase()}${
+                value.length > 1 ? "s" : ""
+              } selected`}
+        </Button>
       </div>
 
       {value.length > 0 && (

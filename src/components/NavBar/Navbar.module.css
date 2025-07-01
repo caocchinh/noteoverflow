@@ -1,9 +1,0 @@
-.subUserMenuContent {
-  display: block;
-}
-
-@media (max-width: 515px) {
-  .subUserMenuContent {
-    display: none;
-  }
-}
