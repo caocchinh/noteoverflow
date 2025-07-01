@@ -31,12 +31,14 @@
   ],
   "r2_buckets": [
     {
-      "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "nfcache"
-    },
-    {
       "binding": "MAIN_BUCKET",
       "bucket_name": "noteoverflow"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "966d0d6109f7487c819d70f64e72d4fd"
     }
   ],
   "durable_objects": {

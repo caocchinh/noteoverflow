@@ -641,13 +641,20 @@ const MultiSelectorList = () => {
   } = useMultiSelect();
 
   useEffect(() => {
+    let focusTimeoutId: NodeJS.Timeout;
+    let unblockTimeoutId: NodeJS.Timeout;
+
     if (isMobileDevice && open) {
-      setTimeout(() => {
+      focusTimeoutId = setTimeout(() => {
         setIsBlockingInput(true);
         inputRef.current?.focus();
-        setTimeout(() => setIsBlockingInput(false), 100);
+        unblockTimeoutId = setTimeout(() => setIsBlockingInput(false), 100);
       }, 0);
     }
+    return () => {
+      clearTimeout(focusTimeoutId);
+      clearTimeout(unblockTimeoutId);
+    };
   }, [inputRef, isMobileDevice, open, setIsBlockingInput]);
 
   return (
@@ -751,6 +758,10 @@ const MultiSelectorList = () => {
                         key={item}
                         className="rounded-md cursor-pointer px-2 py-1 transition-colors flex justify-start "
                         onSelect={() => {
+                          setIsBlockingInput(true);
+                          setTimeout(() => {
+                            setIsBlockingInput(false);
+                          }, 0);
                           onValueChange(item);
                         }}
                         onTouchStart={() => {
@@ -759,7 +770,9 @@ const MultiSelectorList = () => {
                         onTouchEnd={() => {
                           setTimeout(() => {
                             inputRef.current?.focus();
-                            setIsBlockingInput(false);
+                            setTimeout(() => {
+                              setIsBlockingInput(false);
+                            }, 0);
                           }, 0);
                         }}
                         onMouseDown={(e) => {
@@ -809,6 +822,12 @@ const MultiSelectorList = () => {
                         });
                       }
                     }, 100);
+                    if (!inputValue) {
+                      setIsBlockingInput(true);
+                      setTimeout(() => {
+                        setIsBlockingInput(false);
+                      }, 0);
+                    }
                     setInputValue("");
                   }}
                   className={cn(
@@ -823,7 +842,9 @@ const MultiSelectorList = () => {
                   onTouchEnd={() => {
                     setTimeout(() => {
                       inputRef.current?.focus();
-                      setIsBlockingInput(false);
+                      setTimeout(() => {
+                        setIsBlockingInput(false);
+                      }, 0);
                     }, 0);
                   }}
                   onMouseDown={(e) => {
