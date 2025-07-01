@@ -7,7 +7,7 @@ import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { BrushCleaning, ScanText, SlidersHorizontal } from "lucide-react";
+import { BrushCleaning, ScanText, SlidersHorizontal, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,19 +28,28 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "next-themes";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
   setIsResetConfirmationOpen,
   resetEverything,
+  setIsSidebarOpen,
+  search,
 }: {
   isResetConfirmationOpen: boolean;
   setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
+  setIsSidebarOpen: (value: boolean) => void;
+  search: () => void;
 }) => {
+  const { theme } = useTheme();
   return (
     <>
-      <Button className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90">
+      <Button
+        className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90"
+        onClick={search}
+      >
         Search
         <ScanText />
       </Button>
@@ -81,6 +90,16 @@ const ButtonUltility = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Button
+        className="cursor-pointer w-full"
+        onClick={() => {
+          setIsSidebarOpen(false);
+        }}
+        variant={theme === "dark" ? "destructive" : "default"}
+      >
+        Close filter
+        <X className="w-4 h-4" />
+      </Button>
     </>
   );
 };
@@ -119,6 +138,7 @@ const TopicalPage = () => {
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -131,6 +151,17 @@ const TopicalPage = () => {
       setSidebarKey((prev) => prev + 1);
     }
     setIsResetConfirmationOpen(false);
+  };
+
+  const search = () => {
+    console.log(
+      selectedCurriculum,
+      selectedSubject,
+      selectedTopic,
+      selectedYear,
+      selectedPaperType,
+      selectedSeason
+    );
   };
 
   useEffect(() => {
@@ -150,7 +181,12 @@ const TopicalPage = () => {
 
   return (
     <div className="pt-16">
-      <SidebarProvider>
+      <SidebarProvider
+        open={isSidebarOpen}
+        onOpenChange={setIsSidebarOpen}
+        openMobile={isSidebarOpen}
+        onOpenChangeMobile={setIsSidebarOpen}
+      >
         <Sidebar variant="floating" key={sidebarKey}>
           <SidebarHeader className="p-0 m-0 sr-only ">Filters</SidebarHeader>
           <SidebarContent className="p-4 w-full flex flex-col gap-4 items-center justify-start overflow-x-hidden pt-2">
@@ -266,6 +302,8 @@ const TopicalPage = () => {
                 isResetConfirmationOpen={isResetConfirmationOpen}
                 setIsResetConfirmationOpen={setIsResetConfirmationOpen}
                 resetEverything={resetEverything}
+                setIsSidebarOpen={setIsSidebarOpen}
+                search={search}
               />
             </div>
           </SidebarContent>

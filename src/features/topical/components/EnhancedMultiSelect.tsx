@@ -770,9 +770,7 @@ const MultiSelectorList = () => {
                         onTouchEnd={() => {
                           setTimeout(() => {
                             inputRef.current?.focus();
-                            setTimeout(() => {
-                              setIsBlockingInput(false);
-                            }, 0);
+                            setIsBlockingInput(false);
                           }, 0);
                         }}
                         onMouseDown={(e) => {
@@ -842,9 +840,7 @@ const MultiSelectorList = () => {
                   onTouchEnd={() => {
                     setTimeout(() => {
                       inputRef.current?.focus();
-                      setTimeout(() => {
-                        setIsBlockingInput(false);
-                      }, 0);
+                      setIsBlockingInput(false);
                     }, 0);
                   }}
                   onMouseDown={(e) => {
