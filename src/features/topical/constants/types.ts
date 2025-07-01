@@ -13,15 +13,24 @@ export interface TopicalData {
   }[];
 }
 
+export type VALID_LABEL =
+  | "Curriculum"
+  | "Subject"
+  | "Topic"
+  | "Year"
+  | "Paper"
+  | "Season";
+
 export interface MultiSelectorProps {
   values: string[];
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
   data?: string[];
   dir?: string;
-  label: string;
+  label: VALID_LABEL;
   prerequisite: string;
 }
+
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +49,7 @@ export interface MultiSelectContextProps {
   allAvailableOptions?: string[];
   isBlockingInput: boolean;
   setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
-  label: string;
+  label: VALID_LABEL;
   prerequisite: string;
   isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: React.Dispatch<React.SetStateAction<boolean>>;

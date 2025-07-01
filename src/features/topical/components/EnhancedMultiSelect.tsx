@@ -277,8 +277,6 @@ export default function EnhancedMultiSelect({
         {...props}
         label={label}
       >
-        <h3 className="text-sm font-medium w-max">{label}</h3>
-
         {isMobileDevice ? (
           <>
             <MultiSelectorTrigger />
@@ -425,48 +423,8 @@ const MultiSelectorTrigger = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className=" cursor-pointer h-7 w-7 hover:text-yellow-500 transition-colors duration-100 ease-in-out"
-              title="Select all"
-              variant="outline"
-              onMouseDown={(e) => {
-                mousePreventDefault(e);
-                setIsClickingUltility(true);
-              }}
-              onMouseUp={() => {
-                setTimeout(() => {
-                  setIsClickingUltility(false);
-                }, 0);
-              }}
-              onClick={() => {
-                onValueChange(allAvailableOptions, "selectAll");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  onValueChange(allAvailableOptions, "selectAll");
-                }
-              }}
-              onTouchStart={() => {
-                setIsBlockingInput(true);
-              }}
-              onTouchEnd={() => {
-                setTimeout(() => {
-                  setIsBlockingInput(false);
-                }, 0);
-              }}
-            >
-              <Sparkles className="h-4 w-4 " />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="z-[100000000000]">
-            Select all
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
               variant="outline"
               className="cursor-pointer h-7 w-7 hover:text-destructive transition-colors duration-100 ease-in-out"
-              title="Remove all"
               onMouseDown={(e) => {
                 mousePreventDefault(e);
                 setIsClickingUltility(true);
@@ -480,7 +438,7 @@ const MultiSelectorTrigger = () => {
                 onValueChange([], "removeAll");
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && allAvailableOptions) {
                   onValueChange([], "removeAll");
                 }
               }}
@@ -500,6 +458,44 @@ const MultiSelectorTrigger = () => {
             Remove all
           </TooltipContent>
         </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className=" cursor-pointer h-7 w-7 hover:text-yellow-500 transition-colors duration-100 ease-in-out"
+              variant="outline"
+              onMouseDown={(e) => {
+                mousePreventDefault(e);
+                setIsClickingUltility(true);
+              }}
+              onMouseUp={() => {
+                setTimeout(() => {
+                  setIsClickingUltility(false);
+                }, 0);
+              }}
+              onClick={() => {
+                onValueChange(allAvailableOptions, "selectAll");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && allAvailableOptions) {
+                  onValueChange(allAvailableOptions, "selectAll");
+                }
+              }}
+              onTouchStart={() => {
+                setIsBlockingInput(true);
+              }}
+              onTouchEnd={() => {
+                setTimeout(() => {
+                  setIsBlockingInput(false);
+                }, 0);
+              }}
+            >
+              <Sparkles className="h-4 w-4 " />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="z-[100000000000]">
+            Select all
+          </TooltipContent>
+        </Tooltip>
         <Button
           variant="default"
           className="text-xs flex-1 cursor-pointer h-6"
@@ -511,7 +507,11 @@ const MultiSelectorTrigger = () => {
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !isClickingUltility) {
+            if (
+              e.key === "Enter" &&
+              !isClickingUltility &&
+              allAvailableOptions
+            ) {
               setInputValue("");
               setOpen(!open);
             }
@@ -587,7 +587,7 @@ const MultiSelectorTrigger = () => {
                     setIsClickingUltility(true);
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === "Enter" && allAvailableOptions) {
                       onValueChange(item);
                     }
                   }}

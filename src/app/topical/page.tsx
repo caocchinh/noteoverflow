@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TOPICAL_DATA } from "@/features/topical/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -44,6 +45,12 @@ const ButtonUltility = ({
   search: () => void;
 }) => {
   const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <>
       <Button
@@ -95,7 +102,7 @@ const ButtonUltility = ({
         onClick={() => {
           setIsSidebarOpen(false);
         }}
-        variant={theme === "dark" ? "destructive" : "default"}
+        variant={theme === "dark" && mounted ? "destructive" : "default"}
       >
         Close filter
         <X className="w-4 h-4" />
@@ -110,7 +117,6 @@ const TopicalPage = () => {
   >("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
-
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
       TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
@@ -139,6 +145,27 @@ const TopicalPage = () => {
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [invalidInputs, setInvalidInputs] = useState<{
+    curriculum: boolean;
+    subject: boolean;
+    topic: boolean;
+    year: boolean;
+    paperType: boolean;
+    season: boolean;
+  }>({
+    curriculum: false,
+    subject: false,
+    topic: false,
+    year: false,
+    paperType: false,
+    season: false,
+  });
+  const curriculumRef = useRef<HTMLDivElement | null>(null);
+  const subjectRef = useRef<HTMLDivElement | null>(null);
+  const topicRef = useRef<HTMLDivElement | null>(null);
+  const yearRef = useRef<HTMLDivElement | null>(null);
+  const paperTypeRef = useRef<HTMLDivElement | null>(null);
+  const seasonRef = useRef<HTMLDivElement | null>(null);
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -153,15 +180,80 @@ const TopicalPage = () => {
     setIsResetConfirmationOpen(false);
   };
 
+  const isValidInputs = () => {
+    const invalidInputs = {
+      topic: { errorIndex: 0, isInvalid: false },
+      year: { errorIndex: 0, isInvalid: false },
+      paperType: { errorIndex: 0, isInvalid: false },
+      season: { errorIndex: 0, isInvalid: false },
+    };
+    let errorIndex = 0;
+    let flag = true;
+    if (!selectedCurriculum) {
+      setInvalidInputs((prev) => ({ ...prev, curriculum: true }));
+      curriculumRef.current?.scrollIntoView({ behavior: "instant" });
+      return false;
+    }
+    if (!selectedSubject) {
+      setInvalidInputs((prev) => ({ ...prev, subject: true }));
+      subjectRef.current?.scrollIntoView({ behavior: "instant" });
+      return false;
+    }
+    if (!selectedTopic.length) {
+      invalidInputs.topic.isInvalid = true;
+      invalidInputs.topic.errorIndex = errorIndex;
+      errorIndex++;
+      flag = false;
+    }
+    if (!selectedYear.length) {
+      invalidInputs.year.isInvalid = true;
+      invalidInputs.year.errorIndex = errorIndex;
+      errorIndex++;
+      flag = false;
+    }
+    if (!selectedPaperType.length) {
+      invalidInputs.paperType.isInvalid = true;
+      invalidInputs.paperType.errorIndex = errorIndex;
+      errorIndex++;
+      flag = false;
+    }
+    if (!selectedSeason.length) {
+      invalidInputs.season.isInvalid = true;
+      invalidInputs.season.errorIndex = errorIndex;
+      errorIndex++;
+      flag = false;
+    }
+    if (!flag) {
+      setInvalidInputs((prev) => {
+        return {
+          curriculum: prev.curriculum,
+          subject: prev.subject,
+          topic: invalidInputs.topic.isInvalid,
+          year: invalidInputs.year.isInvalid,
+          paperType: invalidInputs.paperType.isInvalid,
+          season: invalidInputs.season.isInvalid,
+        };
+      });
+      if (invalidInputs.topic.errorIndex == 0) {
+        topicRef.current?.scrollIntoView({ behavior: "instant" });
+      }
+      if (invalidInputs.year.errorIndex == 0) {
+        yearRef.current?.scrollIntoView({ behavior: "instant" });
+      }
+      if (invalidInputs.paperType.errorIndex == 0) {
+        paperTypeRef.current?.scrollIntoView({ behavior: "instant" });
+      }
+      if (invalidInputs.season.errorIndex == 0) {
+        seasonRef.current?.scrollIntoView({ behavior: "instant" });
+      }
+    }
+    return flag;
+  };
+
   const search = () => {
-    console.log(
-      selectedCurriculum,
-      selectedSubject,
-      selectedTopic,
-      selectedYear,
-      selectedPaperType,
-      selectedSeason
-    );
+    if (isValidInputs()) {
+      console.log("search");
+    }
   };
 
   useEffect(() => {
@@ -238,64 +330,166 @@ const TopicalPage = () => {
                   )}
                 </AnimatePresence>
                 <div className="flex items-start gap-6 flex-col justify-start">
-                  <EnhancedSelect
-                    label="Curriculum"
-                    prerequisite=""
-                    data={TOPICAL_DATA.map((item) => ({
-                      code: item.curriculum,
-                      coverImage: item.coverImage,
-                    }))}
-                    selectedValue={selectedCurriculum}
-                    setSelectedValue={(value) => {
-                      setSelectedCurriculum(value as ValidCurriculum);
-                    }}
-                  />
-                  <EnhancedSelect
-                    label="Subject"
-                    prerequisite={!selectedCurriculum ? "Curriculum" : ""}
-                    data={availableSubjects}
-                    selectedValue={selectedSubject}
-                    setSelectedValue={setSelectedSubject}
-                  />
+                  <div
+                    className="flex flex-col gap-1 items-start justify-start"
+                    ref={curriculumRef}
+                  >
+                    <h3
+                      className={cn(
+                        "text-sm font-medium w-max",
+                        invalidInputs.curriculum && "text-destructive"
+                      )}
+                    >
+                      Curriculum
+                    </h3>
+                    <EnhancedSelect
+                      label="Curriculum"
+                      prerequisite=""
+                      data={TOPICAL_DATA.map((item) => ({
+                        code: item.curriculum,
+                        coverImage: item.coverImage,
+                      }))}
+                      selectedValue={selectedCurriculum}
+                      setSelectedValue={(value) => {
+                        setSelectedCurriculum(value as ValidCurriculum);
+                      }}
+                    />
+                    {invalidInputs.curriculum && (
+                      <p className="text-destructive text-sm">
+                        Curriculum is required
+                      </p>
+                    )}
+                  </div>
+
+                  <div
+                    className="flex flex-col gap-1 items-start justify-start"
+                    ref={subjectRef}
+                  >
+                    <h3
+                      className={cn(
+                        "text-sm font-medium w-max",
+                        invalidInputs.subject && "text-destructive"
+                      )}
+                    >
+                      Subject
+                    </h3>
+                    <EnhancedSelect
+                      label="Subject"
+                      prerequisite={!selectedCurriculum ? "Curriculum" : ""}
+                      data={availableSubjects}
+                      selectedValue={selectedSubject}
+                      setSelectedValue={setSelectedSubject}
+                    />
+                    {invalidInputs.subject && (
+                      <p className="text-destructive text-sm">
+                        Subject is required
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
             <div className="flex-col flex items-center justify-center gap-4">
-              <EnhancedMultiSelect
-                label="Topic"
-                values={selectedTopic}
-                onValuesChange={(values) =>
-                  setSelectedTopic(values as string[])
-                }
-                prerequisite="Subject"
-                data={availableTopics}
-              />
-              <EnhancedMultiSelect
-                label="Paper"
-                values={selectedPaperType}
-                onValuesChange={(values) =>
-                  setSelectedPaperType(values as string[])
-                }
-                prerequisite="Subject"
-                data={availablePaperTypes?.map((item) => item.toString())}
-              />
-              <EnhancedMultiSelect
-                label="Year"
-                values={selectedYear}
-                onValuesChange={(values) => setSelectedYear(values as string[])}
-                prerequisite="Subject"
-                data={availableYears?.map((item) => item.toString())}
-              />
-
-              <EnhancedMultiSelect
-                label="Season"
-                values={selectedSeason}
-                onValuesChange={(values) =>
-                  setSelectedSeason(values as string[])
-                }
-                prerequisite="Subject"
-                data={availableSeasons}
-              />
+              <div
+                className="flex flex-col gap-1 items-start justify-start"
+                ref={topicRef}
+              >
+                <h3
+                  className={cn(
+                    "text-sm font-medium w-max",
+                    invalidInputs.topic && "text-destructive"
+                  )}
+                >
+                  Topic
+                </h3>
+                <EnhancedMultiSelect
+                  label="Topic"
+                  values={selectedTopic}
+                  onValuesChange={(values) =>
+                    setSelectedTopic(values as string[])
+                  }
+                  prerequisite="Subject"
+                  data={availableTopics}
+                />
+                {invalidInputs.topic && (
+                  <p className="text-destructive text-sm">Topic is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col gap-1 items-start justify-start"
+                ref={paperTypeRef}
+              >
+                <h3
+                  className={cn(
+                    "text-sm font-medium w-max",
+                    invalidInputs.paperType && "text-destructive"
+                  )}
+                >
+                  Paper
+                </h3>
+                <EnhancedMultiSelect
+                  label="Paper"
+                  values={selectedPaperType}
+                  onValuesChange={(values) =>
+                    setSelectedPaperType(values as string[])
+                  }
+                  prerequisite="Subject"
+                  data={availablePaperTypes?.map((item) => item.toString())}
+                />
+                {invalidInputs.paperType && (
+                  <p className="text-destructive text-sm">Paper is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col gap-1 items-start justify-start"
+                ref={yearRef}
+              >
+                <h3
+                  className={cn(
+                    "text-sm font-medium w-max",
+                    invalidInputs.year && "text-destructive"
+                  )}
+                >
+                  Year
+                </h3>
+                <EnhancedMultiSelect
+                  label="Year"
+                  values={selectedYear}
+                  onValuesChange={(values) =>
+                    setSelectedYear(values as string[])
+                  }
+                  prerequisite="Subject"
+                  data={availableYears?.map((item) => item.toString())}
+                />
+                {invalidInputs.year && (
+                  <p className="text-destructive text-sm">Year is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col gap-1 items-start justify-start"
+                ref={seasonRef}
+              >
+                <h3
+                  className={cn(
+                    "text-sm font-medium w-max",
+                    invalidInputs.season && "text-destructive"
+                  )}
+                >
+                  Season
+                </h3>
+                <EnhancedMultiSelect
+                  label="Season"
+                  values={selectedSeason}
+                  onValuesChange={(values) =>
+                    setSelectedSeason(values as string[])
+                  }
+                  prerequisite="Subject"
+                  data={availableSeasons}
+                />
+                {invalidInputs.season && (
+                  <p className="text-destructive text-sm">Season is required</p>
+                )}
+              </div>
             </div>
             <div className="flex w-[300px] justify-center items-center flex-col gap-4">
               <ButtonUltility
@@ -309,9 +503,9 @@ const TopicalPage = () => {
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="relative p-4  pl-2 gap-6 flex items-center md:items-start justify-start flex-col">
-          <div className="absolute">
-            <SidebarTrigger className="flex fixed top-[73px] items-center gap-2 border cursor-pointer">
+        <SidebarInset className="!relative p-4 pl-2 gap-6 flex items-center md:items-start justify-start flex-col">
+          <div className="absolute left-2">
+            <SidebarTrigger className="flex fixed items-center gap-2 border cursor-pointer">
               Filters
               <SlidersHorizontal />
             </SidebarTrigger>
