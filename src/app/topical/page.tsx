@@ -27,13 +27,13 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { InvalidInputs } from "@/features/topical/constants/types";
+import { LAST_SESSION_FILTERS_KEY } from "@/features/topical/constants/constants";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -41,25 +41,23 @@ const ButtonUltility = ({
   resetEverything,
   setIsSidebarOpen,
   search,
+  isMounted,
 }: {
   isResetConfirmationOpen: boolean;
   setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
   search: () => void;
+  isMounted: boolean;
 }) => {
   const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <>
       <Button
         className="cursor-pointer w-full bg-logo-main text-white hover:bg-logo-main/90"
         onClick={search}
+        disabled={!isMounted}
       >
         Search
         <ScanText />
@@ -69,7 +67,11 @@ const ButtonUltility = ({
         onOpenChange={setIsResetConfirmationOpen}
       >
         <DialogTrigger asChild>
-          <Button variant="outline" className="cursor-pointer w-full">
+          <Button
+            variant="outline"
+            className="cursor-pointer w-full"
+            disabled={!isMounted}
+          >
             Clear
             <BrushCleaning />
           </Button>
@@ -106,7 +108,7 @@ const ButtonUltility = ({
         onClick={() => {
           setIsSidebarOpen(false);
         }}
-        variant={theme === "dark" && mounted ? "destructive" : "default"}
+        variant={theme === "dark" && isMounted ? "destructive" : "default"}
       >
         Close filter
         <X className="w-4 h-4" />
@@ -158,6 +160,8 @@ const TopicalPage = () => {
   const yearRef = useRef<HTMLDivElement | null>(null);
   const paperTypeRef = useRef<HTMLDivElement | null>(null);
   const seasonRef = useRef<HTMLDivElement | null>(null);
+  const mountedRef = useRef(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const resetEverything = () => {
     setSelectedCurriculum("");
@@ -217,7 +221,9 @@ const TopicalPage = () => {
       },
     ];
 
-    const newInvalidInputsState: InvalidInputs = INVALID_INPUTS_DEFAULT;
+    const newInvalidInputsState: InvalidInputs = {
+      ...INVALID_INPUTS_DEFAULT,
+    };
 
     let isFormValid = true;
     let firstInvalidRef: React.RefObject<HTMLDivElement | null> | null = null;
@@ -231,7 +237,6 @@ const TopicalPage = () => {
         isFormValid = false;
       }
     }
-    console.log(newInvalidInputsState);
     setInvalidInputs(newInvalidInputsState);
 
     firstInvalidRef?.current?.scrollIntoView({
@@ -243,54 +248,110 @@ const TopicalPage = () => {
   };
 
   useEffect(() => {
-    if (invalidInputs.curriculum && selectedCurriculum) {
+    if (selectedCurriculum) {
       setInvalidInputs((prev) => ({ ...prev, curriculum: false }));
     }
-  }, [selectedCurriculum, invalidInputs.curriculum]);
+  }, [selectedCurriculum]);
 
   useEffect(() => {
-    if (invalidInputs.subject && selectedSubject) {
+    if (selectedSubject) {
       setInvalidInputs((prev) => ({ ...prev, subject: false }));
     }
-  }, [selectedSubject, invalidInputs.subject]);
+  }, [selectedSubject]);
 
   useEffect(() => {
-    if (invalidInputs.topic && selectedTopic.length > 0) {
+    if (selectedTopic.length > 0) {
       setInvalidInputs((prev) => ({ ...prev, topic: false }));
     }
-  }, [selectedTopic, invalidInputs.topic]);
+  }, [selectedTopic]);
 
   useEffect(() => {
-    if (invalidInputs.paperType && selectedPaperType.length > 0) {
+    if (selectedPaperType.length > 0) {
       setInvalidInputs((prev) => ({ ...prev, paperType: false }));
     }
-  }, [selectedPaperType, invalidInputs.paperType]);
+  }, [selectedPaperType]);
 
   useEffect(() => {
-    if (invalidInputs.year && selectedYear.length > 0) {
+    if (selectedYear.length > 0) {
       setInvalidInputs((prev) => ({ ...prev, year: false }));
     }
-  }, [selectedYear, invalidInputs.year]);
+  }, [selectedYear]);
 
   useEffect(() => {
-    if (invalidInputs.season && selectedSeason.length > 0) {
+    if (selectedSeason.length > 0) {
       setInvalidInputs((prev) => ({ ...prev, season: false }));
     }
-  }, [selectedSeason, invalidInputs.season]);
+  }, [selectedSeason]);
 
   useEffect(() => {
+    const savedState = localStorage.getItem(LAST_SESSION_FILTERS_KEY);
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        if (parsedState.curriculum) {
+          setSelectedCurriculum(parsedState.curriculum);
+          if (parsedState.subject) {
+            setSelectedSubject(parsedState.subject);
+            if (parsedState.topic) setSelectedTopic(parsedState.topic);
+            if (parsedState.paperType)
+              setSelectedPaperType(parsedState.paperType);
+            if (parsedState.year) setSelectedYear(parsedState.year);
+            if (parsedState.season) setSelectedSeason(parsedState.season);
+          }
+        }
+      } catch {
+        localStorage.removeItem(LAST_SESSION_FILTERS_KEY);
+      }
+    }
+
+    setTimeout(() => {
+      mountedRef.current = true;
+      setIsMounted(true);
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    const stateToSave = {
+      curriculum: selectedCurriculum,
+      subject: selectedSubject,
+      topic: selectedTopic,
+      paperType: selectedPaperType,
+      year: selectedYear,
+      season: selectedSeason,
+    };
+
+    if (mountedRef.current) {
+      localStorage.setItem(
+        LAST_SESSION_FILTERS_KEY,
+        JSON.stringify(stateToSave)
+      );
+    }
+  }, [
+    selectedCurriculum,
+    selectedSubject,
+    selectedTopic,
+    selectedPaperType,
+    selectedYear,
+    selectedSeason,
+  ]);
+
+  useEffect(() => {
+    if (!mountedRef.current) return;
     setSelectedSubject("");
     setSelectedTopic([]);
     setSelectedYear([]);
     setSelectedPaperType([]);
     setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
   }, [selectedCurriculum]);
 
   useEffect(() => {
+    if (!mountedRef.current) return;
     setSelectedTopic([]);
     setSelectedYear([]);
     setSelectedPaperType([]);
     setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
   }, [selectedSubject]);
 
   const search = () => {
@@ -526,6 +587,7 @@ const TopicalPage = () => {
                 resetEverything={resetEverything}
                 setIsSidebarOpen={setIsSidebarOpen}
                 search={search}
+                isMounted={isMounted}
               />
             </div>
           </SidebarContent>
@@ -533,10 +595,16 @@ const TopicalPage = () => {
         </Sidebar>
         <SidebarInset className="!relative p-4 pl-2 gap-6 flex items-center md:items-start justify-start flex-col">
           <div className="absolute left-2">
-            <SidebarTrigger className="flex fixed items-center gap-2 border cursor-pointer">
+            <Button
+              className="flex fixed items-center gap-2 border cursor-pointer"
+              variant="outline"
+              onClick={() => {
+                setIsSidebarOpen(!isSidebarOpen);
+              }}
+            >
               Filters
               <SlidersHorizontal />
-            </SidebarTrigger>
+            </Button>
           </div>
           <h1 className="text-2xl font-bold w-full  text-center ">
             Topical questions

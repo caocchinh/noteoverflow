@@ -89,6 +89,7 @@ export default function EnhancedMultiSelect({
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const isMobileDevice = useIsMobile();
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

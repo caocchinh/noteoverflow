@@ -65,7 +65,7 @@ function SidebarProvider({
   onOpenChange: setOpenProp,
   openMobile: openMobileProp,
   onOpenChangeMobile: setOpenMobileProp,
-  defaultOpenMobile = false,
+  defaultOpenMobile = true,
   className,
   style,
   children,
