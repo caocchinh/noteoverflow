@@ -192,7 +192,7 @@ export default function Home() {
           >
             <div className="relative z-10 flex flex-col items-center justify-center gap-4">
               <h1 className="font-bold text-3xl text-[var(--home-page-text)] md:text-5xl ">
-                CAIE Exams Preparation.
+                CIE Exams Preparation.
               </h1>
               <RotatingText
                 animate={{ y: 0 }}

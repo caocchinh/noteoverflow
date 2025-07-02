@@ -155,8 +155,7 @@ export const TOPICAL_DATA: TopicalData[] = [
   },
 ];
 
-export const LAST_SESSION_FILTERS_KEY = 'lastSessionFilters';
-export const PERSISTENT_STORAGE_KEY = 'persistentFilters';
+export const FILTERS_CACHE_KEY = 'noteoverflow-filters-cache';
 
 export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   curriculum: false,

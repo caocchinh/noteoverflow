@@ -40,6 +40,23 @@ export interface InvalidInputs {
   season: boolean;
 }
 
+export type FiltersCache = {
+  isSessionCacheEnabled: boolean;
+  lastSessionCurriculum: string;
+  lastSessionSubject: string;
+  isPersistantCacheEnabled: boolean;
+  filters: {
+    [key: string]: {
+      [subject: string]: {
+        topic: string[];
+        paperType: string[];
+        year: string[];
+        season: string[];
+      };
+    };
+  };
+};
+
 export interface MultiSelectContextProps {
   value: string[];
   // biome-ignore lint/suspicious/noExplicitAny: <Don't care>

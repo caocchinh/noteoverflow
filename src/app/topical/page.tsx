@@ -47,15 +47,23 @@ import {
 } from '@/components/ui/sidebar';
 import { Switch } from '@/components/ui/switch';
 import type { ValidCurriculum } from '@/constants/types';
+
 import Dock from '@/features/topical/components/Dock';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
 import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
 import {
+  FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
-  LAST_SESSION_FILTERS_KEY,
   TOPICAL_DATA,
 } from '@/features/topical/constants/constants';
-import type { InvalidInputs } from '@/features/topical/constants/types';
+import type {
+  FiltersCache,
+  InvalidInputs,
+} from '@/features/topical/constants/types';
+import {
+  valdidateCachedData,
+  validateCurriculum,
+} from '@/features/topical/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -141,6 +149,63 @@ const ButtonUltility = ({
   );
 };
 
+const CacheAccordion = ({
+  isSessionCacheEnabled,
+  setIsSessionCacheEnabled,
+  isPersistantCacheEnabled,
+  setIsPersistantCacheEnabled,
+}: {
+  isSessionCacheEnabled: boolean;
+  setIsSessionCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  isPersistantCacheEnabled: boolean;
+  setIsPersistantCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  return (
+    <Accordion
+      className="w-full"
+      collapsible
+      defaultValue="session-cache"
+      type="single"
+    >
+      <AccordionItem value="session-cache">
+        <AccordionTrigger>Session cache</AccordionTrigger>
+        <AccordionContent className="flex flex-col gap-4 text-balance">
+          <p>
+            Automatically restores your filters from the last session on page
+            refresh. Not synced across devices. Is enabled by default.
+          </p>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="session-cache">Enable session cache</Label>
+            <Switch
+              checked={isSessionCacheEnabled}
+              id="session-cache"
+              onCheckedChange={setIsSessionCacheEnabled}
+            />
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="persistant-cache">
+        <AccordionTrigger>Persistant cache</AccordionTrigger>
+        <AccordionContent className="flex flex-col gap-4 text-balance">
+          <p>
+            Permanently saves your filter preferences for each subject. When you
+            re-select a subject, previously used filters are automatically
+            applied. Not synced across devices. Is enabled by default.
+          </p>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="persistant-cache">Enable persistant cache</Label>
+            <Switch
+              checked={isPersistantCacheEnabled}
+              id="persistant-cache"
+              onCheckedChange={setIsPersistantCacheEnabled}
+            />
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+};
+
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     ValidCurriculum | ''
@@ -185,9 +250,42 @@ const TopicalPage = () => {
   const paperTypeRef = useRef<HTMLDivElement | null>(null);
   const seasonRef = useRef<HTMLDivElement | null>(null);
   const mountedRef = useRef(false);
+  const [isSessionCacheEnabled, setIsSessionCacheEnabled] = useState(true);
+  const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
+    useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   const resetEverything = () => {
+    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+    let stateToSave: FiltersCache = existingStateJSON
+      ? JSON.parse(existingStateJSON)
+      : { filters: {} };
+
+    stateToSave = {
+      ...stateToSave,
+      isSessionCacheEnabled,
+      isPersistantCacheEnabled,
+    };
+
+    stateToSave.lastSessionCurriculum = '';
+    stateToSave.lastSessionCurriculum = '';
+    if (selectedCurriculum && selectedSubject) {
+      stateToSave.filters = {
+        ...stateToSave.filters,
+        [selectedCurriculum]: {
+          ...stateToSave.filters?.[selectedCurriculum],
+          [selectedSubject]: {
+            topic: [],
+            paperType: [],
+            year: [],
+            season: [],
+          },
+        },
+      };
+    }
+
+    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+
     setSelectedCurriculum('');
     setSelectedSubject('');
     setSelectedTopic([]);
@@ -197,6 +295,7 @@ const TopicalPage = () => {
     if (!isMobileDevice) {
       setSidebarKey((prev) => prev + 1);
     }
+
     setIsResetConfirmationOpen(false);
   };
 
@@ -308,30 +407,53 @@ const TopicalPage = () => {
   }, [selectedSeason]);
 
   useEffect(() => {
-    const savedState = localStorage.getItem(LAST_SESSION_FILTERS_KEY);
+    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
     if (savedState) {
       try {
-        const parsedState = JSON.parse(savedState);
-        if (parsedState.curriculum) {
-          setSelectedCurriculum(parsedState.curriculum);
-          if (parsedState.subject) {
-            setSelectedSubject(parsedState.subject);
-            if (parsedState.topic) {
-              setSelectedTopic(parsedState.topic);
-            }
-            if (parsedState.paperType) {
-              setSelectedPaperType(parsedState.paperType);
-            }
-            if (parsedState.year) {
-              setSelectedYear(parsedState.year);
-            }
-            if (parsedState.season) {
-              setSelectedSeason(parsedState.season);
-            }
+        const parsedState: FiltersCache = JSON.parse(savedState);
+        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled);
+        setIsPersistantCacheEnabled(parsedState.isPersistantCacheEnabled);
+        if (
+          parsedState.isSessionCacheEnabled &&
+          parsedState.lastSessionCurriculum &&
+          validateCurriculum(parsedState.lastSessionCurriculum)
+        ) {
+          setSelectedCurriculum(
+            parsedState.lastSessionCurriculum as ValidCurriculum
+          );
+          if (
+            parsedState.lastSessionSubject &&
+            valdidateCachedData({
+              cachedCurriculum: parsedState.lastSessionCurriculum,
+              cachedData: parsedState,
+              cachedSubject: parsedState.lastSessionSubject,
+            })
+          ) {
+            setSelectedSubject(parsedState.lastSessionSubject);
+            setSelectedTopic(
+              parsedState.filters[parsedState.lastSessionCurriculum][
+                parsedState.lastSessionSubject
+              ].topic
+            );
+            setSelectedPaperType(
+              parsedState.filters[parsedState.lastSessionCurriculum][
+                parsedState.lastSessionSubject
+              ].paperType
+            );
+            setSelectedYear(
+              parsedState.filters[parsedState.lastSessionCurriculum][
+                parsedState.lastSessionSubject
+              ].year
+            );
+            setSelectedSeason(
+              parsedState.filters[parsedState.lastSessionCurriculum][
+                parsedState.lastSessionSubject
+              ].season
+            );
           }
         }
       } catch {
-        localStorage.removeItem(LAST_SESSION_FILTERS_KEY);
+        localStorage.removeItem(FILTERS_CACHE_KEY);
       }
     }
 
@@ -341,22 +463,94 @@ const TopicalPage = () => {
     }, 0);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
   useEffect(() => {
-    const stateToSave = {
-      curriculum: selectedCurriculum,
-      subject: selectedSubject,
-      topic: selectedTopic,
-      paperType: selectedPaperType,
-      year: selectedYear,
-      season: selectedSeason,
+    if (!mountedRef.current) {
+      return;
+    }
+    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+    if (savedState) {
+      try {
+        const parsedState: FiltersCache = JSON.parse(savedState);
+
+        if (
+          parsedState.isPersistantCacheEnabled &&
+          valdidateCachedData({
+            cachedData: parsedState,
+            cachedCurriculum: selectedCurriculum,
+            cachedSubject: selectedSubject,
+          })
+        ) {
+          setSelectedSubject(selectedSubject);
+          setSelectedTopic(
+            parsedState.filters[selectedCurriculum][selectedSubject].topic
+          );
+          setSelectedPaperType(
+            parsedState.filters[selectedCurriculum][selectedSubject].paperType
+          );
+          setSelectedYear(
+            parsedState.filters[selectedCurriculum][selectedSubject].year
+          );
+          setSelectedSeason(
+            parsedState.filters[selectedCurriculum][selectedSubject].season
+          );
+        } else {
+          setSelectedTopic([]);
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+        }
+      } catch {
+        setSelectedTopic([]);
+        setSelectedYear([]);
+        setSelectedPaperType([]);
+        setSelectedSeason([]);
+      }
+    } else {
+      setSelectedTopic([]);
+      setSelectedYear([]);
+      setSelectedPaperType([]);
+      setSelectedSeason([]);
+    }
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+    let stateToSave: FiltersCache = existingStateJSON
+      ? JSON.parse(existingStateJSON)
+      : { filters: {} };
+
+    stateToSave = {
+      ...stateToSave,
+      isSessionCacheEnabled,
+      isPersistantCacheEnabled,
     };
 
-    if (mountedRef.current) {
-      localStorage.setItem(
-        LAST_SESSION_FILTERS_KEY,
-        JSON.stringify(stateToSave)
-      );
+    if (selectedCurriculum && selectedSubject) {
+      stateToSave.filters = {
+        ...stateToSave.filters,
+        [selectedCurriculum]: {
+          ...stateToSave.filters?.[selectedCurriculum],
+          [selectedSubject]: {
+            topic: selectedTopic,
+            paperType: selectedPaperType,
+            year: selectedYear,
+            season: selectedSeason,
+          },
+        },
+      };
     }
+    if (selectedCurriculum && isSessionCacheEnabled) {
+      stateToSave.lastSessionCurriculum = selectedCurriculum;
+    }
+    if (selectedSubject && isSessionCacheEnabled) {
+      stateToSave.lastSessionSubject = selectedSubject;
+    }
+    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
   }, [
     selectedCurriculum,
     selectedSubject,
@@ -364,6 +558,8 @@ const TopicalPage = () => {
     selectedPaperType,
     selectedYear,
     selectedSeason,
+    isSessionCacheEnabled,
+    isPersistantCacheEnabled,
   ]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
@@ -378,18 +574,6 @@ const TopicalPage = () => {
     setSelectedSeason([]);
     setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
   }, [selectedCurriculum]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
-  useEffect(() => {
-    if (!mountedRef.current) {
-      return;
-    }
-    setSelectedTopic([]);
-    setSelectedYear([]);
-    setSelectedPaperType([]);
-    setSelectedSeason([]);
-    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-  }, [selectedSubject]);
 
   const search = () => {
     if (isValidInputs()) {
@@ -649,66 +833,19 @@ const TopicalPage = () => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="z-[100005]">
-                <Accordion
-                  className="w-full"
-                  collapsible
-                  defaultValue="item-1"
-                  type="single"
-                >
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger>Product Information</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        Our flagship product combines cutting-edge technology
-                        with sleek design. Built with premium materials, it
-                        offers unparalleled performance and reliability.
-                      </p>
-                      <p>
-                        Key features include advanced processing capabilities,
-                        and an intuitive user interface designed for both
-                        beginners and experts.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger>Shipping Details</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We offer worldwide shipping through trusted courier
-                        partners. Standard delivery takes 3-5 business days,
-                        while express shipping ensures delivery within 1-2
-                        business days.
-                      </p>
-                      <p>
-                        All orders are carefully packaged and fully insured.
-                        Track your shipment in real-time through our dedicated
-                        tracking portal.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                    <AccordionTrigger>Return Policy</AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>
-                        We stand behind our products with a comprehensive 30-day
-                        return policy. If you&apos;re not completely satisfied,
-                        simply return the item in its original condition.
-                      </p>
-                      <p>
-                        Our hassle-free return process includes free return
-                        shipping and full refunds processed within 48 hours of
-                        receiving the returned item.
-                      </p>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <CacheAccordion
+                  isPersistantCacheEnabled={isPersistantCacheEnabled}
+                  isSessionCacheEnabled={isSessionCacheEnabled}
+                  setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
+                  setIsSessionCacheEnabled={setIsSessionCacheEnabled}
+                />
               </PopoverContent>
             </Popover>
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="!relative flex flex-col items-center justify-start gap-6 p-4 pl-2 md:items-start">
-          <div className="absolute left-2">
+          <div className="absolute left-3">
             <Button
               className="fixed flex cursor-pointer items-center gap-2 border"
               onClick={() => {
@@ -760,7 +897,7 @@ const TopicalPage = () => {
             alt="default subject"
             className="self-center rounded-md"
             height={350}
-            src="/assets/funny2.png"
+            src="/assets/funny5.png"
             width={350}
           />
         </SidebarInset>
