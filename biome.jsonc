@@ -17,8 +17,7 @@
         "useKeyWithClickEvents": "off"
       },
       "suspicious": {
-        "noArrayIndexKey": "off",
-        "useAwait": "off"
+        "noArrayIndexKey": "off"
       },
       "style": {
         "useFilenamingConvention": "off"

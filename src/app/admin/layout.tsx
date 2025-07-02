@@ -41,7 +41,7 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;

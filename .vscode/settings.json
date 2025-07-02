@@ -25,5 +25,8 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "workbench.activityBar.orientation": "vertical",
+  "editor.wordWrap": "on",
+  "editor.mouseWheelZoom": true
 }
