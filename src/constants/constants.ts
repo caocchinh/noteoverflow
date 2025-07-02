@@ -1,33 +1,5 @@
 export const LOGO_MAIN_COLOR = '#0084ff';
 
-export const LANGUAGE_LIST = [
-  {
-    value: 'vi',
-    label: 'Tiếng Việt',
-    image_src: '/assets/vn.svg',
-  },
-  {
-    value: 'en',
-    label: 'English',
-    image_src: '/assets/gb.svg',
-  },
-  {
-    value: 'fr',
-    label: 'Français',
-    image_src: '/assets/fr.svg',
-  },
-  {
-    value: 'cn',
-    label: '繁體中文',
-    image_src: '/assets/cn.svg',
-  },
-  {
-    value: 'kr',
-    label: '한국인',
-    image_src: '/assets/ks-flag.webp',
-  },
-];
-
 export const AVATARS = [
   { src: '/assets/avatar/blue.webp', name: 'Blue', color: LOGO_MAIN_COLOR },
   { src: '/assets/avatar/coffee.webp', name: 'Coffee', color: '#8c6239' },
@@ -43,6 +15,8 @@ export const INTERNAL_SERVER_ERROR = 'Internal Server Error';
 export const UNAUTHORIZED = 'Unauthorized';
 export const FAILED_TO_UPLOAD_IMAGE = 'Failed to upload image';
 export const BAD_REQUEST = 'Bad Request';
+export const MAX_FILE_SIZE = 3 * 1024 * 1024;
 export const FILE_SIZE_EXCEEDS_LIMIT = 'File size exceeds the 3MiB limit';
 export const ONLY_WEBP_FILES_ALLOWED = 'Only .webp files are allowed';
-export const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
+export const TOPICAL_QUESTION_ROUTE = '/topical';
