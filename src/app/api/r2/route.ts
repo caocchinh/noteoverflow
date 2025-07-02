@@ -1,16 +1,16 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { getDbAsync } from "@/drizzle/db";
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
 import {
   BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  UNAUTHORIZED,
   FILE_SIZE_EXCEEDS_LIMIT,
+  INTERNAL_SERVER_ERROR,
   MAX_FILE_SIZE,
   ONLY_WEBP_FILES_ALLOWED,
-} from "@/constants/constants";
+  UNAUTHORIZED,
+} from '@/constants/constants';
+import { getDbAsync } from '@/drizzle/db';
+import { auth } from '@/lib/auth/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,15 +22,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
     }
 
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
+    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 403 });
     }
     const { env } = getCloudflareContext();
     const formData = await request.formData();
-    const key = formData.get("key") as string;
-    const body = formData.get("body") as File;
-    const options = JSON.parse(formData.get("options") as string);
-    if (!key || !body) {
+    const key = formData.get('key') as string;
+    const body = formData.get('body') as File;
+    const options = JSON.parse(formData.get('options') as string);
+    if (!(key && body)) {
       return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (body.type != "image/webp") {
+    if (body.type !== 'image/webp') {
       return NextResponse.json(
         { error: ONLY_WEBP_FILES_ALLOWED },
         { status: 400 }
@@ -71,12 +71,12 @@ export async function DELETE(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
     }
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
+    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 403 });
     }
     const { env } = getCloudflareContext();
     const formData = await request.formData();
-    const key = formData.get("key") as string;
+    const key = formData.get('key') as string;
     await env.MAIN_BUCKET.delete(key);
     NextResponse.json(
       {

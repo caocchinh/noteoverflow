@@ -1,13 +1,14 @@
-import { useId } from "react";
+/** biome-ignore-all lint/a11y/noSvgWithoutTitle: <Dont'care> */
+import { useId } from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   width?: number;
   height?: number;
   x?: number;
   y?: number;
-  squares?: Array<[x: number, y: number]>;
+  squares?: [x: number, y: number][];
   strokeDasharray?: string;
   className?: string;
   [key: string]: unknown;
@@ -18,7 +19,7 @@ export function GridPattern({
   height = 40,
   x = -1,
   y = -1,
-  strokeDasharray = "0",
+  strokeDasharray = '0',
   squares,
   className,
   ...props
@@ -29,17 +30,17 @@ export function GridPattern({
     <svg
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/50",
+        'pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/50',
         className
       )}
       {...props}
     >
       <defs>
         <pattern
-          id={id}
-          width={width}
           height={height}
+          id={id}
           patternUnits="userSpaceOnUse"
+          width={width}
           x={x}
           y={y}
         >
@@ -50,15 +51,15 @@ export function GridPattern({
           />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
+      <rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
       {squares && (
-        <svg x={x} y={y} className="overflow-visible">
-          {squares.map(([x, y]) => (
+        <svg className="overflow-visible" x={x} y={y}>
+          {squares.map(([_x, _y]) => (
             <rect
-              strokeWidth="0"
-              key={`${x}-${y}`}
-              width={width - 1}
               height={height - 1}
+              key={`${_x}-${_y}`}
+              strokeWidth="0"
+              width={width - 1}
               x={x * width + 1}
               y={y * height + 1}
             />

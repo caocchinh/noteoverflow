@@ -1,39 +1,39 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "../ui/button";
-import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlertTriangle,
+  ImageIcon,
   LayoutDashboard,
   Loader2,
   LogOut,
-  SquareUserRound,
-  AlertTriangle,
   RefreshCcw,
-  ImageIcon,
   ShieldUser,
-} from "lucide-react";
-import { authClient } from "@/lib/auth/auth-client";
-import { useState } from "react";
-import { Skeleton } from "../ui/skeleton";
+  SquareUserRound,
+} from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { authClient } from '@/lib/auth/auth-client';
+import GlareHover from '../GlazeHover';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
   DropdownMenuSubContent,
-  DropdownMenuItem,
-} from "../ui/dropdown-menu";
-import GlareHover from "../GlazeHover";
-import AvatarChange from "./AvatarChange";
-import { motion, AnimatePresence } from "motion/react";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Skeleton } from '../ui/skeleton';
+import AvatarChange from './AvatarChange';
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,7 +44,7 @@ const User = () => {
   const isMobile = useIsMobile({ breakpoint: 515 });
 
   const { data, isPending, error } = useQuery({
-    queryKey: ["user"],
+    queryKey: ['user'],
     queryFn: async () => {
       return await authClient.getSession();
     },
@@ -53,12 +53,12 @@ const User = () => {
   const signOutMutation = useMutation({
     mutationFn: () => authClient.signOut(),
     onSuccess: () => {
-      queryClient.setQueryData(["user"], null);
+      queryClient.setQueryData(['user'], null);
       setIsMenuOpen(false);
-      router.push("/authentication");
+      router.push('/authentication');
     },
     onError: () => {
-      toast.error("Error signing out, please try again.");
+      toast.error('Error signing out, please try again.');
     },
   });
 
@@ -68,10 +68,10 @@ const User = () => {
 
   if (error) {
     return (
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            className="rounded-lg hover:opacity-90 bg-red-600 hover:bg-red-600 text-white cursor-pointer"
+            className="cursor-pointer rounded-lg bg-red-600 text-white hover:bg-red-600 hover:opacity-90"
             title="Error fetching data, please refresh"
           >
             <AlertTriangle />
@@ -79,17 +79,17 @@ const User = () => {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="relative z-[100001] px-0 flex flex-col text-foreground bg-background">
+        <DropdownMenuContent className="relative z-[100001] flex flex-col bg-background px-0 text-foreground">
           <DropdownMenuItem asChild>
             <Button
-              variant="ghost"
-              className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
+              className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
               onClick={() => {
                 setIsMenuOpen(false);
-                if (typeof window !== "undefined") {
+                if (typeof window !== 'undefined') {
                   window.location.reload();
                 }
               }}
+              variant="ghost"
             >
               Refresh
               <RefreshCcw />
@@ -101,22 +101,22 @@ const User = () => {
   }
 
   if (isPending) {
-    return <Skeleton className="h-8 w-8 rounded-full !bg-navbar-skelenton" />;
+    return <Skeleton className="!bg-navbar-skelenton h-8 w-8 rounded-full" />;
   }
-  if (!data || !data.data) {
+  if (!data?.data) {
     return (
       <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
           transition={{
             duration: 0.3,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         >
           <Button
-            className="rounded-lg hover:opacity-90 bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)]"
             asChild
+            className="rounded-lg bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)] hover:opacity-90"
             title="Sign in to access all features"
           >
             <Link href="/authentication">
@@ -131,43 +131,43 @@ const User = () => {
   return (
     <>
       <AvatarChange
+        currentAvatar={data.data.user.image || '/assets/avatar/blue.webp'}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        currentAvatar={data.data.user.image || "/assets/avatar/blue.webp"}
         userId={data.data.user.id}
       />
 
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
         <DropdownMenuTrigger>
           <AnimatePresence mode="wait">
             <motion.div
-              key={data.data.user.image}
-              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              key={data.data.user.image}
               transition={{
                 duration: 0.3,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
             >
               <Avatar>
                 <GlareHover
+                  className="h-max w-max rounded-full"
+                  glareAngle={-30}
                   glareColor="#ffffff"
                   glareOpacity={0.3}
-                  glareAngle={-30}
                   glareSize={300}
-                  transitionDuration={800}
                   playOnce={false}
-                  className="w-max h-max rounded-full"
                   title="Account Settings"
+                  transitionDuration={800}
                 >
                   <AvatarImage
-                    src={data.data.user.image || "/assets/avatar/blue.webp"}
-                    className="w-[32px] h-[32px]"
+                    className="h-[32px] w-[32px]"
+                    src={data.data.user.image || '/assets/avatar/blue.webp'}
                   />
-                  <AvatarFallback className="w-[32px] h-[32px]">
-                    {data.data.user.name.split(" ")[0].charAt(0) +
-                      data.data.user.name.split(" ")[1].charAt(0)}
+                  <AvatarFallback className="h-[32px] w-[32px]">
+                    {data.data.user.name.split(' ')[0].charAt(0) +
+                      data.data.user.name.split(' ')[1].charAt(0)}
                   </AvatarFallback>
                 </GlareHover>
               </Avatar>
@@ -176,51 +176,51 @@ const User = () => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="relative z-[100001] w-[200px] px-1 flex flex-col text-foreground bg-background border-white/50"
           align="end"
+          className="relative z-[100001] flex w-[200px] flex-col border-white/50 bg-background px-1 text-foreground"
         >
           <DropdownMenuSub
-            open={isSubMenuOpen}
-            onOpenChange={setIsSubMenuOpen}
             defaultOpen={false}
+            onOpenChange={setIsSubMenuOpen}
+            open={isSubMenuOpen}
           >
             <Button
-              variant="ghost"
-              className="flex items-center !p-0 justify-start w-full h-full  cursor-pointer"
+              className="!p-0 flex h-full w-full cursor-pointer items-center justify-start"
               onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
+              variant="ghost"
             >
               <DropdownMenuSubTrigger
+                className="pointer-events-none flex w-full items-center justify-start gap-2 px-4 py-2"
                 title="Preferences"
-                className="w-full flex px-4 py-2  items-center gap-2 justify-start pointer-events-none"
               >
                 <Avatar>
                   <AvatarImage
-                    src={data.data?.user.image || "/assets/avatar/blue.webp"}
-                    className="w-[32px] h-[32px]"
+                    className="h-[32px] w-[32px]"
+                    src={data.data?.user.image || '/assets/avatar/blue.webp'}
                   />
-                  <AvatarFallback className="w-[32px] h-[32px]">
-                    {data.data.user.name.split(" ")[0].charAt(0) +
-                      data.data.user.name.split(" ")[1].charAt(0)}
+                  <AvatarFallback className="h-[32px] w-[32px]">
+                    {data.data.user.name.split(' ')[0].charAt(0) +
+                      data.data.user.name.split(' ')[1].charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <p className="text-sm font-medium whitespace-pre-line w-max max-w-[120px]">
+                <p className="w-max max-w-[120px] whitespace-pre-line font-medium text-sm">
                   {data.data.user.name}
                 </p>
               </DropdownMenuSubTrigger>
             </Button>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
+                alignOffset={isMobile ? 50 : undefined}
                 className="z-[100002] border-white/60"
                 sideOffset={isMobile ? -95 : undefined}
-                alignOffset={isMobile ? 50 : undefined}
               >
                 <DropdownMenuItem asChild title="Change avatar">
                   <Button
-                    variant="ghost"
+                    className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 hover:bg-muted"
                     onClick={() => {
                       setIsDialogOpen(true);
                     }}
-                    className="w-full px-4 py-2 hover:bg-muted flex items-center gap-2 cursor-pointer"
+                    variant="ghost"
                   >
                     Change avatar
                     <ImageIcon />
@@ -230,38 +230,38 @@ const User = () => {
             </DropdownMenuPortal>
           </DropdownMenuSub>
 
-          {(data.data.user.role === "admin" ||
-            data.data.user.role === "owner") && (
+          {(data.data.user.role === 'admin' ||
+            data.data.user.role === 'owner') && (
             <>
               <DropdownMenuSeparator className="!mx-0 !my-0" />
               <DropdownMenuItem asChild title="Admin Panel">
                 <Button
-                  variant="ghost"
-                  className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
                   asChild
+                  className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
+                  variant="ghost"
                 >
                   <Link
+                    className="flex w-full items-center justify-start gap-2"
                     href="/admin"
-                    className="flex items-center gap-2 w-full justify-start"
                   >
                     <ShieldUser />
                     Admin Panel
                   </Link>
                 </Button>
-              </DropdownMenuItem>{" "}
+              </DropdownMenuItem>{' '}
             </>
           )}
 
           <DropdownMenuSeparator className="!mx-0 !my-0" />
           <DropdownMenuItem asChild title="Dashboard">
             <Button
-              variant="ghost"
-              className="w-full px-4 py-2 hover:bg-muted cursor-pointer"
               asChild
+              className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
+              variant="ghost"
             >
               <Link
+                className="flex w-full items-center justify-start gap-2"
                 href="/dashboard"
-                className="flex items-center gap-2 w-full justify-start"
               >
                 <LayoutDashboard />
                 Dashboard
@@ -272,17 +272,17 @@ const User = () => {
 
           <DropdownMenuItem
             asChild
-            title="Sign out"
             onSelect={(e) => {
               e.preventDefault();
               setIsMenuOpen(true);
             }}
+            title="Sign out"
           >
             <Button
-              variant="ghost"
-              size="icon"
+              className="flex w-full cursor-pointer items-center justify-start px-4 py-2 hover:bg-muted"
               onClick={handleSignOut}
-              className="w-full flex justify-start items-center  px-4 py-2 hover:bg-muted cursor-pointer"
+              size="icon"
+              variant="ghost"
             >
               {signOutMutation.isPending ? (
                 <>

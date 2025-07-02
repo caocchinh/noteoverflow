@@ -1,9 +1,9 @@
-import { defineCloudflareConfig } from "@opennextjs/cloudflare";
-import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
-import doQueue from "@opennextjs/cloudflare/overrides/queue/do-queue";
-import queueCache from "@opennextjs/cloudflare/overrides/queue/queue-cache";
-import doShardedTagCache from "@opennextjs/cloudflare/overrides/tag-cache/do-sharded-tag-cache";
-import { purgeCache } from "@opennextjs/cloudflare/overrides/cache-purge/index";
+import { defineCloudflareConfig } from '@opennextjs/cloudflare';
+import { purgeCache } from '@opennextjs/cloudflare/overrides/cache-purge/index';
+import kvIncrementalCache from '@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache';
+import doQueue from '@opennextjs/cloudflare/overrides/queue/do-queue';
+import queueCache from '@opennextjs/cloudflare/overrides/queue/queue-cache';
+import doShardedTagCache from '@opennextjs/cloudflare/overrides/tag-cache/do-sharded-tag-cache';
 
 export default defineCloudflareConfig({
   // KV Incremental Cache
@@ -28,5 +28,5 @@ export default defineCloudflareConfig({
   enableCacheInterception: false,
 
   // Add cache purge for automatic clearing on revalidation
-  cachePurge: purgeCache({ type: "direct" }),
+  cachePurge: purgeCache({ type: 'direct' }),
 });

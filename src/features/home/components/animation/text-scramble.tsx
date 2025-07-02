@@ -1,8 +1,7 @@
-"use client";
-import { type JSX, useEffect, useState } from "react";
-import { motion, MotionProps } from "motion/react";
-import FuzzyText from "../../../../components/animation/FuzzyText";
-import { AnimatePresence } from "motion/react";
+'use client';
+import { AnimatePresence, type MotionProps, motion } from 'motion/react';
+import { type JSX, useEffect, useState } from 'react';
+import FuzzyText from '../../../../components/animation/FuzzyText';
 
 export type TextScrambleProps = {
   children: string;
@@ -17,7 +16,7 @@ export type TextScrambleProps = {
 } & MotionProps;
 
 const defaultChars =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 export function TextScramble({
   children,
@@ -25,7 +24,7 @@ export function TextScramble({
   speed = 0.07,
   characterSet = defaultChars,
   className,
-  as: Component = "p",
+  as: Component = 'p',
   delay = 0,
   trigger = true,
   onScrambleComplete,
@@ -34,14 +33,16 @@ export function TextScramble({
   const MotionComponent = motion.create(
     Component as keyof JSX.IntrinsicElements
   );
-  const [displayText, setDisplayText] = useState("");
+  const [displayText, setDisplayText] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [completed, setCompleted] = useState(false);
   const text = children;
 
   const scramble = async () => {
     await new Promise((resolve) => setTimeout(resolve, delay));
-    if (isAnimating) return;
+    if (isAnimating) {
+      return;
+    }
     setIsAnimating(true);
     setCompleted(false);
 
@@ -49,12 +50,12 @@ export function TextScramble({
     let step = 0;
 
     const interval = setInterval(() => {
-      let scrambled = "";
+      let scrambled = '';
       const progress = step / steps;
 
       for (let i = 0; i < text.length; i++) {
-        if (text[i] === " ") {
-          scrambled += " ";
+        if (text[i] === ' ') {
+          scrambled += ' ';
           continue;
         }
 
@@ -79,44 +80,46 @@ export function TextScramble({
     }, speed * 1000);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <Don't care>
   useEffect(() => {
-    if (!trigger) return;
+    if (!trigger) {
+      return;
+    }
 
     scramble();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger]);
 
   return (
     <MotionComponent className={className} {...props}>
       <div className="block lg:hidden">
-        {displayText == text && displayText}
+        {displayText === text && displayText}
       </div>
-      {displayText != text && displayText}
+      {displayText !== text && displayText}
       <AnimatePresence mode="wait">
-        {completed && displayText == text && (
+        {completed && displayText === text && (
           <motion.div
-            key="completed-text"
-            className="hidden lg:block mb-2"
-            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            className="mb-2 hidden lg:block"
+            initial={{ opacity: 0, scale: 0.95 }}
+            key="completed-text"
             transition={{
               duration: 0.7,
               ease: [0.25, 0.1, 0.25, 1],
               opacity: { duration: 0.8 },
               scale: {
                 duration: 0.5,
-                type: "spring",
+                type: 'spring',
                 stiffness: 200,
                 damping: 12,
               },
             }}
           >
             <FuzzyText
+              baseIntensity={0.03}
+              enableHover={true}
               fontSize="100px"
               fontWeight={600}
-              baseIntensity={0.03}
               hoverIntensity={0.17}
-              enableHover={true}
             >
               {displayText}
             </FuzzyText>

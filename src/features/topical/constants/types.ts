@@ -1,4 +1,4 @@
-import { ValidCurriculum, ValidSeason } from "@/constants/types";
+import type { ValidCurriculum, ValidSeason } from '@/constants/types';
 
 export interface TopicalData {
   curriculum: ValidCurriculum;
@@ -24,12 +24,12 @@ export interface MultiSelectorProps {
 }
 
 export type VALID_LABEL =
-  | "Curriculum"
-  | "Subject"
-  | "Topic"
-  | "Year"
-  | "Paper"
-  | "Season";
+  | 'Curriculum'
+  | 'Subject'
+  | 'Topic'
+  | 'Year'
+  | 'Paper'
+  | 'Season';
 
 export interface InvalidInputs {
   curriculum: boolean;
@@ -42,8 +42,8 @@ export interface InvalidInputs {
 
 export interface MultiSelectContextProps {
   value: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValueChange: (value: any, option?: "selectAll" | "removeAll") => void;
+  // biome-ignore lint/suspicious/noExplicitAny: <Don't care>
+  onValueChange: (value: any, option?: 'selectAll' | 'removeAll') => void;
   open: boolean;
   setOpen: (value: boolean) => void;
   inputValue: string;

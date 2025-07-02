@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import AuthPageClient from "./index";
+import type { Metadata } from 'next';
+import AuthPageClient from './index';
 
 export const metadata: Metadata = {
-  title: "Login",
-  description: "Login to NoteOverflow",
+  title: 'Login',
+  description: 'Login to NoteOverflow',
 };
 
 type SearchParams = {

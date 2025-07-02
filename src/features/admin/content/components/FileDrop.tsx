@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { FolderUp, Upload } from "lucide-react";
+import { FolderUp, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const FileDrop = ({
   handleDrop,
@@ -20,17 +20,17 @@ const FileDrop = ({
 
   return (
     <div
-      className="w-[90%] sm:w-max p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center border-primary bg-card transition-all"
-      onDrop={handleDrop}
+      className="flex w-[90%] flex-col items-center justify-center rounded-xl border-2 border-primary border-dashed bg-card p-8 transition-all sm:w-max"
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div className="flex flex-col items-center text-center">
-        <FolderUp className="w-16 h-16 mb-4 text-primary" />
-        <p className="text-lg mb-2 font-medium text-foreground">
+        <FolderUp className="mb-4 h-16 w-16 text-primary" />
+        <p className="mb-2 font-medium text-foreground text-lg">
           Drag & drop your image here
         </p>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="mb-4 text-muted-foreground text-sm">
           Or select using the button below
         </p>
 
@@ -40,10 +40,10 @@ const FileDrop = ({
             Select Image (must be .webp)
           </Button>
           <input
-            type="file"
             accept="image/webp"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleInputChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            type="file"
           />
         </label>
       </div>

@@ -1,9 +1,9 @@
-import "server-only";
-import { cache } from "react";
-import { auth } from "@/lib/auth/auth";
-import { getDbAsync } from "@/drizzle/db";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import 'server-only';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { cache } from 'react';
+import { getDbAsync } from '@/drizzle/db';
+import { auth } from '@/lib/auth/auth';
 
 export const verifySession = cache(async () => {
   const authInstance = await auth(getDbAsync);
@@ -11,7 +11,7 @@ export const verifySession = cache(async () => {
     headers: await headers(),
   });
   if (!session) {
-    redirect("/authentication");
+    redirect('/authentication');
   }
   return session;
 });

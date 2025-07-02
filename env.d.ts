@@ -1,6 +1,8 @@
 // Extra env variables type definitions
+/** biome-ignore-all lint/correctness/noUnusedVariables: <Dont' care> */
+/** biome-ignore-all lint/style/noNamespace: <Don't care> */
 
-declare namespace NodeJS {
+namespace NodeJS {
   interface ProcessEnv {
     BETTER_AUTH_SECRET: string;
     BETTER_AUTH_URL: string;

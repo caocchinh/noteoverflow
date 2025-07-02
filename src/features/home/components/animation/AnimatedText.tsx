@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
-import { FC } from "react";
+import { motion } from 'motion/react';
+import type { FC } from 'react';
 
 interface AnimatedTextProps {
   text: string;
@@ -9,7 +9,7 @@ interface AnimatedTextProps {
 
 const AnimatedText: FC<AnimatedTextProps> = ({
   text,
-  className = "",
+  className = '',
   delay = 0,
 }) => {
   const containerVariants = {
@@ -21,7 +21,7 @@ const AnimatedText: FC<AnimatedTextProps> = ({
         staggerChildren: 0.11,
         delayChildren: 0.9,
         duration: 1.5,
-        delay: delay,
+        delay,
         ease: [0.22, 1, 0.36, 1],
       },
     },
@@ -31,9 +31,9 @@ const AnimatedText: FC<AnimatedTextProps> = ({
     hidden: {
       opacity: 0,
       y: 15,
-      filter: "blur(10px)",
+      filter: 'blur(10px)',
       transition: {
-        type: "spring",
+        type: 'spring',
         damping: 24,
         stiffness: 100,
       },
@@ -41,9 +41,9 @@ const AnimatedText: FC<AnimatedTextProps> = ({
     visible: {
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
+      filter: 'blur(0px)',
       transition: {
-        type: "spring",
+        type: 'spring',
         damping: 24,
         stiffness: 100,
       },
@@ -52,20 +52,20 @@ const AnimatedText: FC<AnimatedTextProps> = ({
 
   return (
     <motion.p
-      className={`overflow-hidden ${className}`}
-      variants={containerVariants}
-      initial="hidden"
       animate="visible"
+      className={`overflow-hidden ${className}`}
+      initial="hidden"
+      variants={containerVariants}
     >
-      {text.split(" ").map((word, index) => (
+      {text.split(' ').map((word, index) => (
         <motion.span
           key={`${word}-${index}`}
-          variants={wordVariants}
           style={{
-            display: "inline-block",
-            marginRight: "0.25em",
-            fontSize: "1.1rem",
+            display: 'inline-block',
+            marginRight: '0.25em',
+            fontSize: '1.1rem',
           }}
+          variants={wordVariants}
         >
           {word}
         </motion.span>

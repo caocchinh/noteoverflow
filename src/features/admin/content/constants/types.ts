@@ -1,12 +1,12 @@
-import { InferSelectModel } from "drizzle-orm";
-import {
+import type { InferSelectModel } from 'drizzle-orm';
+import type {
   curriculum,
   paperType,
-  topic,
   season,
   subject,
+  topic,
   year,
-} from "@/drizzle/schema";
+} from '@/drizzle/schema';
 
 export type CurriculumType = InferSelectModel<typeof curriculum>;
 export type SubjectType = InferSelectModel<typeof subject>;
@@ -25,7 +25,7 @@ export interface EnhancedSelectProps {
   className?: string;
   disabled?: boolean;
   validator?: (value: string) => string | null;
-  inputType?: "text" | "number";
+  inputType?: 'text' | 'number';
 }
 
 export interface EnhancedSelectPlaceholders {
@@ -41,4 +41,4 @@ export interface EnhancedSelectLabels {
   label: string;
 }
 
-export type ValidTabs = "information" | "image-preview" | "refetching";
+export type ValidTabs = 'information' | 'image-preview' | 'refetching';

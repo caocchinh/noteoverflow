@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useId, useState } from "react";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import Particles, { initParticlesEngine } from '@tsparticles/react';
+import { loadSlim } from '@tsparticles/slim';
+import { useEffect, useId, useState } from 'react';
 
 interface SparklesProps {
   className?: string;
@@ -19,7 +19,7 @@ interface SparklesProps {
   mousemove?: boolean;
   hover?: boolean;
   background?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: <Don't care>
   options?: Record<string, any>;
 }
 
@@ -31,13 +31,13 @@ export function Sparkles({
   speed = 1.5,
   minSpeed = null,
   opacity = 1,
-  direction = "",
+  direction = '',
   opacitySpeed = 3,
   minOpacity = null,
-  color = "#ffffff",
+  color = '#ffffff',
   mousemove = false,
   hover = false,
-  background = "transparent",
+  background = 'transparent',
 }: SparklesProps) {
   const [isReady, setIsReady] = useState(false);
 
@@ -66,11 +66,11 @@ export function Sparkles({
       events: {
         onClick: {
           enable: true,
-          mode: "push" as const,
+          mode: 'push' as const,
         },
         onHover: {
           enable: hover,
-          mode: "grab" as const,
+          mode: 'grab' as const,
           parallax: {
             enable: mousemove,
             force: 60,
@@ -97,18 +97,18 @@ export function Sparkles({
       },
       move: {
         enable: true,
-        direction: (direction || "none") as
-          | "none"
-          | "top"
-          | "bottom"
-          | "left"
-          | "right"
-          | "topRight"
-          | "topLeft"
-          | "bottomRight"
-          | "bottomLeft"
-          | "outside"
-          | "inside",
+        direction: (direction || 'none') as
+          | 'none'
+          | 'top'
+          | 'bottom'
+          | 'left'
+          | 'right'
+          | 'topRight'
+          | 'topLeft'
+          | 'bottomRight'
+          | 'bottomLeft'
+          | 'outside'
+          | 'inside',
         speed: {
           min: minSpeed || speed / 130,
           max: speed,
@@ -129,7 +129,7 @@ export function Sparkles({
         },
         enable: false,
         maxSpeed: 50,
-        mode: "bounce" as const,
+        mode: 'bounce' as const,
         overlap: {
           enable: true,
           retries: 0,
@@ -160,7 +160,7 @@ export function Sparkles({
   };
   return (
     isReady && (
-      <Particles id={id} options={defaultOptions} className={className} />
+      <Particles className={className} id={id} options={defaultOptions} />
     )
   );
 }

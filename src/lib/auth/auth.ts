@@ -1,30 +1,29 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { captcha } from "better-auth/plugins";
-import { type User } from "better-auth";
-import { AVATARS } from "@/constants/constants";
-import * as schema from "@/drizzle/schema";
-import { admin } from "better-auth/plugins";
+import { betterAuth, type User } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { admin, captcha } from 'better-auth/plugins';
+import { AVATARS } from '@/constants/constants';
+// biome-ignore lint/performance/noNamespaceImport: <Intended behavior>
+import * as schema from '@/drizzle/schema';
 import {
-  ac,
   AdminRole,
+  ac,
   OwnerRole,
-  UserRole,
   ROLE_ADMIN,
   ROLE_OWNER,
   ROLE_USER,
-} from "./permission";
+  UserRole,
+} from './permission';
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: <Indended behavior>
 export const auth = async (database: any) =>
   betterAuth({
     database: drizzleAdapter(await database(), {
-      provider: "sqlite",
-      schema: schema,
+      provider: 'sqlite',
+      schema,
     }),
-    appName: "NoteOverflow",
+    appName: 'NoteOverflow',
     baseURL: process.env.BETTER_AUTH_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: [process.env.BETTER_AUTH_URL],
@@ -39,10 +38,10 @@ export const auth = async (database: any) =>
         },
         defaultRole: ROLE_USER,
 
-        bannedUserMessage: "You are banned from the platform.",
+        bannedUserMessage: 'You are banned from the platform.',
       }),
       captcha({
-        provider: "cloudflare-turnstile",
+        provider: 'cloudflare-turnstile',
         secretKey: process.env.TURNSTILE_SECRET_KEY,
         endpoints: [`${process.env.BETTER_AUTH_URL}/authentication`],
       }),
@@ -63,12 +62,12 @@ export const auth = async (database: any) =>
     },
     onAPIError: {
       throw: true,
-      errorURL: "/authentication",
+      errorURL: '/authentication',
     },
 
     socialProviders: {
       google: {
-        prompt: "select_account",
+        prompt: 'select_account',
         clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
         clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
       },
@@ -79,7 +78,7 @@ export const auth = async (database: any) =>
       reddit: {
         clientId: process.env.REDDIT_CLIENT_ID,
         clientSecret: process.env.REDDIT_CLIENT_SECRET,
-        scope: ["identity"],
+        scope: ['identity'],
       },
 
       microsoft: {

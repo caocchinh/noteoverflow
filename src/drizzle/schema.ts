@@ -1,100 +1,100 @@
+import { relations } from 'drizzle-orm';
 import {
-  sqliteTable,
-  text,
+  foreignKey,
   integer,
   primaryKey,
-  foreignKey,
-} from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
+  sqliteTable,
+  text,
+} from 'drizzle-orm/sqlite-core';
 
-export const user = sqliteTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" })
+export const user = sqliteTable('user', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  emailVerified: integer('email_verified', { mode: 'boolean' })
     .$defaultFn(() => false)
     .notNull(),
-  image: text("image"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  image: text('image'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: text("role").notNull().default("user"),
-  banned: integer("banned", { mode: "boolean" })
+  role: text('role').notNull().default('user'),
+  banned: integer('banned', { mode: 'boolean' })
     .$defaultFn(() => false)
     .notNull(),
-  banReason: text("ban_reason"),
-  banExpiresAt: integer("ban_expires_at", { mode: "timestamp" }),
+  banReason: text('ban_reason'),
+  banExpiresAt: integer('ban_expires_at', { mode: 'timestamp' }),
 });
 
-export const session = sqliteTable("session", {
-  id: text("id").primaryKey(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  token: text("token").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id")
+export const session = sqliteTable('session', {
+  id: text('id').primaryKey(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: text('user_id')
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  impersonatedBy: text("impersonated_by").references(() => user.id),
+    .references(() => user.id, { onDelete: 'cascade' }),
+  impersonatedBy: text('impersonated_by').references(() => user.id),
 });
 
-export const account = sqliteTable("account", {
-  id: text("id").primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id")
+export const account = sqliteTable('account', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: text('user_id')
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: integer("access_token_expires_at", {
-    mode: "timestamp",
+    .references(() => user.id, { onDelete: 'cascade' }),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: integer('access_token_expires_at', {
+    mode: 'timestamp',
   }),
-  refreshTokenExpiresAt: integer("refresh_token_expires_at", {
-    mode: "timestamp",
+  refreshTokenExpiresAt: integer('refresh_token_expires_at', {
+    mode: 'timestamp',
   }),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });
 
-export const verification = sqliteTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+export const verification = sqliteTable('verification', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
 });
 
-export const curriculum = sqliteTable("curriculum", {
-  name: text("name").notNull().primaryKey().unique(),
+export const curriculum = sqliteTable('curriculum', {
+  name: text('name').notNull().primaryKey().unique(),
 });
 
-export const subject = sqliteTable("subject", {
-  id: text("subject_id").notNull().primaryKey(),
-  curriculumName: text("curriculum_name")
-    .references(() => curriculum.name, { onDelete: "restrict" })
+export const subject = sqliteTable('subject', {
+  id: text('subject_id').notNull().primaryKey(),
+  curriculumName: text('curriculum_name')
+    .references(() => curriculum.name, { onDelete: 'restrict' })
     .notNull(),
 });
 
 export const season = sqliteTable(
-  "season",
+  'season',
   {
-    season: text("season").notNull(),
-    subjectId: text("subject_id")
-      .references(() => subject.id, { onDelete: "cascade" })
+    season: text('season').notNull(),
+    subjectId: text('subject_id')
+      .references(() => subject.id, { onDelete: 'cascade' })
       .notNull(),
   },
   (table) => {
@@ -103,11 +103,11 @@ export const season = sqliteTable(
 );
 
 export const paperType = sqliteTable(
-  "paper_type",
+  'paper_type',
   {
-    paperType: integer("paper_type").notNull(),
-    subjectId: text("subject_id")
-      .references(() => subject.id, { onDelete: "cascade" })
+    paperType: integer('paper_type').notNull(),
+    subjectId: text('subject_id')
+      .references(() => subject.id, { onDelete: 'cascade' })
       .notNull(),
   },
   (table) => {
@@ -116,22 +116,22 @@ export const paperType = sqliteTable(
 );
 
 export const year = sqliteTable(
-  "year",
+  'year',
   {
-    year: integer("year").notNull(),
-    subjectId: text("subject_id")
-      .references(() => subject.id, { onDelete: "cascade" })
+    year: integer('year').notNull(),
+    subjectId: text('subject_id')
+      .references(() => subject.id, { onDelete: 'cascade' })
       .notNull(),
   },
   (table) => [primaryKey({ columns: [table.subjectId, table.year] })]
 );
 
 export const topic = sqliteTable(
-  "topic",
+  'topic',
   {
-    topic: text("topic").notNull(),
-    subjectId: text("subject_id")
-      .references(() => subject.id, { onDelete: "cascade" })
+    topic: text('topic').notNull(),
+    subjectId: text('subject_id')
+      .references(() => subject.id, { onDelete: 'cascade' })
       .notNull(),
   },
   (table) => {
@@ -140,33 +140,33 @@ export const topic = sqliteTable(
 );
 
 export const question = sqliteTable(
-  "question",
+  'question',
   {
-    id: text("id").primaryKey().unique(),
-    year: integer("year").notNull(),
-    season: text("season").notNull(),
-    paperType: integer("paper_type").notNull(),
-    paperVariant: integer("paper_variant").notNull(),
-    topic: text("topic").notNull(),
-    uploadedBy: text("uploaded_by")
+    id: text('id').primaryKey().unique(),
+    year: integer('year').notNull(),
+    season: text('season').notNull(),
+    paperType: integer('paper_type').notNull(),
+    paperVariant: integer('paper_variant').notNull(),
+    topic: text('topic').notNull(),
+    uploadedBy: text('uploaded_by')
       .references(() => user.id)
       .notNull(),
-    uploadedAt: integer("uploaded_at", { mode: "timestamp" })
+    uploadedAt: integer('uploaded_at', { mode: 'timestamp' })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
-    subjectId: text("subject_id")
+    subjectId: text('subject_id')
       .references(() => subject.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       })
       .notNull(),
 
-    questionNumber: integer("question_number").notNull(),
-    ratingSum: integer("rating_sum").notNull().default(0),
-    ratingCount: integer("rating_count").notNull().default(0),
+    questionNumber: integer('question_number').notNull(),
+    ratingSum: integer('rating_sum').notNull().default(0),
+    ratingCount: integer('rating_count').notNull().default(0),
   },
   (table) => [
     foreignKey({
@@ -189,13 +189,13 @@ export const question = sqliteTable(
 );
 
 export const questionImage = sqliteTable(
-  "question_image",
+  'question_image',
   {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
+    questionId: text('question_id')
+      .references(() => question.id, { onDelete: 'cascade' })
       .notNull(),
-    imageSrc: text("image_src").notNull(),
-    order: integer("order").notNull().default(0),
+    imageSrc: text('image_src').notNull(),
+    order: integer('order').notNull().default(0),
   },
   (table) => {
     return [primaryKey({ columns: [table.questionId, table.order] })];
@@ -203,13 +203,13 @@ export const questionImage = sqliteTable(
 );
 
 export const answer = sqliteTable(
-  "answer",
+  'answer',
   {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
+    questionId: text('question_id')
+      .references(() => question.id, { onDelete: 'cascade' })
       .notNull(),
-    answer: text("answer").notNull(),
-    order: integer("order").notNull().default(0),
+    answer: text('answer').notNull(),
+    order: integer('order').notNull().default(0),
   },
   (table) => {
     return [primaryKey({ columns: [table.questionId, table.order] })];
@@ -217,15 +217,15 @@ export const answer = sqliteTable(
 );
 
 export const questionRating = sqliteTable(
-  "question_rating",
+  'question_rating',
   {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
+    questionId: text('question_id')
+      .references(() => question.id, { onDelete: 'cascade' })
       .notNull(),
-    userId: text("user_id")
-      .references(() => user.id, { onDelete: "cascade" })
+    userId: text('user_id')
+      .references(() => user.id, { onDelete: 'cascade' })
       .notNull(),
-    rating: integer("rating").notNull(),
+    rating: integer('rating').notNull(),
   },
   (table) => {
     return [primaryKey({ columns: [table.questionId, table.userId] })];

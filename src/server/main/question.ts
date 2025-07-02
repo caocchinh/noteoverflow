@@ -1,7 +1,7 @@
-import "server-only";
-import { getDbAsync } from "@/drizzle/db";
-import * as schema from "@/drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import 'server-only';
+import { and, eq } from 'drizzle-orm';
+import { getDbAsync } from '@/drizzle/db';
+import { question, questionImage } from '@/drizzle/schema';
 
 export const isQuestionExists = async (
   questionId: string
@@ -9,8 +9,8 @@ export const isQuestionExists = async (
   const db = await getDbAsync();
   const result = await db
     .select()
-    .from(schema.question)
-    .where(eq(schema.question.id, questionId))
+    .from(question)
+    .where(eq(question.id, questionId))
     .limit(1);
   return result.length > 0;
 };
@@ -37,7 +37,7 @@ export const createQuestion = async ({
   questionNumber: number;
 }) => {
   const db = await getDbAsync();
-  await db.insert(schema.question).values({
+  await db.insert(question).values({
     id: questionId,
     year,
     season,
@@ -76,7 +76,7 @@ export const overwriteQuestion = async ({
   const db = await getDbAsync();
 
   await db
-    .insert(schema.question)
+    .insert(question)
     .values({
       id: questionId,
       year,
@@ -89,7 +89,7 @@ export const overwriteQuestion = async ({
       questionNumber,
     })
     .onConflictDoUpdate({
-      target: schema.question.id,
+      target: question.id,
       set: {
         year,
         season,
@@ -111,11 +111,11 @@ export const isQuestionImageExists = async (
   const db = await getDbAsync();
   const result = await db
     .select()
-    .from(schema.questionImage)
+    .from(questionImage)
     .where(
       and(
-        eq(schema.questionImage.questionId, questionId),
-        eq(schema.questionImage.order, order)
+        eq(questionImage.questionId, questionId),
+        eq(questionImage.order, order)
       )
     )
     .limit(1);
@@ -136,18 +136,17 @@ export const createQuestionImage = async ({
 }> => {
   try {
     const db = await getDbAsync();
-    await db
-      .insert(schema.questionImage)
-      .values({ questionId, imageSrc, order });
+    await db.insert(questionImage).values({ questionId, imageSrc, order });
     return {
       success: true,
       error: undefined,
     };
   } catch (error) {
-    console.error("Error creating question image:", error);
+    // biome-ignore lint/suspicious/noConsole: <Needed for debugging on the server>
+    console.error('Error creating question image:', error);
     return {
       success: false,
-      error: "Internal Server Error",
+      error: 'Internal Server Error',
     };
   }
 };
@@ -164,14 +163,14 @@ export const overwriteQuestionImage = async ({
   const db = await getDbAsync();
 
   await db
-    .insert(schema.questionImage)
+    .insert(questionImage)
     .values({
       questionId,
       imageSrc,
       order,
     })
     .onConflictDoUpdate({
-      target: [schema.questionImage.questionId, schema.questionImage.order],
+      target: [questionImage.questionId, questionImage.order],
       set: {
         imageSrc,
       },

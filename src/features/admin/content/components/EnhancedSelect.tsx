@@ -1,4 +1,6 @@
-import { useState, useRef, useMemo } from "react";
+import { Check, Plus, Search, X } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -7,11 +9,9 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Check, Plus, X, Search } from "lucide-react";
-import { EnhancedSelectProps } from "../constants/types";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import type { EnhancedSelectProps } from '../constants/types';
 
 const EnhancedSelect = ({
   selectedValue,
@@ -20,29 +20,29 @@ const EnhancedSelect = ({
   placeholders,
   labels,
   isLoading,
-  className = "w-full",
+  className = 'w-full',
   disabled = false,
   validator,
-  inputType = "text",
+  inputType = 'text',
 }: EnhancedSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [newItemInputValue, setNewItemInputValue] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [newItemInputValue, setNewItemInputValue] = useState<string>('');
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [newItems, setNewItems] = useState<string[]>([]);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   const handleAddNewItem = (item: string) => {
     setNewItems([...newItems, item]);
-    setNewItemInputValue("");
+    setNewItemInputValue('');
   };
 
   const handleRemoveNewItem = (index: number) => {
     setNewItems(newItems.filter((_, i) => i !== index));
     if (selectedValue === newItems[index]) {
-      onValueChange("");
+      onValueChange('');
     }
   };
 
@@ -67,14 +67,10 @@ const EnhancedSelect = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     e.stopPropagation();
 
-    if (e.key === "Enter" && newItemInputValue) {
+    if (e.key === 'Enter' && newItemInputValue) {
       const validationResult = validateInput(newItemInputValue);
 
-      if (!validationResult) {
-        handleAddNewItem(newItemInputValue);
-        setDuplicateError(null);
-        setValidationError(null);
-      } else {
+      if (validationResult) {
         if (isItemDuplicate(newItemInputValue)) {
           setDuplicateError(validationResult);
           setValidationError(null);
@@ -82,6 +78,10 @@ const EnhancedSelect = ({
           setDuplicateError(null);
           setValidationError(validationResult);
         }
+      } else {
+        handleAddNewItem(newItemInputValue);
+        setDuplicateError(null);
+        setValidationError(null);
       }
     }
   };
@@ -90,11 +90,7 @@ const EnhancedSelect = ({
     if (newItemInputValue) {
       const validationResult = validateInput(newItemInputValue);
 
-      if (!validationResult) {
-        handleAddNewItem(newItemInputValue);
-        setDuplicateError(null);
-        setValidationError(null);
-      } else {
+      if (validationResult) {
         if (isItemDuplicate(newItemInputValue)) {
           setDuplicateError(validationResult);
           setValidationError(null);
@@ -102,6 +98,10 @@ const EnhancedSelect = ({
           setDuplicateError(null);
           setValidationError(validationResult);
         }
+      } else {
+        handleAddNewItem(newItemInputValue);
+        setDuplicateError(null);
+        setValidationError(null);
       }
     }
   };
@@ -122,13 +122,17 @@ const EnhancedSelect = ({
   };
 
   const handleWrapperClick = () => {
-    if (isOpen || disabled || isLoading) return;
+    if (isOpen || disabled || isLoading) {
+      return;
+    }
 
     setIsOpen(true);
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open && isInputFocused) return;
+    if (!open && isInputFocused) {
+      return;
+    }
     setIsOpen(open);
   };
 
@@ -152,54 +156,56 @@ const EnhancedSelect = ({
     return [...new Set([...existingItems, ...newItems])];
   }, [existingItems, newItems]);
 
+  const getPlaceholder = () => {
+    if (isLoading) {
+      return placeholders.loading;
+    }
+    if (disabled) {
+      return placeholders.first;
+    }
+    return placeholders.input;
+  };
+
   return (
-    <div className="w-full" ref={wrapperRef} onClick={handleWrapperClick}>
-      <h5 className="block text-sm font-medium mb-1">{labels.label}</h5>
+    <div className="w-full" onClick={handleWrapperClick} ref={wrapperRef}>
+      <h5 className="mb-1 block font-medium text-sm">{labels.label}</h5>
       <div className="relative">
         <Select
-          open={isOpen}
-          onOpenChange={handleOpenChange}
-          value={selectedValue}
-          onValueChange={onValueChange}
           disabled={disabled || isLoading}
+          onOpenChange={handleOpenChange}
+          onValueChange={onValueChange}
+          open={isOpen}
+          value={selectedValue}
         >
-          <SelectTrigger className={cn(className, "cursor-pointer")}>
-            <SelectValue
-              placeholder={
-                isLoading
-                  ? placeholders.loading
-                  : disabled
-                  ? placeholders.first
-                  : placeholders.input
-              }
-            />
+          <SelectTrigger className={cn(className, 'cursor-pointer')}>
+            <SelectValue placeholder={getPlaceholder()} />
           </SelectTrigger>
           <SelectContent className="!z-[99999999999999999] max-w-[320px] sm:max-w-[620px]">
-            <div className="flex items-center border-b p-2 w-full">
-              <Search className="w-4 h-4 mr-2 text-muted-foreground" />
+            <div className="flex w-full items-center border-b p-2">
+              <Search className="mr-2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                }}
-                className="border-0 outline-none flex-grow px-3 h-8"
-                onFocus={(e) => {
-                  e.stopPropagation();
-                  setIsInputFocused(true);
-                }}
+                className="h-8 flex-grow border-0 px-3 outline-none"
                 onBlur={(e) => {
                   e.stopPropagation();
                   setIsInputFocused(false);
                 }}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
+                onFocus={(e) => {
+                  e.stopPropagation();
+                  setIsInputFocused(true);
+                }}
+                placeholder="Search"
+                value={searchQuery}
               />
               {searchQuery && (
                 <div
                   className="cursor-pointer "
+                  onClick={() => setSearchQuery('')}
                   title="Clear search"
-                  onClick={() => setSearchQuery("")}
                 >
-                  <X className="w-4 h-4 ml-2 cursor-pointer text-muted-foreground hover:text-red-500" />
+                  <X className="ml-2 h-4 w-4 cursor-pointer text-muted-foreground hover:text-red-500" />
                 </div>
               )}
             </div>
@@ -208,14 +214,14 @@ const EnhancedSelect = ({
               <SelectLabel>{labels.existingItems}</SelectLabel>
               {noneDuplicateItems
                 .filter((item) => existingItems.includes(item))
-                .map((item, index) => (
+                .map((item) => (
                   <SelectItem
-                    key={index}
-                    value={item}
                     className={cn(
-                      "hidden ",
-                      filteredExistingItems.includes(item) && "block"
+                      'hidden ',
+                      filteredExistingItems.includes(item) && 'block'
                     )}
+                    key={item}
+                    value={item}
                   >
                     {item}
                   </SelectItem>
@@ -227,11 +233,11 @@ const EnhancedSelect = ({
                 .filter((item) => !existingItems.includes(item))
                 .map((item, index) => (
                   <div
-                    key={index}
                     className={cn(
-                      "p-2 hover:bg-muted group cursor-pointer  wrap-anywhere items-center justify-between rounded-md text-sm w-full",
-                      filteredNewItems.includes(item) ? "flex" : "hidden"
+                      'group wrap-anywhere w-full cursor-pointer items-center justify-between rounded-md p-2 text-sm hover:bg-muted',
+                      filteredNewItems.includes(item) ? 'flex' : 'hidden'
                     )}
+                    key={item}
                     onClick={() => {
                       onValueChange(item);
                       setIsOpen(false);
@@ -240,7 +246,7 @@ const EnhancedSelect = ({
                     {item}
                     <div className="flex items-center gap-2">
                       <X
-                        className="w-4 h-4 group-hover:block hidden"
+                        className="hidden h-4 w-4 group-hover:block"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveNewItem(index);
@@ -248,8 +254,8 @@ const EnhancedSelect = ({
                       />
                       <Check
                         className={cn(
-                          "w-4 h-4 group-hover:hidden",
-                          selectedValue === item ? "block" : "hidden"
+                          'h-4 w-4 group-hover:hidden',
+                          selectedValue === item ? 'block' : 'hidden'
                         )}
                         onClick={() => {
                           onValueChange(item);
@@ -265,53 +271,53 @@ const EnhancedSelect = ({
                 (item) =>
                   newItems.includes(item) && !existingItems.includes(item)
               )
-              .map((item, index) => (
-                <SelectItem key={index} value={item} className="hidden">
+              .map((item) => (
+                <SelectItem className="hidden" key={item} value={item}>
                   {item}
                 </SelectItem>
               ))}
 
-            <div className="flex items-start gap-2 p-2 mt-2 flex-col">
-              <div className="flex items-center gap-2 w-full">
+            <div className="mt-2 flex flex-col items-start gap-2 p-2">
+              <div className="flex w-full items-center gap-2">
                 <Input
-                  placeholder={placeholders.input}
-                  value={newItemInputValue}
-                  type={inputType}
-                  onChange={(e) => handleInputChange(e.target.value)}
                   className={cn(
-                    "flex-grow px-3 py-2 border rounded-md focus:outline-none",
+                    'flex-grow rounded-md border px-3 py-2 focus:outline-none',
                     duplicateError || validationError
-                      ? "border-red-500"
-                      : "border-input"
+                      ? 'border-red-500'
+                      : 'border-input'
                   )}
-                  onKeyDown={handleKeyDown}
-                  onFocus={(e) => {
-                    e.stopPropagation();
-                    setIsInputFocused(true);
-                  }}
                   onBlur={(e) => {
                     e.stopPropagation();
                     setIsInputFocused(false);
                   }}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  onFocus={(e) => {
+                    e.stopPropagation();
+                    setIsInputFocused(true);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={placeholders.input}
+                  type={inputType}
+                  value={newItemInputValue}
                 />
                 <div
                   className="cursor-pointer"
                   title={`Add new ${placeholders.input
                     .toLowerCase()
-                    .replace("Enter new ", "")
-                    .replace(" name", "")}`}
+                    .replace('Enter new ', '')
+                    .replace(' name', '')}`}
                 >
                   <Plus
                     className={cn(
-                      "w-4 h-4",
-                      duplicateError || validationError ? "text-red-500" : ""
+                      'h-4 w-4',
+                      duplicateError || validationError ? 'text-red-500' : ''
                     )}
                     onClick={handleAddItem}
                   />
                 </div>
               </div>
               {(duplicateError || validationError) && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="mt-1 text-red-500 text-xs">
                   {duplicateError || validationError}
                 </p>
               )}

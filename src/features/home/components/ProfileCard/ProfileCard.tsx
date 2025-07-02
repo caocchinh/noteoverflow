@@ -1,15 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
+
+import { Mail } from 'lucide-react';
 import React, {
-  useEffect,
-  useRef,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
-} from "react";
-import styles from "./profile.module.css";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Mail } from "lucide-react";
+} from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import styles from './profile.module.css';
 
 interface ProfileCardProps {
   avatarUrl: string;
@@ -31,10 +32,10 @@ interface ProfileCardProps {
 }
 
 const DEFAULT_BEHIND_GRADIENT =
-  "radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y),hsla(266,100%,90%,var(--card-opacity)) 4%,hsla(266,50%,80%,calc(var(--card-opacity)*0.75)) 10%,hsla(266,25%,70%,calc(var(--card-opacity)*0.5)) 50%,hsla(266,0%,60%,0) 100%),radial-gradient(35% 52% at 55% 20%,#00ffaac4 0%,#073aff00 100%),radial-gradient(100% 100% at 50% 50%,#00c1ffff 1%,#073aff00 76%),conic-gradient(from 124deg at 50% 50%,#c137ffff 0%,#07c6ffff 40%,#07c6ffff 60%,#c137ffff 100%)";
+  'radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y),hsla(266,100%,90%,var(--card-opacity)) 4%,hsla(266,50%,80%,calc(var(--card-opacity)*0.75)) 10%,hsla(266,25%,70%,calc(var(--card-opacity)*0.5)) 50%,hsla(266,0%,60%,0) 100%),radial-gradient(35% 52% at 55% 20%,#00ffaac4 0%,#073aff00 100%),radial-gradient(100% 100% at 50% 50%,#00c1ffff 1%,#073aff00 76%),conic-gradient(from 124deg at 50% 50%,#c137ffff 0%,#07c6ffff 40%,#07c6ffff 60%,#c137ffff 100%)';
 
 const DEFAULT_INNER_GRADIENT =
-  "linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)";
+  'linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)';
 
 const ANIMATION_CONFIG = {
   SMOOTH_DURATION: 600,
@@ -47,7 +48,7 @@ const clamp = (value: number, min = 0, max = 100): number =>
   Math.min(Math.max(value, min), max);
 
 const round = (value: number, precision = 3): number =>
-  parseFloat(value.toFixed(precision));
+  Number.parseFloat(value.toFixed(precision));
 
 const adjust = (
   value: number,
@@ -59,29 +60,31 @@ const adjust = (
   round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
 
 const easeInOutCubic = (x: number): number =>
-  x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
 
 const ProfileCardComponent: React.FC<ProfileCardProps> = ({
-  avatarUrl = "<Placeholder for avatar URL>",
-  iconUrl = "<Placeholder for icon URL>",
-  grainUrl = "<Placeholder for grain URL>",
+  avatarUrl = '<Placeholder for avatar URL>',
+  iconUrl = '<Placeholder for icon URL>',
+  grainUrl = '<Placeholder for grain URL>',
   behindGradient,
   innerGradient,
   showBehindGradient = true,
-  className = "",
+  className = '',
   enableTilt = true,
-  name = "Cao Cự Chính",
-  title = "Founder & Developer",
-  handle = "founder@noteoverflow.com",
+  name = 'Cao Cự Chính',
+  title = 'Founder & Developer',
+  handle = 'founder@noteoverflow.com',
   showUserInfo = true,
   onContactClick,
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [buttonText, setButtonText] = useState("Copy email");
+  const [buttonText, setButtonText] = useState('Copy email');
 
   const animationHandlers = useMemo(() => {
-    if (!enableTilt) return null;
+    if (!enableTilt) {
+      return null;
+    }
 
     let rafId: number | null = null;
 
@@ -101,24 +104,24 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       const centerY = percentY - 50;
 
       const properties = {
-        "--pointer-x": `${percentX}%`,
-        "--pointer-y": `${percentY}%`,
-        "--background-x": `${adjust(percentX, 0, 100, 35, 65)}%`,
-        "--background-y": `${adjust(percentY, 0, 100, 35, 65)}%`,
-        "--pointer-from-center": `${clamp(
+        '--pointer-x': `${percentX}%`,
+        '--pointer-y': `${percentY}%`,
+        '--background-x': `${adjust(percentX, 0, 100, 35, 65)}%`,
+        '--background-y': `${adjust(percentY, 0, 100, 35, 65)}%`,
+        '--pointer-from-center': `${clamp(
           Math.hypot(percentY - 50, percentX - 50) / 50,
           0,
           1
         )}`,
-        "--pointer-from-top": `${percentY / 100}`,
-        "--pointer-from-left": `${percentX / 100}`,
-        "--rotate-x": `${round(-(centerX / 5))}deg`,
-        "--rotate-y": `${round(centerY / 4)}deg`,
+        '--pointer-from-top': `${percentY / 100}`,
+        '--pointer-from-left': `${percentX / 100}`,
+        '--rotate-x': `${round(-(centerX / 5))}deg`,
+        '--rotate-y': `${round(centerY / 4)}deg`,
       };
 
-      Object.entries(properties).forEach(([property, value]) => {
+      for (const [property, value] of Object.entries(properties)) {
         wrap.style.setProperty(property, value);
-      });
+      }
     };
 
     const createSmoothAnimation = (
@@ -167,7 +170,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       const card = cardRef.current;
       const wrap = wrapRef.current;
 
-      if (!card || !wrap || !animationHandlers) return;
+      if (!(card && wrap && animationHandlers)) {
+        return;
+      }
 
       const rect = card.getBoundingClientRect();
       animationHandlers.updateCardTransform(
@@ -184,11 +189,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     const card = cardRef.current;
     const wrap = wrapRef.current;
 
-    if (!card || !wrap || !animationHandlers) return;
+    if (!(card && wrap && animationHandlers)) {
+      return;
+    }
 
     animationHandlers.cancelAnimation();
-    wrap.classList.add("active");
-    card.classList.add("active");
+    wrap.classList.add('active');
+    card.classList.add('active');
   }, [animationHandlers]);
 
   const handlePointerLeave = useCallback(
@@ -196,7 +203,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       const card = cardRef.current;
       const wrap = wrapRef.current;
 
-      if (!card || !wrap || !animationHandlers) return;
+      if (!(card && wrap && animationHandlers)) {
+        return;
+      }
 
       animationHandlers.createSmoothAnimation(
         ANIMATION_CONFIG.SMOOTH_DURATION,
@@ -205,27 +214,31 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         card,
         wrap
       );
-      wrap.classList.remove("active");
-      card.classList.remove("active");
+      wrap.classList.remove('active');
+      card.classList.remove('active');
     },
     [animationHandlers]
   );
 
   useEffect(() => {
-    if (!enableTilt || !animationHandlers) return;
+    if (!(enableTilt && animationHandlers)) {
+      return;
+    }
 
     const card = cardRef.current;
     const wrap = wrapRef.current;
 
-    if (!card || !wrap) return;
+    if (!(card && wrap)) {
+      return;
+    }
 
     const pointerMoveHandler = handlePointerMove as EventListener;
     const pointerEnterHandler = handlePointerEnter as EventListener;
     const pointerLeaveHandler = handlePointerLeave as EventListener;
 
-    card.addEventListener("pointerenter", pointerEnterHandler);
-    card.addEventListener("pointermove", pointerMoveHandler);
-    card.addEventListener("pointerleave", pointerLeaveHandler);
+    card.addEventListener('pointerenter', pointerEnterHandler);
+    card.addEventListener('pointermove', pointerMoveHandler);
+    card.addEventListener('pointerleave', pointerLeaveHandler);
 
     const initialX = wrap.clientWidth - ANIMATION_CONFIG.INITIAL_X_OFFSET;
     const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
@@ -240,9 +253,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     );
 
     return () => {
-      card.removeEventListener("pointerenter", pointerEnterHandler);
-      card.removeEventListener("pointermove", pointerMoveHandler);
-      card.removeEventListener("pointerleave", pointerLeaveHandler);
+      card.removeEventListener('pointerenter', pointerEnterHandler);
+      card.removeEventListener('pointermove', pointerMoveHandler);
+      card.removeEventListener('pointerleave', pointerLeaveHandler);
       animationHandlers.cancelAnimation();
     };
   }, [
@@ -256,25 +269,25 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   const cardStyle = useMemo(
     () =>
       ({
-        "--icon": iconUrl ? `url(${iconUrl})` : "none",
-        "--grain": grainUrl ? `url(${grainUrl})` : "none",
-        "--behind-gradient": showBehindGradient
-          ? behindGradient ?? DEFAULT_BEHIND_GRADIENT
-          : "none",
-        "--inner-gradient": innerGradient ?? DEFAULT_INNER_GRADIENT,
-      } as React.CSSProperties),
+        '--icon': iconUrl ? `url(${iconUrl})` : 'none',
+        '--grain': grainUrl ? `url(${grainUrl})` : 'none',
+        '--behind-gradient': showBehindGradient
+          ? (behindGradient ?? DEFAULT_BEHIND_GRADIENT)
+          : 'none',
+        '--inner-gradient': innerGradient ?? DEFAULT_INNER_GRADIENT,
+      }) as React.CSSProperties,
     [iconUrl, grainUrl, showBehindGradient, behindGradient, innerGradient]
   );
 
   const handleContactClick = useCallback(() => {
     navigator.clipboard.writeText(handle);
 
-    setButtonText("Copied");
+    setButtonText('Copied');
 
-    toast.success("Email copied to clipboard");
+    toast.success('Email copied to clipboard');
 
     setTimeout(() => {
-      setButtonText("Copy email");
+      setButtonText('Copy email');
     }, 2000);
 
     onContactClick?.();
@@ -282,34 +295,35 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
   return (
     <div
-      ref={wrapRef}
       className={`${styles.pcCardWrapper} ${className} w-max`.trim()}
+      ref={wrapRef}
       style={cardStyle}
     >
-      <section ref={cardRef} className={styles.pcCard}>
+      <section className={styles.pcCard} ref={cardRef}>
         <div className={styles.pcInside}>
           <div className={styles.pcShine} />
           <div className={styles.pcGlare} />
           <div className={styles.pcContent}>
+            {/** biome-ignore lint/performance/noImgElement: <Don't care> */}
             <img
+              alt={`${name || 'User'} avatar`}
               className={styles.avatar}
-              src={avatarUrl}
-              alt={`${name || "User"} avatar`}
               loading="lazy"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.style.display = "none";
+                target.style.display = 'none';
               }}
+              src={avatarUrl}
             />
             {showUserInfo && (
               <div className={styles.pcUserInfo}>
                 <div className={styles.pcHandle}>{handle}</div>
                 <Button
+                  aria-label={`Copy email ${name || 'user'}`}
                   className={styles.pcContactBtn}
                   onClick={handleContactClick}
-                  style={{ pointerEvents: "auto" }}
+                  style={{ pointerEvents: 'auto' }}
                   type="button"
-                  aria-label={`Copy email ${name || "user"}`}
                 >
                   {buttonText}
                   <Mail />

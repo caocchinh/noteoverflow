@@ -1,12 +1,12 @@
-"use client";
-import styles from "./VerifyingLoader.module.css";
+'use client';
+import styles from './VerifyingLoader.module.css';
 
 const VerifyingLoader = () => {
   return (
-    <div className="w-[300px] h-max  flex items-center gap-5 justify-center bg-transparent bg-no-repeat bg-cover">
+    <div className="flex h-max w-[300px] items-center justify-center gap-5 bg-cover bg-transparent bg-no-repeat">
       <div
         className={styles.loader}
-        style={{ backgroundImage: `transparent` }}
+        style={{ backgroundImage: 'transparent' }}
       />
     </div>
   );

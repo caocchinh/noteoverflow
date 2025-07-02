@@ -1,16 +1,9 @@
-"use client";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+'use client';
+import { ChevronsUpDown } from 'lucide-react';
+import Image from 'next/image';
+import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Command,
   CommandEmpty,
@@ -18,14 +11,20 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { ChevronsUpDown } from "lucide-react";
-import { useRef, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
+} from '@/components/ui/command';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const EnhancedSelect = ({
   label,
@@ -49,7 +48,6 @@ const EnhancedSelect = ({
     <div className="flex flex-col gap-1">
       <Popover
         modal={isMobileDevice}
-        open={isOpen}
         onOpenChange={(open) => {
           if (open) {
             setIsBlockingInput(true);
@@ -59,99 +57,102 @@ const EnhancedSelect = ({
           }
           setIsOpen(open);
         }}
+        open={isOpen}
       >
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
-            disabled={!!prerequisite}
-            role="combobox"
             aria-expanded={isOpen}
-            className="w-[200px] justify-between h-max whitespace-pre-wrap"
+            className="h-max w-[200px] justify-between whitespace-pre-wrap"
+            disabled={!!prerequisite}
+            variant="outline"
           >
-            {selectedValue
-              ? data?.find((item) => item.code === selectedValue)?.code
-              : !prerequisite
-              ? `Select ${label.toLowerCase()}`
-              : `Select ${prerequisite.toLowerCase()} first`}
+            {(() => {
+              if (selectedValue) {
+                return data?.find((item) => item.code === selectedValue)?.code;
+              }
+              if (prerequisite) {
+                return `Select ${prerequisite.toLowerCase()} first`;
+              }
+              return `Select ${label.toLowerCase()}`;
+            })()}
 
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 z-[1000000000000000] w-[300px] sm:w-max "
-          side={isMobileDevice ? "bottom" : "right"}
           align="center"
+          className="z-[1000000000000000] w-[300px] p-0 sm:w-max "
+          side={isMobileDevice ? 'bottom' : 'right'}
         >
           <Command>
             <CommandInput
-              placeholder={`Search ${label.toLowerCase()}`}
               className="h-9 border-none"
-              wrapperClassName="w-full p-4 border-b py-6"
+              placeholder={`Search ${label.toLowerCase()}`}
               readOnly={isBlockingInput}
               ref={inputRef}
+              wrapperClassName="w-full p-4 border-b py-6"
             />
             <CommandList>
               <ScrollArea className="max-h-[195px]">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
-                  {data &&
-                    data.map((item) => (
-                      <HoverCard key={item.code} openDelay={0} closeDelay={0}>
-                        <HoverCardTrigger asChild>
-                          <CommandItem
-                            key={item.code}
-                            value={item.code}
-                            onSelect={(currentValue) => {
-                              setSelectedValue(currentValue);
-                              setIsOpen(false);
-                            }}
-                            className={cn(
-                              "cursor-pointer",
-                              !isOpen && "pointer-events-none"
-                            )}
-                            onTouchStart={() => {
-                              setIsBlockingInput(true);
-                            }}
-                            onTouchEnd={() => {
-                              setTimeout(() => {
-                                inputRef.current?.focus();
-                                setIsBlockingInput(false);
-                              }, 0);
-                            }}
-                          >
-                            <Checkbox
-                              checked={selectedValue === item.code}
-                              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
-                            />
-                            {item.code}
-                          </CommandItem>
-                        </HoverCardTrigger>
-                        <HoverCardContent
+                  {data?.map((item) => (
+                    <HoverCard closeDelay={0} key={item.code} openDelay={0}>
+                      <HoverCardTrigger asChild>
+                        <CommandItem
                           className={cn(
-                            "w-[100px] cursor-pointer bg-transparent border-none shadow-none relative hidden lg:block z-[999999999999999999999999999999]",
-                            !isOpen && "!hidden"
+                            'cursor-pointer',
+                            !isOpen && 'pointer-events-none'
                           )}
-                          side="right"
-                          sideOffset={-10}
-                          align="start"
-                          avoidCollisions={true}
-                          onClick={() => {
+                          key={item.code}
+                          onSelect={(currentValue) => {
+                            setSelectedValue(currentValue);
                             setIsOpen(false);
-                            setSelectedValue(item.code);
                           }}
+                          onTouchEnd={() => {
+                            setTimeout(() => {
+                              inputRef.current?.focus();
+                              setIsBlockingInput(false);
+                            }, 0);
+                          }}
+                          onTouchStart={() => {
+                            setIsBlockingInput(true);
+                          }}
+                          value={item.code}
                         >
-                          <div className="absolute top-0 left-10 bg-card rounded-md p-2 border">
-                            <Image
-                              src={item.coverImage}
-                              alt={item.code}
-                              width={100}
-                              height={100}
-                              className="rounded-[2px]"
-                            />
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    ))}
+                          <Checkbox
+                            checked={selectedValue === item.code}
+                            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                          />
+                          {item.code}
+                        </CommandItem>
+                      </HoverCardTrigger>
+                      <HoverCardContent
+                        align="start"
+                        avoidCollisions={true}
+                        className={cn(
+                          'relative z-[999999999999999999999999999999] hidden w-[100px] cursor-pointer border-none bg-transparent shadow-none lg:block',
+                          !isOpen && '!hidden'
+                        )}
+                        onClick={() => {
+                          setIsOpen(false);
+                          setSelectedValue(item.code);
+                        }}
+                        side="right"
+                        sideOffset={-10}
+                      >
+                        <div className="absolute top-0 left-10 rounded-md border bg-card p-2">
+                          <Image
+                            alt={item.code}
+                            className="rounded-[2px]"
+                            height={100}
+                            src={item.coverImage}
+                            width={100}
+                          />
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  ))}
                 </CommandGroup>
               </ScrollArea>
             </CommandList>

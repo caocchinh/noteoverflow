@@ -1,26 +1,26 @@
-import type { Metadata } from "next";
-import { Inter, Roboto } from "next/font/google";
-import "./globals.css";
-import NextTopLoader from "nextjs-toploader";
-import { LOGO_MAIN_COLOR } from "@/constants/constants";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/context/ThemeProvider";
-import NavBar from "@/components/NavBar/NavBar";
-import { QueryProvider } from "@/context/QueryProvider";
+import type { Metadata } from 'next';
+import { Inter, Roboto } from 'next/font/google';
+import './globals.css';
+import NextTopLoader from 'nextjs-toploader';
+import NavBar from '@/components/NavBar/NavBar';
+import { Toaster } from '@/components/ui/sonner';
+import { LOGO_MAIN_COLOR } from '@/constants/constants';
+import { QueryProvider } from '@/context/QueryProvider';
+import { ThemeProvider } from '@/context/ThemeProvider';
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+  variable: '--font-inter',
+  subsets: ['latin'],
 });
 
 const roboto = Roboto({
-  variable: "--font-roboto",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  variable: '--font-roboto',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
 });
 
 export const metadata: Metadata = {
-  title: "NoteOverflow",
+  title: 'NoteOverflow',
   description:
     "World's most comprehensive IGCSE, AS & A-level study materials platform",
 };
@@ -35,10 +35,10 @@ export default function RootLayout({
       <head>
         <title>NoteOverflow</title>
         <meta
-          name="description"
           content="World's most comprehensive IGCSE, AS & A-level study materials platform"
+          name="description"
         />
-        <link rel="icon" href="/assets/favicon.ico" />
+        <link href="/assets/favicon.ico" rel="icon" />
       </head>
 
       <body
@@ -48,13 +48,13 @@ export default function RootLayout({
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
-            enableSystem={false}
             disableTransitionOnChange
+            enableSystem={false}
           >
             <NextTopLoader
-              zIndex={99999999}
               color={LOGO_MAIN_COLOR}
               showSpinner={false}
+              zIndex={99_999_999}
             />
             <NavBar />
             {children}

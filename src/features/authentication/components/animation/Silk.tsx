@@ -1,16 +1,15 @@
-"use client";
-import { forwardRef, useMemo, useRef, useLayoutEffect } from "react";
-import { Canvas, useFrame, useThree, RootState } from "@react-three/fiber";
-import { Color, Mesh, ShaderMaterial } from "three";
-import { IUniform } from "three";
+'use client';
+import { Canvas, type RootState, useFrame, useThree } from '@react-three/fiber';
+import { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
+import { Color, type IUniform, type Mesh, type ShaderMaterial } from 'three';
 
 type NormalizedRGB = [number, number, number];
 
 const hexToNormalizedRGB = (hex: string): NormalizedRGB => {
-  const clean = hex.replace("#", "");
-  const r = parseInt(clean.slice(0, 2), 16) / 255;
-  const g = parseInt(clean.slice(2, 4), 16) / 255;
-  const b = parseInt(clean.slice(4, 6), 16) / 255;
+  const clean = hex.replace('#', '');
+  const r = Number.parseInt(clean.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(clean.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(clean.slice(4, 6), 16) / 255;
   return [r, g, b];
 };
 
@@ -89,6 +88,7 @@ interface SilkPlaneProps {
   uniforms: SilkUniforms;
 }
 
+// biome-ignore lint/nursery/noShadow: <Needed for the forwardRef function>
 const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane(
   { uniforms },
   ref
@@ -116,14 +116,14 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane(
     <mesh ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
+        fragmentShader={fragmentShader}
         uniforms={uniforms}
         vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
       />
     </mesh>
   );
 });
-SilkPlane.displayName = "SilkPlane";
+SilkPlane.displayName = 'SilkPlane';
 
 export interface SilkProps {
   speed?: number;
@@ -136,7 +136,7 @@ export interface SilkProps {
 const Silk: React.FC<SilkProps> = ({
   speed = 5,
   scale = 1,
-  color = "#7B7481",
+  color = '#7B7481',
   noiseIntensity = 1.5,
   rotation = 0,
 }) => {

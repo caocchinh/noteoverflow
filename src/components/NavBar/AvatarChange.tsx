@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Loader2, X } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { AVATARS } from '@/constants/constants';
+import type { authClient } from '@/lib/auth/auth-client';
+import { cn } from '@/lib/utils';
+import { updateUserAvatarAction } from '@/server/actions';
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogCancel,
-} from "../ui/alert-dialog";
-import { AVATARS } from "@/constants/constants";
-import Image from "next/image";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Loader2, X } from "lucide-react";
-import { Button } from "../ui/button";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth/auth-client";
-import { toast } from "sonner";
-import { ScrollArea } from "../ui/scroll-area";
-import { updateUserAvatarAction } from "@/server/actions";
+} from '../ui/alert-dialog';
+import { Button } from '../ui/button';
+import { ScrollArea } from '../ui/scroll-area';
 
 // Infer the return type from authClient.getSession()
 type SessionData = Awaited<ReturnType<typeof authClient.getSession>>;
@@ -31,35 +31,37 @@ const AvatarChange = ({
   userId,
 }: {
   isDialogOpen: boolean;
-  setIsDialogOpen: (isDialogOpen: boolean) => void;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   currentAvatar: string;
   userId: string;
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatar);
   const [selectedAvatarColor, setSelectedAvatarColor] = useState<string>(
-    AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ""
+    AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ''
   );
   const queryClient = useQueryClient();
 
   const resetDefault = () => {
     setSelectedAvatar(currentAvatar);
     setSelectedAvatarColor(
-      AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ""
+      AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ''
     );
   };
 
   const updateAvatarMutation = useMutation({
     mutationFn: () => updateUserAvatarAction(userId, selectedAvatar),
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["user"] });
+      await queryClient.cancelQueries({ queryKey: ['user'] });
       // Get the previous data so we can roll back to it if the mutation fails
-      const previousData = queryClient.getQueryData<SessionData>(["user"]);
+      const previousData = queryClient.getQueryData<SessionData>(['user']);
 
       // Optimistically update to the new value
       queryClient.setQueryData<SessionData>(
-        ["user"],
+        ['user'],
         (oldData: SessionData | undefined) => {
-          if (!oldData) return oldData;
+          if (!oldData) {
+            return oldData;
+          }
           return {
             data: {
               ...oldData.data,
@@ -76,16 +78,16 @@ const AvatarChange = ({
     onError: (error, _variables, context: SessionData) => {
       // If the mutation fails, roll back to the previous value
       if (context?.previousData) {
-        queryClient.setQueryData(["user"], context.previousData);
+        queryClient.setQueryData(['user'], context.previousData);
       }
       toast.error(
         `Failed to update avatar: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     },
     onSuccess: () => {
-      toast.success("Avatar updated successfully");
+      toast.success('Avatar updated successfully');
       setIsDialogOpen(false);
     },
   });
@@ -93,68 +95,68 @@ const AvatarChange = ({
   const handleSave = () => {
     if (selectedAvatar === currentAvatar) {
       setIsDialogOpen(false);
-      toast.info("You are already using this avatar");
+      toast.info('You are already using this avatar');
       return;
     }
     updateAvatarMutation.mutate();
   };
 
   return (
-    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <AlertDialogContent className="border-foreground/50 bg-white dark:bg-[#222222]  max-w-[90vw] sm:!max-w-[600px]">
+    <AlertDialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
+      <AlertDialogContent className="sm:!max-w-[600px] max-w-[90vw] border-foreground/50 bg-white dark:bg-[#222222]">
         <Button
-          className="absolute right-0 top-0 p-0 !bg-transparent cursor-pointer"
-          title="Cancel"
+          className="!bg-transparent absolute top-0 right-0 cursor-pointer p-0"
           disabled={updateAvatarMutation.isPending}
           onClick={() => {
             setIsDialogOpen(false);
             resetDefault();
           }}
+          title="Cancel"
         >
-          <X className="text-red-500 hover:text-red-600 !w-[20px] !h-[20px]" />
+          <X className="!w-[20px] !h-[20px] text-red-500 hover:text-red-600" />
         </Button>
-        <AlertDialogHeader className="flex flex-row gap-2 items-center justify-center flex-wrap">
-          <AlertDialogTitle className="text-2xl font-semibold text-center">
+        <AlertDialogHeader className="flex flex-row flex-wrap items-center justify-center gap-2">
+          <AlertDialogTitle className="text-center font-semibold text-2xl">
             Choose your avatar
           </AlertDialogTitle>
 
           <div
-            className="w-5 h-5 rounded-xs"
+            className="h-5 w-5 rounded-xs"
             style={{ backgroundColor: selectedAvatarColor }}
-          ></div>
+          />
           <AlertDialogDescription className="sr-only">
             Select an avatar from the list below.
           </AlertDialogDescription>
         </AlertDialogHeader>
         {updateAvatarMutation.isError && (
-          <p className="text-red-500 text-sm text-center -mt-4">
+          <p className="-mt-4 text-center text-red-500 text-sm">
             Error updating avatar
           </p>
         )}
         <ScrollArea className=" h-[300px]">
-          <div className="flex flex-row flex-wrap gap-4 justify-center">
-            {AVATARS.map((avatar, index) => (
+          <div className="flex flex-row flex-wrap justify-center gap-4">
+            {AVATARS.map((avatar) => (
               <Button
                 className={cn(
-                  "flex bg-background text-foreground hover:bg-background h-max p-0 items-center flex-col justify-center border-2 border-foreground cursor-pointer rounded-md overflow-hidden",
-                  "dark:bg-[#222222] dark:text-foreground ",
-                  selectedAvatar === avatar.src && "border-2 border-red-500",
-                  selectedAvatar != avatar.src && "hover:border-amber-500"
+                  'flex h-max cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border-2 border-foreground bg-background p-0 text-foreground hover:bg-background',
+                  'dark:bg-[#222222] dark:text-foreground ',
+                  selectedAvatar === avatar.src && 'border-2 border-red-500',
+                  selectedAvatar !== avatar.src && 'hover:border-amber-500'
                 )}
-                key={index}
+                key={avatar.src}
                 onClick={() => {
                   setSelectedAvatar(avatar.src);
                   setSelectedAvatarColor(avatar.color);
                 }}
               >
                 <Image
-                  src={avatar.src}
                   alt="avatar"
-                  width={100}
-                  height={100}
                   className="pointer-events-none"
+                  height={100}
+                  src={avatar.src}
+                  width={100}
                 />
-                <p className="text-sm text-center p-1">{avatar.name}</p>
+                <p className="p-1 text-center text-sm">{avatar.name}</p>
               </Button>
             ))}
           </div>
@@ -162,19 +164,19 @@ const AvatarChange = ({
         <AlertDialogFooter>
           <AlertDialogCancel
             className="cursor-pointer"
-            onClick={resetDefault}
             disabled={updateAvatarMutation.isPending}
+            onClick={resetDefault}
           >
             Cancel
           </AlertDialogCancel>
           <Button
             className="cursor-pointer"
-            onClick={handleSave}
             disabled={updateAvatarMutation.isPending}
+            onClick={handleSave}
           >
-            {updateAvatarMutation.isPending ? "Saving" : "Save"}
+            {updateAvatarMutation.isPending ? 'Saving' : 'Save'}
             {updateAvatarMutation.isPending && (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             )}
           </Button>
         </AlertDialogFooter>

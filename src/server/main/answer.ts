@@ -1,21 +1,18 @@
-import "server-only";
-import { getDbAsync } from "@/drizzle/db";
-import * as schema from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import 'server-only';
+import { and, eq } from 'drizzle-orm';
+import { getDbAsync } from '@/drizzle/db';
+import { answer } from '@/drizzle/schema';
 
 export const isAnswerExists = async (
   questionId: string,
-  answer: string
+  answerProp: string
 ): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
-    .from(schema.answer)
+    .from(answer)
     .where(
-      and(
-        eq(schema.answer.questionId, questionId),
-        eq(schema.answer.answer, answer)
-      )
+      and(eq(answer.questionId, questionId), eq(answer.answer, answerProp))
     )
     .limit(1);
   return result.length > 0;
@@ -23,7 +20,7 @@ export const isAnswerExists = async (
 
 export const createAnswer = async ({
   questionId,
-  answer,
+  answer: answerProp,
   answerOrder,
 }: {
   questionId: string;
@@ -35,8 +32,8 @@ export const createAnswer = async ({
 }> => {
   const db = await getDbAsync();
   await db
-    .insert(schema.answer)
-    .values({ questionId, answer, order: answerOrder });
+    .insert(answer)
+    .values({ questionId, answer: answerProp, order: answerOrder });
 
   return {
     success: true,
@@ -46,7 +43,7 @@ export const createAnswer = async ({
 
 export const overwriteAnswer = async ({
   questionId,
-  answer,
+  answer: answerProp,
   answerOrder,
 }: {
   questionId: string;
@@ -56,16 +53,16 @@ export const overwriteAnswer = async ({
   const db = await getDbAsync();
 
   await db
-    .insert(schema.answer)
+    .insert(answer)
     .values({
-      questionId: questionId,
-      answer: answer,
+      questionId,
+      answer: answerProp,
       order: answerOrder,
     })
     .onConflictDoUpdate({
-      target: [schema.answer.questionId, schema.answer.order],
+      target: [answer.questionId, answer.order],
       set: {
-        answer: answer,
+        answer: answerProp,
       },
     });
 };

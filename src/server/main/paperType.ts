@@ -1,40 +1,40 @@
-import "server-only";
-import { getDbAsync } from "@/drizzle/db";
-import * as schema from "@/drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import 'server-only';
+import { and, eq } from 'drizzle-orm';
+import { getDbAsync } from '@/drizzle/db';
+import { paperType } from '@/drizzle/schema';
 
 export const createPaperType = async ({
-  paperType,
+  paperType: paperTypeProp,
   subjectId,
 }: {
   paperType: number;
   subjectId: string;
 }) => {
   const db = await getDbAsync();
-  await db.insert(schema.paperType).values({ paperType, subjectId });
+  await db.insert(paperType).values({ paperType: paperTypeProp, subjectId });
 };
 
 export const getPaperType = async (subjectId: string): Promise<number[]> => {
   const db = await getDbAsync();
   const result = await db
     .select()
-    .from(schema.paperType)
-    .where(eq(schema.paperType.subjectId, subjectId));
+    .from(paperType)
+    .where(eq(paperType.subjectId, subjectId));
   return result.map((item) => item.paperType);
 };
 
 export const isPaperTypeExists = async (
-  paperType: number,
+  paperTypeProp: number,
   subjectId: string
 ): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
-    .from(schema.paperType)
+    .from(paperType)
     .where(
       and(
-        eq(schema.paperType.paperType, paperType),
-        eq(schema.paperType.subjectId, subjectId)
+        eq(paperType.paperType, paperTypeProp),
+        eq(paperType.subjectId, subjectId)
       )
     )
     .limit(1);

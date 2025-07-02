@@ -1,5 +1,5 @@
-import { useEffect, useRef, FC, ReactNode } from "react";
-import { gsap } from "gsap";
+import { gsap } from 'gsap';
+import { type FC, type ReactNode, useEffect, useRef } from 'react';
 
 interface GridMotionProps {
   items?: (string | ReactNode)[];
@@ -8,7 +8,7 @@ interface GridMotionProps {
 
 const GridMotion: FC<GridMotionProps> = ({
   items = [],
-  gradientColor = "black",
+  gradientColor = 'black',
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -50,45 +50,45 @@ const GridMotion: FC<GridMotionProps> = ({
             x: moveAmount,
             duration:
               baseDuration + inertiaFactors[index % inertiaFactors.length],
-            ease: "power3.out",
-            overwrite: "auto",
+            ease: 'power3.out',
+            overwrite: 'auto',
           });
         }
       });
     };
 
     const removeAnimationLoop = gsap.ticker.add(updateMotion);
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener('mousemove', handleMouseMove);
       removeAnimationLoop();
     };
   }, []);
 
   return (
-    <div ref={gridRef} className="h-full w-full overflow-hidden">
+    <div className="h-full w-full overflow-hidden" ref={gridRef}>
       <section
-        className="w-full h-screen overflow-hidden relative flex items-center justify-center"
+        className="relative flex h-screen w-full items-center justify-center overflow-hidden"
         style={{
           background: `radial-gradient(circle, ${gradientColor} 0%, transparent 100%)`,
         }}
       >
-        <div className="gap-4 flex-none relative w-[2000px] h-[1000px] grid grid-rows-4 grid-cols-1 rotate-[-15deg] origin-center z-[2]">
+        <div className="relative z-[2] grid h-[1000px] w-[2000px] flex-none origin-center rotate-[-15deg] grid-cols-1 grid-rows-4 gap-4">
           {Array.from({ length: 4 }, (_, rowIndex) => (
             <div
+              className="grid grid-cols-7 gap-4"
               key={rowIndex}
-              className="grid gap-4 grid-cols-7"
-              style={{ willChange: "transform, filter" }}
               ref={(el) => {
                 rowRefs.current[rowIndex] = el;
               }}
+              style={{ willChange: 'transform, filter' }}
             >
-              {Array.from({ length: 7 }, (_, itemIndex) => {
+              {Array.from({ length: 7 }, (__, itemIndex) => {
                 const content = combinedItems[rowIndex * 7 + itemIndex];
                 return (
-                  <div key={itemIndex} className="relative">
-                    <div className="relative w-full h-full overflow-hidden rounded-[10px] bg-transparent flex items-center justify-center text-white text-[1.5rem]">
+                  <div className="relative" key={itemIndex}>
+                    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[10px] bg-transparent text-[1.5rem] text-white">
                       {content}
                     </div>
                   </div>
@@ -97,7 +97,7 @@ const GridMotion: FC<GridMotionProps> = ({
             </div>
           ))}
         </div>
-        <div className="relative w-full h-full top-0 left-0 pointer-events-none"></div>
+        <div className="pointer-events-none relative top-0 left-0 h-full w-full" />
       </section>
     </div>
   );

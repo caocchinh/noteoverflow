@@ -1,8 +1,8 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { Reorder } from "motion/react";
-import { useState } from "react";
+'use client';
+import { X } from 'lucide-react';
+import { Reorder } from 'motion/react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface ReorderableImageListProps {
   images: File[];
@@ -19,44 +19,44 @@ const ReorderableImageList = ({
 }: ReorderableImageListProps) => {
   const [isDragging, setIsDragging] = useState(false);
   return (
-    <div className="flex flex-col flex-1 gap-3">
+    <div className="flex flex-1 flex-col gap-3">
       <Reorder.Group
         axis="y"
-        className="flex flex-col w-full gap-3"
-        values={images}
+        className="flex w-full flex-col gap-3"
         onReorder={onReorder}
+        values={images}
       >
         {images.map((image, index) => (
           <Reorder.Item
             key={image.name + image.size + image.lastModified}
-            value={image}
-            onDragStart={() => setIsDragging(true)}
             onDragEnd={() => setIsDragging(false)}
+            onDragStart={() => setIsDragging(true)}
+            value={image}
           >
-            <div className="flex flex-row w-full items-center justify-start gap-2">
+            <div className="flex w-full flex-row items-center justify-start gap-2">
               <p
-                className="border-dashed rounded-md border bg-background border-foreground w-10 h-10 flex items-center justify-center cursor-grab"
+                className="flex h-10 w-10 cursor-grab items-center justify-center rounded-md border border-foreground border-dashed bg-background"
                 title="Change order"
               >
                 {index + 1}.
               </p>
               <Button
-                variant="outline"
-                className=" w-[200px] sm:w-[300px] text-sm wrap-anywhere whitespace-break-spaces h-max cursor-pointer dark:hover:bg-black dark:bg-black"
+                className=" wrap-anywhere h-max w-[200px] cursor-pointer whitespace-break-spaces text-sm sm:w-[300px] dark:bg-black dark:hover:bg-black"
                 onClick={() => {
                   if (!isDragging) {
                     onViewImage(URL.createObjectURL(image));
                   }
                 }}
+                variant="outline"
               >
                 {image.name}
               </Button>
               <div
-                onClick={() => onRemoveImage(index)}
                 className="cursor-pointer hover:text-red-500"
+                onClick={() => onRemoveImage(index)}
                 title="Remove image"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </div>
             </div>
           </Reorder.Item>

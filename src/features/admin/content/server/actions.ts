@@ -1,45 +1,40 @@
-"use server";
+'use server';
 
-import { verifySession } from "@/dal/verifySession";
-import { redirect } from "next/navigation";
-import { isCurriculumExists } from "@/server/main/curriculum";
-import { createCurriculum } from "@/server/main/curriculum";
-import { isSubjectExists } from "@/server/main/subject";
-import { createSubject } from "@/server/main/subject";
-import { isYearExists } from "@/server/main/year";
-import { ServerActionResponse, UploadPayload } from "@/constants/types";
-import { createYear } from "@/server/main/year";
-import { isSeasonExists } from "@/server/main/season";
-import { createSeason } from "@/server/main/season";
-import { isPaperTypeExists } from "@/server/main/paperType";
-import { createPaperType } from "@/server/main/paperType";
-import { createTopic, isTopicExists } from "@/server/main/topic";
-import { createQuestion } from "@/server/main/question";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import { redirect } from 'next/navigation';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '@/constants/constants';
+import type { ServerActionResponse, UploadPayload } from '@/constants/types';
+import { verifySession } from '@/dal/verifySession';
+import { isValidQuestionId } from '@/lib/utils';
+import { createCurriculum, isCurriculumExists } from '@/server/main/curriculum';
+import { createPaperType, isPaperTypeExists } from '@/server/main/paperType';
+import { createQuestion } from '@/server/main/question';
+import { createSeason, isSeasonExists } from '@/server/main/season';
+import { createSubject, isSubjectExists } from '@/server/main/subject';
+import { createTopic, isTopicExists } from '@/server/main/topic';
+import { createYear, isYearExists } from '@/server/main/year';
 import {
   validateCurriculum,
-  validateSeason,
-  validateYear,
   validatePaperType,
+  validatePaperVariant,
+  validateQuestionNumber,
+  validateSeason,
   validateSubject,
   validateTopic,
-  validateQuestionNumber,
-  validatePaperVariant,
-} from "../lib/utils";
-import { isValidQuestionId } from "@/lib/utils";
+  validateYear,
+} from '../lib/utils';
 
 export async function uploadAction(
   payload: UploadPayload
 ): Promise<ServerActionResponse<void>> {
   if (
-    typeof payload.curriculumName !== "string" ||
-    typeof payload.subjectId !== "string" ||
-    typeof payload.year !== "number" ||
-    typeof payload.season !== "string" ||
-    typeof payload.paperType !== "number" ||
-    typeof payload.topic !== "string" ||
-    typeof payload.questionNumber !== "number" ||
-    typeof payload.paperVariant !== "number" ||
+    typeof payload.curriculumName !== 'string' ||
+    typeof payload.subjectId !== 'string' ||
+    typeof payload.year !== 'number' ||
+    typeof payload.season !== 'string' ||
+    typeof payload.paperType !== 'number' ||
+    typeof payload.topic !== 'string' ||
+    typeof payload.questionNumber !== 'number' ||
+    typeof payload.paperVariant !== 'number' ||
     !payload.questionId ||
     !payload.questionNumber ||
     !payload.year ||
@@ -65,8 +60,8 @@ export async function uploadAction(
   try {
     const session = await verifySession();
 
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      redirect("/app");
+    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+      redirect('/app');
     }
     // Check and create curriculum if needed
     if (!(await isCurriculumExists(payload.curriculumName))) {
@@ -141,7 +136,8 @@ export async function uploadAction(
       success: true,
     };
   } catch (error) {
-    console.error("Content:: Error creating metadata records:", error);
+    // biome-ignore lint/suspicious/noConsole: <Necessary for debugging on server log>
+    console.error('Content:: Error creating metadata records:', error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,

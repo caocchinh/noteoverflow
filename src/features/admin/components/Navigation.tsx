@@ -1,7 +1,7 @@
-"use client";
-import Link from "next/link";
-import { AnimatedBackground } from "@/components/ui/animated-background";
-import { usePathname } from "next/navigation";
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { AnimatedBackground } from '@/components/ui/animated-background';
 
 const Navigation = ({
   items,
@@ -12,12 +12,12 @@ const Navigation = ({
 }) => {
   const pathname = usePathname();
   return (
-    <div className="flex items-center w-full h-max justify-start gap-4 mt-2 flex-wrap sm:flex-nowrap">
+    <div className="mt-2 flex h-max w-full flex-wrap items-center justify-start gap-4 sm:flex-nowrap">
       <AnimatedBackground
+        className=" h-full w-full border-logo-main border-b-2"
         defaultValue={pathname}
-        className=" border-logo-main border-b-2 w-full h-full"
         transition={{
-          type: "spring",
+          type: 'spring',
           bounce: 0.1,
           duration: 0.3,
         }}
@@ -26,11 +26,11 @@ const Navigation = ({
           .filter((item) => !(item.isOwnerNeeded && !isOwner))
           .map((item) => (
             <Link
-              href={item.path}
-              title={item.label}
+              className="cursor-pointer rounded-none bg-transparent p-2 text-primary shadow-none hover:bg-transparent hover:text-primary"
               data-id={pathname.includes(item.path) ? pathname : item.path}
+              href={item.path}
               key={item.path}
-              className="text-primary rounded-none p-2 bg-transparent shadow-none cursor-pointer hover:bg-transparent hover:text-primary"
+              title={item.label}
             >
               {item.label}
             </Link>

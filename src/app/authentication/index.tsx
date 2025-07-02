@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import Silk from "@/features/authentication/components/animation/Silk";
-import { motion } from "motion/react";
-import Image from "next/image";
-import { authClient } from "@/lib/auth/auth-client";
-import { useState, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { TurnstileOptions } from "@/constants/types";
-import VerifyingLoader from "@/features/authentication/components/VerifyingLoader/VerifyingLoader";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw } from 'lucide-react';
+import { motion } from 'motion/react';
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { LOGO_MAIN_COLOR } from '@/constants/constants';
+import type { TurnstileOptions } from '@/constants/types';
+import Silk from '@/features/authentication/components/animation/Silk';
+import VerifyingLoader from '@/features/authentication/components/VerifyingLoader/VerifyingLoader';
 import {
   FUNNY_VERIFICATION_MESSAGES,
   LOADING_MESSAGES,
-} from "@/features/authentication/constants/constants";
-import { LOGO_MAIN_COLOR } from "@/constants/constants";
+} from '@/features/authentication/constants/constants';
+import { authClient } from '@/lib/auth/auth-client';
+import { cn } from '@/lib/utils';
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -41,57 +41,57 @@ const AuthPageClient = ({
 }) => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingText, setLoadingText] = useState("");
+  const [loadingText, setLoadingText] = useState('');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isInvisibleVerifying, setIsInvisibleVerifying] = useState(true);
   const [isVerificationTimeout, setIsVerificationTimeout] = useState(false);
-  const [verificationMessage, setVerificationMessage] = useState("");
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   useEffect(() => {
-    const script = document.createElement("script");
+    const script = document.createElement('script');
     script.src =
-      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback";
+      'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback';
     script.async = true;
-    script.id = "turnstile-script";
+    script.id = 'turnstile-script';
     document.head.appendChild(script);
 
-    if (typeof window !== "undefined") {
-      window.onloadTurnstileCallback = function () {
+    if (typeof window !== 'undefined') {
+      window.onloadTurnstileCallback = () => {
         // Check if widget already exists in this container
-        const container = document.getElementById("cf-turnstile");
-        if (container && container.hasChildNodes()) {
+        const container = document.getElementById('cf-turnstile');
+        if (container?.hasChildNodes()) {
           return;
         }
 
-        turnstile.render("#cf-turnstile", {
+        turnstile.render('#cf-turnstile', {
           sitekey: turnstileSiteKey,
-          callback: function (token: string) {
+          callback(token: string) {
             setError(null);
             setIsInvisibleVerifying(false);
             setTurnstileToken(token);
           },
-          "expired-callback": function () {
+          'expired-callback'() {
             setIsInvisibleVerifying(false);
-            setError("Widget expired, please try again!");
+            setError('Widget expired, please try again!');
           },
-          "error-callback": function () {
+          'error-callback'() {
             setIsInvisibleVerifying(false);
-            setError("Unable to verify, please try again!");
+            setError('Unable to verify, please try again!');
           },
-          "timeout-callback": function () {
-            setError("Timeout, please try again!");
+          'timeout-callback'() {
+            setError('Timeout, please try again!');
           },
-          "before-interactive-callback": function () {
+          'before-interactive-callback'() {
             setIsInvisibleVerifying(false);
           },
-          "unsupported-callback": function () {
+          'unsupported-callback'() {
             setIsInvisibleVerifying(false);
             setError(
-              "Unsupported browser, please try again in a different browser!"
+              'Unsupported browser, please try again in a different browser!'
             );
           },
-          retry: "never",
+          retry: 'never',
         });
       };
     }
@@ -106,10 +106,10 @@ const AuthPageClient = ({
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsVerificationTimeout(true);
-    }, 15000);
+    }, 15_000);
     return () => {
       clearTimeout(timeout);
-      const scriptElement = document.getElementById("turnstile-script");
+      const scriptElement = document.getElementById('turnstile-script');
       if (scriptElement) {
         document.head.removeChild(scriptElement);
       }
@@ -117,13 +117,13 @@ const AuthPageClient = ({
   }, []);
 
   useEffect(() => {
-    if (Object.keys(searchParams).includes("error")) {
-      if (searchParams.error === "access_denied") {
-        setError("Access denied. Please try again.");
-      } else if (searchParams.error === "banned") {
+    if (Object.keys(searchParams).includes('error')) {
+      if (searchParams.error === 'access_denied') {
+        setError('Access denied. Please try again.');
+      } else if (searchParams.error === 'banned') {
         setError(searchParams.error_description as string);
       } else {
-        setError("Login failed, please try again");
+        setError('Login failed, please try again');
       }
     }
 
@@ -152,13 +152,13 @@ const AuthPageClient = ({
     }
 
     timeoutRef.current = setTimeout(() => {
-      setError("Authentication timed out. Please try again.");
+      setError('Authentication timed out. Please try again.');
       setIsNavigating(false);
-    }, 30000);
+    }, 30_000);
   };
 
   const handleSignIn = async (
-    provider: "google" | "microsoft" | "reddit" | "discord"
+    provider: 'google' | 'microsoft' | 'reddit' | 'discord'
   ) => {
     try {
       setIsNavigating(true);
@@ -166,16 +166,16 @@ const AuthPageClient = ({
       startAuthTimeout();
       const response = await authClient.signIn.social({
         provider,
-        callbackURL: "/app",
+        callbackURL: '/app',
         fetchOptions: {
           headers: {
-            ...(turnstileToken && { "x-captcha-response": turnstileToken }),
+            ...(turnstileToken && { 'x-captcha-response': turnstileToken }),
           },
         },
       });
       if (response.error) {
         setError(
-          response.error.message ?? "Something went wrong, please try again"
+          response.error.message ?? 'Something went wrong, please try again'
         );
       }
       if (timeoutRef.current) {
@@ -185,53 +185,53 @@ const AuthPageClient = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      setError("Something went wrong, please try again");
+      setError('Something went wrong, please try again');
     } finally {
       setIsNavigating(false);
     }
   };
 
   return (
-    <div className="grid min-h-svh md:grid-cols-2 bg-background">
+    <div className="grid min-h-svh bg-background md:grid-cols-2">
       <motion.div
-        className="w-full mt-16 flex items-center justify-center flex-col gap-2"
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="mt-16 flex w-full flex-col items-center justify-center gap-2"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <motion.div
-          className="w-[85%] items-center justify-center flex flex-col gap-6"
+          animate="show"
+          className="flex w-[85%] flex-col items-center justify-center gap-6"
+          initial="hidden"
+          transition={{ staggerChildren: 0.1 }}
           variants={{
             hidden: { opacity: 0 },
             show: { opacity: 1 },
           }}
-          initial="hidden"
-          animate="show"
-          transition={{ staggerChildren: 0.1 }}
         >
-          <div className="flex flex-col w-full">
+          <div className="flex w-full flex-col">
             <motion.div
-              className=" w-full text-center flex-row text-sm flex items-center gap-1 justify-center mb-2 flex-wrap"
+              className=" mb-2 flex w-full flex-row flex-wrap items-center justify-center gap-1 text-center text-sm"
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 show: { opacity: 1, y: 0 },
               }}
             >
-              <h1 className="text-3xl bg-background text-foreground relative z-10 px-2 font-semibold text-center">
-                {isNavigating ? loadingText : "Sign In"}
+              <h1 className="relative z-10 bg-background px-2 text-center font-semibold text-3xl text-foreground">
+                {isNavigating ? loadingText : 'Sign In'}
               </h1>
               <Image
-                src="/assets/logo-bg-colorised-modified-small.webp"
                 alt="logo"
-                width={35}
+                className={cn(isNavigating && 'animate-spin')}
                 height={35}
-                className={cn(isNavigating && "animate-spin")}
+                src="/assets/logo-bg-colorised-modified-small.webp"
+                width={35}
               />
             </motion.div>
 
             {isInvisibleVerifying && (
-              <div className="w-full flex flex-col gap-2 items-center justify-center mt-2">
-                <div className="text-center text-sm text-foreground">
+              <div className="mt-2 flex w-full flex-col items-center justify-center gap-2">
+                <div className="text-center text-foreground text-sm">
                   {verificationMessage}
                 </div>
                 <VerifyingLoader />
@@ -239,34 +239,34 @@ const AuthPageClient = ({
             )}
 
             <div
-              id="cf-turnstile"
-              className="w-full flex items-center justify-center mt-4"
-              data-sitekey={turnstileSiteKey}
+              className="mt-4 flex w-full items-center justify-center"
               data-callback="handleTurnstileCallback"
-            ></div>
+              data-sitekey={turnstileSiteKey}
+              id="cf-turnstile"
+            />
 
             {isVerificationTimeout && isInvisibleVerifying && (
-              <div className="w-full flex flex-col gap-2 items-center justify-center">
+              <div className="flex w-full flex-col items-center justify-center gap-2">
                 <Button
-                  variant="outline"
-                  className="w-max mt-5 cursor-pointer"
+                  className="mt-5 w-max cursor-pointer"
                   onClick={() => window.location.reload()}
+                  variant="outline"
                 >
                   Is this taking too long? Try to refresh the page.
-                  <RefreshCcw className="w-4 h-4" />
+                  <RefreshCcw className="h-4 w-4" />
                 </Button>
               </div>
             )}
 
             {error && (
               <motion.div
+                className="mb-2 flex w-full items-center justify-center"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
-                className="w-full flex items-center justify-center mb-2"
               >
-                <div className="text-red-500 font-medium text-center">
+                <div className="text-center font-medium text-red-500">
                   {error}
                 </div>
               </motion.div>
@@ -275,102 +275,102 @@ const AuthPageClient = ({
 
           {turnstileToken && (
             <motion.div
+              animate="show"
               className="flex flex-col gap-5"
+              initial="hidden"
+              transition={{ staggerChildren: 0.1 }}
               variants={{
                 hidden: { opacity: 0 },
                 show: { opacity: 1 },
               }}
-              initial="hidden"
-              animate="show"
-              transition={{ staggerChildren: 0.1 }}
             >
               <motion.div
+                className="flex w-full items-center justify-center"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
-                className="w-full flex items-center justify-center"
               >
                 <Button
-                  variant="outline"
-                  className="!w-[200px] !h-[40px] border-1 border-[#747775] text-[#1F1F1F] !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer dark:text-[#E3E3E3] dark:border-[#8E918F]"
-                  onClick={() => handleSignIn("google")}
+                  className="!w-[200px] !h-[40px] !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] flex items-center justify-center border-1 border-[#747775] text-[#1F1F1F] hover:cursor-pointer dark:border-[#8E918F] dark:text-[#E3E3E3]"
                   disabled={isNavigating}
+                  onClick={() => handleSignIn('google')}
+                  variant="outline"
                 >
                   <Image
-                    src="/assets/google.svg"
                     alt="Google Logo"
-                    width={20}
                     height={20}
+                    src="/assets/google.svg"
+                    width={20}
                   />
                   Sign in with Google
                 </Button>
               </motion.div>
 
               <motion.div
+                className="flex w-full items-center justify-center"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
-                className="w-full flex items-center justify-center"
               >
                 <Button
-                  variant="outline"
-                  className="!w-[200px] !h-[41px] border-1 border-[#8C8C8C] text-[#5E5E5E] !font-medium !font !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer bg-white dark:bg-[#2F2F2F] dark:border-[#8E918F] dark:text-white"
-                  onClick={() => handleSignIn("microsoft")}
+                  className="!w-[200px] !h-[41px] !font-medium !font !rounded-[4px] !gap-[10px] !px-[12px] flex items-center justify-center border-1 border-[#8C8C8C] bg-white text-[#5E5E5E] hover:cursor-pointer dark:border-[#8E918F] dark:bg-[#2F2F2F] dark:text-white"
                   disabled={isNavigating}
+                  onClick={() => handleSignIn('microsoft')}
+                  variant="outline"
                 >
                   <Image
-                    src="/assets/microsoft.svg"
                     alt="Microsoft Logo"
-                    width={20}
                     height={20}
+                    src="/assets/microsoft.svg"
+                    width={20}
                   />
                   Sign in with Microsoft
                 </Button>
               </motion.div>
 
               <motion.div
+                className="flex w-full items-center justify-center"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
-                className="w-full flex items-center justify-center"
               >
                 <Button
-                  variant="outline"
-                  className="!w-[200px] !h-[40px] border-1 border-[#747775] !text-white !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer !bg-[#ff4500]  dark:border-[#8E918F]"
-                  onClick={() => handleSignIn("reddit")}
+                  className="!w-[200px] !h-[40px] !text-white !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] !bg-[#ff4500] flex items-center justify-center border-1 border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
                   disabled={isNavigating}
+                  onClick={() => handleSignIn('reddit')}
+                  variant="outline"
                 >
                   <Image
-                    src="/assets/reddit.svg"
                     alt="Reddit Logo"
-                    width={20}
                     height={20}
+                    src="/assets/reddit.svg"
+                    width={20}
                   />
                   Sign in with Reddit
                 </Button>
               </motion.div>
 
               <motion.div
+                className="flex w-full items-center justify-center"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
-                className="w-full flex items-center justify-center"
               >
                 <Button
-                  variant="outline"
-                  className="!w-[200px] !h-[40px] border-1 border-[#747775] !text-white !font-medium !font-roboto !rounded-[4px] flex items-center justify-center !gap-[10px] !px-[12px] hover:cursor-pointer !bg-[#5865F2]  dark:border-[#8E918F]"
-                  onClick={() => handleSignIn("discord")}
+                  className="!w-[200px] !h-[40px] !text-white !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] !bg-[#5865F2] flex items-center justify-center border-1 border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
                   disabled={isNavigating}
+                  onClick={() => handleSignIn('discord')}
+                  variant="outline"
                 >
                   <Image
-                    src="/assets/discord.svg"
                     alt="Discord Logo"
-                    width={20}
                     height={20}
+                    src="/assets/discord.svg"
+                    width={20}
                   />
                   Sign in with Discord
                 </Button>
@@ -380,17 +380,17 @@ const AuthPageClient = ({
         </motion.div>
       </motion.div>
       <motion.div
-        className="hidden md:block w-full h-screen"
-        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        className="hidden h-screen w-full md:block"
+        initial={{ opacity: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
         <Silk
-          speed={5}
-          scale={1}
           color={LOGO_MAIN_COLOR}
           noiseIntensity={1.5}
           rotation={0}
+          scale={1}
+          speed={5}
         />
       </motion.div>
     </div>

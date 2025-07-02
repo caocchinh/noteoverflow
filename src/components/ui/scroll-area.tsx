@@ -1,63 +1,68 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import {
+  Corner as ScrollAreaPrimitiveCorner,
+  Root as ScrollAreaPrimitiveRoot,
+  ScrollAreaScrollbar as ScrollAreaPrimitiveScrollAreaScrollbar,
+  ScrollAreaThumb as ScrollAreaPrimitiveScrollAreaThumb,
+  Viewport as ScrollAreaPrimitiveViewport,
+} from '@radix-ui/react-scroll-area';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 function ScrollArea({
   className,
   children,
   viewPortClassName,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
+}: React.ComponentProps<typeof ScrollAreaPrimitiveRoot> & {
   viewPortClassName?: string;
 }) {
   return (
-    <ScrollAreaPrimitive.Root
+    <ScrollAreaPrimitiveRoot
+      className={cn('relative', className)}
       data-slot="scroll-area"
-      className={cn("relative", className)}
       {...props}
     >
-      <ScrollAreaPrimitive.Viewport
-        data-slot="scroll-area-viewport"
+      <ScrollAreaPrimitiveViewport
         className={cn(
-          "focus-visible:ring-ring/50 size-full flex rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1",
+          'flex size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50',
           viewPortClassName
         )}
+        data-slot="scroll-area-viewport"
       >
         {children}
-      </ScrollAreaPrimitive.Viewport>
+      </ScrollAreaPrimitiveViewport>
       <ScrollBar />
-      <ScrollAreaPrimitive.Corner />
-    </ScrollAreaPrimitive.Root>
+      <ScrollAreaPrimitiveCorner />
+    </ScrollAreaPrimitiveRoot>
   );
 }
 
 function ScrollBar({
   className,
-  orientation = "vertical",
+  orientation = 'vertical',
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
+}: React.ComponentProps<typeof ScrollAreaPrimitiveScrollAreaScrollbar>) {
   return (
-    <ScrollAreaPrimitive.ScrollAreaScrollbar
-      data-slot="scroll-area-scrollbar"
-      orientation={orientation}
+    <ScrollAreaPrimitiveScrollAreaScrollbar
       className={cn(
-        "flex touch-none p-px transition-colors select-none",
-        orientation === "vertical" &&
-          "h-full w-2.5 border-l border-l-transparent",
-        orientation === "horizontal" &&
-          "h-2.5 flex-col border-t border-t-transparent",
+        'flex touch-none select-none p-px transition-colors',
+        orientation === 'vertical' &&
+          'h-full w-2.5 border-l border-l-transparent',
+        orientation === 'horizontal' &&
+          'h-2.5 flex-col border-t border-t-transparent',
         className
       )}
+      data-slot="scroll-area-scrollbar"
+      orientation={orientation}
       {...props}
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb
+      <ScrollAreaPrimitiveScrollAreaThumb
+        className="relative flex-1 rounded-full bg-border"
         data-slot="scroll-area-thumb"
-        className="bg-border relative flex-1 rounded-full"
       />
-    </ScrollAreaPrimitive.ScrollAreaScrollbar>
+    </ScrollAreaPrimitiveScrollAreaScrollbar>
   );
 }
 
