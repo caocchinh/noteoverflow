@@ -1,6 +1,14 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BrushCleaning, ScanText, SlidersHorizontal, X } from 'lucide-react';
+import {
+  Bookmark,
+  BrushCleaning,
+  FileClock,
+  LayoutDashboard,
+  ScanText,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -24,6 +32,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import type { ValidCurriculum } from '@/constants/types';
+import Dock from '@/features/topical/components/Dock';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
 import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
 import {
@@ -621,6 +630,39 @@ const TopicalPage = () => {
               <SlidersHorizontal />
             </Button>
           </div>
+          <div className="absolute left-0 flex w-full items-start justify-center">
+            <div className="fixed bottom-3 ">
+              <Dock
+                baseItemSize={30}
+                items={[
+                  {
+                    icon: <LayoutDashboard className="!text-white" size={18} />,
+                    label: 'Dashboard',
+                    onClick: () => {
+                      console.log('Dashboard');
+                    },
+                  },
+                  {
+                    icon: <FileClock className="!text-white" size={18} />,
+                    label: 'Recently viewed',
+                    onClick: () => {
+                      console.log('Recently viewed');
+                    },
+                  },
+                  {
+                    icon: <Bookmark className="!text-white" size={18} />,
+                    label: 'Bookmark',
+                    onClick: () => {
+                      console.log('Bookmark');
+                    },
+                  },
+                ]}
+                magnification={50}
+                panelHeight={30}
+              />
+            </div>
+          </div>
+
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
