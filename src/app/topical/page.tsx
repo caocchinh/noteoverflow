@@ -6,12 +6,19 @@ import {
   FileClock,
   LayoutDashboard,
   ScanText,
+  Settings,
   SlidersHorizontal,
   X,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,6 +30,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +43,9 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarRail,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { Switch } from '@/components/ui/switch';
 import type { ValidCurriculum } from '@/constants/types';
 import Dock from '@/features/topical/components/Dock';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
@@ -395,225 +410,300 @@ const TopicalPage = () => {
         <Sidebar key={sidebarKey} variant="floating">
           <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
           <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <AnimatePresence mode="wait">
-                  {selectedSubject && selectedCurriculum ? (
-                    <motion.div
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      key={selectedSubject}
-                      transition={{
-                        duration: 0.15,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <Image
-                        alt="cover"
-                        className="self-center rounded-[2px]"
-                        height={126}
-                        src={
-                          availableSubjects.find(
-                            (item) => item.code === selectedSubject
-                          )?.coverImage ?? ''
-                        }
-                        width={100}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      key={selectedSubject}
-                      transition={{
-                        duration: 0.15,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <Image
-                        alt="default subject"
-                        className="self-center"
-                        height={100}
-                        src="/assets/pointing.png"
-                        width={100}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <div className="flex flex-col items-start justify-start gap-6">
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={curriculumRef}
-                  >
-                    <h3
-                      className={cn(
-                        'w-max font-medium text-sm',
-                        invalidInputs.curriculum && 'text-destructive'
-                      )}
-                    >
-                      Curriculum
-                    </h3>
-                    <EnhancedSelect
-                      data={TOPICAL_DATA.map((item) => ({
-                        code: item.curriculum,
-                        coverImage: item.coverImage,
-                      }))}
-                      label="Curriculum"
-                      prerequisite=""
-                      selectedValue={selectedCurriculum}
-                      setSelectedValue={(value) => {
-                        setSelectedCurriculum(value as ValidCurriculum);
-                      }}
-                    />
-                    {invalidInputs.curriculum && (
-                      <p className="text-destructive text-sm">
-                        Curriculum is required
-                      </p>
+            <div className="flex w-full flex-col items-center justify-start gap-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <AnimatePresence mode="wait">
+                    {selectedSubject && selectedCurriculum ? (
+                      <motion.div
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        key={selectedSubject}
+                        transition={{
+                          duration: 0.15,
+                          ease: 'easeInOut',
+                        }}
+                      >
+                        <Image
+                          alt="cover"
+                          className="self-center rounded-[2px]"
+                          height={126}
+                          src={
+                            availableSubjects.find(
+                              (item) => item.code === selectedSubject
+                            )?.coverImage ?? ''
+                          }
+                          width={100}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        key={selectedSubject}
+                        transition={{
+                          duration: 0.15,
+                          ease: 'easeInOut',
+                        }}
+                      >
+                        <Image
+                          alt="default subject"
+                          className="self-center"
+                          height={100}
+                          src="/assets/pointing.png"
+                          width={100}
+                        />
+                      </motion.div>
                     )}
-                  </div>
+                  </AnimatePresence>
+                  <div className="flex flex-col items-start justify-start gap-6">
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={curriculumRef}
+                    >
+                      <h3
+                        className={cn(
+                          'w-max font-medium text-sm',
+                          invalidInputs.curriculum && 'text-destructive'
+                        )}
+                      >
+                        Curriculum
+                      </h3>
+                      <EnhancedSelect
+                        data={TOPICAL_DATA.map((item) => ({
+                          code: item.curriculum,
+                          coverImage: item.coverImage,
+                        }))}
+                        label="Curriculum"
+                        prerequisite=""
+                        selectedValue={selectedCurriculum}
+                        setSelectedValue={(value) => {
+                          setSelectedCurriculum(value as ValidCurriculum);
+                        }}
+                      />
+                      {invalidInputs.curriculum && (
+                        <p className="text-destructive text-sm">
+                          Curriculum is required
+                        </p>
+                      )}
+                    </div>
 
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={subjectRef}
-                  >
-                    <h3
-                      className={cn(
-                        'w-max font-medium text-sm',
-                        invalidInputs.subject && 'text-destructive'
-                      )}
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={subjectRef}
                     >
-                      Subject
-                    </h3>
-                    <EnhancedSelect
-                      data={availableSubjects}
-                      label="Subject"
-                      prerequisite={selectedCurriculum ? '' : 'Curriculum'}
-                      selectedValue={selectedSubject}
-                      setSelectedValue={setSelectedSubject}
-                    />
-                    {invalidInputs.subject && (
-                      <p className="text-destructive text-sm">
-                        Subject is required
-                      </p>
-                    )}
+                      <h3
+                        className={cn(
+                          'w-max font-medium text-sm',
+                          invalidInputs.subject && 'text-destructive'
+                        )}
+                      >
+                        Subject
+                      </h3>
+                      <EnhancedSelect
+                        data={availableSubjects}
+                        label="Subject"
+                        prerequisite={selectedCurriculum ? '' : 'Curriculum'}
+                        selectedValue={selectedSubject}
+                        setSelectedValue={setSelectedSubject}
+                      />
+                      {invalidInputs.subject && (
+                        <p className="text-destructive text-sm">
+                          Subject is required
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div
+                  className="flex flex-col items-start justify-start gap-1"
+                  ref={topicRef}
+                >
+                  <h3
+                    className={cn(
+                      'w-max font-medium text-sm',
+                      invalidInputs.topic && 'text-destructive'
+                    )}
+                  >
+                    Topic
+                  </h3>
+                  <EnhancedMultiSelect
+                    data={availableTopics}
+                    label="Topic"
+                    onValuesChange={(values) =>
+                      setSelectedTopic(values as string[])
+                    }
+                    prerequisite="Subject"
+                    values={selectedTopic}
+                  />
+                  {invalidInputs.topic && (
+                    <p className="text-destructive text-sm">
+                      Topic is required
+                    </p>
+                  )}
+                </div>
+                <div
+                  className="flex flex-col items-start justify-start gap-1"
+                  ref={paperTypeRef}
+                >
+                  <h3
+                    className={cn(
+                      'w-max font-medium text-sm',
+                      invalidInputs.paperType && 'text-destructive'
+                    )}
+                  >
+                    Paper
+                  </h3>
+                  <EnhancedMultiSelect
+                    data={availablePaperTypes?.map((item) => item.toString())}
+                    label="Paper"
+                    onValuesChange={(values) =>
+                      setSelectedPaperType(values as string[])
+                    }
+                    prerequisite="Subject"
+                    values={selectedPaperType}
+                  />
+                  {invalidInputs.paperType && (
+                    <p className="text-destructive text-sm">
+                      Paper is required
+                    </p>
+                  )}
+                </div>
+                <div
+                  className="flex flex-col items-start justify-start gap-1"
+                  ref={yearRef}
+                >
+                  <h3
+                    className={cn(
+                      'w-max font-medium text-sm',
+                      invalidInputs.year && 'text-destructive'
+                    )}
+                  >
+                    Year
+                  </h3>
+                  <EnhancedMultiSelect
+                    data={availableYears?.map((item) => item.toString())}
+                    label="Year"
+                    onValuesChange={(values) =>
+                      setSelectedYear(values as string[])
+                    }
+                    prerequisite="Subject"
+                    values={selectedYear}
+                  />
+                  {invalidInputs.year && (
+                    <p className="text-destructive text-sm">Year is required</p>
+                  )}
+                </div>
+                <div
+                  className="flex flex-col items-start justify-start gap-1"
+                  ref={seasonRef}
+                >
+                  <h3
+                    className={cn(
+                      'w-max font-medium text-sm',
+                      invalidInputs.season && 'text-destructive'
+                    )}
+                  >
+                    Season
+                  </h3>
+                  <EnhancedMultiSelect
+                    data={availableSeasons}
+                    label="Season"
+                    onValuesChange={(values) =>
+                      setSelectedSeason(values as string[])
+                    }
+                    prerequisite="Subject"
+                    values={selectedSeason}
+                  />
+                  {invalidInputs.season && (
+                    <p className="text-destructive text-sm">
+                      Season is required
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex w-[300px] flex-col items-center justify-center gap-4">
+                <ButtonUltility
+                  isMounted={isMounted}
+                  isResetConfirmationOpen={isResetConfirmationOpen}
+                  resetEverything={resetEverything}
+                  search={search}
+                  setIsResetConfirmationOpen={setIsResetConfirmationOpen}
+                  setIsSidebarOpen={setIsSidebarOpen}
+                />
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={topicRef}
-              >
-                <h3
-                  className={cn(
-                    'w-max font-medium text-sm',
-                    invalidInputs.topic && 'text-destructive'
-                  )}
+            <SidebarSeparator />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  className="flex w-full cursor-pointer items-center justify-start gap-2"
+                  variant="secondary"
                 >
-                  Topic
-                </h3>
-                <EnhancedMultiSelect
-                  data={availableTopics}
-                  label="Topic"
-                  onValuesChange={(values) =>
-                    setSelectedTopic(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedTopic}
-                />
-                {invalidInputs.topic && (
-                  <p className="text-destructive text-sm">Topic is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={paperTypeRef}
-              >
-                <h3
-                  className={cn(
-                    'w-max font-medium text-sm',
-                    invalidInputs.paperType && 'text-destructive'
-                  )}
+                  <Settings />
+                  Cache settings
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-[100005]">
+                <Accordion
+                  className="w-full"
+                  collapsible
+                  defaultValue="item-1"
+                  type="single"
                 >
-                  Paper
-                </h3>
-                <EnhancedMultiSelect
-                  data={availablePaperTypes?.map((item) => item.toString())}
-                  label="Paper"
-                  onValuesChange={(values) =>
-                    setSelectedPaperType(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedPaperType}
-                />
-                {invalidInputs.paperType && (
-                  <p className="text-destructive text-sm">Paper is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={yearRef}
-              >
-                <h3
-                  className={cn(
-                    'w-max font-medium text-sm',
-                    invalidInputs.year && 'text-destructive'
-                  )}
-                >
-                  Year
-                </h3>
-                <EnhancedMultiSelect
-                  data={availableYears?.map((item) => item.toString())}
-                  label="Year"
-                  onValuesChange={(values) =>
-                    setSelectedYear(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedYear}
-                />
-                {invalidInputs.year && (
-                  <p className="text-destructive text-sm">Year is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={seasonRef}
-              >
-                <h3
-                  className={cn(
-                    'w-max font-medium text-sm',
-                    invalidInputs.season && 'text-destructive'
-                  )}
-                >
-                  Season
-                </h3>
-                <EnhancedMultiSelect
-                  data={availableSeasons}
-                  label="Season"
-                  onValuesChange={(values) =>
-                    setSelectedSeason(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedSeason}
-                />
-                {invalidInputs.season && (
-                  <p className="text-destructive text-sm">Season is required</p>
-                )}
-              </div>
-            </div>
-            <div className="flex w-[300px] flex-col items-center justify-center gap-4">
-              <ButtonUltility
-                isMounted={isMounted}
-                isResetConfirmationOpen={isResetConfirmationOpen}
-                resetEverything={resetEverything}
-                search={search}
-                setIsResetConfirmationOpen={setIsResetConfirmationOpen}
-                setIsSidebarOpen={setIsSidebarOpen}
-              />
-            </div>
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>Product Information</AccordionTrigger>
+                    <AccordionContent className="flex flex-col gap-4 text-balance">
+                      <p>
+                        Our flagship product combines cutting-edge technology
+                        with sleek design. Built with premium materials, it
+                        offers unparalleled performance and reliability.
+                      </p>
+                      <p>
+                        Key features include advanced processing capabilities,
+                        and an intuitive user interface designed for both
+                        beginners and experts.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>Shipping Details</AccordionTrigger>
+                    <AccordionContent className="flex flex-col gap-4 text-balance">
+                      <p>
+                        We offer worldwide shipping through trusted courier
+                        partners. Standard delivery takes 3-5 business days,
+                        while express shipping ensures delivery within 1-2
+                        business days.
+                      </p>
+                      <p>
+                        All orders are carefully packaged and fully insured.
+                        Track your shipment in real-time through our dedicated
+                        tracking portal.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>Return Policy</AccordionTrigger>
+                    <AccordionContent className="flex flex-col gap-4 text-balance">
+                      <p>
+                        We stand behind our products with a comprehensive 30-day
+                        return policy. If you&apos;re not completely satisfied,
+                        simply return the item in its original condition.
+                      </p>
+                      <p>
+                        Our hassle-free return process includes free return
+                        shipping and full refunds processed within 48 hours of
+                        receiving the returned item.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </PopoverContent>
+            </Popover>
           </SidebarContent>
           <SidebarRail />
         </Sidebar>

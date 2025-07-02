@@ -79,7 +79,7 @@ function DockItem({
   return (
     <motion.div
       aria-haspopup="true"
-      className={`relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md ${className}`}
+      className={`relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-logo-main ${className}`}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
       onFocus={() => isHovered.set(1)}
@@ -126,7 +126,7 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
       {isVisible && (
         <motion.div
           animate={{ opacity: 1, y: -10 }}
-          className={`${className} -top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs`}
+          className={`${className} -top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs dark:bg-logo-main`}
           exit={{ opacity: 0, y: 0 }}
           initial={{ opacity: 0, y: 0 }}
           role="tooltip"
