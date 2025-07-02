@@ -631,29 +631,29 @@ const TopicalPage = () => {
             </Button>
           </div>
           <div className="absolute left-0 flex w-full items-start justify-center">
-            <div className="fixed bottom-3 ">
+            <div className="fixed bottom-1">
               <Dock
                 baseItemSize={30}
                 items={[
                   {
                     icon: <LayoutDashboard className="!text-white" size={18} />,
-                    label: 'Dashboard',
+                    label: 'App',
                     onClick: () => {
-                      console.log('Dashboard');
+                      return;
                     },
                   },
                   {
                     icon: <FileClock className="!text-white" size={18} />,
                     label: 'Recently viewed',
                     onClick: () => {
-                      console.log('Recently viewed');
+                      return;
                     },
                   },
                   {
                     icon: <Bookmark className="!text-white" size={18} />,
                     label: 'Bookmark',
                     onClick: () => {
-                      console.log('Bookmark');
+                      return;
                     },
                   },
                 ]}

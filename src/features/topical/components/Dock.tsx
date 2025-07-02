@@ -86,7 +86,6 @@ function DockItem({
       onHoverEnd={() => isHovered.set(0)}
       onHoverStart={() => isHovered.set(1)}
       ref={ref}
-      role="button"
       style={{
         width: size,
         height: size,
@@ -94,7 +93,10 @@ function DockItem({
       tabIndex={0}
     >
       {Children.map(children, (child) =>
-        cloneElement(child as React.ReactElement, { isHovered })
+        cloneElement(
+          child as React.ReactElement<{ isHovered: MotionValue<number> }>,
+          { isHovered }
+        )
       )}
     </motion.div>
   );
@@ -103,13 +105,16 @@ function DockItem({
 type DockLabelProps = {
   className?: string;
   children: React.ReactNode;
+  isHovered?: MotionValue<number>;
 };
 
-function DockLabel({ children, className = '', ...rest }: DockLabelProps) {
-  const { isHovered } = rest as { isHovered: MotionValue<number> };
+function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (!isHovered) {
+      return;
+    }
     const unsubscribe = isHovered.on('change', (latest) => {
       setIsVisible(latest === 1);
     });
@@ -138,6 +143,7 @@ function DockLabel({ children, className = '', ...rest }: DockLabelProps) {
 type DockIconProps = {
   className?: string;
   children: React.ReactNode;
+  isHovered?: MotionValue<number>;
 };
 
 function DockIcon({ children, className = '' }: DockIconProps) {
