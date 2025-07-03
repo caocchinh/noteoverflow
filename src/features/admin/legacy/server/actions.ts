@@ -92,7 +92,6 @@ export const legacyUploadAction = async ({
     validateTopic(topic) ||
     !isValidQuestionId(questionId)
   ) {
-    console.log(imageSrc, 'fuckkkk');
     return {
       success: false,
       error: BAD_REQUEST,

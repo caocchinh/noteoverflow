@@ -1,5 +1,5 @@
 'use server';
-import { and, eq, type InferSelectModel, inArray } from 'drizzle-orm';
+import { and, asc, eq, type InferSelectModel, inArray } from 'drizzle-orm';
 import type { ServerActionResponse } from '@/constants/types';
 import { getDbAsync } from '@/drizzle/db';
 import { question } from '@/drizzle/schema';
@@ -9,6 +9,15 @@ import {
   validateSubject,
 } from '@/features/topical/lib/utils';
 import type { FilterData } from '../constants/types';
+
+// Define a type for our selected question fields
+type SelectedQuestion = Pick<InferSelectModel<typeof question>, 'topic'> & {
+  questionImages: Array<{
+    questionId: string;
+    imageSrc: string;
+    order: number;
+  }>;
+};
 
 export const getTopicalData = async ({
   curriculumId,
@@ -20,7 +29,7 @@ export const getTopicalData = async ({
 }: FilterData & {
   curriculumId: string;
   subjectId: string;
-}): Promise<ServerActionResponse<InferSelectModel<typeof question>[]>> => {
+}): Promise<ServerActionResponse<SelectedQuestion[]>> => {
   try {
     if (!validateCurriculum(curriculumId)) {
       return {
@@ -79,8 +88,14 @@ export const getTopicalData = async ({
 
     const data = await db.query.question.findMany({
       where: and(...conditions),
+      columns: {
+        id: true,
+        topic: true,
+      },
       with: {
-        subject: true,
+        questionImages: {
+          orderBy: (table) => [asc(table.order)],
+        },
       },
     });
 
