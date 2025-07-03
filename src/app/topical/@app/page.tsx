@@ -61,6 +61,7 @@ import {
   validateFilterData,
   validateSubject,
 } from '@/features/topical/lib/utils';
+import { getTopicalData } from '@/features/topical/server/actions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -418,16 +419,15 @@ const TopicalPage = () => {
           setSelectedCurriculum(
             parsedState.lastSessionCurriculum as ValidCurriculum
           );
-          if (
-            parsedState.lastSessionSubject &&
-            validateSubject(
-              parsedState.lastSessionCurriculum,
-              parsedState.lastSessionSubject
-            )
-          ) {
+          const isSubjectValid = validateSubject(
+            parsedState.lastSessionCurriculum,
+            parsedState.lastSessionSubject
+          );
+          if (parsedState.lastSessionSubject && isSubjectValid) {
             setSelectedSubject(parsedState.lastSessionSubject);
           }
           if (
+            isSubjectValid &&
             validateFilterData({
               curriculumn: parsedState.lastSessionCurriculum,
               data: parsedState.filters[parsedState.lastSessionCurriculum][
@@ -480,13 +480,15 @@ const TopicalPage = () => {
       try {
         const parsedState: FiltersCache = JSON.parse(savedState);
         if (parsedState.isPersistantCacheEnabled) {
-          if (
-            selectedSubject &&
-            validateSubject(selectedCurriculum, selectedSubject)
-          ) {
+          const isSubjectValid = validateSubject(
+            selectedCurriculum,
+            selectedSubject
+          );
+          if (selectedSubject && isSubjectValid) {
             setSelectedSubject(selectedSubject);
           }
           if (
+            isSubjectValid &&
             validateFilterData({
               data: parsedState.filters[selectedCurriculum][selectedSubject],
               curriculumn: selectedCurriculum,
@@ -587,9 +589,19 @@ const TopicalPage = () => {
     isPersistantCacheEnabled,
   ]);
 
-  const search = () => {
+  const search = async () => {
+    console.log('validating inputs');
     if (isValidInputs()) {
-      return;
+      console.log('getting data');
+      const response = await getTopicalData({
+        curriculumId: selectedCurriculum,
+        subjectId: selectedSubject,
+        topic: selectedTopic,
+        paperType: selectedPaperType,
+        year: selectedYear,
+        season: selectedSeason,
+      });
+      console.log(response);
     }
   };
 

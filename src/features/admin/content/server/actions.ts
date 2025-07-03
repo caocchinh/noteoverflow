@@ -127,6 +127,7 @@ export async function uploadAction(
       paperType: payload.paperType,
       paperVariant: payload.paperVariant,
       userId: session.user.id,
+      curriculumName: payload.curriculumName,
       subjectId: payload.subjectId,
       topic: payload.topic,
       questionNumber: payload.questionNumber,

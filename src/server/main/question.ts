@@ -25,6 +25,7 @@ export const createQuestion = async ({
   subjectId,
   topic,
   questionNumber,
+  curriculumName,
 }: {
   questionId: string;
   year: number;
@@ -35,6 +36,7 @@ export const createQuestion = async ({
   subjectId: string;
   topic: string;
   questionNumber: number;
+  curriculumName: string;
 }) => {
   const db = await getDbAsync();
   await db.insert(question).values({
@@ -47,6 +49,7 @@ export const createQuestion = async ({
     subjectId,
     topic,
     questionNumber,
+    curriculumName,
   });
 };
 
@@ -59,7 +62,7 @@ export const overwriteQuestion = async ({
   subjectId,
   topic,
   questionNumber,
-
+  curriculumName,
   questionId,
 }: {
   userId: string;
@@ -70,7 +73,7 @@ export const overwriteQuestion = async ({
   subjectId: string;
   topic: string;
   questionNumber: number;
-
+  curriculumName: string;
   questionId: string;
 }) => {
   const db = await getDbAsync();
@@ -87,6 +90,7 @@ export const overwriteQuestion = async ({
       subjectId,
       topic,
       questionNumber,
+      curriculumName,
     })
     .onConflictDoUpdate({
       target: question.id,
@@ -99,6 +103,7 @@ export const overwriteQuestion = async ({
         subjectId,
         topic,
         questionNumber,
+        curriculumName,
         updatedAt: new Date(),
       },
     });

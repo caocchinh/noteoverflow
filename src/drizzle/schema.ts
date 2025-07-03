@@ -82,12 +82,18 @@ export const curriculum = sqliteTable('curriculum', {
   name: text('name').notNull().primaryKey().unique(),
 });
 
-export const subject = sqliteTable('subject', {
-  id: text('subject_id').notNull().primaryKey(),
-  curriculumName: text('curriculum_name')
-    .references(() => curriculum.name, { onDelete: 'restrict' })
-    .notNull(),
-});
+export const subject = sqliteTable(
+  'subject',
+  {
+    id: text('subject_id').notNull(),
+    curriculumName: text('curriculum_name')
+      .references(() => curriculum.name, { onDelete: 'restrict' })
+      .notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.id, table.curriculumName] })];
+  }
+);
 
 export const season = sqliteTable(
   'season',
@@ -162,6 +168,9 @@ export const question = sqliteTable(
         onDelete: 'cascade',
         onUpdate: 'cascade',
       })
+      .notNull(),
+    curriculumName: text('curriculum_name')
+      .references(() => curriculum.name, { onDelete: 'restrict' })
       .notNull(),
 
     questionNumber: integer('question_number').notNull(),

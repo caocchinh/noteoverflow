@@ -49,6 +49,7 @@ export const auth = async (database: any) =>
     databaseHooks: {
       user: {
         create: {
+          // biome-ignore lint/suspicious/useAwait: <Don't care wrong linting>
           before: async (user: User) => {
             return {
               data: {

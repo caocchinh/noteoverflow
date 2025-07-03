@@ -44,7 +44,7 @@ const LegacyUploadPage = () => {
   const [failedUploads, setFailedUploads] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [curriculum, setCurriculum] = useState<ValidCurriculum>('A-LEVEL');
+  const [curriculum, setCurriculum] = useState<ValidCurriculum>('CIE A-LEVEL');
   const [subjectCode, setSubjectCode] = useState<string>('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,11 +299,11 @@ const LegacyUploadPage = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setCurriculum('A-LEVEL')}>
-                  A-LEVEL
+                <DropdownMenuItem onClick={() => setCurriculum('CIE A-LEVEL')}>
+                  CIE A-LEVEL
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurriculum('IGCSE')}>
-                  IGCSE
+                <DropdownMenuItem onClick={() => setCurriculum('CIE IGCSE')}>
+                  CIE IGCSE
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

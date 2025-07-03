@@ -166,6 +166,7 @@ export const legacyUploadAction = async ({
         year,
         season,
         paperType,
+        curriculumName: curriculum,
         paperVariant,
         userId,
         subjectId: subjectFullName,

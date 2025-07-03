@@ -2,12 +2,12 @@ import type { InvalidInputs, TopicalData } from './types';
 
 export const TOPICAL_DATA: TopicalData[] = [
   {
-    curriculum: 'A-LEVEL',
+    curriculum: 'CIE A-LEVEL',
     coverImage: '/assets/cover/alevels-logo1.jpg',
     subject: [
       {
         coverImage: '/assets/cover/Physics (9702).jpg',
-        code: 'Physic (9702)',
+        code: 'Physics (9702)',
         topic: [
           'PHYSICAL QUANTITIES & UNITS',
           'MEASUREMENT TECHNIQUES',

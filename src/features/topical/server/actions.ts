@@ -1,6 +1,13 @@
-import { and, eq, inArray } from 'drizzle-orm';
-import { getDb } from '@/drizzle/db';
-import { question, subject } from '@/drizzle/schema';
+'use server';
+import { and, eq, type InferSelectModel, inArray } from 'drizzle-orm';
+import type { ServerActionResponse } from '@/constants/types';
+import { getDbAsync } from '@/drizzle/db';
+import { question } from '@/drizzle/schema';
+import {
+  validateCurriculum,
+  validateFilterData,
+  validateSubject,
+} from '@/features/topical/lib/utils';
 import type { FilterData } from '../constants/types';
 
 export const getTopicalData = async ({
@@ -10,16 +17,44 @@ export const getTopicalData = async ({
   paperType = [],
   year = [],
   season = [],
-}: Partial<FilterData> & {
+}: FilterData & {
   curriculumId: string;
   subjectId: string;
-}) => {
+}): Promise<ServerActionResponse<InferSelectModel<typeof question>[]>> => {
   try {
-    const db = getDb();
+    if (!validateCurriculum(curriculumId)) {
+      return {
+        success: false,
+        data: [],
+        error: 'Invalid curriculum',
+      };
+    }
+    if (!validateSubject(curriculumId, subjectId)) {
+      return {
+        success: false,
+        data: [],
+        error: 'Invalid subject',
+      };
+    }
+    if (
+      !validateFilterData({
+        data: { topic, paperType, year, season },
+        curriculumn: curriculumId,
+        subject: subjectId,
+      })
+    ) {
+      return {
+        success: false,
+        data: [],
+        error: 'Invalid filters',
+      };
+    }
+
+    const db = await getDbAsync();
 
     // Build query conditions
     const conditions = [
-      eq(subject.curriculumName, curriculumId),
+      eq(question.curriculumName, curriculumId),
       eq(question.subjectId, subjectId),
     ];
 
@@ -44,12 +79,21 @@ export const getTopicalData = async ({
 
     const data = await db.query.question.findMany({
       where: and(...conditions),
+      with: {
+        subject: true,
+      },
     });
 
-    return data;
+    return {
+      success: true,
+      data,
+    };
   } catch (error) {
     // biome-ignore lint/suspicious/noConsole: <Needed for debugging on server>
     console.error(error);
-    return [];
+    return {
+      success: false,
+      data: [],
+    };
   }
 };
