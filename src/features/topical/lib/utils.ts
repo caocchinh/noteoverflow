@@ -1,5 +1,5 @@
 import { TOPICAL_DATA } from '../constants/constants';
-import type { FiltersCache } from '../constants/types';
+import type { FilterData } from '../constants/types';
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
@@ -35,75 +35,78 @@ function isSubset(array1: string[], array2: string[]): boolean {
   return true;
 }
 
+export const validateSubject = (
+  curriculum: string,
+  subject: string
+): boolean => {
+  const currentCurriculumData = TOPICAL_DATA.find(
+    (item) => item.curriculum === curriculum
+  );
+  if (!currentCurriculumData) {
+    return false;
+  }
+  return currentCurriculumData.subject.some((sub) => sub.code === subject);
+};
+
 export const valdidateCachedData = ({
-  cachedData,
-  cachedCurriculum,
-  cachedSubject,
+  data,
+  curriculumn,
+  subject,
 }: {
-  cachedData: FiltersCache;
-  cachedCurriculum: string;
-  cachedSubject: string;
+  data: FilterData;
+  curriculumn: string;
+  subject: string;
 }): boolean => {
   try {
     const currentCurriculumData = TOPICAL_DATA.find(
-      (item) => item.curriculum === cachedCurriculum
+      (item) => item.curriculum === curriculumn
     );
     if (!currentCurriculumData) {
       return false;
     }
-    const isCachedSubjectExists = currentCurriculumData.subject.some(
-      (subject) => subject.code === cachedSubject
-    );
-    if (!isCachedSubjectExists) {
-      return false;
-    }
+
     const currentSubjectData = currentCurriculumData.subject.find(
-      (subject) => subject.code === cachedSubject
+      (_subject) => _subject.code === subject
     );
     if (!currentSubjectData) {
       return false;
     }
-    if (!cachedData.filters[cachedCurriculum][cachedSubject]) {
+    if (!data[curriculumn][subject]) {
+      return false;
+    }
+    if (!data[curriculumn][subject].topic) {
+      return false;
+    }
+    if (!isSubset(data[curriculumn][subject].topic, currentSubjectData.topic)) {
+      return false;
+    }
+    if (!data[curriculumn][subject].paperType) {
       return false;
     }
     if (
       !isSubset(
-        cachedData.filters[cachedCurriculum][cachedSubject].topic,
-        currentSubjectData.topic
-      )
-    ) {
-      return false;
-    }
-    if (!cachedData.filters[cachedCurriculum][cachedSubject].topic) {
-      return false;
-    }
-    if (
-      !isSubset(
-        cachedData.filters[cachedCurriculum][cachedSubject].paperType,
+        data[curriculumn][subject].paperType,
         currentSubjectData.paperType.map((paperType) => paperType.toString())
       )
     ) {
       return false;
     }
-    if (!cachedData.filters[cachedCurriculum][cachedSubject].paperType) {
+    if (!data[curriculumn][subject].year) {
       return false;
     }
     if (
       !isSubset(
-        cachedData.filters[cachedCurriculum][cachedSubject].year,
+        data[curriculumn][subject].year,
         currentSubjectData.year.map((year) => year.toString())
       )
     ) {
       return false;
     }
-    if (!cachedData.filters[cachedCurriculum][cachedSubject].year) {
+    if (!data[curriculumn][subject].season) {
       return false;
     }
     if (
-      !isSubset(
-        cachedData.filters[cachedCurriculum][cachedSubject].season,
-        currentSubjectData.season
-      )
+      !isSubset(data[curriculumn][subject].season, currentSubjectData.season)
     ) {
       return false;
     }

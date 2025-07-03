@@ -63,6 +63,7 @@ import type {
 import {
   valdidateCachedData,
   validateCurriculum,
+  validateSubject,
 } from '@/features/topical/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -423,10 +424,18 @@ const TopicalPage = () => {
           );
           if (
             parsedState.lastSessionSubject &&
+            validateSubject(
+              parsedState.lastSessionCurriculum,
+              parsedState.lastSessionSubject
+            )
+          ) {
+            setSelectedSubject(parsedState.lastSessionSubject);
+          }
+          if (
             valdidateCachedData({
-              cachedCurriculum: parsedState.lastSessionCurriculum,
-              cachedData: parsedState,
-              cachedSubject: parsedState.lastSessionSubject,
+              curriculumn: parsedState.lastSessionCurriculum,
+              data: parsedState.filters,
+              subject: parsedState.lastSessionSubject,
             })
           ) {
             setSelectedSubject(parsedState.lastSessionSubject);
@@ -472,33 +481,38 @@ const TopicalPage = () => {
     if (savedState) {
       try {
         const parsedState: FiltersCache = JSON.parse(savedState);
-
-        if (
-          parsedState.isPersistantCacheEnabled &&
-          valdidateCachedData({
-            cachedData: parsedState,
-            cachedCurriculum: selectedCurriculum,
-            cachedSubject: selectedSubject,
-          })
-        ) {
-          setSelectedSubject(selectedSubject);
-          setSelectedTopic(
-            parsedState.filters[selectedCurriculum][selectedSubject].topic
-          );
-          setSelectedPaperType(
-            parsedState.filters[selectedCurriculum][selectedSubject].paperType
-          );
-          setSelectedYear(
-            parsedState.filters[selectedCurriculum][selectedSubject].year
-          );
-          setSelectedSeason(
-            parsedState.filters[selectedCurriculum][selectedSubject].season
-          );
-        } else {
-          setSelectedTopic([]);
-          setSelectedYear([]);
-          setSelectedPaperType([]);
-          setSelectedSeason([]);
+        if (parsedState.isPersistantCacheEnabled) {
+          if (
+            selectedSubject &&
+            validateSubject(selectedCurriculum, selectedSubject)
+          ) {
+            setSelectedSubject(selectedSubject);
+          }
+          if (
+            valdidateCachedData({
+              data: parsedState.filters,
+              curriculumn: selectedCurriculum,
+              subject: selectedSubject,
+            })
+          ) {
+            setSelectedTopic(
+              parsedState.filters[selectedCurriculum][selectedSubject].topic
+            );
+            setSelectedPaperType(
+              parsedState.filters[selectedCurriculum][selectedSubject].paperType
+            );
+            setSelectedYear(
+              parsedState.filters[selectedCurriculum][selectedSubject].year
+            );
+            setSelectedSeason(
+              parsedState.filters[selectedCurriculum][selectedSubject].season
+            );
+          } else {
+            setSelectedTopic([]);
+            setSelectedYear([]);
+            setSelectedPaperType([]);
+            setSelectedSeason([]);
+          }
         }
       } catch {
         setSelectedTopic([]);
@@ -514,6 +528,19 @@ const TopicalPage = () => {
     }
     setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
   }, [selectedSubject]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
+  useEffect(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+    setSelectedSubject('');
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+  }, [selectedCurriculum]);
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -561,19 +588,6 @@ const TopicalPage = () => {
     isSessionCacheEnabled,
     isPersistantCacheEnabled,
   ]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
-  useEffect(() => {
-    if (!mountedRef.current) {
-      return;
-    }
-    setSelectedSubject('');
-    setSelectedTopic([]);
-    setSelectedYear([]);
-    setSelectedPaperType([]);
-    setSelectedSeason([]);
-    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-  }, [selectedCurriculum]);
 
   const search = () => {
     if (isValidInputs()) {

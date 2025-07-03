@@ -40,21 +40,23 @@ export interface InvalidInputs {
   season: boolean;
 }
 
+export interface FilterData {
+  [curriculum: string]: {
+    [subject: string]: {
+      topic: string[];
+      paperType: string[];
+      year: string[];
+      season: string[];
+    };
+  };
+}
+
 export type FiltersCache = {
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
   lastSessionSubject: string;
   isPersistantCacheEnabled: boolean;
-  filters: {
-    [key: string]: {
-      [subject: string]: {
-        topic: string[];
-        paperType: string[];
-        year: string[];
-        season: string[];
-      };
-    };
-  };
+  filters: FilterData;
 };
 
 export interface MultiSelectContextProps {
