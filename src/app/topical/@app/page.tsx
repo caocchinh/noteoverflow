@@ -430,7 +430,9 @@ const TopicalPage = () => {
           if (
             validateFilterData({
               curriculumn: parsedState.lastSessionCurriculum,
-              data: parsedState.filters,
+              data: parsedState.filters[parsedState.lastSessionCurriculum][
+                parsedState.lastSessionSubject
+              ],
               subject: parsedState.lastSessionSubject,
             })
           ) {
@@ -486,7 +488,7 @@ const TopicalPage = () => {
           }
           if (
             validateFilterData({
-              data: parsedState.filters,
+              data: parsedState.filters[selectedCurriculum][selectedSubject],
               curriculumn: selectedCurriculum,
               subject: selectedSubject,
             })
@@ -872,13 +874,6 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
-          <Image
-            alt="default subject"
-            className="self-center rounded-md"
-            height={350}
-            src="/assets/funny5.png"
-            width={350}
-          />
         </SidebarInset>
       </SidebarProvider>
     </div>

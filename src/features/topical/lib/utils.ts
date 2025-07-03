@@ -71,43 +71,39 @@ export const validateFilterData = ({
     if (!currentSubjectData) {
       return false;
     }
-    if (!data[curriculumn][subject]) {
+
+    if (!data.topic) {
       return false;
     }
-    if (!data[curriculumn][subject].topic) {
+    if (!isSubset(data.topic, currentSubjectData.topic)) {
       return false;
     }
-    if (!isSubset(data[curriculumn][subject].topic, currentSubjectData.topic)) {
-      return false;
-    }
-    if (!data[curriculumn][subject].paperType) {
+    if (!data.paperType) {
       return false;
     }
     if (
       !isSubset(
-        data[curriculumn][subject].paperType,
+        data.paperType,
         currentSubjectData.paperType.map((paperType) => paperType.toString())
       )
     ) {
       return false;
     }
-    if (!data[curriculumn][subject].year) {
+    if (!data.year) {
       return false;
     }
     if (
       !isSubset(
-        data[curriculumn][subject].year,
+        data.year,
         currentSubjectData.year.map((year) => year.toString())
       )
     ) {
       return false;
     }
-    if (!data[curriculumn][subject].season) {
+    if (!data.season) {
       return false;
     }
-    if (
-      !isSubset(data[curriculumn][subject].season, currentSubjectData.season)
-    ) {
+    if (!isSubset(data.season, currentSubjectData.season)) {
       return false;
     }
     return true;
