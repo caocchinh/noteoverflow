@@ -83,6 +83,18 @@ const LegacyUploadPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<boolean> => {
+    if (!file.type.includes('text')) {
+      return true;
+    }
+    function readFileAsText(_file: File) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result);
+        reader.onerror = reject;
+        reader.readAsText(_file);
+      });
+    }
+
     const subjectFullName = file.webkitRelativePath.split('/')[0];
     const questionNumber = file.webkitRelativePath.split('/')[7].split('_')[0];
     const order = file.webkitRelativePath
@@ -109,14 +121,8 @@ const LegacyUploadPage = () => {
     const year = file.webkitRelativePath.split('/')[3];
 
     let imageSrc = '';
-
     if (file.type.includes('text')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        imageSrc = content;
-      };
-      reader.readAsText(file);
+      imageSrc = (await readFileAsText(file)) as string;
     } else {
       const { success, data, error } = await uploadImage({
         file,
