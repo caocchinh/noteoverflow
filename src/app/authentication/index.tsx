@@ -5,7 +5,10 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { LOGO_MAIN_COLOR, TOPICAL_QUESTION_ROUTE } from '@/constants/constants';
+import {
+  LOGO_MAIN_COLOR,
+  TOPICAL_QUESTION_APP_ROUTE,
+} from '@/constants/constants';
 import type { TurnstileOptions } from '@/constants/types';
 import Silk from '@/features/authentication/components/animation/Silk';
 import VerifyingLoader from '@/features/authentication/components/VerifyingLoader/VerifyingLoader';
@@ -166,7 +169,7 @@ const AuthPageClient = ({
       startAuthTimeout();
       const response = await authClient.signIn.social({
         provider,
-        callbackURL: TOPICAL_QUESTION_ROUTE,
+        callbackURL: TOPICAL_QUESTION_APP_ROUTE,
         fetchOptions: {
           headers: {
             ...(turnstileToken && { 'x-captcha-response': turnstileToken }),

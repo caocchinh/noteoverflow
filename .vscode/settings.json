@@ -28,5 +28,6 @@
   },
   "workbench.activityBar.orientation": "vertical",
   "editor.wordWrap": "on",
-  "editor.mouseWheelZoom": true
+  "editor.mouseWheelZoom": true,
+  "workbench.colorTheme": "Default Dark+"
 }

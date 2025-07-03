@@ -1,10 +1,7 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Bookmark,
   BrushCleaning,
-  FileClock,
-  LayoutDashboard,
   ScanText,
   Settings,
   SlidersHorizontal,
@@ -47,8 +44,6 @@ import {
 } from '@/components/ui/sidebar';
 import { Switch } from '@/components/ui/switch';
 import type { ValidCurriculum } from '@/constants/types';
-
-import Dock from '@/features/topical/components/Dock';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
 import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
 import {
@@ -61,12 +56,13 @@ import type {
   InvalidInputs,
 } from '@/features/topical/constants/types';
 import {
-  valdidateCachedData,
   validateCurriculum,
+  validateFilterData,
   validateSubject,
 } from '@/features/topical/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useSidebar } from '../layout';
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -240,7 +236,7 @@ const TopicalPage = () => {
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
@@ -432,7 +428,7 @@ const TopicalPage = () => {
             setSelectedSubject(parsedState.lastSessionSubject);
           }
           if (
-            valdidateCachedData({
+            validateFilterData({
               curriculumn: parsedState.lastSessionCurriculum,
               data: parsedState.filters,
               subject: parsedState.lastSessionSubject,
@@ -489,7 +485,7 @@ const TopicalPage = () => {
             setSelectedSubject(selectedSubject);
           }
           if (
-            valdidateCachedData({
+            validateFilterData({
               data: parsedState.filters,
               curriculumn: selectedCurriculum,
               subject: selectedSubject,
@@ -595,6 +591,7 @@ const TopicalPage = () => {
     }
   };
 
+  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
   return (
     <div className="pt-16">
       <SidebarProvider
@@ -870,38 +867,6 @@ const TopicalPage = () => {
               Filters
               <SlidersHorizontal />
             </Button>
-          </div>
-          <div className="absolute left-0 flex w-full items-start justify-center">
-            <div className="fixed bottom-1">
-              <Dock
-                baseItemSize={30}
-                items={[
-                  {
-                    icon: <LayoutDashboard className="!text-white" size={18} />,
-                    label: 'App',
-                    onClick: () => {
-                      return;
-                    },
-                  },
-                  {
-                    icon: <FileClock className="!text-white" size={18} />,
-                    label: 'Recently viewed',
-                    onClick: () => {
-                      return;
-                    },
-                  },
-                  {
-                    icon: <Bookmark className="!text-white" size={18} />,
-                    label: 'Bookmark',
-                    onClick: () => {
-                      return;
-                    },
-                  },
-                ]}
-                magnification={50}
-                panelHeight={30}
-              />
-            </div>
           </div>
 
           <h1 className="w-full text-center font-bold text-2xl ">

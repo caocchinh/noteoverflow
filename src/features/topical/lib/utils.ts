@@ -48,7 +48,7 @@ export const validateSubject = (
   return currentCurriculumData.subject.some((sub) => sub.code === subject);
 };
 
-export const valdidateCachedData = ({
+export const validateFilterData = ({
   data,
   curriculumn,
   subject,

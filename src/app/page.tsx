@@ -17,7 +17,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { LOGO_MAIN_COLOR, TOPICAL_QUESTION_ROUTE } from '@/constants/constants';
+import {
+  LOGO_MAIN_COLOR,
+  TOPICAL_QUESTION_APP_ROUTE,
+} from '@/constants/constants';
 import AnimatedText from '@/features/home/components/animation/AnimatedText';
 import Beams from '@/features/home/components/animation/Beams';
 import ClickSpark from '@/features/home/components/animation/ClickSpark';
@@ -236,7 +239,7 @@ export default function Home() {
               asChild
               className="!px-6 w-[90%] cursor-pointer rounded-lg border border-[var(--home-page-text)] bg-transparent p-6 text-[var(--home-page-text)] shadow-lg transition-all hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 active:scale-[0.99] md:w-[50%]"
             >
-              <Link href={TOPICAL_QUESTION_ROUTE}>
+              <Link href={TOPICAL_QUESTION_APP_ROUTE}>
                 Get Started
                 <SparklesIcon />
               </Link>
@@ -265,7 +268,7 @@ export default function Home() {
                 delay={0}
                 direction="up"
                 duration={2}
-                from={0}
+                from={100_000}
                 to={200_000}
               />
               <span className="font-bold text-5xl text-logo-main">+</span>
@@ -322,7 +325,7 @@ export default function Home() {
               asChild
               className="absolute top-0 left-0 h-full w-full border-2 border-white/70 bg-transparent text-[var(--home-page-text)] text-xl hover:cursor-none hover:bg-transparent active:scale-[0.98]"
             >
-              <Link href={TOPICAL_QUESTION_ROUTE}>
+              <Link href={TOPICAL_QUESTION_APP_ROUTE}>
                 Learn with zero cost
                 <HandCoins className="!w-6 !h-6" />
               </Link>

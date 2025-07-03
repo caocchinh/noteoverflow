@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ShinyText from '@/components/ShinyText';
 import { Button } from '@/components/ui/button';
-import { TOPICAL_QUESTION_ROUTE } from '@/constants/constants';
+import { TOPICAL_QUESTION_APP_ROUTE } from '@/constants/constants';
 import { GlowEffect } from '../ui/glow-effect';
 import Search from './Search';
 import { ModeToggle } from './ThemeToggle';
@@ -63,7 +63,7 @@ const NavBar = () => {
             asChild
             className="group relative rounded-lg border border-[var(--navbar-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] hover:bg-[var(--navbar-bg)] "
           >
-            <Link className="relative" href={TOPICAL_QUESTION_ROUTE}>
+            <Link className="relative" href={TOPICAL_QUESTION_APP_ROUTE}>
               <GlowEffect
                 blur="soft"
                 className="z-[-1] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
