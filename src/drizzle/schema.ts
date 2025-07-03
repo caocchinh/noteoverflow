@@ -85,13 +85,13 @@ export const curriculum = sqliteTable('curriculum', {
 export const subject = sqliteTable(
   'subject',
   {
-    id: text('subject_id').notNull(),
+    subjectId: text('subject_id').notNull(),
     curriculumName: text('curriculum_name')
       .references(() => curriculum.name, { onDelete: 'restrict' })
       .notNull(),
   },
   (table) => {
-    return [primaryKey({ columns: [table.id, table.curriculumName] })];
+    return [primaryKey({ columns: [table.subjectId, table.curriculumName] })];
   }
 );
 
@@ -99,17 +99,18 @@ export const season = sqliteTable(
   'season',
   {
     season: text('season').notNull(),
-    subjectId: text('subject_id')
-      .references(() => subject.id, { onDelete: 'cascade' })
-      .notNull(),
-    curriculumName: text('curriculum_name')
-      .references(() => curriculum.name, { onDelete: 'restrict' })
-      .notNull(),
+    subjectId: text('subject_id'),
+
+    curriculumName: text('curriculum_name'),
   },
   (table) => {
     return [
       primaryKey({
-        columns: [table.subjectId, table.season, table.curriculumName],
+        columns: [table.season, table.subjectId, table.curriculumName],
+      }),
+      foreignKey({
+        columns: [table.subjectId, table.curriculumName],
+        foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
   }
@@ -119,17 +120,17 @@ export const paperType = sqliteTable(
   'paper_type',
   {
     paperType: integer('paper_type').notNull(),
-    subjectId: text('subject_id')
-      .references(() => subject.id, { onDelete: 'cascade' })
-      .notNull(),
-    curriculumName: text('curriculum_name')
-      .references(() => curriculum.name, { onDelete: 'restrict' })
-      .notNull(),
+    subjectId: text('subject_id'),
+    curriculumName: text('curriculum_name'),
   },
   (table) => {
     return [
       primaryKey({
-        columns: [table.subjectId, table.paperType, table.curriculumName],
+        columns: [table.paperType, table.subjectId, table.curriculumName],
+      }),
+      foreignKey({
+        columns: [table.subjectId, table.curriculumName],
+        foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
   }
@@ -139,16 +140,16 @@ export const year = sqliteTable(
   'year',
   {
     year: integer('year').notNull(),
-    subjectId: text('subject_id')
-      .references(() => subject.id, { onDelete: 'cascade' })
-      .notNull(),
-    curriculumName: text('curriculum_name')
-      .references(() => curriculum.name, { onDelete: 'restrict' })
-      .notNull(),
+    subjectId: text('subject_id'),
+    curriculumName: text('curriculum_name'),
   },
   (table) => [
     primaryKey({
-      columns: [table.subjectId, table.year, table.curriculumName],
+      columns: [table.year, table.subjectId, table.curriculumName],
+    }),
+    foreignKey({
+      columns: [table.subjectId, table.curriculumName],
+      foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
   ]
 );
@@ -157,17 +158,17 @@ export const topic = sqliteTable(
   'topic',
   {
     topic: text('topic').notNull(),
-    subjectId: text('subject_id')
-      .references(() => subject.id, { onDelete: 'cascade' })
-      .notNull(),
-    curriculumName: text('curriculum_name')
-      .references(() => curriculum.name, { onDelete: 'restrict' })
-      .notNull(),
+    subjectId: text('subject_id'),
+    curriculumName: text('curriculum_name'),
   },
   (table) => {
     return [
       primaryKey({
-        columns: [table.subjectId, table.topic, table.curriculumName],
+        columns: [table.topic, table.subjectId, table.curriculumName],
+      }),
+      foreignKey({
+        columns: [table.subjectId, table.curriculumName],
+        foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
   }
@@ -191,15 +192,8 @@ export const question = sqliteTable(
     updatedAt: integer('updated_at', { mode: 'timestamp' })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
-    subjectId: text('subject_id')
-      .references(() => subject.id, {
-        onDelete: 'cascade',
-        onUpdate: 'cascade',
-      })
-      .notNull(),
-    curriculumName: text('curriculum_name')
-      .references(() => curriculum.name, { onDelete: 'restrict' })
-      .notNull(),
+    subjectId: text('subject_id'),
+    curriculumName: text('curriculum_name'),
 
     questionNumber: integer('question_number').notNull(),
     ratingSum: integer('rating_sum').notNull().default(0),
@@ -207,24 +201,28 @@ export const question = sqliteTable(
   },
   (table) => [
     foreignKey({
-      columns: [table.subjectId, table.year, table.curriculumName],
-      foreignColumns: [year.subjectId, year.year, year.curriculumName],
+      columns: [table.year, table.subjectId, table.curriculumName],
+      foreignColumns: [year.year, year.subjectId, year.curriculumName],
     }),
     foreignKey({
-      columns: [table.subjectId, table.season, table.curriculumName],
-      foreignColumns: [season.subjectId, season.season, season.curriculumName],
+      columns: [table.season, table.subjectId, table.curriculumName],
+      foreignColumns: [season.season, season.subjectId, season.curriculumName],
     }),
     foreignKey({
-      columns: [table.subjectId, table.paperType, table.curriculumName],
+      columns: [table.paperType, table.subjectId, table.curriculumName],
       foreignColumns: [
-        paperType.subjectId,
         paperType.paperType,
+        paperType.subjectId,
         paperType.curriculumName,
       ],
     }),
     foreignKey({
-      columns: [table.subjectId, table.topic, table.curriculumName],
-      foreignColumns: [topic.subjectId, topic.topic, topic.curriculumName],
+      columns: [table.topic, table.subjectId, table.curriculumName],
+      foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
+    }),
+    foreignKey({
+      columns: [table.subjectId, table.curriculumName],
+      foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
   ]
 );
@@ -300,6 +298,9 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const curriculumRelations = relations(curriculum, ({ many }) => ({
   subjects: many(subject),
   topics: many(topic),
+  seasons: many(season),
+  paperTypes: many(paperType),
+  years: many(year),
   questions: many(question),
 }));
 
@@ -307,32 +308,35 @@ export const subjectRelations = relations(subject, ({ many }) => ({
   curriculum: many(curriculum),
   topics: many(topic),
   questions: many(question),
+  seasons: many(season),
+  paperTypes: many(paperType),
+  years: many(year),
 }));
 
 export const questionRelations = relations(question, ({ one, many }) => ({
   subject: one(subject, {
     fields: [question.subjectId],
-    references: [subject.id],
+    references: [subject.subjectId],
   }),
   topic: one(topic, {
-    fields: [question.subjectId, question.topic, question.curriculumName],
-    references: [topic.subjectId, topic.topic, topic.curriculumName],
+    fields: [question.topic, question.subjectId, question.curriculumName],
+    references: [topic.topic, topic.subjectId, topic.curriculumName],
   }),
   season: one(season, {
-    fields: [question.subjectId, question.season, question.curriculumName],
-    references: [season.subjectId, season.season, season.curriculumName],
+    fields: [question.season, question.subjectId, question.curriculumName],
+    references: [season.season, season.subjectId, season.curriculumName],
   }),
   paperType: one(paperType, {
-    fields: [question.subjectId, question.paperType, question.curriculumName],
+    fields: [question.paperType, question.subjectId, question.curriculumName],
     references: [
-      paperType.subjectId,
       paperType.paperType,
+      paperType.subjectId,
       paperType.curriculumName,
     ],
   }),
   year: one(year, {
-    fields: [question.subjectId, question.year, question.curriculumName],
-    references: [year.subjectId, year.year, year.curriculumName],
+    fields: [question.year, question.subjectId, question.curriculumName],
+    references: [year.year, year.subjectId, year.curriculumName],
   }),
   questionImages: many(questionImage),
   answers: many(answer),
@@ -367,7 +371,7 @@ export const questionRatingRelations = relations(questionRating, ({ one }) => ({
 export const seasonRelations = relations(season, ({ one, many }) => ({
   subject: one(subject, {
     fields: [season.subjectId],
-    references: [subject.id],
+    references: [subject.subjectId],
   }),
   curriculum: one(curriculum, {
     fields: [season.curriculumName],
@@ -379,7 +383,7 @@ export const seasonRelations = relations(season, ({ one, many }) => ({
 export const paperTypeRelations = relations(paperType, ({ one, many }) => ({
   subject: one(subject, {
     fields: [paperType.subjectId],
-    references: [subject.id],
+    references: [subject.subjectId],
   }),
   curriculum: one(curriculum, {
     fields: [paperType.curriculumName],
@@ -391,7 +395,7 @@ export const paperTypeRelations = relations(paperType, ({ one, many }) => ({
 export const yearRelations = relations(year, ({ one, many }) => ({
   subject: one(subject, {
     fields: [year.subjectId],
-    references: [subject.id],
+    references: [subject.subjectId],
   }),
   curriculum: one(curriculum, {
     fields: [year.curriculumName],
@@ -403,7 +407,7 @@ export const yearRelations = relations(year, ({ one, many }) => ({
 export const topicRelations = relations(topic, ({ one, many }) => ({
   subject: one(subject, {
     fields: [topic.subjectId],
-    references: [subject.id],
+    references: [subject.subjectId],
   }),
 
   curriculum: one(curriculum, {

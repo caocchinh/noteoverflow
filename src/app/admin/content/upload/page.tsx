@@ -591,7 +591,7 @@ const UploadPage = () => {
               isCurriculumFetching ||
               isSubjectFetching
             }
-            existingItems={subject?.map((item) => item.id) ?? []}
+            existingItems={subject?.map((item) => item.subjectId) ?? []}
             isLoading={isSubjectFetching}
             labels={SUBJECT_LABELS}
             onValueChange={handleSubjectChange}

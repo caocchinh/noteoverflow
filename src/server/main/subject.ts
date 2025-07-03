@@ -4,19 +4,19 @@ import { getDbAsync } from '@/drizzle/db';
 import { subject } from '@/drizzle/schema';
 
 export const createSubject = async ({
-  id,
+  subjectId,
   curriculumName,
 }: {
-  id: string;
+  subjectId: string;
   curriculumName: string;
 }) => {
   const db = await getDbAsync();
-  await db.insert(subject).values({ id, curriculumName });
+  await db.insert(subject).values({ subjectId, curriculumName });
 };
 
 export const getSubjectByCurriculum = async (
   curriculumName: string
-): Promise<{ id: string; curriculumName: string }[]> => {
+): Promise<{ subjectId: string; curriculumName: string }[]> => {
   const db = await getDbAsync();
   const result = await db
     .select()
@@ -33,7 +33,9 @@ export const isSubjectExists = async (
   const result = await db
     .select()
     .from(subject)
-    .where(and(eq(subject.id, id), eq(subject.curriculumName, curriculumName)))
+    .where(
+      and(eq(subject.subjectId, id), eq(subject.curriculumName, curriculumName))
+    )
     .limit(1);
   return result.length > 0;
 };

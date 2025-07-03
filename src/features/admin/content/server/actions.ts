@@ -71,7 +71,7 @@ export async function uploadAction(
     // Check and create subject if needed
     if (!(await isSubjectExists(payload.subjectId, payload.curriculumName))) {
       await createSubject({
-        id: payload.subjectId,
+        subjectId: payload.subjectId,
         curriculumName: payload.curriculumName,
       });
     }

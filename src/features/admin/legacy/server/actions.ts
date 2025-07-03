@@ -112,7 +112,7 @@ export const legacyUploadAction = async ({
     // Check and create subject if needed
     if (!(await isSubjectExists(subjectFullName, curriculum))) {
       await createSubject({
-        id: subjectFullName,
+        subjectId: subjectFullName,
         curriculumName: curriculum,
       });
     }
