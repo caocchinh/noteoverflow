@@ -183,6 +183,7 @@ export const uploadImage = async ({
   subjectFullName,
   paperCode,
   contentType,
+  curriculumName,
   questionNumber,
   order,
 }: {
@@ -190,6 +191,7 @@ export const uploadImage = async ({
   subjectFullName: string;
   paperCode: string;
   contentType: ValidContentType;
+  curriculumName: string;
   questionNumber: string;
   order: number;
 }): Promise<{
@@ -197,7 +199,7 @@ export const uploadImage = async ({
   error?: string;
   data?: { imageSrc: string };
 }> => {
-  const filename = `${subjectFullName}-${paperCode}-${contentType}-${questionNumber}-${order}`;
+  const filename = `${curriculumName};${subjectFullName};${paperCode};${contentType};${questionNumber};${order}`;
   const form = new FormData();
   form.append('key', filename);
   form.append('body', file);

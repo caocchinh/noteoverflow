@@ -122,6 +122,7 @@ const LegacyUploadPage = () => {
         file,
         subjectFullName,
         paperCode,
+        curriculumName: curriculum,
         contentType,
         questionNumber,
         order: Number.parseInt(order, 10),
@@ -146,6 +147,7 @@ const LegacyUploadPage = () => {
     const questionId = parseQuestionId({
       subject: subjectFullName,
       paperCode,
+      curriculumName: curriculum,
       questionNumber: questionNumber.slice(1),
     });
 

@@ -1,5 +1,5 @@
 import 'server-only';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { getDbAsync } from '@/drizzle/db';
 import { subject } from '@/drizzle/schema';
 
@@ -25,12 +25,15 @@ export const getSubjectByCurriculum = async (
   return result;
 };
 
-export const isSubjectExists = async (id: string): Promise<boolean> => {
+export const isSubjectExists = async (
+  id: string,
+  curriculumName: string
+): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(subject)
-    .where(eq(subject.id, id))
+    .where(and(eq(subject.id, id), eq(subject.curriculumName, curriculumName)))
     .limit(1);
   return result.length > 0;
 };

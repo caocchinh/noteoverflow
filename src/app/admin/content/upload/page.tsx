@@ -224,7 +224,8 @@ const UploadPage = () => {
     queryFn: async () => {
       try {
         const { success, data, error } = await getSubjectInfoAction(
-          selectedSubject ?? ''
+          selectedSubject ?? '',
+          selectedCurriculum ?? ''
         );
         if (!success) {
           throw new Error(error || 'Failed to fetch subject information');
@@ -384,6 +385,7 @@ const UploadPage = () => {
         parseQuestionId({
           subject: selectedSubject ?? '',
           paperCode,
+          curriculumName: selectedCurriculum ?? '',
           questionNumber: questionNumber ?? '',
         })
       );
@@ -399,6 +401,7 @@ const UploadPage = () => {
         questionId: parseQuestionId({
           subject: selectedSubject ?? '',
           paperCode,
+          curriculumName: selectedCurriculum ?? '',
           questionNumber: questionNumber ?? '',
         }),
         year: Number.parseInt(selectedYear ?? '', 10),
@@ -425,6 +428,7 @@ const UploadPage = () => {
             file: image,
             subjectFullName: selectedSubject ?? '',
             paperCode,
+            curriculumName: selectedCurriculum ?? '',
             contentType: 'questions',
             questionNumber: questionNumber ?? '',
             order: index,
@@ -437,6 +441,7 @@ const UploadPage = () => {
               questionId: parseQuestionId({
                 subject: selectedSubject ?? '',
                 paperCode,
+                curriculumName: selectedCurriculum ?? '',
                 questionNumber: questionNumber ?? '',
               }),
               imageSrc: data3?.imageSrc ?? '',
@@ -452,6 +457,7 @@ const UploadPage = () => {
           questionId: parseQuestionId({
             subject: selectedSubject ?? '',
             paperCode,
+            curriculumName: selectedCurriculum ?? '',
             questionNumber: questionNumber ?? '',
           }),
           answer: multipleChoiceInput,
@@ -472,6 +478,7 @@ const UploadPage = () => {
               file: image,
               subjectFullName: selectedSubject ?? '',
               paperCode,
+              curriculumName: selectedCurriculum ?? '',
               contentType: 'answers',
               questionNumber: questionNumber ?? '',
               order: index,
@@ -485,6 +492,7 @@ const UploadPage = () => {
                 questionId: parseQuestionId({
                   subject: selectedSubject ?? '',
                   paperCode,
+                  curriculumName: selectedCurriculum ?? '',
                   questionNumber: questionNumber ?? '',
                 }),
                 answer: data6?.imageSrc ?? '',

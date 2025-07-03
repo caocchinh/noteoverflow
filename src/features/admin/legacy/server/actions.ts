@@ -110,7 +110,7 @@ export const legacyUploadAction = async ({
     }
 
     // Check and create subject if needed
-    if (!(await isSubjectExists(subjectFullName))) {
+    if (!(await isSubjectExists(subjectFullName, curriculum))) {
       await createSubject({
         id: subjectFullName,
         curriculumName: curriculum,
@@ -120,40 +120,46 @@ export const legacyUploadAction = async ({
     await Promise.all([
       // Check and create year if needed
       (async () => {
-        if (!(await isYearExists(year, subjectFullName))) {
+        if (!(await isYearExists(year, subjectFullName, curriculum))) {
           await createYear({
             year,
             subjectId: subjectFullName,
+            curriculumName: curriculum,
           });
         }
       })(),
 
       // Check and create season if needed
       (async () => {
-        if (!(await isSeasonExists(season, subjectFullName))) {
+        if (!(await isSeasonExists(season, subjectFullName, curriculum))) {
           await createSeason({
             season,
             subjectId: subjectFullName,
+            curriculumName: curriculum,
           });
         }
       })(),
 
       // Check and create paperType if needed
       (async () => {
-        if (!(await isPaperTypeExists(paperType, subjectFullName))) {
+        if (
+          !(await isPaperTypeExists(paperType, subjectFullName, curriculum))
+        ) {
           await createPaperType({
             paperType,
             subjectId: subjectFullName,
+            curriculumName: curriculum,
           });
         }
       })(),
 
       // Check and create topic if needed
       (async () => {
-        if (!(await isTopicExists(topic, subjectFullName))) {
+        if (!(await isTopicExists(topic, subjectFullName, curriculum))) {
           await createTopic({
             topic,
             subjectId: subjectFullName,
+            curriculumName: curriculum,
           });
         }
       })(),

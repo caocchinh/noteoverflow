@@ -145,7 +145,8 @@ export const getSubjectByCurriculumAction = async (
 };
 
 export const getSubjectInfoAction = async (
-  subjectId: string
+  subjectId: string,
+  curriculumName: string
 ): Promise<
   ServerActionResponse<{
     topicData: string[];
@@ -157,7 +158,9 @@ export const getSubjectInfoAction = async (
   if (
     typeof subjectId !== 'string' ||
     !subjectId ||
-    validateSubject(subjectId)
+    !curriculumName ||
+    validateSubject(subjectId) ||
+    validateCurriculum(curriculumName)
   ) {
     return {
       success: false,
@@ -170,10 +173,10 @@ export const getSubjectInfoAction = async (
       redirect('/app');
     }
     const data = await Promise.all([
-      getTopic(subjectId ?? ''),
-      getPaperType(subjectId ?? ''),
-      getSeason(subjectId ?? ''),
-      getYear(subjectId ?? ''),
+      getTopic(subjectId ?? '', curriculumName ?? ''),
+      getPaperType(subjectId ?? '', curriculumName ?? ''),
+      getSeason(subjectId ?? '', curriculumName ?? ''),
+      getYear(subjectId ?? '', curriculumName ?? ''),
     ]);
     const [topicData, paperTypeData, seasonData, yearData] = data;
     return {

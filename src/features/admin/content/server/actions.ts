@@ -69,7 +69,7 @@ export async function uploadAction(
     }
 
     // Check and create subject if needed
-    if (!(await isSubjectExists(payload.subjectId))) {
+    if (!(await isSubjectExists(payload.subjectId, payload.curriculumName))) {
       await createSubject({
         id: payload.subjectId,
         curriculumName: payload.curriculumName,
@@ -80,40 +80,68 @@ export async function uploadAction(
     await Promise.all([
       // Check and create year if needed
       (async () => {
-        if (!(await isYearExists(payload.year, payload.subjectId))) {
+        if (
+          !(await isYearExists(
+            payload.year,
+            payload.subjectId,
+            payload.curriculumName
+          ))
+        ) {
           await createYear({
             year: payload.year,
             subjectId: payload.subjectId,
+            curriculumName: payload.curriculumName,
           });
         }
       })(),
 
       // Check and create season if needed
       (async () => {
-        if (!(await isSeasonExists(payload.season, payload.subjectId))) {
+        if (
+          !(await isSeasonExists(
+            payload.season,
+            payload.subjectId,
+            payload.curriculumName
+          ))
+        ) {
           await createSeason({
             season: payload.season,
             subjectId: payload.subjectId,
+            curriculumName: payload.curriculumName,
           });
         }
       })(),
 
       // Check and create paper type if needed
       (async () => {
-        if (!(await isPaperTypeExists(payload.paperType, payload.subjectId))) {
+        if (
+          !(await isPaperTypeExists(
+            payload.paperType,
+            payload.subjectId,
+            payload.curriculumName
+          ))
+        ) {
           await createPaperType({
             paperType: payload.paperType,
             subjectId: payload.subjectId,
+            curriculumName: payload.curriculumName,
           });
         }
       })(),
 
       // Check and create topic if needed
       (async () => {
-        if (!(await isTopicExists(payload.topic, payload.subjectId))) {
+        if (
+          !(await isTopicExists(
+            payload.topic,
+            payload.subjectId,
+            payload.curriculumName
+          ))
+        ) {
           await createTopic({
             topic: payload.topic,
             subjectId: payload.subjectId,
+            curriculumName: payload.curriculumName,
           });
         }
       })(),
