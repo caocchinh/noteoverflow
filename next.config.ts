@@ -16,11 +16,6 @@ const nextConfig: NextConfig = {
         destination: '/admin/content/upload',
         permanent: true,
       },
-      {
-        source: '/topical',
-        destination: '/topical/app',
-        permanent: true,
-      },
     ]);
   },
   devIndicators: {
