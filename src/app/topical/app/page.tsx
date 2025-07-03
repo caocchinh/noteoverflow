@@ -46,6 +46,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ValidCurriculum } from '@/constants/types';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
 import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
+import { useSidebar } from '@/features/topical/components/TopicalLayoutProvider';
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
@@ -62,7 +63,6 @@ import {
 } from '@/features/topical/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { useSidebar } from '../layout';
 
 const ButtonUltility = ({
   isResetConfirmationOpen,

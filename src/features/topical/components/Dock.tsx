@@ -9,7 +9,6 @@ import {
   useSpring,
   useTransform,
 } from 'framer-motion';
-import type React from 'react';
 import {
   Children,
   cloneElement,
@@ -18,12 +17,14 @@ import {
   useRef,
   useState,
 } from 'react';
+import { cn } from '@/lib/utils';
 
 export type DockItemData = {
   icon: React.ReactNode;
   label: React.ReactNode;
   onClick: () => void;
   className?: string;
+  backgroundColor?: string;
 };
 
 export type DockProps = {
@@ -35,6 +36,7 @@ export type DockProps = {
   dockHeight?: number;
   magnification?: number;
   spring?: SpringOptions;
+  backgroundColor?: string;
 };
 
 type DockItemProps = {
@@ -46,6 +48,7 @@ type DockItemProps = {
   distance: number;
   baseItemSize: number;
   magnification: number;
+  backgroundColor?: string;
 };
 
 function DockItem({
@@ -55,6 +58,7 @@ function DockItem({
   mouseX,
   spring,
   distance,
+  backgroundColor,
   magnification,
   baseItemSize,
 }: DockItemProps) {
@@ -79,7 +83,11 @@ function DockItem({
   return (
     <motion.div
       aria-haspopup="true"
-      className={`relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-logo-main ${className}`}
+      className={cn(
+        'relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-white',
+        className,
+        backgroundColor
+      )}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
       onFocus={() => isHovered.set(1)}
@@ -106,9 +114,15 @@ type DockLabelProps = {
   className?: string;
   children: React.ReactNode;
   isHovered?: MotionValue<number>;
+  backgroundColor?: string;
 };
 
-function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
+function DockLabel({
+  children,
+  className = '',
+  isHovered,
+  backgroundColor,
+}: DockLabelProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -126,7 +140,11 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
       {isVisible && (
         <motion.div
           animate={{ opacity: 1, y: -10 }}
-          className={`${className} -top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs dark:bg-logo-main`}
+          className={cn(
+            className,
+            '-top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs',
+            backgroundColor
+          )}
           exit={{ opacity: 0, y: 0 }}
           initial={{ opacity: 0, y: 0 }}
           role="tooltip"
@@ -195,6 +213,7 @@ export default function Dock({
       >
         {items.map((item, index) => (
           <DockItem
+            backgroundColor={item.backgroundColor}
             baseItemSize={baseItemSize}
             className={item.className}
             distance={distance}
@@ -205,7 +224,9 @@ export default function Dock({
             spring={spring}
           >
             <DockIcon>{item.icon}</DockIcon>
-            <DockLabel>{item.label}</DockLabel>
+            <DockLabel backgroundColor={item.backgroundColor}>
+              {item.label}
+            </DockLabel>
           </DockItem>
         ))}
       </motion.div>
