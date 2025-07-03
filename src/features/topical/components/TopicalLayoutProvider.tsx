@@ -57,5 +57,3 @@ export default function TopicalLayoutProvider({
     </SidebarContext.Provider>
   );
 }
-
-TopicalLayoutProvider.displayName = 'TopicalLayoutProvider';

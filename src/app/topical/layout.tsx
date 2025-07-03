@@ -1,4 +1,4 @@
-import TopicalLayoutProvider from '@/features/topical/components/TopicalLayoutProvider';
+import TopicalLayoutProvider from '../../features/topical/components/TopicalLayoutProvider';
 
 export default function TopicalLayout({
   children,
