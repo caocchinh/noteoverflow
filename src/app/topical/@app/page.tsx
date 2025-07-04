@@ -1,6 +1,6 @@
-'use client';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
+"use client";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   BrushCleaning,
   Loader2,
@@ -8,17 +8,17 @@ import {
   Settings,
   SlidersHorizontal,
   X,
-} from 'lucide-react';
-import Image from 'next/image';
-import { useTheme } from 'next-themes';
-import { useEffect, useMemo, useRef, useState } from 'react';
+} from "lucide-react";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -28,13 +28,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -43,31 +43,32 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
-} from '@/components/ui/sidebar';
-import { Switch } from '@/components/ui/switch';
-import type { ValidCurriculum } from '@/constants/types';
-import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
-import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
-import InfiniteScroll from '@/features/topical/components/InfiniteScroll';
-import { useSidebar } from '@/features/topical/components/TopicalLayoutProvider';
+} from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import type { ValidCurriculum } from "@/constants/types";
+import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
+import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
+import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
+import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
   TOPICAL_DATA,
-} from '@/features/topical/constants/constants';
+} from "@/features/topical/constants/constants";
 import type {
   FilterData,
   FiltersCache,
   InvalidInputs,
-} from '@/features/topical/constants/types';
+} from "@/features/topical/constants/types";
 import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
-} from '@/features/topical/lib/utils';
-import { getTopicalData } from '@/features/topical/server/actions';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+} from "@/features/topical/lib/utils";
+import { getTopicalData } from "@/features/topical/server/actions";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -163,7 +164,7 @@ const ButtonUltility = ({
         onClick={() => {
           setIsSidebarOpen(false);
         }}
-        variant={theme === 'dark' && isMounted ? 'destructive' : 'default'}
+        variant={theme === "dark" && isMounted ? "destructive" : "default"}
       >
         Close filter
         <X className="h-4 w-4" />
@@ -231,9 +232,9 @@ const CacheAccordion = ({
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
-    ValidCurriculum | ''
-  >('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('');
+    ValidCurriculum | ""
+  >("");
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
@@ -285,8 +286,8 @@ const TopicalPage = () => {
       subjectId: string;
     } & FilterData
   >({
-    curriculumId: '',
-    subjectId: '',
+    curriculumId: "",
+    subjectId: "",
     topic: [],
     paperType: [],
     year: [],
@@ -305,8 +306,8 @@ const TopicalPage = () => {
       isPersistantCacheEnabled,
     };
 
-    stateToSave.lastSessionCurriculum = '';
-    stateToSave.lastSessionCurriculum = '';
+    stateToSave.lastSessionCurriculum = "";
+    stateToSave.lastSessionCurriculum = "";
     if (selectedCurriculum && selectedSubject) {
       stateToSave.filters = {
         ...stateToSave.filters,
@@ -324,8 +325,8 @@ const TopicalPage = () => {
 
     localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
 
-    setSelectedCurriculum('');
-    setSelectedSubject('');
+    setSelectedCurriculum("");
+    setSelectedSubject("");
     setSelectedTopic([]);
     setSelectedYear([]);
     setSelectedPaperType([]);
@@ -345,37 +346,37 @@ const TopicalPage = () => {
       isInvalid: boolean;
     }[] = [
       {
-        name: 'curriculum',
+        name: "curriculum",
         value: selectedCurriculum,
         ref: curriculumRef,
         isInvalid: !selectedCurriculum,
       },
       {
-        name: 'subject',
+        name: "subject",
         value: selectedSubject,
         ref: subjectRef,
         isInvalid: !selectedSubject,
       },
       {
-        name: 'topic',
+        name: "topic",
         value: selectedTopic,
         ref: topicRef,
         isInvalid: selectedTopic.length === 0,
       },
       {
-        name: 'year',
+        name: "year",
         value: selectedYear,
         ref: yearRef,
         isInvalid: selectedYear.length === 0,
       },
       {
-        name: 'paperType',
+        name: "paperType",
         value: selectedPaperType,
         ref: paperTypeRef,
         isInvalid: selectedPaperType.length === 0,
       },
       {
-        name: 'season',
+        name: "season",
         value: selectedSeason,
         ref: seasonRef,
         isInvalid: selectedSeason.length === 0,
@@ -402,8 +403,8 @@ const TopicalPage = () => {
       setInvalidInputs(newInvalidInputsState);
 
       firstInvalidRef?.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+        behavior: "smooth",
+        block: "center",
       });
     }
 
@@ -576,7 +577,7 @@ const TopicalPage = () => {
     if (!mountedRef.current) {
       return;
     }
-    setSelectedSubject('');
+    setSelectedSubject("");
     setSelectedTopic([]);
     setSelectedYear([]);
     setSelectedPaperType([]);
@@ -632,7 +633,7 @@ const TopicalPage = () => {
   ]);
 
   const search = async ({ pageParam }: { pageParam: number }) => {
-    console.log('searching', pageParam);
+    console.log("searching", pageParam);
     if (isValidInputs(false)) {
       return await getTopicalData({
         curriculumId: selectedCurriculum,
@@ -644,7 +645,7 @@ const TopicalPage = () => {
         page: pageParam,
       });
     }
-    throw new Error('Invalid inputs');
+    throw new Error("Invalid inputs");
   };
 
   const {
@@ -656,7 +657,7 @@ const TopicalPage = () => {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ['topical_questions', currentQuery],
+    queryKey: ["topical_questions", currentQuery],
     queryFn: search,
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
@@ -669,7 +670,7 @@ const TopicalPage = () => {
   });
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 h-screen overflow-y-hidden">
       <SidebarProvider
         defaultOpen={true}
         defaultOpenMobile={true}
@@ -693,7 +694,7 @@ const TopicalPage = () => {
                         key={selectedSubject}
                         transition={{
                           duration: 0.15,
-                          ease: 'easeInOut',
+                          ease: "easeInOut",
                         }}
                       >
                         <Image
@@ -703,7 +704,7 @@ const TopicalPage = () => {
                           src={
                             availableSubjects.find(
                               (item) => item.code === selectedSubject
-                            )?.coverImage ?? ''
+                            )?.coverImage ?? ""
                           }
                           width={100}
                         />
@@ -716,7 +717,7 @@ const TopicalPage = () => {
                         key={selectedSubject}
                         transition={{
                           duration: 0.15,
-                          ease: 'easeInOut',
+                          ease: "easeInOut",
                         }}
                       >
                         <Image
@@ -736,8 +737,8 @@ const TopicalPage = () => {
                     >
                       <h3
                         className={cn(
-                          'w-max font-medium text-sm',
-                          invalidInputs.curriculum && 'text-destructive'
+                          "w-max font-medium text-sm",
+                          invalidInputs.curriculum && "text-destructive"
                         )}
                       >
                         Curriculum
@@ -767,8 +768,8 @@ const TopicalPage = () => {
                     >
                       <h3
                         className={cn(
-                          'w-max font-medium text-sm',
-                          invalidInputs.subject && 'text-destructive'
+                          "w-max font-medium text-sm",
+                          invalidInputs.subject && "text-destructive"
                         )}
                       >
                         Subject
@@ -776,7 +777,7 @@ const TopicalPage = () => {
                       <EnhancedSelect
                         data={availableSubjects}
                         label="Subject"
-                        prerequisite={selectedCurriculum ? '' : 'Curriculum'}
+                        prerequisite={selectedCurriculum ? "" : "Curriculum"}
                         selectedValue={selectedSubject}
                         setSelectedValue={setSelectedSubject}
                       />
@@ -796,8 +797,8 @@ const TopicalPage = () => {
                 >
                   <h3
                     className={cn(
-                      'w-max font-medium text-sm',
-                      invalidInputs.topic && 'text-destructive'
+                      "w-max font-medium text-sm",
+                      invalidInputs.topic && "text-destructive"
                     )}
                   >
                     Topic
@@ -823,8 +824,8 @@ const TopicalPage = () => {
                 >
                   <h3
                     className={cn(
-                      'w-max font-medium text-sm',
-                      invalidInputs.paperType && 'text-destructive'
+                      "w-max font-medium text-sm",
+                      invalidInputs.paperType && "text-destructive"
                     )}
                   >
                     Paper
@@ -850,8 +851,8 @@ const TopicalPage = () => {
                 >
                   <h3
                     className={cn(
-                      'w-max font-medium text-sm',
-                      invalidInputs.year && 'text-destructive'
+                      "w-max font-medium text-sm",
+                      invalidInputs.year && "text-destructive"
                     )}
                   >
                     Year
@@ -875,8 +876,8 @@ const TopicalPage = () => {
                 >
                   <h3
                     className={cn(
-                      'w-max font-medium text-sm',
-                      invalidInputs.season && 'text-destructive'
+                      "w-max font-medium text-sm",
+                      invalidInputs.season && "text-destructive"
                     )}
                   >
                     Season
@@ -941,7 +942,7 @@ const TopicalPage = () => {
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="!relative flex flex-col items-center justify-start gap-6 p-4 pl-2 md:items-start">
+        <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
           <div className="absolute left-3 z-[1000]">
             <Button
               className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
@@ -958,30 +959,37 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
-          <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-            {data?.pages.map((page) =>
-              page.data?.map((item) =>
-                item.questionImages.map((image) => (
-                  <Image
-                    alt="question"
-                    height={700}
-                    key={image.imageSrc}
-                    src={image.imageSrc}
-                    width={280}
-                  />
-                ))
-              )
-            )}
-          </div>
-          <InfiniteScroll
-            hasMore={hasNextPage && isSearchEnabled}
-            isLoading={isFetchingNextPage || isFetching}
-            next={fetchNextPage}
-            threshold={1}
+          <ScrollArea
+            className="h-[75vh] [&_.bg-border]:bg-logo-main/70"
+            type="always"
           >
-            {isFetchingNextPage ||
-              (isFetching && <Loader2 className="my-4 h-8 w-8 animate-spin" />)}
-          </InfiniteScroll>
+            <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+              {data?.pages.map((page) =>
+                page.data?.map((item) =>
+                  item.questionImages.map((image) => (
+                    <Image
+                      alt="question"
+                      height={700}
+                      key={image.imageSrc}
+                      src={image.imageSrc}
+                      width={280}
+                    />
+                  ))
+                )
+              )}
+              <InfiniteScroll
+                hasMore={hasNextPage && isSearchEnabled}
+                isLoading={isFetchingNextPage || isFetching}
+                next={fetchNextPage}
+                threshold={1}
+              >
+                {isFetchingNextPage ||
+                  (isFetching && (
+                    <Loader2 className="my-4 h-8 w-8 animate-spin" />
+                  ))}
+              </InfiniteScroll>
+            </div>
+          </ScrollArea>
         </SidebarInset>
       </SidebarProvider>
     </div>

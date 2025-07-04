@@ -1,4 +1,4 @@
-import { Children, cloneElement, useCallback, useMemo, useRef } from 'react';
+import { Children, cloneElement, useCallback, useMemo, useRef } from "react";
 
 interface InfiniteScrollProps {
   isLoading: boolean;
@@ -7,7 +7,6 @@ interface InfiniteScrollProps {
   threshold?: number;
   root?: Element | Document | null;
   rootMargin?: string;
-  reverse?: boolean;
   children?: React.ReactNode;
 }
 
@@ -17,8 +16,7 @@ export default function InfiniteScroll({
   next,
   threshold = 1,
   root = null,
-  rootMargin = '0px',
-  reverse,
+  rootMargin = "0px",
   children,
 }: InfiniteScrollProps) {
   const observer = useRef<IntersectionObserver>(null);
@@ -48,6 +46,7 @@ export default function InfiniteScroll({
       observer.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasMore) {
+            console.log("fetching");
             next();
           }
         },
@@ -63,12 +62,8 @@ export default function InfiniteScroll({
   return (
     <>
       {flattenChildren.map((child, index) => {
-        const isObserveTarget = reverse
-          ? index === 0
-          : index === flattenChildren.length - 1;
-        const ref = isObserveTarget ? observerRef : null;
         // @ts-expect-error ignore ref type
-        return cloneElement(child, { ref });
+        return cloneElement(child, { ref: observerRef });
       })}
     </>
   );

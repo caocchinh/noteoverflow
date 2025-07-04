@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "npx ultracite lint",
+    "lint": "next lint",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --keep-vars --minify",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload --keep-vars --minify",

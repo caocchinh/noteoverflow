@@ -1,18 +1,18 @@
-'use server';
-import { and, asc, eq, type InferSelectModel, inArray } from 'drizzle-orm';
-import type { ServerActionResponse } from '@/constants/types';
-import { getDbAsync } from '@/drizzle/db';
-import { question } from '@/drizzle/schema';
+"use server";
+import { and, asc, eq, type InferSelectModel, inArray } from "drizzle-orm";
+import type { ServerActionResponse } from "@/constants/types";
+import { getDbAsync } from "@/drizzle/db";
+import { question } from "@/drizzle/schema";
 import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
-} from '@/features/topical/lib/utils';
-import { PAGE_SIZE } from '../constants/constants';
-import type { FilterData } from '../constants/types';
+} from "@/features/topical/lib/utils";
+import { PAGE_SIZE } from "../constants/constants";
+import type { FilterData } from "../constants/types";
 
 // Define a type for our selected question fields
-type SelectedQuestion = Pick<InferSelectModel<typeof question>, 'topic'> & {
+type SelectedQuestion = Pick<InferSelectModel<typeof question>, "topic"> & {
   questionImages: Array<{
     questionId: string;
     imageSrc: string;
@@ -38,14 +38,14 @@ export const getTopicalData = async ({
       return {
         success: false,
         data: [],
-        error: 'Invalid curriculum',
+        error: "Invalid curriculum",
       };
     }
     if (!validateSubject(curriculumId, subjectId)) {
       return {
         success: false,
         data: [],
-        error: 'Invalid subject',
+        error: "Invalid subject",
       };
     }
     if (
@@ -58,7 +58,7 @@ export const getTopicalData = async ({
       return {
         success: false,
         data: [],
-        error: 'Invalid filters',
+        error: "Invalid filters",
       };
     }
 
@@ -109,7 +109,6 @@ export const getTopicalData = async ({
       data,
     };
   } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: <Needed for debugging on server>
     console.error(error);
     return {
       success: false,
