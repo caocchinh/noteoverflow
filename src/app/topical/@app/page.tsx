@@ -9,7 +9,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import Image from "next/image";
+import { default as NextImage } from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -69,6 +69,7 @@ import { getTopicalData } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Masonry } from "masonic";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -697,7 +698,7 @@ const TopicalPage = () => {
                           ease: "easeInOut",
                         }}
                       >
-                        <Image
+                        <NextImage
                           alt="cover"
                           className="self-center rounded-[2px]"
                           height={126}
@@ -720,7 +721,7 @@ const TopicalPage = () => {
                           ease: "easeInOut",
                         }}
                       >
-                        <Image
+                        <NextImage
                           alt="default subject"
                           className="self-center"
                           height={100}
@@ -959,24 +960,24 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
+          <Masonry
+            // Provides the data for our grid items
+            items={data?.pages.flatMap((page) => page.data) ?? []}
+            // Adds 8px of space between the grid cells
+            columnGutter={8}
+            // Sets the minimum column width to 172px
+            columnWidth={172}
+            // Pre-renders 5 windows worth of content
+            overscanBy={5}
+            // This is the grid item component
+            render={Item}
+            className="w-full"
+          />
           <ScrollArea
-            className="h-[75vh] [&_.bg-border]:bg-logo-main/70"
+            className="h-[75vh] [&_.bg-border]:bg-logo-main"
             type="always"
           >
             <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-              {data?.pages.map((page) =>
-                page.data?.map((item) =>
-                  item.questionImages.map((image) => (
-                    <Image
-                      alt="question"
-                      height={700}
-                      key={image.imageSrc}
-                      src={image.imageSrc}
-                      width={280}
-                    />
-                  ))
-                )
-              )}
               <InfiniteScroll
                 hasMore={hasNextPage && isSearchEnabled}
                 isLoading={isFetchingNextPage || isFetching}
@@ -997,3 +998,27 @@ const TopicalPage = () => {
 };
 
 export default TopicalPage;
+
+const Item = ({ data }: { data: any }) => {
+  const [imageDimensions, setImageDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
+  // useEffect(() => {
+  //   const image = new Image();
+  //   image.src = data.questionImages[0].imageSrc;
+  //   image.onload = () => {
+  //     setImageDimensions({ width: image.width, height: image.height });
+  //   };
+  // }, [data]);
+  return (
+    <NextImage
+      alt="question"
+      height={700}
+      className="!w-max !h-max !max-w-full"
+      key={data.questionImages[0].imageSrc}
+      src={data.questionImages[0].imageSrc}
+      width={280}
+    />
+  );
+};
