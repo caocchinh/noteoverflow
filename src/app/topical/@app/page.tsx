@@ -1,7 +1,9 @@
 'use client';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BrushCleaning,
+  Loader2,
   ScanText,
   Settings,
   SlidersHorizontal,
@@ -46,6 +48,7 @@ import { Switch } from '@/components/ui/switch';
 import type { ValidCurriculum } from '@/constants/types';
 import EnhancedMultiSelect from '@/features/topical/components/EnhancedMultiSelect';
 import EnhancedSelect from '@/features/topical/components/EnhancedSelect';
+import InfiniteScroll from '@/features/topical/components/InfiniteScroll';
 import { useSidebar } from '@/features/topical/components/TopicalLayoutProvider';
 import {
   FILTERS_CACHE_KEY,
@@ -53,6 +56,7 @@ import {
   TOPICAL_DATA,
 } from '@/features/topical/constants/constants';
 import type {
+  FilterData,
   FiltersCache,
   InvalidInputs,
 } from '@/features/topical/constants/types';
@@ -70,15 +74,29 @@ const ButtonUltility = ({
   setIsResetConfirmationOpen,
   resetEverything,
   setIsSidebarOpen,
-  search,
   isMounted,
+  isValidInput,
+  setIsSearchEnabled,
+  setCurrentQuery,
+  query,
 }: {
   isResetConfirmationOpen: boolean;
   setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
-  search: () => void;
   isMounted: boolean;
+  isValidInput: (visualFeedback?: boolean) => boolean;
+  setIsSearchEnabled: (value: boolean) => void;
+  setCurrentQuery: (
+    value: {
+      curriculumId: string;
+      subjectId: string;
+    } & FilterData
+  ) => void;
+  query: {
+    curriculumId: string;
+    subjectId: string;
+  } & FilterData;
 }) => {
   const { theme } = useTheme();
 
@@ -87,7 +105,14 @@ const ButtonUltility = ({
       <Button
         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
         disabled={!isMounted}
-        onClick={search}
+        onClick={() => {
+          if (isValidInput(true)) {
+            setIsSearchEnabled(true);
+            setCurrentQuery({
+              ...query,
+            });
+          }
+        }}
       >
         Search
         <ScanText />
@@ -252,6 +277,21 @@ const TopicalPage = () => {
   const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
     useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState<
+    {
+      curriculumId: string;
+      subjectId: string;
+    } & FilterData
+  >({
+    curriculumId: '',
+    subjectId: '',
+    topic: [],
+    paperType: [],
+    year: [],
+    season: [],
+  });
 
   const resetEverything = () => {
     const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
@@ -297,7 +337,7 @@ const TopicalPage = () => {
     setIsResetConfirmationOpen(false);
   };
 
-  const isValidInputs = () => {
+  const isValidInputs = (visualFeedback = false) => {
     const fieldsToValidate: {
       name: keyof InvalidInputs;
       value: string | string[];
@@ -358,12 +398,14 @@ const TopicalPage = () => {
         isFormValid = false;
       }
     }
-    setInvalidInputs(newInvalidInputsState);
+    if (visualFeedback) {
+      setInvalidInputs(newInvalidInputsState);
 
-    firstInvalidRef?.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
+      firstInvalidRef?.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
 
     return isFormValid;
   };
@@ -589,23 +631,43 @@ const TopicalPage = () => {
     isPersistantCacheEnabled,
   ]);
 
-  const search = async () => {
-    console.log('validating inputs');
-    if (isValidInputs()) {
-      console.log('getting data');
-      const response = await getTopicalData({
+  const search = async ({ pageParam }: { pageParam: number }) => {
+    console.log('searching', pageParam);
+    if (isValidInputs(false)) {
+      return await getTopicalData({
         curriculumId: selectedCurriculum,
         subjectId: selectedSubject,
         topic: selectedTopic,
         paperType: selectedPaperType,
         year: selectedYear,
         season: selectedSeason,
+        page: pageParam,
       });
-      console.log(response);
     }
+    throw new Error('Invalid inputs');
   };
 
-  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['topical_questions', currentQuery],
+    queryFn: search,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.data?.length === 0) {
+        return;
+      }
+      return lastPageParam + 1;
+    },
+    enabled: isSearchEnabled,
+  });
+
   return (
     <div className="pt-16">
       <SidebarProvider
@@ -835,13 +897,23 @@ const TopicalPage = () => {
                   )}
                 </div>
               </div>
-              <div className="flex w-[300px] flex-col items-center justify-center gap-4">
+              <div className="flex w-full flex-col items-center justify-center gap-2">
                 <ButtonUltility
                   isMounted={isMounted}
                   isResetConfirmationOpen={isResetConfirmationOpen}
+                  isValidInput={isValidInputs}
+                  query={{
+                    curriculumId: selectedCurriculum,
+                    subjectId: selectedSubject,
+                    topic: selectedTopic,
+                    paperType: selectedPaperType,
+                    year: selectedYear,
+                    season: selectedSeason,
+                  }}
                   resetEverything={resetEverything}
-                  search={search}
+                  setCurrentQuery={setCurrentQuery}
                   setIsResetConfirmationOpen={setIsResetConfirmationOpen}
+                  setIsSearchEnabled={setIsSearchEnabled}
                   setIsSidebarOpen={setIsSidebarOpen}
                 />
               </div>
@@ -870,9 +942,9 @@ const TopicalPage = () => {
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="!relative flex flex-col items-center justify-start gap-6 p-4 pl-2 md:items-start">
-          <div className="absolute left-3">
+          <div className="absolute left-3 z-[1000]">
             <Button
-              className="fixed flex cursor-pointer items-center gap-2 border"
+              className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
               onClick={() => {
                 setIsSidebarOpen(!isSidebarOpen);
               }}
@@ -886,6 +958,30 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
+          <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+            {data?.pages.map((page) =>
+              page.data?.map((item) =>
+                item.questionImages.map((image) => (
+                  <Image
+                    alt="question"
+                    height={700}
+                    key={image.imageSrc}
+                    src={image.imageSrc}
+                    width={280}
+                  />
+                ))
+              )
+            )}
+          </div>
+          <InfiniteScroll
+            hasMore={hasNextPage && isSearchEnabled}
+            isLoading={isFetchingNextPage || isFetching}
+            next={fetchNextPage}
+            threshold={1}
+          >
+            {isFetchingNextPage ||
+              (isFetching && <Loader2 className="my-4 h-8 w-8 animate-spin" />)}
+          </InfiniteScroll>
         </SidebarInset>
       </SidebarProvider>
     </div>

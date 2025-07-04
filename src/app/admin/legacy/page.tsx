@@ -83,9 +83,6 @@ const LegacyUploadPage = () => {
   };
 
   const uploadFile = async (file: File): Promise<boolean> => {
-    if (!file.type.includes('text')) {
-      return true;
-    }
     function readFileAsText(_file: File) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -119,7 +116,6 @@ const LegacyUploadPage = () => {
       Number.parseInt(paperCode.split('_')[1], 10) / 10
     );
     const year = file.webkitRelativePath.split('/')[3];
-
     let imageSrc = '';
     if (file.type.includes('text')) {
       imageSrc = (await readFileAsText(file)) as string;
@@ -149,7 +145,6 @@ const LegacyUploadPage = () => {
       }
       imageSrc = data?.imageSrc ?? '';
     }
-
     const questionId = parseQuestionId({
       subject: subjectFullName,
       paperCode,

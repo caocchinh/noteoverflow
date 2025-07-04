@@ -165,3 +165,5 @@ export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   paperType: false,
   season: false,
 };
+
+export const PAGE_SIZE = 30;

@@ -199,7 +199,7 @@ export default function Dock({
     >
       <motion.div
         aria-label="Application dock"
-        className={`${className} -translate-x-1/2 absolute bottom-2 left-1/2 flex w-fit transform items-end gap-4 rounded-md border-1 border-neutral-700 px-4 pb-2`}
+        className={`${className} -translate-x-1/2 absolute bottom-2 left-1/2 flex w-fit transform items-end gap-4 rounded-md border-1 border-neutral-700 bg-background px-4 pb-2`}
         onMouseLeave={() => {
           isHovered.set(0);
           mouseX.set(Number.POSITIVE_INFINITY);
