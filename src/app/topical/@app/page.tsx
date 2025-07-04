@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { default as NextImage } from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -77,7 +77,6 @@ import {
   useScroller,
 } from "masonic";
 import { useWindowSize } from "@react-hook/window-size";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -679,24 +678,21 @@ const TopicalPage = () => {
   });
   const containerRef = useRef(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     setAnimationTrigger(isSidebarOpen);
-  //   }, 200);
-  //   return () => clearTimeout(timeout);
-  // }, [isSidebarOpen]);
   const [windowWidth, height] = useWindowSize();
   const { offset, width } = useContainerPosition(containerRef, [
     windowWidth,
     height,
     animationTrigger,
   ]);
-  const positioner = usePositioner({
-    width,
-    columnGutter: 8,
-    maxColumnCount: 4,
-    columnWidth: 250,
-  });
+  const positioner = usePositioner(
+    {
+      width,
+      columnGutter: 8,
+      maxColumnCount: 4,
+      columnWidth: 250,
+    },
+    [currentQuery]
+  );
   const { scrollTop, isScrolling } = useScroller(offset);
   const resizeObserver = useResizeObserver(positioner);
 
@@ -1038,8 +1034,21 @@ const TopicalPage = () => {
 export default TopicalPage;
 
 const Item = ({ data }: { data: any }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <div className="relative">
+    <motion.div
+      className="relative cursor-pointer"
+      whileHover={{
+        scale: 0.98,
+        transition: {
+          duration: 0.4,
+          ease: [0.165, 0.84, 0.44, 1],
+        },
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <NextImage
         alt="question"
         height={700}
@@ -1048,6 +1057,14 @@ const Item = ({ data }: { data: any }) => {
         src={data.questionImages[0].imageSrc}
         width={280}
       />
-    </div>
+
+      <motion.div
+        className="absolute inset-0 rounded-sm bg-gradient-to-tr from-pink-500/30 to-sky-500/35"
+        animate={{
+          opacity: isHovered ? 0.3 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+      />
+    </motion.div>
   );
 };
