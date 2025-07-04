@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { default as NextImage } from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -69,7 +69,15 @@ import { getTopicalData } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Masonry } from "masonic";
+import {
+  useMasonry,
+  usePositioner,
+  useContainerPosition,
+  useResizeObserver,
+  useScroller,
+} from "masonic";
+import { useWindowSize } from "@react-hook/window-size";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -669,6 +677,30 @@ const TopicalPage = () => {
     },
     enabled: isSearchEnabled,
   });
+  const containerRef = useRef(null);
+  const [animationTrigger, setAnimationTrigger] = useState(0);
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     setAnimationTrigger(isSidebarOpen);
+  //   }, 200);
+  //   return () => clearTimeout(timeout);
+  // }, [isSidebarOpen]);
+  const [windowWidth, height] = useWindowSize();
+  const { offset, width } = useContainerPosition(containerRef, [
+    windowWidth,
+    height,
+    animationTrigger,
+  ]);
+  const positioner = usePositioner({
+    width,
+    columnGutter: 8,
+    maxColumnCount: 4,
+    columnWidth: 250,
+  });
+  const { scrollTop, isScrolling } = useScroller(offset);
+  const resizeObserver = useResizeObserver(positioner);
+
+  const sidebarInsetRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="pt-16 h-screen overflow-y-hidden">
@@ -680,7 +712,11 @@ const TopicalPage = () => {
         open={isSidebarOpen}
         openMobile={isSidebarOpen}
       >
-        <Sidebar key={sidebarKey} variant="floating">
+        <Sidebar
+          key={sidebarKey}
+          variant="floating"
+          onTransitionEnd={() => setAnimationTrigger(animationTrigger + 1)}
+        >
           <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
           <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
             <div className="flex w-full flex-col items-center justify-start gap-4">
@@ -943,7 +979,10 @@ const TopicalPage = () => {
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
+        <SidebarInset
+          ref={sidebarInsetRef}
+          className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start"
+        >
           <div className="absolute left-3 z-[1000]">
             <Button
               className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
@@ -960,23 +999,22 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
-          <Masonry
-            // Provides the data for our grid items
-            items={data?.pages.flatMap((page) => page.data) ?? []}
-            // Adds 8px of space between the grid cells
-            columnGutter={8}
-            // Sets the minimum column width to 172px
-            columnWidth={172}
-            // Pre-renders 5 windows worth of content
-            overscanBy={5}
-            // This is the grid item component
-            render={Item}
-            className="w-full"
-          />
+
           <ScrollArea
-            className="h-[75vh] [&_.bg-border]:bg-logo-main"
+            className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main"
             type="always"
           >
+            {useMasonry({
+              resizeObserver,
+              positioner,
+              scrollTop,
+              isScrolling,
+              containerRef,
+              items: data?.pages.flatMap((page) => page.data) ?? [],
+              overscanBy: 3,
+              render: Item,
+              height: Infinity,
+            })}
             <div className="flex flex-row flex-wrap items-center justify-center gap-4">
               <InfiniteScroll
                 hasMore={hasNextPage && isSearchEnabled}
@@ -1000,25 +1038,16 @@ const TopicalPage = () => {
 export default TopicalPage;
 
 const Item = ({ data }: { data: any }) => {
-  const [imageDimensions, setImageDimensions] = useState<{
-    width: number;
-    height: number;
-  }>({ width: 0, height: 0 });
-  // useEffect(() => {
-  //   const image = new Image();
-  //   image.src = data.questionImages[0].imageSrc;
-  //   image.onload = () => {
-  //     setImageDimensions({ width: image.width, height: image.height });
-  //   };
-  // }, [data]);
   return (
-    <NextImage
-      alt="question"
-      height={700}
-      className="!w-max !h-max !max-w-full"
-      key={data.questionImages[0].imageSrc}
-      src={data.questionImages[0].imageSrc}
-      width={280}
-    />
+    <div className="relative">
+      <NextImage
+        alt="question"
+        height={700}
+        className="!w-max !h-max !max-w-full rounded-sm"
+        key={data.questionImages[0].imageSrc}
+        src={data.questionImages[0].imageSrc}
+        width={280}
+      />
+    </div>
   );
 };
