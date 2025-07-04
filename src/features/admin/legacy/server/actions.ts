@@ -1,25 +1,18 @@
-'use server';
+"use server";
 
-import { redirect } from 'next/navigation';
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '@/constants/constants';
-import type {
-  ServerActionResponse,
-  ValidContentType,
-  ValidSeason,
-} from '@/constants/types';
-import { verifySession } from '@/dal/verifySession';
-import { isValidQuestionId } from '@/lib/utils';
-import { overwriteAnswer } from '@/server/main/answer';
-import { createCurriculum, isCurriculumExists } from '@/server/main/curriculum';
-import { createPaperType, isPaperTypeExists } from '@/server/main/paperType';
-import {
-  overwriteQuestion,
-  overwriteQuestionImage,
-} from '@/server/main/question';
-import { createSeason, isSeasonExists } from '@/server/main/season';
-import { createSubject, isSubjectExists } from '@/server/main/subject';
-import { createTopic, isTopicExists } from '@/server/main/topic';
-import { createYear, isYearExists } from '@/server/main/year';
+import {redirect} from "next/navigation";
+import {BAD_REQUEST, INTERNAL_SERVER_ERROR} from "@/constants/constants";
+import type {ServerActionResponse, ValidContentType, ValidSeason} from "@/constants/types";
+import {verifySession} from "@/dal/verifySession";
+import {isValidQuestionId} from "@/lib/utils";
+import {overwriteAnswer} from "@/server/main/answer";
+import {createCurriculum, isCurriculumExists} from "@/server/main/curriculum";
+import {createPaperType, isPaperTypeExists} from "@/server/main/paperType";
+import {overwriteQuestion, overwriteQuestionImage} from "@/server/main/question";
+import {createSeason, isSeasonExists} from "@/server/main/season";
+import {createSubject, isSubjectExists} from "@/server/main/subject";
+import {createTopic, isTopicExists} from "@/server/main/topic";
+import {createYear, isYearExists} from "@/server/main/year";
 import {
   validateCurriculum,
   validatePaperType,
@@ -29,7 +22,7 @@ import {
   validateSubject,
   validateTopic,
   validateYear,
-} from '../../content/lib/utils';
+} from "../../content/lib/utils";
 
 export const legacyUploadAction = async ({
   curriculum,
@@ -59,18 +52,18 @@ export const legacyUploadAction = async ({
   order: number;
 }): Promise<ServerActionResponse<void>> => {
   if (
-    typeof curriculum !== 'string' ||
-    typeof subjectFullName !== 'string' ||
-    typeof year !== 'number' ||
-    typeof season !== 'string' ||
-    typeof paperType !== 'number' ||
-    typeof paperVariant !== 'number' ||
-    typeof topic !== 'string' ||
-    typeof questionId !== 'string' ||
-    typeof questionNumber !== 'number' ||
-    typeof contentType !== 'string' ||
-    typeof imageSrc !== 'string' ||
-    typeof order !== 'number' ||
+    typeof curriculum !== "string" ||
+    typeof subjectFullName !== "string" ||
+    typeof year !== "number" ||
+    typeof season !== "string" ||
+    typeof paperType !== "number" ||
+    typeof paperVariant !== "number" ||
+    typeof topic !== "string" ||
+    typeof questionId !== "string" ||
+    typeof questionNumber !== "number" ||
+    typeof contentType !== "string" ||
+    typeof imageSrc !== "string" ||
+    typeof order !== "number" ||
     !questionId ||
     !questionNumber ||
     !year ||
@@ -81,7 +74,7 @@ export const legacyUploadAction = async ({
     !contentType ||
     !imageSrc ||
     order < 0 ||
-    (contentType !== 'questions' && contentType !== 'answers') ||
+    (contentType !== "questions" && contentType !== "answers") ||
     validateCurriculum(curriculum) ||
     validateSubject(subjectFullName) ||
     validateYear(year.toString()) ||
@@ -100,13 +93,13 @@ export const legacyUploadAction = async ({
 
   try {
     const session = await verifySession();
-    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
-      redirect('/app');
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
     }
     const userId = session.user.id;
     // Check and create curriculum if needed
     if (!(await isCurriculumExists(curriculum))) {
-      await createCurriculum({ name: curriculum });
+      await createCurriculum({name: curriculum});
     }
 
     // Check and create subject if needed
@@ -142,9 +135,7 @@ export const legacyUploadAction = async ({
 
       // Check and create paperType if needed
       (async () => {
-        if (
-          !(await isPaperTypeExists(paperType, subjectFullName, curriculum))
-        ) {
+        if (!(await isPaperTypeExists(paperType, subjectFullName, curriculum))) {
           await createPaperType({
             paperType,
             subjectId: subjectFullName,
@@ -166,7 +157,7 @@ export const legacyUploadAction = async ({
     ]);
 
     // Create or overwrite question/answer based on content type
-    if (contentType === 'questions') {
+    if (contentType === "questions") {
       await overwriteQuestion({
         questionId,
         year,
@@ -185,7 +176,7 @@ export const legacyUploadAction = async ({
         imageSrc,
         order,
       });
-    } else if (contentType === 'answers') {
+    } else if (contentType === "answers") {
       await overwriteAnswer({
         questionId,
         answer: imageSrc,
@@ -197,8 +188,7 @@ export const legacyUploadAction = async ({
       success: true,
     };
   } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: <Necessary for debugging on server log>
-    console.error('Legacy:: Error creating metadata records:', error);
+    console.error("Legacy:: Error creating metadata records:", error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,

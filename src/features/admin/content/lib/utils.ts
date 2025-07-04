@@ -1,61 +1,57 @@
-import { redirect } from 'next/navigation';
-import { FAILED_TO_UPLOAD_IMAGE } from '@/constants/constants';
-import type { ValidContentType, ValidSeason } from '@/constants/types';
+import {redirect} from "next/navigation";
+import {FAILED_TO_UPLOAD_IMAGE} from "@/constants/constants";
+import type {ValidContentType, ValidSeason} from "@/constants/types";
 
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
-    return 'Curriculum cannot be empty';
+    return "Curriculum cannot be empty";
   }
   if (value !== value.trim()) {
-    return 'Curriculum cannot have leading or trailing whitespace';
+    return "Curriculum cannot have leading or trailing whitespace";
   }
-  if (value.trim() === '') {
-    return 'Curriculum cannot be empty';
+  if (value.trim() === "") {
+    return "Curriculum cannot be empty";
   }
   return null;
 };
 
 export const validateTopic = (value: string): string | null => {
   if (!value) {
-    return 'Topic cannot be empty';
+    return "Topic cannot be empty";
   }
   if (value !== value.trim()) {
-    return 'Topic cannot have leading or trailing whitespace';
+    return "Topic cannot have leading or trailing whitespace";
   }
-  if (value.trim() === '') {
-    return 'Topic cannot be empty';
+  if (value.trim() === "") {
+    return "Topic cannot be empty";
   }
   return null;
 };
 
 export const validatePaperType = (value: string): string | null => {
   if (value !== value.trim()) {
-    return 'Paper type cannot have leading or trailing whitespace';
+    return "Paper type cannot have leading or trailing whitespace";
   }
   const paperTypeNumber = Number(value);
-  if (
-    Number.isNaN(paperTypeNumber) ||
-    paperTypeNumber < 1 ||
-    paperTypeNumber > 9
-  ) {
-    return 'Paper type must be a number between 1 and 9';
+  if (Number.isNaN(paperTypeNumber) || paperTypeNumber < 1 || paperTypeNumber > 9) {
+    return "Paper type must be a number between 1 and 9";
   }
   return null;
 };
 
 export const validateYear = (value: string): string | null => {
   if (value !== value.trim()) {
-    return 'Year cannot have leading or trailing whitespace';
+    return "Year cannot have leading or trailing whitespace";
   }
   const yearNumber = Number(value);
   const currentYear = new Date().getFullYear();
 
   if (Number.isNaN(yearNumber)) {
-    return 'Year must be a valid number';
+    return "Year must be a valid number";
   }
 
   if (yearNumber < 2009) {
-    return 'Year must not be earlier than 2009';
+    return "Year must not be earlier than 2009";
   }
 
   if (yearNumber > currentYear) {
@@ -67,12 +63,12 @@ export const validateYear = (value: string): string | null => {
 
 export const validateSeason = (value: string): string | null => {
   if (value !== value.trim()) {
-    return 'Season cannot have leading or trailing whitespace';
+    return "Season cannot have leading or trailing whitespace";
   }
-  const validSeasons = ['Summer', 'Winter', 'Spring'];
+  const validSeasons = ["Summer", "Winter", "Spring"];
 
   if (!validSeasons.includes(value)) {
-    return 'Season must be Summer, Winter, or Spring';
+    return "Season must be Summer, Winter, or Spring";
   }
 
   return null;
@@ -80,33 +76,28 @@ export const validateSeason = (value: string): string | null => {
 
 export const validateQuestionNumber = (value: string): string => {
   if (value !== value.trim()) {
-    return 'Question number cannot have leading or trailing whitespace';
+    return "Question number cannot have leading or trailing whitespace";
   }
   const questionNumber = Number(value);
-  if (
-    Number.isNaN(questionNumber) ||
-    questionNumber < 1 ||
-    questionNumber > 100
-  ) {
-    return 'Question number must be between 1 and 100';
+  if (Number.isNaN(questionNumber) || questionNumber < 1 || questionNumber > 100) {
+    return "Question number must be between 1 and 100";
   }
-  return '';
+  return "";
 };
 
 export const validateSubject = (value: string): string | null => {
   if (!value) {
-    return 'Subject cannot be empty';
+    return "Subject cannot be empty";
   }
 
   if (value !== value.trim()) {
-    return 'Subject cannot have leading or trailing whitespace';
+    return "Subject cannot have leading or trailing whitespace";
   }
 
-  if (value.trim() === '') {
-    return 'Subject cannot be empty';
+  if (value.trim() === "") {
+    return "Subject cannot be empty";
   }
 
-  // biome-ignore lint/performance/useTopLevelRegex: <Don't care>
   const regex = /^([^()]+) \(([0-9]+)\)$/;
   const match = value.match(regex);
 
@@ -117,42 +108,41 @@ export const validateSubject = (value: string): string | null => {
   const subjectName = match[1].trim();
   const subjectCode = match[2];
 
-  if (subjectName === '') {
-    return 'Subject name cannot be empty';
+  if (subjectName === "") {
+    return "Subject name cannot be empty";
   }
 
-  if (subjectCode === '' || Number.isNaN(Number(subjectCode))) {
-    return 'Subject code must be numeric';
+  if (subjectCode === "" || Number.isNaN(Number(subjectCode))) {
+    return "Subject code must be numeric";
   }
 
-  return '';
+  return "";
 };
 
 export const validatePaperVariant = (value: string): string => {
   if (value !== value.trim()) {
-    return 'Paper variant cannot have leading or trailing whitespace';
+    return "Paper variant cannot have leading or trailing whitespace";
   }
   const paperVariant = Number(value);
 
-  if (value === '') {
-    return 'Paper variant cannot be empty';
+  if (value === "") {
+    return "Paper variant cannot be empty";
   }
   if (Number.isNaN(paperVariant) || paperVariant < 1 || paperVariant > 9) {
-    return 'Paper variant must be between 1 and 9';
+    return "Paper variant must be between 1 and 9";
   }
 
-  return '';
+  return "";
 };
 
 export const seasonToCode = (season: ValidSeason): string => {
-  // biome-ignore lint/style/useDefaultSwitchClause: <No default case>
   switch (season) {
-    case 'Summer':
-      return 'M_J';
-    case 'Winter':
-      return 'O_N';
-    case 'Spring':
-      return 'F_M';
+    case "Summer":
+      return "M_J";
+    case "Winter":
+      return "O_N";
+    case "Spring":
+      return "F_M";
   }
 };
 
@@ -197,14 +187,14 @@ export const uploadImage = async ({
 }): Promise<{
   success: boolean;
   error?: string;
-  data?: { imageSrc: string };
+  data?: {imageSrc: string};
 }> => {
   const filename = `${curriculumName};${subjectFullName};${paperCode};${contentType};${questionNumber};${order}`;
   const form = new FormData();
-  form.append('key', filename);
-  form.append('body', file);
+  form.append("key", filename);
+  form.append("body", file);
   form.append(
-    'options',
+    "options",
     JSON.stringify({
       httpMetadata: {
         contentType: file.type,
@@ -212,17 +202,17 @@ export const uploadImage = async ({
     })
   );
 
-  const response = await fetch('/api/r2', {
-    method: 'POST',
+  const response = await fetch("/api/r2", {
+    method: "POST",
     body: form,
   });
 
   if (!response.ok) {
     const error = await response.json();
     if (response.status === 401) {
-      redirect('/authentication');
+      redirect("/authentication");
     } else if (response.status === 403) {
-      redirect('/app');
+      redirect("/app");
     } else {
       return {
         success: false,

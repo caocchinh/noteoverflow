@@ -1,6 +1,4 @@
 // Extra env variables type definitions
-/** biome-ignore-all lint/correctness/noUnusedVariables: <Dont' care> */
-/** biome-ignore-all lint/style/noNamespace: <Don't care> */
 
 namespace NodeJS {
   interface ProcessEnv {

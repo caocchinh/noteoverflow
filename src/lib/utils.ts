@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import {type ClassValue, clsx} from "clsx";
+import {twMerge} from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -20,7 +20,6 @@ export const parseQuestionId = ({
 };
 
 export const isValidQuestionId = (id: string): boolean => {
-  // biome-ignore lint/performance/useTopLevelRegex: <Needed for the regex>
   const questionIdRegex = /^[^;]+;[^;]+;[^;]+;questions;Q.+$/;
   return questionIdRegex.test(id);
 };

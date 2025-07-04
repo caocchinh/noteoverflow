@@ -1,17 +1,11 @@
-import 'server-only';
-import { and, eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { question, questionImage } from '@/drizzle/schema';
+import "server-only";
+import {and, eq} from "drizzle-orm";
+import {getDbAsync} from "@/drizzle/db";
+import {question, questionImage} from "@/drizzle/schema";
 
-export const isQuestionExists = async (
-  questionId: string
-): Promise<boolean> => {
+export const isQuestionExists = async (questionId: string): Promise<boolean> => {
   const db = await getDbAsync();
-  const result = await db
-    .select()
-    .from(question)
-    .where(eq(question.id, questionId))
-    .limit(1);
+  const result = await db.select().from(question).where(eq(question.id, questionId)).limit(1);
   return result.length > 0;
 };
 
@@ -109,20 +103,12 @@ export const overwriteQuestion = async ({
     });
 };
 
-export const isQuestionImageExists = async (
-  questionId: string,
-  order: number
-): Promise<boolean> => {
+export const isQuestionImageExists = async (questionId: string, order: number): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(questionImage)
-    .where(
-      and(
-        eq(questionImage.questionId, questionId),
-        eq(questionImage.order, order)
-      )
-    )
+    .where(and(eq(questionImage.questionId, questionId), eq(questionImage.order, order)))
     .limit(1);
   return result.length > 0;
 };
@@ -141,30 +127,21 @@ export const createQuestionImage = async ({
 }> => {
   try {
     const db = await getDbAsync();
-    await db.insert(questionImage).values({ questionId, imageSrc, order });
+    await db.insert(questionImage).values({questionId, imageSrc, order});
     return {
       success: true,
       error: undefined,
     };
   } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: <Needed for debugging on the server>
-    console.error('Error creating question image:', error);
+    console.error("Error creating question image:", error);
     return {
       success: false,
-      error: 'Internal Server Error',
+      error: "Internal Server Error",
     };
   }
 };
 
-export const overwriteQuestionImage = async ({
-  questionId,
-  imageSrc,
-  order,
-}: {
-  questionId: string;
-  imageSrc: string;
-  order: number;
-}) => {
+export const overwriteQuestionImage = async ({questionId, imageSrc, order}: {questionId: string; imageSrc: string; order: number}) => {
   const db = await getDbAsync();
 
   await db

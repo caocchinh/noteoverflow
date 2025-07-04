@@ -1,82 +1,31 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  BrushCleaning,
-  Loader2,
-  ScanText,
-  Settings,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
-import { default as NextImage } from "next/image";
-import { useTheme } from "next-themes";
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarInset,
-  SidebarProvider,
-  SidebarRail,
-  SidebarSeparator,
-} from "@/components/ui/sidebar";
-import { Switch } from "@/components/ui/switch";
-import type { ValidCurriculum } from "@/constants/types";
+import {useInfiniteQuery} from "@tanstack/react-query";
+import {AnimatePresence, motion} from "framer-motion";
+import {BrushCleaning, Loader2, ScanText, Settings, SlidersHorizontal, X} from "lucide-react";
+import {default as NextImage} from "next/image";
+import {useTheme} from "next-themes";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Label} from "@/components/ui/label";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarProvider, SidebarRail, SidebarSeparator} from "@/components/ui/sidebar";
+import {Switch} from "@/components/ui/switch";
+import type {ValidCurriculum} from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
-import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
-import {
-  FILTERS_CACHE_KEY,
-  INVALID_INPUTS_DEFAULT,
-  TOPICAL_DATA,
-} from "@/features/topical/constants/constants";
-import type {
-  FilterData,
-  FiltersCache,
-  InvalidInputs,
-} from "@/features/topical/constants/types";
-import {
-  validateCurriculum,
-  validateFilterData,
-  validateSubject,
-} from "@/features/topical/lib/utils";
-import { getTopicalData } from "@/features/topical/server/actions";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  useMasonry,
-  usePositioner,
-  useContainerPosition,
-  useResizeObserver,
-  useScroller,
-} from "masonic";
-import { useWindowSize } from "@react-hook/window-size";
+import {useSidebar} from "@/features/topical/components/TopicalLayoutProvider";
+import {FILTERS_CACHE_KEY, INVALID_INPUTS_DEFAULT, TOPICAL_DATA} from "@/features/topical/constants/constants";
+import type {FilterData, FiltersCache, InvalidInputs} from "@/features/topical/constants/types";
+import {validateCurriculum, validateFilterData, validateSubject} from "@/features/topical/lib/utils";
+import {getTopicalData} from "@/features/topical/server/actions";
+import {useIsMobile} from "@/hooks/use-mobile";
+import {cn} from "@/lib/utils";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {useMasonry, usePositioner, useContainerPosition, useResizeObserver, useScroller} from "masonic";
+import {useWindowSize} from "@react-hook/window-size";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -107,7 +56,7 @@ const ButtonUltility = ({
     subjectId: string;
   } & FilterData;
 }) => {
-  const { theme } = useTheme();
+  const {theme} = useTheme();
 
   return (
     <>
@@ -143,14 +92,14 @@ const ButtonUltility = ({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Clear all</DialogTitle>
-            <DialogDescription>
-              This will clear all the selected options and reset the form. Are
-              you sure you want to clear?
-            </DialogDescription>
+            <DialogDescription>This will clear all the selected options and reset the form. Are you sure you want to clear?</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <Button className="cursor-pointer" variant="outline">
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+              >
                 Cancel
               </Button>
             </DialogClose>
@@ -202,10 +151,7 @@ const CacheAccordion = ({
       <AccordionItem value="session-cache">
         <AccordionTrigger>Session cache</AccordionTrigger>
         <AccordionContent className="flex flex-col gap-4 text-balance">
-          <p>
-            Automatically restores your filters from the last session on page
-            refresh. Not synced across devices. Is enabled by default.
-          </p>
+          <p>Automatically restores your filters from the last session on page refresh. Not synced across devices. Is enabled by default.</p>
           <div className="flex items-center gap-2">
             <Label htmlFor="session-cache">Enable session cache</Label>
             <Switch
@@ -220,8 +166,7 @@ const CacheAccordion = ({
         <AccordionTrigger>Persistant cache</AccordionTrigger>
         <AccordionContent className="flex flex-col gap-4 text-balance">
           <p>
-            Permanently saves your filter preferences for each subject. When you
-            re-select a subject, previously used filters are automatically
+            Permanently saves your filter preferences for each subject. When you re-select a subject, previously used filters are automatically
             applied. Not synced across devices. Is enabled by default.
           </p>
           <div className="flex items-center gap-2">
@@ -239,35 +184,27 @@ const CacheAccordion = ({
 };
 
 const TopicalPage = () => {
-  const [selectedCurriculum, setSelectedCurriculum] = useState<
-    ValidCurriculum | ""
-  >("");
+  const [selectedCurriculum, setSelectedCurriculum] = useState<ValidCurriculum | "">("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
   const availableSubjects = useMemo(() => {
-    return TOPICAL_DATA[
-      TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-    ]?.subject;
+    return TOPICAL_DATA[TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)]?.subject;
   }, [selectedCurriculum]);
   const availableTopics = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.topic;
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.topic;
   }, [availableSubjects, selectedSubject]);
   const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const availableYears = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.year;
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.year;
   }, [availableSubjects, selectedSubject]);
   const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
   const availablePaperTypes = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.paperType;
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.paperType;
   }, [availableSubjects, selectedSubject]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
   const availableSeasons = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.season;
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.season;
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
@@ -283,10 +220,9 @@ const TopicalPage = () => {
   const seasonRef = useRef<HTMLDivElement | null>(null);
   const mountedRef = useRef(false);
   const [isSessionCacheEnabled, setIsSessionCacheEnabled] = useState(true);
-  const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
-    useState(true);
+  const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+  const {isSidebarOpen, setIsSidebarOpen} = useSidebar();
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<
     {
@@ -304,9 +240,7 @@ const TopicalPage = () => {
 
   const resetEverything = () => {
     const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
+    let stateToSave: FiltersCache = existingStateJSON ? JSON.parse(existingStateJSON) : {filters: {}};
 
     stateToSave = {
       ...stateToSave,
@@ -421,37 +355,37 @@ const TopicalPage = () => {
 
   useEffect(() => {
     if (selectedCurriculum) {
-      setInvalidInputs((prev) => ({ ...prev, curriculum: false }));
+      setInvalidInputs((prev) => ({...prev, curriculum: false}));
     }
   }, [selectedCurriculum]);
 
   useEffect(() => {
     if (selectedSubject) {
-      setInvalidInputs((prev) => ({ ...prev, subject: false }));
+      setInvalidInputs((prev) => ({...prev, subject: false}));
     }
   }, [selectedSubject]);
 
   useEffect(() => {
     if (selectedTopic.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, topic: false }));
+      setInvalidInputs((prev) => ({...prev, topic: false}));
     }
   }, [selectedTopic]);
 
   useEffect(() => {
     if (selectedPaperType.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
+      setInvalidInputs((prev) => ({...prev, paperType: false}));
     }
   }, [selectedPaperType]);
 
   useEffect(() => {
     if (selectedYear.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, year: false }));
+      setInvalidInputs((prev) => ({...prev, year: false}));
     }
   }, [selectedYear]);
 
   useEffect(() => {
     if (selectedSeason.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, season: false }));
+      setInvalidInputs((prev) => ({...prev, season: false}));
     }
   }, [selectedSeason]);
 
@@ -462,18 +396,9 @@ const TopicalPage = () => {
         const parsedState: FiltersCache = JSON.parse(savedState);
         setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled);
         setIsPersistantCacheEnabled(parsedState.isPersistantCacheEnabled);
-        if (
-          parsedState.isSessionCacheEnabled &&
-          parsedState.lastSessionCurriculum &&
-          validateCurriculum(parsedState.lastSessionCurriculum)
-        ) {
-          setSelectedCurriculum(
-            parsedState.lastSessionCurriculum as ValidCurriculum
-          );
-          const isSubjectValid = validateSubject(
-            parsedState.lastSessionCurriculum,
-            parsedState.lastSessionSubject
-          );
+        if (parsedState.isSessionCacheEnabled && parsedState.lastSessionCurriculum && validateCurriculum(parsedState.lastSessionCurriculum)) {
+          setSelectedCurriculum(parsedState.lastSessionCurriculum as ValidCurriculum);
+          const isSubjectValid = validateSubject(parsedState.lastSessionCurriculum, parsedState.lastSessionSubject);
           if (parsedState.lastSessionSubject && isSubjectValid) {
             setSelectedSubject(parsedState.lastSessionSubject);
           }
@@ -481,33 +406,15 @@ const TopicalPage = () => {
             isSubjectValid &&
             validateFilterData({
               curriculumn: parsedState.lastSessionCurriculum,
-              data: parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ],
+              data: parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject],
               subject: parsedState.lastSessionSubject,
             })
           ) {
             setSelectedSubject(parsedState.lastSessionSubject);
-            setSelectedTopic(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].topic
-            );
-            setSelectedPaperType(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].paperType
-            );
-            setSelectedYear(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].year
-            );
-            setSelectedSeason(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].season
-            );
+            setSelectedTopic(parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject].topic);
+            setSelectedPaperType(parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject].paperType);
+            setSelectedYear(parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject].year);
+            setSelectedSeason(parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject].season);
           }
         }
       } catch {
@@ -521,7 +428,6 @@ const TopicalPage = () => {
     }, 0);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
   useEffect(() => {
     if (!mountedRef.current) {
       return;
@@ -531,10 +437,7 @@ const TopicalPage = () => {
       try {
         const parsedState: FiltersCache = JSON.parse(savedState);
         if (parsedState.isPersistantCacheEnabled) {
-          const isSubjectValid = validateSubject(
-            selectedCurriculum,
-            selectedSubject
-          );
+          const isSubjectValid = validateSubject(selectedCurriculum, selectedSubject);
           if (selectedSubject && isSubjectValid) {
             setSelectedSubject(selectedSubject);
           }
@@ -546,18 +449,10 @@ const TopicalPage = () => {
               subject: selectedSubject,
             })
           ) {
-            setSelectedTopic(
-              parsedState.filters[selectedCurriculum][selectedSubject].topic
-            );
-            setSelectedPaperType(
-              parsedState.filters[selectedCurriculum][selectedSubject].paperType
-            );
-            setSelectedYear(
-              parsedState.filters[selectedCurriculum][selectedSubject].year
-            );
-            setSelectedSeason(
-              parsedState.filters[selectedCurriculum][selectedSubject].season
-            );
+            setSelectedTopic(parsedState.filters[selectedCurriculum][selectedSubject].topic);
+            setSelectedPaperType(parsedState.filters[selectedCurriculum][selectedSubject].paperType);
+            setSelectedYear(parsedState.filters[selectedCurriculum][selectedSubject].year);
+            setSelectedSeason(parsedState.filters[selectedCurriculum][selectedSubject].season);
           } else {
             setSelectedTopic([]);
             setSelectedYear([]);
@@ -577,10 +472,10 @@ const TopicalPage = () => {
       setSelectedPaperType([]);
       setSelectedSeason([]);
     }
-    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+    setInvalidInputs({...INVALID_INPUTS_DEFAULT});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSubject]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <Intended behavior>
   useEffect(() => {
     if (!mountedRef.current) {
       return;
@@ -590,7 +485,7 @@ const TopicalPage = () => {
     setSelectedYear([]);
     setSelectedPaperType([]);
     setSelectedSeason([]);
-    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+    setInvalidInputs({...INVALID_INPUTS_DEFAULT});
   }, [selectedCurriculum]);
 
   useEffect(() => {
@@ -598,9 +493,7 @@ const TopicalPage = () => {
       return;
     }
     const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
+    let stateToSave: FiltersCache = existingStateJSON ? JSON.parse(existingStateJSON) : {filters: {}};
 
     stateToSave = {
       ...stateToSave,
@@ -640,7 +533,7 @@ const TopicalPage = () => {
     isPersistantCacheEnabled,
   ]);
 
-  const search = async ({ pageParam }: { pageParam: number }) => {
+  const search = async ({pageParam}: {pageParam: number}) => {
     console.log("searching", pageParam);
     if (isValidInputs(false)) {
       return await getTopicalData({
@@ -658,12 +551,12 @@ const TopicalPage = () => {
 
   const {
     data,
-    error,
+    // error,
     fetchNextPage,
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    status,
+    // status,
   } = useInfiniteQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: search,
@@ -679,11 +572,7 @@ const TopicalPage = () => {
   const containerRef = useRef(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [windowWidth, height] = useWindowSize();
-  const { offset, width } = useContainerPosition(containerRef, [
-    windowWidth,
-    height,
-    animationTrigger,
-  ]);
+  const {offset, width} = useContainerPosition(containerRef, [windowWidth, height, animationTrigger]);
   const positioner = usePositioner(
     {
       width,
@@ -693,7 +582,7 @@ const TopicalPage = () => {
     },
     [currentQuery]
   );
-  const { scrollTop, isScrolling } = useScroller(offset);
+  const {scrollTop, isScrolling} = useScroller(offset);
   const resizeObserver = useResizeObserver(positioner);
 
   const sidebarInsetRef = useRef<HTMLDivElement>(null);
@@ -721,9 +610,9 @@ const TopicalPage = () => {
                   <AnimatePresence mode="wait">
                     {selectedSubject && selectedCurriculum ? (
                       <motion.div
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0, scale: 0.95}}
+                        initial={{opacity: 0, scale: 0.95}}
                         key={selectedSubject}
                         transition={{
                           duration: 0.15,
@@ -734,19 +623,15 @@ const TopicalPage = () => {
                           alt="cover"
                           className="self-center rounded-[2px]"
                           height={126}
-                          src={
-                            availableSubjects.find(
-                              (item) => item.code === selectedSubject
-                            )?.coverImage ?? ""
-                          }
+                          src={availableSubjects.find((item) => item.code === selectedSubject)?.coverImage ?? ""}
                           width={100}
                         />
                       </motion.div>
                     ) : (
                       <motion.div
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{opacity: 1, scale: 1}}
+                        exit={{opacity: 0, scale: 0.95}}
+                        initial={{opacity: 0, scale: 0.95}}
                         key={selectedSubject}
                         transition={{
                           duration: 0.15,
@@ -768,14 +653,7 @@ const TopicalPage = () => {
                       className="flex flex-col items-start justify-start gap-1"
                       ref={curriculumRef}
                     >
-                      <h3
-                        className={cn(
-                          "w-max font-medium text-sm",
-                          invalidInputs.curriculum && "text-destructive"
-                        )}
-                      >
-                        Curriculum
-                      </h3>
+                      <h3 className={cn("w-max font-medium text-sm", invalidInputs.curriculum && "text-destructive")}>Curriculum</h3>
                       <EnhancedSelect
                         data={TOPICAL_DATA.map((item) => ({
                           code: item.curriculum,
@@ -788,25 +666,14 @@ const TopicalPage = () => {
                           setSelectedCurriculum(value as ValidCurriculum);
                         }}
                       />
-                      {invalidInputs.curriculum && (
-                        <p className="text-destructive text-sm">
-                          Curriculum is required
-                        </p>
-                      )}
+                      {invalidInputs.curriculum && <p className="text-destructive text-sm">Curriculum is required</p>}
                     </div>
 
                     <div
                       className="flex flex-col items-start justify-start gap-1"
                       ref={subjectRef}
                     >
-                      <h3
-                        className={cn(
-                          "w-max font-medium text-sm",
-                          invalidInputs.subject && "text-destructive"
-                        )}
-                      >
-                        Subject
-                      </h3>
+                      <h3 className={cn("w-max font-medium text-sm", invalidInputs.subject && "text-destructive")}>Subject</h3>
                       <EnhancedSelect
                         data={availableSubjects}
                         label="Subject"
@@ -814,11 +681,7 @@ const TopicalPage = () => {
                         selectedValue={selectedSubject}
                         setSelectedValue={setSelectedSubject}
                       />
-                      {invalidInputs.subject && (
-                        <p className="text-destructive text-sm">
-                          Subject is required
-                        </p>
-                      )}
+                      {invalidInputs.subject && <p className="text-destructive text-sm">Subject is required</p>}
                     </div>
                   </div>
                 </div>
@@ -828,107 +691,57 @@ const TopicalPage = () => {
                   className="flex flex-col items-start justify-start gap-1"
                   ref={topicRef}
                 >
-                  <h3
-                    className={cn(
-                      "w-max font-medium text-sm",
-                      invalidInputs.topic && "text-destructive"
-                    )}
-                  >
-                    Topic
-                  </h3>
+                  <h3 className={cn("w-max font-medium text-sm", invalidInputs.topic && "text-destructive")}>Topic</h3>
                   <EnhancedMultiSelect
                     data={availableTopics}
                     label="Topic"
-                    onValuesChange={(values) =>
-                      setSelectedTopic(values as string[])
-                    }
+                    onValuesChange={(values) => setSelectedTopic(values as string[])}
                     prerequisite="Subject"
                     values={selectedTopic}
                   />
-                  {invalidInputs.topic && (
-                    <p className="text-destructive text-sm">
-                      Topic is required
-                    </p>
-                  )}
+                  {invalidInputs.topic && <p className="text-destructive text-sm">Topic is required</p>}
                 </div>
                 <div
                   className="flex flex-col items-start justify-start gap-1"
                   ref={paperTypeRef}
                 >
-                  <h3
-                    className={cn(
-                      "w-max font-medium text-sm",
-                      invalidInputs.paperType && "text-destructive"
-                    )}
-                  >
-                    Paper
-                  </h3>
+                  <h3 className={cn("w-max font-medium text-sm", invalidInputs.paperType && "text-destructive")}>Paper</h3>
                   <EnhancedMultiSelect
                     data={availablePaperTypes?.map((item) => item.toString())}
                     label="Paper"
-                    onValuesChange={(values) =>
-                      setSelectedPaperType(values as string[])
-                    }
+                    onValuesChange={(values) => setSelectedPaperType(values as string[])}
                     prerequisite="Subject"
                     values={selectedPaperType}
                   />
-                  {invalidInputs.paperType && (
-                    <p className="text-destructive text-sm">
-                      Paper is required
-                    </p>
-                  )}
+                  {invalidInputs.paperType && <p className="text-destructive text-sm">Paper is required</p>}
                 </div>
                 <div
                   className="flex flex-col items-start justify-start gap-1"
                   ref={yearRef}
                 >
-                  <h3
-                    className={cn(
-                      "w-max font-medium text-sm",
-                      invalidInputs.year && "text-destructive"
-                    )}
-                  >
-                    Year
-                  </h3>
+                  <h3 className={cn("w-max font-medium text-sm", invalidInputs.year && "text-destructive")}>Year</h3>
                   <EnhancedMultiSelect
                     data={availableYears?.map((item) => item.toString())}
                     label="Year"
-                    onValuesChange={(values) =>
-                      setSelectedYear(values as string[])
-                    }
+                    onValuesChange={(values) => setSelectedYear(values as string[])}
                     prerequisite="Subject"
                     values={selectedYear}
                   />
-                  {invalidInputs.year && (
-                    <p className="text-destructive text-sm">Year is required</p>
-                  )}
+                  {invalidInputs.year && <p className="text-destructive text-sm">Year is required</p>}
                 </div>
                 <div
                   className="flex flex-col items-start justify-start gap-1"
                   ref={seasonRef}
                 >
-                  <h3
-                    className={cn(
-                      "w-max font-medium text-sm",
-                      invalidInputs.season && "text-destructive"
-                    )}
-                  >
-                    Season
-                  </h3>
+                  <h3 className={cn("w-max font-medium text-sm", invalidInputs.season && "text-destructive")}>Season</h3>
                   <EnhancedMultiSelect
                     data={availableSeasons}
                     label="Season"
-                    onValuesChange={(values) =>
-                      setSelectedSeason(values as string[])
-                    }
+                    onValuesChange={(values) => setSelectedSeason(values as string[])}
                     prerequisite="Subject"
                     values={selectedSeason}
                   />
-                  {invalidInputs.season && (
-                    <p className="text-destructive text-sm">
-                      Season is required
-                    </p>
-                  )}
+                  {invalidInputs.season && <p className="text-destructive text-sm">Season is required</p>}
                 </div>
               </div>
               <div className="flex w-full flex-col items-center justify-center gap-2">
@@ -992,9 +805,7 @@ const TopicalPage = () => {
             </Button>
           </div>
 
-          <h1 className="w-full text-center font-bold text-2xl ">
-            Topical questions
-          </h1>
+          <h1 className="w-full text-center font-bold text-2xl ">Topical questions</h1>
 
           <ScrollArea
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main"
@@ -1018,10 +829,7 @@ const TopicalPage = () => {
                 next={fetchNextPage}
                 threshold={1}
               >
-                {isFetchingNextPage ||
-                  (isFetching && (
-                    <Loader2 className="my-4 h-8 w-8 animate-spin" />
-                  ))}
+                {isFetchingNextPage || (isFetching && <Loader2 className="my-4 h-8 w-8 animate-spin" />)}
               </InfiniteScroll>
             </div>
           </ScrollArea>
@@ -1033,7 +841,8 @@ const TopicalPage = () => {
 
 export default TopicalPage;
 
-const Item = ({ data }: { data: any }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Item = ({data}: {data: any}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -1063,7 +872,7 @@ const Item = ({ data }: { data: any }) => {
         animate={{
           opacity: isHovered ? 0.3 : 0,
         }}
-        transition={{ duration: 0.3 }}
+        transition={{duration: 0.3}}
       />
     </motion.div>
   );

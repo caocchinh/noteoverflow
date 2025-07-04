@@ -1,29 +1,20 @@
-import { betterAuth, type User } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { admin, captcha } from 'better-auth/plugins';
-import { AVATARS } from '@/constants/constants';
-// biome-ignore lint/performance/noNamespaceImport: <Intended behavior>
-import * as schema from '@/drizzle/schema';
-import {
-  AdminRole,
-  ac,
-  OwnerRole,
-  ROLE_ADMIN,
-  ROLE_OWNER,
-  ROLE_USER,
-  UserRole,
-} from './permission';
+import {betterAuth, type User} from "better-auth";
+import {drizzleAdapter} from "better-auth/adapters/drizzle";
+import {admin, captcha} from "better-auth/plugins";
+import {AVATARS} from "@/constants/constants";
+import * as schema from "@/drizzle/schema";
+import {AdminRole, ac, OwnerRole, ROLE_ADMIN, ROLE_OWNER, ROLE_USER, UserRole} from "./permission";
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
-// biome-ignore lint/suspicious/noExplicitAny: <Indended behavior>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const auth = async (database: any) =>
   betterAuth({
     database: drizzleAdapter(await database(), {
-      provider: 'sqlite',
+      provider: "sqlite",
       schema,
     }),
-    appName: 'NoteOverflow',
+    appName: "NoteOverflow",
     baseURL: process.env.BETTER_AUTH_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: [process.env.BETTER_AUTH_URL],
@@ -38,10 +29,10 @@ export const auth = async (database: any) =>
         },
         defaultRole: ROLE_USER,
 
-        bannedUserMessage: 'You are banned from the platform.',
+        bannedUserMessage: "You are banned from the platform.",
       }),
       captcha({
-        provider: 'cloudflare-turnstile',
+        provider: "cloudflare-turnstile",
         secretKey: process.env.TURNSTILE_SECRET_KEY,
         endpoints: [`${process.env.BETTER_AUTH_URL}/authentication`],
       }),
@@ -49,7 +40,6 @@ export const auth = async (database: any) =>
     databaseHooks: {
       user: {
         create: {
-          // biome-ignore lint/suspicious/useAwait: <Don't care wrong linting>
           before: async (user: User) => {
             return {
               data: {
@@ -63,12 +53,12 @@ export const auth = async (database: any) =>
     },
     onAPIError: {
       throw: true,
-      errorURL: '/authentication',
+      errorURL: "/authentication",
     },
 
     socialProviders: {
       google: {
-        prompt: 'select_account',
+        prompt: "select_account",
         clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
         clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
       },
@@ -79,7 +69,7 @@ export const auth = async (database: any) =>
       reddit: {
         clientId: process.env.REDDIT_CLIENT_ID,
         clientSecret: process.env.REDDIT_CLIENT_SECRET,
-        scope: ['identity'],
+        scope: ["identity"],
       },
 
       microsoft: {

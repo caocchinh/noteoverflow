@@ -61,7 +61,7 @@ export default function InfiniteScroll({
 
   return (
     <>
-      {flattenChildren.map((child, index) => {
+      {flattenChildren.map((child) => {
         // @ts-expect-error ignore ref type
         return cloneElement(child, { ref: observerRef });
       })}

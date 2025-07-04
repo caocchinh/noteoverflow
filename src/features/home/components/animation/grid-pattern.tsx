@@ -1,7 +1,6 @@
-/** biome-ignore-all lint/a11y/noSvgWithoutTitle: <Dont'care> */
-import { useId } from 'react';
+import {useId} from "react";
 
-import { cn } from '@/lib/utils';
+import {cn} from "@/lib/utils";
 
 interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   width?: number;
@@ -14,25 +13,13 @@ interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   [key: string]: unknown;
 }
 
-export function GridPattern({
-  width = 40,
-  height = 40,
-  x = -1,
-  y = -1,
-  strokeDasharray = '0',
-  squares,
-  className,
-  ...props
-}: GridPatternProps) {
+export function GridPattern({width = 40, height = 40, x = -1, y = -1, strokeDasharray = "0", squares, className, ...props}: GridPatternProps) {
   const id = useId();
 
   return (
     <svg
       aria-hidden="true"
-      className={cn(
-        'pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/50',
-        className
-      )}
+      className={cn("pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/50", className)}
       {...props}
     >
       <defs>
@@ -51,9 +38,18 @@ export function GridPattern({
           />
         </pattern>
       </defs>
-      <rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
+      <rect
+        fill={`url(#${id})`}
+        height="100%"
+        strokeWidth={0}
+        width="100%"
+      />
       {squares && (
-        <svg className="overflow-visible" x={x} y={y}>
+        <svg
+          className="overflow-visible"
+          x={x}
+          y={y}
+        >
           {squares.map(([_x, _y]) => (
             <rect
               height={height - 1}
