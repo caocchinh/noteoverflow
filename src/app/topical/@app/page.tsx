@@ -54,7 +54,6 @@ import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider"
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
-  COLUMN_WIDTHS,
   TOPICAL_DATA,
   DEFAULT_NUMBER_OF_COLUMNS,
 } from "@/features/topical/constants/constants";
@@ -72,14 +71,15 @@ import { getTopicalData } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePositioner, useContainerPosition } from "masonic";
-import { useWindowSize } from "@react-hook/window-size";
-import ElasticSlider from "@/features/topical/components/ElasticSlider";
 import dynamic from "next/dynamic";
+import ElasticSlider from "@/features/topical/components/ElasticSlider";
 
 // Client-side only component for masonry
 const MasonryGallery = dynamic(
-  () => import("./MasonryGallery").then((mod) => mod.default),
+  () =>
+    import("@/features/topical/components/MasonryGallery").then(
+      (mod) => mod.default
+    ),
   { ssr: false }
 );
 

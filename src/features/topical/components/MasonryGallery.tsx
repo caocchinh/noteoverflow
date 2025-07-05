@@ -91,6 +91,9 @@ const Item = ({ data }: { data: any }) => {
         animate={{
           opacity: isHovered ? 0.3 : 0,
         }}
+        initial={{
+          opacity: 0,
+        }}
         transition={{ duration: 0.3 }}
       />
     </motion.div>
