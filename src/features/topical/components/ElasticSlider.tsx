@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   animate,
   motion,
@@ -91,7 +91,7 @@ const Slider: React.FC<SliderProps> = ({
     setTimeout(() => {
       isMounted.current = true;
     }, 0);
-  }, []);
+  }, [setColumnsProp]);
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -108,7 +108,7 @@ const Slider: React.FC<SliderProps> = ({
       numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
     };
     localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-  }, [numberOfColumns]);
+  }, [numberOfColumns, setColumnsProp]);
 
   useMotionValueEvent(clientX, "change", (latest: number) => {
     if (sliderRef.current) {

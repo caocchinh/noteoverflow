@@ -688,7 +688,6 @@ const TopicalPage = () => {
     },
     enabled: isSearchEnabled,
   });
-  const containerRef = useRef(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
 
   const [isResizing, setIsResizing] = useState(false);
@@ -697,7 +696,7 @@ const TopicalPage = () => {
       return;
     }
     setIsResizing(true);
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isMobileDevice]);
 
   return (
     <div className="pt-16 h-screen overflow-y-hidden">
