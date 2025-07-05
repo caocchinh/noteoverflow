@@ -72,18 +72,16 @@ import { getTopicalData } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  useMasonry,
-  usePositioner,
-  useContainerPosition,
-  useResizeObserver,
-  useScroller,
-  createResizeObserver,
-} from "masonic";
+import { usePositioner, useContainerPosition } from "masonic";
 import { useWindowSize } from "@react-hook/window-size";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
-import { SquareMinus } from "lucide-react";
-import { SquarePlus } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Client-side only component for masonry
+const MasonryGallery = dynamic(
+  () => import("./MasonryGallery").then((mod) => mod.default),
+  { ssr: false }
+);
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -692,23 +690,7 @@ const TopicalPage = () => {
   });
   const containerRef = useRef(null);
   const [animationTrigger, setAnimationTrigger] = useState(0);
-  const [windowWidth, height] = useWindowSize();
-  const { offset, width } = useContainerPosition(containerRef, [
-    windowWidth,
-    height,
-    animationTrigger,
-  ]);
-  const positioner = usePositioner(
-    {
-      width,
-      columnGutter: 12,
-      maxColumnCount: numberOfColumns,
-      columnWidth: COLUMN_WIDTHS[numberOfColumns as keyof typeof COLUMN_WIDTHS],
-    },
-    [currentQuery]
-  );
-  const { scrollTop, isScrolling } = useScroller(offset);
-  const resizeObserver = useResizeObserver(positioner);
+
   const [isResizing, setIsResizing] = useState(false);
   useEffect(() => {
     if (!mountedRef.current || isMobileDevice) {
@@ -1065,18 +1047,12 @@ const TopicalPage = () => {
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main"
             type="always"
           >
-            {useMasonry({
-              resizeObserver,
-              positioner,
-
-              scrollTop,
-              isScrolling,
-              containerRef,
-              items: data?.pages.flatMap((page) => page.data) ?? [],
-              overscanBy: 3,
-              render: Item,
-              height: Infinity,
-            })}
+            <MasonryGallery
+              items={data?.pages.flatMap((page) => page.data) ?? []}
+              columnCount={numberOfColumns}
+              animationTrigger={animationTrigger}
+              currentQuery={currentQuery}
+            />
             <div className="flex flex-row flex-wrap items-center justify-center gap-4">
               <InfiniteScroll
                 hasMore={hasNextPage && isSearchEnabled}
@@ -1098,39 +1074,3 @@ const TopicalPage = () => {
 };
 
 export default TopicalPage;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Item = ({ data }: { data: any }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  return (
-    <motion.div
-      className="relative cursor-pointer"
-      whileHover={{
-        scale: 0.98,
-        transition: {
-          duration: 0.4,
-          ease: [0.165, 0.84, 0.44, 1],
-        },
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <NextImage
-        alt="question"
-        height={700}
-        className="!w-max !h-max !max-w-full rounded-sm"
-        key={data.questionImages[0].imageSrc}
-        src={data.questionImages[0].imageSrc}
-        width={280}
-      />
-
-      <motion.div
-        className="absolute inset-0 rounded-sm bg-gradient-to-tr from-pink-500/30 to-sky-500/35"
-        animate={{
-          opacity: isHovered ? 0.3 : 0,
-        }}
-        transition={{ duration: 0.3 }}
-      />
-    </motion.div>
-  );
-};
