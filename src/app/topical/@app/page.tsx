@@ -2,6 +2,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Blocks,
   BrushCleaning,
   Loader2,
   ScanText,
@@ -53,7 +54,9 @@ import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider"
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
+  COLUMN_WIDTHS,
   TOPICAL_DATA,
+  DEFAULT_NUMBER_OF_COLUMNS,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -78,6 +81,9 @@ import {
   createResizeObserver,
 } from "masonic";
 import { useWindowSize } from "@react-hook/window-size";
+import ElasticSlider from "@/features/topical/components/ElasticSlider";
+import { SquareMinus } from "lucide-react";
+import { SquarePlus } from "lucide-react";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -272,7 +278,10 @@ const TopicalPage = () => {
   }, [availableSubjects, selectedSubject]);
   const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [numberOfColumns, setNumberOfColumns] = useState(
+    DEFAULT_NUMBER_OF_COLUMNS
+  );
+
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
@@ -461,8 +470,13 @@ const TopicalPage = () => {
     if (savedState) {
       try {
         const parsedState: FiltersCache = JSON.parse(savedState);
-        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled);
-        setIsPersistantCacheEnabled(parsedState.isPersistantCacheEnabled);
+        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
+        setIsPersistantCacheEnabled(
+          parsedState.isPersistantCacheEnabled ?? true
+        );
+        setNumberOfColumns(
+          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
+        );
         if (
           parsedState.isSessionCacheEnabled &&
           parsedState.lastSessionCurriculum &&
@@ -688,29 +702,16 @@ const TopicalPage = () => {
     {
       width,
       columnGutter: 12,
-      maxColumnCount: 3,
-      columnWidth: 10,
+      maxColumnCount: numberOfColumns,
+      columnWidth: COLUMN_WIDTHS[numberOfColumns as keyof typeof COLUMN_WIDTHS],
     },
     [currentQuery]
   );
   const { scrollTop, isScrolling } = useScroller(offset);
   const resizeObserver = useResizeObserver(positioner);
-  const [lastHoverElement, setLastHoverElement] =
-    useState<HTMLDivElement | null>(null);
-  const test = createResizeObserver(positioner, () => {
-    console.log("resizing");
-    if (lastHoverElement) {
-      console.log(lastHoverElement);
-      lastHoverElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  });
   const [isResizing, setIsResizing] = useState(false);
-
   useEffect(() => {
-    if (!mountedRef.current) {
+    if (!mountedRef.current || isMobileDevice) {
       return;
     }
     setIsResizing(true);
@@ -995,17 +996,40 @@ const TopicalPage = () => {
                 />
               </PopoverContent>
             </Popover>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
+                  variant="secondary"
+                >
+                  <Blocks />
+                  Layout settings
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                <h4 className="text-sm font-medium text-center mb-2">
+                  Number of maximum displayed columns
+                </h4>
+                <ElasticSlider
+                  startingValue={1}
+                  maxValue={10}
+                  isStepped
+                  stepSize={1}
+                  setColumnsProp={setNumberOfColumns}
+                />
+              </PopoverContent>
+            </Popover>
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
           <AnimatePresence mode="wait">
-            {isResizing && (
+            {isResizing && data && (
               <motion.div
                 animate={{
                   opacity: 1,
                 }}
-                className="absolute left-3 z-[100000] h-full text-xl w-full bg-background/75 flex items-center justify-center"
+                className="absolute left-3 z-[10000] -mt-18 h-full text-xl w-full bg-background/75 flex items-center justify-center"
                 exit={{
                   opacity: 0,
                 }}

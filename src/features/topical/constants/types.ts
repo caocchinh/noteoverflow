@@ -48,6 +48,7 @@ export interface FilterData {
 }
 
 export type FiltersCache = {
+  numberOfColumns: number;
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
   lastSessionSubject: string;

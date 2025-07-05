@@ -167,3 +167,18 @@ export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
 };
 
 export const PAGE_SIZE = 50;
+
+export const DEFAULT_NUMBER_OF_COLUMNS = 3;
+
+export const COLUMN_WIDTHS = {
+  1: 400,
+  2: 300,
+  3: 200,
+  4: 150,
+  5: 120,
+  6: 100,
+  7: 90,
+  8: 80,
+  9: 70,
+  10: 60,
+};
