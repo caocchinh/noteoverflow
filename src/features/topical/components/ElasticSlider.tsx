@@ -26,8 +26,8 @@ interface ElasticSliderProps {
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
-  startingValue = 0,
-  maxValue = 100,
+  startingValue = 1,
+  maxValue = 5,
   className = "",
   isStepped = false,
   stepSize = 1,
@@ -153,12 +153,10 @@ const Slider: React.FC<SliderProps> = ({
   };
 
   const getRangePercentage = (): number => {
-    const totalRange = maxValue - startingValue;
-    if (totalRange === 0) return 0;
     return (
       ((numberOfColumnsSliderValue ??
         DEFAULT_NUMBER_OF_COLUMNS - startingValue) /
-        totalRange) *
+        maxValue) *
       100
     );
   };

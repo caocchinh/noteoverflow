@@ -1,9 +1,8 @@
-import { Children, cloneElement, useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface InfiniteScrollProps {
-  isLoading: boolean;
-  hasMore: boolean;
   next: () => unknown;
+  hasMore: boolean;
   threshold?: number;
   root?: Element | Document | null;
   rootMargin?: string;
@@ -11,60 +10,44 @@ interface InfiniteScrollProps {
 }
 
 export default function InfiniteScroll({
-  isLoading,
-  hasMore,
   next,
+  hasMore,
   threshold = 1,
   root = null,
-  rootMargin = "0px",
+  rootMargin = "200px",
   children,
 }: InfiniteScrollProps) {
-  const observer = useRef<IntersectionObserver>(null);
-  // This callback ref will be called when it is dispatched to an element or detached from an element,
-  // or when the callback function changes.
-  const observerRef = useCallback(
-    (element: HTMLElement | null) => {
-      let safeThreshold = threshold;
-      if (threshold < 0 || threshold > 1) {
-        safeThreshold = 1;
-      }
-      // When isLoading is true, this callback will do nothing.
-      // It means that the next function will never be called.
-      // It is safe because the intersection observer has disconnected the previous element.
-      if (isLoading) {
-        return;
-      }
+  const observedElementRef = useRef<HTMLDivElement>(null);
 
-      if (observer.current) {
-        observer.current.disconnect();
-      }
-      if (!element) {
-        return;
-      }
-
-      // Create a new IntersectionObserver instance because hasMore or next may be changed.
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            console.log("fetching");
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && hasMore) {
             next();
           }
-        },
-        { threshold: safeThreshold, root, rootMargin }
-      );
-      observer.current.observe(element);
-    },
-    [hasMore, isLoading, next, threshold, root, rootMargin]
-  );
-
-  const flattenChildren = useMemo(() => Children.toArray(children), [children]);
+        });
+      },
+      {
+        root,
+        rootMargin,
+        threshold,
+      }
+    );
+    if (observedElementRef.current) {
+      observer.observe(observedElementRef.current);
+    }
+    return () => {
+      observer.disconnect();
+    };
+  }, [next, root, rootMargin, threshold, hasMore]);
 
   return (
-    <>
-      {flattenChildren.map((child) => {
-        // @ts-expect-error ignore ref type
-        return cloneElement(child, { ref: observerRef });
-      })}
-    </>
+    <div
+      className="flex flex-row flex-wrap items-center justify-center gap-4"
+      ref={observedElementRef}
+    >
+      {children}
+    </div>
   );
 }

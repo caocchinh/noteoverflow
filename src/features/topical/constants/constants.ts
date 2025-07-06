@@ -170,15 +170,10 @@ export const PAGE_SIZE = 50;
 
 export const DEFAULT_NUMBER_OF_COLUMNS = 3;
 
-export const COLUMN_WIDTHS = {
-  1: 400,
-  2: 300,
-  3: 200,
-  4: 170,
-  5: 150,
-  6: 140,
-  7: 130,
-  8: 120,
-  9: 110,
-  10: 100,
+export const COLUMN_BREAKPOINTS = {
+  1: { 0: 1 },
+  2: { 0: 1, 1: 2 },
+  3: { 0: 1, 1: 2, 500: 3 },
+  4: { 0: 1, 1: 2, 500: 3, 790: 4 },
+  5: { 0: 1, 1: 2, 500: 3, 790: 4, 900: 5 },
 };

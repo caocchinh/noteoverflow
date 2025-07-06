@@ -56,6 +56,7 @@ import {
   INVALID_INPUTS_DEFAULT,
   TOPICAL_DATA,
   DEFAULT_NUMBER_OF_COLUMNS,
+  COLUMN_BREAKPOINTS,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -71,17 +72,9 @@ import { getTopicalData } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import dynamic from "next/dynamic";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
-
-// Client-side only component for masonry
-const MasonryGallery = dynamic(
-  () =>
-    import("@/features/topical/components/MasonryGallery").then(
-      (mod) => mod.default
-    ),
-  { ssr: false }
-);
+import Image from "next/image";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -684,22 +677,14 @@ const TopicalPage = () => {
       if (lastPage.data?.length === 0) {
         return;
       }
+
       return lastPageParam + 1;
     },
     enabled: isSearchEnabled,
   });
-  const [animationTrigger, setAnimationTrigger] = useState(0);
-
-  const [isResizing, setIsResizing] = useState(false);
-  useEffect(() => {
-    if (!mountedRef.current || isMobileDevice) {
-      return;
-    }
-    setIsResizing(true);
-  }, [isSidebarOpen, isMobileDevice]);
 
   return (
-    <div className="pt-16 h-screen overflow-y-hidden">
+    <div className="pt-16 h-screen overflow-hidden">
       <SidebarProvider
         defaultOpen={true}
         defaultOpenMobile={true}
@@ -708,16 +693,7 @@ const TopicalPage = () => {
         open={isSidebarOpen}
         openMobile={isSidebarOpen}
       >
-        <Sidebar
-          key={sidebarKey}
-          variant="floating"
-          onTransitionEnd={(e) => {
-            if (e.propertyName == "left" && !isMobileDevice) {
-              setAnimationTrigger(animationTrigger + 1);
-              setIsResizing(false);
-            }
-          }}
-        >
+        <Sidebar key={sidebarKey} variant="floating">
           <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
           <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
             <div className="flex w-full flex-col items-center justify-start gap-4">
@@ -993,7 +969,7 @@ const TopicalPage = () => {
                 </h4>
                 <ElasticSlider
                   startingValue={1}
-                  maxValue={10}
+                  maxValue={5}
                   isStepped
                   stepSize={1}
                   setColumnsProp={setNumberOfColumns}
@@ -1004,28 +980,7 @@ const TopicalPage = () => {
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
-          <AnimatePresence mode="wait">
-            {isResizing && data && (
-              <motion.div
-                animate={{
-                  opacity: 1,
-                }}
-                className="absolute left-3 z-[10000] -mt-18 h-full text-xl w-full bg-background/75 flex items-center justify-center"
-                exit={{
-                  opacity: 0,
-                }}
-                initial={{
-                  opacity: 0,
-                }}
-                transition={{
-                  duration: 0.3,
-                }}
-              >
-                Recalibrating layout
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="absolute left-3 z-[1000]">
+          <div className="absolute left-3  z-[1000]">
             <Button
               className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
               onClick={() => {
@@ -1041,30 +996,46 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
-
+          {/* <Button
+            onClick={() => {
+              fetchNextPage();
+            }}
+          >
+            More
+          </Button> */}
           <ScrollArea
-            className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main"
+            className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"
           >
-            <MasonryGallery
-              items={data?.pages.flatMap((page) => page.data) ?? []}
-              columnCount={numberOfColumns}
-              animationTrigger={animationTrigger}
-              currentQuery={currentQuery}
-            />
-            <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-              <InfiniteScroll
-                hasMore={hasNextPage && isSearchEnabled}
-                isLoading={isFetchingNextPage || isFetching}
-                next={fetchNextPage}
-                threshold={1}
-              >
-                {isFetchingNextPage ||
-                  (isFetching && (
-                    <Loader2 className="my-4 h-8 w-8 animate-spin" />
-                  ))}
-              </InfiniteScroll>
-            </div>
+            <ResponsiveMasonry
+              columnsCountBreakPoints={
+                COLUMN_BREAKPOINTS[
+                  numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+                ]
+              }
+            >
+              <Masonry gutter="10px">
+                {data?.pages.map((page) =>
+                  page.data?.map((image) =>
+                    image.questionImages.map((image) => (
+                      <div
+                        key={image.imageSrc}
+                        className="w-full h-full object-cover relative bg-red-500 group overflow-hidden cursor-pointer hover:scale-[0.98] hover:rotate-[0.75deg] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                      >
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-pink-500/30 to-sky-500/35  opacity-0 transition-opacity duration-300 ease-in-out hover:opacity-[30%]"></div>
+                        <Image
+                          className="w-full h-full object-contain"
+                          src={image.imageSrc}
+                          height={100}
+                          width={100}
+                          alt={image.imageSrc}
+                        />
+                      </div>
+                    ))
+                  )
+                )}
+              </Masonry>
+            </ResponsiveMasonry>
           </ScrollArea>
         </SidebarInset>
       </SidebarProvider>
