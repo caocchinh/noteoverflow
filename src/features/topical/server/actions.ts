@@ -15,7 +15,7 @@ import { verifySession } from "@/dal/verifySession";
 // Define a type for our selected question fields
 export type SelectedQuestion = Pick<
   InferSelectModel<typeof question>,
-  "topic"
+  "topic" | "year" | "paperType" | "season" | "id"
 > & {
   questionImages: Array<{
     questionId: string;
@@ -132,22 +132,21 @@ export const getTopicalData = async ({
   }
 };
 
-export const getUserBookmarksAction = async ({
-  userId,
-}: {
-  userId: string;
-}) => {
+export const getUserBookmarksAction = async (): Promise<
+  ServerActionResponse<{ questionId: string }[]>
+> => {
   try {
     const session = await verifySession();
     if (!session) {
       throw new Error("Unauthorized");
     }
-    if (session.user.id !== userId) {
-      throw new Error("Unauthorized");
-    }
+    const userId = session.user.id;
     const db = await getDbAsync();
     const bookmarks = await db.query.userBookmarks.findMany({
       where: eq(userBookmarks.userId, userId),
+      columns: {
+        questionId: true,
+      },
     });
     return { success: true, data: bookmarks };
   } catch (error) {
@@ -160,10 +159,8 @@ export const getUserBookmarksAction = async ({
 };
 
 export const addBookmarkAction = async ({
-  userId,
   questionId,
 }: {
-  userId: string;
   questionId: string;
 }) => {
   try {
@@ -171,9 +168,7 @@ export const addBookmarkAction = async ({
     if (!session) {
       throw new Error("Unauthorized");
     }
-    if (session.user.id !== userId) {
-      throw new Error("Unauthorized");
-    }
+    const userId = session.user.id;
     const db = await getDbAsync();
     await db.insert(userBookmarks).values({
       userId,
@@ -189,10 +184,8 @@ export const addBookmarkAction = async ({
 };
 
 export const removeBookmarkAction = async ({
-  userId,
   questionId,
 }: {
-  userId: string;
   questionId: string;
 }) => {
   try {
@@ -200,9 +193,7 @@ export const removeBookmarkAction = async ({
     if (!session) {
       throw new Error("Unauthorized");
     }
-    if (session.user.id !== userId) {
-      throw new Error("Unauthorized");
-    }
+    const userId = session.user.id;
     const db = await getDbAsync();
     await db
       .delete(userBookmarks)

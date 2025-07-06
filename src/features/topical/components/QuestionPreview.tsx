@@ -29,14 +29,14 @@ const QuestionPreview = ({
         </Badge>
         <BookmarkButton
           className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-          bookmarks={bookmarks?.data || []}
+          bookmarks={bookmarks || []}
           questionId={image.questionId}
           isBookmarksFetching={isBookmarksPending}
         />
       </div>
       <BookmarkButton
         className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
-        bookmarks={bookmarks?.data || []}
+        bookmarks={bookmarks || []}
         questionId={image.questionId}
         isBookmarksFetching={isBookmarksPending}
       />

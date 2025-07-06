@@ -696,13 +696,7 @@ const TopicalPage = () => {
     queryKey: ["user_bookmarks"],
     queryFn: async () => {
       try {
-        const session = await authClient.getSession();
-        if (session && session.data) {
-          return await getUserBookmarksAction({
-            userId: session.data.user.id,
-          });
-        }
-        throw new Error("Unauthorized");
+        return await getUserBookmarksAction();
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -1054,7 +1048,9 @@ const TopicalPage = () => {
                 {data?.pages.map((page) =>
                   page.data?.map((question) => (
                     <QuestionPreview
-                      bookmarks={bookmarks?.data || []}
+                      bookmarks={
+                        (bookmarks?.data as { questionId: string }[]) || []
+                      }
                       question={question}
                       key={question.id}
                       isBookmarksPending={isBookmarksPending}
