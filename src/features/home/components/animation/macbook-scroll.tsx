@@ -18,15 +18,12 @@ import {
   IconVolume,
   IconVolume2,
   IconVolume3,
+  IconSearch,
+  IconWorld,
+  IconCommand,
+  IconCaretLeftFilled,
+  IconCaretDownFilled,
 } from "@tabler/icons-react";
-import { IconSearch } from "@tabler/icons-react";
-import { IconWorld } from "@tabler/icons-react";
-import { IconCommand } from "@tabler/icons-react";
-import { IconCaretLeftFilled } from "@tabler/icons-react";
-import { IconCaretDownFilled } from "@tabler/icons-react";
-import Image from "next/image";
-import Link from "next/link";
-import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 
 export const MacbookScroll = ({
   src,
@@ -71,7 +68,7 @@ export const MacbookScroll = ({
   return (
     <div
       ref={ref}
-      className="flex min-h-[100vh] shrink-0 scale-[0.35] transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-50 md:scale-100 md:py-80 !pt-12 overflow-hidden"
+      className="flex min-h-[100vh] shrink-0 scale-[0.65] transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-70 md:scale-100 md:pb-80 pt-12 md:pt-12"
     >
       <motion.h2
         style={{
@@ -151,15 +148,8 @@ export const Lid = ({
           }}
           className="absolute inset-0 flex items-center justify-center rounded-lg bg-[#010101]"
         >
-          <span className="text-white">
-            <Link href={TOPICAL_QUESTION_APP_ROUTE} title="Get started">
-              <Image
-                src="/assets/logo-bg-colorised-modified-small.webp"
-                alt="NoteOverflow"
-                height={20}
-                width={20}
-              />
-            </Link>
+          <span className="text-white text-center">
+            Think outside the books
           </span>
         </div>
       </div>
@@ -172,13 +162,12 @@ export const Lid = ({
           transformStyle: "preserve-3d",
           transformOrigin: "top",
         }}
-        className="absolute inset-0 h-96 w-[32rem] rounded-2xl bg-[#010101] p-2"
+        className="absolute inset-0 h-96 w-[32rem] rounded-2xl bg-transparent p-2"
       >
-        <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         <img
           src={src as string}
           alt="aceternity logo"
-          className="absolute inset-0 h-full w-full rounded-lg object-cover object-left-top"
+          className="absolute inset-0 top-5 !h-full !w-full rounded-lg object-contain object-left-top"
         />
       </motion.div>
     </div>

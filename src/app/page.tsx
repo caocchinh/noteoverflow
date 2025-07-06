@@ -348,7 +348,7 @@ export default function Home() {
             </Button>
           </PixelCard>
         </section>
-        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10">
+        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-[var(--home-page-bg)]">
           <div className="-translate-y-1/2 absolute top-1/2 z-[10] hidden h-full w-screen overflow-hidden sm:block ">
             <Sparkles
               color={LOGO_MAIN_COLOR}
