@@ -1046,16 +1046,23 @@ const TopicalPage = () => {
             >
               <Masonry gutter="10px">
                 {data?.pages.map((page) =>
-                  page.data?.map((question) => (
-                    <QuestionPreview
-                      bookmarks={
-                        (bookmarks?.data as { questionId: string }[]) || []
-                      }
-                      question={question}
-                      key={question.id}
-                      isBookmarksPending={isBookmarksPending}
-                    />
-                  ))
+                  page.data?.map((question) =>
+                    question.questionImages.map((image) => (
+                      <QuestionPreview
+                        bookmarks={
+                          (bookmarks?.data as { questionId: string }[]) || []
+                        }
+                        imageSrc={image.imageSrc}
+                        key={image.imageSrc}
+                        isBookmarksPending={isBookmarksPending}
+                        paperType={question.paperType}
+                        questionId={question.id}
+                        season={question.season}
+                        topic={question.topic}
+                        year={question.year}
+                      />
+                    ))
+                  )
                 )}
               </Masonry>
             </ResponsiveMasonry>

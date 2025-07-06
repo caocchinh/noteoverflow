@@ -1,5 +1,3 @@
-import { InferSelectModel } from "drizzle-orm";
-import { userBookmarks } from "@/drizzle/schema";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,7 +24,10 @@ export const BookmarkButton = ({
   }, [bookmarks, questionId]);
   const queryClient = useQueryClient();
 
+  const mutationKey = ["user_bookmarks", questionId];
+
   const updateBookmarkMutation = useMutation({
+    mutationKey: mutationKey,
     mutationFn: async () => {
       if (isBookmarked) {
         return removeBookmarkAction({
@@ -38,36 +39,43 @@ export const BookmarkButton = ({
         });
       }
     },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["bookmarks"] });
-      const previousBookmarks = queryClient.getQueryData<
-        InferSelectModel<typeof userBookmarks>[]
-      >(["bookmarks"]);
-      await queryClient.setQueryData(
-        ["bookmarks"],
-        async (old: InferSelectModel<typeof userBookmarks>[] | undefined) => {
-          if (!old) {
-            return old;
-          }
-          if (isBookmarked) {
-            return old.filter((bookmark) => bookmark.questionId !== questionId);
-          } else {
-            return [...old, { questionId: questionId }];
-          }
+    onSuccess: () => {
+      const old:
+        | { sucess: boolean; data: { questionId: string }[] }
+        | undefined = queryClient.getQueryData<{ questionId: string }[]>([
+        "user_bookmarks",
+      ]) as { sucess: boolean; data: { questionId: string }[] } | undefined;
+      if (!old?.data) {
+        return;
+      }
+      const newBookmarks = isBookmarked
+        ? old.data.filter((bookmark) => bookmark.questionId !== questionId)
+        : [...old.data, { questionId }];
+      queryClient.setQueryData(["user_bookmarks"], {
+        sucess: true,
+        data: newBookmarks,
+      });
+      toast.success(
+        isBookmarked
+          ? "Question removed from bookmark"
+          : "Question added to bookmark",
+        {
+          duration: 2000,
         }
       );
-      return { previousBookmarks };
     },
-    onError: (error, variables, context) => {
-      toast.error(error.message);
-      queryClient.setQueryData(["bookmarks"], context?.previousBookmarks);
+    onError: (error) => {
+      toast.error(
+        "Failed to update bookmarks: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
     },
   });
 
   return (
     <Button
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
-      disabled={isBookmarksFetching || updateBookmarkMutation.isPending}
+      disabled={isBookmarksFetching}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={() => {
         updateBookmarkMutation.mutate();
