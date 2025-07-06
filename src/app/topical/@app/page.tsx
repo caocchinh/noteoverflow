@@ -1020,9 +1020,9 @@ const TopicalPage = () => {
                     image.questionImages.map((image) => (
                       <div
                         key={image.imageSrc}
-                        className="w-full h-full object-cover relative bg-red-500 group overflow-hidden cursor-pointer hover:scale-[0.98] hover:rotate-[0.75deg] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                        className="w-full h-full object-cover relative bg-red-500 group overflow-hidden cursor-pointer hover:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                       >
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-pink-500/30 to-sky-500/35  opacity-0 transition-opacity duration-300 ease-in-out hover:opacity-[30%]"></div>
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-pink-500/30 to-sky-500/40 opacity-0 transition-opacity duration-300 ease-in-out hover:opacity-[25%]"></div>
                         <Image
                           className="w-full h-full object-contain"
                           src={image.imageSrc}

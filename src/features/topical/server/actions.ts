@@ -18,6 +18,11 @@ type SelectedQuestion = Pick<InferSelectModel<typeof question>, "topic"> & {
     imageSrc: string;
     order: number;
   }>;
+  answers: Array<{
+    questionId: string;
+    answer: string;
+    order: number;
+  }>;
 };
 
 export const getTopicalData = async ({
@@ -97,6 +102,9 @@ export const getTopicalData = async ({
       },
       with: {
         questionImages: {
+          orderBy: (table) => [asc(table.order)],
+        },
+        answers: {
           orderBy: (table) => [asc(table.order)],
         },
       },
