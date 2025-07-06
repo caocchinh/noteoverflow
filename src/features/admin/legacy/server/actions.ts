@@ -1,18 +1,25 @@
 "use server";
 
-import {redirect} from "next/navigation";
-import {BAD_REQUEST, INTERNAL_SERVER_ERROR} from "@/constants/constants";
-import type {ServerActionResponse, ValidContentType, ValidSeason} from "@/constants/types";
-import {verifySession} from "@/dal/verifySession";
-import {isValidQuestionId} from "@/lib/utils";
-import {overwriteAnswer} from "@/server/main/answer";
-import {createCurriculum, isCurriculumExists} from "@/server/main/curriculum";
-import {createPaperType, isPaperTypeExists} from "@/server/main/paperType";
-import {overwriteQuestion, overwriteQuestionImage} from "@/server/main/question";
-import {createSeason, isSeasonExists} from "@/server/main/season";
-import {createSubject, isSubjectExists} from "@/server/main/subject";
-import {createTopic, isTopicExists} from "@/server/main/topic";
-import {createYear, isYearExists} from "@/server/main/year";
+import { redirect } from "next/navigation";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
+import type {
+  ServerActionResponse,
+  ValidContentType,
+  ValidSeason,
+} from "@/constants/types";
+import { verifySession } from "@/dal/verifySession";
+import { isValidQuestionId } from "@/lib/utils";
+import { overwriteAnswer } from "@/server/main/answer";
+import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
+import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
+import {
+  overwriteQuestion,
+  overwriteQuestionImage,
+} from "@/server/main/question";
+import { createSeason, isSeasonExists } from "@/server/main/season";
+import { createSubject, isSubjectExists } from "@/server/main/subject";
+import { createTopic, isTopicExists } from "@/server/main/topic";
+import { createYear, isYearExists } from "@/server/main/year";
 import {
   validateCurriculum,
   validatePaperType,
@@ -93,13 +100,16 @@ export const legacyUploadAction = async ({
 
   try {
     const session = await verifySession();
+    if (!session) {
+      return redirect("/authentication");
+    }
     if (session.user.role !== "admin" && session.user.role !== "owner") {
       redirect("/app");
     }
     const userId = session.user.id;
     // Check and create curriculum if needed
     if (!(await isCurriculumExists(curriculum))) {
-      await createCurriculum({name: curriculum});
+      await createCurriculum({ name: curriculum });
     }
 
     // Check and create subject if needed
@@ -135,7 +145,9 @@ export const legacyUploadAction = async ({
 
       // Check and create paperType if needed
       (async () => {
-        if (!(await isPaperTypeExists(paperType, subjectFullName, curriculum))) {
+        if (
+          !(await isPaperTypeExists(paperType, subjectFullName, curriculum))
+        ) {
           await createPaperType({
             paperType,
             subjectId: subjectFullName,

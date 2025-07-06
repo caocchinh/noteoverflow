@@ -1,15 +1,19 @@
-import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
-import Loader from '@/components/Loader/Loader';
-import { verifySession } from '@/dal/verifySession';
-import Navigation from '@/features/admin/components/Navigation';
-import { ADMIN_NAVIGATION_ITEMS } from '@/features/admin/constants/constants';
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import Loader from "@/components/Loader/Loader";
+import { verifySession } from "@/dal/verifySession";
+import Navigation from "@/features/admin/components/Navigation";
+import { ADMIN_NAVIGATION_ITEMS } from "@/features/admin/constants/constants";
 
 const AdminContent = async ({ children }: { children: React.ReactNode }) => {
   const session = await verifySession();
 
-  if (session.user.role !== 'admin' && session.user.role !== 'owner') {
-    return redirect('/app');
+  if (!session) {
+    return redirect("/authentication");
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "owner") {
+    return redirect("/app");
   }
 
   return (
@@ -31,7 +35,7 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
         <div className="hidden h-[35px] w-[1px] border-gray-500 border-l md:block" />
         {session && (
           <Navigation
-            isOwner={session.user.role === 'owner'}
+            isOwner={session.user.role === "owner"}
             items={ADMIN_NAVIGATION_ITEMS}
           />
         )}

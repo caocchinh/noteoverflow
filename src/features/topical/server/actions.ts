@@ -2,7 +2,7 @@
 import { and, asc, eq, type InferSelectModel, inArray } from "drizzle-orm";
 import type { ServerActionResponse } from "@/constants/types";
 import { getDbAsync } from "@/drizzle/db";
-import { question } from "@/drizzle/schema";
+import { question, userBookmarks } from "@/drizzle/schema";
 import {
   validateCurriculum,
   validateFilterData,
@@ -10,9 +10,13 @@ import {
 } from "@/features/topical/lib/utils";
 import { PAGE_SIZE } from "../constants/constants";
 import type { FilterData } from "../constants/types";
+import { verifySession } from "@/dal/verifySession";
 
 // Define a type for our selected question fields
-type SelectedQuestion = Pick<InferSelectModel<typeof question>, "topic"> & {
+export type SelectedQuestion = Pick<
+  InferSelectModel<typeof question>,
+  "topic"
+> & {
   questionImages: Array<{
     questionId: string;
     imageSrc: string;
@@ -98,6 +102,9 @@ export const getTopicalData = async ({
       where: and(...conditions),
       columns: {
         id: true,
+        year: true,
+        paperType: true,
+        season: true,
         topic: true,
       },
       with: {
@@ -122,5 +129,94 @@ export const getTopicalData = async ({
       success: false,
       data: [],
     };
+  }
+};
+
+export const getUserBookmarksAction = async ({
+  userId,
+}: {
+  userId: string;
+}) => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error("Unauthorized");
+    }
+    if (session.user.id !== userId) {
+      throw new Error("Unauthorized");
+    }
+    const db = await getDbAsync();
+    const bookmarks = await db.query.userBookmarks.findMany({
+      where: eq(userBookmarks.userId, userId),
+    });
+    return { success: true, data: bookmarks };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      throw new Error("Unauthorized");
+    }
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+};
+
+export const addBookmarkAction = async ({
+  userId,
+  questionId,
+}: {
+  userId: string;
+  questionId: string;
+}) => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error("Unauthorized");
+    }
+    if (session.user.id !== userId) {
+      throw new Error("Unauthorized");
+    }
+    const db = await getDbAsync();
+    await db.insert(userBookmarks).values({
+      userId,
+      questionId,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      throw new Error("Unauthorized");
+    }
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+};
+
+export const removeBookmarkAction = async ({
+  userId,
+  questionId,
+}: {
+  userId: string;
+  questionId: string;
+}) => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error("Unauthorized");
+    }
+    if (session.user.id !== userId) {
+      throw new Error("Unauthorized");
+    }
+    const db = await getDbAsync();
+    await db
+      .delete(userBookmarks)
+      .where(
+        and(
+          eq(userBookmarks.userId, userId),
+          eq(userBookmarks.questionId, questionId)
+        )
+      );
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      throw new Error("Unauthorized");
+    }
+    console.error(error);
+    throw new Error("Internal Server Error");
   }
 };

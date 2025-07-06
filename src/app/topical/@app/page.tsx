@@ -1,10 +1,9 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
   BrushCleaning,
-  Loader2,
   ScanText,
   Settings,
   SlidersHorizontal,
@@ -68,13 +67,18 @@ import {
   validateFilterData,
   validateSubject,
 } from "@/features/topical/lib/utils";
-import { getTopicalData } from "@/features/topical/server/actions";
+import {
+  getTopicalData,
+  getUserBookmarksAction,
+} from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
-import Image from "next/image";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import { authClient } from "@/lib/auth/auth-client";
+import { toast } from "sonner";
+import QuestionPreview from "@/features/topical/components/QuestionPreview";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -683,6 +687,38 @@ const TopicalPage = () => {
     enabled: isSearchEnabled,
   });
 
+  const {
+    data: bookmarks,
+    isPending: isBookmarksPending,
+    error: bookmarksError,
+    isError: isBookmarksError,
+  } = useQuery({
+    queryKey: ["user_bookmarks"],
+    queryFn: async () => {
+      try {
+        const session = await authClient.getSession();
+        if (session && session.data) {
+          return await getUserBookmarksAction({
+            userId: session.data.user.id,
+          });
+        }
+        throw new Error("Unauthorized");
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Error fetching bookmarks: Unknown error";
+        toast.error(
+          errorMessage === "Unauthorized"
+            ? "Please sign in to bookmark questions"
+            : errorMessage
+        );
+        return { success: false, data: [], error: errorMessage };
+      }
+    },
+    enabled: isSearchEnabled,
+  });
+
   return (
     <div className="pt-16 h-screen overflow-hidden">
       <SidebarProvider
@@ -1016,23 +1052,14 @@ const TopicalPage = () => {
             >
               <Masonry gutter="10px">
                 {data?.pages.map((page) =>
-                  page.data?.map((image) =>
-                    image.questionImages.map((image) => (
-                      <div
-                        key={image.imageSrc}
-                        className="w-full h-full object-cover relative bg-red-500 group overflow-hidden cursor-pointer hover:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                      >
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-pink-500/30 to-sky-500/40 opacity-0 transition-opacity duration-300 ease-in-out hover:opacity-[25%]"></div>
-                        <Image
-                          className="w-full h-full object-contain"
-                          src={image.imageSrc}
-                          height={100}
-                          width={100}
-                          alt={image.imageSrc}
-                        />
-                      </div>
-                    ))
-                  )
+                  page.data?.map((question) => (
+                    <QuestionPreview
+                      bookmarks={bookmarks?.data || []}
+                      question={question}
+                      key={question.id}
+                      isBookmarksPending={isBookmarksPending}
+                    />
+                  ))
                 )}
               </Masonry>
             </ResponsiveMasonry>

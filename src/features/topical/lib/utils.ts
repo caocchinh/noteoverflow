@@ -1,5 +1,5 @@
-import { TOPICAL_DATA } from '../constants/constants';
-import type { FilterData } from '../constants/types';
+import { TOPICAL_DATA } from "../constants/constants";
+import type { FilterData } from "../constants/types";
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
