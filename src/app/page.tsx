@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Atom,
@@ -11,30 +11,31 @@ import {
   Pi,
   RectangleEllipsis,
   Sparkles as SparklesIcon,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { type RefObject, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
+import { type RefObject, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   LOGO_MAIN_COLOR,
   TOPICAL_QUESTION_APP_ROUTE,
-} from '@/constants/constants';
-import AnimatedText from '@/features/home/components/animation/AnimatedText';
-import Beams from '@/features/home/components/animation/Beams';
-import ClickSpark from '@/features/home/components/animation/ClickSpark';
-import CountUp from '@/features/home/components/animation/CountUp';
-import Crosshair from '@/features/home/components/animation/Crosshair';
-import GridMotion from '@/features/home/components/animation/GridMotion';
-import { GridPattern } from '@/features/home/components/animation/grid-pattern';
-import InfiniteScroll from '@/features/home/components/animation/InfiniteScroll';
-import PixelCard from '@/features/home/components/animation/PixelCard';
-import RotatingText from '@/features/home/components/animation/RotatingText';
-import { Sparkles } from '@/features/home/components/animation/Sparkles';
-import { TextScramble } from '@/features/home/components/animation/text-scramble';
-import ProfileCard from '@/features/home/components/ProfileCard/ProfileCard';
-import { cn } from '@/lib/utils';
+} from "@/constants/constants";
+import AnimatedText from "@/features/home/components/animation/AnimatedText";
+import Beams from "@/features/home/components/animation/Beams";
+import ClickSpark from "@/features/home/components/animation/ClickSpark";
+import CountUp from "@/features/home/components/animation/CountUp";
+import Crosshair from "@/features/home/components/animation/Crosshair";
+import GridMotion from "@/features/home/components/animation/GridMotion";
+import { GridPattern } from "@/features/home/components/animation/grid-pattern";
+import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
+import PixelCard from "@/features/home/components/animation/PixelCard";
+import RotatingText from "@/features/home/components/animation/RotatingText";
+import { Sparkles } from "@/features/home/components/animation/Sparkles";
+import { TextScramble } from "@/features/home/components/animation/text-scramble";
+import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
+import { MacbookScroll } from "@/features/home/components/animation/macbook-scroll";
+import { cn } from "@/lib/utils";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -156,15 +157,15 @@ export default function Home() {
             initial={{ opacity: 0 }}
             transition={{
               duration: 0.3,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
           >
             <GridPattern
               className={cn(
-                '[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]'
+                "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]"
               )}
               height={30}
-              strokeDasharray={'4 2'}
+              strokeDasharray={"4 2"}
               width={30}
               x={-1}
               y={-1}
@@ -176,7 +177,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             transition={{
               duration: 2,
-              type: 'tween',
+              type: "tween",
             }}
           >
             <Image
@@ -199,21 +200,21 @@ export default function Home() {
               </h1>
               <RotatingText
                 animate={{ y: 0 }}
-                exit={{ y: '-120%' }}
-                initial={{ y: '100%' }}
+                exit={{ y: "-120%" }}
+                initial={{ y: "100%" }}
                 mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg text-4xl md:text-5xl font-bold text-[var(--home-page-text)]"
                 rotationInterval={4000}
                 splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
                 staggerDuration={0.025}
-                staggerFrom={'last'}
+                staggerFrom={"last"}
                 texts={[
-                  'Free forever.',
-                  'Reimagined.',
-                  'Simplified.',
-                  'Accelerated.',
-                  'Refined.',
+                  "Free forever.",
+                  "Reimagined.",
+                  "Simplified.",
+                  "Accelerated.",
+                  "Refined.",
                 ]}
-                transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                transition={{ type: "spring", damping: 30, stiffness: 400 }}
               />
             </div>
           </motion.div>
@@ -230,7 +231,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             transition={{
               delay: 1.9,
-              type: 'spring',
+              type: "spring",
               damping: 10,
               stiffness: 100,
             }}
@@ -282,6 +283,21 @@ export default function Home() {
           </div>
         </section>
         <GridMotion items={items} />
+        <MacbookScroll
+          title={<span>Self-study made easy.</span>}
+          badge={
+            <Link href={TOPICAL_QUESTION_APP_ROUTE} title="Get started">
+              <Image
+                src="/assets/logo-bg-colorised-modified-small.webp"
+                alt="NoteOverflow"
+                height={20}
+                width={20}
+              />
+            </Link>
+          }
+          src={`/assets/screen.png`}
+          showGradient={false}
+        />
         <section
           className="relative flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
           ref={containerRef}
@@ -352,7 +368,7 @@ export default function Home() {
             />
             <p className="w-[350px] text-left text-[var(--home-page-text-muted)] text-xs">
               *This project is purely 100% created with pride by a 12th grader
-              Vietnamese student at Vinschool Central Park.{' '}
+              Vietnamese student at Vinschool Central Park.{" "}
               <span>
                 <Image
                   alt="Vinschool"
@@ -373,7 +389,7 @@ export default function Home() {
                 rotateZ: -10,
                 transition: {
                   duration: 0.2,
-                  ease: 'easeOut',
+                  ease: "easeOut",
                 },
               }}
               whileTap={{ scale: 0.95 }}
@@ -384,7 +400,7 @@ export default function Home() {
 
           <div className="relative z-20 flex w-[90%] flex-col items-center justify-center md:w-[450px]">
             <p className="text-left text-[32px] text-[var(--home-page-text)]">
-              &quot;Be kind whenever possible. It is always{' '}
+              &quot;Be kind whenever possible. It is always{" "}
               <span className="text-rose-700">possible.</span>&quot;
             </p>
             <p className="after:-translate-y-1/2 relative self-end text-left text-[var(--home-page-text-muted)] text-md after:absolute after:top-1/2 after:left-[-38px] after:z-[10] after:h-[1px] after:w-[35px] after:bg-[var(--home-page-text-muted)] after:content-['']">

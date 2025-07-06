@@ -23,10 +23,11 @@ const QuestionPreview = ({
       <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center">
         <Badge className="h-max bg-white !text-black ">{question.topic}</Badge>
         <Badge className="h-max bg-white !text-black">{question.year}</Badge>
-        <Badge className="h-max bg-white !text-black">{question.season}</Badge>
         <Badge className="h-max bg-white !text-black">
           Paper {question.paperType}
         </Badge>
+        <Badge className="h-max bg-white !text-black">{question.season}</Badge>
+
         <BookmarkButton
           className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
           bookmarks={bookmarks || []}

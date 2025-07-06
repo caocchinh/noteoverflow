@@ -52,7 +52,7 @@ export const BookmarkButton = ({
           if (isBookmarked) {
             return old.filter((bookmark) => bookmark.questionId !== questionId);
           } else {
-            return [...old, questionId];
+            return [...old, { questionId: questionId }];
           }
         }
       );
@@ -67,7 +67,7 @@ export const BookmarkButton = ({
   return (
     <Button
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
-      disabled={isBookmarksFetching}
+      disabled={isBookmarksFetching || updateBookmarkMutation.isPending}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={() => {
         updateBookmarkMutation.mutate();
