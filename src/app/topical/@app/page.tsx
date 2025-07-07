@@ -4,6 +4,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
   BrushCleaning,
+  Loader2,
+  OctagonAlert,
+  RefreshCcw,
   ScanText,
   Settings,
   SlidersHorizontal,
@@ -673,7 +676,13 @@ const TopicalPage = () => {
     throw new Error("Invalid inputs");
   };
 
-  const { data } = useQuery({
+  const {
+    data: topicalData,
+    isFetching: isTopicalDataFetching,
+    isFetched: isTopicalDataFetched,
+    isError: isTopicalDataError,
+    refetch: refetchTopicalData,
+  } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: search,
     enabled: isSearchEnabled,
@@ -685,11 +694,11 @@ const TopicalPage = () => {
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
 
   useEffect(() => {
-    if (data?.data?.data) {
+    if (topicalData?.data?.data) {
       const chunkedData: SelectedQuestion[][] = [];
       let currentChunks: SelectedQuestion[] = [];
 
-      data.data.data.forEach((item: SelectedQuestion) => {
+      topicalData.data.data.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === CHUNK_SIZE) {
           chunkedData.push(currentChunks);
           currentChunks = [];
@@ -702,7 +711,7 @@ const TopicalPage = () => {
       setDisplayedData(chunkedData[0]);
       setCurrentChunkIndex(0);
     }
-  }, [data, numberOfColumns]);
+  }, [topicalData, numberOfColumns]);
 
   const {
     data: userSession,
@@ -1038,7 +1047,7 @@ const TopicalPage = () => {
           <SidebarRail />
         </Sidebar>
         <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
-          <div className="absolute left-3  z-[1000]">
+          <div className="absolute left-3 z-[1000]">
             <Button
               className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
               onClick={() => {
@@ -1054,15 +1063,57 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
+
           <ScrollArea
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"
           >
-            {data?.data?.isRateLimited && (
+            {topicalData?.data?.data && topicalData?.data?.data.length > 0 && (
+              <p className="text-sm text-left mb-1">
+                {topicalData?.data?.data.length} question
+                {topicalData?.data?.data.length > 1 ? "s" : ""} found
+              </p>
+            )}
+            {topicalData?.data?.isRateLimited && (
               <p className="text-md text-center mb-2 text-red-600">
                 Limited results displayed due to rate limiting. Log in for
                 complete access.
               </p>
+            )}
+            {isTopicalDataError &&
+              !isTopicalDataFetching &&
+              isTopicalDataFetched && (
+                <div className="flex flex-col items-center justify-center w-full h-full">
+                  <div className="flex items-start justify-center gap-2">
+                    <p className="text-md text-center mb-2 text-red-600">
+                      An error occurred while fetching data. Please try again.
+                    </p>
+                    <OctagonAlert className="text-red-600" />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      refetchTopicalData();
+                    }}
+                    className="flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    Refetch
+                    <RefreshCcw />
+                  </Button>
+                </div>
+              )}
+            {topicalData?.data?.data.length == 0 &&
+              isTopicalDataFetched &&
+              !isTopicalDataError &&
+              !isTopicalDataFetching && (
+                <div className="flex items-center justify-center w-full h-full">
+                  <p className="text-md text-center mb-2 text-red-600">
+                    No questions found. Try changing the filters.
+                  </p>
+                </div>
+              )}
+            {isTopicalDataFetching && (
+              <Loader2 className="animate-spin m-auto mb-2" />
             )}
             <ResponsiveMasonry
               columnsCountBreakPoints={
