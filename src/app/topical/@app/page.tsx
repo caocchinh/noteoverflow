@@ -1025,13 +1025,6 @@ const TopicalPage = () => {
           <h1 className="w-full text-center font-bold text-2xl ">
             Topical questions
           </h1>
-          {/* <Button
-            onClick={() => {
-              fetchNextPage();
-            }}
-          >
-            More
-          </Button> */}
           <ScrollArea
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"

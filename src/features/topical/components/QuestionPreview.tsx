@@ -57,7 +57,7 @@ const QuestionPreview = ({
             bookmarks={bookmarks || []}
             questionId={questionId}
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-            isValidSession={!!userSession?.session}
+            isValidSession={!!userSession?.data?.session}
           />
         )}
       </div>
@@ -66,7 +66,7 @@ const QuestionPreview = ({
           className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
           bookmarks={bookmarks || []}
           questionId={questionId}
-          isValidSession={!!userSession?.session}
+          isValidSession={!!userSession?.data?.session}
           disabled={isUserSessionPending}
           isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
         />

@@ -79,7 +79,7 @@ export const BookmarkButton = ({
   return (
     <Button
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
-      disabled={disabled}
+      disabled={disabled || isBookmarksFetching}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={() => {
         if (!isValidSession) {
