@@ -17,7 +17,7 @@ const QuestionPreview = ({
   error,
   userSession,
 }: {
-  bookmarks: { questionId: string }[];
+  bookmarks: Set<string> | null;
   questionId: string;
   imageSrc: string;
   topic: string;
@@ -54,7 +54,7 @@ const QuestionPreview = ({
           <BookmarkButton
             className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
             disabled={isUserSessionPending}
-            bookmarks={bookmarks || []}
+            bookmarks={bookmarks}
             questionId={questionId}
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
             isValidSession={!!userSession?.data?.session}
@@ -64,7 +64,7 @@ const QuestionPreview = ({
       {!isMutatingThisQuestion && !error && (
         <BookmarkButton
           className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
-          bookmarks={bookmarks || []}
+          bookmarks={bookmarks || new Set()}
           questionId={questionId}
           isValidSession={!!userSession?.data?.session}
           disabled={isUserSessionPending}

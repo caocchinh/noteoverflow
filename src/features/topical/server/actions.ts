@@ -133,7 +133,7 @@ export const getTopicalData = async ({
 };
 
 export const getUserBookmarksAction = async (): Promise<
-  ServerActionResponse<{ questionId: string }[]>
+  ServerActionResponse<Set<string>>
 > => {
   try {
     const session = await verifySession();
@@ -148,7 +148,10 @@ export const getUserBookmarksAction = async (): Promise<
         questionId: true,
       },
     });
-    return { success: true, data: bookmarks };
+    return {
+      success: true,
+      data: new Set(bookmarks.map((b) => b.questionId)),
+    };
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       throw new Error("Unauthorized");

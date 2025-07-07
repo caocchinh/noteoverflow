@@ -669,7 +669,7 @@ const TopicalPage = () => {
     queryFn: search,
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      if (lastPage.data?.length === 0) {
+      if (lastPage?.data?.length === 0) {
         return;
       }
 
@@ -1042,7 +1042,7 @@ const TopicalPage = () => {
                     question.questionImages.map((image) => (
                       <QuestionPreview
                         bookmarks={
-                          (bookmarks?.data as { questionId: string }[]) || []
+                          (bookmarks?.data as Set<string>) || new Set()
                         }
                         imageSrc={image.imageSrc}
                         isUserSessionPending={isUserSessionPending}

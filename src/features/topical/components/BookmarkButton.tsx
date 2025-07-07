@@ -16,7 +16,7 @@ export const BookmarkButton = ({
   className,
   isValidSession,
 }: {
-  bookmarks: { questionId: string }[];
+  bookmarks: Set<string> | null;
   questionId: string;
   disabled: boolean;
   isBookmarksFetching: boolean;
@@ -24,7 +24,7 @@ export const BookmarkButton = ({
   isValidSession: boolean;
 }) => {
   const isBookmarked = useMemo(() => {
-    return bookmarks.some((bookmark) => bookmark.questionId === questionId);
+    return bookmarks?.has(questionId);
   }, [bookmarks, questionId]);
   const queryClient = useQueryClient();
 
@@ -44,17 +44,18 @@ export const BookmarkButton = ({
       }
     },
     onSuccess: () => {
-      const old:
-        | { sucess: boolean; data: { questionId: string }[] }
-        | undefined = queryClient.getQueryData<{ questionId: string }[]>([
-        "user_bookmarks",
-      ]) as { sucess: boolean; data: { questionId: string }[] } | undefined;
+      const old: { sucess: boolean; data: Set<string> } | undefined =
+        queryClient.getQueryData<Set<string>>(["user_bookmarks"]) as
+          | { sucess: boolean; data: Set<string> }
+          | undefined;
       if (!old?.data) {
         return;
       }
       const newBookmarks = isBookmarked
-        ? old.data.filter((bookmark) => bookmark.questionId !== questionId)
-        : [...old.data, { questionId }];
+        ? new Set(
+            Array.from(old.data).filter((bookmark) => bookmark !== questionId)
+          )
+        : new Set([...Array.from(old.data), questionId]);
       queryClient.setQueryData(["user_bookmarks"], {
         sucess: true,
         data: newBookmarks,
