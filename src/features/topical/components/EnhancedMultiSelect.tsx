@@ -329,7 +329,17 @@ export default function EnhancedMultiSelect({
                   <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-muted pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
                 </div>
                 {maxLength && value.length > maxLength && (
-                  <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
+                  <h3
+                    className="w-max font-medium text-sm text-destructive mx-auto -mt-1"
+                    onTouchEnd={() => {
+                      setTimeout(() => {
+                        setIsBlockingInput(false);
+                      }, 0);
+                    }}
+                    onTouchStart={() => {
+                      setIsBlockingInput(true);
+                    }}
+                  >
                     You can only select up to {maxLength}{" "}
                     {label.toLowerCase() +
                       (label.toLowerCase() === "topic" ? "s" : "")}
