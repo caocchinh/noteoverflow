@@ -177,3 +177,5 @@ export const COLUMN_BREAKPOINTS = {
   4: { 0: 1, 1: 2, 500: 3, 790: 4 },
   5: { 0: 1, 1: 2, 500: 3, 790: 4, 900: 5 },
 };
+
+export const MAX_TOPIC_SELECTION = 5;

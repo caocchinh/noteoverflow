@@ -19,6 +19,7 @@ export interface MultiSelectorProps {
   loop?: boolean;
   data?: string[];
   dir?: string;
+  maxLength?: number;
   label: VALID_LABEL;
   prerequisite: string;
 }
@@ -83,4 +84,5 @@ export interface MultiSelectContextProps {
   isCollapsibleOpen: boolean;
   setIsCollapsibleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isMobileDevice: boolean;
+  maxLength?: number;
 }

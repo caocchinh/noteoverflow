@@ -1,19 +1,61 @@
 "use client";
 
-import {ChevronsUpDown, X as RemoveIcon, Sparkles, Trash2} from "lucide-react";
-import React, {createContext, type KeyboardEvent, useCallback, useContext, useEffect, useRef, useState} from "react";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Checkbox} from "@/components/ui/checkbox";
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator} from "@/components/ui/command";
-import {Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle} from "@/components/ui/drawer";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {useIsMobile} from "@/hooks/use-mobile";
-import {cn} from "@/lib/utils";
-import type {MultiSelectContextProps, MultiSelectorProps} from "../constants/types";
+import {
+  ChevronsUpDown,
+  X as RemoveIcon,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
+import React, {
+  createContext,
+  type KeyboardEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import type {
+  MultiSelectContextProps,
+  MultiSelectorProps,
+} from "../constants/types";
 
 const MultiSelectContext = createContext<MultiSelectContextProps | null>(null);
 
@@ -29,6 +71,7 @@ export default function EnhancedMultiSelect({
   label,
   prerequisite,
   values: value,
+  maxLength = undefined,
   onValuesChange: onValueChange,
   loop = true,
   dir,
@@ -47,10 +90,21 @@ export default function EnhancedMultiSelect({
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const isMobileDevice = useIsMobile();
   const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+  if (
+    maxLength !== undefined &&
+    typeof maxLength == "number" &&
+    maxLength <= 0
+  ) {
+    throw new Error("maxLength must be greater than 0");
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node) && open) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        open
+      ) {
         setOpen(false);
         setInputValue("");
       }
@@ -80,7 +134,10 @@ export default function EnhancedMultiSelect({
     (e: React.SyntheticEvent<HTMLInputElement>) => {
       e.preventDefault();
       const target = e.currentTarget;
-      const selection = target.value.substring(target.selectionStart ?? 0, target.selectionEnd ?? 0);
+      const selection = target.value.substring(
+        target.selectionStart ?? 0,
+        target.selectionEnd ?? 0
+      );
 
       setSelectedValue(selection);
       setIsValueSelected(selection === inputValue);
@@ -105,7 +162,9 @@ export default function EnhancedMultiSelect({
 
       const moveNext = () => {
         const nextIndex = activeIndex + 1;
-        setActiveIndex(nextIndex > value.length - 1 ? (loop ? 0 : -1) : nextIndex);
+        setActiveIndex(
+          nextIndex > value.length - 1 ? (loop ? 0 : -1) : nextIndex
+        );
       };
 
       const movePrev = () => {
@@ -150,7 +209,10 @@ export default function EnhancedMultiSelect({
             if (activeIndex !== -1 && activeIndex < value.length) {
               onValueChangeHandler(value[activeIndex]);
               moveCurrent();
-            } else if (target.selectionStart === 0 && (selectedValue === inputValue || isValueSelected)) {
+            } else if (
+              target.selectionStart === 0 &&
+              (selectedValue === inputValue || isValueSelected)
+            ) {
               onValueChangeHandler(value.at(-1) ?? "");
             }
           }
@@ -167,7 +229,10 @@ export default function EnhancedMultiSelect({
           break;
 
         case "Escape":
-          setInputValue("");
+          if (inputValue) {
+            setInputValue("");
+            return;
+          }
           inputRef.current?.blur();
           if (activeIndex !== -1) {
             setActiveIndex(-1);
@@ -177,7 +242,17 @@ export default function EnhancedMultiSelect({
           break;
       }
     },
-    [value, inputValue, activeIndex, loop, dir, onValueChangeHandler, selectedValue, isValueSelected, open]
+    [
+      value,
+      inputValue,
+      activeIndex,
+      loop,
+      dir,
+      onValueChangeHandler,
+      selectedValue,
+      isValueSelected,
+      open,
+    ]
   );
 
   return (
@@ -192,6 +267,7 @@ export default function EnhancedMultiSelect({
         activeIndex,
         setActiveIndex,
         inputRef,
+        maxLength,
         handleSelect,
         isClickingScrollArea,
         setIsClickingScrollArea,
@@ -207,7 +283,9 @@ export default function EnhancedMultiSelect({
       }}
     >
       <Command
-        className={cn("!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent")}
+        className={cn(
+          "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
+        )}
         dir={dir}
         onKeyDown={handleKeyDown}
         ref={containerRef}
@@ -217,10 +295,14 @@ export default function EnhancedMultiSelect({
         {isMobileDevice ? (
           <>
             <MultiSelectorTrigger />
-            <Drawer
-              onOpenChange={setOpen}
-              open={open}
-            >
+            {maxLength && value.length > maxLength && (
+              <h3 className="w-max font-medium text-sm text-destructive mt-1">
+                You can only select up to {maxLength}{" "}
+                {label.toLowerCase() +
+                  (label.toLowerCase() === "topic" ? "s" : "")}
+              </h3>
+            )}
+            <Drawer onOpenChange={setOpen} open={open}>
               <DrawerContent
                 className="z-[100004] h-[95vh] max-h-[95vh]"
                 onMouseDown={(e) => {
@@ -244,8 +326,15 @@ export default function EnhancedMultiSelect({
                     setIsBlockingInput(true);
                   }}
                 >
-                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-muted pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-muted pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
                 </div>
+                {maxLength && value.length > maxLength && (
+                  <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
+                    You can only select up to {maxLength}{" "}
+                    {label.toLowerCase() +
+                      (label.toLowerCase() === "topic" ? "s" : "")}
+                  </h3>
+                )}
                 <div
                   className="flex flex-row gap-3 p-2 "
                   onTouchEnd={() => {
@@ -257,15 +346,17 @@ export default function EnhancedMultiSelect({
                     setIsBlockingInput(true);
                   }}
                 >
-                  <Button
-                    className="flex-1/3 cursor-pointer"
-                    onClick={() => {
-                      onValueChange(data ?? []);
-                    }}
-                  >
-                    Select all
-                    <Sparkles className="h-4 w-4" />
-                  </Button>
+                  {!maxLength && (
+                    <Button
+                      className="flex-1/3 cursor-pointer"
+                      onClick={() => {
+                        onValueChange(data ?? []);
+                      }}
+                    >
+                      Select all
+                      <Sparkles className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     className="flex-1/3 cursor-pointer"
                     onClick={() => {
@@ -292,13 +383,17 @@ export default function EnhancedMultiSelect({
             </Drawer>
           </>
         ) : (
-          <Popover
-            modal={false}
-            open={open}
-          >
+          <Popover modal={false} open={open}>
             <PopoverTrigger asChild>
               <div>
                 <MultiSelectorTrigger />
+                {maxLength && value.length > maxLength && (
+                  <h3 className="w-max font-medium text-sm text-destructive mt-1">
+                    You can only select up to {maxLength}{" "}
+                    {label.toLowerCase() +
+                      (label.toLowerCase() === "topic" ? "s" : "")}
+                  </h3>
+                )}
               </div>
             </PopoverTrigger>
             <PopoverContent
@@ -317,8 +412,19 @@ export default function EnhancedMultiSelect({
 
 const MultiSelectorTrigger = () => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const {value, onValueChange, activeIndex, open, setOpen, setIsClickingScrollArea, allAvailableOptions, label, setInputValue, setIsBlockingInput} =
-    useMultiSelect();
+  const {
+    value,
+    onValueChange,
+    activeIndex,
+    open,
+    setOpen,
+    setIsClickingScrollArea,
+    allAvailableOptions,
+    label,
+    setInputValue,
+    maxLength,
+    setIsBlockingInput,
+  } = useMultiSelect();
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isClickingUltility, setIsClickingUltility] = useState<boolean>(false);
   const [paddingRight, setPaddingRight] = useState<string>("initial");
@@ -387,44 +493,50 @@ const MultiSelectorTrigger = () => {
               <Trash2 className="h-4 w-4 " />
             </Button>
           </TooltipTrigger>
-          <TooltipContent className="z-[100000000000]">Remove all</TooltipContent>
+          <TooltipContent className="z-[100000000000]">
+            Remove all
+          </TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
-              onClick={() => {
-                onValueChange(allAvailableOptions, "selectAll");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && allAvailableOptions) {
+        {!maxLength && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
+                onClick={() => {
                   onValueChange(allAvailableOptions, "selectAll");
-                }
-              }}
-              onMouseDown={(e) => {
-                mousePreventDefault(e);
-                setIsClickingUltility(true);
-              }}
-              onMouseUp={() => {
-                setTimeout(() => {
-                  setIsClickingUltility(false);
-                }, 0);
-              }}
-              onTouchEnd={() => {
-                setTimeout(() => {
-                  setIsBlockingInput(false);
-                }, 0);
-              }}
-              onTouchStart={() => {
-                setIsBlockingInput(true);
-              }}
-              variant="outline"
-            >
-              <Sparkles className="h-4 w-4 " />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="z-[100000000000]">Select all</TooltipContent>
-        </Tooltip>
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && allAvailableOptions) {
+                    onValueChange(allAvailableOptions, "selectAll");
+                  }
+                }}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingUltility(true);
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingUltility(false);
+                  }, 0);
+                }}
+                onTouchEnd={() => {
+                  setTimeout(() => {
+                    setIsBlockingInput(false);
+                  }, 0);
+                }}
+                onTouchStart={() => {
+                  setIsBlockingInput(true);
+                }}
+                variant="outline"
+              >
+                <Sparkles className="h-4 w-4 " />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="z-[100000000000]">
+              Select all
+            </TooltipContent>
+          </Tooltip>
+        )}
         <Button
           className="h-6 flex-1 cursor-pointer text-xs"
           onClick={() => {
@@ -434,7 +546,11 @@ const MultiSelectorTrigger = () => {
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !isClickingUltility && allAvailableOptions) {
+            if (
+              e.key === "Enter" &&
+              !isClickingUltility &&
+              allAvailableOptions
+            ) {
               setInputValue("");
               setOpen(!open);
             }
@@ -450,7 +566,11 @@ const MultiSelectorTrigger = () => {
           }}
           variant="default"
         >
-          {value.length === 0 ? `Select ${label.toLowerCase()}` : `${value.length} ${label.toLowerCase()}${value.length > 1 ? "s" : ""} selected`}
+          {value.length === 0
+            ? `Select ${label.toLowerCase()}`
+            : `${value.length} ${label.toLowerCase()}${
+                value.length > 1 ? "s" : ""
+              } selected`}
         </Button>
       </div>
 
@@ -478,12 +598,9 @@ const MultiSelectorTrigger = () => {
           onTouchStart={() => {
             setIsBlockingInput(true);
           }}
-          style={{height: `${contentHeight}px`, paddingRight}}
+          style={{ height: `${contentHeight}px`, paddingRight }}
         >
-          <div
-            className="flex w-full flex-wrap gap-2 p-1"
-            ref={contentRef}
-          >
+          <div className="flex w-full flex-wrap gap-2 p-1" ref={contentRef}>
             {value.map((item, index) => (
               <Badge
                 className={cn(
@@ -613,7 +730,11 @@ const MultiSelectorList = () => {
             }, 100);
           }
         }}
-        placeholder={allAvailableOptions ? `Search ${label.toLowerCase()}` : `Select ${prerequisite.toLowerCase()} first`}
+        placeholder={
+          allAvailableOptions
+            ? `Search ${label.toLowerCase()}`
+            : `Select ${prerequisite.toLowerCase()} first`
+        }
         readOnly={isBlockingInput}
         ref={inputRef}
         tabIndex={0}
@@ -621,7 +742,10 @@ const MultiSelectorList = () => {
         wrapperClassName="w-full py-6 px-4 border-b"
       />
       <CommandList
-        className={cn("z-[1000] flex h-full w-full flex-col gap-2 bg-card p-2", label === "Year" || label === "Season")}
+        className={cn(
+          "z-[1000] flex h-full w-full flex-col gap-2 bg-card p-2",
+          label === "Year" || label === "Season"
+        )}
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -653,7 +777,14 @@ const MultiSelectorList = () => {
                 }}
                 title="Toggle selected"
               >
-                <h3 className={cn("font-medium text-xs", value.length > 0 ? "text-logo-main" : "text-muted-foreground")}>
+                <h3
+                  className={cn(
+                    "font-medium text-xs",
+                    value.length > 0
+                      ? "text-logo-main"
+                      : "text-muted-foreground"
+                  )}
+                >
                   {`${value.length} selected`}
                 </h3>
                 <ChevronsUpDown className="h-4 w-4" />
@@ -705,8 +836,13 @@ const MultiSelectorList = () => {
               heading={
                 inputValue
                   ? "Search results"
-                  : `${allAvailableOptions?.length} available ${label.toLowerCase()}${
-                      allAvailableOptions?.length && allAvailableOptions?.length > 1 ? "s" : ""
+                  : `${
+                      allAvailableOptions?.length
+                    } available ${label.toLowerCase()}${
+                      allAvailableOptions?.length &&
+                      allAvailableOptions?.length > 1
+                        ? "s"
+                        : ""
                     }`
               }
             >
