@@ -48,7 +48,6 @@ import { Switch } from "@/components/ui/switch";
 import type { ValidCurriculum } from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
-import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
 import {
   FILTERS_CACHE_KEY,
@@ -76,9 +75,9 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
+import { authClient } from "@/lib/auth/auth-client";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -665,15 +664,7 @@ const TopicalPage = () => {
     throw new Error("Invalid inputs");
   };
 
-  const {
-    data,
-    // error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    // status,
-  } = useInfiniteQuery({
+  const { data } = useInfiniteQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: search,
     initialPageParam: 0,
@@ -686,11 +677,18 @@ const TopicalPage = () => {
     },
     enabled: isSearchEnabled,
   });
+  const {
+    data: userSession,
+    isError: isUserSessionError,
+    isPending: isUserSessionPending,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => await authClient.getSession(),
+  });
 
   const {
     data: bookmarks,
-    isPending: isBookmarksPending,
-    error: bookmarksError,
+    isFetching: isBookmarksFetching,
     isError: isBookmarksError,
   } = useQuery({
     queryKey: ["user_bookmarks"],
@@ -710,7 +708,8 @@ const TopicalPage = () => {
         return { success: false, data: [], error: errorMessage };
       }
     },
-    enabled: isSearchEnabled,
+    enabled:
+      isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
   });
 
   return (
@@ -1053,8 +1052,11 @@ const TopicalPage = () => {
                           (bookmarks?.data as { questionId: string }[]) || []
                         }
                         imageSrc={image.imageSrc}
+                        isUserSessionPending={isUserSessionPending}
+                        error={isUserSessionError || isBookmarksError}
+                        userSession={userSession}
                         key={image.imageSrc}
-                        isBookmarksPending={isBookmarksPending}
+                        isBookmarksFetching={isBookmarksFetching}
                         paperType={question.paperType}
                         questionId={question.id}
                         season={question.season}

@@ -11,13 +11,17 @@ import { toast } from "sonner";
 export const BookmarkButton = ({
   bookmarks,
   questionId,
+  disabled,
   isBookmarksFetching,
   className,
+  isValidSession,
 }: {
   bookmarks: { questionId: string }[];
   questionId: string;
+  disabled: boolean;
   isBookmarksFetching: boolean;
   className?: string;
+  isValidSession: boolean;
 }) => {
   const isBookmarked = useMemo(() => {
     return bookmarks.some((bookmark) => bookmark.questionId === questionId);
@@ -75,9 +79,13 @@ export const BookmarkButton = ({
   return (
     <Button
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
-      disabled={isBookmarksFetching}
+      disabled={disabled}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={() => {
+        if (!isValidSession) {
+          toast.error("Please sign in to bookmark questions");
+          return;
+        }
         updateBookmarkMutation.mutate();
       }}
     >

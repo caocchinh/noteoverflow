@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ImageIcon,
@@ -10,17 +10,17 @@ import {
   RefreshCcw,
   ShieldUser,
   SquareUserRound,
-} from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { authClient } from '@/lib/auth/auth-client';
-import GlareHover from '../GlazeHover';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button } from '../ui/button';
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth/auth-client";
+import GlareHover from "../GlazeHover";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +31,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Skeleton } from '../ui/skeleton';
-import AvatarChange from './AvatarChange';
+} from "../ui/dropdown-menu";
+import { Skeleton } from "../ui/skeleton";
+import AvatarChange from "./AvatarChange";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,7 +44,7 @@ const User = () => {
   const isMobile = useIsMobile({ breakpoint: 515 });
 
   const { data, isPending, error } = useQuery({
-    queryKey: ['user'],
+    queryKey: ["user"],
     queryFn: async () => {
       return await authClient.getSession();
     },
@@ -53,12 +53,13 @@ const User = () => {
   const signOutMutation = useMutation({
     mutationFn: () => authClient.signOut(),
     onSuccess: () => {
-      queryClient.setQueryData(['user'], null);
+      queryClient.setQueryData(["user"], null);
+      queryClient.setQueryData(["user_bookmarks"], null);
       setIsMenuOpen(false);
-      router.push('/authentication');
+      router.push("/authentication");
     },
     onError: () => {
-      toast.error('Error signing out, please try again.');
+      toast.error("Error signing out, please try again.");
     },
   });
 
@@ -85,7 +86,7 @@ const User = () => {
               className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
               onClick={() => {
                 setIsMenuOpen(false);
-                if (typeof window !== 'undefined') {
+                if (typeof window !== "undefined") {
                   window.location.reload();
                 }
               }}
@@ -111,7 +112,7 @@ const User = () => {
           initial={{ opacity: 0 }}
           transition={{
             duration: 0.3,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
         >
           <Button
@@ -131,7 +132,7 @@ const User = () => {
   return (
     <>
       <AvatarChange
-        currentAvatar={data.data.user.image || '/assets/avatar/blue.webp'}
+        currentAvatar={data.data.user.image || "/assets/avatar/blue.webp"}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         userId={data.data.user.id}
@@ -147,7 +148,7 @@ const User = () => {
               key={data.data.user.image}
               transition={{
                 duration: 0.3,
-                ease: 'easeInOut',
+                ease: "easeInOut",
               }}
             >
               <Avatar>
@@ -163,11 +164,11 @@ const User = () => {
                 >
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={data.data.user.image || '/assets/avatar/blue.webp'}
+                    src={data.data.user.image || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(' ')[0].charAt(0) +
-                      data.data.user.name.split(' ')[1].charAt(0)}
+                    {data.data.user.name.split(" ")[0].charAt(0) +
+                      data.data.user.name.split(" ")[1].charAt(0)}
                   </AvatarFallback>
                 </GlareHover>
               </Avatar>
@@ -196,11 +197,11 @@ const User = () => {
                 <Avatar>
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={data.data?.user.image || '/assets/avatar/blue.webp'}
+                    src={data.data?.user.image || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(' ')[0].charAt(0) +
-                      data.data.user.name.split(' ')[1].charAt(0)}
+                    {data.data.user.name.split(" ")[0].charAt(0) +
+                      data.data.user.name.split(" ")[1].charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <p className="w-max max-w-[120px] whitespace-pre-line font-medium text-sm">
@@ -230,8 +231,8 @@ const User = () => {
             </DropdownMenuPortal>
           </DropdownMenuSub>
 
-          {(data.data.user.role === 'admin' ||
-            data.data.user.role === 'owner') && (
+          {(data.data.user.role === "admin" ||
+            data.data.user.role === "owner") && (
             <>
               <DropdownMenuSeparator className="!mx-0 !my-0" />
               <DropdownMenuItem asChild title="Admin Panel">
@@ -248,7 +249,7 @@ const User = () => {
                     Admin Panel
                   </Link>
                 </Button>
-              </DropdownMenuItem>{' '}
+              </DropdownMenuItem>{" "}
             </>
           )}
 

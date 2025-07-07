@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import Image from "next/image";
 import { useIsMutating } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, TriangleAlert } from "lucide-react";
 
 const QuestionPreview = ({
   bookmarks,
@@ -12,7 +12,10 @@ const QuestionPreview = ({
   year,
   paperType,
   season,
-  isBookmarksPending,
+  isBookmarksFetching,
+  isUserSessionPending,
+  error,
+  userSession,
 }: {
   bookmarks: { questionId: string }[];
   questionId: string;
@@ -21,7 +24,12 @@ const QuestionPreview = ({
   year: number;
   paperType: number;
   season: string;
-  isBookmarksPending: boolean;
+  isBookmarksFetching: boolean;
+  isUserSessionPending: boolean;
+  error: boolean;
+  userSession: ReturnType<
+    typeof import("@/lib/auth/auth-client").authClient.getSession
+  > | null;
 }) => {
   const mutationKey = ["user_bookmarks", questionId];
 
@@ -42,27 +50,37 @@ const QuestionPreview = ({
         <Badge className="h-max bg-white !text-black">Paper {paperType}</Badge>
         <Badge className="h-max bg-white !text-black">{season}</Badge>
 
-        {!isMutatingThisQuestion && (
+        {!isMutatingThisQuestion && !error && (
           <BookmarkButton
             className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
+            disabled={isUserSessionPending}
             bookmarks={bookmarks || []}
             questionId={questionId}
-            isBookmarksFetching={isBookmarksPending}
+            isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+            isValidSession={!!userSession?.session}
           />
         )}
       </div>
-      {!isMutatingThisQuestion && (
+      {!isMutatingThisQuestion && !error && (
         <BookmarkButton
           className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
           bookmarks={bookmarks || []}
           questionId={questionId}
-          isBookmarksFetching={isBookmarksPending}
+          isValidSession={!!userSession?.session}
+          disabled={isUserSessionPending}
+          isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
         />
       )}
-      {isMutatingThisQuestion && (
+      {isMutatingThisQuestion && !error && (
         <Badge className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black">
           Saving
           <Loader2 className="animate-spin" />
+        </Badge>
+      )}
+      {error && (
+        <Badge className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-red-600">
+          Unable to bookmark
+          <TriangleAlert />
         </Badge>
       )}
       <Image
