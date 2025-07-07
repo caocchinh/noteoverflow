@@ -1,8 +1,12 @@
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import Image from "next/image";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2, TriangleAlert } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const QuestionPreview = ({
   bookmarks,
@@ -38,12 +42,17 @@ const QuestionPreview = ({
       mutationKey: mutationKey,
     }) > 0;
 
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
   return (
     <div
       key={imageSrc}
-      className="w-full h-full object-cover relative bg-white flex items-center justify-center group overflow-hidden cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-transparent border-black/50 min-h-[75px] "
+      className={cn(
+        "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-none border-black/50 min-h-[75px] relative overflow-hidden",
+        !isImageLoaded && "border-transparent"
+      )}
     >
-      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0  group-hover:opacity-[37%]"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center">
         <Badge className="h-max bg-white !text-black ">{topic}</Badge>
         <Badge className="h-max bg-white !text-black">{year}</Badge>
@@ -84,12 +93,19 @@ const QuestionPreview = ({
         </Badge>
       )}
       <Image
-        className="w-full h-full object-contain"
+        className={cn(
+          "w-full h-full object-contain",
+          isImageLoaded ? "opacity-100" : "opacity-0"
+        )}
         src={imageSrc}
         height={100}
         width={100}
         alt={imageSrc}
+        onLoad={() => setIsImageLoaded(true)}
       />
+      {!isImageLoaded && (
+        <Skeleton className="w-full h-full rounded-sm absolute top-0 left-0" />
+      )}
     </div>
   );
 };

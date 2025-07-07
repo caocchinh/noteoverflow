@@ -38,19 +38,30 @@ export const getTopicalData = async ({
 }: FilterData & {
   curriculumId: string;
   subjectId: string;
-}): Promise<ServerActionResponse<SelectedQuestion[]>> => {
+}): Promise<
+  ServerActionResponse<{
+    data: SelectedQuestion[];
+    isRateLimited: boolean;
+  }>
+> => {
   try {
     if (!validateCurriculum(curriculumId)) {
       return {
         success: false,
-        data: [],
+        data: {
+          data: [],
+          isRateLimited: false,
+        },
         error: "Invalid curriculum",
       };
     }
     if (!validateSubject(curriculumId, subjectId)) {
       return {
         success: false,
-        data: [],
+        data: {
+          data: [],
+          isRateLimited: false,
+        },
         error: "Invalid subject",
       };
     }
@@ -63,7 +74,10 @@ export const getTopicalData = async ({
     ) {
       return {
         success: false,
-        data: [],
+        data: {
+          data: [],
+          isRateLimited: false,
+        },
         error: "Invalid filters",
       };
     }
@@ -114,18 +128,24 @@ export const getTopicalData = async ({
           orderBy: (table) => [asc(table.order)],
         },
       },
-      limit: session?.session ? undefined : 10,
+      limit: session?.session ? undefined : 5,
     });
 
     return {
       success: true,
-      data,
+      data: {
+        data: data as SelectedQuestion[],
+        isRateLimited: session?.session ? false : true,
+      },
     };
   } catch (error) {
     console.error(error);
     return {
       success: false,
-      data: [],
+      data: {
+        data: [],
+        isRateLimited: false,
+      },
     };
   }
 };

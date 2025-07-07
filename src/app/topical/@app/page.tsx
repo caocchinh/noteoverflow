@@ -685,11 +685,11 @@ const TopicalPage = () => {
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
 
   useEffect(() => {
-    if (data?.data) {
+    if (data?.data?.data) {
       const chunkedData: SelectedQuestion[][] = [];
       let currentChunks: SelectedQuestion[] = [];
 
-      data.data.forEach((item) => {
+      data.data.data.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === CHUNK_SIZE) {
           chunkedData.push(currentChunks);
           currentChunks = [];
@@ -1058,6 +1058,12 @@ const TopicalPage = () => {
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"
           >
+            {data?.data?.isRateLimited && (
+              <p className="text-md text-center mb-2 text-red-600">
+                Limited results displayed due to rate limiting. Log in for
+                complete access.
+              </p>
+            )}
             <ResponsiveMasonry
               columnsCountBreakPoints={
                 COLUMN_BREAKPOINTS[
@@ -1086,6 +1092,7 @@ const TopicalPage = () => {
                 )}
               </Masonry>
             </ResponsiveMasonry>
+
             <InfiniteScroll
               next={() => {
                 if (fullPartitionedData) {

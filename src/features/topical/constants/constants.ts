@@ -177,4 +177,4 @@ export const COLUMN_BREAKPOINTS = {
 };
 
 export const MAX_TOPIC_SELECTION = 5;
-export const CHUNK_SIZE = 69;
+export const CHUNK_SIZE = 100;
