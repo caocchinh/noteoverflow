@@ -166,8 +166,6 @@ export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   season: false,
 };
 
-export const PAGE_SIZE = 50;
-
 export const DEFAULT_NUMBER_OF_COLUMNS = 3;
 
 export const COLUMN_BREAKPOINTS = {
@@ -179,3 +177,4 @@ export const COLUMN_BREAKPOINTS = {
 };
 
 export const MAX_TOPIC_SELECTION = 5;
+export const CHUNK_SIZE = 69;

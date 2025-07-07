@@ -8,7 +8,6 @@ import {
   validateFilterData,
   validateSubject,
 } from "@/features/topical/lib/utils";
-import { PAGE_SIZE } from "../constants/constants";
 import type { FilterData } from "../constants/types";
 import { verifySession } from "@/dal/verifySession";
 
@@ -36,11 +35,9 @@ export const getTopicalData = async ({
   paperType = [],
   year = [],
   season = [],
-  page = 0,
 }: FilterData & {
   curriculumId: string;
   subjectId: string;
-  page: number;
 }): Promise<ServerActionResponse<SelectedQuestion[]>> => {
   try {
     if (!validateCurriculum(curriculumId)) {
@@ -70,6 +67,8 @@ export const getTopicalData = async ({
         error: "Invalid filters",
       };
     }
+
+    const session = await verifySession();
 
     const db = await getDbAsync();
 
@@ -115,8 +114,7 @@ export const getTopicalData = async ({
           orderBy: (table) => [asc(table.order)],
         },
       },
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
+      limit: session?.session ? undefined : 10,
     });
 
     return {

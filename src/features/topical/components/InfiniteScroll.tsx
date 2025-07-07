@@ -1,53 +1,55 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
+
+// Extend the IntersectionObserverInit interface to include scrollMargin
+interface ExtendedIntersectionObserverInit extends IntersectionObserverInit {
+  scrollMargin?: string;
+}
 
 interface InfiniteScrollProps {
   next: () => unknown;
   hasMore: boolean;
-  threshold?: number;
   root?: Element | Document | null;
-  rootMargin?: string;
-  children?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export default function InfiniteScroll({
   next,
   hasMore,
-  threshold = 1,
   root = null,
-  rootMargin = "200px",
-  children,
+  isLoading = false,
 }: InfiniteScrollProps) {
-  const observedElementRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && hasMore) {
-            next();
-          }
-        });
-      },
-      {
-        root,
-        rootMargin,
-        threshold,
+  const setObserverRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isLoading) {
+        return;
       }
-    );
-    if (observedElementRef.current) {
-      observer.observe(observedElementRef.current);
-    }
-    return () => {
-      observer.disconnect();
-    };
-  }, [next, root, rootMargin, threshold, hasMore]);
-
-  return (
-    <div
-      className="flex flex-row flex-wrap items-center justify-center gap-4"
-      ref={observedElementRef}
-    >
-      {children}
-    </div>
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      if (!node) {
+        return;
+      }
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && hasMore) {
+              next();
+            }
+          });
+        },
+        {
+          root,
+          rootMargin: "700px",
+          scrollMargin: "700px",
+          threshold: 1,
+        } as ExtendedIntersectionObserverInit
+      );
+      observerRef.current.observe(node);
+    },
+    [next, root, hasMore, isLoading]
   );
+
+  return <div ref={setObserverRef} className="h-10 w-full bg-transparent" />;
 }

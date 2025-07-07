@@ -1,5 +1,5 @@
 "use client";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
@@ -56,6 +56,7 @@ import {
   DEFAULT_NUMBER_OF_COLUMNS,
   COLUMN_BREAKPOINTS,
   MAX_TOPIC_SELECTION,
+  CHUNK_SIZE,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -70,6 +71,7 @@ import {
 import {
   getTopicalData,
   getUserBookmarksAction,
+  SelectedQuestion,
 } from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -79,6 +81,7 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { toast } from "sonner";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
+import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 
 const ButtonUltility = ({
   isResetConfirmationOpen,
@@ -656,8 +659,7 @@ const TopicalPage = () => {
     isPersistantCacheEnabled,
   ]);
 
-  const search = async ({ pageParam }: { pageParam: number }) => {
-    console.log("searching", pageParam);
+  const search = async () => {
     if (isValidInputs(false)) {
       return await getTopicalData({
         curriculumId: selectedCurriculum,
@@ -666,25 +668,42 @@ const TopicalPage = () => {
         paperType: selectedPaperType,
         year: selectedYear,
         season: selectedSeason,
-        page: pageParam,
       });
     }
     throw new Error("Invalid inputs");
   };
 
-  const { data } = useInfiniteQuery({
+  const { data } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: search,
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      if (lastPage?.data?.length === 0) {
-        return;
-      }
-
-      return lastPageParam + 1;
-    },
     enabled: isSearchEnabled,
   });
+  const [fullPartitionedData, setFullPartitionedData] = useState<
+    SelectedQuestion[][] | undefined
+  >(undefined);
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+  const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
+
+  useEffect(() => {
+    if (data?.data) {
+      const chunkedData: SelectedQuestion[][] = [];
+      let currentChunks: SelectedQuestion[] = [];
+
+      data.data.forEach((item) => {
+        if (currentChunks.length === CHUNK_SIZE) {
+          chunkedData.push(currentChunks);
+          currentChunks = [];
+        }
+        currentChunks.push(item);
+      });
+      chunkedData.push(currentChunks);
+
+      setFullPartitionedData(chunkedData);
+      setDisplayedData(chunkedData[0]);
+      setCurrentChunkIndex(0);
+    }
+  }, [data, numberOfColumns]);
+
   const {
     data: userSession,
     isError: isUserSessionError,
@@ -1047,30 +1066,42 @@ const TopicalPage = () => {
               }
             >
               <Masonry gutter="10px">
-                {data?.pages.map((page) =>
-                  page.data?.map((question) =>
-                    question.questionImages.map((image) => (
-                      <QuestionPreview
-                        bookmarks={
-                          (bookmarks?.data as Set<string>) || new Set()
-                        }
-                        imageSrc={image.imageSrc}
-                        isUserSessionPending={isUserSessionPending}
-                        error={isUserSessionError || isBookmarksError}
-                        userSession={userSession}
-                        key={image.imageSrc}
-                        isBookmarksFetching={isBookmarksFetching}
-                        paperType={question.paperType}
-                        questionId={question.id}
-                        season={question.season}
-                        topic={question.topic}
-                        year={question.year}
-                      />
-                    ))
-                  )
+                {displayedData?.map((question) =>
+                  question.questionImages.map((image) => (
+                    <QuestionPreview
+                      bookmarks={(bookmarks?.data as Set<string>) || new Set()}
+                      imageSrc={image.imageSrc}
+                      isUserSessionPending={isUserSessionPending}
+                      error={isUserSessionError || isBookmarksError}
+                      userSession={userSession}
+                      key={image.imageSrc}
+                      isBookmarksFetching={isBookmarksFetching}
+                      paperType={question.paperType}
+                      questionId={question.id}
+                      season={question.season}
+                      topic={question.topic}
+                      year={question.year}
+                    />
+                  ))
                 )}
               </Masonry>
             </ResponsiveMasonry>
+            <InfiniteScroll
+              next={() => {
+                if (fullPartitionedData) {
+                  setCurrentChunkIndex(currentChunkIndex + 1);
+                  setDisplayedData([
+                    ...displayedData,
+                    ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+                  ]);
+                }
+              }}
+              hasMore={
+                !!fullPartitionedData &&
+                currentChunkIndex < fullPartitionedData.length - 1
+              }
+              isLoading={!fullPartitionedData}
+            />
           </ScrollArea>
         </SidebarInset>
       </SidebarProvider>
