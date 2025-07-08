@@ -15,6 +15,7 @@ const QuestionPreview = memo(
     topic,
     year,
     paperType,
+    setIsQuestionViewOpen,
     season,
     isBookmarksFetching,
     isUserSessionPending,
@@ -27,6 +28,10 @@ const QuestionPreview = memo(
     topic: string;
     year: number;
     paperType: number;
+    setIsQuestionViewOpen: (open: {
+      isOpen: boolean;
+      questionId: string;
+    }) => void;
     season: string;
     isBookmarksFetching: boolean;
     isUserSessionPending: boolean;
@@ -48,6 +53,9 @@ const QuestionPreview = memo(
         className={cn(
           "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-none border-black/50 min-h-[100px] relative overflow-hidden"
         )}
+        onClick={() =>
+          setIsQuestionViewOpen({ isOpen: true, questionId: questionId })
+        }
       >
         <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center p-2">

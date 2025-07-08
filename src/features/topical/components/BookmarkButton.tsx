@@ -79,7 +79,9 @@ export const BookmarkButton = ({
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
       disabled={disabled || isBookmarksFetching}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
         if (!isValidSession) {
           toast.error("Please sign in to bookmark questions");
           return;
