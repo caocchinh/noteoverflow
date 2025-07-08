@@ -22,7 +22,7 @@ export default function InfiniteScroll({
 
   const setObserverRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (isLoading) {
+      if (isLoading || typeof window === "undefined") {
         return;
       }
       if (observerRef.current) {
@@ -41,10 +41,8 @@ export default function InfiniteScroll({
         },
         {
           root,
-          rootMargin:
-            typeof window !== "undefined" ? `${window.innerHeight}px` : "900px",
-          scrollMargin:
-            typeof window !== "undefined" ? `${window.innerHeight}px` : "900px",
+          rootMargin: `${window.outerHeight * 2}px`,
+          scrollMargin: `${window.outerHeight * 2}px`,
           threshold: 1,
         } as ExtendedIntersectionObserverInit
       );

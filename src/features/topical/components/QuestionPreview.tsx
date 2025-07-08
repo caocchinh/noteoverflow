@@ -94,19 +94,31 @@ const QuestionPreview = memo(
           />
         )}
         {isMutatingThisQuestion && !error && (
-          <Badge className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black">
+          <Badge
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
             Saving
             <Loader2 className="animate-spin" />
           </Badge>
         )}
         {error && (
-          <Badge className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-red-600">
+          <Badge
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
             Unable to bookmark
             <TriangleAlert />
           </Badge>
         )}
         <Image
-          className={cn("w-full h-full object-contain")}
+          className="w-full h-full object-contain"
           src={imageSrc}
           height={100}
           width={100}

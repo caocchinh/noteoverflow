@@ -48,6 +48,8 @@ const User = () => {
     queryFn: async () => {
       return await authClient.getSession();
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const signOutMutation = useMutation({
