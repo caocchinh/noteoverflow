@@ -51,15 +51,12 @@ export const BookmarkButton = ({
       if (!old?.data) {
         return;
       }
-      const newBookmarks = isBookmarked
-        ? new Set(
-            Array.from(old.data).filter((bookmark) => bookmark !== questionId)
-          )
-        : new Set([...Array.from(old.data), questionId]);
-      queryClient.setQueryData(["user_bookmarks"], {
-        sucess: true,
-        data: newBookmarks,
-      });
+      if (isBookmarked) {
+        old.data.delete(questionId);
+      } else {
+        old.data.add(questionId);
+      }
+
       toast.success(
         isBookmarked
           ? "Question removed from bookmark"

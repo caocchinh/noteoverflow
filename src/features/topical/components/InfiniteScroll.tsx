@@ -42,9 +42,9 @@ export default function InfiniteScroll({
         {
           root,
           rootMargin:
-            typeof window !== "undefined" ? `${window.innerHeight}px` : "850px",
+            typeof window !== "undefined" ? `${window.innerHeight}px` : "900px",
           scrollMargin:
-            typeof window !== "undefined" ? `${window.innerHeight}px` : "850px",
+            typeof window !== "undefined" ? `${window.innerHeight}px` : "900px",
           threshold: 1,
         } as ExtendedIntersectionObserverInit
       );
