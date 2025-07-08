@@ -38,8 +38,10 @@ import {
   COLUMN_BREAKPOINTS,
   MAX_TOPIC_SELECTION,
   CHUNK_SIZE,
+  CACHE_EXPIRE_TIME,
 } from "@/features/topical/constants/constants";
 import type {
+  CacheServerActionResponse,
   FilterData,
   FiltersCache,
   InvalidInputs,
@@ -506,16 +508,61 @@ const TopicalPage = () => {
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
-      const cachedData = await getCache<string>(JSON.stringify(currentQuery));
-      if (cachedData) {
-        return JSON.parse(cachedData) as ServerActionResponse<{
+      try {
+        const cachedData = await getCache<string>(JSON.stringify(currentQuery));
+        const currentTime = Date.now();
+        const parsedCachedData: CacheServerActionResponse<{
           data: SelectedQuestion[];
           isRateLimited: boolean;
-        }>;
+        }> | null = cachedData ? JSON.parse(cachedData) : null;
+        if (
+          parsedCachedData &&
+          currentTime > parsedCachedData.cacheExpireTime
+        ) {
+          throw new Error("Cache expired");
+        }
+        if (parsedCachedData) {
+          return {
+            data: {
+              data: parsedCachedData.data.data,
+              isRateLimited: parsedCachedData.data.isRateLimited,
+            },
+            success: true,
+          } as ServerActionResponse<{
+            data: SelectedQuestion[];
+            isRateLimited: boolean;
+          }>;
+        }
+      } catch {
+        const result = await search();
+        try {
+          const currentTime = Date.now();
+          const cacheExpireTime = currentTime + CACHE_EXPIRE_TIME;
+          const cacheData = {
+            data: result.data,
+            cacheExpireTime,
+          };
+          if (!result.data?.isRateLimited && result.data && result.data.data) {
+            setCache(JSON.stringify(currentQuery), JSON.stringify(cacheData));
+          }
+          return result;
+        } catch {
+          return result;
+        }
       }
       const result = await search();
-      if (!result.data?.isRateLimited) {
-        setCache(JSON.stringify(currentQuery), JSON.stringify(result));
+      try {
+        const currentTime = Date.now();
+        const cacheExpireTime = currentTime + CACHE_EXPIRE_TIME;
+        const cacheData = {
+          data: result.data,
+          cacheExpireTime,
+        };
+        if (!result.data?.isRateLimited && result.data && result.data.data) {
+          setCache(JSON.stringify(currentQuery), JSON.stringify(cacheData));
+        }
+      } catch {
+        return result;
       }
       return result;
     },
@@ -547,6 +594,13 @@ const TopicalPage = () => {
       setCurrentChunkIndex(0);
     }
   }, [topicalData, numberOfColumns]);
+
+  useEffect(() => {
+    scrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  }, [currentQuery]);
 
   const {
     data: userSession,
@@ -582,6 +636,7 @@ const TopicalPage = () => {
     enabled:
       isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
   });
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="pt-16 h-screen overflow-hidden">
@@ -900,6 +955,7 @@ const TopicalPage = () => {
           </h1>
 
           <ScrollArea
+            viewportRef={scrollAreaRef}
             className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"
           >

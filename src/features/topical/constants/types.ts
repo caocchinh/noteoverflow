@@ -61,6 +61,11 @@ export type FiltersCache = {
   };
 };
 
+export interface CacheServerActionResponse<T> {
+  data: T;
+  cacheExpireTime: number;
+}
+
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
