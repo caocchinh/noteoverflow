@@ -3,36 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
-  BrushCleaning,
   Loader2,
   OctagonAlert,
   RefreshCcw,
-  ScanText,
   Settings,
   SlidersHorizontal,
-  X,
 } from "lucide-react";
 import { default as NextImage } from "next/image";
-import { useTheme } from "next-themes";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -47,8 +26,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Switch } from "@/components/ui/switch";
-import type { ValidCurriculum } from "@/constants/types";
+import type { ServerActionResponse, ValidCurriculum } from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
@@ -85,166 +63,9 @@ import { toast } from "sonner";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
-
-const ButtonUltility = ({
-  isResetConfirmationOpen,
-  setIsResetConfirmationOpen,
-  resetEverything,
-  setIsSidebarOpen,
-  isMounted,
-  isValidInput,
-  setIsSearchEnabled,
-  setCurrentQuery,
-  query,
-}: {
-  isResetConfirmationOpen: boolean;
-  setIsResetConfirmationOpen: (value: boolean) => void;
-  resetEverything: () => void;
-  setIsSidebarOpen: (value: boolean) => void;
-  isMounted: boolean;
-  isValidInput: (visualFeedback?: boolean) => boolean;
-  setIsSearchEnabled: (value: boolean) => void;
-  setCurrentQuery: (
-    value: {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData
-  ) => void;
-  query: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
-}) => {
-  const { theme } = useTheme();
-
-  return (
-    <>
-      <Button
-        className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-        disabled={!isMounted}
-        onClick={() => {
-          if (isValidInput(true)) {
-            setIsSearchEnabled(true);
-            setCurrentQuery({
-              ...query,
-            });
-          }
-        }}
-      >
-        Search
-        <ScanText />
-      </Button>
-      <Dialog
-        onOpenChange={setIsResetConfirmationOpen}
-        open={isResetConfirmationOpen}
-      >
-        <DialogTrigger asChild>
-          <Button
-            className="w-full cursor-pointer"
-            disabled={!isMounted}
-            variant="outline"
-          >
-            Clear
-            <BrushCleaning />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Clear all</DialogTitle>
-            <DialogDescription>
-              This will clear all the selected options and reset the form. Are
-              you sure you want to clear?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button className="cursor-pointer" variant="outline">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button
-              className="cursor-pointer"
-              onClick={() => {
-                resetEverything();
-                setIsResetConfirmationOpen(false);
-              }}
-            >
-              Clear
-              <BrushCleaning />
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <Button
-        className="w-full cursor-pointer"
-        onClick={() => {
-          setIsSidebarOpen(false);
-        }}
-        variant={theme === "dark" && isMounted ? "destructive" : "default"}
-      >
-        Close filter
-        <X className="h-4 w-4" />
-      </Button>
-    </>
-  );
-};
-
-const CacheAccordion = ({
-  isSessionCacheEnabled,
-  setIsSessionCacheEnabled,
-  isPersistantCacheEnabled,
-  setIsPersistantCacheEnabled,
-}: {
-  isSessionCacheEnabled: boolean;
-  setIsSessionCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  isPersistantCacheEnabled: boolean;
-  setIsPersistantCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-  return (
-    <Accordion
-      className="w-full"
-      collapsible
-      defaultValue="session-cache"
-      type="single"
-    >
-      <AccordionItem value="session-cache">
-        <AccordionTrigger>Session cache</AccordionTrigger>
-        <AccordionContent className="flex flex-col gap-4 text-balance">
-          <p>
-            Automatically restores your filters from the last session on page
-            refresh. Not synced across devices. Is enabled by default.
-          </p>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="session-cache">Enable session cache</Label>
-            <Switch
-              checked={isSessionCacheEnabled}
-              id="session-cache"
-              onCheckedChange={setIsSessionCacheEnabled}
-            />
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="persistant-cache">
-        <AccordionTrigger>Persistant cache</AccordionTrigger>
-        <AccordionContent className="flex flex-col gap-4 text-balance">
-          <p>
-            Permanently saves your filter preferences for each subject. When you
-            re-select a subject, previously used filters are automatically
-            applied. Not synced across devices. Is enabled by default.
-          </p>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="persistant-cache">Enable persistant cache</Label>
-            <Switch
-              checked={isPersistantCacheEnabled}
-              id="persistant-cache"
-              onCheckedChange={setIsPersistantCacheEnabled}
-            />
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-};
+import { getCache, setCache } from "@/drizzle/db";
+import ButtonUltility from "@/features/topical/components/ButtonUltility";
+import CacheAccordion from "@/features/topical/components/CacheAccordion";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -684,7 +505,21 @@ const TopicalPage = () => {
     refetch: refetchTopicalData,
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
-    queryFn: search,
+    queryFn: async () => {
+      const cachedData = await getCache<string>(JSON.stringify(currentQuery));
+      if (cachedData) {
+        return JSON.parse(cachedData) as ServerActionResponse<{
+          data: SelectedQuestion[];
+          isRateLimited: boolean;
+        }>;
+      }
+      const result = await search();
+      if (!result.data?.isRateLimited) {
+        setCache(JSON.stringify(currentQuery), JSON.stringify(result));
+      }
+      return result;
+    },
+
     enabled: isSearchEnabled,
   });
   const [fullPartitionedData, setFullPartitionedData] = useState<
