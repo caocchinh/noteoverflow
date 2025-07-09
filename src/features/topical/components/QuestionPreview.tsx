@@ -1,7 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
-import Image from "next/image";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2, TriangleAlert } from "lucide-react";
 import { memo } from "react";
@@ -89,6 +89,10 @@ const QuestionPreview = memo(
               e.stopPropagation();
               e.preventDefault();
             }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
           >
             Saving
             <Loader2 className="animate-spin" />
@@ -101,17 +105,19 @@ const QuestionPreview = memo(
               e.stopPropagation();
               e.preventDefault();
             }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
           >
             Unable to bookmark
             <TriangleAlert />
           </Badge>
         )}
-        <Image
+        <img
           className="w-full h-full object-contain"
           src={question.questionImages[imageIndex].imageSrc}
-          height={100}
-          width={100}
-          alt={question.questionImages[imageIndex].imageSrc}
+          alt="Question preview"
         />
       </div>
     );

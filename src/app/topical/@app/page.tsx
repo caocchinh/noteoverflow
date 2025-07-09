@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
   Loader2,
+  Monitor,
   OctagonAlert,
   RefreshCcw,
   Settings,
@@ -68,7 +69,12 @@ import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import { getCache, setCache } from "@/drizzle/db";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import CacheAccordion from "@/features/topical/components/CacheAccordion";
-import QuestionView from "@/features/topical/components/QuestionView";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import QuestionInspect from "@/features/topical/components/QuestionInspect";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -655,6 +661,21 @@ const TopicalPage = () => {
     isOpen: false,
     questionId: "",
   });
+  const isQuestionViewDisabled = useMemo(() => {
+    return (
+      !isSearchEnabled ||
+      topicalData?.data?.data.length === 0 ||
+      isTopicalDataError ||
+      isTopicalDataFetching ||
+      !isTopicalDataFetched
+    );
+  }, [
+    isSearchEnabled,
+    topicalData,
+    isTopicalDataError,
+    isTopicalDataFetching,
+    isTopicalDataFetched,
+  ]);
 
   return (
     <>
@@ -970,6 +991,34 @@ const TopicalPage = () => {
                 <SlidersHorizontal />
               </Button>
             </div>
+            <div className="absolute left-28 z-[1000]">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="fixed">
+                    <Button
+                      className="  flex cursor-pointer items-center gap-2 border"
+                      disabled={isQuestionViewDisabled}
+                      onClick={() => {
+                        setIsQuestionViewOpen((prev) => ({
+                          ...prev,
+                          isOpen: true,
+                        }));
+                      }}
+                      variant="default"
+                    >
+                      Inspect
+                      <Monitor />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className={cn(!isQuestionViewDisabled && "hidden")}
+                >
+                  To inspect questions, run a search first.
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
             <h1 className="w-full text-center font-bold text-2xl ">
               Topical questions
@@ -1081,9 +1130,10 @@ const TopicalPage = () => {
           </SidebarInset>
         </SidebarProvider>
       </div>
-      <QuestionView
+      <QuestionInspect
         isOpen={isQuestionViewOpen}
         setIsOpen={setIsQuestionViewOpen}
+        partitionedTopicalData={fullPartitionedData}
       />
     </>
   );

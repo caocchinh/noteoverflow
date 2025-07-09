@@ -111,3 +111,13 @@ export const validateFilterData = ({
     return false;
   }
 };
+
+export const extractPaperCode = (question: string): string => {
+  const codePart = question.split(";")[2];
+  return codePart.replaceAll("_", "/");
+};
+
+export const extractQuestionNumber = (question: string): number => {
+  const questionNumberPart = question.split(";")[4];
+  return parseInt(questionNumberPart.slice(1));
+};
