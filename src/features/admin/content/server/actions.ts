@@ -160,9 +160,10 @@ export async function uploadAction(
       userId: session.user.id,
       curriculumName: payload.curriculumName,
       subjectId: payload.subjectId,
-      topic: payload.topic,
       questionNumber: payload.questionNumber,
     });
+
+    // REMEMBER TO ADD TOPIC CREATION HERE AFTER QUESTION CREATION--> TOPICS SHOULD BE AN ARRAY OF TOPICS
 
     return {
       success: true,

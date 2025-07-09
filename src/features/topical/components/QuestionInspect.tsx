@@ -311,7 +311,7 @@ const QuestionInspect = ({
                         className="w-full h-full object-contain"
                         key={image.imageSrc}
                         src={image.imageSrc}
-                        alt={image.questionId}
+                        alt="Question image"
                         width={100}
                         height={100}
                       />
@@ -329,7 +329,7 @@ const QuestionInspect = ({
                         className="w-full h-full object-contain"
                         key={answer.answer}
                         src={answer.answer}
-                        alt={answer.questionId}
+                        alt="Answer image"
                         width={100}
                         height={100}
                       />

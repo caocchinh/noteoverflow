@@ -1,11 +1,17 @@
 import "server-only";
-import {and, eq} from "drizzle-orm";
-import {getDbAsync} from "@/drizzle/db";
-import {question, questionImage} from "@/drizzle/schema";
+import { and, eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db";
+import { question, questionImage, questionTopic } from "@/drizzle/schema";
 
-export const isQuestionExists = async (questionId: string): Promise<boolean> => {
+export const isQuestionExists = async (
+  questionId: string
+): Promise<boolean> => {
   const db = await getDbAsync();
-  const result = await db.select().from(question).where(eq(question.id, questionId)).limit(1);
+  const result = await db
+    .select()
+    .from(question)
+    .where(eq(question.id, questionId))
+    .limit(1);
   return result.length > 0;
 };
 
@@ -17,7 +23,6 @@ export const createQuestion = async ({
   paperVariant,
   userId,
   subjectId,
-  topic,
   questionNumber,
   curriculumName,
 }: {
@@ -28,7 +33,6 @@ export const createQuestion = async ({
   paperVariant: number;
   userId: string;
   subjectId: string;
-  topic: string;
   questionNumber: number;
   curriculumName: string;
 }) => {
@@ -41,7 +45,6 @@ export const createQuestion = async ({
     paperVariant,
     uploadedBy: userId,
     subjectId,
-    topic,
     questionNumber,
     curriculumName,
   });
@@ -54,7 +57,6 @@ export const overwriteQuestion = async ({
   paperType,
   paperVariant,
   subjectId,
-  topic,
   questionNumber,
   curriculumName,
   questionId,
@@ -65,7 +67,6 @@ export const overwriteQuestion = async ({
   paperType: number;
   paperVariant: number;
   subjectId: string;
-  topic: string;
   questionNumber: number;
   curriculumName: string;
   questionId: string;
@@ -82,7 +83,6 @@ export const overwriteQuestion = async ({
       paperVariant,
       uploadedBy: userId,
       subjectId,
-      topic,
       questionNumber,
       curriculumName,
     })
@@ -95,7 +95,6 @@ export const overwriteQuestion = async ({
         paperVariant,
         uploadedBy: userId,
         subjectId,
-        topic,
         questionNumber,
         curriculumName,
         updatedAt: new Date(),
@@ -103,12 +102,20 @@ export const overwriteQuestion = async ({
     });
 };
 
-export const isQuestionImageExists = async (questionId: string, order: number): Promise<boolean> => {
+export const isQuestionImageExists = async (
+  questionId: string,
+  order: number
+): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(questionImage)
-    .where(and(eq(questionImage.questionId, questionId), eq(questionImage.order, order)))
+    .where(
+      and(
+        eq(questionImage.questionId, questionId),
+        eq(questionImage.order, order)
+      )
+    )
     .limit(1);
   return result.length > 0;
 };
@@ -127,7 +134,7 @@ export const createQuestionImage = async ({
 }> => {
   try {
     const db = await getDbAsync();
-    await db.insert(questionImage).values({questionId, imageSrc, order});
+    await db.insert(questionImage).values({ questionId, imageSrc, order });
     return {
       success: true,
       error: undefined,
@@ -141,7 +148,15 @@ export const createQuestionImage = async ({
   }
 };
 
-export const overwriteQuestionImage = async ({questionId, imageSrc, order}: {questionId: string; imageSrc: string; order: number}) => {
+export const overwriteQuestionImage = async ({
+  questionId,
+  imageSrc,
+  order,
+}: {
+  questionId: string;
+  imageSrc: string;
+  order: number;
+}) => {
   const db = await getDbAsync();
 
   await db
@@ -157,4 +172,40 @@ export const overwriteQuestionImage = async ({questionId, imageSrc, order}: {que
         imageSrc,
       },
     });
+};
+
+export const createQuestionTopic = async ({
+  questionId,
+  topic,
+  subjectId,
+  curriculumName,
+}: {
+  questionId: string;
+  topic: string;
+  subjectId: string;
+  curriculumName: string;
+}) => {
+  try {
+    const db = await getDbAsync();
+    const existingQuestionTopic = await db
+      .select()
+      .from(questionTopic)
+      .where(
+        and(
+          eq(questionTopic.questionId, questionId),
+          eq(questionTopic.topic, topic)
+        )
+      );
+    if (existingQuestionTopic.length > 0) {
+      return;
+    }
+    await db.insert(questionTopic).values({
+      questionId,
+      topic,
+      subjectId,
+      curriculumName,
+    });
+  } catch (error) {
+    console.error("Error creating question topic:", error);
+  }
 };

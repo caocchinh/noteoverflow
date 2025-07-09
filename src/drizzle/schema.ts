@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
   foreignKey,
   integer,
@@ -183,7 +182,6 @@ export const question = sqliteTable(
     season: text("season").notNull(),
     paperType: integer("paper_type").notNull(),
     paperVariant: integer("paper_variant").notNull(),
-    topic: text("topic").notNull(),
     uploadedBy: text("uploaded_by")
       .references(() => user.id)
       .notNull(),
@@ -217,15 +215,33 @@ export const question = sqliteTable(
         paperType.curriculumName,
       ],
     }),
-    foreignKey({
-      columns: [table.topic, table.subjectId, table.curriculumName],
-      foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
-    }),
+
     foreignKey({
       columns: [table.subjectId, table.curriculumName],
       foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
   ]
+);
+
+export const questionTopic = sqliteTable(
+  "question_topic",
+  {
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    topic: text("topic"),
+    subjectId: text("subject_id"),
+    curriculumName: text("curriculum_name"),
+  },
+  (table) => {
+    return [
+      primaryKey({ columns: [table.questionId, table.topic] }),
+      foreignKey({
+        columns: [table.topic, table.subjectId, table.curriculumName],
+        foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
+      }),
+    ];
+  }
 );
 
 export const questionImage = sqliteTable(
@@ -256,22 +272,6 @@ export const answer = sqliteTable(
   }
 );
 
-export const questionRating = sqliteTable(
-  "question_rating",
-  {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
-      .notNull(),
-    userId: text("user_id")
-      .references(() => user.id, { onDelete: "cascade" })
-      .notNull(),
-    rating: integer("rating").notNull(),
-  },
-  (table) => {
-    return [primaryKey({ columns: [table.questionId, table.userId] })];
-  }
-);
-
 export const userBookmarks = sqliteTable(
   "user_bookmarks",
   {
@@ -286,161 +286,3 @@ export const userBookmarks = sqliteTable(
     return [primaryKey({ columns: [table.userId, table.questionId] })];
   }
 );
-
-export const userRelations = relations(user, ({ many }) => ({
-  sessions: many(session),
-  accounts: many(account),
-  ratings: many(questionRating),
-  bookmarks: many(userBookmarks),
-}));
-
-export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
-  user: one(user, {
-    fields: [userBookmarks.userId],
-    references: [user.id],
-  }),
-  question: one(question, {
-    fields: [userBookmarks.questionId],
-    references: [question.id],
-  }),
-}));
-
-export const sessionRelations = relations(session, ({ one }) => ({
-  user: one(user, {
-    fields: [session.userId],
-    references: [user.id],
-  }),
-  impersonator: one(user, {
-    fields: [session.impersonatedBy],
-    references: [user.id],
-  }),
-}));
-
-export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
-  }),
-}));
-
-export const curriculumRelations = relations(curriculum, ({ many }) => ({
-  subjects: many(subject),
-  topics: many(topic),
-  seasons: many(season),
-  paperTypes: many(paperType),
-  years: many(year),
-  questions: many(question),
-}));
-
-export const subjectRelations = relations(subject, ({ many }) => ({
-  curriculum: many(curriculum),
-  topics: many(topic),
-  questions: many(question),
-  seasons: many(season),
-  paperTypes: many(paperType),
-  years: many(year),
-}));
-
-export const questionRelations = relations(question, ({ one, many }) => ({
-  subject: one(subject, {
-    fields: [question.subjectId],
-    references: [subject.subjectId],
-  }),
-  topic: one(topic, {
-    fields: [question.topic, question.subjectId, question.curriculumName],
-    references: [topic.topic, topic.subjectId, topic.curriculumName],
-  }),
-  season: one(season, {
-    fields: [question.season, question.subjectId, question.curriculumName],
-    references: [season.season, season.subjectId, season.curriculumName],
-  }),
-  paperType: one(paperType, {
-    fields: [question.paperType, question.subjectId, question.curriculumName],
-    references: [
-      paperType.paperType,
-      paperType.subjectId,
-      paperType.curriculumName,
-    ],
-  }),
-  year: one(year, {
-    fields: [question.year, question.subjectId, question.curriculumName],
-    references: [year.year, year.subjectId, year.curriculumName],
-  }),
-  questionImages: many(questionImage),
-  answers: many(answer),
-  ratings: many(questionRating),
-}));
-
-export const questionImageRelations = relations(questionImage, ({ one }) => ({
-  question: one(question, {
-    fields: [questionImage.questionId],
-    references: [question.id],
-  }),
-}));
-
-export const answerRelations = relations(answer, ({ one }) => ({
-  question: one(question, {
-    fields: [answer.questionId],
-    references: [question.id],
-  }),
-}));
-
-export const questionRatingRelations = relations(questionRating, ({ one }) => ({
-  question: one(question, {
-    fields: [questionRating.questionId],
-    references: [question.id],
-  }),
-  user: one(user, {
-    fields: [questionRating.userId],
-    references: [user.id],
-  }),
-}));
-
-export const seasonRelations = relations(season, ({ one, many }) => ({
-  subject: one(subject, {
-    fields: [season.subjectId],
-    references: [subject.subjectId],
-  }),
-  curriculum: one(curriculum, {
-    fields: [season.curriculumName],
-    references: [curriculum.name],
-  }),
-  questions: many(question),
-}));
-
-export const paperTypeRelations = relations(paperType, ({ one, many }) => ({
-  subject: one(subject, {
-    fields: [paperType.subjectId],
-    references: [subject.subjectId],
-  }),
-  curriculum: one(curriculum, {
-    fields: [paperType.curriculumName],
-    references: [curriculum.name],
-  }),
-  questions: many(question),
-}));
-
-export const yearRelations = relations(year, ({ one, many }) => ({
-  subject: one(subject, {
-    fields: [year.subjectId],
-    references: [subject.subjectId],
-  }),
-  curriculum: one(curriculum, {
-    fields: [year.curriculumName],
-    references: [curriculum.name],
-  }),
-  questions: many(question),
-}));
-
-export const topicRelations = relations(topic, ({ one, many }) => ({
-  subject: one(subject, {
-    fields: [topic.subjectId],
-    references: [subject.subjectId],
-  }),
-
-  curriculum: one(curriculum, {
-    fields: [topic.curriculumName],
-    references: [curriculum.name],
-  }),
-  questions: many(question),
-}));

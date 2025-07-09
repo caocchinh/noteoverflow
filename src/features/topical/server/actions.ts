@@ -2,7 +2,13 @@
 import { and, asc, eq, type InferSelectModel, inArray } from "drizzle-orm";
 import type { ServerActionResponse } from "@/constants/types";
 import { getDbAsync } from "@/drizzle/db";
-import { question, userBookmarks } from "@/drizzle/schema";
+import {
+  answer,
+  question,
+  questionImage,
+  questionTopic,
+  userBookmarks,
+} from "@/drizzle/schema";
 import {
   validateCurriculum,
   validateFilterData,
@@ -14,17 +20,18 @@ import { verifySession } from "@/dal/verifySession";
 // Define a type for our selected question fields
 export type SelectedQuestion = Pick<
   InferSelectModel<typeof question>,
-  "topic" | "year" | "paperType" | "season" | "id"
+  "year" | "paperType" | "season" | "id"
 > & {
   questionImages: Array<{
-    questionId: string;
     imageSrc: string;
     order: number;
   }>;
   answers: Array<{
-    questionId: string;
     answer: string;
     order: number;
+  }>;
+  topics: Array<{
+    topic: string;
   }>;
 };
 
@@ -94,7 +101,7 @@ export const getTopicalData = async ({
 
     // Add optional filters when they have values
     if (topic.length > 0) {
-      conditions.push(inArray(question.topic, topic));
+      conditions.push(inArray(questionTopic.topic, topic));
     }
 
     if (paperType.length > 0) {
@@ -118,14 +125,26 @@ export const getTopicalData = async ({
         year: true,
         paperType: true,
         season: true,
-        topic: true,
       },
       with: {
         questionImages: {
-          orderBy: (table) => [asc(table.order)],
+          orderBy: (table: typeof questionImage) => [asc(table.order)],
+          columns: {
+            imageSrc: true,
+            order: true,
+          },
         },
         answers: {
-          orderBy: (table) => [asc(table.order)],
+          orderBy: (table: typeof answer) => [asc(table.order)],
+          columns: {
+            answer: true,
+            order: true,
+          },
+        },
+        topics: {
+          columns: {
+            topic: true,
+          },
         },
       },
       limit: session?.session ? undefined : 5,

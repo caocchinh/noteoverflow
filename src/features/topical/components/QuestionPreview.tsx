@@ -48,9 +48,14 @@ const QuestionPreview = memo(
       >
         <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center p-2">
-          <Badge className="h-max bg-white !text-black whitespace-pre-wrap text-center">
-            {question.topic}
-          </Badge>
+          {question.topics.map((topic) => (
+            <Badge
+              key={topic.topic}
+              className="h-max bg-white !text-black text-center"
+            >
+              {topic.topic}
+            </Badge>
+          ))}
           <Badge className="h-max bg-white !text-black text-center">
             {question.year}
           </Badge>

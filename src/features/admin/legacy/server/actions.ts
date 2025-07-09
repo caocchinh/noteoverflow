@@ -13,6 +13,7 @@ import { overwriteAnswer } from "@/server/main/answer";
 import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
 import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
 import {
+  createQuestionTopic,
   overwriteQuestion,
   overwriteQuestionImage,
 } from "@/server/main/question";
@@ -179,10 +180,14 @@ export const legacyUploadAction = async ({
         paperVariant,
         userId,
         subjectId: subjectFullName,
-        topic,
         questionNumber,
       });
-
+      await createQuestionTopic({
+        questionId,
+        topic,
+        subjectId: subjectFullName,
+        curriculumName: curriculum,
+      });
       await overwriteQuestionImage({
         questionId,
         imageSrc,
