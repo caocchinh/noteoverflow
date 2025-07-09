@@ -1,14 +1,14 @@
-'use client';
-import { usePathname } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+"use client";
+import { usePathname } from "next/navigation";
+import { createContext, useContext, useState } from "react";
 import {
   Sidebar,
   SidebarInset,
   SidebarProvider,
-} from '@/components/ui/sidebar';
-import { TOPICAL_QUESTION_APP_ROUTE } from '@/constants/constants';
-import DockWrapper from '@/features/topical/components/DockWrapper';
-import { useIsMobile } from '@/hooks/use-mobile';
+} from "@/components/ui/sidebar";
+import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
+import DockWrapper from "@/features/topical/components/DockWrapper";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SidebarContext = createContext<{
   isSidebarOpen: boolean;
@@ -18,7 +18,7 @@ const SidebarContext = createContext<{
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (!context) {
-    throw new Error('useSidebar must be used within SidebarProvider');
+    throw new Error("useSidebar must be used within SidebarProvider");
   }
   return context;
 };
@@ -40,7 +40,7 @@ export default function TopicalLayoutProvider({
             open={isSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
           >
             {!isMobileDevice && (
-              <Sidebar className="!bg-transparent !border-none !z-[-1] " />
+              <Sidebar className="!bg-background !border-none !z-[-1]" />
             )}
             <SidebarInset className="relative w-full">
               <div className="absolute left-0 z-[1000] flex w-full items-start justify-center">

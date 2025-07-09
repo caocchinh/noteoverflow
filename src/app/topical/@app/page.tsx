@@ -1042,23 +1042,19 @@ const TopicalPage = () => {
               >
                 <Masonry gutter="10px">
                   {displayedData?.map((question) =>
-                    question.questionImages.map((image) => (
+                    question.questionImages.map((_, imageIndex) => (
                       <QuestionPreview
                         bookmarks={
                           (bookmarks?.data as Set<string>) || new Set()
                         }
-                        imageSrc={image.imageSrc}
+                        question={question}
                         setIsQuestionViewOpen={setIsQuestionViewOpen}
                         isUserSessionPending={isUserSessionPending}
                         error={isUserSessionError || isBookmarksError}
                         userSession={userSession}
-                        key={image.imageSrc}
+                        key={`${question.id}-${imageIndex}`}
                         isBookmarksFetching={isBookmarksFetching}
-                        paperType={question.paperType}
-                        questionId={question.id}
-                        season={question.season}
-                        topic={question.topic}
-                        year={question.year}
+                        imageIndex={imageIndex}
                       />
                     ))
                   )}
