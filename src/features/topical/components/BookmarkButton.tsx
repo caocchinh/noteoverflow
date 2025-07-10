@@ -11,14 +11,14 @@ import { toast } from "sonner";
 export const BookmarkButton = ({
   bookmarks,
   questionId,
-  disabled,
+  isBookmarkDisabled,
   isBookmarksFetching,
   className,
   isValidSession,
 }: {
   bookmarks: Set<string> | null;
   questionId: string;
-  disabled: boolean;
+  isBookmarkDisabled: boolean;
   isBookmarksFetching: boolean;
   className?: string;
   isValidSession: boolean;
@@ -77,7 +77,7 @@ export const BookmarkButton = ({
   return (
     <Button
       className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
-      disabled={disabled || isBookmarksFetching}
+      disabled={isBookmarkDisabled || isBookmarksFetching}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={(e) => {
         e.stopPropagation();

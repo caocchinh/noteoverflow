@@ -14,11 +14,11 @@ const QuestionPreview = memo(
     isBookmarksFetching,
     isUserSessionPending,
     imageIndex,
-    error,
-    userSession,
+    isBookmarkError,
+    isValidSession,
     question,
   }: {
-    bookmarks: Set<string> | null;
+    bookmarks: Set<string>;
     question: SelectedQuestion;
     setIsQuestionViewOpen: (open: {
       isOpen: boolean;
@@ -27,10 +27,8 @@ const QuestionPreview = memo(
     isBookmarksFetching: boolean;
     imageIndex: number;
     isUserSessionPending: boolean;
-    error: boolean;
-    userSession: ReturnType<
-      typeof import("@/lib/auth/auth-client").authClient.getSession
-    > | null;
+    isBookmarkError: boolean;
+    isValidSession: boolean;
   }) => {
     const mutationKey = ["user_bookmarks", question.id];
 
@@ -66,28 +64,28 @@ const QuestionPreview = memo(
             {question?.season}
           </Badge>
 
-          {!isMutatingThisQuestion && !error && (
+          {!isMutatingThisQuestion && !isBookmarkError && (
             <BookmarkButton
               className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-              disabled={isUserSessionPending}
+              isBookmarkDisabled={isUserSessionPending}
               bookmarks={bookmarks}
               questionId={question.id}
               isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-              isValidSession={!!userSession?.data?.session}
+              isValidSession={isValidSession}
             />
           )}
         </div>
-        {!isMutatingThisQuestion && !error && (
+        {!isMutatingThisQuestion && !isBookmarkError && (
           <BookmarkButton
             className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
-            bookmarks={bookmarks || new Set()}
+            bookmarks={bookmarks}
             questionId={question.id}
-            isValidSession={!!userSession?.data?.session}
-            disabled={isUserSessionPending}
+            isValidSession={isValidSession}
+            isBookmarkDisabled={isUserSessionPending}
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
           />
         )}
-        {isMutatingThisQuestion && !error && (
+        {isMutatingThisQuestion && !isBookmarkError && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black"
             onClick={(e) => {
@@ -103,7 +101,7 @@ const QuestionPreview = memo(
             <Loader2 className="animate-spin" />
           </Badge>
         )}
-        {error && (
+        {isBookmarkError && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
             onClick={(e) => {

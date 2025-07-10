@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
+import QuestionInspectBookmark from "./QuestionInspectBookmark";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -48,13 +49,24 @@ const QuestionInspect = ({
   isOpen,
   setIsOpen,
   partitionedTopicalData,
+  bookmarks,
+  isUserSessionPending,
+  isValidSession,
+  isBookmarksFetching,
+  isBookmarkError,
 }: {
   isOpen: {
     isOpen: boolean;
     questionId: string;
   };
+
   setIsOpen: (open: { isOpen: boolean; questionId: string }) => void;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
+  bookmarks: Set<string>;
+  isUserSessionPending: boolean;
+  isValidSession: boolean;
+  isBookmarksFetching: boolean;
+  isBookmarkError: boolean;
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -65,7 +77,15 @@ const QuestionInspect = ({
   const [searchInput, setSearchInput] = useState("");
 
   const scrollToQuestion = useCallback(
-    ({ questionId, tab }: { questionId: string; tab: number }) => {
+    ({
+      questionId,
+      tab,
+      isDelayed,
+    }: {
+      questionId: string;
+      tab: number;
+      isDelayed: boolean;
+    }) => {
       if (!partitionedTopicalData || partitionedTopicalData[tab].length === 0) {
         return;
       }
@@ -76,15 +96,25 @@ const QuestionInspect = ({
       if (itemIndex === -1) {
         return;
       }
-      const timeout = setTimeout(() => {
+
+      if (isDelayed) {
+        const timeout = setTimeout(() => {
+          scrollAreaRef.current?.scrollTo({
+            top:
+              (itemIndex / partitionedTopicalData?.[tab]?.length) *
+              scrollAreaRef.current?.scrollHeight,
+            behavior: "instant",
+          });
+          return () => clearTimeout(timeout);
+        }, 0);
+      } else {
         scrollAreaRef.current?.scrollTo({
           top:
             (itemIndex / partitionedTopicalData?.[tab]?.length) *
             scrollAreaRef.current?.scrollHeight,
           behavior: "instant",
         });
-        return () => clearTimeout(timeout);
-      }, 0);
+      }
     },
     [partitionedTopicalData]
   );
@@ -103,7 +133,7 @@ const QuestionInspect = ({
     setCurrentQuestionId(isOpen.questionId);
 
     if (partitionedTopicalData?.[tab]) {
-      scrollToQuestion({ questionId: isOpen.questionId, tab });
+      scrollToQuestion({ questionId: isOpen.questionId, tab, isDelayed: true });
     }
   }, [isOpen, partitionedTopicalData, scrollToQuestion]);
 
@@ -130,7 +160,7 @@ const QuestionInspect = ({
         setIsOpen({ isOpen: open, questionId: isOpen.questionId })
       }
     >
-      <DialogContent className="w-[87vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0">
+      <DialogContent className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>Question and answer inspector</DialogTitle>
           <DialogDescription>
@@ -150,6 +180,7 @@ const QuestionInspect = ({
                   scrollToQuestion({
                     questionId: currentQuestionId,
                     tab: currentTab,
+                    isDelayed: true,
                   });
                 }
               }}
@@ -173,7 +204,7 @@ const QuestionInspect = ({
                 <Fragment key={question.id}>
                   <div
                     className={cn(
-                      "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10",
+                      "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
                       currentQuestionId === question.id &&
                         "!bg-logo-main text-white"
                     )}
@@ -188,8 +219,18 @@ const QuestionInspect = ({
                       }
                     }}
                   >
-                    {extractPaperCode(question.id)} Q
-                    {extractQuestionNumber(question.id)}
+                    <p>
+                      {extractPaperCode(question.id)} Q
+                      {extractQuestionNumber(question.id)}
+                    </p>
+                    <QuestionInspectBookmark
+                      questionId={question.id}
+                      isBookmarkDisabled={isUserSessionPending}
+                      bookmarks={bookmarks}
+                      isValidSession={isValidSession}
+                      isBookmarksFetching={isBookmarksFetching}
+                      isBookmarkError={isBookmarkError}
+                    />
                   </div>
                   <SelectSeparator />
                 </Fragment>
@@ -201,7 +242,7 @@ const QuestionInspect = ({
                 searchInput.length === 0 && "hidden"
               )}
             >
-              {searchResults.map((question) => (
+              {searchResults.map((question: SelectedQuestion) => (
                 <Fragment key={question.id}>
                   <div
                     className={cn(
@@ -223,6 +264,14 @@ const QuestionInspect = ({
                   >
                     {extractPaperCode(question.id)} Q
                     {extractQuestionNumber(question.id)}
+                    <QuestionInspectBookmark
+                      questionId={question.id}
+                      isBookmarkDisabled={isUserSessionPending}
+                      bookmarks={bookmarks}
+                      isValidSession={isValidSession}
+                      isBookmarksFetching={isBookmarksFetching}
+                      isBookmarkError={isBookmarkError}
+                    />
                   </div>
                   <SelectSeparator />
                 </Fragment>
@@ -240,6 +289,21 @@ const QuestionInspect = ({
               <Button
                 onClick={() => {
                   setCurrentTab(0);
+                  if (
+                    currentTabThatContainsQuestion == 0 &&
+                    currentQuestionId
+                  ) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: 0,
+                      isDelayed: true,
+                    });
+                  } else {
+                    scrollAreaRef.current?.scrollTo({
+                      top: 0,
+                      behavior: "instant",
+                    });
+                  }
                 }}
                 variant="outline"
                 className="w-9 h-9 cursor-pointer"
@@ -253,6 +317,21 @@ const QuestionInspect = ({
                     currentTab < (partitionedTopicalData?.length ?? 0)
                   ) {
                     setCurrentTab(currentTab - 1);
+                  }
+                  if (
+                    currentTabThatContainsQuestion == currentTab - 1 &&
+                    currentQuestionId
+                  ) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: currentTab - 1,
+                      isDelayed: true,
+                    });
+                  } else {
+                    scrollAreaRef.current?.scrollTo({
+                      top: 0,
+                      behavior: "instant",
+                    });
                   }
                 }}
                 variant="outline"
@@ -270,6 +349,21 @@ const QuestionInspect = ({
                   if (currentTab < (partitionedTopicalData?.length ?? 0) - 1) {
                     setCurrentTab(currentTab + 1);
                   }
+                  if (
+                    currentTabThatContainsQuestion == currentTab + 1 &&
+                    currentQuestionId
+                  ) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: currentTab + 1,
+                      isDelayed: true,
+                    });
+                  } else {
+                    scrollAreaRef.current?.scrollTo({
+                      top: 0,
+                      behavior: "instant",
+                    });
+                  }
                 }}
                 variant="outline"
                 className="w-9 h-9 cursor-pointer"
@@ -279,6 +373,22 @@ const QuestionInspect = ({
               <Button
                 onClick={() => {
                   setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
+                  if (
+                    currentTabThatContainsQuestion ==
+                      (partitionedTopicalData?.length ?? 1) - 1 &&
+                    currentQuestionId
+                  ) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: (partitionedTopicalData?.length ?? 1) - 1,
+                      isDelayed: true,
+                    });
+                  } else {
+                    scrollAreaRef.current?.scrollTo({
+                      top: 0,
+                      behavior: "instant",
+                    });
+                  }
                 }}
                 variant="outline"
                 className="w-9 h-9 cursor-pointer"

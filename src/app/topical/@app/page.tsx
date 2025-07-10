@@ -1099,8 +1099,8 @@ const TopicalPage = () => {
                         question={question}
                         setIsQuestionViewOpen={setIsQuestionViewOpen}
                         isUserSessionPending={isUserSessionPending}
-                        error={isUserSessionError || isBookmarksError}
-                        userSession={userSession}
+                        isBookmarkError={isUserSessionError || isBookmarksError}
+                        isValidSession={!!userSession?.data?.session}
                         key={`${question.id}-${imageIndex}`}
                         isBookmarksFetching={isBookmarksFetching}
                         imageIndex={imageIndex}
@@ -1134,6 +1134,11 @@ const TopicalPage = () => {
         isOpen={isQuestionViewOpen}
         setIsOpen={setIsQuestionViewOpen}
         partitionedTopicalData={fullPartitionedData}
+        bookmarks={(bookmarks?.data as Set<string>) || new Set()}
+        isValidSession={!!userSession?.data?.session}
+        isBookmarksFetching={isBookmarksFetching}
+        isUserSessionPending={isUserSessionPending}
+        isBookmarkError={isUserSessionError || isBookmarksError}
       />
     </>
   );
