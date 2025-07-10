@@ -36,7 +36,6 @@ export const auth = async (database: any) =>
           [ROLE_USER]: UserRole,
         },
         defaultRole: ROLE_USER,
-
         bannedUserMessage: "You are banned from the platform.",
       }),
       captcha({

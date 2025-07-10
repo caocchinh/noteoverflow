@@ -14,12 +14,14 @@ import {
   subject,
   curriculum,
   questionTopic,
+  finishedQuestions,
 } from "./schema";
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   bookmarks: many(userBookmarks),
+  finishedQuestions: many(finishedQuestions),
 }));
 
 export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
@@ -32,6 +34,20 @@ export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
     references: [question.id],
   }),
 }));
+
+export const finishedQuestionsRelations = relations(
+  finishedQuestions,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [finishedQuestions.userId],
+      references: [user.id],
+    }),
+    question: one(question, {
+      fields: [finishedQuestions.questionId],
+      references: [question.id],
+    }),
+  })
+);
 
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {

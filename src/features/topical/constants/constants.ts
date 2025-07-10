@@ -155,6 +155,8 @@ export const TOPICAL_DATA: TopicalData[] = [
   },
 ];
 
+export const;
+
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
 
 export const INVALID_INPUTS_DEFAULT: InvalidInputs = {

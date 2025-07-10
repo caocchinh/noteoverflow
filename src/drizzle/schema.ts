@@ -283,3 +283,18 @@ export const userBookmarks = sqliteTable(
     return [primaryKey({ columns: [table.userId, table.questionId] })];
   }
 );
+
+export const finishedQuestions = sqliteTable(
+  "finished_questions",
+  {
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.userId, table.questionId] })];
+  }
+);

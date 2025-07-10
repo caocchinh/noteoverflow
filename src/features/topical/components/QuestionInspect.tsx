@@ -25,6 +25,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Search,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
@@ -33,6 +34,7 @@ import Image from "next/image";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { CHUNK_SIZE } from "../constants/constants";
+import { Badge } from "@/components/ui/badge";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -119,7 +121,7 @@ const QuestionInspect = ({
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
-    getScrollElement: () => scrollAreaRef.current,
+    getScrollElement: () => listScrollAreaRef.current,
     estimateSize: () => 65,
     enabled: isVirtualizationReady,
   });
@@ -127,7 +129,7 @@ const QuestionInspect = ({
 
   const displayVirtualizer = useVirtualizer({
     count: CHUNK_SIZE,
-    getScrollElement: () => scrollAreaRef.current,
+    getScrollElement: () => listScrollAreaRef.current,
     estimateSize: () => 65,
     enabled: isVirtualizationReady,
   });
@@ -163,9 +165,14 @@ const QuestionInspect = ({
           partition.some((question) => question.id === isOpen.questionId)
         ) ?? 0
       : 0;
+
     setCurrentTabThatContainsQuestion(tab);
     setCurrentTab(tab);
-    setCurrentQuestionId(isOpen.questionId);
+    setCurrentQuestionId(
+      !isOpen.questionId
+        ? partitionedTopicalData?.[tab]?.[0]?.id
+        : isOpen.questionId
+    );
 
     if (partitionedTopicalData?.[tab]) {
       scrollToQuestion({ questionId: isOpen.questionId, tab });
@@ -173,7 +180,9 @@ const QuestionInspect = ({
   }, [isOpen, partitionedTopicalData, scrollToQuestion]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const listScrollAreaRef = useRef<HTMLDivElement>(null);
+  const answerScrollAreaRef = useRef<HTMLDivElement>(null);
+  const questionScrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog
@@ -206,6 +215,20 @@ const QuestionInspect = ({
                 }
               }}
             />
+            {searchInput.length > 0 && (
+              <X
+                className="text-red-600 hover:text-red-600/80 cursor-pointer"
+                onClick={() => {
+                  setSearchInput("");
+                  if (currentQuestionId) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: currentTab,
+                    });
+                  }
+                }}
+              />
+            )}
           </div>
           <ScrollArea
             className={cn(
@@ -213,7 +236,7 @@ const QuestionInspect = ({
               searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
             )}
             type="always"
-            viewportRef={scrollAreaRef}
+            viewportRef={listScrollAreaRef}
           >
             <div
               className={cn(
@@ -249,6 +272,14 @@ const QuestionInspect = ({
                               virtualItem.index
                             ]?.id
                           );
+                          questionScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                          answerScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
                           const newTabIndex = partitionedTopicalData?.findIndex(
                             (partition) =>
                               partition.some(
@@ -323,6 +354,14 @@ const QuestionInspect = ({
                         setCurrentQuestionId(
                           searchResults[virtualItem.index]?.id
                         );
+                        questionScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                        answerScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
                         const newTabIndex = partitionedTopicalData?.findIndex(
                           (partition) =>
                             partition.some(
@@ -375,7 +414,7 @@ const QuestionInspect = ({
                       tab: 0,
                     });
                   } else {
-                    scrollAreaRef.current?.scrollTo({
+                    listScrollAreaRef.current?.scrollTo({
                       top: 0,
                       behavior: "instant",
                     });
@@ -403,7 +442,7 @@ const QuestionInspect = ({
                       tab: currentTab - 1,
                     });
                   } else {
-                    scrollAreaRef.current?.scrollTo({
+                    listScrollAreaRef.current?.scrollTo({
                       top: 0,
                       behavior: "instant",
                     });
@@ -433,7 +472,7 @@ const QuestionInspect = ({
                       tab: currentTab + 1,
                     });
                   } else {
-                    scrollAreaRef.current?.scrollTo({
+                    listScrollAreaRef.current?.scrollTo({
                       top: 0,
                       behavior: "instant",
                     });
@@ -457,7 +496,7 @@ const QuestionInspect = ({
                       tab: (partitionedTopicalData?.length ?? 1) - 1,
                     });
                   } else {
-                    scrollAreaRef.current?.scrollTo({
+                    listScrollAreaRef.current?.scrollTo({
                       top: 0,
                       behavior: "instant",
                     });
@@ -485,7 +524,29 @@ const QuestionInspect = ({
               <ScrollArea
                 className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
                 type="always"
+                viewportRef={questionScrollAreaRef}
               >
+                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                  {(() => {
+                    const question = partitionedTopicalData?.[
+                      currentTabThatContainsQuestion
+                    ]?.find((q) => q.id === currentQuestionId);
+                    if (!question) {
+                      return null;
+                    }
+                    return (
+                      <>
+                        <p>
+                          Topic
+                          {question.questionTopics?.length > 1 ? "s" : ""}:
+                        </p>
+                        {question.questionTopics?.map((topic) => (
+                          <Badge key={topic.topic}>{topic.topic}</Badge>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </div>
                 <div className="flex flex-col gap-2 w-full">
                   {partitionedTopicalData?.[currentTabThatContainsQuestion]
                     ?.find((q) => q.id === currentQuestionId)
@@ -503,7 +564,10 @@ const QuestionInspect = ({
               </ScrollArea>
             </TabsContent>
             <TabsContent value="answer">
-              <ScrollArea className="h-[90vh] w-full">
+              <ScrollArea
+                className="h-[90vh] w-full"
+                viewportRef={answerScrollAreaRef}
+              >
                 <div className="flex flex-col gap-2">
                   {partitionedTopicalData?.[currentTabThatContainsQuestion]
                     ?.find((q) => q.id === currentQuestionId)
