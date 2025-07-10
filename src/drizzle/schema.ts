@@ -193,10 +193,7 @@ export const question = sqliteTable(
       .notNull(),
     subjectId: text("subject_id"),
     curriculumName: text("curriculum_name"),
-
     questionNumber: integer("question_number").notNull(),
-    ratingSum: integer("rating_sum").notNull().default(0),
-    ratingCount: integer("rating_count").notNull().default(0),
   },
   (table) => [
     foreignKey({

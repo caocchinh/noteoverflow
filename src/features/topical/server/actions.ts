@@ -1,14 +1,15 @@
 "use server";
-import { and, asc, eq, type InferSelectModel, inArray } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  type InferSelectModel,
+  inArray,
+  exists,
+} from "drizzle-orm";
 import type { ServerActionResponse } from "@/constants/types";
 import { getDbAsync } from "@/drizzle/db";
-import {
-  answer,
-  question,
-  questionImage,
-  questionTopic,
-  userBookmarks,
-} from "@/drizzle/schema";
+import { question, questionTopic, userBookmarks } from "@/drizzle/schema";
 import {
   validateCurriculum,
   validateFilterData,
@@ -30,7 +31,7 @@ export type SelectedQuestion = Pick<
     answer: string;
     order: number;
   }>;
-  topics: Array<{
+  questionTopics: Array<{
     topic: string;
   }>;
 };
@@ -100,9 +101,6 @@ export const getTopicalData = async ({
     ];
 
     // Add optional filters when they have values
-    if (topic.length > 0) {
-      conditions.push(inArray(questionTopic.topic, topic));
-    }
 
     if (paperType.length > 0) {
       const paperTypeNumbers = paperType.map((p) => Number.parseInt(p, 10));
@@ -118,6 +116,22 @@ export const getTopicalData = async ({
       conditions.push(inArray(question.season, season));
     }
 
+    if (topic.length > 0) {
+      conditions.push(
+        exists(
+          db
+            .select()
+            .from(questionTopic)
+            .where(
+              and(
+                eq(questionTopic.questionId, question.id),
+                inArray(questionTopic.topic, topic)
+              )
+            )
+        )
+      );
+    }
+
     const data = await db.query.question.findMany({
       where: and(...conditions),
       columns: {
@@ -128,20 +142,20 @@ export const getTopicalData = async ({
       },
       with: {
         questionImages: {
-          orderBy: (table: typeof questionImage) => [asc(table.order)],
+          orderBy: (table) => [asc(table.order)],
           columns: {
             imageSrc: true,
             order: true,
           },
         },
         answers: {
-          orderBy: (table: typeof answer) => [asc(table.order)],
+          orderBy: (table) => [asc(table.order)],
           columns: {
             answer: true,
             order: true,
           },
         },
-        topics: {
+        questionTopics: {
           columns: {
             topic: true,
           },

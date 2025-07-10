@@ -48,7 +48,7 @@ const QuestionPreview = memo(
       >
         <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center p-2">
-          {question.topics.map((topic) => (
+          {question?.questionTopics?.map((topic) => (
             <Badge
               key={topic.topic}
               className="h-max bg-white !text-black text-center"
@@ -57,13 +57,13 @@ const QuestionPreview = memo(
             </Badge>
           ))}
           <Badge className="h-max bg-white !text-black text-center">
-            {question.year}
+            {question?.year}
           </Badge>
           <Badge className="h-max bg-white !text-black text-center">
-            Paper {question.paperType}
+            Paper {question?.paperType}
           </Badge>
           <Badge className="h-max bg-white !text-black text-center">
-            {question.season}
+            {question?.season}
           </Badge>
 
           {!isMutatingThisQuestion && !error && (
@@ -121,7 +121,7 @@ const QuestionPreview = memo(
         )}
         <img
           className="w-full h-full object-contain"
-          src={question.questionImages[imageIndex].imageSrc}
+          src={question?.questionImages[imageIndex]?.imageSrc}
           alt="Question preview"
         />
       </div>

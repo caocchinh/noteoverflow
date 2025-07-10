@@ -1091,7 +1091,7 @@ const TopicalPage = () => {
               >
                 <Masonry gutter="10px">
                   {displayedData?.map((question) =>
-                    question.questionImages.map((_, imageIndex) => (
+                    question?.questionImages?.map((_, imageIndex) => (
                       <QuestionPreview
                         bookmarks={
                           (bookmarks?.data as Set<string>) || new Set()
