@@ -87,79 +87,6 @@ const QuestionInspect = ({
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (isOpen.isOpen) {
-      timeout = setTimeout(() => {
-        setIsVirtualizationReady(true);
-      }, 0);
-    } else {
-      setIsVirtualizationReady(false);
-    }
-    return () => clearTimeout(timeout);
-  }, [isOpen]);
-
-  const scrollToQuestion = useCallback(
-    ({
-      questionId,
-      tab,
-      isDelayed,
-    }: {
-      questionId: string;
-      tab: number;
-      isDelayed: boolean;
-    }) => {
-      if (!partitionedTopicalData || partitionedTopicalData[tab].length === 0) {
-        return;
-      }
-      const itemIndex =
-        partitionedTopicalData[tab].findIndex(
-          (question) => question.id === questionId
-        ) ?? 0;
-      if (itemIndex === -1) {
-        return;
-      }
-
-      if (isDelayed) {
-        const timeout = setTimeout(() => {
-          scrollAreaRef.current?.scrollTo({
-            top:
-              (itemIndex / partitionedTopicalData?.[tab]?.length) *
-              scrollAreaRef.current?.scrollHeight,
-            behavior: "instant",
-          });
-          return () => clearTimeout(timeout);
-        }, 0);
-      } else {
-        scrollAreaRef.current?.scrollTo({
-          top:
-            (itemIndex / partitionedTopicalData?.[tab]?.length) *
-            scrollAreaRef.current?.scrollHeight,
-          behavior: "instant",
-        });
-      }
-    },
-    [partitionedTopicalData]
-  );
-
-  useEffect(() => {
-    if (!isOpen.isOpen) {
-      return;
-    }
-    const tab = isOpen.questionId
-      ? partitionedTopicalData?.findIndex((partition) =>
-          partition.some((question) => question.id === isOpen.questionId)
-        ) ?? 0
-      : 0;
-    setCurrentTabThatContainsQuestion(tab);
-    setCurrentTab(tab);
-    setCurrentQuestionId(isOpen.questionId);
-
-    if (partitionedTopicalData?.[tab]) {
-      scrollToQuestion({ questionId: isOpen.questionId, tab, isDelayed: true });
-    }
-  }, [isOpen, partitionedTopicalData, scrollToQuestion]);
-
-  useEffect(() => {
     setSearchInput("");
   }, [partitionedTopicalData]);
 
@@ -178,6 +105,18 @@ const QuestionInspect = ({
       : [];
   }, [searchInput, allQuestions]);
 
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isOpen.isOpen) {
+      timeout = setTimeout(() => {
+        setIsVirtualizationReady(true);
+      }, 0);
+    } else {
+      setIsVirtualizationReady(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [isOpen]);
+
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
     getScrollElement: () => scrollAreaRef.current,
@@ -192,8 +131,48 @@ const QuestionInspect = ({
     estimateSize: () => 65,
     enabled: isVirtualizationReady,
   });
-  const virtualDisplayItems = displayVirtualizer.getVirtualItems();
 
+  const scrollToQuestion = useCallback(
+    ({ questionId, tab }: { questionId: string; tab: number }) => {
+      if (
+        !partitionedTopicalData ||
+        partitionedTopicalData[tab].length === 0 ||
+        !isVirtualizationReady
+      ) {
+        return;
+      }
+      const itemIndex =
+        partitionedTopicalData[tab].findIndex(
+          (question) => question.id === questionId
+        ) ?? 0;
+      if (itemIndex === -1) {
+        return;
+      }
+
+      displayVirtualizer.scrollToIndex(itemIndex);
+    },
+    [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
+  );
+
+  useEffect(() => {
+    if (!isOpen.isOpen) {
+      return;
+    }
+    const tab = isOpen.questionId
+      ? partitionedTopicalData?.findIndex((partition) =>
+          partition.some((question) => question.id === isOpen.questionId)
+        ) ?? 0
+      : 0;
+    setCurrentTabThatContainsQuestion(tab);
+    setCurrentTab(tab);
+    setCurrentQuestionId(isOpen.questionId);
+
+    if (partitionedTopicalData?.[tab]) {
+      scrollToQuestion({ questionId: isOpen.questionId, tab });
+    }
+  }, [isOpen, partitionedTopicalData, scrollToQuestion]);
+
+  const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -223,7 +202,6 @@ const QuestionInspect = ({
                   scrollToQuestion({
                     questionId: currentQuestionId,
                     tab: currentTab,
-                    isDelayed: true,
                   });
                 }
               }}
@@ -395,7 +373,6 @@ const QuestionInspect = ({
                     scrollToQuestion({
                       questionId: currentQuestionId,
                       tab: 0,
-                      isDelayed: true,
                     });
                   } else {
                     scrollAreaRef.current?.scrollTo({
@@ -424,7 +401,6 @@ const QuestionInspect = ({
                     scrollToQuestion({
                       questionId: currentQuestionId,
                       tab: currentTab - 1,
-                      isDelayed: true,
                     });
                   } else {
                     scrollAreaRef.current?.scrollTo({
@@ -455,7 +431,6 @@ const QuestionInspect = ({
                     scrollToQuestion({
                       questionId: currentQuestionId,
                       tab: currentTab + 1,
-                      isDelayed: true,
                     });
                   } else {
                     scrollAreaRef.current?.scrollTo({
@@ -480,7 +455,6 @@ const QuestionInspect = ({
                     scrollToQuestion({
                       questionId: currentQuestionId,
                       tab: (partitionedTopicalData?.length ?? 1) - 1,
-                      isDelayed: true,
                     });
                   } else {
                     scrollAreaRef.current?.scrollTo({
