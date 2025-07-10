@@ -121,6 +121,7 @@ const QuestionPreview = memo(
           className="w-full h-full object-contain"
           src={question?.questionImages[imageIndex]?.imageSrc}
           alt="Question preview"
+          loading="lazy"
         />
       </div>
     );

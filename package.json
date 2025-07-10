@@ -37,6 +37,7 @@
     "@react-three/drei": "^10.1.2",
     "@react-three/fiber": "^9.1.2",
     "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-virtual": "^3.13.12",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.8.1",
     "better-auth": "^1.2.12",

@@ -7,7 +7,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SelectedQuestion } from "../server/actions";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { extractPaperCode, extractQuestionNumber } from "../lib/utils";
@@ -24,6 +31,7 @@ import { SelectSeparator } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -141,9 +149,12 @@ const QuestionInspect = ({
     setSearchInput("");
   }, [partitionedTopicalData]);
 
-  const allQuestions = partitionedTopicalData?.flat() ?? [];
-  const searchResults =
-    searchInput.length > 0
+  const allQuestions = useMemo(() => {
+    return partitionedTopicalData?.flat() ?? [];
+  }, [partitionedTopicalData]);
+
+  const searchResults = useMemo(() => {
+    return searchInput.length > 0
       ? allQuestions.filter((question) => {
           const searchableText = `${extractPaperCode(
             question.id
@@ -151,6 +162,16 @@ const QuestionInspect = ({
           return fuzzySearch(searchInput, searchableText);
         })
       : [];
+  }, [searchInput, allQuestions]);
+
+  const virtualizer = useVirtualizer({
+    count: searchResults.length,
+    getScrollElement: () => scrollAreaRef.current,
+    estimateSize: () => 65,
+  });
+
+  const virtualSearchItems = virtualizer.getVirtualItems();
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -237,44 +258,61 @@ const QuestionInspect = ({
               ))}
             </div>
             <div
-              className={cn(
-                "flex flex-col gap-2",
-                searchInput.length === 0 && "hidden"
-              )}
+              className="relative w-full"
+              style={{
+                height: virtualizer.getTotalSize(),
+              }}
             >
-              {searchResults.map((question: SelectedQuestion) => (
-                <Fragment key={question.id}>
-                  <div
-                    className={cn(
-                      "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10",
-                      currentQuestionId === question.id &&
-                        "!bg-logo-main text-white"
-                    )}
-                    onClick={() => {
-                      setCurrentQuestionId(question.id);
-                      const newTabIndex = partitionedTopicalData?.findIndex(
-                        (partition) =>
-                          partition.some((q) => q.id === question.id)
-                      );
-                      if (newTabIndex !== undefined && newTabIndex > -1) {
-                        setCurrentTab(newTabIndex);
-                        setCurrentTabThatContainsQuestion(newTabIndex);
-                      }
-                    }}
-                  >
-                    {extractPaperCode(question.id)} Q
-                    {extractQuestionNumber(question.id)}
-                    <QuestionInspectBookmark
-                      questionId={question.id}
-                      isBookmarkDisabled={isUserSessionPending}
-                      bookmarks={bookmarks}
-                      isValidSession={isValidSession}
-                      isBookmarksFetching={isBookmarksFetching}
-                      isBookmarkError={isBookmarkError}
-                    />
-                  </div>
-                  <SelectSeparator />
-                </Fragment>
+              {virtualSearchItems.map((virtualItem) => (
+                <div
+                  className="absolute top-0 left-0 w-full"
+                  style={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                >
+                  <Fragment key={searchResults[virtualItem.index]?.id}>
+                    <div
+                      className={cn(
+                        "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                        currentQuestionId ===
+                          searchResults[virtualItem.index]?.id &&
+                          "!bg-logo-main text-white"
+                      )}
+                      onClick={() => {
+                        setCurrentQuestionId(
+                          searchResults[virtualItem.index]?.id
+                        );
+                        const newTabIndex = partitionedTopicalData?.findIndex(
+                          (partition) =>
+                            partition.some(
+                              (q) =>
+                                q.id === searchResults[virtualItem.index]?.id
+                            )
+                        );
+                        if (newTabIndex !== undefined && newTabIndex > -1) {
+                          setCurrentTab(newTabIndex);
+                          setCurrentTabThatContainsQuestion(newTabIndex);
+                        }
+                      }}
+                    >
+                      {extractPaperCode(searchResults[virtualItem.index]?.id)} Q
+                      {extractQuestionNumber(
+                        searchResults[virtualItem.index]?.id
+                      )}
+                      <QuestionInspectBookmark
+                        questionId={searchResults[virtualItem.index]?.id}
+                        isBookmarkDisabled={isUserSessionPending}
+                        bookmarks={bookmarks}
+                        isValidSession={isValidSession}
+                        isBookmarksFetching={isBookmarksFetching}
+                        isBookmarkError={isBookmarkError}
+                      />
+                    </div>
+                    <SelectSeparator />
+                  </Fragment>
+                </div>
               ))}
             </div>
           </ScrollArea>

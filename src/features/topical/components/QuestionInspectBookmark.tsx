@@ -29,7 +29,7 @@ const QuestionInspectBookmark = ({
     }) > 0;
 
   return (
-    <div>
+    <>
       {!isMutatingThisQuestion && !isBookmarkError && (
         <BookmarkButton
           className="h-[26px] w-[26px] border border-black"
@@ -42,7 +42,7 @@ const QuestionInspectBookmark = ({
       )}
       {isMutatingThisQuestion && !isBookmarkError && (
         <Badge
-          className="text-white text-[12px] !w-max flex items-center justify-center cursor-pointer bg-black"
+          className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-black"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -58,7 +58,7 @@ const QuestionInspectBookmark = ({
       )}
       {isBookmarkError && (
         <Badge
-          className="text-white text-[12px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
+          className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -72,7 +72,7 @@ const QuestionInspectBookmark = ({
           <TriangleAlert />
         </Badge>
       )}
-    </div>
+    </>
   );
 };
 
