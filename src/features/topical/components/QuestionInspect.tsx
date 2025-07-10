@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { CHUNK_SIZE } from "../constants/constants";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -83,6 +84,19 @@ const QuestionInspect = ({
     string | undefined
   >(undefined);
   const [searchInput, setSearchInput] = useState("");
+  const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isOpen.isOpen) {
+      timeout = setTimeout(() => {
+        setIsVirtualizationReady(true);
+      }, 0);
+    } else {
+      setIsVirtualizationReady(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [isOpen]);
 
   const scrollToQuestion = useCallback(
     ({
@@ -164,13 +178,21 @@ const QuestionInspect = ({
       : [];
   }, [searchInput, allQuestions]);
 
-  const virtualizer = useVirtualizer({
+  const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
     getScrollElement: () => scrollAreaRef.current,
     estimateSize: () => 65,
+    enabled: isVirtualizationReady,
   });
+  const virtualSearchItems = searchVirtualizer.getVirtualItems();
 
-  const virtualSearchItems = virtualizer.getVirtualItems();
+  const displayVirtualizer = useVirtualizer({
+    count: CHUNK_SIZE,
+    getScrollElement: () => scrollAreaRef.current,
+    estimateSize: () => 65,
+    enabled: isVirtualizationReady,
+  });
+  const virtualDisplayItems = displayVirtualizer.getVirtualItems();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -188,7 +210,7 @@ const QuestionInspect = ({
             View the question and answer for individual questions
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-2 w-[27%] h-[inherit] justify-between items-center border-r border-border p-3">
+        <div className="flex flex-col gap-2 w-[27%] h-[inherit] justify-between items-center border-r border-border p-3 pr-1">
           <div className="flex items-center gap-2 w-full border-b border-border">
             <Search />
             <Input
@@ -217,55 +239,94 @@ const QuestionInspect = ({
           >
             <div
               className={cn(
-                "flex flex-col gap-2",
-                searchInput.length > 0 && "hidden"
+                "relative w-full",
+                searchInput.length > 0 && "!hidden"
               )}
+              style={{
+                height: displayVirtualizer.getTotalSize(),
+              }}
             >
-              {partitionedTopicalData?.[currentTab]?.map((question) => (
-                <Fragment key={question.id}>
-                  <div
-                    className={cn(
-                      "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
-                      currentQuestionId === question.id &&
-                        "!bg-logo-main text-white"
-                    )}
-                    onClick={() => {
-                      setCurrentQuestionId(question.id);
-                      const newTabIndex = partitionedTopicalData?.findIndex(
-                        (partition) =>
-                          partition.some((q) => q.id === question.id)
-                      );
-                      if (newTabIndex !== undefined && newTabIndex > -1) {
-                        setCurrentTabThatContainsQuestion(newTabIndex);
-                      }
-                    }}
-                  >
-                    <p>
-                      {extractPaperCode(question.id)} Q
-                      {extractQuestionNumber(question.id)}
-                    </p>
-                    <QuestionInspectBookmark
-                      questionId={question.id}
-                      isBookmarkDisabled={isUserSessionPending}
-                      bookmarks={bookmarks}
-                      isValidSession={isValidSession}
-                      isBookmarksFetching={isBookmarksFetching}
-                      isBookmarkError={isBookmarkError}
-                    />
-                  </div>
-                  <SelectSeparator />
-                </Fragment>
+              {virtualDisplayItems.map((virtualItem) => (
+                <div
+                  className="absolute top-0 left-0 w-full pr-3"
+                  style={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                  key={virtualItem.key}
+                  data-index={virtualItem.index}
+                >
+                  {partitionedTopicalData?.[currentTab][virtualItem.index] && (
+                    <Fragment key={virtualItem.index}>
+                      <div
+                        className={cn(
+                          "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                          currentQuestionId ===
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id && "!bg-logo-main text-white"
+                        )}
+                        onClick={() => {
+                          setCurrentQuestionId(
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id
+                          );
+                          const newTabIndex = partitionedTopicalData?.findIndex(
+                            (partition) =>
+                              partition.some(
+                                (q) =>
+                                  q.id ===
+                                  partitionedTopicalData?.[currentTab][
+                                    virtualItem.index
+                                  ]?.id
+                              )
+                          );
+                          if (newTabIndex !== undefined && newTabIndex > -1) {
+                            setCurrentTabThatContainsQuestion(newTabIndex);
+                          }
+                        }}
+                      >
+                        <p>
+                          {extractPaperCode(
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id
+                          )}{" "}
+                          Q
+                          {extractQuestionNumber(
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id
+                          )}
+                        </p>
+                        <QuestionInspectBookmark
+                          questionId={
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id
+                          }
+                          isBookmarkDisabled={isUserSessionPending}
+                          bookmarks={bookmarks}
+                          isValidSession={isValidSession}
+                          isBookmarksFetching={isBookmarksFetching}
+                          isBookmarkError={isBookmarkError}
+                        />
+                      </div>
+                      <SelectSeparator />
+                    </Fragment>
+                  )}
+                </div>
               ))}
             </div>
             <div
               className="relative w-full"
               style={{
-                height: virtualizer.getTotalSize(),
+                height: searchVirtualizer.getTotalSize(),
               }}
             >
               {virtualSearchItems.map((virtualItem) => (
                 <div
-                  className="absolute top-0 left-0 w-full"
+                  className="absolute top-0 left-0 w-full pr-3"
                   style={{
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
