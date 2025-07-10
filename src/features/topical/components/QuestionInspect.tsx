@@ -17,13 +17,19 @@ import {
 } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { extractPaperCode, extractQuestionNumber } from "../lib/utils";
+import {
+  extractPaperCode,
+  extractQuestionNumber,
+  parsePastPaperUrl,
+} from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  PencilLine,
+  ScrollText,
   Search,
   X,
 } from "lucide-react";
@@ -34,6 +40,12 @@ import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { CHUNK_SIZE } from "../constants/constants";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ValidSeason } from "@/constants/types";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -519,26 +531,75 @@ const QuestionInspect = ({
           </div>
         </div>
         <div className="w-[73%] h-[inherit] p-2 rounded-md pr-4 pl-0">
-          <div className="flex items-center w-max justify-center gap-2 mb-2 p-1 dark:bg-input/30 rounded-md">
-            <Button
-              onClick={() => setCurrentView("question")}
-              className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] text-muted-foreground py-1 px-2 dark:bg-input/30",
-                currentView === "question" && "border-input  "
-              )}
-            >
-              Question
-            </Button>
-            <Button
-              onClick={() => setCurrentView("answer")}
-              className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] text-muted-foreground py-1 px-2 dark:bg-input/30",
-                currentView === "answer" && "border-input  "
-              )}
-            >
-              Answer
-            </Button>
+          <div className="flex items-center w-max justify-center gap-4 mb-2">
+            <div className="flex items-center w-max justify-center gap-2  p-[3px] bg-input/80 rounded-md">
+              <Button
+                onClick={() => setCurrentView("question")}
+                className={cn(
+                  "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                  currentView === "question" &&
+                    "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                )}
+              >
+                Question
+              </Button>
+              <Button
+                onClick={() => setCurrentView("answer")}
+                className={cn(
+                  "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                  currentView === "answer" &&
+                    "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                )}
+              >
+                Answer
+              </Button>
+            </div>
+            <Tooltip>
+              <TooltipTrigger className="cursor-pointer">
+                <PastPaperLink
+                  question={partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId)}
+                  type="qp"
+                >
+                  <ScrollText />
+                </PastPaperLink>
+              </TooltipTrigger>
+              <TooltipContent className="z-[99999999]" side="bottom">
+                <PastPaperLink
+                  question={partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId)}
+                  type="qp"
+                >
+                  View paper
+                </PastPaperLink>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger className="cursor-pointer">
+                <PastPaperLink
+                  question={partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId)}
+                  type="ms"
+                >
+                  <PencilLine />
+                </PastPaperLink>
+              </TooltipTrigger>
+              <TooltipContent className="z-[99999999]" side="bottom">
+                <PastPaperLink
+                  question={partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId)}
+                  type="ms"
+                >
+                  View mark scheme
+                </PastPaperLink>
+              </TooltipContent>
+            </Tooltip>
           </div>
+
           <div className={cn(currentView === "question" ? "block" : "hidden")}>
             <ScrollArea
               className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
@@ -546,25 +607,11 @@ const QuestionInspect = ({
               viewportRef={questionScrollAreaRef}
             >
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                {(() => {
-                  const question = partitionedTopicalData?.[
+                <TopicDisplay
+                  question={partitionedTopicalData?.[
                     currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId);
-                  if (!question) {
-                    return null;
-                  }
-                  return (
-                    <>
-                      <p>
-                        Topic
-                        {question.questionTopics?.length > 1 ? "s" : ""}:
-                      </p>
-                      {question.questionTopics?.map((topic) => (
-                        <Badge key={topic.topic}>{topic.topic}</Badge>
-                      ))}
-                    </>
-                  );
-                })()}
+                  ]?.find((q) => q.id === currentQuestionId)}
+                />
               </div>
               <div className="flex flex-col gap-2 w-full">
                 {partitionedTopicalData?.[currentTabThatContainsQuestion]
@@ -587,18 +634,31 @@ const QuestionInspect = ({
               className="h-[90vh] w-full"
               viewportRef={answerScrollAreaRef}
             >
+              <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                <TopicDisplay
+                  question={partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId)}
+                />
+              </div>
               <div className="flex flex-col gap-2">
                 {partitionedTopicalData?.[currentTabThatContainsQuestion]
                   ?.find((q) => q.id === currentQuestionId)
                   ?.answers?.map((answer) => (
-                    <Image
-                      className="w-full h-full object-contain"
-                      key={answer.answer}
-                      src={answer.answer}
-                      alt="Answer image"
-                      width={100}
-                      height={100}
-                    />
+                    <Fragment key={answer.answer}>
+                      {answer.answer.includes("http") ? (
+                        <Image
+                          className="w-full h-full object-contain"
+                          key={answer.answer}
+                          src={answer.answer}
+                          alt="Answer image"
+                          width={100}
+                          height={100}
+                        />
+                      ) : (
+                        <p>{answer.answer}</p>
+                      )}
+                    </Fragment>
                   ))}
               </div>
             </ScrollArea>
@@ -610,3 +670,52 @@ const QuestionInspect = ({
 };
 
 export default QuestionInspect;
+
+const PastPaperLink = ({
+  question,
+  children,
+  type,
+}: {
+  question: SelectedQuestion | undefined;
+  children: React.ReactNode;
+  type: "qp" | "ms";
+}) => {
+  if (!question) {
+    return null;
+  }
+  return (
+    <a
+      target="_blank"
+      href={parsePastPaperUrl({
+        questionId: question.id,
+        year: question.year.toString(),
+        season: question.season as ValidSeason,
+        type,
+      })}
+    >
+      {children}
+    </a>
+  );
+};
+
+const TopicDisplay = ({
+  question,
+}: {
+  question: SelectedQuestion | undefined;
+}) => {
+  if (!question) {
+    return null;
+  }
+
+  return (
+    <>
+      <p>
+        Topic
+        {question.questionTopics?.length > 1 ? "s" : ""}:
+      </p>
+      {question.questionTopics?.map((topic) => (
+        <Badge key={topic.topic}>{topic.topic}</Badge>
+      ))}
+    </>
+  );
+};
