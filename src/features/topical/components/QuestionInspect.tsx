@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -87,9 +86,13 @@ const QuestionInspect = ({
   >(undefined);
   const [searchInput, setSearchInput] = useState("");
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
+  const [currentView, setCurrentView] = useState<"question" | "answer">(
+    "question"
+  );
 
   useEffect(() => {
     setSearchInput("");
+    setCurrentView("question");
   }, [partitionedTopicalData]);
 
   const allQuestions = useMemo(() => {
@@ -99,9 +102,9 @@ const QuestionInspect = ({
   const searchResults = useMemo(() => {
     return searchInput.length > 0
       ? allQuestions.filter((question) => {
-          const searchableText = `${extractPaperCode(
-            question.id
-          )} Q${extractQuestionNumber(question.id)}`;
+          const searchableText = `${extractPaperCode({
+            questionId: question.id,
+          })} Q${extractQuestionNumber({ questionId: question.id })}`;
           return fuzzySearch(searchInput, searchableText);
         })
       : [];
@@ -296,17 +299,19 @@ const QuestionInspect = ({
                         }}
                       >
                         <p>
-                          {extractPaperCode(
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id
-                          )}{" "}
+                          {extractPaperCode({
+                            questionId:
+                              partitionedTopicalData?.[currentTab][
+                                virtualItem.index
+                              ]?.id,
+                          })}{" "}
                           Q
-                          {extractQuestionNumber(
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id
-                          )}
+                          {extractQuestionNumber({
+                            questionId:
+                              partitionedTopicalData?.[currentTab][
+                                virtualItem.index
+                              ]?.id,
+                          })}
                         </p>
                         <QuestionInspectBookmark
                           questionId={
@@ -375,10 +380,13 @@ const QuestionInspect = ({
                         }
                       }}
                     >
-                      {extractPaperCode(searchResults[virtualItem.index]?.id)} Q
-                      {extractQuestionNumber(
-                        searchResults[virtualItem.index]?.id
-                      )}
+                      {extractPaperCode({
+                        questionId: searchResults[virtualItem.index]?.id,
+                      })}{" "}
+                      Q
+                      {extractQuestionNumber({
+                        questionId: searchResults[virtualItem.index]?.id,
+                      })}
                       <QuestionInspectBookmark
                         questionId={searchResults[virtualItem.index]?.id}
                         isBookmarkDisabled={isUserSessionPending}
@@ -511,80 +519,90 @@ const QuestionInspect = ({
           </div>
         </div>
         <div className="w-[73%] h-[inherit] p-2 rounded-md pr-4 pl-0">
-          <Tabs defaultValue="question">
-            <TabsList>
-              <TabsTrigger value="question" className="cursor-pointer">
-                Question
-              </TabsTrigger>
-              <TabsTrigger value="answer" className="cursor-pointer">
-                Answer
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="question">
-              <ScrollArea
-                className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
-                type="always"
-                viewportRef={questionScrollAreaRef}
-              >
-                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                  {(() => {
-                    const question = partitionedTopicalData?.[
-                      currentTabThatContainsQuestion
-                    ]?.find((q) => q.id === currentQuestionId);
-                    if (!question) {
-                      return null;
-                    }
-                    return (
-                      <>
-                        <p>
-                          Topic
-                          {question.questionTopics?.length > 1 ? "s" : ""}:
-                        </p>
-                        {question.questionTopics?.map((topic) => (
-                          <Badge key={topic.topic}>{topic.topic}</Badge>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </div>
-                <div className="flex flex-col gap-2 w-full">
-                  {partitionedTopicalData?.[currentTabThatContainsQuestion]
-                    ?.find((q) => q.id === currentQuestionId)
-                    ?.questionImages?.map((image) => (
-                      <Image
-                        className="w-full h-full object-contain"
-                        key={image.imageSrc}
-                        src={image.imageSrc}
-                        alt="Question image"
-                        width={100}
-                        height={100}
-                      />
-                    ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="answer">
-              <ScrollArea
-                className="h-[90vh] w-full"
-                viewportRef={answerScrollAreaRef}
-              >
-                <div className="flex flex-col gap-2">
-                  {partitionedTopicalData?.[currentTabThatContainsQuestion]
-                    ?.find((q) => q.id === currentQuestionId)
-                    ?.answers?.map((answer) => (
-                      <Image
-                        className="w-full h-full object-contain"
-                        key={answer.answer}
-                        src={answer.answer}
-                        alt="Answer image"
-                        width={100}
-                        height={100}
-                      />
-                    ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+          <div className="flex items-center w-max justify-center gap-2 mb-2 p-1 dark:bg-input/30 rounded-md">
+            <Button
+              onClick={() => setCurrentView("question")}
+              className={cn(
+                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] text-muted-foreground py-1 px-2 dark:bg-input/30",
+                currentView === "question" && "border-input  "
+              )}
+            >
+              Question
+            </Button>
+            <Button
+              onClick={() => setCurrentView("answer")}
+              className={cn(
+                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] text-muted-foreground py-1 px-2 dark:bg-input/30",
+                currentView === "answer" && "border-input  "
+              )}
+            >
+              Answer
+            </Button>
+          </div>
+          <div className={cn(currentView === "question" ? "block" : "hidden")}>
+            <ScrollArea
+              className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
+              type="always"
+              viewportRef={questionScrollAreaRef}
+            >
+              <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                {(() => {
+                  const question = partitionedTopicalData?.[
+                    currentTabThatContainsQuestion
+                  ]?.find((q) => q.id === currentQuestionId);
+                  if (!question) {
+                    return null;
+                  }
+                  return (
+                    <>
+                      <p>
+                        Topic
+                        {question.questionTopics?.length > 1 ? "s" : ""}:
+                      </p>
+                      {question.questionTopics?.map((topic) => (
+                        <Badge key={topic.topic}>{topic.topic}</Badge>
+                      ))}
+                    </>
+                  );
+                })()}
+              </div>
+              <div className="flex flex-col gap-2 w-full">
+                {partitionedTopicalData?.[currentTabThatContainsQuestion]
+                  ?.find((q) => q.id === currentQuestionId)
+                  ?.questionImages?.map((image) => (
+                    <Image
+                      className="w-full h-full object-contain"
+                      key={image.imageSrc}
+                      src={image.imageSrc}
+                      alt="Question image"
+                      width={100}
+                      height={100}
+                    />
+                  ))}
+              </div>
+            </ScrollArea>
+          </div>
+          <div className={cn(currentView === "answer" ? "block" : "hidden")}>
+            <ScrollArea
+              className="h-[90vh] w-full"
+              viewportRef={answerScrollAreaRef}
+            >
+              <div className="flex flex-col gap-2">
+                {partitionedTopicalData?.[currentTabThatContainsQuestion]
+                  ?.find((q) => q.id === currentQuestionId)
+                  ?.answers?.map((answer) => (
+                    <Image
+                      className="w-full h-full object-contain"
+                      key={answer.answer}
+                      src={answer.answer}
+                      alt="Answer image"
+                      width={100}
+                      height={100}
+                    />
+                  ))}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

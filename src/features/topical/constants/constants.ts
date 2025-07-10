@@ -1,3 +1,4 @@
+import { ValidCurriculum, ValidSeason } from "@/constants/types";
 import type { InvalidInputs, TopicalData } from "./types";
 
 export const TOPICAL_DATA: TopicalData[] = [
@@ -155,7 +156,32 @@ export const TOPICAL_DATA: TopicalData[] = [
   },
 ];
 
-export const;
+export const PASTPAPERCO_SEASON_NEW_PREFIX: Record<ValidSeason, string> = {
+  Summer: "May-June",
+  Winter: "Oct-Nov",
+  Spring: "March",
+};
+
+export const PASTPAPERCO_SEASON_OLD_PREFIX: Record<ValidSeason, string> = {
+  Summer: "Jun",
+  Winter: "Nov",
+  Spring: "Mar",
+};
+
+export const PASTPAPERCO_DOMAIN = "https://pastpapers.co";
+
+export const PASTPAPERCO_SUBJECT_CODE: Record<string, string> = {
+  "9702": "Physics-9702",
+  "9701": "Chemistry-9701",
+};
+
+export const PASTPAPERCO_CURRICULUM_CODE_PREFIX: Record<
+  ValidCurriculum,
+  string
+> = {
+  "CIE A-LEVEL": "cie/A-Level",
+  "CIE IGCSE": "",
+};
 
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
 

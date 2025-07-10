@@ -1,5 +1,13 @@
-import { TOPICAL_DATA } from "../constants/constants";
+import {
+  PASTPAPERCO_CURRICULUM_CODE_PREFIX,
+  PASTPAPERCO_DOMAIN,
+  PASTPAPERCO_SEASON_NEW_PREFIX,
+  PASTPAPERCO_SEASON_OLD_PREFIX,
+  PASTPAPERCO_SUBJECT_CODE,
+  TOPICAL_DATA,
+} from "../constants/constants";
 import type { FilterData } from "../constants/types";
+import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
@@ -112,12 +120,57 @@ export const validateFilterData = ({
   }
 };
 
-export const extractPaperCode = (question: string): string => {
-  const codePart = question.split(";")[2];
+export const extractPaperCode = ({
+  questionId,
+}: {
+  questionId: string;
+}): string => {
+  const codePart = questionId.split(";")[2];
   return codePart.replaceAll("_", "/");
 };
 
-export const extractQuestionNumber = (question: string): number => {
-  const questionNumberPart = question.split(";")[4];
+export const extractQuestionNumber = ({
+  questionId,
+}: {
+  questionId: string;
+}): number => {
+  const questionNumberPart = questionId.split(";")[4];
   return parseInt(questionNumberPart.slice(1));
+};
+
+const getShortSeason = (season: ValidSeason): string | undefined => {
+  if (season === "Summer") {
+    return "s";
+  } else if (season === "Winter") {
+    return "w";
+  } else if (season === "Spring") {
+    return "m";
+  }
+  return undefined;
+};
+
+export const parsePastPaperUrl = ({
+  questionId,
+  year,
+  season,
+  type,
+}: {
+  questionId: string;
+  year: string;
+  season: ValidSeason;
+  type: "qp" | "ms";
+}): string => {
+  const splitedQuestionId = questionId.split(";");
+  const subjectCode = splitedQuestionId[2].split("_")[0];
+  const paper = splitedQuestionId[2].split("_")[1];
+  const curriculum = splitedQuestionId[0] as ValidCurriculum;
+  const shortSeason = getShortSeason(season);
+  const newPaperCode = `${subjectCode}_${shortSeason}${year.slice(
+    2
+  )}_${type}_${paper}`;
+  if (parseInt(year) < 2018) {
+    return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}/${year} ${PASTPAPERCO_SEASON_OLD_PREFIX[season]}/${newPaperCode}.pdf`;
+  } else {
+    return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}-${PASTPAPERCO_SEASON_NEW_PREFIX[season]}/${newPaperCode}.pdf`;
+  }
 };
