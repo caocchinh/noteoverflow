@@ -76,6 +76,9 @@ const QuestionInspect = ({
   isValidSession,
   isBookmarksFetching,
   isBookmarkError,
+  isFinishedQuestionsFetching,
+  isFinishedQuestionsError,
+  userFinishedQuestions,
 }: {
   isOpen: {
     isOpen: boolean;
@@ -89,6 +92,9 @@ const QuestionInspect = ({
   isValidSession: boolean;
   isBookmarksFetching: boolean;
   isBookmarkError: boolean;
+  isFinishedQuestionsFetching: boolean;
+  isFinishedQuestionsError: boolean;
+  userFinishedQuestions: Set<string>;
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =

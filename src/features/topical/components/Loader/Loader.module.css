@@ -1,0 +1,14 @@
+.loader {
+  width: 50px;
+  height: 7.5px;
+  -webkit-mask: linear-gradient(90deg, #0084ff 70%, #0000 0) left / 20% 100%;
+  mask: linear-gradient(90deg, #0084ff 70%, #0000 0) left / 20% 100%;
+  background: linear-gradient(#0084ff 0 0) left -25% top 0 / 20% 100% no-repeat #ddd;
+  animation: loader 1s infinite steps(6);
+}
+
+@keyframes loader {
+  100% {
+    background-position: right -25% top 0;
+  }
+}

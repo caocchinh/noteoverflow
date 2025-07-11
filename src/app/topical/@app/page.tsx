@@ -1146,6 +1146,9 @@ const TopicalPage = () => {
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
         isBookmarkError={isUserSessionError || isBookmarksError}
+        isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
+        isFinishedQuestionsError={isUserFinishedQuestionsError}
+        userFinishedQuestions={userFinishedQuestions as Set<string>}
       />
     </>
   );

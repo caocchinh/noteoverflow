@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2, TriangleAlert } from "lucide-react";
-import { memo } from "react";
-import { SelectedQuestion } from "../server/actions";
+import { memo, useState } from "react";
+import { SelectedQuestion } from "../constants/types";
+import Loader from "./Loader/Loader";
 
 const QuestionPreview = memo(
   ({
@@ -31,6 +32,7 @@ const QuestionPreview = memo(
     isValidSession: boolean;
   }) => {
     const mutationKey = ["user_bookmarks", question.id];
+    const [loading, setLoading] = useState(true);
 
     const isMutatingThisQuestion =
       useIsMutating({
@@ -39,17 +41,22 @@ const QuestionPreview = memo(
 
     return (
       <div
-        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-none border-black/50 min-h-[100px] relative overflow-hidden"
+        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-none border-black/50  relative overflow-hidden min-h-[100px]"
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
       >
         <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-center p-2">
+        {loading && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <Loader />
+          </div>
+        )}
+        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-start p-2 overflow-hidden">
           {question?.questionTopics?.map((topic) => (
             <Badge
               key={topic.topic}
-              className="h-max bg-white !text-black text-center"
+              className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
             >
               {topic.topic}
             </Badge>
@@ -122,6 +129,7 @@ const QuestionPreview = memo(
           src={question?.questionImages[imageIndex]?.imageSrc}
           alt="Question preview"
           loading="lazy"
+          onLoad={() => setLoading(false)}
         />
       </div>
     );
