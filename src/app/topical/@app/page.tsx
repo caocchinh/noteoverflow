@@ -57,7 +57,6 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { toast } from "sonner";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
@@ -631,34 +630,42 @@ const TopicalPage = () => {
   } = useQuery({
     queryKey: ["user_bookmarks"],
     queryFn: async () => {
-      try {
-        const response = await fetch("/api/topical/bookmark", {
-          method: "GET",
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error);
-        }
-        console.log(data, "data bookmark");
-        return new Set(
-          data.data.map((item: { questionId: string }) => item.questionId)
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Error fetching bookmarks: Unknown error";
-        toast.error(
-          errorMessage === "Unauthorized"
-            ? "Please sign in to bookmark questions"
-            : errorMessage
-        );
-        return { success: false, data: new Set(), error: errorMessage };
+      const response = await fetch("/api/topical/bookmark", {
+        method: "GET",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
       }
+
+      return new Set(
+        data.data.map((item: { questionId: string }) => item.questionId)
+      );
     },
     enabled:
       isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
   });
+
+  const {
+    data: userFinishedQuestions,
+    isFetching: isUserFinishedQuestionsFetching,
+    isError: isUserFinishedQuestionsError,
+  } = useQuery({
+    queryKey: ["user_finished_questions"],
+    queryFn: async () => {
+      const response = await fetch("/api/topical/finished");
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      return new Set(
+        data.data.map((item: { questionId: string }) => item.questionId)
+      );
+    },
+    enabled:
+      isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
+  });
+
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [isQuestionViewOpen, setIsQuestionViewOpen] = useState({
     isOpen: false,

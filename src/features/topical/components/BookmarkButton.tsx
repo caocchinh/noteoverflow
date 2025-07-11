@@ -44,17 +44,14 @@ export const BookmarkButton = ({
       }
     },
     onSuccess: () => {
-      const old: { sucess: boolean; data: Set<string> } | undefined =
-        queryClient.getQueryData<Set<string>>(["user_bookmarks"]) as
-          | { sucess: boolean; data: Set<string> }
-          | undefined;
-      if (!old?.data) {
+      const old = queryClient.getQueryData<Set<string>>(["user_bookmarks"]);
+      if (!old) {
         return;
       }
       if (isBookmarked) {
-        old.data.delete(questionId);
+        old.delete(questionId);
       } else {
-        old.data.add(questionId);
+        old.add(questionId);
       }
 
       toast.success(
