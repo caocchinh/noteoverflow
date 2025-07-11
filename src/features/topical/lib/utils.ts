@@ -125,8 +125,12 @@ export const extractPaperCode = ({
 }: {
   questionId: string;
 }): string => {
-  const codePart = questionId.split(";")[2];
-  return codePart.replaceAll("_", "/");
+  try {
+    const codePart = questionId.split(";")[2];
+    return codePart.replaceAll("_", "/");
+  } catch {
+    return "";
+  }
 };
 
 export const extractQuestionNumber = ({
@@ -134,8 +138,12 @@ export const extractQuestionNumber = ({
 }: {
   questionId: string;
 }): number => {
-  const questionNumberPart = questionId.split(";")[4];
-  return parseInt(questionNumberPart.slice(1));
+  try {
+    const questionNumberPart = questionId.split(";")[4];
+    return parseInt(questionNumberPart.slice(1));
+  } catch {
+    return 0;
+  }
 };
 
 const getShortSeason = (season: ValidSeason): string | undefined => {
@@ -160,17 +168,21 @@ export const parsePastPaperUrl = ({
   season: ValidSeason;
   type: "qp" | "ms";
 }): string => {
-  const splitedQuestionId = questionId.split(";");
-  const subjectCode = splitedQuestionId[2].split("_")[0];
-  const paper = splitedQuestionId[2].split("_")[1];
-  const curriculum = splitedQuestionId[0] as ValidCurriculum;
-  const shortSeason = getShortSeason(season);
-  const newPaperCode = `${subjectCode}_${shortSeason}${year.slice(
-    2
-  )}_${type}_${paper}`;
-  if (parseInt(year) < 2018) {
-    return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}/${year} ${PASTPAPERCO_SEASON_OLD_PREFIX[season]}/${newPaperCode}.pdf`;
-  } else {
-    return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}-${PASTPAPERCO_SEASON_NEW_PREFIX[season]}/${newPaperCode}.pdf`;
+  try {
+    const splitedQuestionId = questionId.split(";");
+    const subjectCode = splitedQuestionId[2].split("_")[0];
+    const paper = splitedQuestionId[2].split("_")[1];
+    const curriculum = splitedQuestionId[0] as ValidCurriculum;
+    const shortSeason = getShortSeason(season);
+    const newPaperCode = `${subjectCode}_${shortSeason}${year.slice(
+      2
+    )}_${type}_${paper}`;
+    if (parseInt(year) < 2018) {
+      return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}/${year} ${PASTPAPERCO_SEASON_OLD_PREFIX[season]}/${newPaperCode}.pdf`;
+    } else {
+      return `${PASTPAPERCO_DOMAIN}/${PASTPAPERCO_CURRICULUM_CODE_PREFIX[curriculum]}/${PASTPAPERCO_SUBJECT_CODE[subjectCode]}/${year}-${PASTPAPERCO_SEASON_NEW_PREFIX[season]}/${newPaperCode}.pdf`;
+    }
+  } catch {
+    return "";
   }
 };

@@ -13,6 +13,7 @@ export const BookmarkButton = ({
   questionId,
   isBookmarkDisabled,
   isBookmarksFetching,
+  isBookmarkError,
   className,
   isValidSession,
 }: {
@@ -20,6 +21,7 @@ export const BookmarkButton = ({
   questionId: string;
   isBookmarkDisabled: boolean;
   isBookmarksFetching: boolean;
+  isBookmarkError: boolean;
   className?: string;
   isValidSession: boolean;
 }) => {
@@ -56,8 +58,8 @@ export const BookmarkButton = ({
 
       toast.success(
         isBookmarked
-          ? "Question removed from bookmark"
-          : "Question added to bookmark",
+          ? "Question removed from bookmarks."
+          : "Question added to bookmarks.",
         {
           duration: 2000,
         }
@@ -79,11 +81,19 @@ export const BookmarkButton = ({
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
+        if (isBookmarkError) {
+          toast.error("Bookmark error. Please refresh the page.");
+          return;
+        }
         if (!isValidSession) {
-          toast.error("Please sign in to bookmark questions");
+          toast.error("Please sign in to bookmark questions.");
           return;
         }
         updateBookmarkMutation.mutate();
+      }}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
       }}
     >
       {isBookmarksFetching ? (

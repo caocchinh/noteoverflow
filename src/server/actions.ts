@@ -18,10 +18,9 @@ import {
 } from "@/features/admin/content/lib/utils";
 import { auth } from "@/lib/auth/auth";
 import { isValidQuestionId } from "@/lib/utils";
-import { createAnswer } from "./main/answer";
 import { getCurriculum } from "./main/curriculum";
 import { getPaperType } from "./main/paperType";
-import { createQuestionImage, isQuestionExists } from "./main/question";
+import { isQuestionExists } from "./main/question";
 import { getSeason } from "./main/season";
 import { getSubjectByCurriculum } from "./main/subject";
 import { getTopic } from "./main/topic";
@@ -199,102 +198,6 @@ export const getSubjectInfoAction = async (
     };
   } catch (error) {
     console.error("Error getting subject info:", error);
-    return {
-      success: false,
-      error: INTERNAL_SERVER_ERROR,
-    };
-  }
-};
-
-export const createQuestionImageAction = async ({
-  questionId,
-  imageSrc,
-  order,
-}: {
-  questionId: string;
-  imageSrc: string;
-  order: number;
-}): Promise<ServerActionResponse<void>> => {
-  if (
-    typeof order !== "number" ||
-    typeof questionId !== "string" ||
-    typeof imageSrc !== "string" ||
-    !questionId ||
-    !imageSrc ||
-    order < 0 ||
-    !isValidQuestionId(questionId)
-  ) {
-    return {
-      success: false,
-      error: BAD_REQUEST,
-    };
-  }
-  try {
-    const session = await verifySession();
-    if (!session) {
-      return redirect("/authentication");
-    }
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      redirect("/app");
-    }
-    await createQuestionImage({
-      questionId,
-      imageSrc,
-      order,
-    });
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("Error creating question image:", error);
-    return {
-      success: false,
-      error: INTERNAL_SERVER_ERROR,
-    };
-  }
-};
-
-export const createAnswerAction = async ({
-  questionId,
-  answer,
-  answerOrder,
-}: {
-  questionId: string;
-  answer: string;
-  answerOrder: number;
-}): Promise<ServerActionResponse<void>> => {
-  if (
-    typeof answerOrder !== "number" ||
-    typeof questionId !== "string" ||
-    typeof answer !== "string" ||
-    !questionId ||
-    !answer ||
-    answerOrder < 0 ||
-    !isValidQuestionId(questionId)
-  ) {
-    return {
-      success: false,
-      error: BAD_REQUEST,
-    };
-  }
-  try {
-    const session = await verifySession();
-    if (!session) {
-      return redirect("/authentication");
-    }
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      redirect("/app");
-    }
-    await createAnswer({
-      questionId,
-      answer,
-      answerOrder,
-    });
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("Error creating answer:", error);
     return {
       success: false,
       error: INTERNAL_SERVER_ERROR,

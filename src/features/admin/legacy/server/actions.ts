@@ -9,14 +9,9 @@ import type {
 } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
 import { isValidQuestionId } from "@/lib/utils";
-import { overwriteAnswer } from "@/server/main/answer";
 import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
 import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
-import {
-  createQuestionTopic,
-  overwriteQuestion,
-  overwriteQuestionImage,
-} from "@/server/main/question";
+import { createQuestion, isQuestionExists } from "@/server/main/question";
 import { createSeason, isSeasonExists } from "@/server/main/season";
 import { createSubject, isSubjectExists } from "@/server/main/subject";
 import { createTopic, isTopicExists } from "@/server/main/topic";
@@ -31,6 +26,9 @@ import {
   validateTopic,
   validateYear,
 } from "../../content/lib/utils";
+import { question } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db";
 
 export const legacyUploadAction = async ({
   curriculum,
@@ -171,34 +169,68 @@ export const legacyUploadAction = async ({
 
     // Create or overwrite question/answer based on content type
     if (contentType === "questions") {
-      await overwriteQuestion({
-        questionId,
-        year,
-        season,
-        paperType,
-        curriculumName: curriculum,
-        paperVariant,
-        userId,
-        subjectId: subjectFullName,
-        questionNumber,
-      });
-      await createQuestionTopic({
-        questionId,
-        topic,
-        subjectId: subjectFullName,
-        curriculumName: curriculum,
-      });
-      await overwriteQuestionImage({
-        questionId,
-        imageSrc,
-        order,
-      });
+      if (await isQuestionExists(questionId)) {
+        const db = await getDbAsync();
+        const existingQuestionImages = await db
+          .select({ questionImages: question.questionImages })
+          .from(question)
+          .where(eq(question.id, questionId));
+        if (existingQuestionImages.length > 0) {
+          const parsedQuestionImages = JSON.parse(
+            existingQuestionImages as unknown as string
+          ) as string[];
+          if (!parsedQuestionImages.includes(imageSrc)) {
+            if (parsedQuestionImages[order] !== imageSrc) {
+              parsedQuestionImages.splice(order, 1, imageSrc);
+              await db
+                .update(question)
+                .set({ questionImages: JSON.stringify(parsedQuestionImages) })
+                .where(eq(question.id, questionId));
+            }
+          }
+        }
+      } else {
+        const questionImage = [imageSrc];
+        createQuestion({
+          questionId,
+          year,
+          season,
+          paperType,
+          paperVariant,
+          userId,
+          subjectId: subjectFullName,
+          questionNumber,
+          curriculumName: curriculum,
+          questionImages: JSON.stringify(questionImage),
+        });
+      }
     } else if (contentType === "answers") {
-      await overwriteAnswer({
-        questionId,
-        answer: imageSrc,
-        answerOrder: order,
-      });
+      // Answer always come after question creation so certain that no constraint error
+      const db = await getDbAsync();
+      const existingAnswers = await db
+        .select({ answers: question.answers })
+        .from(question)
+        .where(eq(question.id, questionId));
+      if (existingAnswers.length > 0) {
+        const parsedAnswers = JSON.parse(
+          existingAnswers as unknown as string
+        ) as string[];
+        if (!parsedAnswers.includes(imageSrc)) {
+          if (parsedAnswers[order] !== imageSrc) {
+            parsedAnswers.splice(order, 1, imageSrc);
+            await db
+              .update(question)
+              .set({ answers: JSON.stringify(parsedAnswers) })
+              .where(eq(question.id, questionId));
+          }
+        }
+      } else {
+        const answer = [imageSrc];
+        await db
+          .update(question)
+          .set({ answers: JSON.stringify(answer) })
+          .where(eq(question.id, questionId));
+      }
     }
 
     return {

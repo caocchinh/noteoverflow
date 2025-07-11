@@ -4,7 +4,6 @@ import { useIsMutating } from "@tanstack/react-query";
 import { BookmarkButton } from "./BookmarkButton";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { TriangleAlert } from "lucide-react";
 
 const QuestionInspectBookmark = ({
   questionId,
@@ -30,17 +29,18 @@ const QuestionInspectBookmark = ({
 
   return (
     <>
-      {!isMutatingThisQuestion && !isBookmarkError && (
+      {!isMutatingThisQuestion && (
         <BookmarkButton
           className="h-[26px] w-[26px] border border-black"
           bookmarks={bookmarks}
           questionId={questionId}
           isValidSession={isValidSession}
+          isBookmarkError={isBookmarkError}
           isBookmarkDisabled={isBookmarkDisabled}
           isBookmarksFetching={isBookmarksFetching || isBookmarkDisabled}
         />
       )}
-      {isMutatingThisQuestion && !isBookmarkError && (
+      {isMutatingThisQuestion && (
         <Badge
           className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-black"
           onClick={(e) => {
@@ -54,22 +54,6 @@ const QuestionInspectBookmark = ({
         >
           Saving
           <Loader2 className="animate-spin" />
-        </Badge>
-      )}
-      {isBookmarkError && (
-        <Badge
-          className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          Unable to bookmark
-          <TriangleAlert />
         </Badge>
       )}
     </>

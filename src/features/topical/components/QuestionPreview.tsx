@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
-import { Loader2, TriangleAlert } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { memo, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
@@ -71,28 +71,30 @@ const QuestionPreview = memo(
             {question?.season}
           </Badge>
 
-          {!isMutatingThisQuestion && !isBookmarkError && (
+          {!isMutatingThisQuestion && (
             <BookmarkButton
               className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
               isBookmarkDisabled={isUserSessionPending}
               bookmarks={bookmarks}
+              isBookmarkError={isBookmarkError}
               questionId={question.id}
               isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
               isValidSession={isValidSession}
             />
           )}
         </div>
-        {!isMutatingThisQuestion && !isBookmarkError && (
+        {!isMutatingThisQuestion && (
           <BookmarkButton
             className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
             bookmarks={bookmarks}
+            isBookmarkError={isBookmarkError}
             questionId={question.id}
             isValidSession={isValidSession}
             isBookmarkDisabled={isUserSessionPending}
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
           />
         )}
-        {isMutatingThisQuestion && !isBookmarkError && (
+        {isMutatingThisQuestion && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black"
             onClick={(e) => {
@@ -108,22 +110,7 @@ const QuestionPreview = memo(
             <Loader2 className="animate-spin" />
           </Badge>
         )}
-        {isBookmarkError && (
-          <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-red-600"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onTouchStart={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            Unable to bookmark
-            <TriangleAlert />
-          </Badge>
-        )}
+
         <img
           className="w-full h-full object-contain"
           src={question?.questionImages[imageIndex]?.imageSrc}

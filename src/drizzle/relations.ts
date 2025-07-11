@@ -5,8 +5,6 @@ import {
   account,
   userBookmarks,
   question,
-  questionImage,
-  answer,
   season,
   paperType,
   year,
@@ -107,23 +105,7 @@ export const questionRelations = relations(question, ({ one, many }) => ({
     fields: [question.year, question.subjectId, question.curriculumName],
     references: [year.year, year.subjectId, year.curriculumName],
   }),
-  questionImages: many(questionImage),
-  answers: many(answer),
   questionTopics: many(questionTopic),
-}));
-
-export const questionImageRelations = relations(questionImage, ({ one }) => ({
-  question: one(question, {
-    fields: [questionImage.questionId],
-    references: [question.id],
-  }),
-}));
-
-export const answerRelations = relations(answer, ({ one }) => ({
-  question: one(question, {
-    fields: [answer.questionId],
-    references: [question.id],
-  }),
 }));
 
 export const questionTopicRelations = relations(questionTopic, ({ one }) => ({

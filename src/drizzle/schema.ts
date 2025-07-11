@@ -191,8 +191,10 @@ export const question = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
-    subjectId: text("subject_id"),
-    curriculumName: text("curriculum_name"),
+    questionImages: text("question_images"),
+    answers: text("answers"),
+    subjectId: text("subject_id").notNull(),
+    curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),
   },
   (table) => [
@@ -238,34 +240,6 @@ export const questionTopic = sqliteTable(
         foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
       }),
     ];
-  }
-);
-
-export const questionImage = sqliteTable(
-  "question_image",
-  {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
-      .notNull(),
-    imageSrc: text("image_src").notNull(),
-    order: integer("order").notNull().default(0),
-  },
-  (table) => {
-    return [primaryKey({ columns: [table.questionId, table.order] })];
-  }
-);
-
-export const answer = sqliteTable(
-  "answer",
-  {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
-      .notNull(),
-    answer: text("answer").notNull(),
-    order: integer("order").notNull().default(0),
-  },
-  (table) => {
-    return [primaryKey({ columns: [table.questionId, table.order] })];
   }
 );
 

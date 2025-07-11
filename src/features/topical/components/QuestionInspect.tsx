@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import {
   Dialog,
@@ -27,6 +29,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Loader2,
   PencilLine,
   ScrollText,
   Search,
@@ -107,6 +110,15 @@ const QuestionInspect = ({
   const [currentView, setCurrentView] = useState<"question" | "answer">(
     "question"
   );
+  const currentQuestionData = useMemo(() => {
+    return partitionedTopicalData?.[currentTabThatContainsQuestion]?.find(
+      (question) => question.id === currentQuestionId
+    );
+  }, [
+    partitionedTopicalData,
+    currentTabThatContainsQuestion,
+    currentQuestionId,
+  ]);
 
   useEffect(() => {
     setSearchInput("");
@@ -131,6 +143,7 @@ const QuestionInspect = ({
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (isOpen.isOpen) {
+      setCurrentView("question");
       timeout = setTimeout(() => {
         setIsVirtualizationReady(true);
       }, 0);
@@ -538,7 +551,7 @@ const QuestionInspect = ({
         </div>
         <div className="w-[73%] h-[inherit] p-2 rounded-md pr-4 pl-0">
           <div className="flex items-center w-max justify-center gap-4 mb-2">
-            <div className="flex items-center w-max justify-center gap-2  p-[3px] bg-input/80 rounded-md">
+            <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
               <Button
                 onClick={() => setCurrentView("question")}
                 className={cn(
@@ -561,45 +574,29 @@ const QuestionInspect = ({
               </Button>
             </div>
             <Tooltip>
-              <TooltipTrigger className="cursor-pointer">
-                <PastPaperLink
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                  type="qp"
-                >
-                  <ScrollText />
-                </PastPaperLink>
+              <TooltipTrigger className="cursor-pointer" asChild>
+                <Button variant="outline" className="w-9 h-9 cursor-pointer">
+                  <PastPaperLink question={currentQuestionData} type="qp">
+                    <ScrollText />
+                  </PastPaperLink>
+                </Button>
               </TooltipTrigger>
               <TooltipContent className="z-[99999999]" side="bottom">
-                <PastPaperLink
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                  type="qp"
-                >
+                <PastPaperLink question={currentQuestionData} type="qp">
                   View paper
                 </PastPaperLink>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger className="cursor-pointer">
-                <PastPaperLink
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                  type="ms"
-                >
-                  <PencilLine />
-                </PastPaperLink>
+              <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                <Button variant="outline" className="w-9 h-9 cursor-pointer">
+                  <PastPaperLink question={currentQuestionData} type="ms">
+                    <PencilLine />
+                  </PastPaperLink>
+                </Button>
               </TooltipTrigger>
               <TooltipContent className="z-[99999999]" side="bottom">
-                <PastPaperLink
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                  type="ms"
-                >
+                <PastPaperLink question={currentQuestionData} type="ms">
                   View mark scheme
                 </PastPaperLink>
               </TooltipContent>
@@ -613,26 +610,11 @@ const QuestionInspect = ({
               viewportRef={questionScrollAreaRef}
             >
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                <TopicDisplay
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                />
+                <TopicDisplay question={currentQuestionData} />
               </div>
-              <div className="flex flex-col gap-2 w-full">
-                {partitionedTopicalData?.[currentTabThatContainsQuestion]
-                  ?.find((q) => q.id === currentQuestionId)
-                  ?.questionImages?.map((image) => (
-                    <Image
-                      className="w-full h-full object-contain"
-                      key={image.imageSrc}
-                      src={image.imageSrc}
-                      alt="Question image"
-                      width={100}
-                      height={100}
-                    />
-                  ))}
-              </div>
+              <QuestionImages
+                questionImages={currentQuestionData?.questionImages}
+              />
             </ScrollArea>
           </div>
           <div className={cn(currentView === "answer" ? "block" : "hidden")}>
@@ -641,31 +623,32 @@ const QuestionInspect = ({
               viewportRef={answerScrollAreaRef}
             >
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                <TopicDisplay
-                  question={partitionedTopicalData?.[
-                    currentTabThatContainsQuestion
-                  ]?.find((q) => q.id === currentQuestionId)}
-                />
+                <TopicDisplay question={currentQuestionData} />
               </div>
               <div className="flex flex-col gap-2">
-                {partitionedTopicalData?.[currentTabThatContainsQuestion]
-                  ?.find((q) => q.id === currentQuestionId)
-                  ?.answers?.map((answer) => (
-                    <Fragment key={answer.answer}>
-                      {answer.answer.includes("http") ? (
-                        <Image
-                          className="w-full h-full object-contain"
-                          key={answer.answer}
-                          src={answer.answer}
-                          alt="Answer image"
-                          width={100}
-                          height={100}
-                        />
-                      ) : (
-                        <p>{answer.answer}</p>
-                      )}
-                    </Fragment>
-                  ))}
+                {currentQuestionData?.answers?.map((answer) => (
+                  <Fragment
+                    key={`${answer.answer}${currentQuestionId}${
+                      currentQuestionId &&
+                      extractQuestionNumber({
+                        questionId: currentQuestionId,
+                      })
+                    }`}
+                  >
+                    {answer.answer.includes("http") ? (
+                      <Image
+                        className="w-full h-full object-contain"
+                        key={answer.answer}
+                        src={answer.answer}
+                        alt="Answer image"
+                        width={100}
+                        height={100}
+                      />
+                    ) : (
+                      <p>{answer.answer}</p>
+                    )}
+                  </Fragment>
+                ))}
               </div>
             </ScrollArea>
           </div>
@@ -723,5 +706,35 @@ const TopicDisplay = ({
         <Badge key={topic.topic}>{topic.topic}</Badge>
       ))}
     </>
+  );
+};
+
+const QuestionImages = ({
+  questionImages,
+}: {
+  questionImages: { imageSrc: string; order: number }[] | undefined;
+}) => {
+  const [loadedCount, setLoadedCount] = useState(0);
+  if (!questionImages) {
+    return null;
+  }
+  return (
+    <div className="flex flex-col flex-wrap w-full gap-2">
+      {/* {loadedCount < questionImages.length && (
+        <div className="w-full h-full flex items-center justify-center">
+          <Loader2 className="animate-spin" />
+        </div>
+      )} */}
+      {questionImages.map((image) => (
+        <img
+          className="w-full h-full object-contain"
+          key={image.imageSrc}
+          src={image.imageSrc}
+          alt="Question image"
+          loading="lazy"
+          onLoad={() => setLoadedCount(loadedCount + 1)}
+        />
+      ))}
+    </div>
   );
 };
