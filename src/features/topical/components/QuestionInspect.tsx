@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SelectedQuestion } from "../server/actions";
 import {
   Fragment,
   useCallback,
@@ -46,6 +45,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
+import { SelectedQuestion } from "../constants/types";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {

@@ -27,7 +27,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import type { ServerActionResponse, ValidCurriculum } from "@/constants/types";
+import type { ValidCurriculum } from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
@@ -42,21 +42,16 @@ import {
   CACHE_EXPIRE_TIME,
 } from "@/features/topical/constants/constants";
 import type {
-  CacheServerActionResponse,
   FilterData,
   FiltersCache,
   InvalidInputs,
 } from "@/features/topical/constants/types";
+import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
 } from "@/features/topical/lib/utils";
-import {
-  getTopicalData,
-  getUserBookmarksAction,
-  SelectedQuestion,
-} from "@/features/topical/server/actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -494,14 +489,25 @@ const TopicalPage = () => {
 
   const search = async () => {
     if (isValidInputs(false)) {
-      return await getTopicalData({
-        curriculumId: selectedCurriculum,
-        subjectId: selectedSubject,
-        topic: selectedTopic,
-        paperType: selectedPaperType,
-        year: selectedYear,
-        season: selectedSeason,
+      const params = new URLSearchParams();
+      params.append("curriculumId", selectedCurriculum);
+      params.append("subjectId", selectedSubject);
+      params.append("topic", JSON.stringify(selectedTopic));
+      params.append("paperType", JSON.stringify(selectedPaperType));
+      params.append("year", JSON.stringify(selectedYear));
+      params.append("season", JSON.stringify(selectedSeason));
+      const response = await fetch(`/api/topical?${params.toString()}`, {
+        method: "GET",
       });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      return data as {
+        data: SelectedQuestion[];
+        isRateLimited: boolean;
+      };
     }
     throw new Error("Invalid inputs");
   };
@@ -518,10 +524,11 @@ const TopicalPage = () => {
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
         const currentTime = Date.now();
-        const parsedCachedData: CacheServerActionResponse<{
+        const parsedCachedData: {
           data: SelectedQuestion[];
           isRateLimited: boolean;
-        }> | null = cachedData ? JSON.parse(cachedData) : null;
+          cacheExpireTime: number;
+        } | null = cachedData ? JSON.parse(cachedData) : null;
         if (
           parsedCachedData &&
           currentTime > parsedCachedData.cacheExpireTime
@@ -530,24 +537,14 @@ const TopicalPage = () => {
         }
         if (parsedCachedData) {
           return {
-            data: {
-              data: parsedCachedData.data.data,
-              isRateLimited: parsedCachedData.data.isRateLimited,
-            },
-            success: true,
-          } as ServerActionResponse<{
-            data: SelectedQuestion[];
-            isRateLimited: boolean;
-          }>;
+            data: parsedCachedData.data,
+            isRateLimited: parsedCachedData.isRateLimited,
+          };
         }
       } catch {
         const result = await search();
         try {
-          if (
-            result.data &&
-            result.data.data.length > 0 &&
-            !result.data?.isRateLimited
-          ) {
+          if (result.data && result.data.length > 0 && !result.isRateLimited) {
             const currentTime = Date.now();
             const cacheExpireTime = currentTime + CACHE_EXPIRE_TIME;
             const cacheData = {
@@ -565,11 +562,7 @@ const TopicalPage = () => {
       }
       const result = await search();
       try {
-        if (
-          result.data &&
-          result.data.data.length > 0 &&
-          !result.data?.isRateLimited
-        ) {
+        if (result.data && result.data.length > 0 && !result.isRateLimited) {
           const currentTime = Date.now();
           const cacheExpireTime = currentTime + CACHE_EXPIRE_TIME;
           const cacheData = {
@@ -596,11 +589,11 @@ const TopicalPage = () => {
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
 
   useEffect(() => {
-    if (topicalData?.data?.data) {
+    if (topicalData?.data) {
       const chunkedData: SelectedQuestion[][] = [];
       let currentChunks: SelectedQuestion[] = [];
 
-      topicalData.data.data.forEach((item: SelectedQuestion) => {
+      topicalData.data.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === CHUNK_SIZE) {
           chunkedData.push(currentChunks);
           currentChunks = [];
@@ -639,7 +632,17 @@ const TopicalPage = () => {
     queryKey: ["user_bookmarks"],
     queryFn: async () => {
       try {
-        return await getUserBookmarksAction();
+        const response = await fetch("/api/topical/bookmark", {
+          method: "GET",
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error);
+        }
+        console.log(data, "data bookmark");
+        return new Set(
+          data.data.map((item: { questionId: string }) => item.questionId)
+        );
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -664,7 +667,7 @@ const TopicalPage = () => {
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
-      topicalData?.data?.data.length === 0 ||
+      topicalData?.data?.length === 0 ||
       isTopicalDataError ||
       isTopicalDataFetching ||
       !isTopicalDataFetched
@@ -1030,18 +1033,17 @@ const TopicalPage = () => {
               type="always"
             >
               {!isTopicalDataFetching && !isTopicalDataFetched && (
-                <div className="flex flex-row items-center justify-center w-full h-full">
+                <div className="flex flex-row items-center justify-center w-full h-full mb-3">
                   Use the sidebar on the left to search for questions.
                 </div>
               )}
-              {topicalData?.data?.data &&
-                topicalData?.data?.data.length > 0 && (
-                  <p className="text-sm text-left mb-1">
-                    {topicalData?.data?.data.length} question
-                    {topicalData?.data?.data.length > 1 ? "s" : ""} found
-                  </p>
-                )}
-              {topicalData?.data?.isRateLimited && (
+              {topicalData?.data && topicalData?.data.length > 0 && (
+                <p className="text-sm text-left mb-1">
+                  {topicalData?.data.length} question
+                  {topicalData?.data.length > 1 ? "s" : ""} found
+                </p>
+              )}
+              {topicalData?.isRateLimited && (
                 <p className="text-md text-center mb-2 text-red-600">
                   Limited results displayed due to rate limiting. Log in for
                   complete access.
@@ -1050,7 +1052,7 @@ const TopicalPage = () => {
               {isTopicalDataError &&
                 !isTopicalDataFetching &&
                 isTopicalDataFetched && (
-                  <div className="flex flex-col items-center justify-center w-full h-full">
+                  <div className="flex flex-col items-center justify-center w-full h-full mb-3">
                     <div className="flex items-start justify-center gap-2">
                       <p className="text-md text-center mb-2 text-red-600">
                         An error occurred while fetching data. Please try again.
@@ -1069,7 +1071,7 @@ const TopicalPage = () => {
                     </Button>
                   </div>
                 )}
-              {topicalData?.data?.data.length == 0 &&
+              {topicalData?.data.length == 0 &&
                 isTopicalDataFetched &&
                 !isTopicalDataError &&
                 !isTopicalDataFetching && (
@@ -1093,9 +1095,7 @@ const TopicalPage = () => {
                   {displayedData?.map((question) =>
                     question?.questionImages?.map((_, imageIndex) => (
                       <QuestionPreview
-                        bookmarks={
-                          (bookmarks?.data as Set<string>) || new Set()
-                        }
+                        bookmarks={(bookmarks as Set<string>) || new Set()}
                         question={question}
                         setIsQuestionViewOpen={setIsQuestionViewOpen}
                         isUserSessionPending={isUserSessionPending}
@@ -1134,7 +1134,7 @@ const TopicalPage = () => {
         isOpen={isQuestionViewOpen}
         setIsOpen={setIsQuestionViewOpen}
         partitionedTopicalData={fullPartitionedData}
-        bookmarks={(bookmarks?.data as Set<string>) || new Set()}
+        bookmarks={(bookmarks as Set<string>) || new Set()}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}

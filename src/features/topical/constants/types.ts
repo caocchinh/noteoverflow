@@ -1,4 +1,6 @@
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
+import { question } from "@/drizzle/schema";
+import { InferSelectModel } from "drizzle-orm";
 
 export interface TopicalData {
   curriculum: ValidCurriculum;
@@ -61,10 +63,22 @@ export type FiltersCache = {
   };
 };
 
-export interface CacheServerActionResponse<T> {
-  data: T;
-  cacheExpireTime: number;
-}
+export type SelectedQuestion = Pick<
+  InferSelectModel<typeof question>,
+  "year" | "paperType" | "season" | "id"
+> & {
+  questionImages: Array<{
+    imageSrc: string;
+    order: number;
+  }>;
+  answers: Array<{
+    answer: string;
+    order: number;
+  }>;
+  questionTopics: Array<{
+    topic: string;
+  }>;
+};
 
 export interface MultiSelectContextProps {
   value: string[];

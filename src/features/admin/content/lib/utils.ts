@@ -1,6 +1,4 @@
-import {redirect} from "next/navigation";
-import {FAILED_TO_UPLOAD_IMAGE} from "@/constants/constants";
-import type {ValidContentType, ValidSeason} from "@/constants/types";
+import type { ValidSeason } from "@/constants/types";
 
 export const validateCurriculum = (value: string): string | null => {
   if (!value) {
@@ -33,7 +31,11 @@ export const validatePaperType = (value: string): string | null => {
     return "Paper type cannot have leading or trailing whitespace";
   }
   const paperTypeNumber = Number(value);
-  if (Number.isNaN(paperTypeNumber) || paperTypeNumber < 1 || paperTypeNumber > 9) {
+  if (
+    Number.isNaN(paperTypeNumber) ||
+    paperTypeNumber < 1 ||
+    paperTypeNumber > 9
+  ) {
     return "Paper type must be a number between 1 and 9";
   }
   return null;
@@ -79,7 +81,11 @@ export const validateQuestionNumber = (value: string): string => {
     return "Question number cannot have leading or trailing whitespace";
   }
   const questionNumber = Number(value);
-  if (Number.isNaN(questionNumber) || questionNumber < 1 || questionNumber > 100) {
+  if (
+    Number.isNaN(questionNumber) ||
+    questionNumber < 1 ||
+    questionNumber > 100
+  ) {
     return "Question number must be between 1 and 100";
   }
   return "";
@@ -166,67 +172,4 @@ export const paperCodeParser = ({
   const paperTypeVariant = `${paperType}${variant}`;
 
   return `${subjectCode}_${paperTypeVariant}_${seasonCode}_${yearCode}`;
-};
-
-export const uploadImage = async ({
-  file,
-  subjectFullName,
-  paperCode,
-  contentType,
-  curriculumName,
-  questionNumber,
-  order,
-}: {
-  file: File;
-  subjectFullName: string;
-  paperCode: string;
-  contentType: ValidContentType;
-  curriculumName: string;
-  questionNumber: string;
-  order: number;
-}): Promise<{
-  success: boolean;
-  error?: string;
-  data?: {imageSrc: string};
-}> => {
-  const filename = `${curriculumName};${subjectFullName};${paperCode};${contentType};${questionNumber};${order}`;
-  const form = new FormData();
-  form.append("key", filename);
-  form.append("body", file);
-  form.append(
-    "options",
-    JSON.stringify({
-      httpMetadata: {
-        contentType: file.type,
-      },
-    })
-  );
-
-  const response = await fetch("/api/r2", {
-    method: "POST",
-    body: form,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    if (response.status === 401) {
-      redirect("/authentication");
-    } else if (response.status === 403) {
-      redirect("/app");
-    } else {
-      return {
-        success: false,
-        error: error.error ?? FAILED_TO_UPLOAD_IMAGE,
-      };
-    }
-  }
-
-  const data = await response.json();
-
-  return {
-    success: true,
-    data: {
-      imageSrc: data.imageSrc,
-    },
-  };
 };

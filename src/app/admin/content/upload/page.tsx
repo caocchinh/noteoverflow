@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { DialogTitle } from '@radix-ui/react-dialog';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Loader2, Upload } from 'lucide-react';
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -15,24 +15,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   BAD_REQUEST,
   FAILED_TO_UPLOAD_IMAGE,
@@ -40,11 +40,11 @@ import {
   INTERNAL_SERVER_ERROR,
   MAX_FILE_SIZE,
   ONLY_WEBP_FILES_ALLOWED,
-} from '@/constants/constants';
-import type { ValidSeason } from '@/constants/types';
-import EnhancedSelect from '@/features/admin/content/components/EnhancedSelect';
-import FileDrop from '@/features/admin/content/components/FileDrop';
-import ReorderableImageList from '@/features/admin/content/components/ReorderableImageList';
+} from "@/constants/constants";
+import type { ValidSeason } from "@/constants/types";
+import EnhancedSelect from "@/features/admin/content/components/EnhancedSelect";
+import FileDrop from "@/features/admin/content/components/FileDrop";
+import ReorderableImageList from "@/features/admin/content/components/ReorderableImageList";
 import {
   CURRICULUM_LABELS,
   CURRICULUM_PLACEHOLDERS,
@@ -58,15 +58,14 @@ import {
   TOPIC_PLACEHOLDERS,
   YEAR_LABELS,
   YEAR_PLACEHOLDERS,
-} from '@/features/admin/content/constants/constants';
+} from "@/features/admin/content/constants/constants";
 import type {
   CurriculumType,
   SubjectType,
   ValidTabs,
-} from '@/features/admin/content/constants/types';
+} from "@/features/admin/content/constants/types";
 import {
   paperCodeParser,
-  uploadImage,
   validateCurriculum,
   validatePaperType,
   validatePaperVariant,
@@ -75,9 +74,10 @@ import {
   validateSubject,
   validateTopic,
   validateYear,
-} from '@/features/admin/content/lib/utils';
-import { uploadAction } from '@/features/admin/content/server/actions';
-import { cn, parseQuestionId } from '@/lib/utils';
+} from "@/features/admin/content/lib/utils";
+import { uploadImage } from "@/features/admin/lib/utils";
+import { uploadAction } from "@/features/admin/content/server/actions";
+import { cn, parseQuestionId } from "@/lib/utils";
 import {
   createAnswerAction,
   createQuestionImageAction,
@@ -85,7 +85,7 @@ import {
   getSubjectByCurriculumAction,
   getSubjectInfoAction,
   isQuestionExistsAction,
-} from '@/server/actions';
+} from "@/server/actions";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -100,27 +100,27 @@ const UploadPage = () => {
   const [selectedPaperType, setSelectedPaperType] = useState<
     string | undefined
   >(undefined);
-  const [selectedSeason, setSelectedSeason] = useState<ValidSeason | ''>('');
+  const [selectedSeason, setSelectedSeason] = useState<ValidSeason | "">("");
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
     undefined
   );
   const queryClient = useQueryClient();
-  const [questionNumber, setQuestionNumber] = useState<string>('');
-  const [questionNumberError, setQuestionNumberError] = useState<string>('');
+  const [questionNumber, setQuestionNumber] = useState<string>("");
+  const [questionNumberError, setQuestionNumberError] = useState<string>("");
   const [isMultipleChoice, setIsMultipleChoice] = useState<boolean>(false);
-  const [multipleChoiceInput, setMultipleChoiceInput] = useState<string>('A');
+  const [multipleChoiceInput, setMultipleChoiceInput] = useState<string>("A");
   const [questionImages, setQuestionImages] = useState<File[]>([]);
   const [answerImages, setAnswerImages] = useState<File[]>([]);
   const [imageDialogOpen, setImageDialogOpen] = useState<boolean>(false);
   const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
     undefined
   );
-  const [currentTab, setCurrentTab] = useState<ValidTabs>('information');
+  const [currentTab, setCurrentTab] = useState<ValidTabs>("information");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [paperVariantInput, setPaperVariantInput] = useState<string>('');
-  const [paperVariantError, setPaperVariantError] = useState<string>('');
+  const [paperVariantInput, setPaperVariantInput] = useState<string>("");
+  const [paperVariantError, setPaperVariantError] = useState<string>("");
   const canUpload = useMemo(() => {
     return (
       isUploading ||
@@ -130,12 +130,12 @@ const UploadPage = () => {
       !selectedPaperType ||
       !selectedSeason ||
       !selectedYear ||
-      questionNumber === '' ||
-      questionNumberError !== '' ||
-      paperVariantInput === '' ||
-      paperVariantError !== '' ||
+      questionNumber === "" ||
+      questionNumberError !== "" ||
+      paperVariantInput === "" ||
+      paperVariantError !== "" ||
       questionImages.length === 0 ||
-      (isMultipleChoice && multipleChoiceInput === '') ||
+      (isMultipleChoice && multipleChoiceInput === "") ||
       questionImages.length === 0 ||
       (answerImages.length === 0 && !isMultipleChoice)
     );
@@ -165,16 +165,16 @@ const UploadPage = () => {
     error: curriculumError,
     isError: isCurriculumError,
   } = useQuery({
-    queryKey: ['curriculum'],
+    queryKey: ["curriculum"],
     queryFn: async (): Promise<CurriculumType[]> => {
       try {
         const { success, data, error } = await getCurriculumAction();
         if (!success) {
-          throw new Error(error || 'Failed to fetch curriculum data');
+          throw new Error(error || "Failed to fetch curriculum data");
         }
         return data ?? [];
       } catch (error) {
-        toast.error('Failed to fetch curriculum data');
+        toast.error("Failed to fetch curriculum data");
         throw error;
       }
     },
@@ -194,18 +194,18 @@ const UploadPage = () => {
     refetch: refetchSubject,
     isFetching: isSubjectFetching,
   } = useQuery({
-    queryKey: ['subject', selectedCurriculum],
+    queryKey: ["subject", selectedCurriculum],
     queryFn: async (): Promise<SubjectType[]> => {
       try {
         const { success, data, error } = await getSubjectByCurriculumAction(
-          selectedCurriculum ?? ''
+          selectedCurriculum ?? ""
         );
         if (!success) {
-          throw new Error(error || 'Failed to fetch subject data');
+          throw new Error(error || "Failed to fetch subject data");
         }
         return data ?? [];
       } catch (error) {
-        toast.error('Failed to fetch subject data');
+        toast.error("Failed to fetch subject data");
         throw error;
       }
     },
@@ -220,19 +220,19 @@ const UploadPage = () => {
     isError: isSubjectInfoError,
     refetch: refetchSubjectInfo,
   } = useQuery({
-    queryKey: ['subjectInfo', selectedSubject],
+    queryKey: ["subjectInfo", selectedSubject],
     queryFn: async () => {
       try {
         const { success, data, error } = await getSubjectInfoAction(
-          selectedSubject ?? '',
-          selectedCurriculum ?? ''
+          selectedSubject ?? "",
+          selectedCurriculum ?? ""
         );
         if (!success) {
-          throw new Error(error || 'Failed to fetch subject information');
+          throw new Error(error || "Failed to fetch subject information");
         }
         return data;
       } catch (error) {
-        toast.error('Failed to fetch subject information');
+        toast.error("Failed to fetch subject information");
         throw error;
       }
     },
@@ -242,26 +242,26 @@ const UploadPage = () => {
 
   const handleCurriculumChange = (item: string) => {
     setSelectedCurriculum(item);
-    setSelectedSubject('');
-    setSelectedTopic('');
-    setSelectedPaperType('');
-    setSelectedSeason('');
-    setSelectedYear('');
+    setSelectedSubject("");
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
   };
 
   const handleSubjectChange = (item: string) => {
     setSelectedSubject(item);
-    setSelectedTopic('');
-    setSelectedPaperType('');
-    setSelectedSeason('');
-    setSelectedYear('');
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
   };
 
   const handlePaperVariantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPaperVariantInput(value);
-    if (value === '') {
-      setPaperVariantError('');
+    if (value === "") {
+      setPaperVariantError("");
     } else {
       setPaperVariantError(validatePaperVariant(value));
     }
@@ -273,16 +273,16 @@ const UploadPage = () => {
     const value = e.target.value;
     setQuestionNumber(value);
 
-    if (value === '') {
-      setQuestionNumberError('');
+    if (value === "") {
+      setQuestionNumberError("");
     } else {
       setQuestionNumberError(validateQuestionNumber(value));
     }
   };
 
-  const handleFileInput = (files: FileList, type: 'question' | 'answer') => {
+  const handleFileInput = (files: FileList, type: "question" | "answer") => {
     for (const file of files) {
-      if (file.type !== 'image/webp') {
+      if (file.type !== "image/webp") {
         toast.error(ONLY_WEBP_FILES_ALLOWED);
         return;
       }
@@ -292,30 +292,30 @@ const UploadPage = () => {
       }
     }
     if (files.length === 0) {
-      toast.error('No files selected');
+      toast.error("No files selected");
       return;
     }
 
-    if (type === 'question') {
+    if (type === "question") {
       if (questionImages.length + files.length > 9) {
-        toast.error('You can only upload up to 9 images');
+        toast.error("You can only upload up to 9 images");
         return;
       }
       for (const file of files) {
         if (questionImages.some((image) => image.name === file.name)) {
-          toast.error('Image already exists');
+          toast.error("Image already exists");
           return;
         }
       }
       setQuestionImages((prev) => [...prev, ...files]);
     } else {
       if (answerImages.length + files.length > 9) {
-        toast.error('You can only upload up to 9 images');
+        toast.error("You can only upload up to 9 images");
         return;
       }
       for (const file of files) {
         if (answerImages.some((image) => image.name === file.name)) {
-          toast.error('Image already exists');
+          toast.error("Image already exists");
           return;
         }
       }
@@ -332,25 +332,25 @@ const UploadPage = () => {
   };
 
   const resetAllInputs = async () => {
-    setSelectedCurriculum('');
-    setCurrentTab('refetching');
-    setSelectedSubject('');
-    setSelectedTopic('');
-    setSelectedPaperType('');
-    setSelectedSeason('');
-    setSelectedYear('');
-    setQuestionNumber('');
-    setQuestionNumberError('');
+    setSelectedCurriculum("");
+    setCurrentTab("refetching");
+    setSelectedSubject("");
+    setSelectedTopic("");
+    setSelectedPaperType("");
+    setSelectedSeason("");
+    setSelectedYear("");
+    setQuestionNumber("");
+    setQuestionNumberError("");
     setIsMultipleChoice(false);
-    setMultipleChoiceInput('A');
+    setMultipleChoiceInput("A");
     setQuestionImages([]);
     setAnswerImages([]);
-    queryClient.setQueryData(['curriculum'], []);
-    queryClient.setQueryData(['subject'], []);
-    queryClient.setQueryData(['topic'], []);
-    queryClient.setQueryData(['paperType'], []);
-    queryClient.setQueryData(['season'], []);
-    queryClient.setQueryData(['year'], []);
+    queryClient.setQueryData(["curriculum"], []);
+    queryClient.setQueryData(["subject"], []);
+    queryClient.setQueryData(["topic"], []);
+    queryClient.setQueryData(["paperType"], []);
+    queryClient.setQueryData(["season"], []);
+    queryClient.setQueryData(["year"], []);
     await refetchCurriculum();
     setIsResetDialogOpen(false);
   };
@@ -375,18 +375,18 @@ const UploadPage = () => {
     setIsUploading(true);
     try {
       const paperCode = paperCodeParser({
-        subjectCode: selectedSubject?.split('(')[1].slice(0, -1) ?? '',
-        paperType: selectedPaperType ?? '',
-        variant: paperVariantInput ?? '',
+        subjectCode: selectedSubject?.split("(")[1].slice(0, -1) ?? "",
+        paperType: selectedPaperType ?? "",
+        variant: paperVariantInput ?? "",
         season: selectedSeason as ValidSeason,
-        year: selectedYear ?? '',
+        year: selectedYear ?? "",
       });
       const { success, data, error } = await isQuestionExistsAction(
         parseQuestionId({
-          subject: selectedSubject ?? '',
+          subject: selectedSubject ?? "",
           paperCode,
-          curriculumName: selectedCurriculum ?? '',
-          questionNumber: questionNumber ?? '',
+          curriculumName: selectedCurriculum ?? "",
+          questionNumber: questionNumber ?? "",
         })
       );
       if (!success) {
@@ -394,24 +394,24 @@ const UploadPage = () => {
       }
       if (data) {
         throw new Error(
-          'Question already exists! If you want to overwrite it, please use the update page.'
+          "Question already exists! If you want to overwrite it, please use the update page."
         );
       }
       const { success: success2, error: error2 } = await uploadAction({
         questionId: parseQuestionId({
-          subject: selectedSubject ?? '',
+          subject: selectedSubject ?? "",
           paperCode,
-          curriculumName: selectedCurriculum ?? '',
-          questionNumber: questionNumber ?? '',
+          curriculumName: selectedCurriculum ?? "",
+          questionNumber: questionNumber ?? "",
         }),
-        year: Number.parseInt(selectedYear ?? '', 10),
+        year: Number.parseInt(selectedYear ?? "", 10),
         season: selectedSeason as ValidSeason,
-        paperType: Number.parseInt(selectedPaperType ?? '', 10),
-        paperVariant: Number.parseInt(paperVariantInput ?? '', 10),
-        curriculumName: selectedCurriculum ?? '',
-        subjectId: selectedSubject ?? '',
-        topic: selectedTopic ?? '',
-        questionNumber: Number.parseInt(questionNumber ?? '', 10),
+        paperType: Number.parseInt(selectedPaperType ?? "", 10),
+        paperVariant: Number.parseInt(paperVariantInput ?? "", 10),
+        curriculumName: selectedCurriculum ?? "",
+        subjectId: selectedSubject ?? "",
+        topic: selectedTopic ?? "",
+        questionNumber: Number.parseInt(questionNumber ?? "", 10),
       });
       if (!success2) {
         handleError(error2);
@@ -426,11 +426,11 @@ const UploadPage = () => {
             error: error3,
           } = await uploadImage({
             file: image,
-            subjectFullName: selectedSubject ?? '',
+            subjectFullName: selectedSubject ?? "",
             paperCode,
-            curriculumName: selectedCurriculum ?? '',
-            contentType: 'questions',
-            questionNumber: questionNumber ?? '',
+            curriculumName: selectedCurriculum ?? "",
+            contentType: "questions",
+            questionNumber: questionNumber ?? "",
             order: index,
           });
           if (!success3) {
@@ -439,12 +439,12 @@ const UploadPage = () => {
           const { success: success4, error: error4 } =
             await createQuestionImageAction({
               questionId: parseQuestionId({
-                subject: selectedSubject ?? '',
+                subject: selectedSubject ?? "",
                 paperCode,
-                curriculumName: selectedCurriculum ?? '',
-                questionNumber: questionNumber ?? '',
+                curriculumName: selectedCurriculum ?? "",
+                questionNumber: questionNumber ?? "",
               }),
-              imageSrc: data3?.imageSrc ?? '',
+              imageSrc: data3?.imageSrc ?? "",
               order: index,
             });
           if (!success4) {
@@ -455,10 +455,10 @@ const UploadPage = () => {
       if (isMultipleChoice) {
         const { success: success5, error: error5 } = await createAnswerAction({
           questionId: parseQuestionId({
-            subject: selectedSubject ?? '',
+            subject: selectedSubject ?? "",
             paperCode,
-            curriculumName: selectedCurriculum ?? '',
-            questionNumber: questionNumber ?? '',
+            curriculumName: selectedCurriculum ?? "",
+            questionNumber: questionNumber ?? "",
           }),
           answer: multipleChoiceInput,
           answerOrder: 0,
@@ -476,11 +476,11 @@ const UploadPage = () => {
               error: error6,
             } = await uploadImage({
               file: image,
-              subjectFullName: selectedSubject ?? '',
+              subjectFullName: selectedSubject ?? "",
               paperCode,
-              curriculumName: selectedCurriculum ?? '',
-              contentType: 'answers',
-              questionNumber: questionNumber ?? '',
+              curriculumName: selectedCurriculum ?? "",
+              contentType: "answers",
+              questionNumber: questionNumber ?? "",
               order: index,
             });
             if (!success6) {
@@ -490,12 +490,12 @@ const UploadPage = () => {
             const { success: success7, error: error7 } =
               await createAnswerAction({
                 questionId: parseQuestionId({
-                  subject: selectedSubject ?? '',
+                  subject: selectedSubject ?? "",
                   paperCode,
-                  curriculumName: selectedCurriculum ?? '',
-                  questionNumber: questionNumber ?? '',
+                  curriculumName: selectedCurriculum ?? "",
+                  questionNumber: questionNumber ?? "",
                 }),
-                answer: data6?.imageSrc ?? '',
+                answer: data6?.imageSrc ?? "",
                 answerOrder: index,
               });
             if (!success7) {
@@ -506,10 +506,10 @@ const UploadPage = () => {
       }
 
       await resetAllInputs();
-      toast.success('Question uploaded successfully');
+      toast.success("Question uploaded successfully");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'An unknown error occurred'
+        error instanceof Error ? error.message : "An unknown error occurred"
       );
     } finally {
       setIsUploadDialogOpen(false);
@@ -525,11 +525,11 @@ const UploadPage = () => {
     };
 
     if (selectedCurriculum) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener("beforeunload", handleBeforeUnload);
     }
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [selectedCurriculum]);
 
@@ -549,7 +549,7 @@ const UploadPage = () => {
               alt="Upload Image"
               className="h-max w-[100%] border-2 border-transparent object-contain hover:border-red-500"
               height={100}
-              src={imageDialogImage ?? ''}
+              src={imageDialogImage ?? ""}
               width={100}
             />
           </DialogContent>
@@ -681,8 +681,8 @@ const UploadPage = () => {
             </Label>
             <Input
               className={cn(
-                'w-full',
-                questionNumberError ? 'border-red-500' : ''
+                "w-full",
+                questionNumberError ? "border-red-500" : ""
               )}
               id="questionNumber"
               onChange={handleQuestionNumberChange}
@@ -702,8 +702,8 @@ const UploadPage = () => {
             </Label>
             <Input
               className={cn(
-                'w-full',
-                paperVariantError ? 'border-red-500' : ''
+                "w-full",
+                paperVariantError ? "border-red-500" : ""
               )}
               id="paperVariant"
               onChange={handlePaperVariantChange}
@@ -745,11 +745,11 @@ const UploadPage = () => {
               <FileDrop
                 handleDrop={(e) => {
                   e.preventDefault();
-                  handleFileInput(e.dataTransfer.files, 'question');
+                  handleFileInput(e.dataTransfer.files, "question");
                 }}
                 handleInputChange={(e) => {
                   e.preventDefault();
-                  handleFileInput(e.target.files ?? new FileList(), 'question');
+                  handleFileInput(e.target.files ?? new FileList(), "question");
                 }}
               />
             </div>
@@ -809,11 +809,11 @@ const UploadPage = () => {
                 <FileDrop
                   handleDrop={(e) => {
                     e.preventDefault();
-                    handleFileInput(e.dataTransfer.files, 'answer');
+                    handleFileInput(e.dataTransfer.files, "answer");
                   }}
                   handleInputChange={(e) => {
                     e.preventDefault();
-                    handleFileInput(e.target.files ?? new FileList(), 'answer');
+                    handleFileInput(e.target.files ?? new FileList(), "answer");
                   }}
                 />
               </div>
@@ -835,16 +835,16 @@ const UploadPage = () => {
                       <Button
                         className="w-full cursor-pointer"
                         onClick={() => {
-                          setCurrentTab('information');
+                          setCurrentTab("information");
                           setIsUploadDialogOpen(true);
                         }}
                       >
-                        {isUploading ? 'Uploading...' : 'Upload'}
+                        {isUploading ? "Uploading..." : "Upload"}
                       </Button>
                     )}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className={cn(!canUpload && 'hidden')}>
+                <TooltipContent className={cn(!canUpload && "hidden")}>
                   {!selectedCurriculum && <p>-Curriculumn</p>}
                   {!selectedSubject && <p>-Subject</p>}
                   {!selectedTopic && <p>-Topic</p>}
@@ -903,20 +903,20 @@ const UploadPage = () => {
                       <div>{selectedPaperType}</div>
                       <div className="font-semibold">Season:</div>
                       <div>
-                        {selectedSeason} {'('}
+                        {selectedSeason} {"("}
                         {(() => {
                           switch (selectedSeason) {
-                            case 'Summer':
-                              return 'M/J';
-                            case 'Winter':
-                              return 'O/N';
-                            case 'Spring':
-                              return 'F/M';
+                            case "Summer":
+                              return "M/J";
+                            case "Winter":
+                              return "O/N";
+                            case "Spring":
+                              return "F/M";
                             default:
-                              return '';
+                              return "";
                           }
                         })()}
-                        {')'}
+                        {")"}
                       </div>
                       <div className="font-semibold">Year:</div>
                       <div>{selectedYear}</div>
@@ -926,12 +926,12 @@ const UploadPage = () => {
                       <div>{paperVariantInput}</div>
                       <div className="font-semibold">Question Type:</div>
                       <div>
-                        {isMultipleChoice ? 'Multiple Choice' : 'Theory (FRQ)'}
+                        {isMultipleChoice ? "Multiple Choice" : "Theory (FRQ)"}
                       </div>
                     </div>
                     <Button
                       className="w-full cursor-pointer"
-                      onClick={() => setCurrentTab('image-preview')}
+                      onClick={() => setCurrentTab("image-preview")}
                     >
                       Next <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -943,8 +943,8 @@ const UploadPage = () => {
                       </h4>
                       <ScrollArea
                         className={cn(
-                          'w-full',
-                          isMultipleChoice ? 'h-[150px]' : 'h-[100px]'
+                          "w-full",
+                          isMultipleChoice ? "h-[150px]" : "h-[100px]"
                         )}
                       >
                         <div className="flex w-full flex-col items-start justify-center gap-2 ">
@@ -971,7 +971,7 @@ const UploadPage = () => {
                         </div>
                       </ScrollArea>
                       <h4 className="mt-6 font-semibold">
-                        Answer {isMultipleChoice ? '' : '(ordered by order)'}
+                        Answer {isMultipleChoice ? "" : "(ordered by order)"}
                       </h4>
                       {isMultipleChoice ? (
                         <div className="w-full">
@@ -1007,7 +1007,7 @@ const UploadPage = () => {
                     <div className="mt-5 flex flex-row items-center justify-center gap-4">
                       <Button
                         className="flex-1 cursor-pointer"
-                        onClick={() => setCurrentTab('information')}
+                        onClick={() => setCurrentTab("information")}
                       >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -1089,7 +1089,7 @@ const UploadPage = () => {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       </>
                     ) : (
-                      'Reset'
+                      "Reset"
                     )}
                   </Button>
                 </AlertDialogFooter>
