@@ -30,6 +30,28 @@ import { question } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db";
 
+function insertAtIndex(array: string[], index: number, element: string) {
+  const newArray = [...array];
+
+  // Fill gaps with empty strings if needed
+  if (index >= newArray.length) {
+    for (let i = newArray.length; i < index; i++) {
+      newArray[i] = "";
+    }
+    newArray[index] = element;
+  } else {
+    // If element at index is an empty string, replace it
+    if (newArray[index] === "") {
+      newArray[index] = element;
+    } else {
+      // Otherwise insert and shift existing elements
+      newArray.splice(index, 0, element);
+    }
+  }
+
+  return newArray;
+}
+
 export const legacyUploadAction = async ({
   curriculum,
   subjectFullName,
@@ -177,20 +199,22 @@ export const legacyUploadAction = async ({
           .where(eq(question.id, questionId));
         if (existingQuestionImages.length > 0) {
           const parsedQuestionImages = JSON.parse(
-            existingQuestionImages as unknown as string
+            existingQuestionImages[0].questionImages as unknown as string
           ) as string[];
           if (!parsedQuestionImages.includes(imageSrc)) {
             if (parsedQuestionImages[order] !== imageSrc) {
-              parsedQuestionImages.splice(order, 1, imageSrc);
               await db
                 .update(question)
-                .set({ questionImages: JSON.stringify(parsedQuestionImages) })
+                .set({
+                  questionImages: JSON.stringify(
+                    insertAtIndex(parsedQuestionImages, order, imageSrc)
+                  ),
+                })
                 .where(eq(question.id, questionId));
             }
           }
         }
       } else {
-        const questionImage = [imageSrc];
         createQuestion({
           questionId,
           year,
@@ -201,7 +225,7 @@ export const legacyUploadAction = async ({
           subjectId: subjectFullName,
           questionNumber,
           curriculumName: curriculum,
-          questionImages: JSON.stringify(questionImage),
+          questionImages: JSON.stringify(insertAtIndex([], order, imageSrc)),
         });
       }
     } else if (contentType === "answers") {
@@ -213,19 +237,32 @@ export const legacyUploadAction = async ({
         .where(eq(question.id, questionId));
       if (existingAnswers.length > 0) {
         const parsedAnswers = JSON.parse(
-          existingAnswers as unknown as string
+          existingAnswers[0].answers as unknown as string
         ) as string[];
+        const isMultipleAnswers = parsedAnswers.some((answer) =>
+          answer.includes("http")
+        );
+        if (isMultipleAnswers) {
+          return {
+            success: true,
+          };
+        }
         if (!parsedAnswers.includes(imageSrc)) {
           if (parsedAnswers[order] !== imageSrc) {
-            parsedAnswers.splice(order, 1, imageSrc);
             await db
               .update(question)
-              .set({ answers: JSON.stringify(parsedAnswers) })
+              .set({
+                answers: JSON.stringify(
+                  insertAtIndex(parsedAnswers, order, imageSrc)
+                ),
+              })
               .where(eq(question.id, questionId));
           }
         }
       } else {
-        const answer = [imageSrc];
+        const answer = imageSrc.includes("http")
+          ? insertAtIndex([], order, imageSrc)
+          : [imageSrc];
         await db
           .update(question)
           .set({ answers: JSON.stringify(answer) })

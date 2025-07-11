@@ -5,7 +5,7 @@ import {
 } from "@/features/topical/lib/utils";
 import { validateFilterData } from "@/features/topical/lib/utils";
 import { question, questionTopic } from "@/drizzle/schema";
-import { and, eq, inArray, exists, asc } from "drizzle-orm";
+import { and, eq, inArray, exists } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
@@ -89,20 +89,6 @@ export async function GET(request: NextRequest) {
         season: true,
       },
       with: {
-        questionImages: {
-          orderBy: (table) => [asc(table.order)],
-          columns: {
-            imageSrc: true,
-            order: true,
-          },
-        },
-        answers: {
-          orderBy: (table) => [asc(table.order)],
-          columns: {
-            answer: true,
-            order: true,
-          },
-        },
         questionTopics: {
           columns: {
             topic: true,

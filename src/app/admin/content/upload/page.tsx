@@ -79,8 +79,6 @@ import { uploadImage } from "@/features/admin/lib/utils";
 import { uploadAction } from "@/features/admin/content/server/actions";
 import { cn, parseQuestionId } from "@/lib/utils";
 import {
-  createAnswerAction,
-  createQuestionImageAction,
   getCurriculumAction,
   getSubjectByCurriculumAction,
   getSubjectInfoAction,
@@ -422,7 +420,7 @@ const UploadPage = () => {
         questionImages.map(async (image, index) => {
           const {
             success: success3,
-            data: data3,
+            // data: data3,
             error: error3,
           } = await uploadImage({
             file: image,
@@ -436,43 +434,43 @@ const UploadPage = () => {
           if (!success3) {
             handleError(error3);
           }
-          const { success: success4, error: error4 } =
-            await createQuestionImageAction({
-              questionId: parseQuestionId({
-                subject: selectedSubject ?? "",
-                paperCode,
-                curriculumName: selectedCurriculum ?? "",
-                questionNumber: questionNumber ?? "",
-              }),
-              imageSrc: data3?.imageSrc ?? "",
-              order: index,
-            });
-          if (!success4) {
-            handleError(error4);
-          }
+          // const { success: success4, error: error4 } =
+          // await createQuestionImageAction({
+          //   questionId: parseQuestionId({
+          //     subject: selectedSubject ?? "",
+          //     paperCode,
+          //     curriculumName: selectedCurriculum ?? "",
+          //     questionNumber: questionNumber ?? "",
+          //   }),
+          //   imageSrc: data3?.imageSrc ?? "",
+          //   order: index,
+          // });
+          // if (!success4) {
+          //   handleError(error4);
+          // }
         })
       );
       if (isMultipleChoice) {
-        const { success: success5, error: error5 } = await createAnswerAction({
-          questionId: parseQuestionId({
-            subject: selectedSubject ?? "",
-            paperCode,
-            curriculumName: selectedCurriculum ?? "",
-            questionNumber: questionNumber ?? "",
-          }),
-          answer: multipleChoiceInput,
-          answerOrder: 0,
-        });
-        if (!success5) {
-          handleError(error5);
-        }
+        // const { success: success5, error: error5 } = await createAnswerAction({
+        //   questionId: parseQuestionId({
+        //     subject: selectedSubject ?? "",
+        //     paperCode,
+        //     curriculumName: selectedCurriculum ?? "",
+        //     questionNumber: questionNumber ?? "",
+        //   }),
+        //   answer: multipleChoiceInput,
+        //   answerOrder: 0,
+        // });
+        // if (!success5) {
+        //   handleError(error5);
+        // }
       } else {
         // Upload and create all answer images in parallel
         await Promise.all(
           answerImages.map(async (image, index) => {
             const {
               success: success6,
-              data: data6,
+              // data: data6,
               error: error6,
             } = await uploadImage({
               file: image,
@@ -487,20 +485,20 @@ const UploadPage = () => {
               handleError(error6);
             }
 
-            const { success: success7, error: error7 } =
-              await createAnswerAction({
-                questionId: parseQuestionId({
-                  subject: selectedSubject ?? "",
-                  paperCode,
-                  curriculumName: selectedCurriculum ?? "",
-                  questionNumber: questionNumber ?? "",
-                }),
-                answer: data6?.imageSrc ?? "",
-                answerOrder: index,
-              });
-            if (!success7) {
-              handleError(error7);
-            }
+            // const { success: success7, error: error7 } =
+            // await createAnswerAction({
+            //   questionId: parseQuestionId({
+            //     subject: selectedSubject ?? "",
+            //     paperCode,
+            //     curriculumName: selectedCurriculum ?? "",
+            //     questionNumber: questionNumber ?? "",
+            //   }),
+            //   answer: data6?.imageSrc ?? "",
+            //   answerOrder: index,
+            // });
+            // if (!success7) {
+            //   handleError(error7);
+            // }
           })
         );
       }
