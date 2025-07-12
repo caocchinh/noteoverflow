@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (topic.length > 0) {
-      const rows = await db
+      const baseQuery = db
         .select({
           topic: questionTopic.topic,
           season: question.season,
@@ -91,7 +91,9 @@ export async function GET(request: NextRequest) {
         )
         .where(and(...conditions));
 
-      // Aggregate all topics for each question
+      // Apply rate limit only for unauthenticated users
+
+      const rows = await (session?.session ? baseQuery : baseQuery.limit(5));
       const questionMap = new Map<
         string,
         Omit<SelectedQuestion, "questionTopics"> & {

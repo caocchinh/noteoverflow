@@ -151,7 +151,7 @@ const QuestionInspect = ({
       setIsVirtualizationReady(false);
     }
     return () => clearTimeout(timeout);
-  }, [isOpen]);
+  }, [currentQuestionId, isOpen.isOpen, setIsOpen]);
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
@@ -222,7 +222,10 @@ const QuestionInspect = ({
     <Dialog
       open={isOpen.isOpen}
       onOpenChange={(open) =>
-        setIsOpen({ isOpen: open, questionId: isOpen.questionId })
+        setIsOpen({
+          isOpen: open,
+          questionId: currentQuestionId ?? isOpen.questionId,
+        })
       }
     >
       <DialogContent className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0">
@@ -577,7 +580,11 @@ const QuestionInspect = ({
               <TooltipTrigger className="cursor-pointer" asChild>
                 <Button
                   variant="outline"
-                  className="w-9 h-9 cursor-pointer !p-0 "
+                  className={cn(
+                    "w-9 h-9 cursor-pointer !p-0",
+                    currentQuestionData?.year === 2009 &&
+                      "opacity-50 cursor-default"
+                  )}
                 >
                   <PastPaperLink question={currentQuestionData} type="qp">
                     <ScrollText />
@@ -586,7 +593,9 @@ const QuestionInspect = ({
               </TooltipTrigger>
               <TooltipContent className="z-[99999999]" side="bottom">
                 <PastPaperLink question={currentQuestionData} type="qp">
-                  View paper
+                  {currentQuestionData?.year === 2009
+                    ? "Only supported for 2010 and above"
+                    : "View paper"}
                 </PastPaperLink>
               </TooltipContent>
             </Tooltip>
@@ -594,7 +603,11 @@ const QuestionInspect = ({
               <TooltipTrigger className="cursor-pointer -ml-1" asChild>
                 <Button
                   variant="outline"
-                  className="w-9 h-9 cursor-pointer !p-0"
+                  className={cn(
+                    "w-9 h-9 cursor-pointer !p-0",
+                    currentQuestionData?.year === 2009 &&
+                      "opacity-50 cursor-default"
+                  )}
                 >
                   <PastPaperLink question={currentQuestionData} type="ms">
                     <PencilLine />
@@ -603,7 +616,9 @@ const QuestionInspect = ({
               </TooltipTrigger>
               <TooltipContent className="z-[99999999]" side="bottom">
                 <PastPaperLink question={currentQuestionData} type="ms">
-                  View mark scheme
+                  {currentQuestionData?.year === 2009
+                    ? "Only supported for 2010 and above"
+                    : "  View mark scheme"}
                 </PastPaperLink>
               </TooltipContent>
             </Tooltip>
@@ -681,13 +696,20 @@ const PastPaperLink = ({
   return (
     <a
       target="_blank"
-      className="w-full h-full flex items-center justify-center"
-      href={parsePastPaperUrl({
-        questionId: question.id,
-        year: question.year.toString(),
-        season: question.season as ValidSeason,
-        type,
-      })}
+      className={cn(
+        "w-full h-full flex items-center justify-center",
+        question.year === 2009 && "pointer-events-none"
+      )}
+      href={
+        question.year === 2009
+          ? ""
+          : parsePastPaperUrl({
+              questionId: question.id,
+              year: question.year.toString(),
+              season: question.season as ValidSeason,
+              type,
+            })
+      }
       rel="noopener noreferrer"
     >
       {children}

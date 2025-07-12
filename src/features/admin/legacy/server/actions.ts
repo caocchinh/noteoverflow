@@ -56,6 +56,15 @@ function insertAtIndex(array: string[], index: number, element: string) {
   return newArray;
 }
 
+export function updateAtIndex<T>(
+  arr: readonly T[],
+  index: number,
+  value: T
+): T[] {
+  if (index < 0 || index >= arr.length) return [...arr]; // -- out of range
+  return [...arr.slice(0, index), value, ...arr.slice(index + 1)];
+}
+
 export const legacyUploadAction = async ({
   curriculum,
   subjectFullName,
@@ -218,6 +227,15 @@ export const legacyUploadAction = async ({
                   ),
                 })
                 .where(eq(question.id, questionId));
+            } else {
+              await db
+                .update(question)
+                .set({
+                  questionImages: JSON.stringify(
+                    updateAtIndex(parsedQuestionImages, order, imageSrc)
+                  ),
+                })
+                .where(eq(question.id, questionId));
             }
           }
         }
@@ -246,10 +264,16 @@ export const legacyUploadAction = async ({
         const parsedAnswers = JSON.parse(
           existingAnswers[0].answers as unknown as string
         ) as string[];
-        const isMultipleAnswers = parsedAnswers.some((answer) =>
+        const isNotMultipleChoice = parsedAnswers.some((answer) =>
           answer.includes("http")
         );
-        if (isMultipleAnswers) {
+        if (!isNotMultipleChoice) {
+          await db
+            .update(question)
+            .set({
+              answers: JSON.stringify([imageSrc]),
+            })
+            .where(eq(question.id, questionId));
           return {
             success: true,
           };
@@ -262,6 +286,15 @@ export const legacyUploadAction = async ({
               .set({
                 answers: JSON.stringify(
                   insertAtIndex(parsedAnswers, order, imageSrc)
+                ),
+              })
+              .where(eq(question.id, questionId));
+          } else {
+            await db
+              .update(question)
+              .set({
+                answers: JSON.stringify(
+                  updateAtIndex(parsedAnswers, order, imageSrc)
                 ),
               })
               .where(eq(question.id, questionId));
