@@ -5,7 +5,7 @@ import {
 } from "@/features/topical/lib/utils";
 import { validateFilterData } from "@/features/topical/lib/utils";
 import { question, questionTopic } from "@/drizzle/schema";
-import { and, eq, inArray, exists } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
@@ -53,66 +53,83 @@ export async function GET(request: NextRequest) {
     if (paperType.length > 0) {
       const paperTypeNumbers = paperType.map((p) => Number.parseInt(p, 10));
       conditions.push(inArray(question.paperType, paperTypeNumbers));
+    } else {
+      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
 
     if (year.length > 0) {
       const yearNumbers = year.map((y) => Number.parseInt(y, 10));
       conditions.push(inArray(question.year, yearNumbers));
+    } else {
+      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
 
     if (season.length > 0) {
       conditions.push(inArray(question.season, season));
+    } else {
+      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
 
     if (topic.length > 0) {
-      conditions.push(
-        exists(
-          db
-            .select()
-            .from(questionTopic)
-            .where(
-              and(
-                eq(questionTopic.questionId, question.id),
-                inArray(questionTopic.topic, topic)
-              )
-            )
+      const rows = await db
+        .select({
+          topic: questionTopic.topic,
+          season: question.season,
+          year: question.year,
+          paperType: question.paperType,
+          id: question.id,
+          answers: question.answers,
+          questionImages: question.questionImages,
+        })
+        .from(questionTopic)
+        .innerJoin(
+          question,
+          and(
+            eq(questionTopic.questionId, question.id),
+            inArray(questionTopic.topic, topic)
+          )
         )
-      );
-    }
+        .where(and(...conditions));
 
-    const data = await db.query.question.findMany({
-      where: and(...conditions),
-      columns: {
-        id: true,
-        year: true,
-        paperType: true,
-        season: true,
-        answers: true,
-        questionImages: true,
-      },
-      with: {
-        questionTopics: {
-          columns: {
-            topic: true,
-          },
+      // Aggregate all topics for each question
+      const questionMap = new Map<
+        string,
+        Omit<SelectedQuestion, "questionTopics"> & {
+          questionTopics: Array<{ topic: string | null }>;
+        }
+      >();
+
+      for (const row of rows) {
+        const parsedImages = JSON.parse(row.questionImages ?? "[]");
+        const parsedAnswers = JSON.parse(row.answers ?? "[]");
+        const existing = questionMap.get(row.id);
+
+        if (!existing) {
+          questionMap.set(row.id, {
+            id: row.id,
+            year: row.year,
+            paperType: row.paperType,
+            season: row.season,
+            questionImages: parsedImages,
+            answers: parsedAnswers,
+            questionTopics: [{ topic: row.topic }],
+          });
+        } else {
+          existing.questionTopics.push({ topic: row.topic });
+        }
+      }
+
+      const formattedData = Array.from(questionMap.values());
+      return NextResponse.json(
+        {
+          data: formattedData as SelectedQuestion[],
+          isRateLimited: session?.session ? false : true,
         },
-      },
-      limit: session?.session ? undefined : 5,
-    });
-
-    const formattedData = data.map((question) => ({
-      ...question,
-      questionImages: JSON.parse(question.questionImages ?? "[]"),
-      answers: JSON.parse(question.answers ?? "[]"),
-    }));
-
-    return NextResponse.json(
-      {
-        data: formattedData as SelectedQuestion[],
-        isRateLimited: session?.session ? false : true,
-      },
-      { status: 200 }
-    );
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+    }
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: INTERNAL_SERVER_ERROR }, { status: 500 });
