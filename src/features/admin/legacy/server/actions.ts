@@ -56,11 +56,7 @@ function insertAtIndex(array: string[], index: number, element: string) {
   return newArray;
 }
 
-export function updateAtIndex<T>(
-  arr: readonly T[],
-  index: number,
-  value: T
-): T[] {
+function updateAtIndex<T>(arr: readonly T[], index: number, value: T): T[] {
   if (index < 0 || index >= arr.length) return [...arr]; // -- out of range
   return [...arr.slice(0, index), value, ...arr.slice(index + 1)];
 }
@@ -218,12 +214,16 @@ export const legacyUploadAction = async ({
             existingQuestionImages[0].questionImages as unknown as string
           ) as string[];
           if (!parsedQuestionImages.includes(imageSrc)) {
-            if (parsedQuestionImages[order] !== imageSrc) {
+            if (
+              parsedQuestionImages[order] !== imageSrc &&
+              (parsedQuestionImages[order] == "" ||
+                parsedQuestionImages[order] !== undefined)
+            ) {
               await db
                 .update(question)
                 .set({
                   questionImages: JSON.stringify(
-                    insertAtIndex(parsedQuestionImages, order, imageSrc)
+                    updateAtIndex(parsedQuestionImages, order, imageSrc)
                   ),
                 })
                 .where(eq(question.id, questionId));
@@ -232,7 +232,7 @@ export const legacyUploadAction = async ({
                 .update(question)
                 .set({
                   questionImages: JSON.stringify(
-                    updateAtIndex(parsedQuestionImages, order, imageSrc)
+                    insertAtIndex(parsedQuestionImages, order, imageSrc)
                   ),
                 })
                 .where(eq(question.id, questionId));
@@ -280,12 +280,15 @@ export const legacyUploadAction = async ({
         }
 
         if (!parsedAnswers.includes(imageSrc)) {
-          if (parsedAnswers[order] !== imageSrc) {
+          if (
+            parsedAnswers[order] !== imageSrc &&
+            (parsedAnswers[order] == "" || parsedAnswers[order] !== undefined)
+          ) {
             await db
               .update(question)
               .set({
                 answers: JSON.stringify(
-                  insertAtIndex(parsedAnswers, order, imageSrc)
+                  updateAtIndex(parsedAnswers, order, imageSrc)
                 ),
               })
               .where(eq(question.id, questionId));
@@ -294,7 +297,7 @@ export const legacyUploadAction = async ({
               .update(question)
               .set({
                 answers: JSON.stringify(
-                  updateAtIndex(parsedAnswers, order, imageSrc)
+                  insertAtIndex(parsedAnswers, order, imageSrc)
                 ),
               })
               .where(eq(question.id, questionId));

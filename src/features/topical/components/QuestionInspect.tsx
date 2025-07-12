@@ -144,8 +144,10 @@ const QuestionInspect = ({
     let timeout: NodeJS.Timeout;
     if (isOpen.isOpen) {
       setCurrentView("question");
+      setIsBlockingInput(true);
       timeout = setTimeout(() => {
         setIsVirtualizationReady(true);
+        setIsBlockingInput(false);
       }, 0);
     } else {
       setIsVirtualizationReady(false);
@@ -217,6 +219,7 @@ const QuestionInspect = ({
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isBlockingInput, setIsBlockingInput] = useState(false);
 
   return (
     <Dialog
@@ -224,7 +227,10 @@ const QuestionInspect = ({
       onOpenChange={(open) =>
         setIsOpen({
           isOpen: open,
-          questionId: currentQuestionId ?? isOpen.questionId,
+          questionId:
+            currentQuestionId ??
+            isOpen.questionId ??
+            partitionedTopicalData?.[0]?.[0]?.id,
         })
       }
     >
@@ -242,6 +248,7 @@ const QuestionInspect = ({
               className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent"
               placeholder="Search for a question"
               value={searchInput}
+              readOnly={isBlockingInput}
               onChange={(e) => {
                 setSearchInput(e.target.value);
                 if (e.target.value.length === 0 && currentQuestionId) {
@@ -633,44 +640,24 @@ const QuestionInspect = ({
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
                 <TopicDisplay question={currentQuestionData} />
               </div>
-              <QuestionImages
-                questionImages={currentQuestionData?.questionImages ?? []}
+              <InspectImages
+                imageSource={currentQuestionData?.questionImages ?? []}
+                currentQuestionId={currentQuestionData?.id}
               />
             </ScrollArea>
           </div>
           <div className={cn(currentView === "answer" ? "block" : "hidden")}>
             <ScrollArea
-              className="h-[90vh] w-full"
+              className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
               viewportRef={answerScrollAreaRef}
             >
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
                 <TopicDisplay question={currentQuestionData} />
               </div>
-              <div className="flex flex-col gap-2">
-                {currentQuestionData?.answers.map((answer: string) => (
-                  <Fragment
-                    key={`${answer}${currentQuestionId}${
-                      currentQuestionId &&
-                      extractQuestionNumber({
-                        questionId: currentQuestionId,
-                      })
-                    }`}
-                  >
-                    {answer.includes("http") ? (
-                      <Image
-                        className="w-full h-full object-contain"
-                        key={answer}
-                        src={answer}
-                        alt="Answer image"
-                        width={100}
-                        height={100}
-                      />
-                    ) : (
-                      <p>{answer}</p>
-                    )}
-                  </Fragment>
-                ))}
-              </div>
+              <InspectImages
+                imageSource={currentQuestionData?.answers ?? []}
+                currentQuestionId={currentQuestionData?.id}
+              />
             </ScrollArea>
           </div>
         </div>
@@ -739,31 +726,41 @@ const TopicDisplay = ({
   );
 };
 
-const QuestionImages = ({
-  questionImages,
+const InspectImages = ({
+  imageSource,
+  currentQuestionId,
 }: {
-  questionImages: string[] | undefined;
+  imageSource: string[] | undefined;
+  currentQuestionId: string | undefined;
 }) => {
-  const [loadedCount, setLoadedCount] = useState(0);
-  if (!questionImages) {
+  if (!imageSource) {
     return null;
   }
   return (
-    <div className="flex flex-col flex-wrap w-full gap-2">
-      {/* {loadedCount < questionImages.length && (
-        <div className="w-full h-full flex items-center justify-center">
-          <Loader2 className="animate-spin" />
-        </div>
-      )} */}
-      {questionImages.map((image) => (
-        <img
-          className="w-full h-full object-contain"
-          key={image}
-          src={image}
-          alt="Question image"
-          loading="lazy"
-          onLoad={() => setLoadedCount(loadedCount + 1)}
-        />
+    <div className="flex flex-col flex-wrap w-full gap-2 relative">
+      {imageSource[0]?.includes("http") && (
+        <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
+      )}
+      {imageSource.map((item) => (
+        <Fragment
+          key={`${item}${currentQuestionId}${
+            currentQuestionId &&
+            extractQuestionNumber({
+              questionId: currentQuestionId,
+            })
+          }`}
+        >
+          {item.includes("http") ? (
+            <img
+              className="w-full h-full object-contain relative z-10"
+              src={item}
+              alt="Question image"
+              loading="lazy"
+            />
+          ) : (
+            <p>{item}</p>
+          )}
+        </Fragment>
       ))}
     </div>
   );
