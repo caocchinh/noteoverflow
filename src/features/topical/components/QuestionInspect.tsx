@@ -688,6 +688,7 @@ const PastPaperLink = ({
         season: question.season as ValidSeason,
         type,
       })}
+      rel="noopener noreferrer"
     >
       {children}
     </a>
