@@ -575,7 +575,10 @@ const QuestionInspect = ({
             </div>
             <Tooltip>
               <TooltipTrigger className="cursor-pointer" asChild>
-                <Button variant="outline" className="w-9 h-9 cursor-pointer">
+                <Button
+                  variant="outline"
+                  className="w-9 h-9 cursor-pointer !p-0 "
+                >
                   <PastPaperLink question={currentQuestionData} type="qp">
                     <ScrollText />
                   </PastPaperLink>
@@ -589,7 +592,10 @@ const QuestionInspect = ({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger className="cursor-pointer -ml-1" asChild>
-                <Button variant="outline" className="w-9 h-9 cursor-pointer">
+                <Button
+                  variant="outline"
+                  className="w-9 h-9 cursor-pointer !p-0"
+                >
                   <PastPaperLink question={currentQuestionData} type="ms">
                     <PencilLine />
                   </PastPaperLink>
@@ -613,7 +619,7 @@ const QuestionInspect = ({
                 <TopicDisplay question={currentQuestionData} />
               </div>
               <QuestionImages
-                questionImages={currentQuestionData?.questionImages}
+                questionImages={currentQuestionData?.questionImages ?? []}
               />
             </ScrollArea>
           </div>
@@ -626,26 +632,26 @@ const QuestionInspect = ({
                 <TopicDisplay question={currentQuestionData} />
               </div>
               <div className="flex flex-col gap-2">
-                {currentQuestionData?.answers?.map((answer) => (
+                {currentQuestionData?.answers.map((answer: string) => (
                   <Fragment
-                    key={`${answer.answer}${currentQuestionId}${
+                    key={`${answer}${currentQuestionId}${
                       currentQuestionId &&
                       extractQuestionNumber({
                         questionId: currentQuestionId,
                       })
                     }`}
                   >
-                    {answer.answer.includes("http") ? (
+                    {answer.includes("http") ? (
                       <Image
                         className="w-full h-full object-contain"
-                        key={answer.answer}
-                        src={answer.answer}
+                        key={answer}
+                        src={answer}
                         alt="Answer image"
                         width={100}
                         height={100}
                       />
                     ) : (
-                      <p>{answer.answer}</p>
+                      <p>{answer}</p>
                     )}
                   </Fragment>
                 ))}
@@ -675,6 +681,7 @@ const PastPaperLink = ({
   return (
     <a
       target="_blank"
+      className="w-full h-full flex items-center justify-center"
       href={parsePastPaperUrl({
         questionId: question.id,
         year: question.year.toString(),
@@ -712,7 +719,7 @@ const TopicDisplay = ({
 const QuestionImages = ({
   questionImages,
 }: {
-  questionImages: { imageSrc: string; order: number }[] | undefined;
+  questionImages: string[] | undefined;
 }) => {
   const [loadedCount, setLoadedCount] = useState(0);
   if (!questionImages) {
@@ -728,8 +735,8 @@ const QuestionImages = ({
       {questionImages.map((image) => (
         <img
           className="w-full h-full object-contain"
-          key={image.imageSrc}
-          src={image.imageSrc}
+          key={image}
+          src={image}
           alt="Question image"
           loading="lazy"
           onLoad={() => setLoadedCount(loadedCount + 1)}

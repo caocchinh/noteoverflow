@@ -87,6 +87,8 @@ export async function GET(request: NextRequest) {
         year: true,
         paperType: true,
         season: true,
+        answers: true,
+        questionImages: true,
       },
       with: {
         questionTopics: {
@@ -98,9 +100,15 @@ export async function GET(request: NextRequest) {
       limit: session?.session ? undefined : 5,
     });
 
+    const formattedData = data.map((question) => ({
+      ...question,
+      questionImages: JSON.parse(question.questionImages ?? "[]"),
+      answers: JSON.parse(question.answers ?? "[]"),
+    }));
+
     return NextResponse.json(
       {
-        data: data as SelectedQuestion[],
+        data: formattedData as SelectedQuestion[],
         isRateLimited: session?.session ? false : true,
       },
       { status: 200 }

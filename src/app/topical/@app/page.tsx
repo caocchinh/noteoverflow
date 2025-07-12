@@ -1100,7 +1100,7 @@ const TopicalPage = () => {
               >
                 <Masonry gutter="10px">
                   {displayedData?.map((question) =>
-                    question?.questionImages?.map((_, imageIndex) => (
+                    question?.questionImages.map((imageSrc: string) => (
                       <QuestionPreview
                         bookmarks={(bookmarks as Set<string>) || new Set()}
                         question={question}
@@ -1108,9 +1108,9 @@ const TopicalPage = () => {
                         isUserSessionPending={isUserSessionPending}
                         isBookmarkError={isUserSessionError || isBookmarksError}
                         isValidSession={!!userSession?.data?.session}
-                        key={`${question.id}-${imageIndex}`}
+                        key={`${question.id}-${imageSrc}`}
                         isBookmarksFetching={isBookmarksFetching}
-                        imageIndex={imageIndex}
+                        imageSrc={imageSrc}
                       />
                     ))
                   )}

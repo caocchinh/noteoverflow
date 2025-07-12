@@ -14,7 +14,7 @@ const QuestionPreview = memo(
     setIsQuestionViewOpen,
     isBookmarksFetching,
     isUserSessionPending,
-    imageIndex,
+    imageSrc,
     isBookmarkError,
     isValidSession,
     question,
@@ -26,13 +26,14 @@ const QuestionPreview = memo(
       questionId: string;
     }) => void;
     isBookmarksFetching: boolean;
-    imageIndex: number;
+    imageSrc: string;
     isUserSessionPending: boolean;
     isBookmarkError: boolean;
     isValidSession: boolean;
   }) => {
     const mutationKey = ["user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     const isMutatingThisQuestion =
       useIsMutating({
@@ -50,6 +51,11 @@ const QuestionPreview = memo(
         {loading && (
           <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
             <Loader />
+          </div>
+        )}
+        {error && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <p className="text-red-500 text-sm">Image failed to load</p>
           </div>
         )}
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-start p-2 overflow-hidden">
@@ -113,10 +119,14 @@ const QuestionPreview = memo(
 
         <img
           className="w-full h-full object-contain"
-          src={question?.questionImages[imageIndex]?.imageSrc}
+          src={imageSrc}
           alt="Question preview"
           loading="lazy"
           onLoad={() => setLoading(false)}
+          onError={() => {
+            setLoading(false);
+            setError(true);
+          }}
         />
       </div>
     );

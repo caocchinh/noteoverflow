@@ -65,18 +65,12 @@ export type FiltersCache = {
 
 export type SelectedQuestion = Pick<
   InferSelectModel<typeof question>,
-  "year" | "paperType" | "season" | "id"
+  "id" | "year" | "paperType" | "season"
 > & {
-  questionImages: Array<{
-    imageSrc: string;
-    order: number;
-  }>;
-  answers: Array<{
-    answer: string;
-    order: number;
-  }>;
+  questionImages: string[];
+  answers: string[];
   questionTopics: Array<{
-    topic: string;
+    topic: string | null;
   }>;
 };
 
