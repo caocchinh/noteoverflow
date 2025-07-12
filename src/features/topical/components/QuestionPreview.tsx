@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { memo, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
+import { cn } from "@/lib/utils";
 
 const QuestionPreview = memo(
   ({
@@ -18,6 +19,7 @@ const QuestionPreview = memo(
     isBookmarkError,
     isValidSession,
     question,
+    userFinishedQuestions,
   }: {
     bookmarks: Set<string>;
     question: SelectedQuestion;
@@ -30,6 +32,7 @@ const QuestionPreview = memo(
     isUserSessionPending: boolean;
     isBookmarkError: boolean;
     isValidSession: boolean;
+    userFinishedQuestions: Set<string>;
   }) => {
     const mutationKey = ["user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
@@ -47,6 +50,15 @@ const QuestionPreview = memo(
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
       >
+        <div
+          className={cn(
+            "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
+            userFinishedQuestions?.has(question.id)
+              ? "opacity-100"
+              : " opacity-0"
+          )}
+        />
+
         <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
         {loading && (
           <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">

@@ -1106,6 +1106,9 @@ const TopicalPage = () => {
                         question={question}
                         setIsQuestionViewOpen={setIsQuestionViewOpen}
                         isUserSessionPending={isUserSessionPending}
+                        userFinishedQuestions={
+                          (userFinishedQuestions as Set<string>) || new Set()
+                        }
                         isBookmarkError={isUserSessionError || isBookmarksError}
                         isValidSession={!!userSession?.data?.session}
                         key={`${question.id}-${imageSrc}`}

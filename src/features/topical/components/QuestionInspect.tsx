@@ -249,12 +249,19 @@ const QuestionInspect = ({
               value={searchInput}
               readOnly={isBlockingInput}
               onChange={(e) => {
+                if (searchInput == "") {
+                  listScrollAreaRef.current?.scrollTo({
+                    top: 0,
+                  });
+                }
                 setSearchInput(e.target.value);
                 if (e.target.value.length === 0 && currentQuestionId) {
-                  scrollToQuestion({
-                    questionId: currentQuestionId,
-                    tab: currentTab,
-                  });
+                  setTimeout(() => {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: currentTab,
+                    });
+                  }, 0);
                 }
               }}
             />
