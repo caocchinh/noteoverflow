@@ -58,15 +58,18 @@ export const BookmarkButton = ({
         isRealBookmarked,
       }: { realQuestionId: string; isRealBookmarked: boolean }
     ) => {
-      const old = queryClient.getQueryData<Set<string>>(["user_bookmarks"]);
-      if (!old) {
-        return;
-      }
-      if (isRealBookmarked) {
-        old.delete(realQuestionId);
-      } else {
-        old.add(realQuestionId);
-      }
+      queryClient.setQueryData<Set<string>>(
+        ["user_bookmarks"],
+        (prev) => {
+          const next = new Set(prev ?? []);
+          if (isRealBookmarked) {
+            next.delete(realQuestionId);
+          } else {
+            next.add(realQuestionId);
+          }
+          return next;
+        }
+      );
 
       toast.success(
         isRealBookmarked

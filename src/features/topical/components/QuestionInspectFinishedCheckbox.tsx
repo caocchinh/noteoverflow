@@ -11,6 +11,8 @@ import {
 } from "../server/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
 
 export const QuestionInspectFinishedCheckbox = ({
   finishedQuestions,
@@ -34,7 +36,9 @@ export const QuestionInspectFinishedCheckbox = ({
       mutationKey: ["user_finished_questions", questionId],
     }) > 0;
 
-  const isFinished = finishedQuestions?.has(questionId ?? "");
+  const isFinished = useMemo(() => {
+    return finishedQuestions?.has(questionId ?? "");
+  }, [finishedQuestions, questionId]);
 
   const queryClient = useQueryClient();
 
@@ -52,8 +56,6 @@ export const QuestionInspectFinishedCheckbox = ({
           "No question id provided for finished question mutation"
         );
       }
-
-      // Only perform the remote update. Cache & UI updates happen in onSuccess.
       if (isRealFinished) {
         await removeFinishedQuestionAction({ questionId: realQuestionId });
       } else {
@@ -61,24 +63,25 @@ export const QuestionInspectFinishedCheckbox = ({
       }
     },
 
-    onSuccess: (
+    onSuccess: async (
       _data,
       {
         realQuestionId,
         isRealFinished,
       }: { realQuestionId: string; isRealFinished: boolean }
     ) => {
-      const old = queryClient.getQueryData<Set<string>>([
-        "user_finished_questions",
-      ]);
-
-      if (old) {
-        if (isRealFinished) {
-          old.delete(realQuestionId);
-        } else {
-          old.add(realQuestionId);
+      queryClient.setQueryData<Set<string>>(
+        ["user_finished_questions"],
+        (prev) => {
+          const next = new Set(prev ?? []);
+          if (isRealFinished) {
+            next.delete(realQuestionId);
+          } else {
+            next.add(realQuestionId);
+          }
+          return next;
         }
-      }
+      );
 
       toast.success(
         isRealFinished
@@ -115,8 +118,15 @@ export const QuestionInspectFinishedCheckbox = ({
         className
       )}
       title="Add to finished question"
-      onClick={() => {
-        if (isMutatingThisQuestion || isFinishedQuestionDisabled) {
+      onClick={(e) => {
+        if ((e.target as HTMLElement).tagName === "LABEL") {
+          return;
+        }
+        if (
+          isMutatingThisQuestion ||
+          isFinishedQuestionDisabled ||
+          isFinishedQuestionFetching
+        ) {
           return;
         }
         if (!isValidSession) {
@@ -135,11 +145,15 @@ export const QuestionInspectFinishedCheckbox = ({
         });
       }}
     >
-      <Switch
-        className="border cursor-pointer border-dashed dark:data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
-        id="completed-switch"
-        checked={isFinished ?? false}
-      />
+      {isFinishedQuestionFetching ? (
+        <Loader2 className="animate-spin w-4 h-4" />
+      ) : (
+        <Switch
+          className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
+          id="completed-switch"
+          checked={isFinished ?? false}
+        />
+      )}
       <Label
         className={cn(
           isFinished ? "text-green-600" : "text-muted-foreground",
@@ -149,6 +163,8 @@ export const QuestionInspectFinishedCheckbox = ({
       >
         {isMutatingThisQuestion ? (
           <>Saving...</>
+        ) : isFinishedQuestionFetching ? (
+          <>Loading</>
         ) : (
           <>Complete{isFinished && "d"}</>
         )}

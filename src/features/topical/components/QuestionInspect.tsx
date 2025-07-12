@@ -307,7 +307,13 @@ const QuestionInspect = ({
                           currentQuestionId ===
                             partitionedTopicalData?.[currentTab][
                               virtualItem.index
-                            ]?.id && "!bg-logo-main text-white"
+                            ]?.id && "!bg-logo-main text-white",
+                          userFinishedQuestions?.has(
+                            partitionedTopicalData?.[currentTab][
+                              virtualItem.index
+                            ]?.id
+                          ) &&
+                            "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
                         )}
                         onClick={() => {
                           setCurrentQuestionId(
@@ -393,7 +399,11 @@ const QuestionInspect = ({
                         "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
                         currentQuestionId ===
                           searchResults[virtualItem.index]?.id &&
-                          "!bg-logo-main text-white"
+                          "!bg-logo-main text-white",
+                        userFinishedQuestions?.has(
+                          searchResults[virtualItem.index]?.id
+                        ) &&
+                          "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
                       )}
                       onClick={() => {
                         setCurrentQuestionId(
