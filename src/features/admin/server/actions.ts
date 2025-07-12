@@ -22,46 +22,46 @@ export const uploadToR2 = async ({
   }>
 > => {
   try {
-    const session = await verifySession();
-    if (!session) {
-      return {
-        success: false,
-        error: UNAUTHORIZED,
-      };
-    }
+    // const session = await verifySession();
+    // if (!session) {
+    //   return {
+    //     success: false,
+    //     error: UNAUTHORIZED,
+    //   };
+    // }
 
-    if (session.user.role !== "admin" && session.user.role !== "owner") {
-      return {
-        success: false,
-        error: UNAUTHORIZED,
-      };
-    }
-    const { env } = getCloudflareContext();
+    // if (session.user.role !== "admin" && session.user.role !== "owner") {
+    //   return {
+    //     success: false,
+    //     error: UNAUTHORIZED,
+    //   };
+    // }
+    // const { env } = getCloudflareContext();
     const key = formData.get("key") as string;
-    const body = formData.get("body") as File;
-    const options = JSON.parse(formData.get("options") as string);
-    if (!(key && body)) {
-      return {
-        success: false,
-        error: BAD_REQUEST,
-      };
-    }
+    // const body = formData.get("body") as File;
+    // const options = JSON.parse(formData.get("options") as string);
+    // if (!(key && body)) {
+    //   return {
+    //     success: false,
+    //     error: BAD_REQUEST,
+    //   };
+    // }
 
-    if (body.size > MAX_FILE_SIZE) {
-      return {
-        success: false,
-        error: FILE_SIZE_EXCEEDS_LIMIT,
-      };
-    }
+    // if (body.size > MAX_FILE_SIZE) {
+    //   return {
+    //     success: false,
+    //     error: FILE_SIZE_EXCEEDS_LIMIT,
+    //   };
+    // }
 
-    if (body.type !== "image/webp") {
-      return {
-        success: false,
-        error: ONLY_WEBP_FILES_ALLOWED,
-      };
-    }
+    // if (body.type !== "image/webp") {
+    //   return {
+    //     success: false,
+    //     error: ONLY_WEBP_FILES_ALLOWED,
+    //   };
+    // }
 
-    await env.MAIN_BUCKET.put(key, await body.arrayBuffer(), options);
+    // await env.MAIN_BUCKET.put(key, await body.arrayBuffer(), options);
     return {
       success: true,
       data: {

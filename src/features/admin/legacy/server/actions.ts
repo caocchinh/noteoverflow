@@ -11,7 +11,11 @@ import { verifySession } from "@/dal/verifySession";
 import { isValidQuestionId } from "@/lib/utils";
 import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
 import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
-import { createQuestion, isQuestionExists } from "@/server/main/question";
+import {
+  createQuestion,
+  createQuestionTopic,
+  isQuestionExists,
+} from "@/server/main/question";
 import { createSeason, isSeasonExists } from "@/server/main/season";
 import { createSubject, isSubjectExists } from "@/server/main/subject";
 import { createTopic, isTopicExists } from "@/server/main/topic";
@@ -197,7 +201,10 @@ export const legacyUploadAction = async ({
           .select({ questionImages: question.questionImages })
           .from(question)
           .where(eq(question.id, questionId));
-        if (existingQuestionImages.length > 0) {
+        if (
+          existingQuestionImages[0].questionImages &&
+          existingQuestionImages[0].questionImages.length > 0
+        ) {
           const parsedQuestionImages = JSON.parse(
             existingQuestionImages[0].questionImages as unknown as string
           ) as string[];
@@ -235,7 +242,7 @@ export const legacyUploadAction = async ({
         .select({ answers: question.answers })
         .from(question)
         .where(eq(question.id, questionId));
-      if (existingAnswers.length > 0) {
+      if (existingAnswers[0].answers && existingAnswers[0].answers.length > 0) {
         const parsedAnswers = JSON.parse(
           existingAnswers[0].answers as unknown as string
         ) as string[];
@@ -247,6 +254,7 @@ export const legacyUploadAction = async ({
             success: true,
           };
         }
+
         if (!parsedAnswers.includes(imageSrc)) {
           if (parsedAnswers[order] !== imageSrc) {
             await db
@@ -270,6 +278,12 @@ export const legacyUploadAction = async ({
       }
     }
 
+    await createQuestionTopic({
+      questionId,
+      topic,
+      subjectId: subjectFullName,
+      curriculumName: curriculum,
+    });
     return {
       success: true,
     };
