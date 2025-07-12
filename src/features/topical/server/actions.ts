@@ -17,6 +17,20 @@ export const addBookmarkAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+    if (
+      await db
+        .select()
+        .from(userBookmarks)
+        .where(
+          and(
+            eq(userBookmarks.userId, userId),
+            eq(userBookmarks.questionId, questionId)
+          )
+        )
+        .limit(1)
+    ) {
+      return;
+    }
     await db.insert(userBookmarks).values({
       userId,
       questionId,
@@ -71,6 +85,20 @@ export const addFinishedQuestionAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+    if (
+      await db
+        .select()
+        .from(finishedQuestions)
+        .where(
+          and(
+            eq(finishedQuestions.userId, userId),
+            eq(finishedQuestions.questionId, questionId)
+          )
+        )
+        .limit(1)
+    ) {
+      return;
+    }
     await db.insert(finishedQuestions).values({
       userId,
       questionId,

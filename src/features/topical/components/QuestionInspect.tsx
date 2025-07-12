@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import {
   Dialog,
@@ -37,7 +36,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
-import Image from "next/image";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { CHUNK_SIZE } from "../constants/constants";
@@ -49,6 +47,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
 import { SelectedQuestion } from "../constants/types";
+import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 
 const fuzzySearch = (query: string, text: string): boolean => {
   if (!query) {
@@ -560,7 +559,7 @@ const QuestionInspect = ({
           </div>
         </div>
         <div className="w-[73%] h-[inherit] p-2 rounded-md pr-4 pl-0">
-          <div className="flex items-center w-max justify-center gap-4 mb-2">
+          <div className="flex items-stretch w-max justify-center gap-4 mb-2">
             <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
               <Button
                 onClick={() => setCurrentView("question")}
@@ -601,7 +600,7 @@ const QuestionInspect = ({
               <TooltipContent className="z-[99999999]" side="bottom">
                 <PastPaperLink question={currentQuestionData} type="qp">
                   {currentQuestionData?.year === 2009
-                    ? "Only supported for 2010 and above"
+                    ? "Only supported year 2010 and above"
                     : "View paper"}
                 </PastPaperLink>
               </TooltipContent>
@@ -624,16 +623,24 @@ const QuestionInspect = ({
               <TooltipContent className="z-[99999999]" side="bottom">
                 <PastPaperLink question={currentQuestionData} type="ms">
                   {currentQuestionData?.year === 2009
-                    ? "Only supported for 2010 and above"
-                    : "  View mark scheme"}
+                    ? "Only supported year 2010 and above"
+                    : "View mark scheme"}
                 </PastPaperLink>
               </TooltipContent>
             </Tooltip>
+            <QuestionInspectFinishedCheckbox
+              finishedQuestions={userFinishedQuestions}
+              questionId={currentQuestionId}
+              isFinishedQuestionDisabled={isUserSessionPending}
+              isFinishedQuestionFetching={isFinishedQuestionsFetching}
+              isFinishedQuestionError={isFinishedQuestionsError}
+              isValidSession={isValidSession}
+            />
           </div>
 
           <div className={cn(currentView === "question" ? "block" : "hidden")}>
             <ScrollArea
-              className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
+              className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
               type="always"
               viewportRef={questionScrollAreaRef}
             >
@@ -648,7 +655,8 @@ const QuestionInspect = ({
           </div>
           <div className={cn(currentView === "answer" ? "block" : "hidden")}>
             <ScrollArea
-              className="h-[83vh] w-full [&_.bg-border]:bg-logo-main/25"
+              className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
+              type="always"
               viewportRef={answerScrollAreaRef}
             >
               <div className="flex flex-row flex-wrap w-full gap-2 py-2">
@@ -733,8 +741,8 @@ const InspectImages = ({
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
 }) => {
-  if (!imageSource) {
-    return null;
+  if (!imageSource || imageSource.length === 0) {
+    return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
   return (
     <div className="flex flex-col flex-wrap w-full gap-2 relative">

@@ -34,30 +34,42 @@ export const BookmarkButton = ({
 
   const updateBookmarkMutation = useMutation({
     mutationKey: mutationKey,
-    mutationFn: async () => {
-      if (isBookmarked) {
+    mutationFn: async ({
+      realQuestionId,
+      isRealBookmarked,
+    }: {
+      realQuestionId: string;
+      isRealBookmarked: boolean;
+    }) => {
+      if (isRealBookmarked) {
         return removeBookmarkAction({
-          questionId,
+          questionId: realQuestionId,
         });
       } else {
         return addBookmarkAction({
-          questionId,
+          questionId: realQuestionId,
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (
+      _data,
+      {
+        realQuestionId,
+        isRealBookmarked,
+      }: { realQuestionId: string; isRealBookmarked: boolean }
+    ) => {
       const old = queryClient.getQueryData<Set<string>>(["user_bookmarks"]);
       if (!old) {
         return;
       }
-      if (isBookmarked) {
-        old.delete(questionId);
+      if (isRealBookmarked) {
+        old.delete(realQuestionId);
       } else {
-        old.add(questionId);
+        old.add(realQuestionId);
       }
 
       toast.success(
-        isBookmarked
+        isRealBookmarked
           ? "Question removed from bookmarks."
           : "Question added to bookmarks.",
         {
@@ -89,7 +101,10 @@ export const BookmarkButton = ({
           toast.error("Please sign in to bookmark questions.");
           return;
         }
-        updateBookmarkMutation.mutate();
+        updateBookmarkMutation.mutate({
+          realQuestionId: questionId,
+          isRealBookmarked: isBookmarked ?? false,
+        });
       }}
       onTouchStart={(e) => {
         e.stopPropagation();
