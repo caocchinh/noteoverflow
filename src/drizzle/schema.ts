@@ -269,6 +269,9 @@ export const userBookmarks = sqliteTable(
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
       .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.questionId] })];
@@ -283,6 +286,9 @@ export const finishedQuestions = sqliteTable(
       .notNull(),
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => {

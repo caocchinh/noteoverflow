@@ -54,6 +54,7 @@ export type FiltersCache = {
   numberOfColumns: number;
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
+  showFinishedQuestionTint: boolean;
   lastSessionSubject: string;
   isPersistantCacheEnabled: boolean;
   filters: {

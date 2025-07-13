@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Blocks,
+  LandPlot,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -69,6 +70,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import QuestionInspect from "@/features/topical/components/QuestionInspect";
+import { Switch } from "@/components/ui/switch";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -106,7 +108,8 @@ const TopicalPage = () => {
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
   );
-
+  const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
+    useState(true);
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
@@ -147,6 +150,7 @@ const TopicalPage = () => {
       ...stateToSave,
       isSessionCacheEnabled,
       isPersistantCacheEnabled,
+      showFinishedQuestionTint,
     };
 
     stateToSave.lastSessionCurriculum = "";
@@ -304,6 +308,9 @@ const TopicalPage = () => {
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
+        setShowFinishedQuestionTint(
+          parsedState.showFinishedQuestionTint ?? true
+        );
         if (
           parsedState.isSessionCacheEnabled &&
           parsedState.lastSessionCurriculum &&
@@ -452,6 +459,7 @@ const TopicalPage = () => {
       ...stateToSave,
       isSessionCacheEnabled,
       isPersistantCacheEnabled,
+      showFinishedQuestionTint,
     };
 
     if (selectedCurriculum && selectedSubject) {
@@ -484,6 +492,7 @@ const TopicalPage = () => {
     selectedSeason,
     isSessionCacheEnabled,
     isPersistantCacheEnabled,
+    showFinishedQuestionTint,
   ]);
 
   const search = async () => {
@@ -985,6 +994,26 @@ const TopicalPage = () => {
                   />
                 </PopoverContent>
               </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
+                    variant="secondary"
+                  >
+                    <LandPlot />
+                    Visual settings
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                  <h4 className="text-sm font-medium text-center mb-2">
+                    Show green tint on finished questions?
+                  </h4>
+                  <Switch
+                    checked={showFinishedQuestionTint}
+                    onCheckedChange={setShowFinishedQuestionTint}
+                  />
+                </PopoverContent>
+              </Popover>
             </SidebarContent>
             <SidebarRail />
           </Sidebar>
@@ -1109,6 +1138,7 @@ const TopicalPage = () => {
                         userFinishedQuestions={
                           (userFinishedQuestions as Set<string>) || new Set()
                         }
+                        showFinishedQuestionTint={showFinishedQuestionTint}
                         isBookmarkError={isUserSessionError || isBookmarksError}
                         isValidSession={!!userSession?.data?.session}
                         key={`${question.id}-${imageSrc}`}

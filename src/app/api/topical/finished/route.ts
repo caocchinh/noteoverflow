@@ -17,6 +17,7 @@ export async function GET() {
       where: eq(finishedQuestions.userId, userId),
       columns: {
         questionId: true,
+        updatedAt: true,
       },
     });
     return NextResponse.json({ data: bookmarks }, { status: 200 });

@@ -18,6 +18,7 @@ const QuestionPreview = memo(
     imageSrc,
     isBookmarkError,
     isValidSession,
+    showFinishedQuestionTint,
     question,
     userFinishedQuestions,
   }: {
@@ -33,6 +34,7 @@ const QuestionPreview = memo(
     isBookmarkError: boolean;
     isValidSession: boolean;
     userFinishedQuestions: Set<string>;
+    showFinishedQuestionTint: boolean;
   }) => {
     const mutationKey = ["user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
@@ -53,7 +55,7 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
-            userFinishedQuestions?.has(question.id)
+            userFinishedQuestions?.has(question.id) && showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}

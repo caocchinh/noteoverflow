@@ -23,6 +23,8 @@ export const addBookmarkAction = async ({
       .values({
         userId,
         questionId,
+        // Local server time
+        updatedAt: new Date(),
       })
       .onConflictDoNothing();
   } catch (error) {
@@ -80,6 +82,8 @@ export const addFinishedQuestionAction = async ({
       .values({
         userId,
         questionId,
+        //Local server time
+        updatedAt: new Date(),
       })
       .onConflictDoNothing();
   } catch (error) {
