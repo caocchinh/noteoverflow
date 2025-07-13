@@ -549,7 +549,7 @@ const QuestionInspect = ({
                 <div className="flex items-center gap-2 border-b border-border">
                   <Search />
                   <Input
-                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[13px]"
+                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[12px]"
                     placeholder="Search for a question"
                     value={searchInput}
                     readOnly={isBlockingInput}

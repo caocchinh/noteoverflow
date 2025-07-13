@@ -80,7 +80,7 @@ export default function ButtonUltility({
             <BrushCleaning />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md z-[100006]">
           <DialogHeader>
             <DialogTitle>Clear all</DialogTitle>
             <DialogDescription>
