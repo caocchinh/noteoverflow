@@ -208,10 +208,79 @@ const QuestionInspect = ({
     }
   }, [isMobile, setIsInspectSidebarOpen]);
 
+  const ultilityRef = useRef<HTMLDivElement | null>(null);
+  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
+  const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
+    useState(false);
+  const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
+    useState(false);
+  const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+
+  const overflowScrollHandler = useCallback(() => {
+    if (ultilityRef.current && sideBarInsetRef.current) {
+      if (
+        ultilityRef.current.clientWidth >= sideBarInsetRef.current.clientWidth
+      ) {
+        const ultilityLeft = Math.abs(
+          Math.round(ultilityRef.current.getBoundingClientRect().left)
+        );
+        const ultilityRight = Math.abs(
+          Math.round(ultilityRef.current.getBoundingClientRect().right)
+        );
+        const sideBarInsetLeft = Math.abs(
+          Math.round(sideBarInsetRef.current.getBoundingClientRect().left)
+        );
+        const sideBarInsetRight = Math.abs(
+          Math.round(sideBarInsetRef.current.getBoundingClientRect().right)
+        );
+
+        const rightThreshold =
+          ((Math.max(ultilityLeft, sideBarInsetLeft) -
+            Math.min(ultilityLeft, sideBarInsetLeft)) /
+            ((ultilityLeft + sideBarInsetLeft) / 2)) *
+          100;
+        const leftThreshold =
+          ((Math.max(ultilityRight, sideBarInsetRight) -
+            Math.min(ultilityRight, sideBarInsetRight)) /
+            ((ultilityRight + sideBarInsetRight) / 2)) *
+          100;
+
+        if (leftThreshold < 0.1) {
+          setIsUltilityOverflowingLeft(true);
+          setIsUltilityOverflowingRight(false);
+        } else if (rightThreshold < 0.1) {
+          setIsUltilityOverflowingRight(true);
+          setIsUltilityOverflowingLeft(false);
+        } else if (
+          ultilityLeft !== sideBarInsetLeft &&
+          ultilityRight !== sideBarInsetRight
+        ) {
+          setIsUltilityOverflowingRight(true);
+          setIsUltilityOverflowingLeft(true);
+        }
+      } else {
+        setIsUltilityOverflowingRight(false);
+        setIsUltilityOverflowingLeft(false);
+      }
+    } else {
+      setIsUltilityOverflowingRight(false);
+      setIsUltilityOverflowingLeft(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("resize", overflowScrollHandler);
+
+    return () => {
+      window.removeEventListener("resize", overflowScrollHandler);
+    };
+  }, [overflowScrollHandler]);
+
   useEffect(() => {
     if (!isOpen.isOpen) {
       return;
     }
+    overflowScrollHandler();
     const tab = isOpen.questionId
       ? partitionedTopicalData?.findIndex((partition) =>
           partition.some((question) => question.id === isOpen.questionId)
@@ -229,7 +298,7 @@ const QuestionInspect = ({
     if (partitionedTopicalData?.[tab]) {
       scrollToQuestion({ questionId: isOpen.questionId, tab });
     }
-  }, [isOpen, partitionedTopicalData, scrollToQuestion]);
+  }, [isOpen, overflowScrollHandler, partitionedTopicalData, scrollToQuestion]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -425,74 +494,6 @@ const QuestionInspect = ({
     searchResults,
     currentQuestionId,
   ]);
-  const ultilityRef = useRef<HTMLDivElement | null>(null);
-  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
-  const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
-    useState(false);
-  const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
-    useState(false);
-  const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
-
-  const overflowScrollHandler = useCallback(() => {
-    if (ultilityRef.current && sideBarInsetRef.current) {
-      if (
-        ultilityRef.current.clientWidth >= sideBarInsetRef.current.clientWidth
-      ) {
-        const ultilityLeft = Math.round(
-          ultilityRef.current.getBoundingClientRect().left
-        );
-        const ultilityRight = Math.round(
-          ultilityRef.current.getBoundingClientRect().right
-        );
-        const sideBarInsetLeft = Math.round(
-          sideBarInsetRef.current.getBoundingClientRect().left
-        );
-        const sideBarInsetRight = Math.round(
-          sideBarInsetRef.current.getBoundingClientRect().right
-        );
-
-        if (
-          ((Math.max(ultilityLeft, sideBarInsetLeft) -
-            Math.min(ultilityLeft, sideBarInsetLeft)) /
-            ((ultilityLeft + sideBarInsetLeft) / 2)) *
-            100 <
-          0.5
-        ) {
-          setIsUltilityOverflowingRight(true);
-          setIsUltilityOverflowingLeft(false);
-        } else if (
-          ((Math.max(ultilityRight, sideBarInsetRight) -
-            Math.min(ultilityRight, sideBarInsetRight)) /
-            ((ultilityRight + sideBarInsetRight) / 2)) *
-            100 <
-          0.5
-        ) {
-          setIsUltilityOverflowingLeft(true);
-          setIsUltilityOverflowingRight(false);
-        } else if (
-          ultilityLeft !== sideBarInsetLeft &&
-          ultilityRight !== sideBarInsetRight
-        ) {
-          setIsUltilityOverflowingRight(true);
-          setIsUltilityOverflowingLeft(true);
-        }
-      } else {
-        setIsUltilityOverflowingRight(false);
-        setIsUltilityOverflowingLeft(false);
-      }
-    } else {
-      setIsUltilityOverflowingRight(false);
-      setIsUltilityOverflowingLeft(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("resize", overflowScrollHandler);
-
-    return () => {
-      window.removeEventListener("resize", overflowScrollHandler);
-    };
-  }, [overflowScrollHandler]);
 
   return (
     <Dialog

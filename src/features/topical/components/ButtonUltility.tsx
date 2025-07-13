@@ -12,6 +12,7 @@ import {
 import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, X } from "lucide-react";
 import { FilterData } from "../constants/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ButtonUltility({
   isResetConfirmationOpen,
@@ -43,6 +44,7 @@ export default function ButtonUltility({
   } & FilterData;
 }) {
   const { theme } = useTheme();
+  const isMobileDevice = useIsMobile();
 
   return (
     <>
@@ -51,6 +53,9 @@ export default function ButtonUltility({
         disabled={!isMounted}
         onClick={() => {
           if (isValidInput(true)) {
+            if (isMobileDevice) {
+              setIsSidebarOpen(false);
+            }
             setIsSearchEnabled(true);
             setCurrentQuery({
               ...query,
