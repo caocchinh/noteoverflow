@@ -24,10 +24,12 @@ import {
 } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronUp,
   Loader2,
   PencilLine,
   ScrollText,
@@ -109,14 +111,25 @@ const QuestionInspect = ({
   const [currentView, setCurrentView] = useState<"question" | "answer">(
     "question"
   );
-  const currentQuestionData = useMemo(() => {
-    return partitionedTopicalData?.[currentTabThatContainsQuestion]?.find(
-      (question) => question.id === currentQuestionId
+  const currentQuestionIndex = useMemo(() => {
+    return (
+      partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
+        (question) => question.id === currentQuestionId
+      ) ?? 0
     );
   }, [
     partitionedTopicalData,
     currentTabThatContainsQuestion,
     currentQuestionId,
+  ]);
+  const currentQuestionData = useMemo(() => {
+    return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
+      currentQuestionIndex
+    ];
+  }, [
+    partitionedTopicalData,
+    currentTabThatContainsQuestion,
+    currentQuestionIndex,
   ]);
 
   useEffect(() => {
@@ -219,6 +232,82 @@ const QuestionInspect = ({
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
+  const handleNextQuestion = () => {
+    if (partitionedTopicalData) {
+      if (
+        currentQuestionIndex <
+        partitionedTopicalData[currentTabThatContainsQuestion].length - 1
+      ) {
+        setCurrentQuestionId(
+          partitionedTopicalData[currentTabThatContainsQuestion][
+            currentQuestionIndex + 1
+          ].id
+        );
+        setCurrentTab(currentTabThatContainsQuestion);
+        scrollToQuestion({
+          questionId:
+            partitionedTopicalData[currentTabThatContainsQuestion][
+              currentQuestionIndex + 1
+            ].id,
+          tab: currentTabThatContainsQuestion,
+        });
+      } else {
+        if (
+          currentTabThatContainsQuestion <
+          partitionedTopicalData.length - 1
+        ) {
+          setCurrentTab(currentTabThatContainsQuestion + 1);
+          setCurrentTabThatContainsQuestion(currentTabThatContainsQuestion + 1);
+          setCurrentQuestionId(
+            partitionedTopicalData[currentTabThatContainsQuestion + 1][0].id
+          );
+          listScrollAreaRef.current?.scrollTo({
+            top: 0,
+            behavior: "instant",
+          });
+        }
+      }
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (partitionedTopicalData) {
+      if (currentQuestionIndex > 0) {
+        setCurrentQuestionId(
+          partitionedTopicalData[currentTabThatContainsQuestion][
+            currentQuestionIndex - 1
+          ].id
+        );
+        setCurrentTab(currentTabThatContainsQuestion);
+        scrollToQuestion({
+          questionId:
+            partitionedTopicalData[currentTabThatContainsQuestion][
+              currentQuestionIndex - 1
+            ].id,
+          tab: currentTabThatContainsQuestion,
+        });
+      } else {
+        if (currentTabThatContainsQuestion > 0) {
+          setCurrentTab(currentTabThatContainsQuestion - 1);
+          setCurrentTabThatContainsQuestion(currentTabThatContainsQuestion - 1);
+          setCurrentQuestionId(
+            partitionedTopicalData[currentTabThatContainsQuestion - 1][
+              partitionedTopicalData[currentTabThatContainsQuestion - 1]
+                .length - 1
+            ].id
+          );
+          scrollToQuestion({
+            questionId:
+              partitionedTopicalData[currentTabThatContainsQuestion - 1][
+                partitionedTopicalData[currentTabThatContainsQuestion - 1]
+                  .length - 1
+              ].id,
+            tab: currentTabThatContainsQuestion - 1,
+          });
+        }
+      }
+    }
+  };
 
   return (
     <Dialog
@@ -645,6 +734,24 @@ const QuestionInspect = ({
                 </PastPaperLink>
               </TooltipContent>
             </Tooltip>
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                className="w-9 rounded-sm cursor-pointer"
+                onClick={handleNextQuestion}
+                title="Next question"
+              >
+                <ChevronDown />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-9 rounded-sm cursor-pointer"
+                onClick={handlePreviousQuestion}
+                title="Previous question"
+              >
+                <ChevronUp />
+              </Button>
+            </div>
             <QuestionInspectFinishedCheckbox
               finishedQuestions={userFinishedQuestions}
               questionId={currentQuestionId}
