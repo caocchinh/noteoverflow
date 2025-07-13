@@ -127,7 +127,6 @@ const QuestionInspect = ({
     currentTabThatContainsQuestion,
     currentQuestionIndex,
   ]);
-
   useEffect(() => {
     setSearchInput("");
     setCurrentView("question");
@@ -204,7 +203,9 @@ const QuestionInspect = ({
   );
   const isMobile = useIsMobile();
   useEffect(() => {
-    setIsInspectSidebarOpen(false);
+    if (isMobile) {
+      setIsInspectSidebarOpen(false);
+    }
   }, [isMobile, setIsInspectSidebarOpen]);
 
   useEffect(() => {
@@ -424,7 +425,74 @@ const QuestionInspect = ({
     searchResults,
     currentQuestionId,
   ]);
-  const ultilityHorizontalScrollRef = useRef<HTMLDivElement | null>(null);
+  const ultilityRef = useRef<HTMLDivElement | null>(null);
+  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
+  const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
+    useState(false);
+  const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
+    useState(false);
+  const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+
+  const overflowScrollHandler = useCallback(() => {
+    if (ultilityRef.current && sideBarInsetRef.current) {
+      if (
+        ultilityRef.current.clientWidth >= sideBarInsetRef.current.clientWidth
+      ) {
+        const ultilityLeft = Math.round(
+          ultilityRef.current.getBoundingClientRect().left
+        );
+        const ultilityRight = Math.round(
+          ultilityRef.current.getBoundingClientRect().right
+        );
+        const sideBarInsetLeft = Math.round(
+          sideBarInsetRef.current.getBoundingClientRect().left
+        );
+        const sideBarInsetRight = Math.round(
+          sideBarInsetRef.current.getBoundingClientRect().right
+        );
+
+        if (
+          ((Math.max(ultilityLeft, sideBarInsetLeft) -
+            Math.min(ultilityLeft, sideBarInsetLeft)) /
+            ((ultilityLeft + sideBarInsetLeft) / 2)) *
+            100 <
+          0.5
+        ) {
+          setIsUltilityOverflowingRight(true);
+          setIsUltilityOverflowingLeft(false);
+        } else if (
+          ((Math.max(ultilityRight, sideBarInsetRight) -
+            Math.min(ultilityRight, sideBarInsetRight)) /
+            ((ultilityRight + sideBarInsetRight) / 2)) *
+            100 <
+          0.5
+        ) {
+          setIsUltilityOverflowingLeft(true);
+          setIsUltilityOverflowingRight(false);
+        } else if (
+          ultilityLeft !== sideBarInsetLeft &&
+          ultilityRight !== sideBarInsetRight
+        ) {
+          setIsUltilityOverflowingRight(true);
+          setIsUltilityOverflowingLeft(true);
+        }
+      } else {
+        setIsUltilityOverflowingRight(false);
+        setIsUltilityOverflowingLeft(false);
+      }
+    } else {
+      setIsUltilityOverflowingRight(false);
+      setIsUltilityOverflowingLeft(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("resize", overflowScrollHandler);
+
+    return () => {
+      window.removeEventListener("resize", overflowScrollHandler);
+    };
+  }, [overflowScrollHandler]);
 
   return (
     <Dialog
@@ -444,7 +512,7 @@ const QuestionInspect = ({
       }}
     >
       <DialogContent
-        className="w-[89vw] h-[91vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+        className="w-[90vw] h-[94vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -466,7 +534,14 @@ const QuestionInspect = ({
             } as React.CSSProperties
           }
         >
-          <Sidebar className="top-0 !h-full">
+          <Sidebar
+            className="top-0 !h-full"
+            onTransitionEnd={(e) => {
+              if (e.propertyName == "left") {
+                overflowScrollHandler();
+              }
+            }}
+          >
             <SidebarHeader className="sr-only">Search questions</SidebarHeader>
             <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1">
               <div className="flex items-center justify-start w-full gap-2 px-1">
@@ -850,157 +925,206 @@ const QuestionInspect = ({
             </SidebarContent>
             <SidebarRail />
           </Sidebar>
-          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent overflow-hidden">
-            <ScrollArea
-              className="w-full whitespace-nowrap"
-              viewportRef={ultilityHorizontalScrollRef}
-            >
-              <div className="flex items-stretch w-max justify-center gap-4 mb-2">
-                <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
-                  <Button
-                    onClick={() => setCurrentView("question")}
-                    className={cn(
-                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                      currentView === "question" &&
-                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                    )}
-                  >
-                    Question
-                  </Button>
-                  <Button
-                    onClick={() => setCurrentView("answer")}
-                    className={cn(
-                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                      currentView === "answer" &&
-                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                    )}
-                  >
-                    Answer
-                  </Button>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-pointer" asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-9 h-9 cursor-pointer !p-0",
-                        currentQuestionData?.year === 2009 &&
-                          "opacity-50 cursor-default"
-                      )}
-                    >
-                      <PastPaperLink question={currentQuestionData} type="qp">
-                        <ScrollText />
-                      </PastPaperLink>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="z-[99999999]" side="bottom">
-                    <PastPaperLink question={currentQuestionData} type="qp">
-                      {currentQuestionData?.year === 2009
-                        ? "Only supported year 2010 and above"
-                        : "View paper"}
-                    </PastPaperLink>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-pointer -ml-1" asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-9 h-9 cursor-pointer !p-0",
-                        currentQuestionData?.year === 2009 &&
-                          "opacity-50 cursor-default"
-                      )}
-                    >
-                      <PastPaperLink question={currentQuestionData} type="ms">
-                        <PencilLine />
-                      </PastPaperLink>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="z-[99999999]" side="bottom">
-                    <PastPaperLink question={currentQuestionData} type="ms">
-                      {currentQuestionData?.year === 2009
-                        ? "Only supported year 2010 and above"
-                        : "View mark scheme"}
-                    </PastPaperLink>
-                  </TooltipContent>
-                </Tooltip>
-                <div className="flex items-center justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    className="w-9 rounded-sm cursor-pointer"
-                    onClick={handleNextQuestion}
-                    title="Next question"
-                    disabled={isHandleNextQuestionButtonDisabled}
-                  >
-                    <ChevronDown />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-9 rounded-sm cursor-pointer"
-                    onClick={handlePreviousQuestion}
-                    title="Previous question"
-                    disabled={isHandlePreviousQuestionButtonDisabled}
-                  >
-                    <ChevronUp />
-                  </Button>
-                </div>
-                <Button
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => setIsInspectSidebarOpen(!isInspectSidebarOpen)}
-                >
-                  Toggle
-                  <PanelsTopLeft />
-                </Button>
-                <QuestionInspectFinishedCheckbox
-                  finishedQuestions={userFinishedQuestions}
-                  questionId={currentQuestionId}
-                  isFinishedQuestionDisabled={isUserSessionPending}
-                  isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                  isFinishedQuestionError={isFinishedQuestionsError}
-                  isValidSession={isValidSession}
-                />
-              </div>
-              <ScrollBar
-                orientation="horizontal"
-                className="[&_.bg-border]:bg-transparent"
-              />
-            </ScrollArea>
-
+          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
             <div
-              className={cn(currentView === "question" ? "block" : "hidden")}
+              className="w-full flex flex-col gap-2 items-center justify-start relative"
+              ref={sideBarInsetRef}
             >
+              {isUltilityOverflowingRight && (
+                <Button
+                  className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-[200]"
+                  title="Move right"
+                  onClick={() => {
+                    if (ultilityHorizontalScrollBarRef.current) {
+                      ultilityHorizontalScrollBarRef.current.scrollBy({
+                        left: 200,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                >
+                  <ChevronRight size={5} />
+                </Button>
+              )}
+              {isUltilityOverflowingLeft && (
+                <Button
+                  className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                  title="Move left"
+                  onClick={() => {
+                    if (ultilityHorizontalScrollBarRef.current) {
+                      ultilityHorizontalScrollBarRef.current.scrollBy({
+                        left: -200,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                >
+                  <ChevronLeft size={5} />
+                </Button>
+              )}
               <ScrollArea
-                className="h-[74vh] md:h-[80vh] w-full [&_.bg-border]:bg-transparent"
-                type="always"
-                viewportRef={questionScrollAreaRef}
+                className="w-full whitespace-nowrap"
+                viewPortOnScroll={overflowScrollHandler}
+                viewportRef={ultilityHorizontalScrollBarRef}
               >
-                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                  <TopicDisplay question={currentQuestionData} />
+                <div
+                  className="flex items-stretch w-max justify-center gap-4 mb-2 relative"
+                  ref={ultilityRef}
+                >
+                  <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
+                    <Button
+                      onClick={() => setCurrentView("question")}
+                      className={cn(
+                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                        currentView === "question" &&
+                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      )}
+                    >
+                      Question
+                    </Button>
+                    <Button
+                      onClick={() => setCurrentView("answer")}
+                      className={cn(
+                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                        currentView === "answer" &&
+                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      )}
+                    >
+                      Answer
+                    </Button>
+                  </div>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-pointer" asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-9 h-9 cursor-pointer !p-0",
+                          currentQuestionData?.year === 2009 &&
+                            "opacity-50 cursor-default"
+                        )}
+                      >
+                        <PastPaperLink question={currentQuestionData} type="qp">
+                          <ScrollText />
+                        </PastPaperLink>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="z-[99999999]" side="bottom">
+                      <PastPaperLink question={currentQuestionData} type="qp">
+                        {currentQuestionData?.year === 2009
+                          ? "Only supported year 2010 and above"
+                          : "View paper"}
+                      </PastPaperLink>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-9 h-9 cursor-pointer !p-0",
+                          currentQuestionData?.year === 2009 &&
+                            "opacity-50 cursor-default"
+                        )}
+                      >
+                        <PastPaperLink question={currentQuestionData} type="ms">
+                          <PencilLine />
+                        </PastPaperLink>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="z-[99999999]" side="bottom">
+                      <PastPaperLink question={currentQuestionData} type="ms">
+                        {currentQuestionData?.year === 2009
+                          ? "Only supported year 2010 and above"
+                          : "View mark scheme"}
+                      </PastPaperLink>
+                    </TooltipContent>
+                  </Tooltip>
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="w-9 rounded-sm cursor-pointer"
+                      onClick={handleNextQuestion}
+                      title="Next question"
+                      disabled={isHandleNextQuestionButtonDisabled}
+                    >
+                      <ChevronDown />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-9 rounded-sm cursor-pointer"
+                      onClick={handlePreviousQuestion}
+                      title="Previous question"
+                      disabled={isHandlePreviousQuestionButtonDisabled}
+                    >
+                      <ChevronUp />
+                    </Button>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setIsInspectSidebarOpen(!isInspectSidebarOpen)
+                    }
+                  >
+                    Toggle
+                    <PanelsTopLeft />
+                  </Button>
+                  <QuestionInspectFinishedCheckbox
+                    finishedQuestions={userFinishedQuestions}
+                    questionId={currentQuestionId}
+                    isFinishedQuestionDisabled={isUserSessionPending}
+                    isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                    isFinishedQuestionError={isFinishedQuestionsError}
+                    isValidSession={isValidSession}
+                  />
                 </div>
-                <InspectImages
-                  imageSource={currentQuestionData?.questionImages ?? []}
-                  currentQuestionId={currentQuestionData?.id}
+                <ScrollBar
+                  orientation="horizontal"
+                  className="[&_.bg-border]:bg-transparent"
                 />
               </ScrollArea>
-            </div>
-            <div className={cn(currentView === "answer" ? "block" : "hidden")}>
-              <ScrollArea
-                className="h-[74vh] md:h-[80vh] w-full [&_.bg-border]:bg-transparent"
-                type="always"
-                viewportRef={answerScrollAreaRef}
+
+              <div
+                className={cn(
+                  currentView === "question" ? "block w-full" : "hidden"
+                )}
               >
-                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                  <TopicDisplay question={currentQuestionData} />
-                </div>
-                <InspectImages
-                  imageSource={currentQuestionData?.answers ?? []}
-                  currentQuestionId={currentQuestionData?.id}
-                />
-              </ScrollArea>
+                <ScrollArea
+                  className="h-[76vh] lg:h-[80vh] w-full [&_.bg-border]:bg-transparent"
+                  type="always"
+                  viewportRef={questionScrollAreaRef}
+                >
+                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                    <TopicDisplay question={currentQuestionData} />
+                  </div>
+                  <InspectImages
+                    imageSource={currentQuestionData?.questionImages ?? []}
+                    currentQuestionId={currentQuestionData?.id}
+                  />
+                </ScrollArea>
+              </div>
+              <div
+                className={cn(
+                  currentView === "answer" ? "block w-full" : "hidden"
+                )}
+              >
+                <ScrollArea
+                  className="h-[76vh] lg:h-[80vh] w-full [&_.bg-border]:bg-transparent"
+                  type="always"
+                  viewportRef={answerScrollAreaRef}
+                >
+                  <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                    <TopicDisplay question={currentQuestionData} />
+                  </div>
+                  <InspectImages
+                    imageSource={currentQuestionData?.answers ?? []}
+                    currentQuestionId={currentQuestionData?.id}
+                  />
+                </ScrollArea>
+              </div>
             </div>
             <Button
-              className="w-full mt-2 h-8 cursor-pointer block md:hidden"
+              className="w-full h-8 cursor-pointer block lg:hidden "
               onClick={() => {
                 if (currentQuestionId) {
                   setIsOpen({ isOpen: false, questionId: currentQuestionId });
