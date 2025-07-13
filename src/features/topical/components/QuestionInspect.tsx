@@ -20,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   extractPaperCode,
   extractQuestionNumber,
+  fuzzySearch,
   parsePastPaperUrl,
 } from "../lib/utils";
 import { Button } from "@/components/ui/button";
@@ -50,26 +51,6 @@ import {
 import { ValidSeason } from "@/constants/types";
 import { SelectedQuestion } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
-
-const fuzzySearch = (query: string, text: string): boolean => {
-  if (!query) {
-    return true;
-  }
-  if (!text) {
-    return false;
-  }
-  const lowerQuery = query.toLowerCase();
-  const lowerText = text.toLowerCase();
-  let queryIndex = 0;
-  let textIndex = 0;
-  while (queryIndex < lowerQuery.length && textIndex < lowerText.length) {
-    if (lowerQuery[queryIndex] === lowerText[textIndex]) {
-      queryIndex++;
-    }
-    textIndex++;
-  }
-  return queryIndex === lowerQuery.length;
-};
 
 const QuestionInspect = ({
   isOpen,
@@ -234,80 +215,193 @@ const QuestionInspect = ({
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const handleNextQuestion = () => {
     if (partitionedTopicalData) {
-      if (
-        currentQuestionIndex <
-        partitionedTopicalData[currentTabThatContainsQuestion].length - 1
-      ) {
-        setCurrentQuestionId(
-          partitionedTopicalData[currentTabThatContainsQuestion][
-            currentQuestionIndex + 1
-          ].id
-        );
-        setCurrentTab(currentTabThatContainsQuestion);
-        scrollToQuestion({
-          questionId:
+      if (searchInput === "") {
+        if (
+          currentQuestionIndex <
+          partitionedTopicalData[currentTabThatContainsQuestion].length - 1
+        ) {
+          setCurrentQuestionId(
             partitionedTopicalData[currentTabThatContainsQuestion][
               currentQuestionIndex + 1
-            ].id,
-          tab: currentTabThatContainsQuestion,
-        });
-      } else {
-        if (
-          currentTabThatContainsQuestion <
-          partitionedTopicalData.length - 1
-        ) {
-          setCurrentTab(currentTabThatContainsQuestion + 1);
-          setCurrentTabThatContainsQuestion(currentTabThatContainsQuestion + 1);
-          setCurrentQuestionId(
-            partitionedTopicalData[currentTabThatContainsQuestion + 1][0].id
+            ].id
           );
-          listScrollAreaRef.current?.scrollTo({
-            top: 0,
-            behavior: "instant",
+          setCurrentTab(currentTabThatContainsQuestion);
+          scrollToQuestion({
+            questionId:
+              partitionedTopicalData[currentTabThatContainsQuestion][
+                currentQuestionIndex + 1
+              ].id,
+            tab: currentTabThatContainsQuestion,
           });
+        } else {
+          if (
+            currentTabThatContainsQuestion <
+            partitionedTopicalData.length - 1
+          ) {
+            setCurrentTab(currentTabThatContainsQuestion + 1);
+            setCurrentTabThatContainsQuestion(
+              currentTabThatContainsQuestion + 1
+            );
+            setCurrentQuestionId(
+              partitionedTopicalData[currentTabThatContainsQuestion + 1][0].id
+            );
+            listScrollAreaRef.current?.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+          }
+        }
+      } else {
+        const currentQuestionIndexInSearchResult = searchResults.findIndex(
+          (question) => question.id === currentQuestionId
+        );
+        if (currentQuestionIndexInSearchResult === -1) {
+          return;
+        }
+        if (currentQuestionIndexInSearchResult < searchResults.length - 1) {
+          setCurrentQuestionId(
+            searchResults[currentQuestionIndexInSearchResult + 1].id
+          );
+          const newTabIndex = partitionedTopicalData?.findIndex((partition) =>
+            partition.some(
+              (q) =>
+                q.id ===
+                searchResults[currentQuestionIndexInSearchResult + 1].id
+            )
+          );
+          if (newTabIndex > -1) {
+            setCurrentTabThatContainsQuestion(newTabIndex);
+          }
+          searchVirtualizer.scrollToIndex(
+            currentQuestionIndexInSearchResult + 1
+          );
         }
       }
     }
   };
-
   const handlePreviousQuestion = () => {
     if (partitionedTopicalData) {
-      if (currentQuestionIndex > 0) {
-        setCurrentQuestionId(
-          partitionedTopicalData[currentTabThatContainsQuestion][
-            currentQuestionIndex - 1
-          ].id
-        );
-        setCurrentTab(currentTabThatContainsQuestion);
-        scrollToQuestion({
-          questionId:
+      if (searchInput === "") {
+        if (currentQuestionIndex > 0) {
+          setCurrentQuestionId(
             partitionedTopicalData[currentTabThatContainsQuestion][
               currentQuestionIndex - 1
-            ].id,
-          tab: currentTabThatContainsQuestion,
-        });
-      } else {
-        if (currentTabThatContainsQuestion > 0) {
-          setCurrentTab(currentTabThatContainsQuestion - 1);
-          setCurrentTabThatContainsQuestion(currentTabThatContainsQuestion - 1);
-          setCurrentQuestionId(
-            partitionedTopicalData[currentTabThatContainsQuestion - 1][
-              partitionedTopicalData[currentTabThatContainsQuestion - 1]
-                .length - 1
             ].id
           );
+          setCurrentTab(currentTabThatContainsQuestion);
           scrollToQuestion({
             questionId:
+              partitionedTopicalData[currentTabThatContainsQuestion][
+                currentQuestionIndex - 1
+              ].id,
+            tab: currentTabThatContainsQuestion,
+          });
+        } else {
+          if (currentTabThatContainsQuestion > 0) {
+            setCurrentTab(currentTabThatContainsQuestion - 1);
+            setCurrentTabThatContainsQuestion(
+              currentTabThatContainsQuestion - 1
+            );
+            setCurrentQuestionId(
               partitionedTopicalData[currentTabThatContainsQuestion - 1][
                 partitionedTopicalData[currentTabThatContainsQuestion - 1]
                   .length - 1
-              ].id,
-            tab: currentTabThatContainsQuestion - 1,
-          });
+              ].id
+            );
+            scrollToQuestion({
+              questionId:
+                partitionedTopicalData[currentTabThatContainsQuestion - 1][
+                  partitionedTopicalData[currentTabThatContainsQuestion - 1]
+                    .length - 1
+                ].id,
+              tab: currentTabThatContainsQuestion - 1,
+            });
+          }
+        }
+      } else {
+        const currentQuestionIndexInSearchResult = searchResults.findIndex(
+          (question) => question.id === currentQuestionId
+        );
+        if (currentQuestionIndexInSearchResult === -1) {
+          return;
+        }
+        if (currentQuestionIndexInSearchResult > 0) {
+          setCurrentQuestionId(
+            searchResults[currentQuestionIndexInSearchResult - 1].id
+          );
+          const newTabIndex = partitionedTopicalData?.findIndex((partition) =>
+            partition.some(
+              (q) =>
+                q.id ===
+                searchResults[currentQuestionIndexInSearchResult - 1].id
+            )
+          );
+          if (newTabIndex > -1) {
+            setCurrentTabThatContainsQuestion(newTabIndex);
+          }
+          searchVirtualizer.scrollToIndex(
+            currentQuestionIndexInSearchResult - 1
+          );
         }
       }
     }
   };
+  const isHandleNextQuestionButtonDisabled = useMemo(() => {
+    if (!partitionedTopicalData) {
+      return true;
+    }
+    if (searchInput === "") {
+      return (
+        currentQuestionIndex ===
+          partitionedTopicalData[currentTabThatContainsQuestion].length - 1 &&
+        currentTabThatContainsQuestion === partitionedTopicalData.length - 1
+      );
+    } else {
+      const currentQuestionIndexInSearchResult = searchResults.findIndex(
+        (question) => question.id === currentQuestionId
+      );
+      if (currentQuestionIndexInSearchResult === -1) {
+        return true;
+      }
+      if (currentQuestionIndexInSearchResult === searchResults.length - 1) {
+        return true;
+      }
+    }
+    return false;
+  }, [
+    partitionedTopicalData,
+    searchInput,
+    currentQuestionIndex,
+    currentTabThatContainsQuestion,
+    searchResults,
+    currentQuestionId,
+  ]);
+  const isHandlePreviousQuestionButtonDisabled = useMemo(() => {
+    if (!partitionedTopicalData) {
+      return true;
+    }
+    if (searchInput === "") {
+      return currentQuestionIndex === 0 && currentTabThatContainsQuestion === 0;
+    } else {
+      const currentQuestionIndexInSearchResult = searchResults.findIndex(
+        (question) => question.id === currentQuestionId
+      );
+      if (currentQuestionIndexInSearchResult === -1) {
+        return true;
+      }
+      if (currentQuestionIndexInSearchResult === 0) {
+        return true;
+      }
+    }
+    return false;
+  }, [
+    partitionedTopicalData,
+    searchInput,
+    currentQuestionIndex,
+    currentTabThatContainsQuestion,
+    searchResults,
+    currentQuestionId,
+  ]);
 
   return (
     <Dialog
@@ -345,10 +439,11 @@ const QuestionInspect = ({
                 }
                 setSearchInput(e.target.value);
                 if (e.target.value.length === 0 && currentQuestionId) {
+                  setCurrentTab(currentTabThatContainsQuestion);
                   setTimeout(() => {
                     scrollToQuestion({
                       questionId: currentQuestionId,
-                      tab: currentTab,
+                      tab: currentTabThatContainsQuestion,
                     });
                   }, 0);
                 }
@@ -359,11 +454,14 @@ const QuestionInspect = ({
                 className="text-red-600 hover:text-red-600/80 cursor-pointer"
                 onClick={() => {
                   setSearchInput("");
+                  setCurrentTab(currentTabThatContainsQuestion);
                   if (currentQuestionId) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTab,
-                    });
+                    setTimeout(() => {
+                      scrollToQuestion({
+                        questionId: currentQuestionId,
+                        tab: currentTabThatContainsQuestion,
+                      });
+                    }, 0);
                   }
                 }}
               />
@@ -740,6 +838,7 @@ const QuestionInspect = ({
                 className="w-9 rounded-sm cursor-pointer"
                 onClick={handleNextQuestion}
                 title="Next question"
+                disabled={isHandleNextQuestionButtonDisabled}
               >
                 <ChevronDown />
               </Button>
@@ -748,6 +847,7 @@ const QuestionInspect = ({
                 className="w-9 rounded-sm cursor-pointer"
                 onClick={handlePreviousQuestion}
                 title="Previous question"
+                disabled={isHandlePreviousQuestionButtonDisabled}
               >
                 <ChevronUp />
               </Button>

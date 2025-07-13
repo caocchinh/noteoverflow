@@ -118,6 +118,26 @@ export const validateFilterData = ({
   }
 };
 
+export const fuzzySearch = (query: string, text: string): boolean => {
+  if (!query) {
+    return true;
+  }
+  if (!text) {
+    return false;
+  }
+  const lowerQuery = query.toLowerCase();
+  const lowerText = text.toLowerCase();
+  let queryIndex = 0;
+  let textIndex = 0;
+  while (queryIndex < lowerQuery.length && textIndex < lowerText.length) {
+    if (lowerQuery[queryIndex] === lowerText[textIndex]) {
+      queryIndex++;
+    }
+    textIndex++;
+  }
+  return queryIndex === lowerQuery.length;
+};
+
 export const extractPaperCode = ({
   questionId,
 }: {
