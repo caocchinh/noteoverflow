@@ -16,7 +16,7 @@ import {
   useState,
 } from "react";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   extractPaperCode,
   extractQuestionNumber,
@@ -150,7 +150,6 @@ const QuestionInspect = ({
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (isOpen.isOpen) {
-      setCurrentView("question");
       setIsBlockingInput(true);
       timeout = setTimeout(() => {
         setIsVirtualizationReady(true);
@@ -160,7 +159,11 @@ const QuestionInspect = ({
       setIsVirtualizationReady(false);
     }
     return () => clearTimeout(timeout);
-  }, [currentQuestionId, isOpen.isOpen, setIsOpen]);
+  }, [isOpen.isOpen, isInspectSidebarOpen]);
+
+  useEffect(() => {
+    setCurrentView("question");
+  }, [currentQuestionId]);
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
@@ -416,11 +419,15 @@ const QuestionInspect = ({
     searchResults,
     currentQuestionId,
   ]);
+  const ultilityHorizontalScrollRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <Dialog
       open={isOpen.isOpen}
-      onOpenChange={(open) =>
+      onOpenChange={(open) => {
+        if (open) {
+          setCurrentView("question");
+        }
         setIsOpen({
           isOpen: open,
           questionId:
@@ -428,8 +435,8 @@ const QuestionInspect = ({
             isOpen.questionId ??
             partitionedTopicalData?.[0]?.[0]?.id ??
             "",
-        })
-      }
+        });
+      }}
     >
       <DialogContent
         className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
@@ -840,113 +847,122 @@ const QuestionInspect = ({
             </SidebarContent>
             <SidebarRail />
           </Sidebar>
-          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent">
-            <div className="flex items-stretch w-max justify-center gap-4 mb-2">
-              <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
-                <Button
-                  onClick={() => setCurrentView("question")}
-                  className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                    currentView === "question" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                  )}
-                >
-                  Question
-                </Button>
-                <Button
-                  onClick={() => setCurrentView("answer")}
-                  className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                    currentView === "answer" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                  )}
-                >
-                  Answer
-                </Button>
-              </div>
-              <Tooltip>
-                <TooltipTrigger className="cursor-pointer" asChild>
+          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent overflow-hidden">
+            <ScrollArea
+              className="w-full whitespace-nowrap"
+              viewportRef={ultilityHorizontalScrollRef}
+            >
+              <div className="flex items-stretch w-max justify-center gap-4 mb-2">
+                <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
                   <Button
-                    variant="outline"
+                    onClick={() => setCurrentView("question")}
                     className={cn(
-                      "w-9 h-9 cursor-pointer !p-0",
-                      currentQuestionData?.year === 2009 &&
-                        "opacity-50 cursor-default"
+                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                      currentView === "question" &&
+                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
                     )}
                   >
+                    Question
+                  </Button>
+                  <Button
+                    onClick={() => setCurrentView("answer")}
+                    className={cn(
+                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                      currentView === "answer" &&
+                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                    )}
+                  >
+                    Answer
+                  </Button>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger className="cursor-pointer" asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-9 h-9 cursor-pointer !p-0",
+                        currentQuestionData?.year === 2009 &&
+                          "opacity-50 cursor-default"
+                      )}
+                    >
+                      <PastPaperLink question={currentQuestionData} type="qp">
+                        <ScrollText />
+                      </PastPaperLink>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="z-[99999999]" side="bottom">
                     <PastPaperLink question={currentQuestionData} type="qp">
-                      <ScrollText />
+                      {currentQuestionData?.year === 2009
+                        ? "Only supported year 2010 and above"
+                        : "View paper"}
                     </PastPaperLink>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="z-[99999999]" side="bottom">
-                  <PastPaperLink question={currentQuestionData} type="qp">
-                    {currentQuestionData?.year === 2009
-                      ? "Only supported year 2010 and above"
-                      : "View paper"}
-                  </PastPaperLink>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-9 h-9 cursor-pointer !p-0",
+                        currentQuestionData?.year === 2009 &&
+                          "opacity-50 cursor-default"
+                      )}
+                    >
+                      <PastPaperLink question={currentQuestionData} type="ms">
+                        <PencilLine />
+                      </PastPaperLink>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="z-[99999999]" side="bottom">
+                    <PastPaperLink question={currentQuestionData} type="ms">
+                      {currentQuestionData?.year === 2009
+                        ? "Only supported year 2010 and above"
+                        : "View mark scheme"}
+                    </PastPaperLink>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="flex items-center justify-center gap-2">
                   <Button
                     variant="outline"
-                    className={cn(
-                      "w-9 h-9 cursor-pointer !p-0",
-                      currentQuestionData?.year === 2009 &&
-                        "opacity-50 cursor-default"
-                    )}
+                    className="w-9 rounded-sm cursor-pointer"
+                    onClick={handleNextQuestion}
+                    title="Next question"
+                    disabled={isHandleNextQuestionButtonDisabled}
                   >
-                    <PastPaperLink question={currentQuestionData} type="ms">
-                      <PencilLine />
-                    </PastPaperLink>
+                    <ChevronDown />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent className="z-[99999999]" side="bottom">
-                  <PastPaperLink question={currentQuestionData} type="ms">
-                    {currentQuestionData?.year === 2009
-                      ? "Only supported year 2010 and above"
-                      : "View mark scheme"}
-                  </PastPaperLink>
-                </TooltipContent>
-              </Tooltip>
-              <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="w-9 rounded-sm cursor-pointer"
+                    onClick={handlePreviousQuestion}
+                    title="Previous question"
+                    disabled={isHandlePreviousQuestionButtonDisabled}
+                  >
+                    <ChevronUp />
+                  </Button>
+                </div>
                 <Button
                   variant="outline"
-                  className="w-9 rounded-sm cursor-pointer"
-                  onClick={handleNextQuestion}
-                  title="Next question"
-                  disabled={isHandleNextQuestionButtonDisabled}
+                  className="cursor-pointer"
+                  onClick={() => setIsInspectSidebarOpen(!isInspectSidebarOpen)}
                 >
-                  <ChevronDown />
+                  Toggle
+                  <PanelsTopLeft />
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-9 rounded-sm cursor-pointer"
-                  onClick={handlePreviousQuestion}
-                  title="Previous question"
-                  disabled={isHandlePreviousQuestionButtonDisabled}
-                >
-                  <ChevronUp />
-                </Button>
+                <QuestionInspectFinishedCheckbox
+                  finishedQuestions={userFinishedQuestions}
+                  questionId={currentQuestionId}
+                  isFinishedQuestionDisabled={isUserSessionPending}
+                  isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                  isFinishedQuestionError={isFinishedQuestionsError}
+                  isValidSession={isValidSession}
+                />
               </div>
-              <Button
-                variant="outline"
-                className="cursor-pointer"
-                onClick={() => setIsInspectSidebarOpen(!isInspectSidebarOpen)}
-              >
-                Toggle
-                <PanelsTopLeft />
-              </Button>
-              <QuestionInspectFinishedCheckbox
-                finishedQuestions={userFinishedQuestions}
-                questionId={currentQuestionId}
-                isFinishedQuestionDisabled={isUserSessionPending}
-                isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                isFinishedQuestionError={isFinishedQuestionsError}
-                isValidSession={isValidSession}
+              <ScrollBar
+                orientation="horizontal"
+                className="[&_.bg-border]:bg-transparent"
               />
-            </div>
+            </ScrollArea>
 
             <div
               className={cn(currentView === "question" ? "block" : "hidden")}
@@ -1054,12 +1070,13 @@ const InspectImages = ({
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
 }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
   return (
     <div className="flex flex-col flex-wrap w-full gap-2 relative items-center">
-      {imageSource[0]?.includes("http") && (
+      {imageSource[0]?.includes("http") && !isLoaded && (
         <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
       )}
       {imageSource.map((item) => (
@@ -1077,6 +1094,7 @@ const InspectImages = ({
               src={item}
               alt="Question image"
               loading="lazy"
+              onLoad={() => setIsLoaded(true)}
             />
           ) : (
             <p>{item}</p>
