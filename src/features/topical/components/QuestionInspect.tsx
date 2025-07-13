@@ -513,7 +513,7 @@ const QuestionInspect = ({
       }}
     >
       <DialogContent
-        className="w-[90vw] h-[94vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+        className="w-[90vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -529,7 +529,7 @@ const QuestionInspect = ({
           open={isInspectSidebarOpen}
           style={
             {
-              "--sidebar-width": "300px",
+              "--sidebar-width": "299.6px",
               height: "inherit",
               minHeight: "inherit !important",
             } as React.CSSProperties
@@ -1091,7 +1091,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76vh] lg:h-[80vh] w-full [&_.bg-border]:bg-transparent"
+                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-transparent"
                   type="always"
                   viewportRef={questionScrollAreaRef}
                 >
@@ -1110,7 +1110,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76vh] lg:h-[80vh] w-full [&_.bg-border]:bg-transparent"
+                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-transparent"
                   type="always"
                   viewportRef={answerScrollAreaRef}
                 >
@@ -1125,7 +1125,7 @@ const QuestionInspect = ({
               </div>
             </div>
             <Button
-              className="w-full h-8 cursor-pointer block lg:hidden "
+              className="w-full h-7 flex items-center justify-center cursor-pointer lg:hidden "
               onClick={() => {
                 if (currentQuestionId) {
                   setIsOpen({ isOpen: false, questionId: currentQuestionId });

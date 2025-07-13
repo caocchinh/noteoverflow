@@ -966,7 +966,7 @@ const TopicalPage = () => {
                       Cache settings
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="z-[100005]">
+                  <PopoverContent className="z-[100006]">
                     <CacheAccordion
                       isPersistantCacheEnabled={isPersistantCacheEnabled}
                       isSessionCacheEnabled={isSessionCacheEnabled}
@@ -985,7 +985,7 @@ const TopicalPage = () => {
                       Layout settings
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                  <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
                     <h4 className="text-sm font-medium text-center mb-2">
                       Number of maximum displayed columns
                     </h4>
@@ -1008,7 +1008,7 @@ const TopicalPage = () => {
                       Visual settings
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                  <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
                     <h4 className="text-sm font-medium text-center mb-2">
                       Show green tint on finished questions?
                     </h4>

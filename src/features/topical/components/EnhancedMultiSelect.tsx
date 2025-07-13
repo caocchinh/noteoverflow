@@ -304,7 +304,7 @@ export default function EnhancedMultiSelect({
             )}
             <Drawer onOpenChange={setOpen} open={open}>
               <DrawerContent
-                className="z-[100004] h-[95vh] max-h-[95vh]"
+                className="z-[100007] h-[95vh] max-h-[95vh]"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
