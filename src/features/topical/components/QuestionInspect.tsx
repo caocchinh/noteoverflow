@@ -31,6 +31,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ChevronUp,
+  FastForward,
   Loader2,
   PanelsTopLeft,
   PencilLine,
@@ -52,6 +53,14 @@ import {
 import { ValidSeason } from "@/constants/types";
 import { SelectedQuestion } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarProvider,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 
 const QuestionInspect = ({
   isOpen,
@@ -64,6 +73,8 @@ const QuestionInspect = ({
   isBookmarkError,
   isFinishedQuestionsFetching,
   isFinishedQuestionsError,
+  isInspectSidebarOpen,
+  setIsInspectSidebarOpen,
   userFinishedQuestions,
 }: {
   isOpen: {
@@ -76,6 +87,8 @@ const QuestionInspect = ({
   bookmarks: Set<string>;
   isUserSessionPending: boolean;
   isValidSession: boolean;
+  isInspectSidebarOpen: boolean;
+  setIsInspectSidebarOpen: (open: boolean) => void;
   isBookmarksFetching: boolean;
   isBookmarkError: boolean;
   isFinishedQuestionsFetching: boolean;
@@ -413,519 +426,562 @@ const QuestionInspect = ({
           questionId:
             currentQuestionId ??
             isOpen.questionId ??
-            partitionedTopicalData?.[0]?.[0]?.id,
+            partitionedTopicalData?.[0]?.[0]?.id ??
+            "",
         })
       }
     >
-      <DialogContent className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0">
+      <DialogContent
+        className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+        showCloseButton={false}
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Question and answer inspector</DialogTitle>
           <DialogDescription>
             View the question and answer for individual questions
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-2 w-[27%] h-[inherit] justify-between items-center border-r border-border p-3 pr-1">
-          <div className="flex items-center justify-start w-full gap-2">
-            <div className="flex items-center gap-2  border-b border-border">
-              <Search />
-              <Input
-                className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[13px]"
-                placeholder="Search for a question"
-                value={searchInput}
-                readOnly={isBlockingInput}
-                onChange={(e) => {
-                  if (searchInput == "") {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                    });
-                  }
-                  setSearchInput(e.target.value);
-                  if (e.target.value.length === 0 && currentQuestionId) {
-                    setCurrentTab(currentTabThatContainsQuestion);
-                    setTimeout(() => {
-                      scrollToQuestion({
-                        questionId: currentQuestionId,
-                        tab: currentTabThatContainsQuestion,
-                      });
-                    }, 0);
-                  }
-                }}
-              />
-              {searchInput.length > 0 && (
-                <X
-                  className="text-red-600 hover:text-red-600/80 cursor-pointer"
+        <SidebarProvider
+          defaultOpen={isInspectSidebarOpen}
+          onOpenChange={setIsInspectSidebarOpen}
+          openMobile={isInspectSidebarOpen}
+          defaultOpenMobile={false}
+          onOpenChangeMobile={setIsInspectSidebarOpen}
+          open={isInspectSidebarOpen}
+          style={
+            {
+              "--sidebar-width": "300px",
+              height: "inherit",
+              minHeight: "inherit !important",
+            } as React.CSSProperties
+          }
+        >
+          <Sidebar className="top-0 !h-full">
+            <SidebarHeader className="sr-only">Search questions</SidebarHeader>
+            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1">
+              <div className="flex items-center justify-start w-full gap-2 px-1">
+                <div className="flex items-center gap-2 border-b border-border">
+                  <Search />
+                  <Input
+                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[13px]"
+                    placeholder="Search for a question"
+                    value={searchInput}
+                    readOnly={isBlockingInput}
+                    onChange={(e) => {
+                      if (searchInput == "") {
+                        listScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                        });
+                      }
+                      setSearchInput(e.target.value);
+                      if (e.target.value.length === 0 && currentQuestionId) {
+                        setCurrentTab(currentTabThatContainsQuestion);
+                        setTimeout(() => {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: currentTabThatContainsQuestion,
+                          });
+                        }, 0);
+                      }
+                    }}
+                  />
+                  {searchInput.length > 0 && (
+                    <X
+                      className="text-red-600 hover:text-red-600/80 cursor-pointer"
+                      onClick={() => {
+                        setSearchInput("");
+                        setCurrentTab(currentTabThatContainsQuestion);
+                        if (currentQuestionId) {
+                          setTimeout(() => {
+                            scrollToQuestion({
+                              questionId: currentQuestionId,
+                              tab: currentTabThatContainsQuestion,
+                            });
+                          }, 0);
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+                <Button
+                  variant="default"
+                  className="cursor-pointer flex items-center justify-center gap-1"
+                  title="Go to current question"
                   onClick={() => {
-                    setSearchInput("");
-                    setCurrentTab(currentTabThatContainsQuestion);
-                    if (currentQuestionId) {
-                      setTimeout(() => {
+                    if (searchInput === "") {
+                      setCurrentTab(currentTabThatContainsQuestion);
+                      if (currentQuestionId) {
                         scrollToQuestion({
                           questionId: currentQuestionId,
                           tab: currentTabThatContainsQuestion,
                         });
-                      }, 0);
+                      }
+                    } else {
+                      const currentQuestionIndexInSearchResult =
+                        searchResults.findIndex(
+                          (question) => question.id === currentQuestionId
+                        );
+                      if (currentQuestionIndexInSearchResult === -1) {
+                        return;
+                      }
+                      searchVirtualizer.scrollToIndex(
+                        currentQuestionIndexInSearchResult
+                      );
                     }
                   }}
-                />
-              )}
-            </div>
-            <Button
-              variant="default"
-              className="cursor-pointer flex items-center justify-center gap-1"
-              title="Go to current question"
-              onClick={() => {
-                if (searchInput === "") {
-                  setCurrentTab(currentTabThatContainsQuestion);
-                  if (currentQuestionId) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTabThatContainsQuestion,
-                    });
-                  }
-                } else {
-                  const currentQuestionIndexInSearchResult =
-                    searchResults.findIndex(
-                      (question) => question.id === currentQuestionId
-                    );
-                  if (currentQuestionIndexInSearchResult === -1) {
-                    return;
-                  }
-                  searchVirtualizer.scrollToIndex(
-                    currentQuestionIndexInSearchResult
-                  );
-                }
-              }}
-            >
-              <PanelsTopLeft />
-              Current
-            </Button>
-          </div>
-          <ScrollArea
-            className={cn(
-              "w-full",
-              searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
-            )}
-            type="always"
-            viewportRef={listScrollAreaRef}
-          >
-            <div
-              className={cn(
-                "relative w-full",
-                searchInput.length > 0 && "!hidden"
-              )}
-              style={{
-                height: displayVirtualizer.getTotalSize(),
-              }}
-            >
-              {virtualDisplayItems.map((virtualItem) => (
-                <div
-                  className="absolute top-0 left-0 w-full pr-3"
-                  style={{
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
                 >
-                  {partitionedTopicalData?.[currentTab][virtualItem.index] && (
-                    <Fragment key={virtualItem.index}>
-                      <div
-                        className={cn(
-                          "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
-                          currentQuestionId ===
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id && "!bg-logo-main text-white",
-                          userFinishedQuestions?.has(
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id
-                          ) &&
-                            "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-                        )}
-                        onClick={() => {
-                          setCurrentQuestionId(
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id
-                          );
-                          questionScrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                          answerScrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                          const newTabIndex = partitionedTopicalData?.findIndex(
-                            (partition) =>
-                              partition.some(
-                                (q) =>
-                                  q.id ===
+                  <FastForward />
+                  Current
+                </Button>
+              </div>
+              <ScrollArea
+                className={cn(
+                  "w-full",
+                  searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
+                )}
+                type="always"
+                viewportRef={listScrollAreaRef}
+              >
+                <div
+                  className={cn(
+                    "relative w-full",
+                    searchInput.length > 0 && "!hidden"
+                  )}
+                  style={{
+                    height: displayVirtualizer.getTotalSize(),
+                  }}
+                >
+                  {virtualDisplayItems.map((virtualItem) => (
+                    <div
+                      className="absolute top-0 left-0 w-full pr-3"
+                      style={{
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      key={virtualItem.key}
+                      data-index={virtualItem.index}
+                    >
+                      {partitionedTopicalData?.[currentTab][
+                        virtualItem.index
+                      ] && (
+                        <Fragment key={virtualItem.index}>
+                          <div
+                            className={cn(
+                              "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                              currentQuestionId ===
+                                partitionedTopicalData?.[currentTab][
+                                  virtualItem.index
+                                ]?.id && "!bg-logo-main text-white",
+                              userFinishedQuestions?.has(
+                                partitionedTopicalData?.[currentTab][
+                                  virtualItem.index
+                                ]?.id
+                              ) &&
+                                "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+                            )}
+                            onClick={() => {
+                              setCurrentQuestionId(
+                                partitionedTopicalData?.[currentTab][
+                                  virtualItem.index
+                                ]?.id
+                              );
+                              questionScrollAreaRef.current?.scrollTo({
+                                top: 0,
+                                behavior: "instant",
+                              });
+                              answerScrollAreaRef.current?.scrollTo({
+                                top: 0,
+                                behavior: "instant",
+                              });
+                              const newTabIndex =
+                                partitionedTopicalData?.findIndex((partition) =>
+                                  partition.some(
+                                    (q) =>
+                                      q.id ===
+                                      partitionedTopicalData?.[currentTab][
+                                        virtualItem.index
+                                      ]?.id
+                                  )
+                                );
+                              if (
+                                newTabIndex !== undefined &&
+                                newTabIndex > -1
+                              ) {
+                                setCurrentTabThatContainsQuestion(newTabIndex);
+                              }
+                            }}
+                          >
+                            <p>
+                              {extractPaperCode({
+                                questionId:
                                   partitionedTopicalData?.[currentTab][
                                     virtualItem.index
-                                  ]?.id
-                              )
-                          );
-                          if (newTabIndex !== undefined && newTabIndex > -1) {
-                            setCurrentTabThatContainsQuestion(newTabIndex);
-                          }
-                        }}
-                      >
-                        <p>
+                                  ]?.id,
+                              })}{" "}
+                              Q
+                              {extractQuestionNumber({
+                                questionId:
+                                  partitionedTopicalData?.[currentTab][
+                                    virtualItem.index
+                                  ]?.id,
+                              })}
+                            </p>
+                            <QuestionInspectBookmark
+                              questionId={
+                                partitionedTopicalData?.[currentTab][
+                                  virtualItem.index
+                                ]?.id
+                              }
+                              isBookmarkDisabled={isUserSessionPending}
+                              bookmarks={bookmarks}
+                              isValidSession={isValidSession}
+                              isBookmarksFetching={isBookmarksFetching}
+                              isBookmarkError={isBookmarkError}
+                            />
+                          </div>
+                          <SelectSeparator />
+                        </Fragment>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div
+                  className="relative w-full"
+                  style={{
+                    height: searchVirtualizer.getTotalSize(),
+                  }}
+                >
+                  {virtualSearchItems.map((virtualItem) => (
+                    <div
+                      className="absolute top-0 left-0 w-full pr-3"
+                      style={{
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      key={virtualItem.key}
+                      data-index={virtualItem.index}
+                    >
+                      <Fragment key={searchResults[virtualItem.index]?.id}>
+                        <div
+                          className={cn(
+                            "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                            currentQuestionId ===
+                              searchResults[virtualItem.index]?.id &&
+                              "!bg-logo-main text-white",
+                            userFinishedQuestions?.has(
+                              searchResults[virtualItem.index]?.id
+                            ) &&
+                              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+                          )}
+                          onClick={() => {
+                            setCurrentQuestionId(
+                              searchResults[virtualItem.index]?.id
+                            );
+                            questionScrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                            answerScrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                            const newTabIndex =
+                              partitionedTopicalData?.findIndex((partition) =>
+                                partition.some(
+                                  (q) =>
+                                    q.id ===
+                                    searchResults[virtualItem.index]?.id
+                                )
+                              );
+                            if (newTabIndex !== undefined && newTabIndex > -1) {
+                              setCurrentTab(newTabIndex);
+                              setCurrentTabThatContainsQuestion(newTabIndex);
+                            }
+                          }}
+                        >
                           {extractPaperCode({
-                            questionId:
-                              partitionedTopicalData?.[currentTab][
-                                virtualItem.index
-                              ]?.id,
+                            questionId: searchResults[virtualItem.index]?.id,
                           })}{" "}
                           Q
                           {extractQuestionNumber({
-                            questionId:
-                              partitionedTopicalData?.[currentTab][
-                                virtualItem.index
-                              ]?.id,
+                            questionId: searchResults[virtualItem.index]?.id,
                           })}
-                        </p>
-                        <QuestionInspectBookmark
-                          questionId={
-                            partitionedTopicalData?.[currentTab][
-                              virtualItem.index
-                            ]?.id
-                          }
-                          isBookmarkDisabled={isUserSessionPending}
-                          bookmarks={bookmarks}
-                          isValidSession={isValidSession}
-                          isBookmarksFetching={isBookmarksFetching}
-                          isBookmarkError={isBookmarkError}
-                        />
-                      </div>
-                      <SelectSeparator />
-                    </Fragment>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div
-              className="relative w-full"
-              style={{
-                height: searchVirtualizer.getTotalSize(),
-              }}
-            >
-              {virtualSearchItems.map((virtualItem) => (
-                <div
-                  className="absolute top-0 left-0 w-full pr-3"
-                  style={{
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                >
-                  <Fragment key={searchResults[virtualItem.index]?.id}>
-                    <div
-                      className={cn(
-                        "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
-                        currentQuestionId ===
-                          searchResults[virtualItem.index]?.id &&
-                          "!bg-logo-main text-white",
-                        userFinishedQuestions?.has(
-                          searchResults[virtualItem.index]?.id
-                        ) &&
-                          "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-                      )}
-                      onClick={() => {
-                        setCurrentQuestionId(
-                          searchResults[virtualItem.index]?.id
-                        );
-                        questionScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                        answerScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                        const newTabIndex = partitionedTopicalData?.findIndex(
-                          (partition) =>
-                            partition.some(
-                              (q) =>
-                                q.id === searchResults[virtualItem.index]?.id
-                            )
-                        );
-                        if (newTabIndex !== undefined && newTabIndex > -1) {
-                          setCurrentTab(newTabIndex);
-                          setCurrentTabThatContainsQuestion(newTabIndex);
-                        }
-                      }}
-                    >
-                      {extractPaperCode({
-                        questionId: searchResults[virtualItem.index]?.id,
-                      })}{" "}
-                      Q
-                      {extractQuestionNumber({
-                        questionId: searchResults[virtualItem.index]?.id,
-                      })}
-                      <QuestionInspectBookmark
-                        questionId={searchResults[virtualItem.index]?.id}
-                        isBookmarkDisabled={isUserSessionPending}
-                        bookmarks={bookmarks}
-                        isValidSession={isValidSession}
-                        isBookmarksFetching={isBookmarksFetching}
-                        isBookmarkError={isBookmarkError}
-                      />
+                          <QuestionInspectBookmark
+                            questionId={searchResults[virtualItem.index]?.id}
+                            isBookmarkDisabled={isUserSessionPending}
+                            bookmarks={bookmarks}
+                            isValidSession={isValidSession}
+                            isBookmarksFetching={isBookmarksFetching}
+                            isBookmarkError={isBookmarkError}
+                          />
+                        </div>
+                        <SelectSeparator />
+                      </Fragment>
                     </div>
-                    <SelectSeparator />
-                  </Fragment>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+              </ScrollArea>
 
-          <div
-            className={cn(
-              "flex justify-between items-center w-full",
-              searchInput.length > 0 && "hidden"
-            )}
-          >
-            <div className="flex items-center gap-2  ">
-              <Button
-                onClick={() => {
-                  setCurrentTab(0);
-                  if (
-                    currentTabThatContainsQuestion == 0 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: 0,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer"
-              >
-                <ChevronsLeft />
-              </Button>
-              <Button
-                onClick={() => {
-                  if (
-                    currentTab > 0 &&
-                    currentTab < (partitionedTopicalData?.length ?? 0)
-                  ) {
-                    setCurrentTab(currentTab - 1);
-                  }
-                  if (
-                    currentTabThatContainsQuestion == currentTab - 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTab - 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer"
-              >
-                <ChevronLeft />
-              </Button>
-            </div>
-            <p className="text-md">
-              {currentTab + 1}/{partitionedTopicalData?.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => {
-                  if (currentTab < (partitionedTopicalData?.length ?? 0) - 1) {
-                    setCurrentTab(currentTab + 1);
-                  }
-                  if (
-                    currentTabThatContainsQuestion == currentTab + 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTab + 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer"
-              >
-                <ChevronRight />
-              </Button>
-              <Button
-                onClick={() => {
-                  setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
-                  if (
-                    currentTabThatContainsQuestion ==
-                      (partitionedTopicalData?.length ?? 1) - 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: (partitionedTopicalData?.length ?? 1) - 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer"
-              >
-                <ChevronsRight />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-[73%] h-[inherit] p-2 rounded-md pr-4 pl-0">
-          <div className="flex items-stretch w-max justify-center gap-4 mb-2">
-            <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
-              <Button
-                onClick={() => setCurrentView("question")}
+              <div
                 className={cn(
-                  "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                  currentView === "question" &&
-                    "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                  "flex justify-between items-center w-full",
+                  searchInput.length > 0 && "hidden"
                 )}
               >
-                Question
-              </Button>
-              <Button
-                onClick={() => setCurrentView("answer")}
-                className={cn(
-                  "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                  currentView === "answer" &&
-                    "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                )}
-              >
-                Answer
-              </Button>
-            </div>
-            <Tooltip>
-              <TooltipTrigger className="cursor-pointer" asChild>
+                <div className="flex items-center gap-2  ">
+                  <Button
+                    onClick={() => {
+                      setCurrentTab(0);
+                      if (
+                        currentTabThatContainsQuestion == 0 &&
+                        currentQuestionId
+                      ) {
+                        scrollToQuestion({
+                          questionId: currentQuestionId,
+                          tab: 0,
+                        });
+                      } else {
+                        listScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="w-9 h-9 cursor-pointer"
+                  >
+                    <ChevronsLeft />
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (
+                        currentTab > 0 &&
+                        currentTab < (partitionedTopicalData?.length ?? 0)
+                      ) {
+                        setCurrentTab(currentTab - 1);
+                      }
+                      if (
+                        currentTabThatContainsQuestion == currentTab - 1 &&
+                        currentQuestionId
+                      ) {
+                        scrollToQuestion({
+                          questionId: currentQuestionId,
+                          tab: currentTab - 1,
+                        });
+                      } else {
+                        listScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="w-9 h-9 cursor-pointer"
+                  >
+                    <ChevronLeft />
+                  </Button>
+                </div>
+                <p className="text-md">
+                  {currentTab + 1}/{partitionedTopicalData?.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => {
+                      if (
+                        currentTab <
+                        (partitionedTopicalData?.length ?? 0) - 1
+                      ) {
+                        setCurrentTab(currentTab + 1);
+                      }
+                      if (
+                        currentTabThatContainsQuestion == currentTab + 1 &&
+                        currentQuestionId
+                      ) {
+                        scrollToQuestion({
+                          questionId: currentQuestionId,
+                          tab: currentTab + 1,
+                        });
+                      } else {
+                        listScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="w-9 h-9 cursor-pointer"
+                  >
+                    <ChevronRight />
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
+                      if (
+                        currentTabThatContainsQuestion ==
+                          (partitionedTopicalData?.length ?? 1) - 1 &&
+                        currentQuestionId
+                      ) {
+                        scrollToQuestion({
+                          questionId: currentQuestionId,
+                          tab: (partitionedTopicalData?.length ?? 1) - 1,
+                        });
+                      } else {
+                        listScrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                    className="w-9 h-9 cursor-pointer"
+                  >
+                    <ChevronsRight />
+                  </Button>
+                </div>
+              </div>
+            </SidebarContent>
+            <SidebarRail />
+          </Sidebar>
+          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent">
+            <div className="flex items-stretch w-max justify-center gap-4 mb-2">
+              <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
                 <Button
-                  variant="outline"
+                  onClick={() => setCurrentView("question")}
                   className={cn(
-                    "w-9 h-9 cursor-pointer !p-0",
-                    currentQuestionData?.year === 2009 &&
-                      "opacity-50 cursor-default"
+                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                    currentView === "question" &&
+                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
                   )}
                 >
+                  Question
+                </Button>
+                <Button
+                  onClick={() => setCurrentView("answer")}
+                  className={cn(
+                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                    currentView === "answer" &&
+                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                  )}
+                >
+                  Answer
+                </Button>
+              </div>
+              <Tooltip>
+                <TooltipTrigger className="cursor-pointer" asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-9 h-9 cursor-pointer !p-0",
+                      currentQuestionData?.year === 2009 &&
+                        "opacity-50 cursor-default"
+                    )}
+                  >
+                    <PastPaperLink question={currentQuestionData} type="qp">
+                      <ScrollText />
+                    </PastPaperLink>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="z-[99999999]" side="bottom">
                   <PastPaperLink question={currentQuestionData} type="qp">
-                    <ScrollText />
+                    {currentQuestionData?.year === 2009
+                      ? "Only supported year 2010 and above"
+                      : "View paper"}
                   </PastPaperLink>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="z-[99999999]" side="bottom">
-                <PastPaperLink question={currentQuestionData} type="qp">
-                  {currentQuestionData?.year === 2009
-                    ? "Only supported year 2010 and above"
-                    : "View paper"}
-                </PastPaperLink>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger className="cursor-pointer -ml-1" asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-9 h-9 cursor-pointer !p-0",
+                      currentQuestionData?.year === 2009 &&
+                        "opacity-50 cursor-default"
+                    )}
+                  >
+                    <PastPaperLink question={currentQuestionData} type="ms">
+                      <PencilLine />
+                    </PastPaperLink>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="z-[99999999]" side="bottom">
+                  <PastPaperLink question={currentQuestionData} type="ms">
+                    {currentQuestionData?.year === 2009
+                      ? "Only supported year 2010 and above"
+                      : "View mark scheme"}
+                  </PastPaperLink>
+                </TooltipContent>
+              </Tooltip>
+              <div className="flex items-center justify-center gap-2">
                 <Button
                   variant="outline"
-                  className={cn(
-                    "w-9 h-9 cursor-pointer !p-0",
-                    currentQuestionData?.year === 2009 &&
-                      "opacity-50 cursor-default"
-                  )}
+                  className="w-9 rounded-sm cursor-pointer"
+                  onClick={handleNextQuestion}
+                  title="Next question"
+                  disabled={isHandleNextQuestionButtonDisabled}
                 >
-                  <PastPaperLink question={currentQuestionData} type="ms">
-                    <PencilLine />
-                  </PastPaperLink>
+                  <ChevronDown />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent className="z-[99999999]" side="bottom">
-                <PastPaperLink question={currentQuestionData} type="ms">
-                  {currentQuestionData?.year === 2009
-                    ? "Only supported year 2010 and above"
-                    : "View mark scheme"}
-                </PastPaperLink>
-              </TooltipContent>
-            </Tooltip>
-            <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  className="w-9 rounded-sm cursor-pointer"
+                  onClick={handlePreviousQuestion}
+                  title="Previous question"
+                  disabled={isHandlePreviousQuestionButtonDisabled}
+                >
+                  <ChevronUp />
+                </Button>
+              </div>
               <Button
                 variant="outline"
-                className="w-9 rounded-sm cursor-pointer"
-                onClick={handleNextQuestion}
-                title="Next question"
-                disabled={isHandleNextQuestionButtonDisabled}
+                className="cursor-pointer"
+                onClick={() => setIsInspectSidebarOpen(!isInspectSidebarOpen)}
               >
-                <ChevronDown />
+                Toggle
+                <PanelsTopLeft />
               </Button>
-              <Button
-                variant="outline"
-                className="w-9 rounded-sm cursor-pointer"
-                onClick={handlePreviousQuestion}
-                title="Previous question"
-                disabled={isHandlePreviousQuestionButtonDisabled}
-              >
-                <ChevronUp />
-              </Button>
+              <QuestionInspectFinishedCheckbox
+                finishedQuestions={userFinishedQuestions}
+                questionId={currentQuestionId}
+                isFinishedQuestionDisabled={isUserSessionPending}
+                isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                isFinishedQuestionError={isFinishedQuestionsError}
+                isValidSession={isValidSession}
+              />
             </div>
-            <QuestionInspectFinishedCheckbox
-              finishedQuestions={userFinishedQuestions}
-              questionId={currentQuestionId}
-              isFinishedQuestionDisabled={isUserSessionPending}
-              isFinishedQuestionFetching={isFinishedQuestionsFetching}
-              isFinishedQuestionError={isFinishedQuestionsError}
-              isValidSession={isValidSession}
-            />
-          </div>
 
-          <div className={cn(currentView === "question" ? "block" : "hidden")}>
-            <ScrollArea
-              className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
-              type="always"
-              viewportRef={questionScrollAreaRef}
+            <div
+              className={cn(currentView === "question" ? "block" : "hidden")}
             >
-              <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                <TopicDisplay question={currentQuestionData} />
-              </div>
-              <InspectImages
-                imageSource={currentQuestionData?.questionImages ?? []}
-                currentQuestionId={currentQuestionData?.id}
-              />
-            </ScrollArea>
-          </div>
-          <div className={cn(currentView === "answer" ? "block" : "hidden")}>
-            <ScrollArea
-              className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
-              type="always"
-              viewportRef={answerScrollAreaRef}
-            >
-              <div className="flex flex-row flex-wrap w-full gap-2 py-2">
-                <TopicDisplay question={currentQuestionData} />
-              </div>
-              <InspectImages
-                imageSource={currentQuestionData?.answers ?? []}
-                currentQuestionId={currentQuestionData?.id}
-              />
-            </ScrollArea>
-          </div>
-        </div>
+              <ScrollArea
+                className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
+                type="always"
+                viewportRef={questionScrollAreaRef}
+              >
+                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                  <TopicDisplay question={currentQuestionData} />
+                </div>
+                <InspectImages
+                  imageSource={currentQuestionData?.questionImages ?? []}
+                  currentQuestionId={currentQuestionData?.id}
+                />
+              </ScrollArea>
+            </div>
+            <div className={cn(currentView === "answer" ? "block" : "hidden")}>
+              <ScrollArea
+                className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
+                type="always"
+                viewportRef={answerScrollAreaRef}
+              >
+                <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                  <TopicDisplay question={currentQuestionData} />
+                </div>
+                <InspectImages
+                  imageSource={currentQuestionData?.answers ?? []}
+                  currentQuestionId={currentQuestionData?.id}
+                />
+              </ScrollArea>
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
       </DialogContent>
     </Dialog>
   );
@@ -1002,7 +1058,7 @@ const InspectImages = ({
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
   return (
-    <div className="flex flex-col flex-wrap w-full gap-2 relative">
+    <div className="flex flex-col flex-wrap w-full gap-2 relative items-center">
       {imageSource[0]?.includes("http") && (
         <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
       )}
@@ -1017,7 +1073,7 @@ const InspectImages = ({
         >
           {item.includes("http") ? (
             <img
-              className="w-full h-full object-contain relative z-10"
+              className="w-full h-full object-contain relative z-10 !max-w-[800px]"
               src={item}
               alt="Question image"
               loading="lazy"

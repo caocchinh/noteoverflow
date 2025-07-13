@@ -1,26 +1,26 @@
-import type { Metadata } from 'next';
-import { Inter, Roboto } from 'next/font/google';
-import './globals.css';
-import NextTopLoader from 'nextjs-toploader';
-import NavBar from '@/components/NavBar/NavBar';
-import { Toaster } from '@/components/ui/sonner';
-import { LOGO_MAIN_COLOR } from '@/constants/constants';
-import { QueryProvider } from '@/context/QueryProvider';
-import { ThemeProvider } from '@/context/ThemeProvider';
+import type { Metadata } from "next";
+import { Inter, Roboto } from "next/font/google";
+import "./globals.css";
+import NextTopLoader from "nextjs-toploader";
+import NavBar from "@/components/NavBar/NavBar";
+import { Toaster } from "@/components/ui/sonner";
+import { LOGO_MAIN_COLOR } from "@/constants/constants";
+import { QueryProvider } from "@/context/QueryProvider";
+import { ThemeProvider } from "@/context/ThemeProvider";
 
 const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
+  variable: "--font-inter",
+  subsets: ["latin"],
 });
 
 const roboto = Roboto({
-  variable: '--font-roboto',
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
-  title: 'NoteOverflow',
+  title: "NoteOverflow",
   description:
     "World's most comprehensive IGCSE, AS & A-level study materials platform",
 };
@@ -33,7 +33,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>NoteOverflow</title>
         <meta
           content="World's most comprehensive IGCSE, AS & A-level study materials platform"
           name="description"

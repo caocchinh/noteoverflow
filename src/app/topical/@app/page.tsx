@@ -125,6 +125,7 @@ const TopicalPage = () => {
     useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+  const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<
     {
@@ -709,312 +710,318 @@ const TopicalPage = () => {
         >
           <Sidebar key={sidebarKey} variant="floating">
             <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
-            <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
-              <div className="flex w-full flex-col items-center justify-start gap-4">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <AnimatePresence mode="wait">
-                      {selectedSubject && selectedCurriculum ? (
-                        <motion.div
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          key={selectedSubject}
-                          transition={{
-                            duration: 0.15,
-                            ease: "easeInOut",
-                          }}
-                        >
-                          <NextImage
-                            alt="cover"
-                            className="self-center rounded-[2px]"
-                            height={126}
-                            src={
-                              availableSubjects.find(
-                                (item) => item.code === selectedSubject
-                              )?.coverImage ?? ""
-                            }
-                            width={100}
-                          />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          key={selectedSubject}
-                          transition={{
-                            duration: 0.15,
-                            ease: "easeInOut",
-                          }}
-                        >
-                          <NextImage
-                            alt="default subject"
-                            className="self-center"
-                            height={100}
-                            src="/assets/pointing.png"
-                            width={100}
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    <div className="flex flex-col items-start justify-start gap-6">
-                      <div
-                        className="flex flex-col items-start justify-start gap-1"
-                        ref={curriculumRef}
-                      >
-                        <h3
-                          className={cn(
-                            "w-max font-medium text-sm",
-                            invalidInputs.curriculum && "text-destructive"
-                          )}
-                        >
-                          Curriculum
-                        </h3>
-                        <EnhancedSelect
-                          data={TOPICAL_DATA.map((item) => ({
-                            code: item.curriculum,
-                            coverImage: item.coverImage,
-                          }))}
-                          label="Curriculum"
-                          prerequisite=""
-                          selectedValue={selectedCurriculum}
-                          setSelectedValue={(value) => {
-                            setSelectedCurriculum(value as ValidCurriculum);
-                          }}
-                        />
-                        {invalidInputs.curriculum && (
-                          <p className="text-destructive text-sm">
-                            Curriculum is required
-                          </p>
+            <ScrollArea className="h-full" type="always">
+              <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
+                <div className="flex w-full flex-col items-center justify-start gap-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <AnimatePresence mode="wait">
+                        {selectedSubject && selectedCurriculum ? (
+                          <motion.div
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            key={selectedSubject}
+                            transition={{
+                              duration: 0.15,
+                              ease: "easeInOut",
+                            }}
+                          >
+                            <NextImage
+                              alt="cover"
+                              className="self-center rounded-[2px]"
+                              height={126}
+                              src={
+                                availableSubjects.find(
+                                  (item) => item.code === selectedSubject
+                                )?.coverImage ?? ""
+                              }
+                              width={100}
+                            />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            key={selectedSubject}
+                            transition={{
+                              duration: 0.15,
+                              ease: "easeInOut",
+                            }}
+                          >
+                            <NextImage
+                              alt="default subject"
+                              className="self-center"
+                              height={100}
+                              src="/assets/pointing.png"
+                              width={100}
+                            />
+                          </motion.div>
                         )}
-                      </div>
+                      </AnimatePresence>
+                      <div className="flex flex-col items-start justify-start gap-6">
+                        <div
+                          className="flex flex-col items-start justify-start gap-1"
+                          ref={curriculumRef}
+                        >
+                          <h3
+                            className={cn(
+                              "w-max font-medium text-sm",
+                              invalidInputs.curriculum && "text-destructive"
+                            )}
+                          >
+                            Curriculum
+                          </h3>
+                          <EnhancedSelect
+                            data={TOPICAL_DATA.map((item) => ({
+                              code: item.curriculum,
+                              coverImage: item.coverImage,
+                            }))}
+                            label="Curriculum"
+                            prerequisite=""
+                            selectedValue={selectedCurriculum}
+                            setSelectedValue={(value) => {
+                              setSelectedCurriculum(value as ValidCurriculum);
+                            }}
+                          />
+                          {invalidInputs.curriculum && (
+                            <p className="text-destructive text-sm">
+                              Curriculum is required
+                            </p>
+                          )}
+                        </div>
 
-                      <div
-                        className="flex flex-col items-start justify-start gap-1"
-                        ref={subjectRef}
-                      >
-                        <h3
-                          className={cn(
-                            "w-max font-medium text-sm",
-                            invalidInputs.subject && "text-destructive"
-                          )}
+                        <div
+                          className="flex flex-col items-start justify-start gap-1"
+                          ref={subjectRef}
                         >
-                          Subject
-                        </h3>
-                        <EnhancedSelect
-                          data={availableSubjects}
-                          label="Subject"
-                          prerequisite={selectedCurriculum ? "" : "Curriculum"}
-                          selectedValue={selectedSubject}
-                          setSelectedValue={setSelectedSubject}
-                        />
-                        {invalidInputs.subject && (
-                          <p className="text-destructive text-sm">
-                            Subject is required
-                          </p>
-                        )}
+                          <h3
+                            className={cn(
+                              "w-max font-medium text-sm",
+                              invalidInputs.subject && "text-destructive"
+                            )}
+                          >
+                            Subject
+                          </h3>
+                          <EnhancedSelect
+                            data={availableSubjects}
+                            label="Subject"
+                            prerequisite={
+                              selectedCurriculum ? "" : "Curriculum"
+                            }
+                            selectedValue={selectedSubject}
+                            setSelectedValue={setSelectedSubject}
+                          />
+                          {invalidInputs.subject && (
+                            <p className="text-destructive text-sm">
+                              Subject is required
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={topicRef}
-                  >
-                    <h3
-                      className={cn(
-                        "w-max font-medium text-sm",
-                        invalidInputs.topic && "text-destructive"
-                      )}
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={topicRef}
                     >
-                      Topic
-                    </h3>
-                    <EnhancedMultiSelect
-                      data={availableTopics}
-                      label="Topic"
-                      maxLength={MAX_TOPIC_SELECTION}
-                      onValuesChange={(values) =>
-                        setSelectedTopic(values as string[])
-                      }
-                      prerequisite="Subject"
-                      values={selectedTopic}
-                    />
-                    {invalidInputs.topic &&
-                      selectedTopic.length < MAX_TOPIC_SELECTION && (
+                      <h3
+                        className={cn(
+                          "w-max font-medium text-sm",
+                          invalidInputs.topic && "text-destructive"
+                        )}
+                      >
+                        Topic
+                      </h3>
+                      <EnhancedMultiSelect
+                        data={availableTopics}
+                        label="Topic"
+                        maxLength={MAX_TOPIC_SELECTION}
+                        onValuesChange={(values) =>
+                          setSelectedTopic(values as string[])
+                        }
+                        prerequisite="Subject"
+                        values={selectedTopic}
+                      />
+                      {invalidInputs.topic &&
+                        selectedTopic.length < MAX_TOPIC_SELECTION && (
+                          <p className="text-destructive text-sm">
+                            Topic is required
+                          </p>
+                        )}
+                    </div>
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={paperTypeRef}
+                    >
+                      <h3
+                        className={cn(
+                          "w-max font-medium text-sm",
+                          invalidInputs.paperType && "text-destructive"
+                        )}
+                      >
+                        Paper
+                      </h3>
+                      <EnhancedMultiSelect
+                        data={availablePaperTypes?.map((item) =>
+                          item.toString()
+                        )}
+                        label="Paper"
+                        onValuesChange={(values) =>
+                          setSelectedPaperType(values as string[])
+                        }
+                        prerequisite="Subject"
+                        values={selectedPaperType}
+                      />
+                      {invalidInputs.paperType && (
                         <p className="text-destructive text-sm">
-                          Topic is required
+                          Paper is required
                         </p>
                       )}
-                  </div>
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={paperTypeRef}
-                  >
-                    <h3
-                      className={cn(
-                        "w-max font-medium text-sm",
-                        invalidInputs.paperType && "text-destructive"
-                      )}
+                    </div>
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={yearRef}
                     >
-                      Paper
-                    </h3>
-                    <EnhancedMultiSelect
-                      data={availablePaperTypes?.map((item) => item.toString())}
-                      label="Paper"
-                      onValuesChange={(values) =>
-                        setSelectedPaperType(values as string[])
-                      }
-                      prerequisite="Subject"
-                      values={selectedPaperType}
-                    />
-                    {invalidInputs.paperType && (
-                      <p className="text-destructive text-sm">
-                        Paper is required
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={yearRef}
-                  >
-                    <h3
-                      className={cn(
-                        "w-max font-medium text-sm",
-                        invalidInputs.year && "text-destructive"
+                      <h3
+                        className={cn(
+                          "w-max font-medium text-sm",
+                          invalidInputs.year && "text-destructive"
+                        )}
+                      >
+                        Year
+                      </h3>
+                      <EnhancedMultiSelect
+                        data={availableYears?.map((item) => item.toString())}
+                        label="Year"
+                        onValuesChange={(values) =>
+                          setSelectedYear(values as string[])
+                        }
+                        prerequisite="Subject"
+                        values={selectedYear}
+                      />
+                      {invalidInputs.year && (
+                        <p className="text-destructive text-sm">
+                          Year is required
+                        </p>
                       )}
+                    </div>
+                    <div
+                      className="flex flex-col items-start justify-start gap-1"
+                      ref={seasonRef}
                     >
-                      Year
-                    </h3>
-                    <EnhancedMultiSelect
-                      data={availableYears?.map((item) => item.toString())}
-                      label="Year"
-                      onValuesChange={(values) =>
-                        setSelectedYear(values as string[])
-                      }
-                      prerequisite="Subject"
-                      values={selectedYear}
-                    />
-                    {invalidInputs.year && (
-                      <p className="text-destructive text-sm">
-                        Year is required
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className="flex flex-col items-start justify-start gap-1"
-                    ref={seasonRef}
-                  >
-                    <h3
-                      className={cn(
-                        "w-max font-medium text-sm",
-                        invalidInputs.season && "text-destructive"
+                      <h3
+                        className={cn(
+                          "w-max font-medium text-sm",
+                          invalidInputs.season && "text-destructive"
+                        )}
+                      >
+                        Season
+                      </h3>
+                      <EnhancedMultiSelect
+                        data={availableSeasons}
+                        label="Season"
+                        onValuesChange={(values) =>
+                          setSelectedSeason(values as string[])
+                        }
+                        prerequisite="Subject"
+                        values={selectedSeason}
+                      />
+                      {invalidInputs.season && (
+                        <p className="text-destructive text-sm">
+                          Season is required
+                        </p>
                       )}
-                    >
-                      Season
-                    </h3>
-                    <EnhancedMultiSelect
-                      data={availableSeasons}
-                      label="Season"
-                      onValuesChange={(values) =>
-                        setSelectedSeason(values as string[])
-                      }
-                      prerequisite="Subject"
-                      values={selectedSeason}
+                    </div>
+                  </div>
+                  <div className="flex w-full flex-col items-center justify-center gap-2">
+                    <ButtonUltility
+                      isMounted={isMounted}
+                      isResetConfirmationOpen={isResetConfirmationOpen}
+                      isValidInput={isValidInputs}
+                      query={{
+                        curriculumId: selectedCurriculum,
+                        subjectId: selectedSubject,
+                        topic: selectedTopic,
+                        paperType: selectedPaperType,
+                        year: selectedYear,
+                        season: selectedSeason,
+                      }}
+                      resetEverything={resetEverything}
+                      setCurrentQuery={setCurrentQuery}
+                      setIsResetConfirmationOpen={setIsResetConfirmationOpen}
+                      setIsSearchEnabled={setIsSearchEnabled}
+                      setIsSidebarOpen={setIsSidebarOpen}
                     />
-                    {invalidInputs.season && (
-                      <p className="text-destructive text-sm">
-                        Season is required
-                      </p>
-                    )}
                   </div>
                 </div>
-                <div className="flex w-full flex-col items-center justify-center gap-2">
-                  <ButtonUltility
-                    isMounted={isMounted}
-                    isResetConfirmationOpen={isResetConfirmationOpen}
-                    isValidInput={isValidInputs}
-                    query={{
-                      curriculumId: selectedCurriculum,
-                      subjectId: selectedSubject,
-                      topic: selectedTopic,
-                      paperType: selectedPaperType,
-                      year: selectedYear,
-                      season: selectedSeason,
-                    }}
-                    resetEverything={resetEverything}
-                    setCurrentQuery={setCurrentQuery}
-                    setIsResetConfirmationOpen={setIsResetConfirmationOpen}
-                    setIsSearchEnabled={setIsSearchEnabled}
-                    setIsSidebarOpen={setIsSidebarOpen}
-                  />
-                </div>
-              </div>
-              <SidebarSeparator />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="flex w-full cursor-pointer items-center justify-start gap-2"
-                    variant="secondary"
-                  >
-                    <Settings />
-                    Cache settings
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-[100005]">
-                  <CacheAccordion
-                    isPersistantCacheEnabled={isPersistantCacheEnabled}
-                    isSessionCacheEnabled={isSessionCacheEnabled}
-                    setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
-                    setIsSessionCacheEnabled={setIsSessionCacheEnabled}
-                  />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
-                    variant="secondary"
-                  >
-                    <Blocks />
-                    Layout settings
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
-                  <h4 className="text-sm font-medium text-center mb-2">
-                    Number of maximum displayed columns
-                  </h4>
-                  <ElasticSlider
-                    startingValue={1}
-                    maxValue={5}
-                    isStepped
-                    stepSize={1}
-                    setColumnsProp={setNumberOfColumns}
-                  />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
-                    variant="secondary"
-                  >
-                    <LandPlot />
-                    Visual settings
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
-                  <h4 className="text-sm font-medium text-center mb-2">
-                    Show green tint on finished questions?
-                  </h4>
-                  <Switch
-                    checked={showFinishedQuestionTint}
-                    onCheckedChange={setShowFinishedQuestionTint}
-                  />
-                </PopoverContent>
-              </Popover>
-            </SidebarContent>
+                <SidebarSeparator />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="flex w-full cursor-pointer items-center justify-start gap-2"
+                      variant="secondary"
+                    >
+                      <Settings />
+                      Cache settings
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="z-[100005]">
+                    <CacheAccordion
+                      isPersistantCacheEnabled={isPersistantCacheEnabled}
+                      isSessionCacheEnabled={isSessionCacheEnabled}
+                      setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
+                      setIsSessionCacheEnabled={setIsSessionCacheEnabled}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
+                      variant="secondary"
+                    >
+                      <Blocks />
+                      Layout settings
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                    <h4 className="text-sm font-medium text-center mb-2">
+                      Number of maximum displayed columns
+                    </h4>
+                    <ElasticSlider
+                      startingValue={1}
+                      maxValue={5}
+                      isStepped
+                      stepSize={1}
+                      setColumnsProp={setNumberOfColumns}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
+                      variant="secondary"
+                    >
+                      <LandPlot />
+                      Visual settings
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="z-[100005] flex flex-col items-center justify-center gap-3">
+                    <h4 className="text-sm font-medium text-center mb-2">
+                      Show green tint on finished questions?
+                    </h4>
+                    <Switch
+                      checked={showFinishedQuestionTint}
+                      onCheckedChange={setShowFinishedQuestionTint}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </SidebarContent>
+            </ScrollArea>
             <SidebarRail />
           </Sidebar>
           <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
@@ -1081,7 +1088,7 @@ const TopicalPage = () => {
               )}
               {topicalData?.isRateLimited && (
                 <p className="text-md text-center mb-2 text-red-600">
-                  Limited results displayed due to rate limiting. Log in for
+                  Limited results displayed due to rate limiting. Sign in for
                   complete access.
                 </p>
               )}
@@ -1180,6 +1187,8 @@ const TopicalPage = () => {
         isUserSessionPending={isUserSessionPending}
         isBookmarkError={isUserSessionError || isBookmarksError}
         isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
+        isInspectSidebarOpen={isInspectSidebarOpen}
+        setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions as Set<string>}
       />
