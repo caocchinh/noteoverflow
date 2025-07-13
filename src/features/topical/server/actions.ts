@@ -26,7 +26,12 @@ export const addBookmarkAction = async ({
         // Local server time
         updatedAt: new Date(),
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: [userBookmarks.userId, userBookmarks.questionId],
+        set: {
+          updatedAt: new Date(),
+        },
+      });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);
@@ -85,7 +90,12 @@ export const addFinishedQuestionAction = async ({
         //Local server time
         updatedAt: new Date(),
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: [finishedQuestions.userId, finishedQuestions.questionId],
+        set: {
+          updatedAt: new Date(),
+        },
+      });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);

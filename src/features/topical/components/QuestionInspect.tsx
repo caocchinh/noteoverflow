@@ -32,6 +32,7 @@ import {
   ChevronsRight,
   ChevronUp,
   Loader2,
+  PanelsTopLeft,
   PencilLine,
   ScrollText,
   Search,
@@ -424,38 +425,23 @@ const QuestionInspect = ({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 w-[27%] h-[inherit] justify-between items-center border-r border-border p-3 pr-1">
-          <div className="flex items-center gap-2 w-full border-b border-border">
-            <Search />
-            <Input
-              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent"
-              placeholder="Search for a question"
-              value={searchInput}
-              readOnly={isBlockingInput}
-              onChange={(e) => {
-                if (searchInput == "") {
-                  listScrollAreaRef.current?.scrollTo({
-                    top: 0,
-                  });
-                }
-                setSearchInput(e.target.value);
-                if (e.target.value.length === 0 && currentQuestionId) {
-                  setCurrentTab(currentTabThatContainsQuestion);
-                  setTimeout(() => {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTabThatContainsQuestion,
+          <div className="flex items-center justify-start w-full gap-2">
+            <div className="flex items-center gap-2  border-b border-border">
+              <Search />
+              <Input
+                className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[13px]"
+                placeholder="Search for a question"
+                value={searchInput}
+                readOnly={isBlockingInput}
+                onChange={(e) => {
+                  if (searchInput == "") {
+                    listScrollAreaRef.current?.scrollTo({
+                      top: 0,
                     });
-                  }, 0);
-                }
-              }}
-            />
-            {searchInput.length > 0 && (
-              <X
-                className="text-red-600 hover:text-red-600/80 cursor-pointer"
-                onClick={() => {
-                  setSearchInput("");
-                  setCurrentTab(currentTabThatContainsQuestion);
-                  if (currentQuestionId) {
+                  }
+                  setSearchInput(e.target.value);
+                  if (e.target.value.length === 0 && currentQuestionId) {
+                    setCurrentTab(currentTabThatContainsQuestion);
                     setTimeout(() => {
                       scrollToQuestion({
                         questionId: currentQuestionId,
@@ -465,7 +451,54 @@ const QuestionInspect = ({
                   }
                 }}
               />
-            )}
+              {searchInput.length > 0 && (
+                <X
+                  className="text-red-600 hover:text-red-600/80 cursor-pointer"
+                  onClick={() => {
+                    setSearchInput("");
+                    setCurrentTab(currentTabThatContainsQuestion);
+                    if (currentQuestionId) {
+                      setTimeout(() => {
+                        scrollToQuestion({
+                          questionId: currentQuestionId,
+                          tab: currentTabThatContainsQuestion,
+                        });
+                      }, 0);
+                    }
+                  }}
+                />
+              )}
+            </div>
+            <Button
+              variant="default"
+              className="cursor-pointer flex items-center justify-center gap-1"
+              title="Go to current question"
+              onClick={() => {
+                if (searchInput === "") {
+                  setCurrentTab(currentTabThatContainsQuestion);
+                  if (currentQuestionId) {
+                    scrollToQuestion({
+                      questionId: currentQuestionId,
+                      tab: currentTabThatContainsQuestion,
+                    });
+                  }
+                } else {
+                  const currentQuestionIndexInSearchResult =
+                    searchResults.findIndex(
+                      (question) => question.id === currentQuestionId
+                    );
+                  if (currentQuestionIndexInSearchResult === -1) {
+                    return;
+                  }
+                  searchVirtualizer.scrollToIndex(
+                    currentQuestionIndexInSearchResult
+                  );
+                }
+              }}
+            >
+              <PanelsTopLeft />
+              Current
+            </Button>
           </div>
           <ScrollArea
             className={cn(
