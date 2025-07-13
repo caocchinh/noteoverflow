@@ -701,8 +701,6 @@ const TopicalPage = () => {
     <>
       <div className="pt-16 h-screen overflow-hidden">
         <SidebarProvider
-          defaultOpen={true}
-          defaultOpenMobile={true}
           onOpenChange={setIsSidebarOpen}
           onOpenChangeMobile={setIsSidebarOpen}
           open={isSidebarOpen}

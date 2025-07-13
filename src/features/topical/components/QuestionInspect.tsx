@@ -61,6 +61,7 @@ import {
   SidebarProvider,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const QuestionInspect = ({
   isOpen,
@@ -201,6 +202,10 @@ const QuestionInspect = ({
     },
     [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
   );
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    setIsInspectSidebarOpen(false);
+  }, [isMobile, setIsInspectSidebarOpen]);
 
   useEffect(() => {
     if (!isOpen.isOpen) {
@@ -439,7 +444,7 @@ const QuestionInspect = ({
       }}
     >
       <DialogContent
-        className="w-[89vw] h-[93vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+        className="w-[89vw] h-[91vh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -449,10 +454,8 @@ const QuestionInspect = ({
           </DialogDescription>
         </DialogHeader>
         <SidebarProvider
-          defaultOpen={isInspectSidebarOpen}
           onOpenChange={setIsInspectSidebarOpen}
           openMobile={isInspectSidebarOpen}
-          defaultOpenMobile={false}
           onOpenChangeMobile={setIsInspectSidebarOpen}
           open={isInspectSidebarOpen}
           style={
@@ -968,7 +971,7 @@ const QuestionInspect = ({
               className={cn(currentView === "question" ? "block" : "hidden")}
             >
               <ScrollArea
-                className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
+                className="h-[74vh] md:h-[80vh] w-full [&_.bg-border]:bg-transparent"
                 type="always"
                 viewportRef={questionScrollAreaRef}
               >
@@ -983,7 +986,7 @@ const QuestionInspect = ({
             </div>
             <div className={cn(currentView === "answer" ? "block" : "hidden")}>
               <ScrollArea
-                className="h-[83vh] w-full [&_.bg-border]:bg-transparent"
+                className="h-[74vh] md:h-[80vh] w-full [&_.bg-border]:bg-transparent"
                 type="always"
                 viewportRef={answerScrollAreaRef}
               >
@@ -996,6 +999,16 @@ const QuestionInspect = ({
                 />
               </ScrollArea>
             </div>
+            <Button
+              className="w-full mt-2 h-8 cursor-pointer block md:hidden"
+              onClick={() => {
+                if (currentQuestionId) {
+                  setIsOpen({ isOpen: false, questionId: currentQuestionId });
+                }
+              }}
+            >
+              Close
+            </Button>
           </SidebarInset>
         </SidebarProvider>
       </DialogContent>
@@ -1070,13 +1083,12 @@ const InspectImages = ({
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
   return (
     <div className="flex flex-col flex-wrap w-full gap-2 relative items-center">
-      {imageSource[0]?.includes("http") && !isLoaded && (
+      {imageSource[0]?.includes("http") && (
         <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
       )}
       {imageSource.map((item) => (
@@ -1094,7 +1106,6 @@ const InspectImages = ({
               src={item}
               alt="Question image"
               loading="lazy"
-              onLoad={() => setIsLoaded(true)}
             />
           ) : (
             <p>{item}</p>

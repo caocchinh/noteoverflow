@@ -50,7 +50,7 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       {...props}
     >
-      <XIcon className="absolute top-2 right-2" size={20} />
+      <XIcon className="absolute top-2 right-2 hidden md:block" size={20} />
     </DialogPrimitiveOverlay>
   );
 }

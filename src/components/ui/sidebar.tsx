@@ -97,6 +97,7 @@ function SidebarProvider({
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = useState(defaultOpen);
   const open = openProp ?? _open;
+
   const setOpen = useCallback(
     (value: boolean | ((_value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value;
