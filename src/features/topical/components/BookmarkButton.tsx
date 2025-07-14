@@ -58,18 +58,15 @@ export const BookmarkButton = ({
         isRealBookmarked,
       }: { realQuestionId: string; isRealBookmarked: boolean }
     ) => {
-      queryClient.setQueryData<Set<string>>(
-        ["user_bookmarks"],
-        (prev) => {
-          const next = new Set(prev ?? []);
-          if (isRealBookmarked) {
-            next.delete(realQuestionId);
-          } else {
-            next.add(realQuestionId);
-          }
-          return next;
+      queryClient.setQueryData<Set<string>>(["user_bookmarks"], (prev) => {
+        const next = new Set(prev ?? []);
+        if (isRealBookmarked) {
+          next.delete(realQuestionId);
+        } else {
+          next.add(realQuestionId);
         }
-      );
+        return next;
+      });
 
       toast.success(
         isRealBookmarked
@@ -90,7 +87,11 @@ export const BookmarkButton = ({
 
   return (
     <Button
-      className={cn(className, isBookmarked && "!bg-logo-main !text-white")}
+      className={cn(
+        className,
+        "rounded-[3px]",
+        isBookmarked && "!bg-logo-main !text-white "
+      )}
       disabled={isBookmarkDisabled || isBookmarksFetching}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       onClick={(e) => {

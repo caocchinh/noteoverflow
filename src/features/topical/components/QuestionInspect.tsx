@@ -591,7 +591,7 @@ const QuestionInspect = ({
                 </div>
                 <Button
                   variant="default"
-                  className="cursor-pointer flex items-center justify-center gap-1"
+                  className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
                   title="Go to current question"
                   onClick={() => {
                     if (searchInput === "") {

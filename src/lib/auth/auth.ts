@@ -35,7 +35,7 @@ export const auth = async (database: any) =>
           [ROLE_OWNER]: OwnerRole,
           [ROLE_USER]: UserRole,
         },
-        defaultRole: ROLE_OWNER,
+        defaultRole: ROLE_USER,
         bannedUserMessage: "You are banned from the platform.",
       }),
       captcha({
@@ -54,6 +54,15 @@ export const auth = async (database: any) =>
                 image: AVATARS[Math.floor(Math.random() * AVATARS.length)].src,
               },
             };
+          },
+          after: async (user: User) => {
+            const db = await database();
+            await db.insert(schema.userBookmarkList).values({
+              userId: user.id,
+              listName: "My bookmarks",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
           },
         },
       },

@@ -155,7 +155,7 @@ function SidebarProvider({
       <TooltipProvider delayDuration={0}>
         <div
           className={cn(
-            "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
+            "group/sidebar-wrapper flex min-h-dvh w-full has-data-[variant=inset]:bg-sidebar",
             className
           )}
           data-slot="sidebar-wrapper"
@@ -255,7 +255,7 @@ function Sidebar({
       />
       <div
         className={cn(
-          "fixed bottom-0 z-10 hidden h-[calc(100svh-64px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed bottom-0 z-10 hidden h-[calc(100dvh-54px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",

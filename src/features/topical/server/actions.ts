@@ -7,8 +7,10 @@ import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 
 export const addBookmarkAction = async ({
   questionId,
+  bookmarkListName,
 }: {
   questionId: string;
+  bookmarkListName: string;
 }) => {
   try {
     const session = await verifySession();
@@ -17,21 +19,32 @@ export const addBookmarkAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
-
-    await db
-      .insert(userBookmarks)
-      .values({
-        userId,
-        questionId,
-        // Local server time
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [userBookmarks.userId, userBookmarks.questionId],
-        set: {
+    try {
+      await db
+        .insert(userBookmarks)
+        .values({
+          userId,
+          questionId,
+          listName: bookmarkListName,
           updatedAt: new Date(),
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: [
+            userBookmarks.userId,
+            userBookmarks.questionId,
+            userBookmarks.listName,
+          ],
+          set: { updatedAt: new Date() },
+        });
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        /FOREIGN KEY constraint failed/i.test(e.message)
+      ) {
+        throw new Error("Bookmark list doesn't exist! Please refresh.");
+      }
+      throw e;
+    }
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);
@@ -43,8 +56,10 @@ export const addBookmarkAction = async ({
 
 export const removeBookmarkAction = async ({
   questionId,
+  bookmarkListName,
 }: {
   questionId: string;
+  bookmarkListName: string;
 }) => {
   try {
     const session = await verifySession();
@@ -58,7 +73,8 @@ export const removeBookmarkAction = async ({
       .where(
         and(
           eq(userBookmarks.userId, userId),
-          eq(userBookmarks.questionId, questionId)
+          eq(userBookmarks.questionId, questionId),
+          eq(userBookmarks.listName, bookmarkListName)
         )
       );
   } catch (error) {

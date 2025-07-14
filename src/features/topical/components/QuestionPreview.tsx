@@ -116,7 +116,7 @@ const QuestionPreview = memo(
         )}
         {isMutatingThisQuestion && (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black"
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px]"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

@@ -42,7 +42,7 @@ const QuestionInspectBookmark = ({
       )}
       {isMutatingThisQuestion && (
         <Badge
-          className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-black"
+          className="text-white text-[12px] h-[26px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px]"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();

@@ -260,21 +260,45 @@ export const questionTopic = sqliteTable(
   }
 );
 
-export const userBookmarks = sqliteTable(
-  "user_bookmarks",
+export const userBookmarkList = sqliteTable(
+  "user_bookmark_list",
   {
     userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
+    listName: text("list_name").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => {
-    return [primaryKey({ columns: [table.userId, table.questionId] })];
+    return [primaryKey({ columns: [table.userId, table.listName] })];
+  }
+);
+
+export const userBookmarks = sqliteTable(
+  "user_bookmarks",
+  {
+    userId: text("user_id").notNull(),
+    listName: text("list_name").notNull(),
+    questionId: text("question_id")
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => {
+    return [
+      primaryKey({ columns: [table.userId, table.listName, table.questionId] }),
+      foreignKey({
+        columns: [table.userId, table.listName],
+        foreignColumns: [userBookmarkList.userId, userBookmarkList.listName],
+      }),
+    ];
   }
 );
 
