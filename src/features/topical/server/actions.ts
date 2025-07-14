@@ -8,6 +8,7 @@ import {
 } from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
 import {
+  BAD_REQUEST,
   DOES_NOT_EXIST,
   INTERNAL_SERVER_ERROR,
   LIMIT_EXCEEDED,
@@ -20,6 +21,12 @@ export const createBookmarkListAction = async ({
 }: {
   listName: string;
 }): Promise<ServerActionResponse<string>> => {
+  if (listName.trim() === "") {
+    return {
+      error: BAD_REQUEST,
+      success: false,
+    };
+  }
   try {
     const session = await verifySession();
     if (!session) {
@@ -75,6 +82,12 @@ export const addBookmarkAction = async ({
   questionId: string;
   bookmarkListName: string;
 }): Promise<ServerActionResponse<string>> => {
+  if (bookmarkListName.trim() === "") {
+    return {
+      error: BAD_REQUEST,
+      success: false,
+    };
+  }
   try {
     const session = await verifySession();
     if (!session) {

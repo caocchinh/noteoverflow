@@ -1142,7 +1142,7 @@ const TopicalPage = () => {
                   {displayedData?.map((question) =>
                     question?.questionImages.map((imageSrc: string) => (
                       <QuestionPreview
-                        bookmarks={(bookmarks as Set<string>) || new Set()}
+                        bookmarks={bookmarks || []}
                         question={question}
                         setIsQuestionViewOpen={setIsQuestionViewOpen}
                         isUserSessionPending={isUserSessionPending}
@@ -1185,7 +1185,7 @@ const TopicalPage = () => {
         isOpen={isQuestionViewOpen}
         setIsOpen={setIsQuestionViewOpen}
         partitionedTopicalData={fullPartitionedData}
-        bookmarks={(bookmarks as Set<string>) || new Set()}
+        bookmarks={bookmarks || []}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}

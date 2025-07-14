@@ -51,7 +51,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
-import { SelectedQuestion } from "../constants/types";
+import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import {
   Sidebar,
@@ -85,7 +85,7 @@ const QuestionInspect = ({
 
   setIsOpen: (open: { isOpen: boolean; questionId: string }) => void;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
-  bookmarks: Set<string>;
+  bookmarks: SelectedBookmark;
   isUserSessionPending: boolean;
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;

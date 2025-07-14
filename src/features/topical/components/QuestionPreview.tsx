@@ -92,40 +92,37 @@ const QuestionPreview = memo(
             {question?.season}
           </Badge>
 
-          {!isMutatingThisQuestion && (
-            <BookmarkButton
-              className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-              isBookmarkDisabled={isUserSessionPending}
-              bookmarks={bookmarks}
-              isBookmarkError={isBookmarkError}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-              questionId={question.id}
-              isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-              isValidSession={isValidSession}
-            />
-          )}
-        </div>
-        {!isMutatingThisQuestion && (
           <BookmarkButton
-            className={cn(
-              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
-              isPopoverOpen && "md:flex hidden"
-            )}
+            className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
+            isBookmarkDisabled={isUserSessionPending}
             bookmarks={bookmarks}
             isBookmarkError={isBookmarkError}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
             questionId={question.id}
-            isValidSession={isValidSession}
-            isBookmarkDisabled={isUserSessionPending}
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+            isValidSession={isValidSession}
           />
-        )}
-        {isMutatingThisQuestion && (
+        </div>
+        <BookmarkButton
+          className={cn(
+            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+            isPopoverOpen && !isMutatingThisQuestion && "md:flex hidden"
+          )}
+          bookmarks={bookmarks}
+          isBookmarkError={isBookmarkError}
+          questionId={question.id}
+          isValidSession={isValidSession}
+          isBookmarkDisabled={isUserSessionPending}
+          isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+        />
+        {isMutatingThisQuestion && !isPopoverOpen && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px]"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              setIsPopoverOpen(true);
             }}
             onTouchStart={(e) => {
               e.stopPropagation();

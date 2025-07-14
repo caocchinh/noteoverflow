@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Loader2, Plus, X } from "lucide-react";
@@ -8,7 +8,11 @@ import {
   removeBookmarkAction,
 } from "../server/actions";
 import { addBookmarkAction } from "../server/actions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Popover,
@@ -21,13 +25,13 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
 } from "@/components/ui/command";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import AddToBookMarkCommandItem from "./AddToBookMarkCommandItem";
+import { Badge } from "@/components/ui/badge";
 
 export const BookmarkButton = ({
   bookmarks,
@@ -50,11 +54,14 @@ export const BookmarkButton = ({
   className?: string;
   isValidSession: boolean;
 }) => {
-  const [currentTab, setCurrentTab] = useState("add-existing");
+  const [currentTab, setCurrentTab] = useState<"add-existing" | "add-new">(
+    "add-existing"
+  );
   const [_open, _setOpen] = useState(false);
   const open = openProp ?? _open;
   const [newBookmarkListNameInput, setNewBookmarkListNameInput] = useState("");
   const [isInputError, setIsInputError] = useState(false);
+  const [bookmarkListName, setBookmarkListName] = useState("");
 
   const setOpen = useCallback(
     (value: boolean | ((_value: boolean) => boolean)) => {
@@ -71,19 +78,23 @@ export const BookmarkButton = ({
     [setOpenProp, open]
   );
 
-  const isBookmarked = useMemo(() => {
-    if (bookmarks && bookmarks.length > 0) {
-      return bookmarks.some((bookmark) =>
-        bookmark.userBookmarks?.some(
-          (bookmark) => bookmark.questionId === questionId
+  const isBookmarked =
+    bookmarks && bookmarks.length > 0
+      ? bookmarks.some((bookmark) =>
+          bookmark.userBookmarks?.some(
+            (bookmark) => bookmark.questionId === questionId
+          )
         )
-      );
-    }
-    return false;
-  }, [bookmarks, questionId]);
+      : false;
+
   const queryClient = useQueryClient();
 
-  const mutationKey = ["all_user_bookmarks", questionId];
+  const mutationKey = ["all_user_bookmarks", questionId, bookmarkListName];
+
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["all_user_bookmarks", questionId],
+    }) > 0;
 
   const updateBookmarkMutation = useMutation({
     mutationKey: mutationKey,
@@ -162,27 +173,18 @@ export const BookmarkButton = ({
           }
 
           const addNewBookmark = () => {
-            const isBookmarkedDoubleCheck = prev[
+            const newBookmarks = [...prev];
+            newBookmarks[
               prev.findIndex(
                 (bookmark) => bookmark.listName === newBookmarkListName
               )
-            ].userBookmarks?.some(
-              (bookmark) => bookmark.questionId === questionId
-            );
-            if (!isBookmarkedDoubleCheck) {
-              const newBookmarks = [...prev];
-              newBookmarks[
-                prev.findIndex(
-                  (bookmark) => bookmark.listName === newBookmarkListName
-                )
-              ].userBookmarks.push({
-                questionId: newQuestionId,
-                updatedAt: new Date(),
-                userId,
-                listName: newBookmarkListName,
-              });
-              return newBookmarks;
-            }
+            ].userBookmarks.push({
+              questionId: newQuestionId,
+              updatedAt: new Date(),
+              userId,
+              listName: newBookmarkListName,
+            });
+            return newBookmarks;
           };
 
           if (isCreateNew) {
@@ -247,38 +249,55 @@ export const BookmarkButton = ({
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
-        <Button
-          className={cn(
-            className,
-            "rounded-[3px]",
-            isBookmarked && "!bg-logo-main !text-white "
-          )}
-          disabled={isBookmarkDisabled || isBookmarksFetching}
-          title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (isBookmarkError) {
-              toast.error("Bookmark error. Please refresh the page.");
-              return;
-            }
-            if (!isValidSession) {
-              toast.error("Please sign in to bookmark questions.");
-              return;
-            }
-            setOpen(true);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          {isBookmarksFetching ? (
+        {isMutatingThisQuestion ? (
+          <Badge
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px]"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            Saving
             <Loader2 className="animate-spin" />
-          ) : (
-            <Bookmark size={10} />
-          )}
-        </Button>
+          </Badge>
+        ) : (
+          <Button
+            className={cn(
+              className,
+              "rounded-[3px]",
+              isBookmarked && "!bg-logo-main !text-white "
+            )}
+            disabled={isBookmarkDisabled || isBookmarksFetching}
+            title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (isBookmarkError) {
+                toast.error("Bookmark error. Please refresh the page.");
+                return;
+              }
+              if (!isValidSession) {
+                toast.error("Please sign in to bookmark questions.");
+                return;
+              }
+              setOpen(true);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            {isBookmarksFetching ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Bookmark size={10} />
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent
         className="w-full h-full z-[100006] !px-0"
@@ -289,7 +308,12 @@ export const BookmarkButton = ({
           onClick={() => setOpen(false)}
           size={15}
         />
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
+        <Tabs
+          value={currentTab}
+          onValueChange={(value) => {
+            setCurrentTab(value as "add-existing" | "add-new");
+          }}
+        >
           <TabsContent value="add-existing">
             <Command>
               <CommandInput
@@ -312,29 +336,31 @@ export const BookmarkButton = ({
                           const isItemBookmarked = bookmark.userBookmarks.some(
                             (bookmark) => bookmark.questionId === questionId
                           );
+
                           return (
-                            <CommandItem
+                            <AddToBookMarkCommandItem
                               key={bookmark.listName}
-                              className="cursor-pointer flex items-center justify-start"
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
                               onSelect={() => {
-                                updateBookmarkMutation.mutate({
-                                  realQuestionId: questionId,
-                                  realBookmarkListName: bookmark.listName,
-                                  isRealBookmarked: isItemBookmarked,
-                                  isCreateNew: false,
-                                });
+                                if (bookmark.listName.trim() === "") {
+                                  toast.error(
+                                    "Failed to update bookmarks: Bad Request."
+                                  );
+                                  return;
+                                }
+                                setBookmarkListName(bookmark.listName);
+                                setTimeout(() => {
+                                  updateBookmarkMutation.mutate({
+                                    realQuestionId: questionId,
+                                    realBookmarkListName: bookmark.listName,
+                                    isRealBookmarked: isItemBookmarked,
+                                    isCreateNew: false,
+                                  });
+                                }, 0);
                               }}
-                            >
-                              <Checkbox
-                                checked={isItemBookmarked}
-                                className="data-[state=checked]:!bg-logo-main"
-                              />
-                              {bookmark.listName}
-                            </CommandItem>
+                              isItemBookmarked={isItemBookmarked}
+                              listName={bookmark.listName}
+                              questionId={questionId}
+                            />
                           );
                         })}
                       </>
@@ -381,12 +407,15 @@ export const BookmarkButton = ({
                     setIsInputError(true);
                     return;
                   }
-                  updateBookmarkMutation.mutate({
-                    realQuestionId: questionId,
-                    realBookmarkListName: newBookmarkListNameInput.trim(),
-                    isRealBookmarked: false,
-                    isCreateNew: true,
-                  });
+                  setBookmarkListName(newBookmarkListNameInput.trim());
+                  setTimeout(() => {
+                    updateBookmarkMutation.mutate({
+                      realQuestionId: questionId,
+                      realBookmarkListName: newBookmarkListNameInput.trim(),
+                      isRealBookmarked: false,
+                      isCreateNew: true,
+                    });
+                  }, 0);
                 }}
               >
                 Create <Plus />
