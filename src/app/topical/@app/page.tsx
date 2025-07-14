@@ -46,6 +46,8 @@ import type {
   FilterData,
   FiltersCache,
   InvalidInputs,
+  SelectedBookmark,
+  SelectedFinishedQuestion,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -638,19 +640,20 @@ const TopicalPage = () => {
     isFetching: isBookmarksFetching,
     isError: isBookmarksError,
   } = useQuery({
-    queryKey: ["user_bookmarks"],
+    queryKey: ["all_user_bookmarks"],
     queryFn: async () => {
       const response = await fetch("/api/topical/bookmark", {
         method: "GET",
       });
-      const data = await response.json();
+      const data: {
+        data: SelectedBookmark;
+        error?: string;
+      } = await response.json();
       if (!response.ok) {
         throw new Error(data.error);
       }
 
-      return new Set(
-        data.data.map((item: { questionId: string }) => item.questionId)
-      );
+      return data.data;
     },
     enabled:
       isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
@@ -664,7 +667,10 @@ const TopicalPage = () => {
     queryKey: ["user_finished_questions"],
     queryFn: async () => {
       const response = await fetch("/api/topical/finished");
-      const data = await response.json();
+      const data: {
+        data: SelectedFinishedQuestion;
+        error?: string;
+      } = await response.json();
       if (!response.ok) {
         throw new Error(data.error);
       }

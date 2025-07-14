@@ -1,9 +1,42 @@
 "use server";
 import { and, eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db";
-import { finishedQuestions, userBookmarks } from "@/drizzle/schema";
+import {
+  finishedQuestions,
+  userBookmarks,
+  userBookmarkList,
+} from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
+
+export const createBookmarkListAction = async ({
+  listName,
+}: {
+  listName: string;
+}) => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error(UNAUTHORIZED);
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
+    await db
+      .insert(userBookmarkList)
+      .values({
+        userId,
+        listName,
+        updatedAt: new Date(),
+      })
+      .onConflictDoNothing();
+  } catch (error) {
+    if (error instanceof Error && error.message === UNAUTHORIZED) {
+      throw new Error(UNAUTHORIZED);
+    }
+    console.error(error);
+    throw new Error(INTERNAL_SERVER_ERROR);
+  }
+};
 
 export const addBookmarkAction = async ({
   questionId,

@@ -20,7 +20,7 @@ const QuestionInspectBookmark = ({
   isBookmarksFetching: boolean;
   isBookmarkError: boolean;
 }) => {
-  const mutationKey = ["user_bookmarks", questionId];
+  const mutationKey = ["all_user_bookmarks", questionId];
 
   const isMutatingThisQuestion =
     useIsMutating({

@@ -4,6 +4,7 @@ import {
   session,
   account,
   userBookmarks,
+  userBookmarkList,
   question,
   season,
   paperType,
@@ -19,8 +20,20 @@ export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   bookmarks: many(userBookmarks),
+  bookmarkLists: many(userBookmarkList),
   finishedQuestions: many(finishedQuestions),
 }));
+
+export const userBookmarkListRelations = relations(
+  userBookmarkList,
+  ({ many, one }) => ({
+    userBookmarks: many(userBookmarks),
+    user: one(user, {
+      fields: [userBookmarkList.userId],
+      references: [user.id],
+    }),
+  })
+);
 
 export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
   user: one(user, {
@@ -30,6 +43,10 @@ export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
   question: one(question, {
     fields: [userBookmarks.questionId],
     references: [question.id],
+  }),
+  listName: one(userBookmarkList, {
+    fields: [userBookmarks.listName],
+    references: [userBookmarkList.listName],
   }),
 }));
 

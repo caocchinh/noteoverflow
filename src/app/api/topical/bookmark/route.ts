@@ -1,7 +1,8 @@
 import { UNAUTHORIZED, INTERNAL_SERVER_ERROR } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
-import { userBookmarks } from "@/drizzle/schema";
+import { userBookmarkList } from "@/drizzle/schema";
+import { SelectedBookmark } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -13,13 +14,13 @@ export async function GET() {
     }
     const userId = session.user.id;
     const db = await getDbAsync();
-    const bookmarks = await db.query.userBookmarks.findMany({
-      where: eq(userBookmarks.userId, userId),
-      columns: {
-        questionId: true,
-        updatedAt: true,
-      },
-    });
+    const bookmarks: SelectedBookmark =
+      await db.query.userBookmarkList.findMany({
+        where: eq(userBookmarkList.userId, userId),
+        with: {
+          userBookmarks: true,
+        },
+      });
     return NextResponse.json({ data: bookmarks }, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {

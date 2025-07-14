@@ -13,14 +13,14 @@ export async function GET() {
     }
     const userId = session.user.id;
     const db = await getDbAsync();
-    const bookmarks = await db.query.finishedQuestions.findMany({
+    const finishedQuestionsData = await db.query.finishedQuestions.findMany({
       where: eq(finishedQuestions.userId, userId),
       columns: {
         questionId: true,
         updatedAt: true,
       },
     });
-    return NextResponse.json({ data: bookmarks }, { status: 200 });
+    return NextResponse.json({ data: finishedQuestionsData }, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });

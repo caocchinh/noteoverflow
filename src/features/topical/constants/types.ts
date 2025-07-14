@@ -75,6 +75,24 @@ export type SelectedQuestion = Pick<
   }>;
 };
 
+export type SelectedBookmark = {
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  listName: string;
+  userBookmarks: {
+    questionId: string;
+    updatedAt: Date;
+    userId: string;
+    listName: string;
+  }[];
+}[];
+
+export type SelectedFinishedQuestion = {
+  updatedAt: Date;
+  questionId: string;
+}[];
+
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

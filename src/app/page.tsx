@@ -10,7 +10,6 @@ import {
   HandCoins,
   Pi,
   RectangleEllipsis,
-  Sparkles as SparklesIcon,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -21,21 +20,18 @@ import {
   LOGO_MAIN_COLOR,
   TOPICAL_QUESTION_APP_ROUTE,
 } from "@/constants/constants";
-import AnimatedText from "@/features/home/components/animation/AnimatedText";
 import Beams from "@/features/home/components/animation/Beams";
 import ClickSpark from "@/features/home/components/animation/ClickSpark";
 import CountUp from "@/features/home/components/animation/CountUp";
 import Crosshair from "@/features/home/components/animation/Crosshair";
 import GridMotion from "@/features/home/components/animation/GridMotion";
-import { GridPattern } from "@/features/home/components/animation/grid-pattern";
 import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
 import PixelCard from "@/features/home/components/animation/PixelCard";
-import RotatingText from "@/features/home/components/animation/RotatingText";
 import { Sparkles } from "@/features/home/components/animation/Sparkles";
 import { TextScramble } from "@/features/home/components/animation/text-scramble";
 import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
 import { MacbookScroll } from "@/features/home/components/animation/macbook-scroll";
-import { cn } from "@/lib/utils";
+import WaitlistPage from "@/features/home/components/waitlist";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -151,102 +147,8 @@ export default function Home() {
         sparkRadius={15}
         sparkSize={10}
       >
-        <section className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-12 pb-0 text-center md:px-8">
-          <motion.div
-            animate={{ opacity: 1 }}
-            initial={{ opacity: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: "easeInOut",
-            }}
-          >
-            <GridPattern
-              className={cn(
-                "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]"
-              )}
-              height={30}
-              strokeDasharray={"4 2"}
-              width={30}
-              x={-1}
-              y={-1}
-            />
-          </motion.div>
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{
-              duration: 2,
-              type: "tween",
-            }}
-          >
-            <Image
-              alt="NoteOverflow"
-              className="relative z-10"
-              height={65}
-              src="/assets/logo-bg-colorised-modified-small.webp"
-              width={65}
-            />
-          </motion.div>
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 1, delay: 0.8 }}
-          >
-            <div className="relative z-10 flex flex-col items-center justify-center gap-4">
-              <h1 className="font-bold text-3xl text-[var(--home-page-text)] md:text-5xl ">
-                CIE Exams Preparation.
-              </h1>
-              <RotatingText
-                animate={{ y: 0 }}
-                exit={{ y: "-120%" }}
-                initial={{ y: "100%" }}
-                mainClassName="px-2 mt-1 sm:px-2 md:px-3 bg-logo-main overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg text-4xl md:text-5xl font-bold text-[var(--home-page-text)]"
-                rotationInterval={4000}
-                splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-                staggerDuration={0.025}
-                staggerFrom={"last"}
-                texts={[
-                  "Free forever.",
-                  "Reimagined.",
-                  "Simplified.",
-                  "Accelerated.",
-                  "Refined.",
-                ]}
-                transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              />
-            </div>
-          </motion.div>
+        <WaitlistPage />
 
-          <AnimatedText
-            className="relative z-10 mx-auto max-w-2xl text-[var(--home-page-text-muted)]"
-            delay={1}
-            text="World's most comprehensive IGCSE, AS & A-level study materials platform."
-          />
-
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-7 w-full"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{
-              delay: 1.9,
-              type: "spring",
-              damping: 10,
-              stiffness: 100,
-            }}
-          >
-            <Button
-              asChild
-              className="!px-6 w-[90%] cursor-pointer rounded-lg border border-[var(--home-page-text)] bg-transparent p-6 text-[var(--home-page-text)] shadow-lg transition-all hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 active:scale-[0.99] md:w-[50%]"
-            >
-              <Link href={TOPICAL_QUESTION_APP_ROUTE}>
-                Get Started
-                <SparklesIcon />
-              </Link>
-            </Button>
-          </motion.div>
-        </section>
         <section className="relative flex min-h-screen flex-col items-center justify-center gap-12 px-4 py-0 md:flex-row md:px-8">
           <div className="order-2 flex w-full items-center justify-center overflow-hidden md:order-1 md:w-1/2">
             <InfiniteScroll

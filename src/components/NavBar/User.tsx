@@ -56,7 +56,7 @@ const User = () => {
     mutationFn: () => authClient.signOut(),
     onSuccess: () => {
       queryClient.setQueryData(["user"], null);
-      queryClient.setQueryData(["user_bookmarks"], null);
+      queryClient.setQueryData(["all_user_bookmarks"], null);
       setIsMenuOpen(false);
       router.push("/authentication");
     },

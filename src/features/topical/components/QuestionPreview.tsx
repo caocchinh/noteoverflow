@@ -36,7 +36,7 @@ const QuestionPreview = memo(
     userFinishedQuestions: Set<string>;
     showFinishedQuestionTint: boolean;
   }) => {
-    const mutationKey = ["user_bookmarks", question.id];
+    const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
