@@ -18,6 +18,8 @@ export const BAD_REQUEST = "Bad Request";
 export const MAX_FILE_SIZE = 3 * 1024 * 1024;
 export const FILE_SIZE_EXCEEDS_LIMIT = "File size exceeds the 3MiB limit";
 export const ONLY_WEBP_FILES_ALLOWED = "Only .webp files are allowed";
+export const LIMIT_EXCEEDED = "Limit exceeded";
+export const DOES_NOT_EXIST = "Does not exist";
 
 export const TOPICAL_QUESTION_APP_ROUTE = "/topical";
 export const TOPICAL_QUESTION_HISTORY_ROUTE = "/topical/history";

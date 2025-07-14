@@ -1,5 +1,5 @@
 "use server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db";
 import {
   finishedQuestions,
@@ -7,13 +7,19 @@ import {
   userBookmarkList,
 } from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
-import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
+import {
+  DOES_NOT_EXIST,
+  INTERNAL_SERVER_ERROR,
+  LIMIT_EXCEEDED,
+  UNAUTHORIZED,
+} from "@/constants/constants";
+import { ServerActionResponse } from "@/constants/types";
 
 export const createBookmarkListAction = async ({
   listName,
 }: {
   listName: string;
-}) => {
+}): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -21,6 +27,19 @@ export const createBookmarkListAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+
+    const [{ total }] = await db
+      .select({ total: sql<number>`count(*)` })
+      .from(userBookmarkList)
+      .where(eq(userBookmarkList.userId, userId));
+
+    if (total >= 50) {
+      return {
+        error: LIMIT_EXCEEDED,
+        success: false,
+      };
+    }
+
     await db
       .insert(userBookmarkList)
       .values({
@@ -29,12 +48,23 @@ export const createBookmarkListAction = async ({
         updatedAt: new Date(),
       })
       .onConflictDoNothing();
+
+    return {
+      success: true,
+      data: session.user.id,
+    };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
@@ -44,7 +74,7 @@ export const addBookmarkAction = async ({
 }: {
   questionId: string;
   bookmarkListName: string;
-}) => {
+}): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -52,6 +82,24 @@ export const addBookmarkAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+
+    const [{ total }] = await db
+      .select({ total: sql<number>`count(*)` })
+      .from(userBookmarks)
+      .where(
+        and(
+          eq(userBookmarks.userId, userId),
+          eq(userBookmarks.listName, bookmarkListName)
+        )
+      );
+
+    if (total >= 100) {
+      return {
+        error: LIMIT_EXCEEDED,
+        success: false,
+      };
+    }
+
     try {
       await db
         .insert(userBookmarks)
@@ -74,16 +122,32 @@ export const addBookmarkAction = async ({
         e instanceof Error &&
         /FOREIGN KEY constraint failed/i.test(e.message)
       ) {
-        throw new Error("Bookmark list doesn't exist! Please refresh.");
+        return {
+          error: DOES_NOT_EXIST,
+          success: false,
+        };
       }
-      throw e;
+      return {
+        error: INTERNAL_SERVER_ERROR,
+        success: false,
+      };
     }
+    return {
+      success: true,
+      data: userId,
+    };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
@@ -93,7 +157,7 @@ export const removeBookmarkAction = async ({
 }: {
   questionId: string;
   bookmarkListName: string;
-}) => {
+}): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -110,6 +174,10 @@ export const removeBookmarkAction = async ({
           eq(userBookmarks.listName, bookmarkListName)
         )
       );
+    return {
+      success: true,
+      data: userId,
+    };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);

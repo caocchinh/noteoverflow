@@ -5,7 +5,7 @@ import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { memo, useState } from "react";
-import { SelectedQuestion } from "../constants/types";
+import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const QuestionPreview = memo(
     question,
     userFinishedQuestions,
   }: {
-    bookmarks: Set<string>;
+    bookmarks: SelectedBookmark;
     question: SelectedQuestion;
     setIsQuestionViewOpen: (open: {
       isOpen: boolean;
@@ -39,6 +39,7 @@ const QuestionPreview = memo(
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const isMutatingThisQuestion =
       useIsMutating({
@@ -97,6 +98,8 @@ const QuestionPreview = memo(
               isBookmarkDisabled={isUserSessionPending}
               bookmarks={bookmarks}
               isBookmarkError={isBookmarkError}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
               questionId={question.id}
               isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
               isValidSession={isValidSession}
@@ -105,7 +108,10 @@ const QuestionPreview = memo(
         </div>
         {!isMutatingThisQuestion && (
           <BookmarkButton
-            className="absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer"
+            className={cn(
+              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+              isPopoverOpen && "md:flex hidden"
+            )}
             bookmarks={bookmarks}
             isBookmarkError={isBookmarkError}
             questionId={question.id}

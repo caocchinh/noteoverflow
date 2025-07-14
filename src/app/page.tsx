@@ -155,7 +155,7 @@ export default function HomePage() {
       >
         <Home />
 
-        <section className="relative flex min-h-screen flex-col items-center justify-center gap-12 px-4 py-0 md:flex-row md:px-8">
+        <section className="relative flex flex-col items-center justify-center gap-12 px-4 py-10 md:flex-row md:px-8">
           <div className="order-2 flex w-full items-center justify-center overflow-hidden md:order-1 md:w-1/2">
             <InfiniteScroll
               autoplay={true}

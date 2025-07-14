@@ -4,6 +4,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { BookmarkButton } from "./BookmarkButton";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { SelectedBookmark } from "../constants/types";
 
 const QuestionInspectBookmark = ({
   questionId,
@@ -14,7 +15,7 @@ const QuestionInspectBookmark = ({
   isBookmarkError,
 }: {
   questionId: string;
-  bookmarks: Set<string>;
+  bookmarks: SelectedBookmark;
   isValidSession: boolean;
   isBookmarkDisabled: boolean;
   isBookmarksFetching: boolean;
