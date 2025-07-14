@@ -16,10 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  LOGO_MAIN_COLOR,
-  TOPICAL_QUESTION_APP_ROUTE,
-} from "@/constants/constants";
+import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import Beams from "@/features/home/components/animation/Beams";
 import ClickSpark from "@/features/home/components/animation/ClickSpark";
 import CountUp from "@/features/home/components/animation/CountUp";
@@ -27,11 +24,10 @@ import Crosshair from "@/features/home/components/animation/Crosshair";
 import GridMotion from "@/features/home/components/animation/GridMotion";
 import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
 import PixelCard from "@/features/home/components/animation/PixelCard";
-import { Sparkles } from "@/features/home/components/animation/Sparkles";
 import { TextScramble } from "@/features/home/components/animation/text-scramble";
 import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
 import { MacbookScroll } from "@/features/home/components/animation/macbook-scroll";
-import WaitlistPage from "@/features/home/components/waitlist";
+import Home from "@/features/home/components/home";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -112,7 +108,17 @@ const InfiniteScrollItems = [
   },
 ];
 
-export default function Home() {
+const glowAnimation = {
+  opacity: [0.5, 0.8, 0.5],
+  scale: [1, 1.05, 1],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    ease: "easeInOut",
+  },
+};
+
+export default function HomePage() {
   const [isTrigger, setIsTrigger] = useState(false);
   const alreadyScrambled = useRef(false);
   const scrambleRef = useRef<HTMLDivElement>(null);
@@ -139,7 +145,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--home-page-bg)]">
+    <div className="min-h-screen bg-[var(--home-page-bg)] overflow-hidden">
       <ClickSpark
         duration={400}
         sparkColor="#fff"
@@ -147,7 +153,7 @@ export default function Home() {
         sparkRadius={15}
         sparkSize={10}
       >
-        <WaitlistPage />
+        <Home />
 
         <section className="relative flex min-h-screen flex-col items-center justify-center gap-12 px-4 py-0 md:flex-row md:px-8">
           <div className="order-2 flex w-full items-center justify-center overflow-hidden md:order-1 md:w-1/2">
@@ -201,7 +207,7 @@ export default function Home() {
           showGradient={false}
         />
         <section
-          className="relative flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
+          className="relative z-[1000] flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
           ref={containerRef}
         >
           <Crosshair
@@ -250,14 +256,47 @@ export default function Home() {
             </Button>
           </PixelCard>
         </section>
-        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-[var(--home-page-bg)]">
-          <div className="-translate-y-1/2 absolute top-1/2 z-[10] hidden h-full w-screen overflow-hidden sm:block ">
-            <Sparkles
-              color={LOGO_MAIN_COLOR}
-              density={200}
-              direction="top"
-              speed={1.2}
-            />
+        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-[var(--home-page-bg)] z-[1000]">
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/30 via-black/70 to-gray-950 blur-3xl"></div>
+
+            <div className="absolute inset-0 opacity-10">
+              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.33)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.31)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+            </div>
+
+            <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/20 blur-[100px]"></div>
+            <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/20 blur-[100px]"></div>
+            <motion.div
+              animate={glowAnimation}
+              className="absolute left-1/4 top-1/3 h-40 w-40 rounded-full bg-indigo-500/10 blur-[80px]"
+            ></motion.div>
+            <motion.div
+              animate={glowAnimation}
+              className="absolute bottom-1/3 right-1/4 h-40 w-40 rounded-full bg-purple-500/10 blur-[80px]"
+            ></motion.div>
+
+            <div className="absolute inset-0 opacity-20">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute h-1 w-1 rounded-full bg-white"
+                  style={{
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                  }}
+                  animate={{
+                    opacity: [0.2, 0.8, 0.2],
+                    scale: [1, 1.5, 1],
+                  }}
+                  transition={{
+                    duration: 3 + Math.random() * 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: Math.random() * 2,
+                  }}
+                />
+              ))}
+            </div>
           </div>
           <div className="z-20 order-1 flex flex-col items-center justify-center gap-4 md:order-0">
             <ProfileCard

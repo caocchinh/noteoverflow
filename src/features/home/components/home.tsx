@@ -18,7 +18,7 @@ const brico = Bricolage_Grotesque({
   subsets: ["latin"],
 });
 
-export default function WaitlistPage() {
+export default function Home() {
   const color = "#ffffff";
 
   return (
