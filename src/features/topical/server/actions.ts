@@ -12,6 +12,8 @@ import {
   DOES_NOT_EXIST,
   INTERNAL_SERVER_ERROR,
   LIMIT_EXCEEDED,
+  MAXIMUM_BOOKMARK_LISTS_PER_USER,
+  MAXIMUM_BOOKMARKS_PER_LIST,
   UNAUTHORIZED,
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
@@ -40,7 +42,7 @@ export const createBookmarkListAction = async ({
       .from(userBookmarkList)
       .where(eq(userBookmarkList.userId, userId));
 
-    if (total >= 50) {
+    if (total >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
       return {
         error: LIMIT_EXCEEDED,
         success: false,
@@ -106,7 +108,7 @@ export const addBookmarkAction = async ({
         )
       );
 
-    if (total >= 100) {
+    if (total >= MAXIMUM_BOOKMARKS_PER_LIST) {
       return {
         error: LIMIT_EXCEEDED,
         success: false,

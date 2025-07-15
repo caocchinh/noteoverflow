@@ -265,7 +265,7 @@ export default function HomePage() {
             </div>
 
             <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>
-            <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/30 blur-[100px]"></div>
+            <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/42 blur-[100px]"></div>
             <motion.div
               animate={glowAnimation}
               className="absolute left-1/4 top-1/3 h-40 w-40 rounded-full bg-indigo-500/30 blur-[80px]"

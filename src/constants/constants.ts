@@ -25,3 +25,6 @@ export const TOPICAL_QUESTION_APP_ROUTE = "/topical";
 export const TOPICAL_QUESTION_HISTORY_ROUTE = "/topical/history";
 export const TOPICAL_QUESTION_BOOKMARK_ROUTE = "/topical/bookmark";
 export const TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE = "/topical/finished";
+
+export const MAXIMUM_BOOKMARK_LISTS_PER_USER = 50;
+export const MAXIMUM_BOOKMARKS_PER_LIST = 100;

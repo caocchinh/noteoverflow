@@ -50,7 +50,7 @@ export const MacbookScroll = ({
       <Spotlight />
       <div className="pointer-events-none absolute h-full w-full overflow-hidden opacity-50 [perspective:200px]">
         <div className="absolute inset-0 [transform:rotateX(35deg)]">
-          <div className="animate-grid [background-image:linear-gradient(to_right,rgba(255,255,255,0.5)_1px,transparent_0),linear-gradient(to_bottom,rgba(255,255,255,0.45)_1px,transparent_0)] [background-repeat:repeat] [background-size:120px_120px] [height:300vh] [inset:0%_0px] [margin-left:-50%] [transform-origin:100%_0_0] [width:600vw]"></div>
+          <div className="animate-grid [background-image:linear-gradient(to_right,rgba(255,255,255,0.6)_1px,transparent_0),linear-gradient(to_bottom,rgba(255,255,255,0.5)_1px,transparent_0)] [background-repeat:repeat] [background-size:120px_120px] [height:300vh] [inset:0%_0px] [margin-left:-50%] [transform-origin:100%_0_0] [width:600vw]"></div>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent to-90%"></div>
       </div>

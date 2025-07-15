@@ -32,6 +32,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AddToBookMarkCommandItem from "./AddToBookMarkCommandItem";
 import { Badge } from "@/components/ui/badge";
+import {
+  DOES_NOT_EXIST,
+  LIMIT_EXCEEDED,
+  MAXIMUM_BOOKMARK_LISTS_PER_USER,
+  MAXIMUM_BOOKMARKS_PER_LIST,
+} from "@/constants/constants";
 
 export const BookmarkButton = ({
   bookmarks,
@@ -238,11 +244,32 @@ export const BookmarkButton = ({
         }
       );
     },
-    onError: (error) => {
-      toast.error(
-        "Failed to update bookmarks: " +
-          (error instanceof Error ? error.message : "Unknown error")
-      );
+    onError: (error, variables) => {
+      if (error instanceof Error) {
+        if (error.message.includes(LIMIT_EXCEEDED)) {
+          if (error.message.includes("list")) {
+            toast.error(
+              "Failed to update bookmarks. You can only have maximum of " +
+                MAXIMUM_BOOKMARK_LISTS_PER_USER +
+                " bookmark lists."
+            );
+          } else if (error.message.includes("bookmark")) {
+            toast.error(
+              "Failed to update bookmarks. You can only have maximum of " +
+                MAXIMUM_BOOKMARKS_PER_LIST +
+                " bookmarks per list."
+            );
+          }
+        } else if (error.message.includes(DOES_NOT_EXIST)) {
+          toast.error(
+            `Failed to update bookmarks. The list ${variables.realBookmarkListName} does not exist.`
+          );
+        } else {
+          toast.error("Failed to update bookmarks: " + error.message);
+        }
+      } else {
+        toast.error("Failed to update bookmarks: Unknown error");
+      }
     },
   });
 
@@ -269,13 +296,16 @@ export const BookmarkButton = ({
             className={cn(
               className,
               "rounded-[3px]",
-              isBookmarked && "!bg-logo-main !text-white "
+              isBookmarked && "!bg-logo-main !text-white",
+              (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
             )}
-            disabled={isBookmarkDisabled || isBookmarksFetching}
             title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              if (isBookmarkDisabled || isBookmarksFetching) {
+                return;
+              }
               if (isBookmarkError) {
                 toast.error("Bookmark error. Please refresh the page.");
                 return;
@@ -345,6 +375,17 @@ export const BookmarkButton = ({
                                 if (bookmark.listName.trim() === "") {
                                   toast.error(
                                     "Failed to update bookmarks: Bad Request."
+                                  );
+                                  return;
+                                }
+                                if (
+                                  bookmark.userBookmarks.length >=
+                                  MAXIMUM_BOOKMARKS_PER_LIST
+                                ) {
+                                  toast.error(
+                                    "Failed to update bookmarks. You can only have maximum of " +
+                                      MAXIMUM_BOOKMARKS_PER_LIST +
+                                      " bookmarks per list."
                                   );
                                   return;
                                 }
@@ -421,6 +462,14 @@ export const BookmarkButton = ({
                     newBookmarkListNameInput.length > 100
                   ) {
                     setIsInputError(true);
+                    return;
+                  }
+                  if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
+                    toast.error(
+                      "Failed to update bookmarks. You can only have maximum of " +
+                        MAXIMUM_BOOKMARK_LISTS_PER_USER +
+                        " bookmark lists."
+                    );
                     return;
                   }
                   setBookmarkListName(newBookmarkListNameInput.trim());
