@@ -1141,7 +1141,7 @@ const QuestionInspect = ({
                   type="always"
                   viewportRef={answerScrollAreaRef}
                 >
-                  <div className="flex flex-row flex-wrap w-full gap-2 py-2">
+                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
                     <TopicDisplay question={currentQuestionData} />
                   </div>
                   <InspectImages

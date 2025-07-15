@@ -355,6 +355,23 @@ export const BookmarkButton = ({
     }, 0);
   };
 
+  const openPopover = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isBookmarkDisabled || isBookmarksFetching) {
+      return;
+    }
+    if (isBookmarkError) {
+      toast.error("Bookmark error. Please refresh the page.");
+      return;
+    }
+    if (!isValidSession) {
+      toast.error("Please sign in to bookmark questions.");
+      return;
+    }
+    setOpen(true);
+  };
+
   return (
     <Popover
       open={open}
@@ -377,8 +394,7 @@ export const BookmarkButton = ({
               badgeClassName
             )}
             onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
+              openPopover(e);
             }}
             onTouchStart={(e) => {
               e.stopPropagation();
@@ -402,20 +418,7 @@ export const BookmarkButton = ({
                 : "Add to bookmarks"
             }
             onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (isBookmarkDisabled || isBookmarksFetching) {
-                return;
-              }
-              if (isBookmarkError) {
-                toast.error("Bookmark error. Please refresh the page.");
-                return;
-              }
-              if (!isValidSession) {
-                toast.error("Please sign in to bookmark questions.");
-                return;
-              }
-              setOpen(true);
+              openPopover(e);
             }}
             onTouchStart={(e) => {
               e.stopPropagation();
