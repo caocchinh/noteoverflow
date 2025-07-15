@@ -120,7 +120,7 @@ export const BookmarkButton = ({
           listName: realBookmarkListName,
         });
         if (!result.success) {
-          throw new Error(result.error);
+          throw new Error(result.error + "list");
         }
       }
       if (isRealBookmarked) {
@@ -141,7 +141,7 @@ export const BookmarkButton = ({
           bookmarkListName: realBookmarkListName,
         });
         if (!result.success) {
-          throw new Error(result.error);
+          throw new Error(result.error + "bookmark");
         }
         return {
           userId: result.data!,
@@ -231,8 +231,8 @@ export const BookmarkButton = ({
 
       toast.success(
         isRealBookmarked
-          ? "Question removed from bookmarks."
-          : "Question added to bookmarks.",
+          ? `Question removed from ${newBookmarkListName}.`
+          : `Question added to ${newBookmarkListName}.`,
         {
           duration: 2000,
         }
@@ -251,7 +251,7 @@ export const BookmarkButton = ({
       <PopoverTrigger asChild>
         {isMutatingThisQuestion ? (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px]"
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -302,6 +302,7 @@ export const BookmarkButton = ({
       <PopoverContent
         className="w-full h-full z-[100006] !px-0"
         onClick={(e) => e.stopPropagation()}
+        align="end"
       >
         <X
           className="absolute top-1 right-1 cursor-pointer"
@@ -384,14 +385,25 @@ export const BookmarkButton = ({
             className="flex flex-col items-center w-full justify-center gap-2 px-4"
           >
             <h3 className="w-full text-left">New list</h3>
-            <Input
-              onChange={(e) => {
-                setNewBookmarkListNameInput(e.target.value);
-                setIsInputError(false);
-              }}
-              value={newBookmarkListNameInput}
-              placeholder="e.g. Super hard questions"
-            />
+            <div className="flex items-center justify-center gap-2">
+              <Input
+                onChange={(e) => {
+                  if (e.target.value.length > 100) {
+                    setIsInputError(true);
+                  } else {
+                    setIsInputError(false);
+                  }
+                  setNewBookmarkListNameInput(e.target.value);
+                }}
+                value={newBookmarkListNameInput}
+                placeholder="e.g. Super hard questions"
+              />
+              <X
+                className="cursor-pointer text-red-500"
+                onClick={() => setNewBookmarkListNameInput("")}
+                size={20}
+              />
+            </div>
             <div className="flex gap-2 w-full">
               <Button
                 onClick={() => setCurrentTab("add-existing")}
@@ -402,8 +414,12 @@ export const BookmarkButton = ({
               </Button>
               <Button
                 className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+                disabled={isInputError}
                 onClick={() => {
-                  if (newBookmarkListNameInput.trim() === "") {
+                  if (
+                    newBookmarkListNameInput.trim() === "" ||
+                    newBookmarkListNameInput.length > 100
+                  ) {
                     setIsInputError(true);
                     return;
                   }
@@ -422,8 +438,9 @@ export const BookmarkButton = ({
               </Button>
             </div>
             {isInputError && (
-              <p className="text-red-500 text-xs mt-1">
+              <p className="text-red-500 text-xs mt-1 text-center">
                 Please enter valid a list name.
+                <br /> Max 100 characters.
               </p>
             )}
           </TabsContent>

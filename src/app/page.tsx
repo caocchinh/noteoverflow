@@ -258,21 +258,21 @@ export default function HomePage() {
         </section>
         <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-[var(--home-page-bg)] z-[1000]">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/30 via-black/70 to-gray-950 blur-3xl"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/35 via-black/70 to-gray-950 blur-3xl"></div>
 
             <div className="absolute inset-0 opacity-10">
-              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.33)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.31)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.55)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.55)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
             </div>
 
-            <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/20 blur-[100px]"></div>
-            <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/20 blur-[100px]"></div>
+            <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>
+            <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/30 blur-[100px]"></div>
             <motion.div
               animate={glowAnimation}
-              className="absolute left-1/4 top-1/3 h-40 w-40 rounded-full bg-indigo-500/10 blur-[80px]"
+              className="absolute left-1/4 top-1/3 h-40 w-40 rounded-full bg-indigo-500/30 blur-[80px]"
             ></motion.div>
             <motion.div
               animate={glowAnimation}
-              className="absolute bottom-1/3 right-1/4 h-40 w-40 rounded-full bg-purple-500/10 blur-[80px]"
+              className="absolute bottom-1/3 right-1/4 h-40 w-40 rounded-full bg-purple-500/30 blur-[80px]"
             ></motion.div>
 
             <div className="absolute inset-0 opacity-20">
@@ -341,8 +341,8 @@ export default function HomePage() {
 
           <div className="relative z-20 flex w-[90%] flex-col items-center justify-center md:w-[450px]">
             <p className="text-left text-[32px] text-[var(--home-page-text)]">
-              &quot;Be kind whenever possible. It is always{" "}
-              <span className="text-rose-700">possible.</span>&quot;
+              &quot;Be kind whenever possible. It is{" "}
+              <span className="text-rose-700">always</span> possible.&quot;
             </p>
             <p className="after:-translate-y-1/2 relative self-end text-left text-[var(--home-page-text-muted)] text-md after:absolute after:top-1/2 after:left-[-38px] after:z-[10] after:h-[1px] after:w-[35px] after:bg-[var(--home-page-text-muted)] after:content-['']">
               14th Dalai Lama (Tenzin Gyatso)

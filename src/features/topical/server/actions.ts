@@ -21,7 +21,7 @@ export const createBookmarkListAction = async ({
 }: {
   listName: string;
 }): Promise<ServerActionResponse<string>> => {
-  if (listName.trim() === "") {
+  if (listName.trim() === "" || listName.length > 100) {
     return {
       error: BAD_REQUEST,
       success: false,
@@ -82,7 +82,7 @@ export const addBookmarkAction = async ({
   questionId: string;
   bookmarkListName: string;
 }): Promise<ServerActionResponse<string>> => {
-  if (bookmarkListName.trim() === "") {
+  if (bookmarkListName.trim() === "" || bookmarkListName.length > 100) {
     return {
       error: BAD_REQUEST,
       success: false,
