@@ -89,7 +89,6 @@ export default function EnhancedMultiSelect({
   const commandListRef = useRef<HTMLDivElement | null>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const isMobileDevice = useIsMobile();
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   if (
     maxLength !== undefined &&
     typeof maxLength == "number" &&
@@ -277,8 +276,7 @@ export default function EnhancedMultiSelect({
         allAvailableOptions: data,
         label,
         prerequisite,
-        isCollapsibleOpen,
-        setIsCollapsibleOpen,
+
         isMobileDevice,
       }}
     >
@@ -680,8 +678,7 @@ const MultiSelectorList = () => {
     allAvailableOptions,
     open,
     setInputValue,
-    isCollapsibleOpen,
-    setIsCollapsibleOpen,
+
     prerequisite,
     inputRef,
     isBlockingInput,
@@ -775,10 +772,7 @@ const MultiSelectorList = () => {
         ref={commandListRef}
       >
         <ScrollArea className="max-h-[50vh]">
-          <Collapsible
-            onOpenChange={setIsCollapsibleOpen}
-            open={isCollapsibleOpen}
-          >
+          <Collapsible>
             {!inputValue && (
               <CollapsibleTrigger
                 className="flex w-full cursor-pointer items-center justify-between gap-2 px-3"

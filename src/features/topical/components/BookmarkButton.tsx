@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Loader2, Plus, X } from "lucide-react";
+import { ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
 import { Bookmark } from "lucide-react";
 import {
   createBookmarkListAction,
@@ -26,6 +26,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,6 +46,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export const BookmarkButton = ({
   bookmarks,
@@ -75,7 +81,6 @@ export const BookmarkButton = ({
   const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const [searchInput, setSearchInput] = useState("");
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
 
   const setOpen = useCallback(
     (value: boolean | ((_value: boolean) => boolean)) => {
@@ -92,14 +97,16 @@ export const BookmarkButton = ({
     [setOpenProp, open]
   );
 
-  const isBookmarked =
-    bookmarks && bookmarks.length > 0
-      ? bookmarks.some((bookmark) =>
-          bookmark.userBookmarks?.some(
-            (bookmark) => bookmark.questionId === questionId
-          )
-        )
-      : false;
+  const bookmarkCount = bookmarks.reduce((acc, bookmark) => {
+    if (
+      bookmark.userBookmarks.some(
+        (bookmark) => bookmark.questionId === questionId
+      )
+    ) {
+      return acc.add(bookmark.listName);
+    }
+    return acc;
+  }, new Set<string>());
 
   const queryClient = useQueryClient();
 
@@ -312,6 +319,36 @@ export const BookmarkButton = ({
     }, 0);
   };
 
+  const onListSelect = ({
+    bookmark,
+    isItemBookmarked,
+  }: {
+    bookmark: SelectedBookmark[number];
+    isItemBookmarked: boolean;
+  }) => {
+    if (bookmark.listName.trim() === "") {
+      toast.error("Failed to update bookmarks: Bad Request.");
+      return;
+    }
+    if (bookmark.userBookmarks.length >= MAXIMUM_BOOKMARKS_PER_LIST) {
+      toast.error(
+        "Failed to update bookmarks. You can only have maximum of " +
+          MAXIMUM_BOOKMARKS_PER_LIST +
+          " bookmarks per list."
+      );
+      return;
+    }
+    setBookmarkListName(bookmark.listName);
+    setTimeout(() => {
+      updateBookmarkMutation.mutate({
+        realQuestionId: questionId,
+        realBookmarkListName: bookmark.listName,
+        isRealBookmarked: isItemBookmarked,
+        isCreateNew: false,
+      });
+    }, 0);
+  };
+
   return (
     <Popover
       open={open}
@@ -347,10 +384,14 @@ export const BookmarkButton = ({
             className={cn(
               className,
               "rounded-[3px]",
-              isBookmarked && "!bg-logo-main !text-white",
+              bookmarkCount.size > 0 && "!bg-logo-main !text-white",
               (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
             )}
-            title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            title={
+              bookmarkCount.size > 0
+                ? "Remove from bookmarks"
+                : "Add to bookmarks"
+            }
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -408,6 +449,56 @@ export const BookmarkButton = ({
           <CommandList className="w-full h-[200px]">
             <ScrollArea>
               <CommandEmpty>No lists found.</CommandEmpty>
+              <Collapsible>
+                {!searchInput && (
+                  <CollapsibleTrigger
+                    className="flex w-full cursor-pointer items-center justify-between gap-2 px-3"
+                    onTouchStart={() => {
+                      setIsBlockingInput(false);
+                    }}
+                    title="Toggle selected"
+                  >
+                    <h3
+                      className={cn(
+                        "font-medium text-xs",
+                        bookmarkCount.size > 0
+                          ? "text-logo-main"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {`${bookmarkCount.size} selected`}
+                    </h3>
+                    <ChevronsUpDown className="h-4 w-4" />
+                  </CollapsibleTrigger>
+                )}
+                <CommandGroup value={`${bookmarkCount.size} selected`}>
+                  <CollapsibleContent>
+                    {bookmarkCount.size > 0 &&
+                      !searchInput &&
+                      bookmarks
+                        .filter((bookmark) =>
+                          bookmarkCount.has(bookmark.listName)
+                        )
+                        .map((bookmark) => (
+                          <AddToBookMarkCommandItem
+                            key={bookmark.listName}
+                            onSelect={() =>
+                              onListSelect({
+                                bookmark,
+                                isItemBookmarked: true,
+                              })
+                            }
+                            isItemBookmarked={true}
+                            listName={bookmark.listName}
+                            questionId={questionId}
+                            visibility={bookmark.visibility}
+                          />
+                        ))}
+                  </CollapsibleContent>
+                </CommandGroup>
+              </Collapsible>
+              <CommandSeparator />
+
               <CommandGroup
                 heading={searchInput.length > 0 ? "Search result" : "Save to"}
               >
@@ -421,34 +512,9 @@ export const BookmarkButton = ({
                       return (
                         <AddToBookMarkCommandItem
                           key={bookmark.listName}
-                          onSelect={() => {
-                            if (bookmark.listName.trim() === "") {
-                              toast.error(
-                                "Failed to update bookmarks: Bad Request."
-                              );
-                              return;
-                            }
-                            if (
-                              bookmark.userBookmarks.length >=
-                              MAXIMUM_BOOKMARKS_PER_LIST
-                            ) {
-                              toast.error(
-                                "Failed to update bookmarks. You can only have maximum of " +
-                                  MAXIMUM_BOOKMARKS_PER_LIST +
-                                  " bookmarks per list."
-                              );
-                              return;
-                            }
-                            setBookmarkListName(bookmark.listName);
-                            setTimeout(() => {
-                              updateBookmarkMutation.mutate({
-                                realQuestionId: questionId,
-                                realBookmarkListName: bookmark.listName,
-                                isRealBookmarked: isItemBookmarked,
-                                isCreateNew: false,
-                              });
-                            }, 0);
-                          }}
+                          onSelect={() =>
+                            onListSelect({ bookmark, isItemBookmarked })
+                          }
                           isItemBookmarked={isItemBookmarked}
                           listName={bookmark.listName}
                           questionId={questionId}

@@ -114,8 +114,6 @@ export interface MultiSelectContextProps {
   setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
   label: VALID_LABEL;
   prerequisite: string;
-  isCollapsibleOpen: boolean;
-  setIsCollapsibleOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isMobileDevice: boolean;
   maxLength?: number;
 }
