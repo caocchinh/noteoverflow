@@ -41,7 +41,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
-import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -725,7 +724,7 @@ const QuestionInspect = ({
                               })}
                             </p>
                             <BookmarkButton
-                              className="h-[26px] w-[26px] border-black border"
+                              triggerButtonClassName="h-[26px] w-[26px] border-black border"
                               badgeClassName="h-[26px] min-h-[26px] !static"
                               questionId={
                                 partitionedTopicalData?.[currentTab][
@@ -805,7 +804,9 @@ const QuestionInspect = ({
                           {extractQuestionNumber({
                             questionId: searchResults[virtualItem.index]?.id,
                           })}
-                          <QuestionInspectBookmark
+                          <BookmarkButton
+                            triggerButtonClassName="h-[26px] w-[26px] border-black border"
+                            badgeClassName="h-[26px] min-h-[26px] !static"
                             questionId={searchResults[virtualItem.index]?.id}
                             isBookmarkDisabled={isUserSessionPending}
                             bookmarks={bookmarks}
@@ -1087,7 +1088,7 @@ const QuestionInspect = ({
                   </Button>
                   {currentQuestionId && (
                     <BookmarkButton
-                      className="h-[35px] w-[35px] border-black border"
+                      triggerButtonClassName="h-[35px] w-[35px] border-black border"
                       badgeClassName="h-[35px] min-h-[35px] !static"
                       questionId={currentQuestionId}
                       isBookmarkDisabled={isUserSessionPending}

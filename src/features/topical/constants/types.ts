@@ -1,6 +1,7 @@
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { question } from "@/drizzle/schema";
 import { InferSelectModel } from "drizzle-orm";
+import { Dispatch, SetStateAction, RefObject } from "react";
 
 export interface TopicalData {
   curriculum: ValidCurriculum;
@@ -20,7 +21,6 @@ export interface MultiSelectorProps {
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
   data?: string[];
-  dir?: string;
   maxLength?: number;
   label: VALID_LABEL;
   prerequisite: string;
@@ -102,21 +102,43 @@ export interface MultiSelectContextProps {
   open: boolean;
   setOpen: (value: boolean) => void;
   inputValue: string;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
-  activeIndex: number;
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  handleSelect: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+  setInputValue: Dispatch<SetStateAction<string>>;
+  inputRef: RefObject<HTMLInputElement | null>;
   isClickingScrollArea: boolean;
-  setIsClickingScrollArea: React.Dispatch<React.SetStateAction<boolean>>;
-  commandListRef: React.RefObject<HTMLDivElement | null>;
+  setIsClickingScrollArea: Dispatch<SetStateAction<boolean>>;
+  commandListRef: RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   isBlockingInput: boolean;
-  setIsBlockingInput: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsBlockingInput: Dispatch<SetStateAction<boolean>>;
   label: VALID_LABEL;
   prerequisite: string;
   isMobileDevice: boolean;
   maxLength?: number;
+}
+
+export interface BookmarkContextProps {
+  isBlockingInput: boolean;
+  setIsBlockingInput: Dispatch<SetStateAction<boolean>>;
+  searchInput: string;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  bookmarks: SelectedBookmark;
+  setSearchInput: Dispatch<SetStateAction<string>>;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  createNewList: () => void;
+  isMutatingThisQuestion: boolean;
+  openUI: (e: React.MouseEvent) => void;
+  questionId: string;
+  badgeClassName?: string;
+  triggerButtonClassName?: string;
+  chosenBookmarkListName: Set<string>;
+  isBookmarksFetching: boolean;
+  isBookmarkDisabled: boolean;
+  onListSelect: (params: {
+    bookmark: SelectedBookmark[number];
+    isItemBookmarked: boolean;
+  }) => void;
 }
 
 export interface InfiniteScrollProps {

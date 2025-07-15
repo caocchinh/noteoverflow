@@ -3,20 +3,27 @@ import { CommandItem } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2, Lock, Globe } from "lucide-react";
+import { RefObject } from "react";
 
 const AddToBookMarkCommandItem = ({
   onSelect,
   isItemBookmarked,
   listName,
   isPlaceholder = false,
+  setIsBlockingInput,
   questionId,
+  inputValue,
+  inputRef,
   visibility,
 }: {
   onSelect: () => void;
   isItemBookmarked: boolean;
   listName: string;
   questionId: string;
+  inputValue: string;
+  inputRef: RefObject<HTMLInputElement | null>;
   isPlaceholder?: boolean;
+  setIsBlockingInput: (value: boolean) => void;
   visibility: "private" | "public";
 }) => {
   const isMutatingThisQuestionInThisList =
@@ -33,7 +40,33 @@ const AddToBookMarkCommandItem = ({
         e.preventDefault();
         e.stopPropagation();
       }}
+      onTouchEnd={() => {
+        setTimeout(() => {
+          inputRef.current?.focus();
+          setIsBlockingInput(false);
+        }, 0);
+      }}
+      onTouchStart={() => {
+        if (!inputValue && isPlaceholder) {
+          setIsBlockingInput(true);
+        } else if (!isPlaceholder && !inputValue) {
+          setIsBlockingInput(true);
+        }
+      }}
       onSelect={() => {
+        if (!isPlaceholder) {
+          if (!inputValue) {
+            setIsBlockingInput(true);
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
+          }
+        } else {
+          setIsBlockingInput(true);
+          setTimeout(() => {
+            setIsBlockingInput(false);
+          }, 0);
+        }
         if (isMutatingThisQuestionInThisList) {
           return;
         }

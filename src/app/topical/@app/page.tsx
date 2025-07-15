@@ -1137,9 +1137,9 @@ const TopicalPage = () => {
                     sidebar/filter on the left to search for questions.
                   </div>
                   <div className="w-full md:w-[500px] text-center m-auto">
-                    You can scroll down to bottom of sidebar to adjust content
-                    layout, cache behaviour, and visual related settings to your
-                    own preference.
+                    You can scroll down to bottom of the sidebar to adjust
+                    content layout, cache behaviour, and visual related settings
+                    to your own preference.
                   </div>
                 </div>
               )}

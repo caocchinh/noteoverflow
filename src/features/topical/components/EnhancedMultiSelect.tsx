@@ -73,17 +73,11 @@ export default function EnhancedMultiSelect({
   values: value,
   maxLength = undefined,
   onValuesChange: onValueChange,
-  loop = true,
-  dir,
   data,
-  ...props
 }: MultiSelectorProps) {
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState<boolean>(false);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [isValueSelected, setIsValueSelected] = React.useState(false);
-  const [selectedValue, setSelectedValue] = React.useState("");
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
@@ -129,29 +123,10 @@ export default function EnhancedMultiSelect({
     },
     [value, data, onValueChange]
   );
-  const handleSelect = React.useCallback(
-    (e: React.SyntheticEvent<HTMLInputElement>) => {
-      e.preventDefault();
-      const target = e.currentTarget;
-      const selection = target.value.substring(
-        target.selectionStart ?? 0,
-        target.selectionEnd ?? 0
-      );
-
-      setSelectedValue(selection);
-      setIsValueSelected(selection === inputValue);
-    },
-    [inputValue]
-  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      const target = inputRef.current;
-
-      if (!target) {
-        return;
-      }
       if (commandListRef.current) {
         commandListRef.current.scrollTo({
           top: 0,
@@ -159,99 +134,18 @@ export default function EnhancedMultiSelect({
         });
       }
 
-      const moveNext = () => {
-        const nextIndex = activeIndex + 1;
-        setActiveIndex(
-          nextIndex > value.length - 1 ? (loop ? 0 : -1) : nextIndex
-        );
-      };
-
-      const movePrev = () => {
-        const prevIndex = activeIndex - 1;
-        setActiveIndex(prevIndex < 0 ? value.length - 1 : prevIndex);
-      };
-
-      const moveCurrent = () => {
-        let newIndex: number;
-        if (activeIndex - 1 <= 0) {
-          newIndex = value.length - 1 === 0 ? -1 : 0;
-        } else {
-          newIndex = activeIndex - 1;
+      if (e.key === "Escape") {
+        if (inputValue) {
+          setInputValue("");
+          return;
         }
-        setActiveIndex(newIndex);
-      };
-
-      switch (e.key) {
-        case "ArrowLeft":
-          if (dir === "rtl") {
-            if (value.length > 0 && (activeIndex !== -1 || loop)) {
-              moveNext();
-            }
-          } else if (value.length > 0 && target.selectionStart === 0) {
-            movePrev();
-          }
-          break;
-
-        case "ArrowRight":
-          if (dir === "rtl") {
-            if (value.length > 0 && target.selectionStart === 0) {
-              movePrev();
-            }
-          } else if (value.length > 0 && (activeIndex !== -1 || loop)) {
-            moveNext();
-          }
-          break;
-
-        case "Backspace":
-        case "Delete":
-          if (value.length > 0) {
-            if (activeIndex !== -1 && activeIndex < value.length) {
-              onValueChangeHandler(value[activeIndex]);
-              moveCurrent();
-            } else if (
-              target.selectionStart === 0 &&
-              (selectedValue === inputValue || isValueSelected)
-            ) {
-              onValueChangeHandler(value.at(-1) ?? "");
-            }
-          }
-          break;
-
-        case "Enter":
-          setOpen(true);
-          if (commandListRef.current) {
-            commandListRef.current.scrollTo({
-              top: 0,
-              behavior: "instant",
-            });
-          }
-          break;
-
-        case "Escape":
-          if (inputValue) {
-            setInputValue("");
-            return;
-          }
-          inputRef.current?.blur();
-          if (activeIndex !== -1) {
-            setActiveIndex(-1);
-          } else if (open) {
-            setOpen(false);
-          }
-          break;
+        inputRef.current?.blur();
+        if (open) {
+          setOpen(false);
+        }
       }
     },
-    [
-      value,
-      inputValue,
-      activeIndex,
-      loop,
-      dir,
-      onValueChangeHandler,
-      selectedValue,
-      isValueSelected,
-      open,
-    ]
+    [inputValue, open]
   );
 
   return (
@@ -263,11 +157,8 @@ export default function EnhancedMultiSelect({
         setOpen,
         inputValue,
         setInputValue,
-        activeIndex,
-        setActiveIndex,
         inputRef,
         maxLength,
-        handleSelect,
         isClickingScrollArea,
         setIsClickingScrollArea,
         commandListRef,
@@ -276,7 +167,6 @@ export default function EnhancedMultiSelect({
         allAvailableOptions: data,
         label,
         prerequisite,
-
         isMobileDevice,
       }}
     >
@@ -284,11 +174,8 @@ export default function EnhancedMultiSelect({
         className={cn(
           "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
         )}
-        dir={dir}
-        onKeyDown={handleKeyDown}
         ref={containerRef}
-        {...props}
-        label={label}
+        onKeyDown={handleKeyDown}
       >
         {isMobileDevice ? (
           <>
@@ -423,7 +310,6 @@ const MultiSelectorTrigger = () => {
   const {
     value,
     onValueChange,
-    activeIndex,
     open,
     setOpen,
     setIsClickingScrollArea,
@@ -460,7 +346,6 @@ const MultiSelectorTrigger = () => {
       className={cn(
         "relative mb-0 flex w-[300px] flex-col flex-wrap gap-1 rounded-lg bg-background p-1 py-2 ring-1 ring-muted dark:bg-secondary",
         {
-          "ring-1 focus-within:ring-ring": activeIndex === -1,
           "opacity-50": !allAvailableOptions,
         },
         !allAvailableOptions && "pointer-events-none "
@@ -609,11 +494,10 @@ const MultiSelectorTrigger = () => {
           style={{ height: `${contentHeight}px`, paddingRight }}
         >
           <div className="flex w-full flex-wrap gap-2 p-1" ref={contentRef}>
-            {value.map((item, index) => (
+            {value.map((item) => (
               <Badge
                 className={cn(
-                  "wrap-anywhere dark:!border-white/25 flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left",
-                  activeIndex === index && "ring-2 ring-muted-foreground "
+                  "wrap-anywhere dark:!border-white/25 flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left"
                 )}
                 key={item}
                 onTouchEnd={() => {
@@ -665,8 +549,6 @@ const MultiSelectorTrigger = () => {
   );
 };
 
-MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
-
 const MultiSelectorList = () => {
   const {
     value,
@@ -683,7 +565,6 @@ const MultiSelectorList = () => {
     inputRef,
     isBlockingInput,
     isClickingScrollArea,
-    activeIndex,
     setOpen,
     isMobileDevice,
   } = useMultiSelect();
@@ -708,10 +589,7 @@ const MultiSelectorList = () => {
   return (
     <div className="flex h-full flex-col gap-2">
       <CommandInput
-        className={cn(
-          "w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0",
-          activeIndex !== -1 && "caret-transparent"
-        )}
+        className="w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
         enterKeyHint="search"
         onBlur={() => {
           if (!(isClickingScrollArea || isBlockingInput)) {
@@ -724,10 +602,7 @@ const MultiSelectorList = () => {
           e.stopPropagation();
         }}
         onValueChange={(e) => {
-          if (activeIndex === -1) {
-            setInputValue(e);
-          }
-
+          setInputValue(e);
           if (!e) {
             setTimeout(() => {
               commandListRef.current?.scrollTo({
@@ -908,5 +783,3 @@ const MultiSelectorList = () => {
     </div>
   );
 };
-
-MultiSelectorList.displayName = "MultiSelectorList";
