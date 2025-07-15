@@ -61,6 +61,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BookmarkButton } from "./BookmarkButton";
 
 const QuestionInspect = ({
   isOpen,
@@ -173,7 +174,7 @@ const QuestionInspect = ({
   const virtualSearchItems = searchVirtualizer.getVirtualItems();
 
   const displayVirtualizer = useVirtualizer({
-    count: partitionedTopicalData?.[currentTab].length ?? 0,
+    count: partitionedTopicalData?.[currentTab]?.length ?? 0,
     getScrollElement: () => listScrollAreaRef.current,
     estimateSize: () => 65,
     enabled: isVirtualizationReady,
@@ -548,8 +549,8 @@ const QuestionInspect = ({
                 <div className="flex items-center gap-2 border-b border-border">
                   <Search />
                   <Input
-                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-[12px]"
-                    placeholder="Search for a question"
+                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
+                    placeholder="Search questions"
                     value={searchInput}
                     readOnly={isBlockingInput}
                     onChange={(e) => {
@@ -710,7 +711,9 @@ const QuestionInspect = ({
                                   ]?.id,
                               })}
                             </p>
-                            <QuestionInspectBookmark
+                            <BookmarkButton
+                              className="h-[26px] w-[26px] border-black border"
+                              badgeClassName="h-[26px] min-h-[26px] !static"
                               questionId={
                                 partitionedTopicalData?.[currentTab][
                                   virtualItem.index

@@ -12,6 +12,7 @@ import {
 } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const QuestionPreview = memo(
   ({
@@ -46,36 +47,47 @@ const QuestionPreview = memo(
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isInView, setIsInView] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
+    const isMobileDevice = useIsMobile();
 
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: mutationKey,
       }) > 0;
 
-    const setObserverRef = useCallback((node: HTMLDivElement | null) => {
-      if (typeof window === "undefined") {
-        return;
-      }
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-      if (!node) {
-        return;
-      }
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            setIsInView(entry.isIntersecting);
-          });
-        },
-        {
-          rootMargin: `${window.innerHeight}px`,
-          scrollMargin: `${window.innerHeight}px`,
-          threshold: 1,
-        } as ExtendedIntersectionObserverInit
-      );
-      observerRef.current.observe(node);
-    }, []);
+    const setObserverRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        if (typeof window === "undefined") {
+          return;
+        }
+        if (observerRef.current) {
+          observerRef.current.disconnect();
+        }
+        if (!node) {
+          return;
+        }
+        observerRef.current = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (isMobileDevice) {
+                setIsInView(entry.isIntersecting);
+              } else {
+                if (isHovering) {
+                  setIsInView(entry.isIntersecting);
+                }
+              }
+            });
+          },
+          {
+            rootMargin: `${window.innerHeight}px`,
+            scrollMargin: `${window.innerHeight}px`,
+            threshold: 1,
+          } as ExtendedIntersectionObserverInit
+        );
+        observerRef.current.observe(node);
+      },
+      [isHovering, isMobileDevice]
+    );
 
     return (
       <div
@@ -83,6 +95,8 @@ const QuestionPreview = memo(
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
         ref={setObserverRef}
       >
         <div
@@ -105,39 +119,43 @@ const QuestionPreview = memo(
             <p className="text-red-500 text-sm">Image failed to load</p>
           </div>
         )}
-        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-start p-2 overflow-hidden">
-          {question?.questionTopics?.map((topic) => (
-            <Badge
-              key={topic.topic}
-              className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
-            >
-              {topic.topic}
+        {isInView && (
+          <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-start p-2 overflow-hidden">
+            {question?.questionTopics?.map((topic) => (
+              <Badge
+                key={topic.topic}
+                className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
+              >
+                {topic.topic}
+              </Badge>
+            ))}
+            <Badge className="h-max bg-white !text-black text-center">
+              {question?.year}
             </Badge>
-          ))}
-          <Badge className="h-max bg-white !text-black text-center">
-            {question?.year}
-          </Badge>
-          <Badge className="h-max bg-white !text-black text-center">
-            Paper {question?.paperType}
-          </Badge>
-          <Badge className="h-max bg-white !text-black text-center">
-            {question?.season}
-          </Badge>
+            <Badge className="h-max bg-white !text-black text-center">
+              Paper {question?.paperType}
+            </Badge>
+            <Badge className="h-max bg-white !text-black text-center">
+              {question?.season}
+            </Badge>
 
-          {isInView && (
-            <BookmarkButton
-              className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-              isBookmarkDisabled={isUserSessionPending}
-              bookmarks={bookmarks}
-              isBookmarkError={isBookmarkError}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-              questionId={question.id}
-              isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-              isValidSession={isValidSession}
-            />
-          )}
-        </div>
+            {isInView && (
+              <BookmarkButton
+                className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
+                isBookmarkDisabled={isUserSessionPending}
+                bookmarks={bookmarks}
+                isBookmarkError={isBookmarkError}
+                isPopoverOpen={isPopoverOpen}
+                setIsPopoverOpen={setIsPopoverOpen}
+                questionId={question.id}
+                isBookmarksFetching={
+                  isBookmarksFetching || isUserSessionPending
+                }
+                isValidSession={isValidSession}
+              />
+            )}
+          </div>
+        )}
         {isInView && (
           <BookmarkButton
             className={cn(
@@ -152,7 +170,7 @@ const QuestionPreview = memo(
             isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
           />
         )}
-        {isMutatingThisQuestion && isInView && !isPopoverOpen && (
+        {isMutatingThisQuestion && !isPopoverOpen && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
             onClick={(e) => {

@@ -58,6 +58,7 @@ export const BookmarkButton = ({
   isBookmarkDisabled,
   isBookmarksFetching,
   isBookmarkError,
+  badgeClassName,
   isPopoverOpen: openProp,
   setIsPopoverOpen: setOpenProp,
   className,
@@ -70,6 +71,7 @@ export const BookmarkButton = ({
   setIsPopoverOpen?: (open: boolean) => void;
   isBookmarksFetching: boolean;
   isBookmarkError: boolean;
+  badgeClassName?: string;
   className?: string;
   isValidSession: boolean;
 }) => {
@@ -370,7 +372,10 @@ export const BookmarkButton = ({
       <PopoverTrigger asChild>
         {isMutatingThisQuestion ? (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
+            className={cn(
+              "absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
+              badgeClassName
+            )}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

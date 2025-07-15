@@ -1002,7 +1002,7 @@ const TopicalPage = () => {
                       Layout settings
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+                  <PopoverContent className="z-[100006] h-[190px] flex flex-col items-center justify-center gap-3">
                     <h4 className="text-sm font-medium text-center mb-2">
                       Number of maximum displayed columns
                     </h4>
