@@ -15,12 +15,14 @@ function ScrollArea({
   children,
   viewPortClassName,
   viewportRef,
+  viewPortOnScrollEnd,
   viewPortOnScroll,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitiveRoot> & {
   viewPortClassName?: string;
   viewportRef?: React.RefObject<HTMLDivElement | null>;
   viewPortOnScroll?: () => void;
+  viewPortOnScrollEnd?: () => void;
 }) {
   return (
     <ScrollAreaPrimitiveRoot
@@ -35,6 +37,7 @@ function ScrollArea({
         )}
         data-slot="scroll-area-viewport"
         onScroll={viewPortOnScroll}
+        onScrollEnd={viewPortOnScrollEnd}
         ref={viewportRef}
       >
         {children}

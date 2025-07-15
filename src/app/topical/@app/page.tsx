@@ -2,6 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowLeft,
+  ArrowUpFromLine,
   Blocks,
   LandPlot,
   Loader2,
@@ -142,6 +144,11 @@ const TopicalPage = () => {
     year: [],
     season: [],
   });
+  const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
+  const [
+    isScrollingAndShouldShowScrollButton,
+    setIsScrollingAndShouldShowScrollButton,
+  ] = useState(false);
 
   const resetEverything = () => {
     const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
@@ -153,6 +160,7 @@ const TopicalPage = () => {
       ...stateToSave,
       isSessionCacheEnabled,
       isPersistantCacheEnabled,
+      showScrollToTopButton,
       showFinishedQuestionTint,
     };
 
@@ -311,6 +319,7 @@ const TopicalPage = () => {
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
+        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
         setShowFinishedQuestionTint(
           parsedState.showFinishedQuestionTint ?? true
         );
@@ -461,6 +470,7 @@ const TopicalPage = () => {
     stateToSave = {
       ...stateToSave,
       isSessionCacheEnabled,
+      showScrollToTopButton,
       isPersistantCacheEnabled,
       showFinishedQuestionTint,
     };
@@ -496,6 +506,7 @@ const TopicalPage = () => {
     isSessionCacheEnabled,
     isPersistantCacheEnabled,
     showFinishedQuestionTint,
+    showScrollToTopButton,
   ]);
 
   const search = async () => {
@@ -1015,13 +1026,25 @@ const TopicalPage = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
-                    <h4 className="text-sm font-medium text-center mb-2">
-                      Show green tint on finished questions?
-                    </h4>
-                    <Switch
-                      checked={showFinishedQuestionTint}
-                      onCheckedChange={setShowFinishedQuestionTint}
-                    />
+                    <div className="flex flex-row items-center justify-center gap-2">
+                      <h4 className="text-sm font-medium text-center">
+                        Show green tint on finished questions?
+                      </h4>
+                      <Switch
+                        checked={showFinishedQuestionTint}
+                        onCheckedChange={setShowFinishedQuestionTint}
+                      />
+                    </div>
+                    <hr />
+                    <div className="flex flex-row items-center justify-center gap-2">
+                      <h4 className="text-sm font-medium text-center ">
+                        Show scroll to top button?
+                      </h4>
+                      <Switch
+                        checked={showScrollToTopButton}
+                        onCheckedChange={setShowScrollToTopButton}
+                      />
+                    </div>
                   </PopoverContent>
                 </Popover>
               </SidebarContent>
@@ -1029,9 +1052,32 @@ const TopicalPage = () => {
             <SidebarRail />
           </Sidebar>
           <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
-            <div className="absolute left-3 z-[1000]">
+            {showScrollToTopButton && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className={cn(
+                      "fixed cursor-pointer !px-[10px] bottom-[3%] right-[1.5%] rounded-sm z-[10]",
+                      !isScrollingAndShouldShowScrollButton && "!hidden"
+                    )}
+                    onClick={() =>
+                      scrollAreaRef.current?.scrollTo({
+                        top: 0,
+                        behavior: "instant",
+                      })
+                    }
+                  >
+                    <ArrowUpFromLine />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Scroll to top</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <div className="flex flex-row items-center justify-start gap-2 ml-2 w-full">
               <Button
-                className="!bg-background fixed flex cursor-pointer items-center gap-2 border"
+                className="!bg-background flex cursor-pointer items-center gap-2 border"
                 onClick={() => {
                   setIsSidebarOpen(!isSidebarOpen);
                 }}
@@ -1040,13 +1086,11 @@ const TopicalPage = () => {
                 Filters
                 <SlidersHorizontal />
               </Button>
-            </div>
-            <div className="absolute left-28 z-[1000]">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="fixed">
+                  <div>
                     <Button
-                      className="  flex cursor-pointer items-center gap-2 border"
+                      className="flex cursor-pointer items-center gap-2 border"
                       disabled={isQuestionViewDisabled}
                       onClick={() => {
                         setIsQuestionViewOpen((prev) => ({
@@ -1070,18 +1114,33 @@ const TopicalPage = () => {
               </Tooltip>
             </div>
 
-            <h1 className="w-full text-center font-bold text-2xl ">
-              Topical questions
-            </h1>
-
             <ScrollArea
               viewportRef={scrollAreaRef}
               className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
               type="always"
+              viewPortOnScrollEnd={() => {
+                if (scrollAreaRef.current?.scrollTop === 0) {
+                  setIsScrollingAndShouldShowScrollButton(false);
+                } else {
+                  setIsScrollingAndShouldShowScrollButton(true);
+                }
+              }}
             >
               {!isTopicalDataFetching && !isTopicalDataFetched && (
-                <div className="flex flex-row items-center justify-center w-full h-full mb-3">
-                  Use the sidebar on the left to search for questions.
+                <div className="flex flex-col items-center justify-center w-full h-full mb-3 gap-4">
+                  <h1 className="w-full text-center font-bold text-2xl">
+                    Topical questions
+                  </h1>
+
+                  <div className="flex flex-row items-center justify-center w-full h-full dark:text-green-600 text-green-700 text-center">
+                    <ArrowLeft className="hidden md:block" size={16} /> Use the
+                    sidebar/filter on the left to search for questions.
+                  </div>
+                  <div className="w-full md:w-[500px] text-center m-auto">
+                    You can scroll down to bottom of sidebar to adjust content
+                    layout, cache behaviour, and visual related settings to your
+                    own preference.
+                  </div>
                 </div>
               )}
               {topicalData?.data && topicalData?.data.length > 0 && (

@@ -55,6 +55,7 @@ export type FiltersCache = {
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
   showFinishedQuestionTint: boolean;
+  showScrollToTopButton: boolean;
   lastSessionSubject: string;
   isPersistantCacheEnabled: boolean;
   filters: {
