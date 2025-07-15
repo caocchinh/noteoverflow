@@ -14,6 +14,7 @@ export async function GET() {
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+    // @ts-expect-error visibility is always a string and is always "private" or "public"
     const bookmarks: SelectedBookmark =
       await db.query.userBookmarkList.findMany({
         where: eq(userBookmarkList.userId, userId),

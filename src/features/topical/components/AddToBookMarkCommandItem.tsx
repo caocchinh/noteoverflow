@@ -1,18 +1,21 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { CommandItem } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { useIsMutating } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock, Earth } from "lucide-react";
 
 const AddToBookMarkCommandItem = ({
   onSelect,
   isItemBookmarked,
   listName,
   questionId,
+  visibility,
 }: {
   onSelect: () => void;
   isItemBookmarked: boolean;
   listName: string;
   questionId: string;
+  visibility: "private" | "public";
 }) => {
   const isMutatingThisQuestionInThisList =
     useIsMutating({
@@ -20,20 +23,36 @@ const AddToBookMarkCommandItem = ({
     }) > 0;
   return (
     <CommandItem
-      className="cursor-pointer flex items-center justify-start"
-      disabled={isMutatingThisQuestionInThisList}
+      className={cn(
+        "cursor-pointer wrap-anywhere flex items-center justify-between",
+        isMutatingThisQuestionInThisList && "opacity-50 cursor-default"
+      )}
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
-      onSelect={onSelect}
+      onSelect={() => {
+        if (isMutatingThisQuestionInThisList) {
+          return;
+        }
+        onSelect();
+      }}
     >
-      <Checkbox
-        checked={isItemBookmarked}
-        className="data-[state=checked]:!bg-logo-main"
-      />
-      {listName}
-      {isMutatingThisQuestionInThisList && <Loader2 className="animate-spin" />}
+      <div className="flex items-center justify-start gap-2">
+        <Checkbox
+          checked={isItemBookmarked}
+          className="data-[state=checked]:!bg-logo-main "
+        />
+        {listName}
+        {isMutatingThisQuestionInThisList && (
+          <Loader2 className="animate-spin" />
+        )}
+      </div>
+      {visibility === "private" ? (
+        <Lock className="w-4 h-4" />
+      ) : (
+        <Earth className="w-4 h-4" />
+      )}
     </CommandItem>
   );
 };

@@ -27,7 +27,6 @@ import {
   CommandInput,
   CommandList,
 } from "@/components/ui/command";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AddToBookMarkCommandItem from "./AddToBookMarkCommandItem";
@@ -38,6 +37,14 @@ import {
   MAXIMUM_BOOKMARK_LISTS_PER_USER,
   MAXIMUM_BOOKMARKS_PER_LIST,
 } from "@/constants/constants";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const BookmarkButton = ({
   bookmarks,
@@ -60,14 +67,15 @@ export const BookmarkButton = ({
   className?: string;
   isValidSession: boolean;
 }) => {
-  const [currentTab, setCurrentTab] = useState<"add-existing" | "add-new">(
-    "add-existing"
-  );
   const [_open, _setOpen] = useState(false);
   const open = openProp ?? _open;
   const [newBookmarkListNameInput, setNewBookmarkListNameInput] = useState("");
   const [isInputError, setIsInputError] = useState(false);
   const [bookmarkListName, setBookmarkListName] = useState("");
+  const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
+  const [isBlockingInput, setIsBlockingInput] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
 
   const setOpen = useCallback(
     (value: boolean | ((_value: boolean) => boolean)) => {
@@ -173,6 +181,7 @@ export const BookmarkButton = ({
     }) => {
       queryClient.setQueryData<SelectedBookmark>(
         ["all_user_bookmarks"],
+        //@ts-expect-error No need the type check here for visibility param
         (prev: SelectedBookmark | undefined) => {
           if (!prev) {
             return prev;
@@ -197,6 +206,9 @@ export const BookmarkButton = ({
             const isListAlreadyExist = prev.some(
               (bookmark) => bookmark.listName === newBookmarkListName
             );
+            setIsAddNewListDialogOpen(false);
+            setIsInputError(false);
+            setNewBookmarkListNameInput("");
             if (isListAlreadyExist) {
               return addNewBookmark();
             }
@@ -237,8 +249,8 @@ export const BookmarkButton = ({
 
       toast.success(
         isRealBookmarked
-          ? `Question removed from ${newBookmarkListName}.`
-          : `Question added to ${newBookmarkListName}.`,
+          ? `Question removed from ${newBookmarkListName}`
+          : `Question added to ${newBookmarkListName}`,
         {
           duration: 2000,
         }
@@ -273,8 +285,47 @@ export const BookmarkButton = ({
     },
   });
 
+  const createNewList = () => {
+    if (
+      newBookmarkListNameInput.trim() === "" ||
+      newBookmarkListNameInput.length > 100
+    ) {
+      setIsInputError(true);
+      return;
+    }
+    if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
+      toast.error(
+        "Failed to update bookmarks. You can only have maximum of " +
+          MAXIMUM_BOOKMARK_LISTS_PER_USER +
+          " bookmark lists."
+      );
+      return;
+    }
+    setBookmarkListName(newBookmarkListNameInput.trim());
+    setTimeout(() => {
+      updateBookmarkMutation.mutate({
+        realQuestionId: questionId,
+        realBookmarkListName: newBookmarkListNameInput.trim(),
+        isRealBookmarked: false,
+        isCreateNew: true,
+      });
+    }, 0);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (open) {
+          setIsBlockingInput(true);
+          setTimeout(() => {
+            setIsBlockingInput(false);
+          }, 0);
+        }
+        setOpen(open);
+      }}
+      modal={true}
+    >
       <PopoverTrigger asChild>
         {isMutatingThisQuestion ? (
           <Badge
@@ -330,7 +381,7 @@ export const BookmarkButton = ({
         )}
       </PopoverTrigger>
       <PopoverContent
-        className="w-full h-full z-[100006] !px-0"
+        className="h-full z-[100006] w-[250px] !px-0"
         onClick={(e) => e.stopPropagation()}
         align="end"
       >
@@ -339,93 +390,97 @@ export const BookmarkButton = ({
           onClick={() => setOpen(false)}
           size={15}
         />
-        <Tabs
-          value={currentTab}
-          onValueChange={(value) => {
-            setCurrentTab(value as "add-existing" | "add-new");
-          }}
-        >
-          <TabsContent value="add-existing">
-            <Command>
-              <CommandInput
-                placeholder="Search bookmark lists"
-                wrapperClassName="border-b border-border p-1 pb-2 px-2"
-                onClick={(e) => {
-                  e.currentTarget.focus();
-                }}
-                onDoubleClick={(e) => {
-                  e.currentTarget.select();
-                }}
-              />
-              <CommandList className="w-full h-[200px]">
-                <ScrollArea>
-                  <CommandEmpty>No lists found.</CommandEmpty>
-                  <CommandGroup heading="Save to">
-                    {bookmarks.length > 0 && (
-                      <>
-                        {bookmarks.map((bookmark) => {
-                          const isItemBookmarked = bookmark.userBookmarks.some(
-                            (bookmark) => bookmark.questionId === questionId
-                          );
 
-                          return (
-                            <AddToBookMarkCommandItem
-                              key={bookmark.listName}
-                              onSelect={() => {
-                                if (bookmark.listName.trim() === "") {
-                                  toast.error(
-                                    "Failed to update bookmarks: Bad Request."
-                                  );
-                                  return;
-                                }
-                                if (
-                                  bookmark.userBookmarks.length >=
-                                  MAXIMUM_BOOKMARKS_PER_LIST
-                                ) {
-                                  toast.error(
-                                    "Failed to update bookmarks. You can only have maximum of " +
-                                      MAXIMUM_BOOKMARKS_PER_LIST +
-                                      " bookmarks per list."
-                                  );
-                                  return;
-                                }
-                                setBookmarkListName(bookmark.listName);
-                                setTimeout(() => {
-                                  updateBookmarkMutation.mutate({
-                                    realQuestionId: questionId,
-                                    realBookmarkListName: bookmark.listName,
-                                    isRealBookmarked: isItemBookmarked,
-                                    isCreateNew: false,
-                                  });
-                                }, 0);
-                              }}
-                              isItemBookmarked={isItemBookmarked}
-                              listName={bookmark.listName}
-                              questionId={questionId}
-                            />
-                          );
-                        })}
-                      </>
-                    )}
-                  </CommandGroup>
-                </ScrollArea>
-              </CommandList>
-            </Command>
-            <div className="px-2 w-full">
-              <Button
-                onClick={() => setCurrentTab("add-new")}
-                className="w-full mt-2 cursor-pointer"
-                variant="outline"
+        <Command>
+          <CommandInput
+            placeholder="Search bookmark lists"
+            wrapperClassName="border-b border-border mb-2 p-2 pb-5"
+            onClick={(e) => {
+              e.currentTarget.focus();
+            }}
+            value={searchInput}
+            onValueChange={setSearchInput}
+            readOnly={isBlockingInput}
+            onDoubleClick={(e) => {
+              e.currentTarget.select();
+            }}
+          />
+          <CommandList className="w-full h-[200px]">
+            <ScrollArea>
+              <CommandEmpty>No lists found.</CommandEmpty>
+              <CommandGroup
+                heading={searchInput.length > 0 ? "Search result" : "Save to"}
               >
+                {bookmarks.length > 0 && (
+                  <>
+                    {bookmarks.map((bookmark) => {
+                      const isItemBookmarked = bookmark.userBookmarks.some(
+                        (bookmark) => bookmark.questionId === questionId
+                      );
+
+                      return (
+                        <AddToBookMarkCommandItem
+                          key={bookmark.listName}
+                          onSelect={() => {
+                            if (bookmark.listName.trim() === "") {
+                              toast.error(
+                                "Failed to update bookmarks: Bad Request."
+                              );
+                              return;
+                            }
+                            if (
+                              bookmark.userBookmarks.length >=
+                              MAXIMUM_BOOKMARKS_PER_LIST
+                            ) {
+                              toast.error(
+                                "Failed to update bookmarks. You can only have maximum of " +
+                                  MAXIMUM_BOOKMARKS_PER_LIST +
+                                  " bookmarks per list."
+                              );
+                              return;
+                            }
+                            setBookmarkListName(bookmark.listName);
+                            setTimeout(() => {
+                              updateBookmarkMutation.mutate({
+                                realQuestionId: questionId,
+                                realBookmarkListName: bookmark.listName,
+                                isRealBookmarked: isItemBookmarked,
+                                isCreateNew: false,
+                              });
+                            }, 0);
+                          }}
+                          isItemBookmarked={isItemBookmarked}
+                          listName={bookmark.listName}
+                          questionId={questionId}
+                          visibility={bookmark.visibility}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </CommandGroup>
+            </ScrollArea>
+          </CommandList>
+        </Command>
+
+        <AlertDialog
+          open={isAddNewListDialogOpen}
+          onOpenChange={setIsAddNewListDialogOpen}
+        >
+          <AlertDialogTrigger asChild>
+            <div className="px-2 w-full">
+              <Button className="w-full mt-2 cursor-pointer" variant="outline">
                 <Plus /> New list
               </Button>
             </div>
-          </TabsContent>
-          <TabsContent
-            value="add-new"
-            className="flex flex-col items-center w-full justify-center gap-2 px-4"
+          </AlertDialogTrigger>
+          <AlertDialogContent
+            className="z-[100008]"
+            overlayClassName="z-[100007]"
           >
-            <h3 className="w-full text-left">New list</h3>
+            <AlertDialogHeader>
+              <AlertDialogTitle>New list</AlertDialogTitle>
+            </AlertDialogHeader>
             <div className="flex items-center justify-center gap-2">
               <Input
                 onChange={(e) => {
@@ -436,64 +491,65 @@ export const BookmarkButton = ({
                   }
                   setNewBookmarkListNameInput(e.target.value);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    createNewList();
+                  }
+                }}
+                disabled={isMutatingThisQuestion}
                 value={newBookmarkListNameInput}
                 placeholder="e.g. Super hard questions"
+                className="placeholder:text-[13px]"
               />
               <X
-                className="cursor-pointer text-red-500"
-                onClick={() => setNewBookmarkListNameInput("")}
+                className={cn(
+                  "cursor-pointer text-red-500",
+                  isMutatingThisQuestion && "opacity-50"
+                )}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onClick={() => {
+                  if (isMutatingThisQuestion) return;
+                  setNewBookmarkListNameInput("");
+                  setIsInputError(false);
+                }}
                 size={20}
               />
             </div>
-            <div className="flex gap-2 w-full">
-              <Button
-                onClick={() => setCurrentTab("add-existing")}
-                className="w-1/2 mt-2 cursor-pointer"
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
-                disabled={isInputError}
-                onClick={() => {
-                  if (
-                    newBookmarkListNameInput.trim() === "" ||
-                    newBookmarkListNameInput.length > 100
-                  ) {
-                    setIsInputError(true);
-                    return;
-                  }
-                  if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
-                    toast.error(
-                      "Failed to update bookmarks. You can only have maximum of " +
-                        MAXIMUM_BOOKMARK_LISTS_PER_USER +
-                        " bookmark lists."
-                    );
-                    return;
-                  }
-                  setBookmarkListName(newBookmarkListNameInput.trim());
-                  setTimeout(() => {
-                    updateBookmarkMutation.mutate({
-                      realQuestionId: questionId,
-                      realBookmarkListName: newBookmarkListNameInput.trim(),
-                      isRealBookmarked: false,
-                      isCreateNew: true,
-                    });
-                  }, 0);
-                }}
-              >
-                Create <Plus />
-              </Button>
-            </div>
             {isInputError && (
               <p className="text-red-500 text-xs mt-1 text-center">
-                Please enter valid a list name.
-                <br /> Max 100 characters.
+                Please enter valid a list name. Max 100 characters.
               </p>
             )}
-          </TabsContent>
-        </Tabs>
+            <div className="flex gap-2 w-full">
+              <AlertDialogCancel asChild>
+                <Button className="w-1/2 mt-2 cursor-pointer" variant="outline">
+                  Back
+                </Button>
+              </AlertDialogCancel>
+              <Button
+                className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+                disabled={isInputError || isMutatingThisQuestion}
+                onClick={createNewList}
+              >
+                {isMutatingThisQuestion ? (
+                  <>
+                    Processing
+                    <Loader2 className="animate-spin ml-1" />
+                  </>
+                ) : (
+                  <>
+                    <Plus />
+                    Create
+                  </>
+                )}
+              </Button>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </PopoverContent>
     </Popover>
   );

@@ -78,6 +78,7 @@ export type SelectedQuestion = Pick<
 export type SelectedBookmark = {
   createdAt: Date;
   updatedAt: Date;
+  visibility: "private" | "public";
   userId: string;
   listName: string;
   userBookmarks: {

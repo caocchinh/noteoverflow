@@ -273,6 +273,7 @@ export const userBookmarkList = sqliteTable(
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
+    visibility: text("visibility").notNull().default("private"),
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.listName] })];
