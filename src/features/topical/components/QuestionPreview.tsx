@@ -97,6 +97,8 @@ const QuestionPreview = memo(
         }
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        onTouchStart={() => setIsHovering(true)}
+        onTouchEnd={() => setIsHovering(false)}
         ref={setObserverRef}
       >
         <div

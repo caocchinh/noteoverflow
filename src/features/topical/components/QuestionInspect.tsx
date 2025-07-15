@@ -147,19 +147,32 @@ const QuestionInspect = ({
       : [];
   }, [searchInput, allQuestions]);
 
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    if (isMobile) {
+      setIsInspectSidebarOpen(false);
+    }
+  }, [isMobile, setIsInspectSidebarOpen]);
+
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (isOpen.isOpen) {
       setIsBlockingInput(true);
       timeout = setTimeout(() => {
-        setIsVirtualizationReady(true);
+        if (isMobile && isInspectSidebarOpen) {
+          setIsVirtualizationReady(true);
+        } else if (!isMobile) {
+          setIsVirtualizationReady(true);
+        } else {
+          setIsVirtualizationReady(false);
+        }
         setIsBlockingInput(false);
       }, 0);
     } else {
       setIsVirtualizationReady(false);
     }
     return () => clearTimeout(timeout);
-  }, [isOpen.isOpen, isInspectSidebarOpen]);
+  }, [isOpen.isOpen, isInspectSidebarOpen, isMobile]);
 
   useEffect(() => {
     setCurrentView("question");
@@ -201,12 +214,6 @@ const QuestionInspect = ({
     },
     [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
   );
-  const isMobile = useIsMobile();
-  useEffect(() => {
-    if (isMobile) {
-      setIsInspectSidebarOpen(false);
-    }
-  }, [isMobile, setIsInspectSidebarOpen]);
 
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
@@ -295,10 +302,16 @@ const QuestionInspect = ({
         : isOpen.questionId
     );
 
-    if (partitionedTopicalData?.[tab]) {
+    if (partitionedTopicalData?.[tab] && isVirtualizationReady) {
       scrollToQuestion({ questionId: isOpen.questionId, tab });
     }
-  }, [isOpen, overflowScrollHandler, partitionedTopicalData, scrollToQuestion]);
+  }, [
+    isOpen,
+    isVirtualizationReady,
+    overflowScrollHandler,
+    partitionedTopicalData,
+    scrollToQuestion,
+  ]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -1072,6 +1085,18 @@ const QuestionInspect = ({
                     Toggle
                     <PanelsTopLeft />
                   </Button>
+                  {currentQuestionId && (
+                    <BookmarkButton
+                      className="h-[35px] w-[35px] border-black border"
+                      badgeClassName="h-[35px] min-h-[35px] !static"
+                      questionId={currentQuestionId}
+                      isBookmarkDisabled={isUserSessionPending}
+                      bookmarks={bookmarks}
+                      isValidSession={isValidSession}
+                      isBookmarksFetching={isBookmarksFetching}
+                      isBookmarkError={isBookmarkError}
+                    />
+                  )}
                   <QuestionInspectFinishedCheckbox
                     finishedQuestions={userFinishedQuestions}
                     questionId={currentQuestionId}
