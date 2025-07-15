@@ -4,8 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { memo, useState } from "react";
-import { SelectedBookmark, SelectedQuestion } from "../constants/types";
+import { memo, useCallback, useRef, useState } from "react";
+import {
+  ExtendedIntersectionObserverInit,
+  SelectedBookmark,
+  SelectedQuestion,
+} from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 
@@ -36,22 +40,50 @@ const QuestionPreview = memo(
     userFinishedQuestions: Set<string>;
     showFinishedQuestionTint: boolean;
   }) => {
+    const observerRef = useRef<IntersectionObserver | null>(null);
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isInView, setIsInView] = useState(false);
 
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: mutationKey,
       }) > 0;
 
+    const setObserverRef = useCallback((node: HTMLDivElement | null) => {
+      if (typeof window === "undefined") {
+        return;
+      }
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      if (!node) {
+        return;
+      }
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            setIsInView(entry.isIntersecting);
+          });
+        },
+        {
+          rootMargin: `${window.innerHeight}px`,
+          scrollMargin: `${window.innerHeight}px`,
+          threshold: 1,
+        } as ExtendedIntersectionObserverInit
+      );
+      observerRef.current.observe(node);
+    }, []);
+
     return (
       <div
-        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer hover:scale-[0.98] transition-all group duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] rounded-sm border dark:border-none border-black/50  relative overflow-hidden min-h-[110px]"
+        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-none border-black/50  relative overflow-hidden min-h-[110px]"
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
+        ref={setObserverRef}
       >
         <div
           className={cn(
@@ -92,31 +124,35 @@ const QuestionPreview = memo(
             {question?.season}
           </Badge>
 
+          {isInView && (
+            <BookmarkButton
+              className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
+              isBookmarkDisabled={isUserSessionPending}
+              bookmarks={bookmarks}
+              isBookmarkError={isBookmarkError}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+              questionId={question.id}
+              isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+              isValidSession={isValidSession}
+            />
+          )}
+        </div>
+        {isInView && (
           <BookmarkButton
-            className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-            isBookmarkDisabled={isUserSessionPending}
+            className={cn(
+              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+              isPopoverOpen && !isMutatingThisQuestion && "md:flex hidden"
+            )}
             bookmarks={bookmarks}
             isBookmarkError={isBookmarkError}
-            isPopoverOpen={isPopoverOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
             questionId={question.id}
-            isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
             isValidSession={isValidSession}
+            isBookmarkDisabled={isUserSessionPending}
+            isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
           />
-        </div>
-        <BookmarkButton
-          className={cn(
-            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
-            isPopoverOpen && !isMutatingThisQuestion && "md:flex hidden"
-          )}
-          bookmarks={bookmarks}
-          isBookmarkError={isBookmarkError}
-          questionId={question.id}
-          isValidSession={isValidSession}
-          isBookmarkDisabled={isUserSessionPending}
-          isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-        />
-        {isMutatingThisQuestion && !isPopoverOpen && (
+        )}
+        {isMutatingThisQuestion && isInView && !isPopoverOpen && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
             onClick={(e) => {

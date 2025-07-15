@@ -117,3 +117,16 @@ export interface MultiSelectContextProps {
   isMobileDevice: boolean;
   maxLength?: number;
 }
+
+export interface InfiniteScrollProps {
+  next: () => unknown;
+  hasMore: boolean;
+  root?: Element | Document | null;
+  isLoading?: boolean;
+}
+
+// Extend the IntersectionObserverInit interface to include scrollMargin
+export interface ExtendedIntersectionObserverInit
+  extends IntersectionObserverInit {
+  scrollMargin?: string;
+}

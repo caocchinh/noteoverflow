@@ -1,16 +1,8 @@
 import { useCallback, useRef } from "react";
-
-// Extend the IntersectionObserverInit interface to include scrollMargin
-interface ExtendedIntersectionObserverInit extends IntersectionObserverInit {
-  scrollMargin?: string;
-}
-
-interface InfiniteScrollProps {
-  next: () => unknown;
-  hasMore: boolean;
-  root?: Element | Document | null;
-  isLoading?: boolean;
-}
+import {
+  ExtendedIntersectionObserverInit,
+  InfiniteScrollProps,
+} from "../constants/types";
 
 export default function InfiniteScroll({
   next,

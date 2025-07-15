@@ -43,7 +43,6 @@ import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import QuestionInspectBookmark from "./QuestionInspectBookmark";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CHUNK_SIZE } from "../constants/constants";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -174,7 +173,7 @@ const QuestionInspect = ({
   const virtualSearchItems = searchVirtualizer.getVirtualItems();
 
   const displayVirtualizer = useVirtualizer({
-    count: CHUNK_SIZE,
+    count: partitionedTopicalData?.[currentTab].length ?? 0,
     getScrollElement: () => listScrollAreaRef.current,
     estimateSize: () => 65,
     enabled: isVirtualizationReady,

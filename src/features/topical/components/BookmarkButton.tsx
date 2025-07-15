@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
@@ -81,6 +81,7 @@ export const BookmarkButton = ({
   const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   const setOpen = useCallback(
     (value: boolean | ((_value: boolean) => boolean)) => {
@@ -188,7 +189,6 @@ export const BookmarkButton = ({
     }) => {
       queryClient.setQueryData<SelectedBookmark>(
         ["all_user_bookmarks"],
-        //@ts-expect-error No need the type check here for visibility param
         (prev: SelectedBookmark | undefined) => {
           if (!prev) {
             return prev;
@@ -216,6 +216,9 @@ export const BookmarkButton = ({
             setIsAddNewListDialogOpen(false);
             setIsInputError(false);
             setNewBookmarkListNameInput("");
+            scrollAreaRef.current?.scrollTo({
+              top: 0,
+            });
             if (isListAlreadyExist) {
               return addNewBookmark();
             }
@@ -226,6 +229,7 @@ export const BookmarkButton = ({
                 updatedAt: new Date(),
                 userId,
                 listName: newBookmarkListName,
+                visibility: "private",
                 userBookmarks: [
                   {
                     questionId: newQuestionId,
@@ -410,7 +414,6 @@ export const BookmarkButton = ({
             }}
             onTouchStart={(e) => {
               e.stopPropagation();
-              e.preventDefault();
             }}
           >
             {isBookmarksFetching ? (
@@ -446,8 +449,12 @@ export const BookmarkButton = ({
               e.currentTarget.select();
             }}
           />
-          <CommandList className="w-full h-[200px]">
-            <ScrollArea>
+          <CommandList className="w-full">
+            <ScrollArea
+              viewportRef={scrollAreaRef}
+              className=" h-[200px] [&_.bg-border]:bg-logo-main/50"
+              type="always"
+            >
               <CommandEmpty>No lists found.</CommandEmpty>
               <Collapsible>
                 {!searchInput && (
@@ -490,6 +497,7 @@ export const BookmarkButton = ({
                             }
                             isItemBookmarked={true}
                             listName={bookmark.listName}
+                            isPlaceholder={true}
                             questionId={questionId}
                             visibility={bookmark.visibility}
                           />

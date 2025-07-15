@@ -2,12 +2,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CommandItem } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useIsMutating } from "@tanstack/react-query";
-import { Loader2, Lock, Earth } from "lucide-react";
+import { Loader2, Lock, Globe } from "lucide-react";
 
 const AddToBookMarkCommandItem = ({
   onSelect,
   isItemBookmarked,
   listName,
+  isPlaceholder = false,
   questionId,
   visibility,
 }: {
@@ -15,6 +16,7 @@ const AddToBookMarkCommandItem = ({
   isItemBookmarked: boolean;
   listName: string;
   questionId: string;
+  isPlaceholder?: boolean;
   visibility: "private" | "public";
 }) => {
   const isMutatingThisQuestionInThisList =
@@ -44,6 +46,7 @@ const AddToBookMarkCommandItem = ({
           className="data-[state=checked]:!bg-logo-main "
         />
         {listName}
+        {isPlaceholder && <span className="sr-only">skibidi toilet</span>}
         {isMutatingThisQuestionInThisList && (
           <Loader2 className="animate-spin" />
         )}
@@ -51,7 +54,7 @@ const AddToBookMarkCommandItem = ({
       {visibility === "private" ? (
         <Lock className="w-4 h-4" />
       ) : (
-        <Earth className="w-4 h-4" />
+        <Globe className="w-4 h-4" />
       )}
     </CommandItem>
   );
