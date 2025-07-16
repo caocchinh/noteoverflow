@@ -1093,6 +1093,7 @@ const QuestionInspect = ({
                       questionId={currentQuestionId}
                       isBookmarkDisabled={isUserSessionPending}
                       bookmarks={bookmarks}
+                      popOverAlign="start"
                       isValidSession={isValidSession}
                       isBookmarksFetching={isBookmarksFetching}
                       isBookmarkError={isBookmarkError}

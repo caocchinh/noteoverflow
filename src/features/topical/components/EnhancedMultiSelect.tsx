@@ -752,7 +752,6 @@ const MultiSelectorList = () => {
                         setIsBlockingInput(false);
                       }, 0);
                     }
-                    setInputValue("");
                   }}
                   onTouchEnd={() => {
                     setTimeout(() => {
