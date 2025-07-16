@@ -1,13 +1,11 @@
 import React, {
-  createContext,
   useCallback,
   useMemo,
-  useContext,
   useRef,
   useState,
   forwardRef,
-  memo,
   type KeyboardEvent,
+  memo,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -70,536 +68,516 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Checkbox } from "@/components/ui/checkbox";
+import createBookmarkStore, {
+  BookmarkState,
+  BookmarkStore,
+} from "../store/useBookmark";
+import { createContext, useContext } from "react";
+import { useStore } from "zustand";
 
-const BookmarkContext = createContext<BookmarkContextProps | null>(null);
+const BookmarkContext = createContext<BookmarkStore | null>(null);
 
-const useBookmark = () => {
-  const context = useContext(BookmarkContext);
-  if (!context) {
-    throw new Error("useBookmark must be used within BookmarkProvider");
-  }
-  return context;
-};
+function useBookmarkContext<T>(selector: (state: BookmarkState) => T): T {
+  const store = useContext(BookmarkContext);
+  if (!store) throw new Error("Missing BookmarkContext.Provider in the tree");
+  return useStore(store, selector);
+}
 
-export const BookmarkButton = ({
-  bookmarks,
-  questionId,
-  isBookmarkDisabled,
-  isBookmarksFetching,
-  isBookmarkError,
-  popOverAlign = "end",
-  badgeClassName,
-  isPopoverOpen: openProp,
-  setIsPopoverOpen: setOpenProp,
-  triggerButtonClassName,
-  isValidSession,
-}: {
-  bookmarks: SelectedBookmark;
-  questionId: string;
-  isBookmarkDisabled: boolean;
-  isPopoverOpen?: boolean;
-  popOverAlign?: "start" | "end";
-  setIsPopoverOpen?: (open: boolean) => void;
-  isBookmarksFetching: boolean;
-  isBookmarkError: boolean;
-  badgeClassName?: string;
-  triggerButtonClassName?: string;
-  isValidSession: boolean;
-}) => {
-  const [_open, _setOpen] = useState(false);
-  const open = openProp ?? _open;
-  const [newBookmarkListNameInput, setNewBookmarkListNameInput] = useState("");
-  const [isInputError, setIsInputError] = useState(false);
-  const [bookmarkListName, setBookmarkListName] = useState("");
-  const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
-  const [isBlockingInput, setIsBlockingInput] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
+export const BookmarkButton = memo(
+  ({
+    bookmarks,
+    questionId,
+    isBookmarkDisabled,
+    isBookmarksFetching,
+    isBookmarkError,
+    popOverAlign = "end",
+    badgeClassName,
+    isPopoverOpen: openProp,
+    setIsPopoverOpen: setOpenProp,
+    triggerButtonClassName,
+    isValidSession,
+  }: {
+    bookmarks: SelectedBookmark;
+    questionId: string;
+    isBookmarkDisabled: boolean;
+    isPopoverOpen?: boolean;
+    popOverAlign?: "start" | "end";
+    setIsPopoverOpen?: (open: boolean) => void;
+    isBookmarksFetching: boolean;
+    isBookmarkError: boolean;
+    badgeClassName?: string;
+    triggerButtonClassName?: string;
+    isValidSession: boolean;
+  }) => {
+    const bookmarkStore = useRef(
+      createBookmarkStore({
+        isBookmarksFetching,
+        isBookmarkDisabled,
+        isBookmarkError,
+        isValidSession,
+        questionId,
+        bookmarks,
+        badgeClassName,
+        triggerButtonClassName,
+      })
+    ).current;
 
-  const setOpen = useCallback(
-    (value: boolean | ((_value: boolean) => boolean)) => {
-      const openState = typeof value === "function" ? value(open) : value;
-      if (setOpenProp) {
-        setOpenProp(openState);
-      } else {
-        _setOpen(openState);
-      }
-      if (!openState) {
-        setNewBookmarkListNameInput("");
-      }
-    },
-    [setOpenProp, open]
-  );
+    const queryClient = useQueryClient();
 
-  const queryClient = useQueryClient();
+    const mutationKey = ["all_user_bookmarks", questionId, bookmarkListName];
 
-  const mutationKey = ["all_user_bookmarks", questionId, bookmarkListName];
+    const isMobileDevice = useIsMobile();
 
-  const isMobileDevice = useIsMobile();
-
-  const isMutatingThisQuestion =
-    useIsMutating({
-      mutationKey: ["all_user_bookmarks", questionId],
-    }) > 0;
-
-  const chosenBookmarkListName = useMemo(() => {
-    const set = new Set<string>();
-    for (const bookmark of bookmarks) {
-      if (bookmark.userBookmarks.some((b) => b.questionId === questionId)) {
-        set.add(bookmark.listName);
-      }
-    }
-    return set;
-  }, [bookmarks, questionId]);
-
-  const updateBookmarkMutation = useMutation({
-    mutationKey: mutationKey,
-    mutationFn: async ({
-      realQuestionId,
-      realBookmarkListName,
-      isRealBookmarked,
-      isCreateNew,
-    }: {
-      realQuestionId: string;
-      isRealBookmarked: boolean;
-      realBookmarkListName: string;
-      isCreateNew: boolean;
-    }): Promise<{
-      userId: string;
-      realQuestionId: string;
-      realBookmarkListName: string;
-      isRealBookmarked: boolean;
-      isCreateNew: boolean;
-    }> => {
-      if (isCreateNew) {
-        const result = await createBookmarkListAction({
-          listName: realBookmarkListName,
-        });
-        if (!result.success) {
-          throw new Error(result.error + "list");
+    const chosenBookmarkListName = useMemo(() => {
+      const set = new Set<string>();
+      for (const bookmark of bookmarks) {
+        if (bookmark.userBookmarks.some((b) => b.questionId === questionId)) {
+          set.add(bookmark.listName);
         }
       }
-      if (isRealBookmarked) {
-        const result = await removeBookmarkAction({
-          questionId: realQuestionId,
-          bookmarkListName: realBookmarkListName,
-        });
-        return {
-          userId: result.data!,
-          realQuestionId: realQuestionId,
-          realBookmarkListName: realBookmarkListName,
-          isRealBookmarked: true,
-          isCreateNew: isCreateNew,
-        };
-      } else {
-        const result = await addBookmarkAction({
-          questionId: realQuestionId,
-          bookmarkListName: realBookmarkListName,
-        });
-        if (!result.success) {
-          throw new Error(result.error + "bookmark");
-        }
-        return {
-          userId: result.data!,
-          realQuestionId: realQuestionId,
-          realBookmarkListName: realBookmarkListName,
-          isRealBookmarked: false,
-          isCreateNew: isCreateNew,
-        };
-      }
-    },
-    onSuccess: ({
-      realQuestionId: newQuestionId,
-      isRealBookmarked,
-      realBookmarkListName: newBookmarkListName,
-      isCreateNew,
-      userId,
-    }: {
-      realQuestionId: string;
-      isRealBookmarked: boolean;
-      realBookmarkListName: string;
-      isCreateNew: boolean;
-      userId: string;
-    }) => {
-      queryClient.setQueryData<SelectedBookmark>(
-        ["all_user_bookmarks"],
-        (prev: SelectedBookmark | undefined) => {
-          if (!prev) {
-            return prev;
+      return set;
+    }, [bookmarks, questionId]);
+
+    const updateBookmarkMutation = useMutation({
+      mutationKey: mutationKey,
+      mutationFn: async ({
+        realQuestionId,
+        realBookmarkListName,
+        isRealBookmarked,
+        isCreateNew,
+      }: {
+        realQuestionId: string;
+        isRealBookmarked: boolean;
+        realBookmarkListName: string;
+        isCreateNew: boolean;
+      }): Promise<{
+        userId: string;
+        realQuestionId: string;
+        realBookmarkListName: string;
+        isRealBookmarked: boolean;
+        isCreateNew: boolean;
+      }> => {
+        if (isCreateNew) {
+          const result = await createBookmarkListAction({
+            listName: realBookmarkListName,
+          });
+          if (!result.success) {
+            throw new Error(result.error + "list");
           }
-
-          const addNewBookmark = () => {
-            const newBookmarks = [...prev];
-            chosenBookmarkListName.add(newBookmarkListName);
-            newBookmarks[
-              prev.findIndex(
-                (bookmark) => bookmark.listName === newBookmarkListName
-              )
-            ].userBookmarks.push({
-              questionId: newQuestionId,
-              updatedAt: new Date(),
-              userId,
-              listName: newBookmarkListName,
-            });
-            return newBookmarks;
+        }
+        if (isRealBookmarked) {
+          const result = await removeBookmarkAction({
+            questionId: realQuestionId,
+            bookmarkListName: realBookmarkListName,
+          });
+          return {
+            userId: result.data!,
+            realQuestionId: realQuestionId,
+            realBookmarkListName: realBookmarkListName,
+            isRealBookmarked: true,
+            isCreateNew: isCreateNew,
           };
-
-          if (isCreateNew) {
-            const isListAlreadyExist = prev.some(
-              (bookmark) => bookmark.listName === newBookmarkListName
-            );
-
-            setIsAddNewListDialogOpen(false);
-            setIsInputError(false);
-            setNewBookmarkListNameInput("");
-            scrollAreaRef.current?.scrollTo({
-              top: 0,
-            });
-            if (isListAlreadyExist) {
-              return addNewBookmark();
+        } else {
+          const result = await addBookmarkAction({
+            questionId: realQuestionId,
+            bookmarkListName: realBookmarkListName,
+          });
+          if (!result.success) {
+            throw new Error(result.error + "bookmark");
+          }
+          return {
+            userId: result.data!,
+            realQuestionId: realQuestionId,
+            realBookmarkListName: realBookmarkListName,
+            isRealBookmarked: false,
+            isCreateNew: isCreateNew,
+          };
+        }
+      },
+      onSuccess: ({
+        realQuestionId: newQuestionId,
+        isRealBookmarked,
+        realBookmarkListName: newBookmarkListName,
+        isCreateNew,
+        userId,
+      }: {
+        realQuestionId: string;
+        isRealBookmarked: boolean;
+        realBookmarkListName: string;
+        isCreateNew: boolean;
+        userId: string;
+      }) => {
+        queryClient.setQueryData<SelectedBookmark>(
+          ["all_user_bookmarks"],
+          (prev: SelectedBookmark | undefined) => {
+            if (!prev) {
+              return prev;
             }
-            return [
-              ...prev,
-              {
-                createdAt: new Date(),
+
+            const addNewBookmark = () => {
+              const newBookmarks = [...prev];
+              chosenBookmarkListName.add(newBookmarkListName);
+              newBookmarks[
+                prev.findIndex(
+                  (bookmark) => bookmark.listName === newBookmarkListName
+                )
+              ].userBookmarks.push({
+                questionId: newQuestionId,
                 updatedAt: new Date(),
                 userId,
                 listName: newBookmarkListName,
-                visibility: "private",
-                userBookmarks: [
-                  {
-                    questionId: newQuestionId,
-                    updatedAt: new Date(),
-                    userId,
-                    listName: newBookmarkListName,
-                  },
-                ],
-              },
-            ];
-          } else if (!isCreateNew && !isRealBookmarked) {
-            return addNewBookmark();
-          } else if (!isCreateNew && isRealBookmarked) {
-            chosenBookmarkListName.delete(newBookmarkListName);
-            return prev.map((oldBookmarkList) => {
-              if (oldBookmarkList.listName === newBookmarkListName) {
-                return {
-                  ...oldBookmarkList,
-                  userBookmarks: oldBookmarkList.userBookmarks.filter(
-                    (oldBookmark) => oldBookmark.questionId !== newQuestionId
-                  ),
-                };
-              }
-              return oldBookmarkList;
-            });
-          }
-        }
-      );
+              });
+              return newBookmarks;
+            };
 
-      toast.success(
-        isRealBookmarked
-          ? `Question removed from ${newBookmarkListName}`
-          : `Question added to ${newBookmarkListName}`,
-        {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        }
-      );
-    },
-    onError: (error, variables) => {
-      if (error instanceof Error) {
-        if (error.message.includes(LIMIT_EXCEEDED)) {
-          if (error.message.includes("list")) {
-            toast.error(
-              "Failed to update bookmarks. You can only have maximum of " +
-                MAXIMUM_BOOKMARK_LISTS_PER_USER +
-                " bookmark lists.",
-              {
-                duration: 2000,
-                position: isMobileDevice ? "top-center" : "bottom-right",
+            if (isCreateNew) {
+              const isListAlreadyExist = prev.some(
+                (bookmark) => bookmark.listName === newBookmarkListName
+              );
+
+              setIsAddNewListDialogOpen(false);
+              setIsInputError(false);
+              setNewBookmarkListNameInput("");
+              scrollAreaRef.current?.scrollTo({
+                top: 0,
+              });
+              if (isListAlreadyExist) {
+                return addNewBookmark();
               }
-            );
-          } else if (error.message.includes("bookmark")) {
-            toast.error(
-              "Failed to update bookmarks. You can only have maximum of " +
-                MAXIMUM_BOOKMARKS_PER_LIST +
-                " bookmarks per list.",
-              {
-                duration: 2000,
-                position: isMobileDevice ? "top-center" : "bottom-right",
-              }
-            );
+              return [
+                ...prev,
+                {
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  userId,
+                  listName: newBookmarkListName,
+                  visibility: "private",
+                  userBookmarks: [
+                    {
+                      questionId: newQuestionId,
+                      updatedAt: new Date(),
+                      userId,
+                      listName: newBookmarkListName,
+                    },
+                  ],
+                },
+              ];
+            } else if (!isCreateNew && !isRealBookmarked) {
+              return addNewBookmark();
+            } else if (!isCreateNew && isRealBookmarked) {
+              chosenBookmarkListName.delete(newBookmarkListName);
+              return prev.map((oldBookmarkList) => {
+                if (oldBookmarkList.listName === newBookmarkListName) {
+                  return {
+                    ...oldBookmarkList,
+                    userBookmarks: oldBookmarkList.userBookmarks.filter(
+                      (oldBookmark) => oldBookmark.questionId !== newQuestionId
+                    ),
+                  };
+                }
+                return oldBookmarkList;
+              });
+            }
           }
-        } else if (error.message.includes(DOES_NOT_EXIST)) {
-          toast.error(
-            `Failed to update bookmarks. The list ${variables.realBookmarkListName} does not exist.`,
-            {
+        );
+
+        toast.success(
+          isRealBookmarked
+            ? `Question removed from ${newBookmarkListName}`
+            : `Question added to ${newBookmarkListName}`,
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
+      },
+      onError: (error, variables) => {
+        if (error instanceof Error) {
+          if (error.message.includes(LIMIT_EXCEEDED)) {
+            if (error.message.includes("list")) {
+              toast.error(
+                "Failed to update bookmarks. You can only have maximum of " +
+                  MAXIMUM_BOOKMARK_LISTS_PER_USER +
+                  " bookmark lists.",
+                {
+                  duration: 2000,
+                  position: isMobileDevice ? "top-center" : "bottom-right",
+                }
+              );
+            } else if (error.message.includes("bookmark")) {
+              toast.error(
+                "Failed to update bookmarks. You can only have maximum of " +
+                  MAXIMUM_BOOKMARKS_PER_LIST +
+                  " bookmarks per list.",
+                {
+                  duration: 2000,
+                  position: isMobileDevice ? "top-center" : "bottom-right",
+                }
+              );
+            }
+          } else if (error.message.includes(DOES_NOT_EXIST)) {
+            toast.error(
+              `Failed to update bookmarks. The list ${variables.realBookmarkListName} does not exist.`,
+              {
+                duration: 2000,
+                position: isMobileDevice ? "top-center" : "bottom-right",
+              }
+            );
+          } else {
+            toast.error("Failed to update bookmarks: " + error.message, {
               duration: 2000,
               position: isMobileDevice ? "top-center" : "bottom-right",
-            }
-          );
+            });
+          }
         } else {
-          toast.error("Failed to update bookmarks: " + error.message, {
+          toast.error("Failed to update bookmarks: Unknown error", {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
           });
         }
-      } else {
-        toast.error("Failed to update bookmarks: Unknown error", {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        });
+      },
+    });
+
+    const createNewList = () => {
+      if (
+        newBookmarkListNameInput.trim() === "" ||
+        newBookmarkListNameInput.length > 100
+      ) {
+        setIsInputError(true);
+        return;
       }
-    },
-  });
+      if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
+        toast.error(
+          "Failed to update bookmarks. You can only have maximum of " +
+            MAXIMUM_BOOKMARK_LISTS_PER_USER +
+            " bookmark lists.",
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
+        return;
+      }
+      setBookmarkListName(newBookmarkListNameInput.trim());
+      setTimeout(() => {
+        updateBookmarkMutation.mutate({
+          realQuestionId: questionId,
+          realBookmarkListName: newBookmarkListNameInput.trim(),
+          isRealBookmarked: false,
+          isCreateNew: true,
+        });
+      }, 0);
+    };
 
-  const createNewList = () => {
-    if (
-      newBookmarkListNameInput.trim() === "" ||
-      newBookmarkListNameInput.length > 100
-    ) {
-      setIsInputError(true);
-      return;
-    }
-    if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
-      toast.error(
-        "Failed to update bookmarks. You can only have maximum of " +
-          MAXIMUM_BOOKMARK_LISTS_PER_USER +
-          " bookmark lists.",
-        {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        }
-      );
-      return;
-    }
-    setBookmarkListName(newBookmarkListNameInput.trim());
-    setTimeout(() => {
-      updateBookmarkMutation.mutate({
-        realQuestionId: questionId,
-        realBookmarkListName: newBookmarkListNameInput.trim(),
-        isRealBookmarked: false,
-        isCreateNew: true,
-      });
-    }, 0);
-  };
+    const onListSelect = ({
+      bookmark,
+      isItemBookmarked,
+    }: {
+      bookmark: SelectedBookmark[number];
+      isItemBookmarked: boolean;
+    }) => {
+      if (bookmark.listName.trim() === "") {
+        toast.error("Failed to update bookmarks: Bad Request.");
+        return;
+      }
+      if (bookmark.userBookmarks.length >= MAXIMUM_BOOKMARKS_PER_LIST) {
+        toast.error(
+          "Failed to update bookmarks. You can only have maximum of " +
+            MAXIMUM_BOOKMARKS_PER_LIST +
+            " bookmarks per list.",
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
+        return;
+      }
+      setBookmarkListName(bookmark.listName);
+      setTimeout(() => {
+        updateBookmarkMutation.mutate({
+          realQuestionId: questionId,
+          realBookmarkListName: bookmark.listName,
+          isRealBookmarked: isItemBookmarked,
+          isCreateNew: false,
+        });
+      }, 0);
+    };
 
-  const onListSelect = ({
-    bookmark,
-    isItemBookmarked,
-  }: {
-    bookmark: SelectedBookmark[number];
-    isItemBookmarked: boolean;
-  }) => {
-    if (bookmark.listName.trim() === "") {
-      toast.error("Failed to update bookmarks: Bad Request.");
-      return;
-    }
-    if (bookmark.userBookmarks.length >= MAXIMUM_BOOKMARKS_PER_LIST) {
-      toast.error(
-        "Failed to update bookmarks. You can only have maximum of " +
-          MAXIMUM_BOOKMARKS_PER_LIST +
-          " bookmarks per list.",
-        {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        }
-      );
-      return;
-    }
-    setBookmarkListName(bookmark.listName);
-    setTimeout(() => {
-      updateBookmarkMutation.mutate({
-        realQuestionId: questionId,
-        realBookmarkListName: bookmark.listName,
-        isRealBookmarked: isItemBookmarked,
-        isCreateNew: false,
-      });
-    }, 0);
-  };
-
-  const openUI = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (isBookmarkDisabled || isBookmarksFetching) {
-      return;
-    }
-    if (isBookmarkError) {
-      toast.error("Bookmark error. Please refresh the page.", {
-        duration: 2000,
-        position: isMobileDevice ? "top-center" : "bottom-right",
-      });
-      return;
-    }
-    if (!isValidSession) {
-      toast.error("Please sign in to bookmark questions.", {
-        duration: 2000,
-        position: isMobileDevice ? "top-center" : "bottom-right",
-      });
-      return;
-    }
-    setIsBlockingInput(true);
-    setTimeout(() => {
-      setIsBlockingInput(false);
-    }, 0);
-    setOpen(true);
-  };
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
+    const openUI = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTo({
-          top: 0,
-          behavior: "instant",
+      e.preventDefault();
+      if (isBookmarkDisabled || isBookmarksFetching) {
+        return;
+      }
+      if (isBookmarkError) {
+        toast.error("Bookmark error. Please refresh the page.", {
+          duration: 2000,
+          position: isMobileDevice ? "top-center" : "bottom-right",
         });
+        return;
       }
-
-      if (e.key === "Escape") {
-        if (searchInput) {
-          setSearchInput("");
-          return;
-        }
-        searchInputRef.current?.blur();
-        if (open) {
-          setOpen(false);
-        }
+      if (!isValidSession) {
+        toast.error("Please sign in to bookmark questions.", {
+          duration: 2000,
+          position: isMobileDevice ? "top-center" : "bottom-right",
+        });
+        return;
       }
-    },
-    [open, searchInput, setOpen]
-  );
+      setIsBlockingInput(true);
+      setTimeout(() => {
+        setIsBlockingInput(false);
+      }, 0);
+      setOpen(true);
+    };
 
-  return (
-    <BookmarkContext.Provider
-      value={{
-        isBlockingInput,
-        setIsBlockingInput,
-        searchInput,
-        open,
-        setOpen,
-        bookmarks,
-        setSearchInput,
-        scrollAreaRef,
-        searchInputRef,
-        createNewList,
-        isMutatingThisQuestion,
-        openUI,
-        questionId,
-        badgeClassName,
-        triggerButtonClassName,
-        isAddNewListDialogOpen,
-        setIsAddNewListDialogOpen,
-        newBookmarkListNameInput,
-        setNewBookmarkListNameInput,
-        isInputError,
-        setIsInputError,
-        chosenBookmarkListName,
-        isBookmarksFetching,
-        isBookmarkDisabled,
-        onListSelect,
-      }}
-    >
-      <Command
-        onKeyDown={handleKeyDown}
-        className=" bg-transparent overflow-visible !w-max"
-      >
-        {isMobileDevice ? (
-          <>
-            <BookmarkTrigger />
-            <Drawer onOpenChange={setOpen} open={open}>
-              <DrawerContent
-                className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-              >
-                <DrawerHeader className="sr-only">
-                  <DrawerTitle>Select</DrawerTitle>
-                  <DrawerDescription />
-                  Save to book mark list
-                </DrawerHeader>
-                <div
-                  className="w-full pt-2 pb-4"
-                  onTouchEnd={() => {
-                    setTimeout(() => {
-                      setIsBlockingInput(false);
-                    }, 0);
-                  }}
-                  onTouchStart={() => {
-                    setIsBlockingInput(true);
-                  }}
-                >
-                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
-                </div>
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        if (e.key === "Escape") {
+          if (searchInput) {
+            setSearchInput("");
+            return;
+          }
+          searchInputRef.current?.blur();
+          if (open) {
+            setOpen(false);
+          }
+        }
+      },
+      [open, searchInput, setOpen]
+    );
 
-                <div
-                  className="flex flex-row gap-3 p-2 "
-                  onTouchEnd={() => {
-                    setTimeout(() => {
-                      setIsBlockingInput(false);
-                    }, 0);
-                  }}
-                  onTouchStart={() => {
-                    setIsBlockingInput(true);
-                  }}
-                >
-                  <Button
-                    className="flex-1/3 cursor-pointer mb-4"
-                    onClick={() => {
-                      setOpen(false);
-                    }}
-                    variant="outline"
-                  >
-                    Close
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <BookmarkList />
-              </DrawerContent>
-            </Drawer>
-          </>
-        ) : (
-          <Popover modal={true} open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+    return (
+      <BookmarkContext.Provider value={bookmarkStore}>
+        <Command
+          onKeyDown={handleKeyDown}
+          className=" bg-transparent overflow-visible !w-max"
+        >
+          {isMobileDevice ? (
+            <>
               <BookmarkTrigger />
-            </PopoverTrigger>
-            <PopoverContent
-              className="h-full z-[100006] w-[250px] !px-0 dark:bg-accent"
-              onClick={(e) => e.stopPropagation()}
-              align={popOverAlign}
-            >
-              <X
-                className="absolute top-1 right-1 cursor-pointer"
-                onClick={() => setOpen(false)}
-                size={15}
-              />
-              <BookmarkList />
-            </PopoverContent>
-          </Popover>
-        )}
-      </Command>
-    </BookmarkContext.Provider>
-  );
-};
+              <Drawer
+                onOpenChange={(open) => {
+                  bookmarkStore.getState().actions.setOpen(open);
+                }}
+                open={bookmarkStore.getState().open}
+              >
+                <DrawerContent
+                  className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                >
+                  <DrawerHeader className="sr-only">
+                    <DrawerTitle>Select</DrawerTitle>
+                    <DrawerDescription />
+                    Save to book mark list
+                  </DrawerHeader>
+                  <div
+                    className="w-full pt-2 pb-4"
+                    onTouchEnd={() => {
+                      setTimeout(() => {
+                        bookmarkStore
+                          .getState()
+                          .actions.setIsBlockingInput(false);
+                      }, 0);
+                    }}
+                    onTouchStart={() => {
+                      bookmarkStore.getState().actions.setIsBlockingInput(true);
+                    }}
+                  >
+                    <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
+                  </div>
 
-const BookmarkTriggerInner = forwardRef<
+                  <div
+                    className="flex flex-row gap-3 p-2 "
+                    onTouchEnd={() => {
+                      setTimeout(() => {
+                        bookmarkStore
+                          .getState()
+                          .actions.setIsBlockingInput(false);
+                      }, 0);
+                    }}
+                    onTouchStart={() => {
+                      bookmarkStore.getState().actions.setIsBlockingInput(true);
+                    }}
+                  >
+                    <Button
+                      className="flex-1/3 cursor-pointer mb-4"
+                      onClick={() => {
+                        bookmarkStore.getState().actions.setOpen(false);
+                      }}
+                      variant="outline"
+                    >
+                      Close
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <BookmarkList />
+                </DrawerContent>
+              </Drawer>
+            </>
+          ) : (
+            <Popover
+              modal={true}
+              open={bookmarkStore.getState().open}
+              onOpenChange={bookmarkStore.getState().actions.setOpen}
+            >
+              <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <BookmarkTrigger />
+              </PopoverTrigger>
+              <PopoverContent
+                className="h-full z-[100006] w-[250px] !px-0 dark:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+                align={popOverAlign}
+              >
+                <X
+                  className="absolute top-1 right-1 cursor-pointer"
+                  onClick={() =>
+                    bookmarkStore.getState().actions.setOpen(false)
+                  }
+                  size={15}
+                />
+                <BookmarkList />
+              </PopoverContent>
+            </Popover>
+          )}
+        </Command>
+      </BookmarkContext.Provider>
+    );
+  }
+);
+
+BookmarkButton.displayName = "BookmarkButton";
+
+const BookmarkTrigger = forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentPropsWithoutRef<typeof Button>
 >((props, ref) => {
-  const {
-    isMutatingThisQuestion,
-    badgeClassName,
-    openUI,
-    chosenBookmarkListName,
-    triggerButtonClassName,
-    isBookmarksFetching,
-    isBookmarkDisabled,
-  } = useBookmark();
+  const badgeClassName = useBookmarkContext((state) => state.badgeClassName);
+  const triggerButtonClassName = useBookmarkContext(
+    (state) => state.triggerButtonClassName
+  );
+  const isBookmarksFetching = useBookmarkContext(
+    (state) => state.isBookmarksFetching
+  );
+  const isBookmarkDisabled = useBookmarkContext(
+    (state) => state.isBookmarkDisabled
+  );
+  const questionId = useBookmarkContext((state) => state.questionId);
+  const chosenBookmarkListName = useBookmarkContext(
+    (state) => state.chosenBookmarkListName
+  );
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["all_user_bookmarks", questionId],
+    }) > 0;
+  const setOpen = useBookmarkContext((state) => state.actions.setOpen);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
@@ -609,9 +587,9 @@ const BookmarkTriggerInner = forwardRef<
           | undefined
       )?.(e);
 
-      openUI(e);
+      setOpen(true);
     },
-    [openUI, props.onClick]
+    [props.onClick, setOpen]
   );
 
   const handleTouchStart = useCallback(
@@ -675,39 +653,50 @@ const BookmarkTriggerInner = forwardRef<
   );
 });
 
-BookmarkTriggerInner.displayName = "BookmarkTrigger";
-const BookmarkTrigger = memo(BookmarkTriggerInner);
+BookmarkTrigger.displayName = "BookmarkTrigger";
 
-const BookmarkListInner = () => {
-  const {
-    searchInput,
-    setSearchInput,
-    isBlockingInput,
-    scrollAreaRef,
-    searchInputRef,
-    setIsBlockingInput,
-    chosenBookmarkListName,
-    onListSelect,
-    bookmarks,
-    questionId,
-  } = useBookmark();
+const BookmarkSearchInput = () => {
+  const setSearchInput = useBookmarkContext(
+    (state) => state.actions.setSearchInput
+  );
+  const isBlockingInput = useBookmarkContext((state) => state.isBlockingInput);
+  const searchInputRef = useBookmarkContext((state) => state.searchInputRef);
+  const searchInput = useBookmarkContext((state) => state.searchInput);
+  return (
+    <CommandInput
+      placeholder="Search bookmark lists"
+      wrapperClassName="border-b border-border mb-2 p-2 pb-5"
+      onClick={(e) => {
+        e.currentTarget.focus();
+      }}
+      value={searchInput}
+      ref={searchInputRef}
+      onValueChange={setSearchInput}
+      readOnly={isBlockingInput}
+      onDoubleClick={(e) => {
+        e.currentTarget.select();
+      }}
+    />
+  );
+};
+
+const BookmarkList = () => {
+  const searchInput = useBookmarkContext((state) => state.searchInput);
+  const scrollAreaRef = useBookmarkContext((state) => state.scrollAreaRef);
+  const setIsBlockingInput = useBookmarkContext(
+    (state) => state.actions.setIsBlockingInput
+  );
+  const chosenBookmarkListName = useBookmarkContext(
+    (state) => state.chosenBookmarkListName
+  );
+  const onListSelect = useBookmarkContext((state) => state.onListSelect);
+  const bookmarks = useBookmarkContext((state) => state.bookmarks);
+  const questionId = useBookmarkContext((state) => state.questionId);
+  console.log("rerendering");
 
   return (
     <div className="h-full flex flex-col mb-2 md:mb-0">
-      <CommandInput
-        placeholder="Search bookmark lists"
-        wrapperClassName="border-b border-border mb-2 p-2 pb-5"
-        onClick={(e) => {
-          e.currentTarget.focus();
-        }}
-        value={searchInput}
-        ref={searchInputRef}
-        onValueChange={setSearchInput}
-        readOnly={isBlockingInput}
-        onDoubleClick={(e) => {
-          e.currentTarget.select();
-        }}
-      />
+      <BookmarkSearchInput />
       <ScrollArea
         viewportRef={scrollAreaRef}
         className="h-[60%] md:h-[200px] [&_.bg-border]:bg-logo-main/50"
@@ -814,9 +803,7 @@ const BookmarkListInner = () => {
   );
 };
 
-const BookmarkList = memo(BookmarkListInner);
-
-const BookmarkItemInner = ({
+const BookmarkItem = ({
   listName,
   visibility,
   isPlaceholder,
@@ -861,7 +848,7 @@ const BookmarkItemInner = ({
           setIsBlockingInput(true);
         }
       }}
-      onSelect={() => {
+      onSelect={(e) => {
         if (!isPlaceholder) {
           if (!searchInput) {
             setIsBlockingInput(true);
@@ -878,7 +865,7 @@ const BookmarkItemInner = ({
         if (isMutatingThisQuestionInThisList) {
           return;
         }
-        onSelect();
+        // onSelect();
       }}
     >
       <div className="flex items-center justify-start gap-2">
@@ -901,9 +888,7 @@ const BookmarkItemInner = ({
   );
 };
 
-const BookmarkItem = memo(BookmarkItemInner);
-
-const CreateNewListAlertDialogInner = () => {
+const CreateNewListAlertDialog = () => {
   const {
     isAddNewListDialogOpen,
     setIsAddNewListDialogOpen,
@@ -1005,4 +990,3 @@ const CreateNewListAlertDialogInner = () => {
     </AlertDialog>
   );
 };
-const CreateNewListAlertDialog = memo(CreateNewListAlertDialogInner);

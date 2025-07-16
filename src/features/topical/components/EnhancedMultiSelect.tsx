@@ -127,12 +127,6 @@ export default function EnhancedMultiSelect({
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      if (commandListRef.current) {
-        commandListRef.current.scrollTo({
-          top: 0,
-          behavior: "instant",
-        });
-      }
 
       if (e.key === "Escape") {
         if (inputValue) {
@@ -560,7 +554,6 @@ const MultiSelectorList = () => {
     allAvailableOptions,
     open,
     setInputValue,
-
     prerequisite,
     inputRef,
     isBlockingInput,
@@ -585,7 +578,6 @@ const MultiSelectorList = () => {
       clearTimeout(unblockTimeoutId);
     };
   }, [inputRef, isMobileDevice, open, setIsBlockingInput]);
-
   return (
     <div className="flex h-full flex-col gap-2">
       <CommandInput
