@@ -664,7 +664,7 @@ const QuestionInspect = ({
                         <Fragment key={virtualItem.index}>
                           <div
                             className={cn(
-                              "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                              "cursor-pointer p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
                               currentQuestionId ===
                                 partitionedTopicalData?.[currentTab][
                                   virtualItem.index
@@ -762,7 +762,7 @@ const QuestionInspect = ({
                       <Fragment key={searchResults[virtualItem.index]?.id}>
                         <div
                           className={cn(
-                            "cursor-pointer p-2 rounded-sm dark:hover:bg-background hover:bg-foreground/10 flex items-center justify-between",
+                            "cursor-pointer p-2 rounded-sm  hover:bg-foreground/10 flex items-center justify-between",
                             currentQuestionId ===
                               searchResults[virtualItem.index]?.id &&
                               "!bg-logo-main text-white",

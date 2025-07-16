@@ -1,5 +1,7 @@
 import { createStore } from "zustand";
 import type { SelectedBookmark } from "../constants/types";
+import { RefObject } from "react";
+import { UseMutateFunction } from "@tanstack/react-query";
 
 interface BookmarkAction {
   setIsBlockingInput: (value: boolean) => void;
@@ -11,17 +13,40 @@ interface BookmarkAction {
   addChosenBookmarkListName: (name: string) => void;
   removeChosenBookmarkListName: (name: string) => void;
   clearChosenBookmarkList: () => void;
+  setNewBookmarkListName: (value: string) => void;
+  setMutate: (mutate: MutateFunction) => void;
 }
+
+// Define the mutate function type
+export type MutateFunction = UseMutateFunction<
+  {
+    userId: string;
+    realQuestionId: string;
+    realBookmarkListName: string;
+    isRealBookmarked: boolean;
+    isCreateNew: boolean;
+  },
+  Error,
+  {
+    realQuestionId: string;
+    isRealBookmarked: boolean;
+    realBookmarkListName: string;
+    isCreateNew: boolean;
+  },
+  unknown
+>;
 
 interface BookmarkProps {
   isBookmarksFetching: boolean;
   questionId: string;
   badgeClassName?: string;
+  popOverAlign?: "start" | "end";
   triggerButtonClassName?: string;
   isBookmarkError: boolean;
   isBookmarkDisabled: boolean;
   isValidSession: boolean;
   bookmarks: SelectedBookmark;
+  chosenBookmarkListName: Set<string>;
 }
 
 export interface BookmarkState extends BookmarkProps {
@@ -31,7 +56,12 @@ export interface BookmarkState extends BookmarkProps {
   open: boolean;
 
   /* Data */
-  chosenBookmarkListName: Set<string>;
+  newBookmarkListName: string;
+  mutate: MutateFunction | null;
+
+  /* Ref */
+  searchInputRef: RefObject<HTMLInputElement | null> | undefined;
+  scrollAreaRef: RefObject<HTMLDivElement | null> | undefined;
 
   /* Dialog / form helpers */
   isAddNewListDialogOpen: boolean;
@@ -49,7 +79,12 @@ const defaultState: Omit<BookmarkState, "actions"> = {
   open: false,
 
   /* Data */
-  chosenBookmarkListName: new Set<string>(),
+  newBookmarkListName: "",
+  mutate: null,
+
+  /* Ref */
+  searchInputRef: undefined,
+  scrollAreaRef: undefined,
 
   /* Dialog / form helpers */
   isAddNewListDialogOpen: false,
@@ -63,9 +98,13 @@ const defaultState: Omit<BookmarkState, "actions"> = {
   isValidSession: false,
   questionId: "",
   badgeClassName: "",
+  popOverAlign: "end",
   triggerButtonClassName: "",
   bookmarks: [],
+  chosenBookmarkListName: new Set<string>(),
 };
+
+export type BookmarkStore = ReturnType<typeof createBookmarkStore>;
 
 const createBookmarkStore = (initProps?: Partial<BookmarkProps>) => {
   return createStore<BookmarkState>()((set) => ({
@@ -99,6 +138,8 @@ const createBookmarkStore = (initProps?: Partial<BookmarkProps>) => {
           return { chosenBookmarkListName: next };
         }),
       clearChosenBookmarkList: () => set({ chosenBookmarkListName: new Set() }),
+      setNewBookmarkListName: (value) => set({ newBookmarkListName: value }),
+      setMutate: (mutate) => set({ mutate }),
     },
   }));
 };
