@@ -1,9 +1,9 @@
-'use client';
-import { ChevronsUpDown } from 'lucide-react';
-import Image from 'next/image';
-import { useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+"use client";
+import { ChevronsUpDown } from "lucide-react";
+import Image from "next/image";
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -11,20 +11,20 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '@/components/ui/hover-card';
+} from "@/components/ui/hover-card";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const EnhancedSelect = ({
   label,
@@ -81,8 +81,8 @@ const EnhancedSelect = ({
         </PopoverTrigger>
         <PopoverContent
           align="center"
-          className="z-[1000000000000000] w-[300px] p-0 sm:w-max "
-          side={isMobileDevice ? 'bottom' : 'right'}
+          className="z-[1000000000000000] w-[300px] p-0 sm:w-max"
+          side={isMobileDevice ? "bottom" : "right"}
         >
           <Command>
             <CommandInput
@@ -90,10 +90,10 @@ const EnhancedSelect = ({
               placeholder={`Search ${label.toLowerCase()}`}
               readOnly={isBlockingInput}
               ref={inputRef}
-              wrapperClassName="w-full p-4 border-b py-6"
+              wrapperClassName="w-full p-4 border-b py-6 dark:bg-accent"
             />
-            <CommandList>
-              <ScrollArea className="max-h-[195px]">
+            <ScrollArea viewPortClassName="max-h-[195px]" type="always">
+              <CommandList className="dark:bg-accent">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   {data?.map((item) => (
@@ -101,8 +101,8 @@ const EnhancedSelect = ({
                       <HoverCardTrigger asChild>
                         <CommandItem
                           className={cn(
-                            'cursor-pointer',
-                            !isOpen && 'pointer-events-none'
+                            "cursor-pointer",
+                            !isOpen && "pointer-events-none"
                           )}
                           key={item.code}
                           onSelect={(currentValue) => {
@@ -131,8 +131,8 @@ const EnhancedSelect = ({
                         align="start"
                         avoidCollisions={true}
                         className={cn(
-                          'relative z-[999999999999999999999999999999] hidden w-[100px] cursor-pointer border-none bg-transparent shadow-none lg:block',
-                          !isOpen && '!hidden'
+                          "relative z-[999999999999999999999999999999] hidden w-[100px] cursor-pointer border-none bg-transparent shadow-none lg:block",
+                          !isOpen && "!hidden"
                         )}
                         onClick={() => {
                           setIsOpen(false);
@@ -141,7 +141,7 @@ const EnhancedSelect = ({
                         side="right"
                         sideOffset={-10}
                       >
-                        <div className="absolute top-0 left-10 rounded-md border bg-card p-2">
+                        <div className="absolute top-0 left-10 rounded-md border  dark:bg-accent bg-card p-2">
                           <Image
                             alt={item.code}
                             className="rounded-[2px]"
@@ -154,8 +154,8 @@ const EnhancedSelect = ({
                     </HoverCard>
                   ))}
                 </CommandGroup>
-              </ScrollArea>
-            </CommandList>
+              </CommandList>
+            </ScrollArea>
           </Command>
         </PopoverContent>
       </Popover>

@@ -122,28 +122,30 @@ const QuestionPreview = memo(
           </div>
         )}
         {isInView && (
-          <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center content-start p-2 overflow-hidden">
-            {question?.questionTopics?.map((topic) => (
-              <Badge
-                key={topic.topic}
-                className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
-              >
-                {topic.topic}
+          <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden">
+            <div className="flex flex-wrap gap-2 items-center justify-center content-start">
+              {question?.questionTopics?.map((topic) => (
+                <Badge
+                  key={topic.topic}
+                  className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
+                >
+                  {topic.topic}
+                </Badge>
+              ))}
+              <Badge className="h-max bg-white !text-black text-center">
+                {question?.year}
               </Badge>
-            ))}
-            <Badge className="h-max bg-white !text-black text-center">
-              {question?.year}
-            </Badge>
-            <Badge className="h-max bg-white !text-black text-center">
-              Paper {question?.paperType}
-            </Badge>
-            <Badge className="h-max bg-white !text-black text-center">
-              {question?.season}
-            </Badge>
+              <Badge className="h-max bg-white !text-black text-center">
+                Paper {question?.paperType}
+              </Badge>
+              <Badge className="h-max bg-white !text-black text-center">
+                {question?.season}
+              </Badge>
+            </div>
 
             {isInView && (
               <BookmarkButton
-                className="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
+                triggerButtonClassName="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
                 isBookmarkDisabled={isUserSessionPending}
                 bookmarks={bookmarks}
                 isBookmarkError={isBookmarkError}
@@ -160,7 +162,7 @@ const QuestionPreview = memo(
         )}
         {isInView && (
           <BookmarkButton
-            className={cn(
+            triggerButtonClassName={cn(
               "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
               isPopoverOpen && !isMutatingThisQuestion && "md:flex hidden"
             )}

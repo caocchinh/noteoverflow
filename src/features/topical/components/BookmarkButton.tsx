@@ -1,9 +1,12 @@
-import {
+import React, {
   createContext,
   useCallback,
+  useMemo,
   useContext,
   useRef,
   useState,
+  forwardRef,
+  memo,
   type KeyboardEvent,
 } from "react";
 import { Button } from "@/components/ui/button";
@@ -126,16 +129,15 @@ export const BookmarkButton = ({
     [setOpenProp, open]
   );
 
-  const chosenBookmarkListName = bookmarks.reduce((acc, bookmark) => {
-    if (
-      bookmark.userBookmarks.some(
-        (bookmark) => bookmark.questionId === questionId
-      )
-    ) {
-      return acc.add(bookmark.listName);
+  const chosenBookmarkListName = useMemo(() => {
+    const set = new Set<string>();
+    for (const bookmark of bookmarks) {
+      if (bookmark.userBookmarks.some((b) => b.questionId === questionId)) {
+        set.add(bookmark.listName);
+      }
     }
-    return acc;
-  }, new Set<string>());
+    return set;
+  }, [bookmarks, questionId]);
 
   const queryClient = useQueryClient();
 
@@ -400,7 +402,7 @@ export const BookmarkButton = ({
     setIsBlockingInput(true);
     setTimeout(() => {
       setIsBlockingInput(false);
-    }, 100);
+    }, 0);
     setOpen(true);
   };
 
@@ -431,32 +433,40 @@ export const BookmarkButton = ({
   return (
     <BookmarkContext.Provider
       value={{
+        isBlockingInput,
+        setIsBlockingInput,
+        searchInput,
         open,
         setOpen,
-        onListSelect,
-        isBlockingInput,
-        badgeClassName,
-        triggerButtonClassName,
-        setIsBlockingInput,
-        isMutatingThisQuestion,
-        searchInput,
-        setSearchInput,
-        isBookmarksFetching,
         bookmarks,
-        isBookmarkDisabled,
-        questionId,
-        chosenBookmarkListName,
+        setSearchInput,
         scrollAreaRef,
         searchInputRef,
         createNewList,
+        isMutatingThisQuestion,
         openUI,
+        questionId,
+        badgeClassName,
+        triggerButtonClassName,
+        isAddNewListDialogOpen,
+        setIsAddNewListDialogOpen,
+        newBookmarkListNameInput,
+        setNewBookmarkListNameInput,
+        isInputError,
+        setIsInputError,
+        chosenBookmarkListName,
+        isBookmarksFetching,
+        isBookmarkDisabled,
+        onListSelect,
       }}
     >
-      <Command onKeyDown={handleKeyDown}>
+      <Command
+        onKeyDown={handleKeyDown}
+        className=" bg-transparent overflow-visible !w-max"
+      >
         {isMobileDevice ? (
           <>
             <BookmarkTrigger />
-
             <Drawer onOpenChange={setOpen} open={open}>
               <DrawerContent
                 className="z-[100007] h-[95vh] max-h-[95vh]"
@@ -511,14 +521,12 @@ export const BookmarkButton = ({
             </Drawer>
           </>
         ) : (
-          <Popover modal={false} open={open}>
-            <PopoverTrigger asChild>
-              <div>
-                <BookmarkTrigger />
-              </div>
+          <Popover modal={true} open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <BookmarkTrigger />
             </PopoverTrigger>
             <PopoverContent
-              className="h-full z-[100006] w-[250px] !px-0"
+              className="h-full z-[100006] w-[250px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align="end"
             >
@@ -532,99 +540,14 @@ export const BookmarkButton = ({
           </Popover>
         )}
       </Command>
-
-      <AlertDialog
-        open={isAddNewListDialogOpen}
-        onOpenChange={setIsAddNewListDialogOpen}
-      >
-        <AlertDialogTrigger asChild>
-          <div className="px-2 w-full">
-            <Button className="w-full mt-2 cursor-pointer" variant="outline">
-              <Plus /> New list
-            </Button>
-          </div>
-        </AlertDialogTrigger>
-        <AlertDialogContent
-          className="z-[100008]"
-          overlayClassName="z-[100007]"
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle>New list</AlertDialogTitle>
-          </AlertDialogHeader>
-          <div className="flex items-center justify-center gap-2">
-            <Input
-              onChange={(e) => {
-                if (e.target.value.length > 100) {
-                  setIsInputError(true);
-                } else {
-                  setIsInputError(false);
-                }
-                setNewBookmarkListNameInput(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  createNewList();
-                }
-              }}
-              disabled={isMutatingThisQuestion}
-              value={newBookmarkListNameInput}
-              placeholder="e.g. Super hard questions"
-              className="placeholder:text-[13px]"
-            />
-            <X
-              className={cn(
-                "cursor-pointer text-red-500",
-                isMutatingThisQuestion && "opacity-50"
-              )}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onClick={() => {
-                if (isMutatingThisQuestion) return;
-                setNewBookmarkListNameInput("");
-                setIsInputError(false);
-              }}
-              size={20}
-            />
-          </div>
-          {isInputError && (
-            <p className="text-red-500 text-xs mt-1 text-center">
-              Please enter valid a list name. Max 100 characters.
-            </p>
-          )}
-          <div className="flex gap-2 w-full">
-            <AlertDialogCancel asChild>
-              <Button className="w-1/2 mt-2 cursor-pointer" variant="outline">
-                Back
-              </Button>
-            </AlertDialogCancel>
-            <Button
-              className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
-              disabled={isInputError || isMutatingThisQuestion}
-              onClick={createNewList}
-            >
-              {isMutatingThisQuestion ? (
-                <>
-                  Processing
-                  <Loader2 className="animate-spin ml-1" />
-                </>
-              ) : (
-                <>
-                  <Plus />
-                  Create
-                </>
-              )}
-            </Button>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </BookmarkContext.Provider>
   );
 };
 
-const BookmarkTrigger = () => {
+const BookmarkTriggerInner = forwardRef<
+  React.ElementRef<typeof Button>,
+  React.ComponentPropsWithoutRef<typeof Button>
+>((props, ref) => {
   const {
     isMutatingThisQuestion,
     badgeClassName,
@@ -634,57 +557,85 @@ const BookmarkTrigger = () => {
     isBookmarksFetching,
     isBookmarkDisabled,
   } = useBookmark();
-  return (
-    <>
-      {isMutatingThisQuestion ? (
-        <Badge
-          className={cn(
-            "absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
-            badgeClassName
-          )}
-          onClick={(e) => {
-            openUI(e);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          Saving
-          <Loader2 className="animate-spin" />
-        </Badge>
-      ) : (
-        <Button
-          className={cn(
-            triggerButtonClassName,
-            "rounded-[3px]",
-            chosenBookmarkListName.size > 0 && "!bg-logo-main !text-white",
-            (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
-          )}
-          title={
-            chosenBookmarkListName.size > 0
-              ? "Remove from bookmarks"
-              : "Add to bookmarks"
-          }
-          onClick={(e) => {
-            openUI(e);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {isBookmarksFetching ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <Bookmark size={10} />
-          )}
-        </Button>
-      )}
-    </>
-  );
-};
 
-const BookmarkList = () => {
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
+      (
+        props.onClick as
+          | ((event: React.MouseEvent<Element>) => void)
+          | undefined
+      )?.(e);
+
+      openUI(e);
+    },
+    [openUI, props.onClick]
+  );
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLButtonElement | HTMLDivElement>) => {
+      (
+        props.onTouchStart as
+          | ((event: React.TouchEvent<Element>) => void)
+          | undefined
+      )?.(e);
+      e.stopPropagation();
+    },
+    [props.onTouchStart]
+  );
+
+  if (isMutatingThisQuestion) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { variant: _omitVariant, ...badgeProps } = props;
+
+    return (
+      <Badge
+        ref={ref as React.Ref<HTMLDivElement>}
+        className={cn(
+          "absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
+          badgeClassName
+        )}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        {...badgeProps}
+      >
+        Saving
+        <Loader2 className="animate-spin" />
+      </Badge>
+    );
+  }
+
+  return (
+    <Button
+      ref={ref}
+      className={cn(
+        triggerButtonClassName,
+        "rounded-[3px]",
+        chosenBookmarkListName.size > 0 && "!bg-logo-main !text-white",
+        (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
+      )}
+      title={
+        chosenBookmarkListName.size > 0
+          ? "Remove from bookmarks"
+          : "Add to bookmarks"
+      }
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      disabled={isBookmarkDisabled || isBookmarksFetching}
+      {...props}
+    >
+      {isBookmarksFetching ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <Bookmark size={10} />
+      )}
+    </Button>
+  );
+});
+BookmarkTriggerInner.displayName = "BookmarkTrigger";
+
+const BookmarkTrigger = memo(BookmarkTriggerInner);
+
+const BookmarkListInner = () => {
   const {
     searchInput,
     setSearchInput,
@@ -824,6 +775,112 @@ const BookmarkList = () => {
           </CommandGroup>
         </ScrollArea>
       </CommandList>
+      <CreateNewListAlertDialog />
     </div>
+  );
+};
+
+const BookmarkList = memo(BookmarkListInner);
+
+const CreateNewListAlertDialog = () => {
+  const {
+    isAddNewListDialogOpen,
+    setIsAddNewListDialogOpen,
+    newBookmarkListNameInput,
+    setNewBookmarkListNameInput,
+    isInputError,
+    setIsInputError,
+    createNewList,
+    isMutatingThisQuestion,
+  } = useBookmark();
+
+  return (
+    <AlertDialog
+      open={isAddNewListDialogOpen}
+      onOpenChange={setIsAddNewListDialogOpen}
+    >
+      <AlertDialogTrigger asChild>
+        <div className="px-2 w-full">
+          <Button className="w-full mt-2 cursor-pointer" variant="outline">
+            <Plus /> New list
+          </Button>
+        </div>
+      </AlertDialogTrigger>
+      <AlertDialogContent
+        className="z-[100008] dark:bg-accent"
+        overlayClassName="z-[100007] "
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>New list</AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="flex items-center justify-center gap-2">
+          <Input
+            onChange={(e) => {
+              if (e.target.value.length > 100) {
+                setIsInputError(true);
+              } else {
+                setIsInputError(false);
+              }
+              setNewBookmarkListNameInput(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                createNewList();
+              }
+            }}
+            disabled={isMutatingThisQuestion}
+            value={newBookmarkListNameInput}
+            placeholder="e.g. Super hard questions"
+            className="placeholder:text-[13px]"
+          />
+          <X
+            className={cn(
+              "cursor-pointer text-red-500",
+              isMutatingThisQuestion && "opacity-50"
+            )}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onClick={() => {
+              if (isMutatingThisQuestion) return;
+              setNewBookmarkListNameInput("");
+              setIsInputError(false);
+            }}
+            size={20}
+          />
+        </div>
+        {isInputError && (
+          <p className="text-red-500 text-xs mt-1 text-center">
+            Please enter valid a list name. Max 100 characters.
+          </p>
+        )}
+        <div className="flex gap-2 w-full">
+          <AlertDialogCancel asChild>
+            <Button className="w-1/2 mt-2 cursor-pointer" variant="outline">
+              Back
+            </Button>
+          </AlertDialogCancel>
+          <Button
+            className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+            disabled={isInputError || isMutatingThisQuestion}
+            onClick={createNewList}
+          >
+            {isMutatingThisQuestion ? (
+              <>
+                Processing
+                <Loader2 className="animate-spin ml-1" />
+              </>
+            ) : (
+              <>
+                <Plus />
+                Create
+              </>
+            )}
+          </Button>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };

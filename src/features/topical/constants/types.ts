@@ -132,6 +132,12 @@ export interface BookmarkContextProps {
   questionId: string;
   badgeClassName?: string;
   triggerButtonClassName?: string;
+  isAddNewListDialogOpen: boolean;
+  setIsAddNewListDialogOpen: Dispatch<SetStateAction<boolean>>;
+  newBookmarkListNameInput: string;
+  setNewBookmarkListNameInput: Dispatch<SetStateAction<string>>;
+  isInputError: boolean;
+  setIsInputError: Dispatch<SetStateAction<boolean>>;
   chosenBookmarkListName: Set<string>;
   isBookmarksFetching: boolean;
   isBookmarkDisabled: boolean;

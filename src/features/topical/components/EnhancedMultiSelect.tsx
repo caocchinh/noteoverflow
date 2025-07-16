@@ -189,7 +189,7 @@ export default function EnhancedMultiSelect({
             )}
             <Drawer onOpenChange={setOpen} open={open}>
               <DrawerContent
-                className="z-[100007] h-[95vh] max-h-[95vh]"
+                className="z-[100007] h-[95vh] max-h-[95vh] bg-accent"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -211,7 +211,7 @@ export default function EnhancedMultiSelect({
                     setIsBlockingInput(true);
                   }}
                 >
-                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-muted pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
+                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
                 </div>
                 {maxLength && value.length > maxLength && (
                   <h3
@@ -293,7 +293,7 @@ export default function EnhancedMultiSelect({
             </PopoverTrigger>
             <PopoverContent
               align="center"
-              className="z-[1000000000000] m-0 border-1 p-0 shadow-none"
+              className="z-[1000000000000] m-0 border-1 p-0 shadow-none dark:bg-accent"
               side="right"
             >
               <MultiSelectorList />
@@ -623,30 +623,30 @@ const MultiSelectorList = () => {
         value={inputValue}
         wrapperClassName="w-full py-6 px-4 border-b"
       />
-      <CommandList
-        className={cn(
-          "z-[1000] flex h-full w-full flex-col gap-2 bg-card p-2",
-          label === "Year" || label === "Season"
-        )}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onTouchEnd={() => {
-          setTimeout(() => {
+      <ScrollArea viewPortClassName="max-h-[50vh]" type="always">
+        <CommandList
+          className={cn(
+            "z-[1000] flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
+            label === "Year" || label === "Season"
+          )}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchEnd={() => {
+            setTimeout(() => {
+              if (!inputValue) {
+                setIsBlockingInput(false);
+              }
+            }, 0);
+          }}
+          onTouchStart={() => {
             if (!inputValue) {
-              setIsBlockingInput(false);
+              setIsBlockingInput(true);
             }
-          }, 0);
-        }}
-        onTouchStart={() => {
-          if (!inputValue) {
-            setIsBlockingInput(true);
-          }
-        }}
-        ref={commandListRef}
-      >
-        <ScrollArea className="max-h-[50vh]">
+          }}
+          ref={commandListRef}
+        >
           <Collapsible>
             {!inputValue && (
               <CollapsibleTrigger
@@ -775,11 +775,11 @@ const MultiSelectorList = () => {
               ))}
             </CommandGroup>
           </Collapsible>
-        </ScrollArea>
-        <CommandEmpty>
-          <span className="text-muted-foreground">No results found</span>
-        </CommandEmpty>
-      </CommandList>
+          <CommandEmpty>
+            <span className="text-muted-foreground">No results found</span>
+          </CommandEmpty>
+        </CommandList>
+      </ScrollArea>
     </div>
   );
 };
