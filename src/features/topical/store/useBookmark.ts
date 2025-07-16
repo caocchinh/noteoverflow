@@ -6,7 +6,6 @@ import { UseMutateFunction } from "@tanstack/react-query";
 interface BookmarkAction {
   setIsBlockingInput: (value: boolean) => void;
   setSearchInput: (value: string) => void;
-  setOpen: (value: boolean) => void;
   setIsAddNewListDialogOpen: (value: boolean) => void;
   setNewBookmarkListNameInput: (value: string) => void;
   setIsInputError: (value: boolean) => void;
@@ -47,6 +46,7 @@ interface BookmarkProps {
   isValidSession: boolean;
   bookmarks: SelectedBookmark;
   chosenBookmarkListName: Set<string>;
+  open?: boolean;
 }
 
 export interface BookmarkState extends BookmarkProps {
@@ -114,12 +114,6 @@ const createBookmarkStore = (initProps?: Partial<BookmarkProps>) => {
     actions: {
       setIsBlockingInput: (value) => set({ isBlockingInput: value }),
       setSearchInput: (value) => set({ searchInput: value }),
-      setOpen: (value) => {
-        set({ open: value });
-        if (!value) {
-          set({ newBookmarkListNameInput: "" });
-        }
-      },
       setIsAddNewListDialogOpen: (value) =>
         set({ isAddNewListDialogOpen: value }),
       setNewBookmarkListNameInput: (value) =>
