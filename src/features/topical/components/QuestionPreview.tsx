@@ -54,7 +54,7 @@ const QuestionPreview = memo(
 
     return (
       <div
-        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-none border-black/50  relative overflow-hidden min-h-[110px]"
+        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]"
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }

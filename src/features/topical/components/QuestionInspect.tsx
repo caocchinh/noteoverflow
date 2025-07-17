@@ -164,6 +164,14 @@ const QuestionInspect = ({
           setIsVirtualizationReady(true);
         } else {
           setIsVirtualizationReady(false);
+          setIsOpen({
+            isOpen: true,
+            questionId:
+              currentQuestionId ??
+              isOpen.questionId ??
+              partitionedTopicalData?.[0]?.[0]?.id ??
+              "",
+          });
         }
         setIsBlockingInput(false);
       }, 0);
@@ -171,7 +179,15 @@ const QuestionInspect = ({
       setIsVirtualizationReady(false);
     }
     return () => clearTimeout(timeout);
-  }, [isOpen.isOpen, isInspectSidebarOpen, isMobile]);
+  }, [
+    isOpen.isOpen,
+    isInspectSidebarOpen,
+    isMobile,
+    isOpen.questionId,
+    setIsOpen,
+    currentQuestionId,
+    partitionedTopicalData,
+  ]);
 
   useEffect(() => {
     setCurrentView("question");
@@ -251,10 +267,10 @@ const QuestionInspect = ({
             ((ultilityRight + sideBarInsetRight) / 2)) *
           100;
 
-        if (leftThreshold < 0.1) {
+        if (leftThreshold < 0.3) {
           setIsUltilityOverflowingLeft(true);
           setIsUltilityOverflowingRight(false);
-        } else if (rightThreshold < 0.1) {
+        } else if (rightThreshold < 0.3) {
           setIsUltilityOverflowingRight(true);
           setIsUltilityOverflowingLeft(false);
         } else if (
@@ -282,6 +298,7 @@ const QuestionInspect = ({
     };
   }, [overflowScrollHandler]);
 
+  // Hydrate inspector on open
   useEffect(() => {
     if (!isOpen.isOpen) {
       return;
@@ -690,22 +707,8 @@ const QuestionInspect = ({
                                 top: 0,
                                 behavior: "instant",
                               });
-                              const newTabIndex =
-                                partitionedTopicalData?.findIndex((partition) =>
-                                  partition.some(
-                                    (q) =>
-                                      q.id ===
-                                      partitionedTopicalData?.[currentTab][
-                                        virtualItem.index
-                                      ]?.id
-                                  )
-                                );
-                              if (
-                                newTabIndex !== undefined &&
-                                newTabIndex > -1
-                              ) {
-                                setCurrentTabThatContainsQuestion(newTabIndex);
-                              }
+
+                              setCurrentTabThatContainsQuestion(currentTab);
                             }}
                           >
                             <p>

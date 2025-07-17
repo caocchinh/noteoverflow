@@ -413,6 +413,10 @@ const BookmarkButtonConsumer = memo(
               setIsAddNewListDialogOpen(false);
               setIsInputError(false);
               setNewBookmarkListNameInput("");
+              setIsBlockingInput(true);
+              setTimeout(() => {
+                setIsBlockingInput(false);
+              }, 0);
               // Use the scrollAreaRef directly from the component
               scrollAreaRef?.current?.scrollTo({
                 top: 0,
@@ -1099,7 +1103,7 @@ const BookmarkItem = memo(
         }}
         onSelect={() => {
           if (!isPlaceholder) {
-            if (!false) {
+            if (!searchInput) {
               setIsBlockingInput(true);
               setTimeout(() => {
                 setIsBlockingInput(false);
@@ -1166,6 +1170,8 @@ const CreateNewListAlertDialog = memo(() => {
   const mutate = useBookmarkContext((state) => state.mutate);
 
   const createNewList = () => {
+    setIsBlockingDialogInput(true);
+
     if (
       newBookmarkListNameInput.trim() === "" ||
       newBookmarkListNameInput.length > 100
@@ -1194,27 +1200,24 @@ const CreateNewListAlertDialog = memo(() => {
         isCreateNew: true,
         realVisibility: visibility,
       });
+      setIsBlockingDialogInput(false);
     }, 0);
   };
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [isBlockingInput, setIsBlockingInput] = useState(false);
   const setVisibility = useBookmarkContext(
     (state) => state.actions.setVisibility
   );
   const visibility = useBookmarkContext((state) => state.visibility);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
 
   return (
     <AlertDialog
       open={isAddNewListDialogOpen}
       onOpenChange={(value) => {
         setIsAddNewListDialogOpen(value);
-        if (value) {
+        if (value === true) {
           setTimeout(() => {
             inputRef.current?.focus();
-            setIsBlockingInput(true);
-            setTimeout(() => {
-              setIsBlockingInput(false);
-            }, 0);
           }, 0);
         }
       }}
@@ -1237,8 +1240,6 @@ const CreateNewListAlertDialog = memo(() => {
           <p className="text-sm w-full text-left mb-1">List name</p>
           <div className="flex items-center justify-center gap-2 w-full">
             <Input
-              ref={inputRef}
-              readOnly={isBlockingInput}
               onChange={(e) => {
                 if (e.target.value.length > 100) {
                   setIsInputError(true);
@@ -1247,11 +1248,17 @@ const CreateNewListAlertDialog = memo(() => {
                 }
                 setNewBookmarkListNameInput(e.target.value);
               }}
+              ref={inputRef}
+              readOnly={isBlockingDialogInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   createNewList();
                 }
+              }}
+              onClick={() => {
+                inputRef.current?.focus();
+                setIsBlockingDialogInput(false);
               }}
               disabled={isMutatingThisQuestion}
               value={newBookmarkListNameInput}
@@ -1270,6 +1277,8 @@ const CreateNewListAlertDialog = memo(() => {
               onClick={() => {
                 if (isMutatingThisQuestion) return;
                 setNewBookmarkListNameInput("");
+                inputRef.current?.focus();
+                setIsBlockingDialogInput(false);
                 setIsInputError(false);
               }}
               size={20}
@@ -1326,7 +1335,16 @@ const CreateNewListAlertDialog = memo(() => {
         </p>
         <div className="flex gap-2 w-full">
           <AlertDialogCancel asChild>
-            <Button className="w-1/2 mt-2 cursor-pointer" variant="outline">
+            <Button
+              className="w-1/2 mt-2 cursor-pointer"
+              variant="outline"
+              onClick={() => {
+                setIsBlockingDialogInput(true);
+                setTimeout(() => {
+                  setIsBlockingDialogInput(false);
+                }, 0);
+              }}
+            >
               Back
             </Button>
           </AlertDialogCancel>

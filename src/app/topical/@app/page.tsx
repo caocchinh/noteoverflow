@@ -714,6 +714,12 @@ const TopicalPage = () => {
     isTopicalDataFetched,
   ]);
 
+  useEffect(() => {
+    if (isQuestionViewOpen.isOpen && isMobileDevice) {
+      setIsSidebarOpen(false);
+    }
+  }, [isMobileDevice, isQuestionViewOpen.isOpen, setIsSidebarOpen]);
+
   return (
     <>
       <div className="pt-16 h-screen overflow-hidden">
