@@ -58,12 +58,6 @@ const QuestionPreview = memo(
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
-        onTouchStart={() => setIsHovering(true)}
-        onTouchEnd={() => {
-          if (!isPopoverOpen) {
-            setIsHovering(false);
-          }
-        }}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           if (!isPopoverOpen) {
@@ -93,7 +87,7 @@ const QuestionPreview = memo(
         )}
 
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden">
-          {isHovering && (
+          {((isHovering && !isMobileDevice) || isMobileDevice) && (
             <div className="flex flex-wrap gap-2 items-center justify-center content-start">
               {question?.questionTopics?.map((topic) => (
                 <Badge

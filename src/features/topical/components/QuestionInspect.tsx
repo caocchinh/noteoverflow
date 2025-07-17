@@ -37,6 +37,7 @@ import {
   PencilLine,
   ScrollText,
   Search,
+  SkipForward,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,11 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BookmarkButton } from "./BookmarkButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const QuestionInspect = ({
   isOpen,
@@ -886,9 +892,11 @@ const QuestionInspect = ({
                     <ChevronLeft />
                   </Button>
                 </div>
-                <p className="text-md">
-                  {currentTab + 1}/{partitionedTopicalData?.length}
-                </p>
+                <JumpToTabButton
+                  tab={currentTab}
+                  setCurrentTab={setCurrentTab}
+                  totalTabs={partitionedTopicalData?.length ?? 0}
+                />
                 <div className="flex items-center gap-2">
                   <Button
                     onClick={() => {
@@ -1273,5 +1281,67 @@ const InspectImages = ({
         </Fragment>
       ))}
     </div>
+  );
+};
+
+const JumpToTabButton = ({
+  tab,
+  setCurrentTab,
+  totalTabs,
+}: {
+  tab: number;
+  setCurrentTab: (tab: number) => void;
+  totalTabs: number;
+}) => {
+  const [jumpToTabInput, setJumpToTabInput] = useState(tab + 1);
+
+  const handleJumpToTab = () => {
+    if (jumpToTabInput > 0 && jumpToTabInput <= totalTabs) {
+      setCurrentTab(jumpToTabInput - 1);
+    }
+  };
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger>
+        <p
+          className="text-md underline cursor-pointer"
+          title="Click to jump to tab"
+        >
+          {tab + 1}/{totalTabs}
+        </p>
+      </PopoverTrigger>
+      <PopoverContent
+        className="z-[999999] dark:bg-accent w-[200px] flex flex-col gap-2"
+        side="top"
+        sideOffset={17}
+      >
+        <X
+          className="absolute top-2 right-2 cursor-pointer"
+          onClick={() => setIsPopoverOpen(false)}
+          size={15}
+        />
+        <div className="flex flex-col gap-3">
+          <p>Jump to tab</p>
+          <Input
+            type="number"
+            min={1}
+            max={totalTabs}
+            value={jumpToTabInput}
+            onChange={(e) => setJumpToTabInput(parseInt(e.target.value, 10))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleJumpToTab();
+              }
+            }}
+          />
+          <Button onClick={handleJumpToTab} className="cursor-pointer">
+            Jump
+            <SkipForward />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };

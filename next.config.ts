@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
     ]);
   },
   devIndicators: {
-    position: "top-right",
+    position: "bottom-right",
   },
 };
 
