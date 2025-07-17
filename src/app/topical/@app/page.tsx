@@ -4,23 +4,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowUpFromLine,
-  Blocks,
-  LandPlot,
   Loader2,
   Monitor,
   OctagonAlert,
   RefreshCcw,
-  Settings,
   SlidersHorizontal,
 } from "lucide-react";
 import { default as NextImage } from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import {
   Sidebar,
   SidebarContent,
@@ -60,21 +53,21 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ElasticSlider from "@/features/topical/components/ElasticSlider";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import { getCache, setCache } from "@/drizzle/db";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
-import CacheAccordion from "@/features/topical/components/CacheAccordion";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import QuestionInspect from "@/features/topical/components/QuestionInspect";
-import { Switch } from "@/components/ui/switch";
+import CacheSetting from "@/features/topical/components/CacheSetting";
+import LayoutSetting from "@/features/topical/components/LayoutSetting";
+import VisualSetting from "@/features/topical/components/VisualSetting";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -979,80 +972,19 @@ const TopicalPage = () => {
                   </div>
                 </div>
                 <SidebarSeparator />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      className="flex w-full cursor-pointer items-center justify-start gap-2"
-                      variant="secondary"
-                    >
-                      <Settings />
-                      Cache settings
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="z-[100006]">
-                    <CacheAccordion
-                      isPersistantCacheEnabled={isPersistantCacheEnabled}
-                      isSessionCacheEnabled={isSessionCacheEnabled}
-                      setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
-                      setIsSessionCacheEnabled={setIsSessionCacheEnabled}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
-                      variant="secondary"
-                    >
-                      <Blocks />
-                      Layout settings
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="z-[100006] h-[190px] flex flex-col items-center justify-center gap-3">
-                    <h4 className="text-sm font-medium text-center mb-2">
-                      Number of maximum displayed columns
-                    </h4>
-                    <ElasticSlider
-                      startingValue={1}
-                      maxValue={5}
-                      isStepped
-                      stepSize={1}
-                      setColumnsProp={setNumberOfColumns}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
-                      variant="secondary"
-                    >
-                      <LandPlot />
-                      Visual settings
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <h4 className="text-sm font-medium text-center">
-                        Show green tint on finished questions?
-                      </h4>
-                      <Switch
-                        checked={showFinishedQuestionTint}
-                        onCheckedChange={setShowFinishedQuestionTint}
-                      />
-                    </div>
-                    <hr />
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <h4 className="text-sm font-medium text-center ">
-                        Show scroll to top button?
-                      </h4>
-                      <Switch
-                        checked={showScrollToTopButton}
-                        onCheckedChange={setShowScrollToTopButton}
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <CacheSetting
+                  isPersistantCacheEnabled={isPersistantCacheEnabled}
+                  isSessionCacheEnabled={isSessionCacheEnabled}
+                  setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
+                  setIsSessionCacheEnabled={setIsSessionCacheEnabled}
+                />
+                <LayoutSetting setNumberOfColumns={setNumberOfColumns} />
+                <VisualSetting
+                  showFinishedQuestionTint={showFinishedQuestionTint}
+                  setShowFinishedQuestionTint={setShowFinishedQuestionTint}
+                  showScrollToTopButton={showScrollToTopButton}
+                  setShowScrollToTopButton={setShowScrollToTopButton}
+                />
               </SidebarContent>
             </ScrollArea>
             <SidebarRail />
