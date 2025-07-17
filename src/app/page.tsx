@@ -261,7 +261,7 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/35 via-black/70 to-gray-950 blur-3xl"></div>
 
             <div className="absolute inset-0 opacity-10">
-              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.55)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.55)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.40)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.40)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
             </div>
 
             <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>

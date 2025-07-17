@@ -841,6 +841,7 @@ const QuestionInspect = ({
               >
                 <div className="flex items-center gap-2  ">
                   <Button
+                    title="Jump to first tab"
                     onClick={() => {
                       setCurrentTab(0);
                       if (
@@ -864,6 +865,7 @@ const QuestionInspect = ({
                     <ChevronsLeft />
                   </Button>
                   <Button
+                    title="Jump to previous tab"
                     onClick={() => {
                       if (
                         currentTab > 0 &&
@@ -899,6 +901,7 @@ const QuestionInspect = ({
                 />
                 <div className="flex items-center gap-2">
                   <Button
+                    title="Jump to next tab"
                     onClick={() => {
                       if (
                         currentTab <
@@ -927,6 +930,7 @@ const QuestionInspect = ({
                     <ChevronRight />
                   </Button>
                   <Button
+                    title="Jump to last tab"
                     onClick={() => {
                       setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
                       if (
@@ -1294,16 +1298,29 @@ const JumpToTabButton = ({
   totalTabs: number;
 }) => {
   const [jumpToTabInput, setJumpToTabInput] = useState(tab + 1);
+  const [isInvalidInput, setIsInvalidInput] = useState(false);
 
   const handleJumpToTab = () => {
     if (jumpToTabInput > 0 && jumpToTabInput <= totalTabs) {
       setCurrentTab(jumpToTabInput - 1);
+      setIsInvalidInput(false);
+    } else {
+      setIsInvalidInput(true);
     }
   };
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+    <Popover
+      open={isPopoverOpen}
+      onOpenChange={(open) => {
+        setIsPopoverOpen(open);
+        setIsInvalidInput(false);
+        if (open) {
+          setJumpToTabInput(tab + 1);
+        }
+      }}
+    >
       <PopoverTrigger>
         <p
           className="text-md underline cursor-pointer"
@@ -1323,20 +1340,34 @@ const JumpToTabButton = ({
           size={15}
         />
         <div className="flex flex-col gap-3">
-          <p>Jump to tab</p>
+          <p className={cn(isInvalidInput && "text-red-500", "text-sm")}>
+            Jump to tab
+          </p>
+          <p className="text-xs text-muted-foreground">Max: {totalTabs}</p>
+          <div className="text-xs text-muted-foreground">
+            Current tab: {tab + 1}
+          </div>
           <Input
             type="number"
             min={1}
             max={totalTabs}
+            className={cn(isInvalidInput && "border-red-500 text-red-500")}
             value={jumpToTabInput}
-            onChange={(e) => setJumpToTabInput(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              setJumpToTabInput(parseInt(e.target.value, 10));
+              setIsInvalidInput(false);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleJumpToTab();
               }
             }}
           />
-          <Button onClick={handleJumpToTab} className="cursor-pointer">
+          <Button
+            onClick={handleJumpToTab}
+            className="cursor-pointer"
+            variant={isInvalidInput ? "destructive" : "default"}
+          >
             Jump
             <SkipForward />
           </Button>
