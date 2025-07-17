@@ -10,6 +10,7 @@ import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const QuestionPreview = memo(
   ({
@@ -43,6 +44,7 @@ const QuestionPreview = memo(
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
+    const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
 
     const isMutatingThisQuestion =
@@ -56,6 +58,12 @@ const QuestionPreview = memo(
         onClick={() =>
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
+        onTouchStart={() => setIsHovering(true)}
+        onTouchEnd={() => {
+          if (!isPopoverOpen) {
+            setIsHovering(false);
+          }
+        }}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           if (!isPopoverOpen) {
@@ -123,11 +131,11 @@ const QuestionPreview = memo(
           questionId={question.id}
           setIsPopoverOpen={setIsPopoverOpen}
           isPopoverOpen={isPopoverOpen}
-          setIsHovering={setIsHovering}
+          setIsHovering={setShouldOpen}
           isValidSession={isValidSession}
           isBookmarkDisabled={isUserSessionPending}
           isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-          isInView={isHovering}
+          isInView={shouldOpen}
         />
         {isMutatingThisQuestion && (
           <Badge
@@ -135,6 +143,24 @@ const QuestionPreview = memo(
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              if (isUserSessionPending) {
+                return;
+              }
+              if (isBookmarkError) {
+                toast.error("Bookmark error. Please refresh the page.", {
+                  duration: 2000,
+                  position: isMobileDevice ? "top-center" : "bottom-right",
+                });
+                return;
+              }
+              if (!isValidSession) {
+                toast.error("Please sign in to bookmark questions.", {
+                  duration: 2000,
+                  position: isMobileDevice ? "top-center" : "bottom-right",
+                });
+                return;
+              }
+              setShouldOpen(true);
               setIsPopoverOpen(true);
             }}
             onTouchStart={(e) => {
@@ -146,39 +172,59 @@ const QuestionPreview = memo(
             <Loader2 className="animate-spin" />
           </Badge>
         )}
-        {isMobileDevice && !isMutatingThisQuestion && (
-          <Button
-            className={cn(
-              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
-              "rounded-[3px]",
-              (() => {
-                for (const bookmark of bookmarks) {
-                  if (
-                    bookmark.userBookmarks.some(
-                      (b) => b.questionId === question.id
-                    )
-                  ) {
-                    return true;
+        {!isMutatingThisQuestion &&
+          !isPopoverOpen &&
+          ((!isMobileDevice && isHovering) || isMobileDevice) && (
+            <Button
+              className={cn(
+                "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
+                "rounded-[3px]",
+                (() => {
+                  for (const bookmark of bookmarks) {
+                    if (
+                      bookmark.userBookmarks.some(
+                        (b) => b.questionId === question.id
+                      )
+                    ) {
+                      return true;
+                    }
                   }
+                  return false;
+                })() && "!bg-logo-main !text-white",
+                (isUserSessionPending || isBookmarksFetching) && "opacity-50"
+              )}
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isUserSessionPending || isBookmarksFetching) {
+                  return;
                 }
-                return false;
-              })() && "!bg-logo-main !text-white",
-              (isUserSessionPending || isBookmarksFetching) && "opacity-50"
-            )}
-            tabIndex={-1}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsPopoverOpen(true);
-            }}
-            disabled={isUserSessionPending || isBookmarksFetching}
-          >
-            {isBookmarksFetching ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Bookmark size={10} />
-            )}
-          </Button>
-        )}
+                if (isBookmarkError) {
+                  toast.error("Bookmark error. Please refresh the page.", {
+                    duration: 2000,
+                    position: isMobileDevice ? "top-center" : "bottom-right",
+                  });
+                  return;
+                }
+                if (!isValidSession) {
+                  toast.error("Please sign in to bookmark questions.", {
+                    duration: 2000,
+                    position: isMobileDevice ? "top-center" : "bottom-right",
+                  });
+                  return;
+                }
+                setShouldOpen(true);
+                setIsPopoverOpen(true);
+              }}
+              disabled={isUserSessionPending || isBookmarksFetching}
+            >
+              {isBookmarksFetching ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Bookmark size={10} />
+              )}
+            </Button>
+          )}
 
         <img
           className="w-full h-full object-contain"

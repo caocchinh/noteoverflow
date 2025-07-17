@@ -175,7 +175,6 @@ export const BookmarkButton = memo(
         return;
       }
       if (bookmarkStore.current) {
-        // console.log("updating store");
         bookmarkStore.current.setState((state) => ({
           ...state,
           isBookmarksFetching,
@@ -591,7 +590,12 @@ const BookmarkButtonConsumer = memo(
                 e.stopPropagation();
               }}
             >
-              <div>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
                 <BookmarkTrigger />
               </div>
             </DrawerTrigger>
@@ -671,7 +675,13 @@ const BookmarkButtonConsumer = memo(
               }}
               asChild
             >
-              <div className={popOverTriggerClassName}>
+              <div
+                className={popOverTriggerClassName}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
                 <BookmarkTrigger />
               </div>
             </PopoverTrigger>
@@ -714,13 +724,20 @@ const BookmarkTrigger = memo(() => {
     (state) => state.isBookmarkDisabled
   );
   const questionId = useBookmarkContext((state) => state.questionId);
-  const chosenBookmarkListName = useBookmarkContext(
-    (state) => state.chosenBookmarkListName
-  );
+
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["all_user_bookmarks", questionId],
     }) > 0;
+
+  const queryClient = useQueryClient();
+
+  const bookmarks = queryClient.getQueryData<SelectedBookmark>([
+    "all_user_bookmarks",
+  ]);
+  const isBookmarked = bookmarks?.some((bookmark) =>
+    bookmark.userBookmarks.some((b) => b.questionId === questionId)
+  );
 
   if (isMutatingThisQuestion) {
     return (
@@ -741,15 +758,11 @@ const BookmarkTrigger = memo(() => {
       className={cn(
         triggerButtonClassName,
         "rounded-[3px]",
-        chosenBookmarkListName.size > 0 && "!bg-logo-main !text-white",
+        isBookmarked && "!bg-logo-main !text-white",
         (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
       )}
       tabIndex={-1}
-      title={
-        chosenBookmarkListName.size > 0
-          ? "Remove from bookmarks"
-          : "Add to bookmarks"
-      }
+      title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
       disabled={isBookmarkDisabled || isBookmarksFetching}
     >
       {isBookmarksFetching ? (
@@ -991,8 +1004,6 @@ const BookmarkItem = memo(
     const chosenBookmarkListName = useBookmarkContext(
       (state) => state.chosenBookmarkListName
     );
-    console.log("rerendering");
-
     const isMutating =
       useIsMutating({
         mutationKey: ["all_user_bookmarks", questionId, listName],
