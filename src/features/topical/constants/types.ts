@@ -87,6 +87,7 @@ export type SelectedBookmark = {
     updatedAt: Date;
     userId: string;
     listName: string;
+    visibility: "private" | "public";
   }[];
 }[];
 
@@ -114,37 +115,6 @@ export interface MultiSelectContextProps {
   prerequisite: string;
   isMobileDevice: boolean;
   maxLength?: number;
-}
-
-export interface BookmarkContextProps {
-  isBlockingInput: boolean;
-  setIsBlockingInput: Dispatch<SetStateAction<boolean>>;
-  searchInput: string;
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  bookmarks: SelectedBookmark;
-  setSearchInput: Dispatch<SetStateAction<string>>;
-  scrollAreaRef: RefObject<HTMLDivElement | null>;
-  searchInputRef: RefObject<HTMLInputElement | null>;
-  createNewList: () => void;
-  isMutatingThisQuestion: boolean;
-  openUI: (e: React.MouseEvent) => void;
-  questionId: string;
-  badgeClassName?: string;
-  triggerButtonClassName?: string;
-  isAddNewListDialogOpen: boolean;
-  setIsAddNewListDialogOpen: Dispatch<SetStateAction<boolean>>;
-  newBookmarkListNameInput: string;
-  setNewBookmarkListNameInput: Dispatch<SetStateAction<string>>;
-  isInputError: boolean;
-  setIsInputError: Dispatch<SetStateAction<boolean>>;
-  chosenBookmarkListName: Set<string>;
-  isBookmarksFetching: boolean;
-  isBookmarkDisabled: boolean;
-  onListSelect: (params: {
-    bookmark: SelectedBookmark[number];
-    isItemBookmarked: boolean;
-  }) => void;
 }
 
 export interface InfiniteScrollProps {

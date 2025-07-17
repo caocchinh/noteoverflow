@@ -161,7 +161,7 @@ export const BookmarkButton = memo(
             if (
               bookmark.userBookmarks.some((b) => b.questionId === questionId)
             ) {
-              set.add(bookmark.listName);
+              set.add(bookmark.listName + " " + bookmark.visibility);
             }
           }
           return set;
@@ -195,7 +195,7 @@ export const BookmarkButton = memo(
               if (
                 bookmark.userBookmarks.some((b) => b.questionId === questionId)
               ) {
-                set.add(bookmark.listName);
+                set.add(bookmark.listName + " " + bookmark.visibility);
               }
             }
             return set;
@@ -247,8 +247,8 @@ const BookmarkButtonConsumer = memo(
     setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   }) => {
     const questionId = useBookmarkContext((state) => state.questionId);
-    const newBookmarkListName = useBookmarkContext(
-      (state) => state.newBookmarkListName
+    const bookmarkListName = useBookmarkContext(
+      (state) => state.bookmarkListName
     );
     const queryClient = useQueryClient();
     const searchInput = useBookmarkContext((state) => state.searchInput);
@@ -268,9 +268,15 @@ const BookmarkButtonConsumer = memo(
     const isBookmarkError = useBookmarkContext(
       (state) => state.isBookmarkError
     );
+    const visibility = useBookmarkContext((state) => state.visibility);
     // const isInView = useBookmarkContext((state) => state.isInView);
     const isValidSession = useBookmarkContext((state) => state.isValidSession);
-    const mutationKey = ["all_user_bookmarks", questionId, newBookmarkListName];
+    const mutationKey = [
+      "all_user_bookmarks",
+      questionId,
+      bookmarkListName,
+      visibility,
+    ];
 
     const setIsInputError = useBookmarkContext(
       (state) => state.actions.setIsInputError
@@ -321,7 +327,7 @@ const BookmarkButtonConsumer = memo(
         realQuestionId: string;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
-        realVisibility?: "public" | "private";
+        realVisibility: "public" | "private";
         isCreateNew: boolean;
       }): Promise<{
         userId: string;
@@ -329,13 +335,13 @@ const BookmarkButtonConsumer = memo(
         realBookmarkListName: string;
         isRealBookmarked: boolean;
         isCreateNew: boolean;
-        realVisibility?: "public" | "private";
+        realVisibility: "public" | "private";
       }> => {
         if (isCreateNew) {
           // If create new, visibility is always available
           const result = await createBookmarkListAction({
             listName: realBookmarkListName,
-            visibility: realVisibility!,
+            visibility: realVisibility,
           });
           if (!result.success) {
             throw new Error(result.error + "list");
@@ -345,6 +351,7 @@ const BookmarkButtonConsumer = memo(
           const result = await removeBookmarkAction({
             questionId: realQuestionId,
             bookmarkListName: realBookmarkListName,
+            visibility: realVisibility,
           });
           return {
             userId: result.data!,
@@ -358,6 +365,7 @@ const BookmarkButtonConsumer = memo(
           const result = await addBookmarkAction({
             questionId: realQuestionId,
             bookmarkListName: realBookmarkListName,
+            visibility: realVisibility,
           });
           if (!result.success) {
             throw new Error(result.error + "bookmark");
@@ -385,7 +393,7 @@ const BookmarkButtonConsumer = memo(
         realBookmarkListName: string;
         isCreateNew: boolean;
         userId: string;
-        realVisibility?: "public" | "private";
+        realVisibility: "public" | "private";
       }) => {
         queryClient.setQueryData<SelectedBookmark>(
           ["all_user_bookmarks"],
@@ -397,7 +405,9 @@ const BookmarkButtonConsumer = memo(
             // Modify data in-place to avoid re-renders caused by new references
             if (isCreateNew) {
               const isListAlreadyExist = prev.some(
-                (bookmark) => bookmark.listName === newBookmarkListName
+                (bookmark) =>
+                  bookmark.listName === newBookmarkListName &&
+                  bookmark.visibility === realVisibility
               );
 
               setIsAddNewListDialogOpen(false);
@@ -410,9 +420,13 @@ const BookmarkButtonConsumer = memo(
 
               if (isListAlreadyExist) {
                 // Add bookmark to existing list
-                addChosenBookmarkListName(newBookmarkListName);
+                addChosenBookmarkListName(
+                  newBookmarkListName + " " + realVisibility
+                );
                 const existingList = prev.find(
-                  (bookmark) => bookmark.listName === newBookmarkListName
+                  (bookmark) =>
+                    bookmark.listName === newBookmarkListName &&
+                    bookmark.visibility === realVisibility
                 );
                 if (existingList) {
                   existingList.userBookmarks.push({
@@ -420,23 +434,27 @@ const BookmarkButtonConsumer = memo(
                     updatedAt: new Date(),
                     userId,
                     listName: newBookmarkListName,
+                    visibility: realVisibility,
                   });
                 }
               } else {
                 // Create new list and add bookmark
-                addChosenBookmarkListName(newBookmarkListName);
+                addChosenBookmarkListName(
+                  newBookmarkListName + " " + realVisibility
+                );
                 prev.push({
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   userId,
                   listName: newBookmarkListName,
-                  visibility: realVisibility!,
+                  visibility: realVisibility,
                   userBookmarks: [
                     {
                       questionId: newQuestionId,
                       updatedAt: new Date(),
                       userId,
                       listName: newBookmarkListName,
+                      visibility: realVisibility,
                     },
                   ],
                 });
@@ -448,27 +466,38 @@ const BookmarkButtonConsumer = memo(
               }
             } else if (!isCreateNew && !isRealBookmarked) {
               // Add bookmark to existing list
-              addChosenBookmarkListName(newBookmarkListName);
+              addChosenBookmarkListName(
+                newBookmarkListName + " " + realVisibility
+              );
               const existingList = prev.find(
-                (bookmark) => bookmark.listName === newBookmarkListName
+                (bookmark) =>
+                  bookmark.listName === newBookmarkListName &&
+                  bookmark.visibility === realVisibility
               );
               if (existingList) {
                 existingList.userBookmarks.push({
                   questionId: newQuestionId,
                   updatedAt: new Date(),
+                  visibility: realVisibility,
                   userId,
                   listName: newBookmarkListName,
                 });
               }
             } else if (!isCreateNew && isRealBookmarked) {
               // Remove bookmark from list
-              removeChosenBookmarkListName(newBookmarkListName);
+              removeChosenBookmarkListName(
+                newBookmarkListName + " " + realVisibility
+              );
               const existingList = prev.find(
-                (bookmark) => bookmark.listName === newBookmarkListName
+                (bookmark) =>
+                  bookmark.listName === newBookmarkListName &&
+                  bookmark.visibility === realVisibility
               );
               if (existingList) {
                 existingList.userBookmarks = existingList.userBookmarks.filter(
-                  (bookmark) => bookmark.questionId !== newQuestionId
+                  (bookmark) =>
+                    bookmark.questionId !== newQuestionId &&
+                    bookmark.visibility !== realVisibility
                 );
               }
             }
@@ -845,16 +874,20 @@ const BookmarkList = memo(
     const bookmarks = useBookmarkContext((state) => state.bookmarks);
     const questionId = useBookmarkContext((state) => state.questionId);
     const setBookmarkListName = useBookmarkContext(
-      (state) => state.actions.setNewBookmarkListName
+      (state) => state.actions.setBookmarkListName
     );
     const mutate = useBookmarkContext((state) => state.mutate);
-
+    const setVisibility = useBookmarkContext(
+      (state) => state.actions.setVisibility
+    );
     const onListSelect = ({
       bookmark,
       isItemBookmarked,
+      visibility,
     }: {
       bookmark: SelectedBookmark[number];
       isItemBookmarked: boolean;
+      visibility: "public" | "private";
     }) => {
       if (bookmark.listName.trim() === "") {
         toast.error("Failed to update bookmarks: Bad Request.");
@@ -872,6 +905,7 @@ const BookmarkList = memo(
         );
         return;
       }
+      setVisibility(visibility);
       setBookmarkListName(bookmark.listName);
       setTimeout(() => {
         mutate?.({
@@ -879,6 +913,7 @@ const BookmarkList = memo(
           realBookmarkListName: bookmark.listName,
           isRealBookmarked: isItemBookmarked,
           isCreateNew: false,
+          realVisibility: visibility,
         });
       }, 0);
     };
@@ -911,82 +946,97 @@ const BookmarkList = memo(
             }}
           >
             <CommandEmpty>No lists found.</CommandEmpty>
-            <Collapsible>
-              {!searchInput && (
-                <CollapsibleTrigger
-                  className="flex w-full cursor-pointer items-center justify-between gap-2 px-3"
-                  onTouchStart={() => {
-                    setIsBlockingInput(false);
-                  }}
-                  title="Toggle selected"
-                >
-                  <h3
-                    className={cn(
-                      "font-medium text-xs",
-                      chosenBookmarkListName.size > 0
-                        ? "text-logo-main"
-                        : "text-muted-foreground"
-                    )}
+            {bookmarks.length > 0 && (
+              <>
+                <Collapsible>
+                  {!searchInput && (
+                    <CollapsibleTrigger
+                      className="flex w-full cursor-pointer items-center justify-between gap-2 px-3"
+                      onTouchStart={() => {
+                        setIsBlockingInput(false);
+                      }}
+                      title="Toggle selected"
+                    >
+                      <h3
+                        className={cn(
+                          "font-medium text-xs",
+                          chosenBookmarkListName.size > 0
+                            ? "text-logo-main"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {`${chosenBookmarkListName.size} selected`}
+                      </h3>
+                      <ChevronsUpDown className="h-4 w-4" />
+                    </CollapsibleTrigger>
+                  )}
+                  <CommandGroup
+                    value={`${chosenBookmarkListName.size} selected`}
                   >
-                    {`${chosenBookmarkListName.size} selected`}
-                  </h3>
-                  <ChevronsUpDown className="h-4 w-4" />
-                </CollapsibleTrigger>
-              )}
-              <CommandGroup value={`${chosenBookmarkListName.size} selected`}>
-                <CollapsibleContent>
-                  {chosenBookmarkListName.size > 0 &&
-                    !searchInput &&
-                    bookmarks
-                      .filter((bookmark) =>
-                        chosenBookmarkListName.has(bookmark.listName)
-                      )
-                      .map((bookmark) => (
-                        <BookmarkItem
-                          key={bookmark.listName}
-                          onSelect={() => {
-                            onListSelect({
-                              bookmark,
-                              isItemBookmarked: true,
-                            });
-                          }}
-                          listName={bookmark.listName}
-                          isPlaceholder={true}
-                          visibility={bookmark.visibility}
-                          searchInputRef={searchInputRef}
-                        />
-                      ))}
-                </CollapsibleContent>
-              </CommandGroup>
-            </Collapsible>
-            <CommandSeparator />
+                    <CollapsibleContent>
+                      {chosenBookmarkListName.size > 0 &&
+                        !searchInput &&
+                        bookmarks
+                          .filter((bookmark) =>
+                            chosenBookmarkListName.has(
+                              bookmark.listName + " " + bookmark.visibility
+                            )
+                          )
+                          .map((bookmark) => (
+                            <BookmarkItem
+                              key={
+                                bookmark.listName + " " + bookmark.visibility
+                              }
+                              onSelect={() => {
+                                onListSelect({
+                                  bookmark,
+                                  isItemBookmarked: true,
+                                  visibility: bookmark.visibility,
+                                });
+                              }}
+                              listName={bookmark.listName}
+                              isPlaceholder={true}
+                              visibility={bookmark.visibility}
+                              searchInputRef={searchInputRef}
+                            />
+                          ))}
+                    </CollapsibleContent>
+                  </CommandGroup>
+                </Collapsible>
+                <CommandSeparator />
 
-            <CommandGroup
-              heading={searchInput.length > 0 ? "Search result" : "Save to"}
-            >
-              {bookmarks.length > 0 && (
-                <>
-                  {bookmarks.map((bookmark) => {
-                    const isItemBookmarked = chosenBookmarkListName.has(
-                      bookmark.listName
-                    );
+                <CommandGroup
+                  heading={searchInput.length > 0 ? "Search result" : "Save to"}
+                >
+                  {bookmarks.length > 0 && (
+                    <>
+                      {bookmarks.map((bookmark) => {
+                        const isItemBookmarked = chosenBookmarkListName.has(
+                          bookmark.listName + " " + bookmark.visibility
+                        );
 
-                    return (
-                      <BookmarkItem
-                        key={bookmark.listName}
-                        onSelect={() => {
-                          onListSelect({ bookmark, isItemBookmarked });
-                        }}
-                        listName={bookmark.listName}
-                        visibility={bookmark.visibility}
-                        isPlaceholder={false}
-                        searchInputRef={searchInputRef}
-                      />
-                    );
-                  })}
-                </>
-              )}
-            </CommandGroup>
+                        return (
+                          <BookmarkItem
+                            key={bookmark.listName + " " + bookmark.visibility}
+                            onSelect={() => {
+                              onListSelect({
+                                bookmark,
+                                isItemBookmarked,
+                                visibility: bookmark.visibility,
+                              });
+                            }}
+                            listName={bookmark.listName}
+                            visibility={bookmark.visibility}
+                            isPlaceholder={false}
+                            searchInputRef={searchInputRef}
+                          />
+                        );
+                      })}
+                    </>
+                  )}
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </ScrollArea>
         <CreateNewListAlertDialog />
@@ -1021,7 +1071,7 @@ const BookmarkItem = memo(
     );
     const isMutating =
       useIsMutating({
-        mutationKey: ["all_user_bookmarks", questionId, listName],
+        mutationKey: ["all_user_bookmarks", questionId, listName, visibility],
       }) > 0;
 
     return (
@@ -1069,10 +1119,11 @@ const BookmarkItem = memo(
       >
         <div className="flex items-center justify-start gap-2">
           <Checkbox
-            checked={chosenBookmarkListName.has(listName)}
+            checked={chosenBookmarkListName.has(listName + " " + visibility)}
             className="data-[state=checked]:!bg-logo-main "
           />
           {listName}
+          <span className="sr-only">{visibility}</span>
           {isPlaceholder && <span className="sr-only">skibidi toilet</span>}
           {isMutating && <Loader2 className="animate-spin" />}
         </div>

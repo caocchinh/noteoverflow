@@ -83,9 +83,11 @@ export const createBookmarkListAction = async ({
 export const addBookmarkAction = async ({
   questionId,
   bookmarkListName,
+  visibility,
 }: {
   questionId: string;
   bookmarkListName: string;
+  visibility: "public" | "private";
 }): Promise<ServerActionResponse<string>> => {
   if (bookmarkListName.trim() === "" || bookmarkListName.length > 100) {
     return {
@@ -107,7 +109,8 @@ export const addBookmarkAction = async ({
       .where(
         and(
           eq(userBookmarks.userId, userId),
-          eq(userBookmarks.listName, bookmarkListName)
+          eq(userBookmarks.listName, bookmarkListName),
+          eq(userBookmarks.visibility, visibility)
         )
       );
 
@@ -126,16 +129,19 @@ export const addBookmarkAction = async ({
           questionId,
           listName: bookmarkListName,
           updatedAt: new Date(),
+          visibility,
         })
         .onConflictDoUpdate({
           target: [
             userBookmarks.userId,
             userBookmarks.questionId,
             userBookmarks.listName,
+            userBookmarks.visibility,
           ],
           set: { updatedAt: new Date() },
         });
     } catch (e) {
+      console.log(e);
       if (
         e instanceof Error &&
         /FOREIGN KEY constraint failed/i.test(e.message)
@@ -172,9 +178,11 @@ export const addBookmarkAction = async ({
 export const removeBookmarkAction = async ({
   questionId,
   bookmarkListName,
+  visibility,
 }: {
   questionId: string;
   bookmarkListName: string;
+  visibility: "public" | "private";
 }): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
@@ -189,7 +197,8 @@ export const removeBookmarkAction = async ({
         and(
           eq(userBookmarks.userId, userId),
           eq(userBookmarks.questionId, questionId),
-          eq(userBookmarks.listName, bookmarkListName)
+          eq(userBookmarks.listName, bookmarkListName),
+          eq(userBookmarks.visibility, visibility)
         )
       );
     return {

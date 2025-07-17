@@ -287,19 +287,31 @@ export const userBookmarks = sqliteTable(
   {
     userId: text("user_id").notNull(),
     listName: text("list_name").notNull(),
+    visibility: text("visibility").notNull().default("private"),
     questionId: text("question_id")
-      .notNull()
-      .references(() => question.id, { onDelete: "cascade" }),
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => {
     return [
-      primaryKey({ columns: [table.userId, table.listName, table.questionId] }),
+      primaryKey({
+        columns: [
+          table.userId,
+          table.listName,
+          table.visibility,
+          table.questionId,
+        ],
+      }),
       foreignKey({
-        columns: [table.userId, table.listName],
-        foreignColumns: [userBookmarkList.userId, userBookmarkList.listName],
+        columns: [table.userId, table.listName, table.visibility],
+        foreignColumns: [
+          userBookmarkList.userId,
+          userBookmarkList.listName,
+          userBookmarkList.visibility,
+        ],
       }),
     ];
   }
