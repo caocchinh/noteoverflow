@@ -20,8 +20,10 @@ import { ServerActionResponse } from "@/constants/types";
 
 export const createBookmarkListAction = async ({
   listName,
+  visibility,
 }: {
   listName: string;
+  visibility: "public" | "private";
 }): Promise<ServerActionResponse<string>> => {
   if (listName.trim() === "" || listName.length > 100) {
     return {
@@ -55,6 +57,7 @@ export const createBookmarkListAction = async ({
         userId,
         listName,
         updatedAt: new Date(),
+        visibility,
       })
       .onConflictDoNothing();
 

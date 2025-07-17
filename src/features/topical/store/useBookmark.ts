@@ -7,6 +7,7 @@ type MutateFunction = (params: {
   realBookmarkListName: string;
   isRealBookmarked: boolean;
   isCreateNew: boolean;
+  realVisibility?: "public" | "private";
 }) => Promise<unknown> | void;
 
 export type BookmarkState = {
@@ -17,6 +18,7 @@ export type BookmarkState = {
   isBlockingInput: boolean;
   isInputError: boolean;
   isAddNewListDialogOpen: boolean;
+  visibility: "public" | "private";
   questionId: string;
   newBookmarkListName: string;
   newBookmarkListNameInput: string;
@@ -43,6 +45,7 @@ export type BookmarkState = {
     setNewBookmarkListNameInput: (value: string) => void;
     setIsInputError: (value: boolean) => void;
     setIsAddNewListDialogOpen: (value: boolean) => void;
+    setVisibility: (value: "public" | "private") => void;
   };
 };
 
@@ -73,6 +76,7 @@ const createBookmarkStore = (props: BookmarkProps) => {
     isBlockingInput: false,
     isInputError: false,
     isAddNewListDialogOpen: false,
+    visibility: "private",
     questionId: props.questionId,
     newBookmarkListName: "",
     newBookmarkListNameInput: "",
@@ -144,6 +148,11 @@ const createBookmarkStore = (props: BookmarkProps) => {
         set((state) => ({
           ...state,
           isAddNewListDialogOpen: value,
+        })),
+      setVisibility: (value: "public" | "private") =>
+        set((state) => ({
+          ...state,
+          visibility: value,
         })),
     },
   }));

@@ -216,7 +216,6 @@ const QuestionPreview = memo(
                 setShouldOpen(true);
                 setIsPopoverOpen(true);
               }}
-              disabled={isUserSessionPending || isBookmarksFetching}
             >
               {isBookmarksFetching ? (
                 <Loader2 className="animate-spin" />

@@ -276,7 +276,9 @@ export const userBookmarkList = sqliteTable(
     visibility: text("visibility").notNull().default("private"),
   },
   (table) => {
-    return [primaryKey({ columns: [table.userId, table.listName] })];
+    return [
+      primaryKey({ columns: [table.userId, table.listName, table.visibility] }),
+    ];
   }
 );
 

@@ -74,6 +74,13 @@ import createBookmarkStore, {
 } from "../store/useBookmark";
 import { createContext, useContext } from "react";
 import { useStore } from "zustand";
+import {
+  Select,
+  SelectItem,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const BookmarkContext = createContext<BookmarkStore | null>(null);
 
@@ -308,11 +315,13 @@ const BookmarkButtonConsumer = memo(
         realQuestionId,
         realBookmarkListName,
         isRealBookmarked,
+        realVisibility,
         isCreateNew,
       }: {
         realQuestionId: string;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
+        realVisibility?: "public" | "private";
         isCreateNew: boolean;
       }): Promise<{
         userId: string;
@@ -320,10 +329,13 @@ const BookmarkButtonConsumer = memo(
         realBookmarkListName: string;
         isRealBookmarked: boolean;
         isCreateNew: boolean;
+        realVisibility?: "public" | "private";
       }> => {
         if (isCreateNew) {
+          // If create new, visibility is always available
           const result = await createBookmarkListAction({
             listName: realBookmarkListName,
+            visibility: realVisibility!,
           });
           if (!result.success) {
             throw new Error(result.error + "list");
@@ -340,6 +352,7 @@ const BookmarkButtonConsumer = memo(
             realBookmarkListName: realBookmarkListName,
             isRealBookmarked: true,
             isCreateNew: isCreateNew,
+            realVisibility: realVisibility,
           };
         } else {
           const result = await addBookmarkAction({
@@ -355,6 +368,7 @@ const BookmarkButtonConsumer = memo(
             realBookmarkListName: realBookmarkListName,
             isRealBookmarked: false,
             isCreateNew: isCreateNew,
+            realVisibility: realVisibility,
           };
         }
       },
@@ -364,12 +378,14 @@ const BookmarkButtonConsumer = memo(
         realBookmarkListName: newBookmarkListName,
         isCreateNew,
         userId,
+        realVisibility,
       }: {
         realQuestionId: string;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
         isCreateNew: boolean;
         userId: string;
+        realVisibility?: "public" | "private";
       }) => {
         queryClient.setQueryData<SelectedBookmark>(
           ["all_user_bookmarks"],
@@ -414,7 +430,7 @@ const BookmarkButtonConsumer = memo(
                   updatedAt: new Date(),
                   userId,
                   listName: newBookmarkListName,
-                  visibility: "private",
+                  visibility: realVisibility!,
                   userBookmarks: [
                     {
                       questionId: newQuestionId,
@@ -686,7 +702,7 @@ const BookmarkButtonConsumer = memo(
               </div>
             </PopoverTrigger>
             <PopoverContent
-              className="h-full z-[100006] w-[250px] !px-0 dark:bg-accent"
+              className="h-full z-[100006] w-[300px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
             >
@@ -763,7 +779,6 @@ const BookmarkTrigger = memo(() => {
       )}
       tabIndex={-1}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-      disabled={isBookmarkDisabled || isBookmarksFetching}
     >
       {isBookmarksFetching ? (
         <Loader2 className="animate-spin" />
@@ -1126,14 +1141,32 @@ const CreateNewListAlertDialog = memo(() => {
         realBookmarkListName: newBookmarkListNameInput.trim(),
         isRealBookmarked: false,
         isCreateNew: true,
+        realVisibility: visibility,
       });
     }, 0);
   };
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isBlockingInput, setIsBlockingInput] = useState(false);
+  const setVisibility = useBookmarkContext(
+    (state) => state.actions.setVisibility
+  );
+  const visibility = useBookmarkContext((state) => state.visibility);
 
   return (
     <AlertDialog
       open={isAddNewListDialogOpen}
-      onOpenChange={setIsAddNewListDialogOpen}
+      onOpenChange={(value) => {
+        setIsAddNewListDialogOpen(value);
+        if (value) {
+          setTimeout(() => {
+            inputRef.current?.focus();
+            setIsBlockingInput(true);
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
+          }, 0);
+        }
+      }}
     >
       <AlertDialogTrigger asChild>
         <div className="px-2 w-full">
@@ -1149,49 +1182,97 @@ const CreateNewListAlertDialog = memo(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>New list</AlertDialogTitle>
         </AlertDialogHeader>
-        <div className="flex items-center justify-center gap-2">
-          <Input
-            onChange={(e) => {
-              if (e.target.value.length > 100) {
-                setIsInputError(true);
-              } else {
-                setIsInputError(false);
-              }
-              setNewBookmarkListNameInput(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
+        <div className="flex items-center justify-center flex-col">
+          <p className="text-sm w-full text-left mb-1">List name</p>
+          <div className="flex items-center justify-center gap-2 w-full">
+            <Input
+              ref={inputRef}
+              readOnly={isBlockingInput}
+              onChange={(e) => {
+                if (e.target.value.length > 100) {
+                  setIsInputError(true);
+                } else {
+                  setIsInputError(false);
+                }
+                setNewBookmarkListNameInput(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  createNewList();
+                }
+              }}
+              disabled={isMutatingThisQuestion}
+              value={newBookmarkListNameInput}
+              placeholder="e.g. Super hard questions"
+              className="placeholder:text-[13px]"
+            />
+            <X
+              className={cn(
+                "cursor-pointer text-red-500",
+                isMutatingThisQuestion && "opacity-50"
+              )}
+              onMouseDown={(e) => {
+                e.stopPropagation();
                 e.preventDefault();
-                createNewList();
+              }}
+              onClick={() => {
+                if (isMutatingThisQuestion) return;
+                setNewBookmarkListNameInput("");
+                setIsInputError(false);
+              }}
+              size={20}
+            />
+          </div>
+          <p className="text-sm w-full text-left mt-3 mb-1">Visibility</p>
+          <div className="flex items-center justify-center gap-2 w-full">
+            <Select
+              disabled={isMutatingThisQuestion}
+              defaultValue="private"
+              onValueChange={(value) =>
+                setVisibility(value as "public" | "private")
               }
-            }}
-            disabled={isMutatingThisQuestion}
-            value={newBookmarkListNameInput}
-            placeholder="e.g. Super hard questions"
-            className="placeholder:text-[13px]"
-          />
-          <X
-            className={cn(
-              "cursor-pointer text-red-500",
-              isMutatingThisQuestion && "opacity-50"
-            )}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onClick={() => {
-              if (isMutatingThisQuestion) return;
-              setNewBookmarkListNameInput("");
-              setIsInputError(false);
-            }}
-            size={20}
-          />
+              value={visibility}
+            >
+              <SelectTrigger className="w-full py-6">
+                <SelectValue placeholder="Select a visibility" />
+              </SelectTrigger>
+              <SelectContent className="z-[999999]">
+                <SelectItem value="public">
+                  <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
+                    <Globe className="w-4 h-4" />
+                    <div className="flex flex-col justify-center items-start">
+                      <p className="text-sm">Public</p>
+                      <p className="text-xs text-muted-foreground">
+                        Anyone can see this list
+                      </p>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="private">
+                  <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
+                    <Lock className="w-4 h-4" />
+                    <div className="flex flex-col justify-center items-start">
+                      <p className="text-sm">Private</p>
+                      <p className="text-xs text-muted-foreground">
+                        Only you can see this list
+                      </p>
+                    </div>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         {isInputError && (
           <p className="text-red-500 text-xs mt-1 text-center">
             Please enter valid a list name. Max 100 characters.
           </p>
         )}
+        <p className="text-xs text-muted-foreground mt-1 text-left">
+          If list name with the same visibility already exists, the question
+          will be added to the list.
+        </p>
         <div className="flex gap-2 w-full">
           <AlertDialogCancel asChild>
             <Button className="w-1/2 mt-2 cursor-pointer" variant="outline">
