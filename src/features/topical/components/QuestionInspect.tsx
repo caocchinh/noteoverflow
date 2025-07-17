@@ -724,7 +724,7 @@ const QuestionInspect = ({
                               })}
                             </p>
                             <BookmarkButton
-                              triggerButtonClassName="h-[26px] w-[26px] border-black border"
+                              triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
                               badgeClassName="h-[26px] min-h-[26px] !static"
                               questionId={
                                 partitionedTopicalData?.[currentTab][
@@ -736,6 +736,7 @@ const QuestionInspect = ({
                               isValidSession={isValidSession}
                               isBookmarksFetching={isBookmarksFetching}
                               isBookmarkError={isBookmarkError}
+                              isInView={true}
                             />
                           </div>
                           <SelectSeparator />
@@ -813,6 +814,7 @@ const QuestionInspect = ({
                             isValidSession={isValidSession}
                             isBookmarksFetching={isBookmarksFetching}
                             isBookmarkError={isBookmarkError}
+                            isInView={true}
                           />
                         </div>
                         <SelectSeparator />
@@ -1088,7 +1090,7 @@ const QuestionInspect = ({
                   </Button>
                   {currentQuestionId && (
                     <BookmarkButton
-                      triggerButtonClassName="h-[35px] w-[35px] border-black border"
+                      triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
                       badgeClassName="h-[35px] min-h-[35px] !static"
                       questionId={currentQuestionId}
                       isBookmarkDisabled={isUserSessionPending}
@@ -1097,6 +1099,7 @@ const QuestionInspect = ({
                       isValidSession={isValidSession}
                       isBookmarksFetching={isBookmarksFetching}
                       isBookmarkError={isBookmarkError}
+                      isInView={true}
                     />
                   )}
                   <QuestionInspectFinishedCheckbox

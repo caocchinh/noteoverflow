@@ -91,28 +91,34 @@ export const BookmarkButton = memo(
     isBookmarksFetching,
     isPopoverOpen: openProp,
     setIsPopoverOpen: setOpenProp,
+    setIsHovering,
     isBookmarkError,
     popOverAlign = "end",
     badgeClassName,
+    popOverTriggerClassName,
     triggerButtonClassName,
     isValidSession,
+    isInView,
   }: {
     bookmarks: SelectedBookmark;
     questionId: string;
     isBookmarkDisabled: boolean;
     isPopoverOpen?: boolean;
     setIsPopoverOpen?: (open: boolean) => void;
+    setIsHovering?: (value: boolean) => void;
     popOverAlign?: "start" | "end";
     isBookmarksFetching: boolean;
     isBookmarkError: boolean;
     badgeClassName?: string;
+    popOverTriggerClassName?: string;
     triggerButtonClassName?: string;
     isValidSession: boolean;
+    isInView: boolean;
   }) => {
     const [_open, _setOpen] = useState(false);
 
     // Use the open prop if provided, otherwise use local state
-    const open = openProp !== undefined ? openProp : _open;
+    const open = openProp ?? _open;
 
     // Create a function to handle state changes, respecting both local and prop state
     const handleOpenChange = useCallback(
@@ -125,14 +131,17 @@ export const BookmarkButton = memo(
         } else {
           _setOpen(newOpenState);
         }
+        if (setIsHovering && !newOpenState) {
+          setIsHovering(false);
+        }
       },
-      [open, setOpenProp]
+      [open, setOpenProp, setIsHovering]
     );
 
     const bookmarkStore = useRef<BookmarkStore | null>(null);
 
     // Only create the store once when component mounts
-    if (bookmarkStore.current === null) {
+    if (bookmarkStore.current === null && isInView) {
       bookmarkStore.current = createBookmarkStore({
         isBookmarksFetching,
         isBookmarkDisabled,
@@ -153,14 +162,20 @@ export const BookmarkButton = memo(
         bookmarks,
         popOverAlign,
         badgeClassName,
+        popOverTriggerClassName,
         triggerButtonClassName,
         open,
+        isInView,
       });
     }
 
     // Update the store with new props when they change
     useEffect(() => {
+      if (!isInView) {
+        return;
+      }
       if (bookmarkStore.current) {
+        // console.log("updating store");
         bookmarkStore.current.setState((state) => ({
           ...state,
           isBookmarksFetching,
@@ -182,8 +197,10 @@ export const BookmarkButton = memo(
           bookmarks,
           popOverAlign,
           badgeClassName,
+          popOverTriggerClassName,
           triggerButtonClassName,
           open,
+          isInView,
         }));
       }
     }, [
@@ -195,11 +212,16 @@ export const BookmarkButton = memo(
       bookmarks,
       popOverAlign,
       badgeClassName,
+      popOverTriggerClassName,
       triggerButtonClassName,
       open,
+      isInView,
     ]);
 
-    // Wrap the component with BookmarkContext provider and pass the open state and handler
+    if (!isInView) {
+      return null;
+    }
+
     return (
       <BookmarkContext.Provider value={bookmarkStore.current}>
         <BookmarkButtonConsumer open={open} setOpen={handleOpenChange} />
@@ -240,11 +262,10 @@ const BookmarkButtonConsumer = memo(
     const isBookmarkError = useBookmarkContext(
       (state) => state.isBookmarkError
     );
+    // const isInView = useBookmarkContext((state) => state.isInView);
     const isValidSession = useBookmarkContext((state) => state.isValidSession);
     const mutationKey = ["all_user_bookmarks", questionId, newBookmarkListName];
-    const triggerButtonClassName = useBookmarkContext(
-      (state) => state.triggerButtonClassName
-    );
+
     const setIsInputError = useBookmarkContext(
       (state) => state.actions.setIsInputError
     );
@@ -259,10 +280,8 @@ const BookmarkButtonConsumer = memo(
 
     const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Get the store directly to update the ref
     const store = useContext(BookmarkContext);
 
-    // Bind the store with the refs on store mount
     useEffect(() => {
       if (store) {
         // Set refs directly to store
@@ -544,6 +563,9 @@ const BookmarkButtonConsumer = memo(
       }, 0);
       setOpen(true);
     };
+    const popOverTriggerClassName = useBookmarkContext(
+      (state) => state.popOverTriggerClassName
+    );
 
     return (
       <Command
@@ -628,6 +650,7 @@ const BookmarkButtonConsumer = memo(
               <BookmarkList
                 scrollAreaRef={scrollAreaRef}
                 searchInputRef={searchInputRef}
+                isMobileDevice={true}
               />
             </DrawerContent>
           </Drawer>
@@ -648,7 +671,7 @@ const BookmarkButtonConsumer = memo(
               }}
               asChild
             >
-              <div className={triggerButtonClassName}>
+              <div className={popOverTriggerClassName}>
                 <BookmarkTrigger />
               </div>
             </PopoverTrigger>
@@ -665,6 +688,7 @@ const BookmarkButtonConsumer = memo(
               <BookmarkList
                 scrollAreaRef={scrollAreaRef}
                 searchInputRef={searchInputRef}
+                isMobileDevice={false}
               />
             </PopoverContent>
           </Popover>
@@ -678,6 +702,7 @@ BookmarkButtonConsumer.displayName = "BookmarkButtonConsumer";
 
 const BookmarkTrigger = memo(() => {
   const badgeClassName = useBookmarkContext((state) => state.badgeClassName);
+
   const triggerButtonClassName = useBookmarkContext(
     (state) => state.triggerButtonClassName
   );
@@ -701,7 +726,7 @@ const BookmarkTrigger = memo(() => {
     return (
       <Badge
         className={cn(
-          "absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
+          "text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
           badgeClassName
         )}
       >
@@ -772,22 +797,15 @@ const BookmarkSearchInput = memo(
 
 BookmarkSearchInput.displayName = "BookmarkSearchInput";
 
-// Hook to check if a specific bookmark list is being mutated
-function useBookmarkMutation(questionId: string, listName: string) {
-  return (
-    useIsMutating({
-      mutationKey: ["all_user_bookmarks", questionId, listName],
-    }) > 0
-  );
-}
-
 const BookmarkList = memo(
   ({
     scrollAreaRef,
     searchInputRef,
+    isMobileDevice,
   }: {
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     searchInputRef: React.RefObject<HTMLInputElement | null>;
+    isMobileDevice: boolean;
   }) => {
     const searchInput = useBookmarkContext((state) => state.searchInput);
     const setIsBlockingInput = useBookmarkContext(
@@ -796,7 +814,6 @@ const BookmarkList = memo(
     const chosenBookmarkListName = useBookmarkContext(
       (state) => state.chosenBookmarkListName
     );
-    const isMobileDevice = useIsMobile();
     const bookmarks = useBookmarkContext((state) => state.bookmarks);
     const questionId = useBookmarkContext((state) => state.questionId);
     const setBookmarkListName = useBookmarkContext(
@@ -974,10 +991,12 @@ const BookmarkItem = memo(
     const chosenBookmarkListName = useBookmarkContext(
       (state) => state.chosenBookmarkListName
     );
+    console.log("rerendering");
 
-    // Use the custom hook to check mutation status
-    const isMutating = useBookmarkMutation(questionId, listName);
-    // Remove console.log to prevent unnecessary work during renders
+    const isMutating =
+      useIsMutating({
+        mutationKey: ["all_user_bookmarks", questionId, listName],
+      }) > 0;
 
     return (
       <CommandItem

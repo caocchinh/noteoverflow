@@ -1,139 +1,150 @@
-import { createStore } from "zustand";
-import type { SelectedBookmark } from "../constants/types";
-import { RefObject } from "react";
-import { UseMutateFunction } from "@tanstack/react-query";
+import { create } from "zustand";
+import { SelectedBookmark } from "../constants/types";
 
-interface BookmarkAction {
-  setIsBlockingInput: (value: boolean) => void;
-  setSearchInput: (value: string) => void;
-  setIsAddNewListDialogOpen: (value: boolean) => void;
-  setNewBookmarkListNameInput: (value: string) => void;
-  setIsInputError: (value: boolean) => void;
-  addChosenBookmarkListName: (name: string) => void;
-  removeChosenBookmarkListName: (name: string) => void;
-  clearChosenBookmarkList: () => void;
-  setNewBookmarkListName: (value: string) => void;
-  setMutate: (mutate: MutateFunction) => void;
-}
+// Define a type for the mutation function
+type MutateFunction = (params: {
+  realQuestionId: string;
+  realBookmarkListName: string;
+  isRealBookmarked: boolean;
+  isCreateNew: boolean;
+}) => Promise<unknown> | void;
 
-// Define the mutate function type
-export type MutateFunction = UseMutateFunction<
-  {
-    userId: string;
-    realQuestionId: string;
-    realBookmarkListName: string;
-    isRealBookmarked: boolean;
-    isCreateNew: boolean;
-  },
-  Error,
-  {
-    realQuestionId: string;
-    isRealBookmarked: boolean;
-    realBookmarkListName: string;
-    isCreateNew: boolean;
-  },
-  unknown
->;
-
-interface BookmarkProps {
+export type BookmarkState = {
   isBookmarksFetching: boolean;
-  questionId: string;
-  badgeClassName?: string;
-  popOverAlign?: "start" | "end";
-  triggerButtonClassName?: string;
-  isBookmarkError: boolean;
   isBookmarkDisabled: boolean;
+  isBookmarkError: boolean;
   isValidSession: boolean;
+  isBlockingInput: boolean;
+  isInputError: boolean;
+  isAddNewListDialogOpen: boolean;
+  questionId: string;
+  newBookmarkListName: string;
+  newBookmarkListNameInput: string;
+  searchInput: string;
   bookmarks: SelectedBookmark;
   chosenBookmarkListName: Set<string>;
-  open?: boolean;
-}
-
-export interface BookmarkState extends BookmarkProps {
-  /* UI/interaction state */
-  isBlockingInput: boolean;
-  searchInput: string;
+  popOverAlign: "start" | "end";
+  badgeClassName?: string;
+  popOverTriggerClassName?: string;
+  triggerButtonClassName?: string;
   open: boolean;
-
-  /* Data */
-  newBookmarkListName: string;
+  isInView: boolean; // Add isInView property
   mutate: MutateFunction | null;
+  scrollAreaRef: React.RefObject<HTMLDivElement | null> | null;
+  searchInputRef: React.RefObject<HTMLInputElement | null> | null;
+  actions: {
+    setIsBlockingInput: (value: boolean) => void;
+    setIsHovering?: (value: boolean) => void;
+    setSearchInput: (value: string) => void;
+    addChosenBookmarkListName: (value: string) => void;
+    removeChosenBookmarkListName: (value: string) => void;
+    setMutate: (mutate: MutateFunction | null) => void;
+    setNewBookmarkListName: (value: string) => void;
+    setNewBookmarkListNameInput: (value: string) => void;
+    setIsInputError: (value: boolean) => void;
+    setIsAddNewListDialogOpen: (value: boolean) => void;
+  };
+};
 
-  /* Ref */
-  searchInputRef: RefObject<HTMLInputElement | null> | undefined;
-  scrollAreaRef: RefObject<HTMLDivElement | null> | undefined;
-
-  /* Dialog / form helpers */
-  isAddNewListDialogOpen: boolean;
-  newBookmarkListNameInput: string;
-  isInputError: boolean;
-
-  /* ----- Actions ----- */
-  actions: BookmarkAction;
-}
-
-const defaultState: Omit<BookmarkState, "actions"> = {
-  /* UI/interaction state */
-  isBlockingInput: false,
-  searchInput: "",
-  open: false,
-
-  /* Data */
-  newBookmarkListName: "",
-  mutate: null,
-
-  /* Ref */
-  searchInputRef: undefined,
-  scrollAreaRef: undefined,
-
-  /* Dialog / form helpers */
-  isAddNewListDialogOpen: false,
-  newBookmarkListNameInput: "",
-  isInputError: false,
-
-  /* Misc flags, will be set by parent component at run time */
-  isBookmarksFetching: false,
-  isBookmarkError: false,
-  isBookmarkDisabled: false,
-  isValidSession: false,
-  questionId: "",
-  badgeClassName: "",
-  popOverAlign: "end",
-  triggerButtonClassName: "",
-  bookmarks: [],
-  chosenBookmarkListName: new Set<string>(),
+export type BookmarkProps = {
+  isBookmarksFetching: boolean;
+  isBookmarkDisabled: boolean;
+  isBookmarkError: boolean;
+  isValidSession: boolean;
+  questionId: string;
+  chosenBookmarkListName: Set<string>;
+  bookmarks: SelectedBookmark;
+  popOverAlign?: "start" | "end";
+  badgeClassName?: string;
+  popOverTriggerClassName?: string;
+  triggerButtonClassName?: string;
+  open: boolean;
+  isInView: boolean; // Add isInView property
 };
 
 export type BookmarkStore = ReturnType<typeof createBookmarkStore>;
 
-const createBookmarkStore = (initProps?: Partial<BookmarkProps>) => {
-  return createStore<BookmarkState>()((set) => ({
-    ...defaultState,
-    ...initProps,
-    /* ---------- Actions ---------- */
+const createBookmarkStore = (props: BookmarkProps) => {
+  return create<BookmarkState>()((set) => ({
+    isBookmarksFetching: props.isBookmarksFetching,
+    isBookmarkDisabled: props.isBookmarkDisabled,
+    isBookmarkError: props.isBookmarkError,
+    isValidSession: props.isValidSession,
+    isBlockingInput: false,
+    isInputError: false,
+    isAddNewListDialogOpen: false,
+    questionId: props.questionId,
+    newBookmarkListName: "",
+    newBookmarkListNameInput: "",
+    searchInput: "",
+    bookmarks: props.bookmarks,
+    chosenBookmarkListName: props.chosenBookmarkListName,
+    popOverAlign: props.popOverAlign ?? "end",
+    badgeClassName: props.badgeClassName,
+    popOverTriggerClassName: props.popOverTriggerClassName,
+    triggerButtonClassName: props.triggerButtonClassName,
+    open: props.open,
+    isInView: props.isInView, // Initialize isInView
+    mutate: null,
+    scrollAreaRef: null,
+    searchInputRef: null,
     actions: {
-      setIsBlockingInput: (value) => set({ isBlockingInput: value }),
-      setSearchInput: (value) => set({ searchInput: value }),
-      setIsAddNewListDialogOpen: (value) =>
-        set({ isAddNewListDialogOpen: value }),
-      setNewBookmarkListNameInput: (value) =>
-        set({ newBookmarkListNameInput: value }),
-      setIsInputError: (value) => set({ isInputError: value }),
-      addChosenBookmarkListName: (name) =>
+      setIsBlockingInput: (value: boolean) =>
+        set((state) => ({
+          ...state,
+          isBlockingInput: value,
+        })),
+      setIsHovering: (value: boolean) =>
+        set((state) => ({
+          ...state,
+          isHovering: value,
+        })),
+      setSearchInput: (value: string) =>
+        set((state) => ({
+          ...state,
+          searchInput: value,
+        })),
+      addChosenBookmarkListName: (value: string) =>
         set((state) => {
-          const next = new Set(state.chosenBookmarkListName);
-          next.add(name);
-          return { chosenBookmarkListName: next };
+          state.chosenBookmarkListName.add(value);
+          return {
+            ...state,
+            chosenBookmarkListName: new Set(state.chosenBookmarkListName),
+          };
         }),
-      removeChosenBookmarkListName: (name) =>
+      removeChosenBookmarkListName: (value: string) =>
         set((state) => {
-          const next = new Set(state.chosenBookmarkListName);
-          next.delete(name);
-          return { chosenBookmarkListName: next };
+          state.chosenBookmarkListName.delete(value);
+          return {
+            ...state,
+            chosenBookmarkListName: new Set(state.chosenBookmarkListName),
+          };
         }),
-      clearChosenBookmarkList: () => set({ chosenBookmarkListName: new Set() }),
-      setNewBookmarkListName: (value) => set({ newBookmarkListName: value }),
-      setMutate: (mutate) => set({ mutate }),
+      setMutate: (mutate: MutateFunction | null) =>
+        set((state) => ({
+          ...state,
+          mutate,
+        })),
+      setNewBookmarkListName: (value: string) =>
+        set((state) => ({
+          ...state,
+          newBookmarkListName: value,
+        })),
+      setNewBookmarkListNameInput: (value: string) =>
+        set((state) => ({
+          ...state,
+          newBookmarkListNameInput: value,
+        })),
+      setIsInputError: (value: boolean) =>
+        set((state) => ({
+          ...state,
+          isInputError: value,
+        })),
+      setIsAddNewListDialogOpen: (value: boolean) =>
+        set((state) => ({
+          ...state,
+          isAddNewListDialogOpen: value,
+        })),
     },
   }));
 };

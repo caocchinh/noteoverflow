@@ -3,16 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { memo, useCallback, useRef, useState } from "react";
-import {
-  ExtendedIntersectionObserverInit,
-  SelectedBookmark,
-  SelectedQuestion,
-} from "../constants/types";
+import { Bookmark, Loader2 } from "lucide-react";
+import { memo, useState } from "react";
+import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 
 const QuestionPreview = memo(
   ({
@@ -41,12 +38,10 @@ const QuestionPreview = memo(
     userFinishedQuestions: Set<string>;
     showFinishedQuestionTint: boolean;
   }) => {
-    const observerRef = useRef<IntersectionObserver | null>(null);
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [isInView, setIsInView] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
     const isMobileDevice = useIsMobile();
 
@@ -55,40 +50,6 @@ const QuestionPreview = memo(
         mutationKey: mutationKey,
       }) > 0;
 
-    const setObserverRef = useCallback(
-      (node: HTMLDivElement | null) => {
-        if (typeof window === "undefined") {
-          return;
-        }
-        if (observerRef.current) {
-          observerRef.current.disconnect();
-        }
-        if (!node) {
-          return;
-        }
-        observerRef.current = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (isMobileDevice) {
-                setIsInView(entry.isIntersecting);
-              } else {
-                if (isHovering) {
-                  setIsInView(entry.isIntersecting);
-                }
-              }
-            });
-          },
-          {
-            rootMargin: `${window.innerHeight}px`,
-            scrollMargin: `${window.innerHeight}px`,
-            threshold: 1,
-          } as ExtendedIntersectionObserverInit
-        );
-        observerRef.current.observe(node);
-      },
-      [isHovering, isMobileDevice]
-    );
-
     return (
       <div
         className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-none border-black/50  relative overflow-hidden min-h-[110px]"
@@ -96,10 +57,11 @@ const QuestionPreview = memo(
           setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
         }
         onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        onTouchStart={() => setIsHovering(true)}
-        onTouchEnd={() => setIsHovering(false)}
-        ref={setObserverRef}
+        onMouseLeave={() => {
+          if (!isPopoverOpen) {
+            setIsHovering(false);
+          }
+        }}
       >
         <div
           className={cn(
@@ -121,8 +83,9 @@ const QuestionPreview = memo(
             <p className="text-red-500 text-sm">Image failed to load</p>
           </div>
         )}
-        {isInView && (
-          <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden">
+
+        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden">
+          {isHovering && (
             <div className="flex flex-wrap gap-2 items-center justify-center content-start">
               {question?.questionTopics?.map((topic) => (
                 <Badge
@@ -142,39 +105,31 @@ const QuestionPreview = memo(
                 {question?.season}
               </Badge>
             </div>
+          )}
+        </div>
 
-            {isInView && (
-              <BookmarkButton
-                triggerButtonClassName="absolute bottom-1 right-1 h-7 w-7 md:flex hidden cursor-pointer"
-                isBookmarkDisabled={isUserSessionPending}
-                bookmarks={bookmarks}
-                isBookmarkError={isBookmarkError}
-                isPopoverOpen={isPopoverOpen}
-                setIsPopoverOpen={setIsPopoverOpen}
-                questionId={question.id}
-                isBookmarksFetching={
-                  isBookmarksFetching || isUserSessionPending
-                }
-                isValidSession={isValidSession}
-              />
-            )}
-          </div>
-        )}
-        {isInView && (
-          <BookmarkButton
-            triggerButtonClassName={cn(
-              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
-              isPopoverOpen && !isMutatingThisQuestion && "md:flex hidden"
-            )}
-            bookmarks={bookmarks}
-            isBookmarkError={isBookmarkError}
-            questionId={question.id}
-            isValidSession={isValidSession}
-            isBookmarkDisabled={isUserSessionPending}
-            isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
-          />
-        )}
-        {isMutatingThisQuestion && !isPopoverOpen && (
+        <BookmarkButton
+          triggerButtonClassName={cn(
+            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+            isHovering && !isMobileDevice && "md:flex hidden"
+          )}
+          popOverTriggerClassName={cn(
+            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+            isHovering && !isMobileDevice && "md:flex hidden"
+          )}
+          badgeClassName="hidden"
+          bookmarks={bookmarks}
+          isBookmarkError={isBookmarkError}
+          questionId={question.id}
+          setIsPopoverOpen={setIsPopoverOpen}
+          isPopoverOpen={isPopoverOpen}
+          setIsHovering={setIsHovering}
+          isValidSession={isValidSession}
+          isBookmarkDisabled={isUserSessionPending}
+          isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+          isInView={isHovering}
+        />
+        {isMutatingThisQuestion && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
             onClick={(e) => {
@@ -190,6 +145,39 @@ const QuestionPreview = memo(
             Saving
             <Loader2 className="animate-spin" />
           </Badge>
+        )}
+        {isMobileDevice && !isMutatingThisQuestion && (
+          <Button
+            className={cn(
+              "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+              "rounded-[3px]",
+              (() => {
+                for (const bookmark of bookmarks) {
+                  if (
+                    bookmark.userBookmarks.some(
+                      (b) => b.questionId === question.id
+                    )
+                  ) {
+                    return true;
+                  }
+                }
+                return false;
+              })() && "!bg-logo-main !text-white",
+              (isUserSessionPending || isBookmarksFetching) && "opacity-50"
+            )}
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPopoverOpen(true);
+            }}
+            disabled={isUserSessionPending || isBookmarksFetching}
+          >
+            {isBookmarksFetching ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Bookmark size={10} />
+            )}
+          </Button>
         )}
 
         <img
