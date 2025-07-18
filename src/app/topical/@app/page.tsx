@@ -6,6 +6,8 @@ import {
   ArrowUpFromLine,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -74,6 +76,7 @@ import CacheSetting from "@/features/topical/components/CacheSetting";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import { Separator } from "@/components/ui/separator";
+import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -1164,58 +1167,121 @@ const TopicalPage = () => {
                   To inspect questions, run a search first.
                 </TooltipContent>
               </Tooltip>
-              <Separator orientation="vertical" />
               {layoutStyle === "pagination" && !isQuestionViewDisabled && (
-                <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer !p-[8px] rounded-[2px]"
-                    title="Previous"
-                    disabled={currentChunkIndex === 0}
-                    onClick={() => {
-                      if (currentChunkIndex === 0) return;
-                      setCurrentChunkIndex(currentChunkIndex - 1);
-                      setDisplayedData(
-                        fullPartitionedData![currentChunkIndex - 1]
-                      );
-                      if (scrollUpWhenPageChange) {
-                        scrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
+                <>
+                  <Separator orientation="vertical" />
+                  <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer !p-[8px] rounded-[2px]"
+                      title="First page"
+                      disabled={currentChunkIndex === 0}
+                      onClick={() => {
+                        if (currentChunkIndex === 0) return;
+                        setCurrentChunkIndex(0);
+                        setDisplayedData(fullPartitionedData![0]);
+                        if (scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                    >
+                      <ChevronsLeft />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer !p-[8px] rounded-[2px]"
+                      title="Previous page"
+                      disabled={currentChunkIndex === 0}
+                      onClick={() => {
+                        if (currentChunkIndex === 0) return;
+                        setCurrentChunkIndex(currentChunkIndex - 1);
+                        setDisplayedData(
+                          fullPartitionedData![currentChunkIndex - 1]
+                        );
+                        if (scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                    >
+                      <ChevronLeft />
+                    </Button>
+                    <JumpToTabButton
+                      className="mx-4"
+                      tab={currentChunkIndex}
+                      totalTabs={fullPartitionedData!.length}
+                      onTabChangeCallback={({ tab }) => {
+                        setCurrentChunkIndex(tab);
+                        setDisplayedData(fullPartitionedData![tab]);
+                        if (scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer !p-[8px] rounded-[2px]"
+                      title="Next page"
+                      disabled={
+                        currentChunkIndex === fullPartitionedData!.length - 1
                       }
-                    }}
-                  >
-                    <ChevronLeft />
-                  </Button>
-                  <p className="text-sm">
-                    {currentChunkIndex + 1} / {fullPartitionedData!.length}
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer !p-[8px] rounded-[2px]"
-                    title="Next"
-                    disabled={
-                      currentChunkIndex === fullPartitionedData!.length - 1
-                    }
-                    onClick={() => {
-                      if (currentChunkIndex === fullPartitionedData!.length - 1)
-                        return;
-                      setCurrentChunkIndex(currentChunkIndex + 1);
-                      setDisplayedData(
-                        fullPartitionedData![currentChunkIndex + 1]
-                      );
-                      if (scrollUpWhenPageChange) {
-                        scrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
+                      onClick={() => {
+                        if (
+                          currentChunkIndex ===
+                          fullPartitionedData!.length - 1
+                        )
+                          return;
+                        setCurrentChunkIndex(currentChunkIndex + 1);
+                        setDisplayedData(
+                          fullPartitionedData![currentChunkIndex + 1]
+                        );
+                        if (scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                    >
+                      <ChevronRight />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer !p-[8px] rounded-[2px]"
+                      title="Last page"
+                      disabled={
+                        currentChunkIndex === fullPartitionedData!.length - 1
                       }
-                    }}
-                  >
-                    <ChevronRight />
-                  </Button>
-                </div>
+                      onClick={() => {
+                        if (
+                          currentChunkIndex ===
+                          fullPartitionedData!.length - 1
+                        )
+                          return;
+                        setCurrentChunkIndex(fullPartitionedData!.length - 1);
+                        setDisplayedData(
+                          fullPartitionedData![fullPartitionedData!.length - 1]
+                        );
+                        if (scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                    >
+                      <ChevronsRight />
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
 
