@@ -41,18 +41,27 @@ export default function LayoutSetting({
   const isMounted = useRef(false);
 
   useEffect(() => {
-    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-    if (savedState) {
-      const parsedState: FiltersCache = JSON.parse(savedState);
-      setNumberOfColumns(
-        parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-      );
-      setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-      setNumberOfQuestionsPerPage(
-        parsedState.numberOfQuestionsPerPage ??
-          DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-      );
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (savedState) {
+        const parsedState: FiltersCache = JSON.parse(savedState);
+        setNumberOfColumns(
+          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
+        );
+        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+        setNumberOfQuestionsPerPage(
+          parsedState.numberOfQuestionsPerPage ??
+            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+        );
+      }
+    } catch (error) {
+      // Use default values if localStorage is not available
+      setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
+      setLayoutStyle(DEFAULT_LAYOUT_STYLE);
+      setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
+      console.error("Failed to access localStorage:", error);
     }
+
     setTimeout(() => {
       isMounted.current = true;
     }, 0);
@@ -62,19 +71,55 @@ export default function LayoutSetting({
     if (!isMounted.current) {
       return;
     }
-    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
 
-    stateToSave = {
-      ...stateToSave,
-      numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
-      layoutStyle: layoutStyle ?? DEFAULT_LAYOUT_STYLE,
-      numberOfQuestionsPerPage:
-        numberOfQuestionsPerPage ?? DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-    };
-    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    try {
+      let stateToSave: FiltersCache;
+
+      try {
+        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+        stateToSave = existingStateJSON
+          ? JSON.parse(existingStateJSON)
+          : {
+              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+              layoutStyle: DEFAULT_LAYOUT_STYLE,
+              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+              isSessionCacheEnabled: true,
+              isPersistantCacheEnabled: true,
+              showFinishedQuestionTint: true,
+              showScrollToTopButton: true,
+              lastSessionCurriculum: "",
+              lastSessionSubject: "",
+              filters: {},
+            };
+      } catch {
+        // If reading fails, start with empty state
+        stateToSave = {
+          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+          layoutStyle: DEFAULT_LAYOUT_STYLE,
+          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+          isSessionCacheEnabled: true,
+          isPersistantCacheEnabled: true,
+          showFinishedQuestionTint: true,
+          showScrollToTopButton: true,
+          lastSessionCurriculum: "",
+          lastSessionSubject: "",
+          filters: {},
+        };
+      }
+
+      stateToSave = {
+        ...stateToSave,
+        numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
+        layoutStyle: layoutStyle ?? DEFAULT_LAYOUT_STYLE,
+        numberOfQuestionsPerPage:
+          numberOfQuestionsPerPage ?? DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+      };
+
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      // Silently handle localStorage errors - settings won't persist
+      console.error("Failed to save settings to localStorage:", error);
+    }
   }, [numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
 
   return (

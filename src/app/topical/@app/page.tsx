@@ -153,39 +153,54 @@ const TopicalPage = () => {
   ] = useState(false);
 
   const resetEverything = () => {
-    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
+    try {
+      const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+      let stateToSave: FiltersCache = existingStateJSON
+        ? JSON.parse(existingStateJSON)
+        : {
+            numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+            layoutStyle: DEFAULT_LAYOUT_STYLE,
+            numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+            isSessionCacheEnabled: true,
+            isPersistantCacheEnabled: true,
+            showFinishedQuestionTint: true,
+            showScrollToTopButton: true,
+            lastSessionCurriculum: "",
+            lastSessionSubject: "",
+            filters: {},
+          };
 
-    stateToSave = {
-      ...stateToSave,
-      isSessionCacheEnabled,
-      isPersistantCacheEnabled,
-      showScrollToTopButton,
-      showFinishedQuestionTint,
-      layoutStyle,
-      numberOfQuestionsPerPage,
-    };
-
-    stateToSave.lastSessionCurriculum = "";
-    stateToSave.lastSessionCurriculum = "";
-    if (selectedCurriculum && selectedSubject) {
-      stateToSave.filters = {
-        ...stateToSave.filters,
-        [selectedCurriculum]: {
-          ...stateToSave.filters?.[selectedCurriculum],
-          [selectedSubject]: {
-            topic: [],
-            paperType: [],
-            year: [],
-            season: [],
-          },
-        },
+      stateToSave = {
+        ...stateToSave,
+        isSessionCacheEnabled,
+        isPersistantCacheEnabled,
+        showScrollToTopButton,
+        showFinishedQuestionTint,
+        layoutStyle,
+        numberOfQuestionsPerPage,
       };
-    }
 
-    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+      stateToSave.lastSessionCurriculum = "";
+      stateToSave.lastSessionCurriculum = "";
+      if (selectedCurriculum && selectedSubject) {
+        stateToSave.filters = {
+          ...stateToSave.filters,
+          [selectedCurriculum]: {
+            ...stateToSave.filters?.[selectedCurriculum],
+            [selectedSubject]: {
+              topic: [],
+              paperType: [],
+              year: [],
+              season: [],
+            },
+          },
+        };
+      }
+
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+    }
 
     setSelectedCurriculum("");
     setSelectedSubject("");
@@ -312,77 +327,89 @@ const TopicalPage = () => {
   }, [selectedSeason]);
 
   useEffect(() => {
-    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-    if (savedState) {
-      try {
-        const parsedState: FiltersCache = JSON.parse(savedState);
-        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
-        setIsPersistantCacheEnabled(
-          parsedState.isPersistantCacheEnabled ?? true
-        );
-        setNumberOfColumns(
-          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-        );
-        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-        setNumberOfQuestionsPerPage(
-          parsedState.numberOfQuestionsPerPage ??
-            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-        );
-        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
-        setShowFinishedQuestionTint(
-          parsedState.showFinishedQuestionTint ?? true
-        );
-        if (
-          parsedState.isSessionCacheEnabled &&
-          parsedState.lastSessionCurriculum &&
-          validateCurriculum(parsedState.lastSessionCurriculum)
-        ) {
-          setSelectedCurriculum(
-            parsedState.lastSessionCurriculum as ValidCurriculum
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (savedState) {
+        try {
+          const parsedState: FiltersCache = JSON.parse(savedState);
+          setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
+          setIsPersistantCacheEnabled(
+            parsedState.isPersistantCacheEnabled ?? true
           );
-          const isSubjectValid = validateSubject(
-            parsedState.lastSessionCurriculum,
-            parsedState.lastSessionSubject
+          setNumberOfColumns(
+            parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
           );
-          if (parsedState.lastSessionSubject && isSubjectValid) {
-            setSelectedSubject(parsedState.lastSessionSubject);
-          }
+          setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+          setNumberOfQuestionsPerPage(
+            parsedState.numberOfQuestionsPerPage ??
+              DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+          );
+          setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
+          setShowFinishedQuestionTint(
+            parsedState.showFinishedQuestionTint ?? true
+          );
           if (
-            isSubjectValid &&
-            validateFilterData({
-              curriculumn: parsedState.lastSessionCurriculum,
-              data: parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ],
-              subject: parsedState.lastSessionSubject,
-            })
+            parsedState.isSessionCacheEnabled &&
+            parsedState.lastSessionCurriculum &&
+            validateCurriculum(parsedState.lastSessionCurriculum)
           ) {
-            setSelectedSubject(parsedState.lastSessionSubject);
-            setSelectedTopic(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].topic
+            setSelectedCurriculum(
+              parsedState.lastSessionCurriculum as ValidCurriculum
             );
-            setSelectedPaperType(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].paperType
+            const isSubjectValid = validateSubject(
+              parsedState.lastSessionCurriculum,
+              parsedState.lastSessionSubject
             );
-            setSelectedYear(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].year
-            );
-            setSelectedSeason(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].season
-            );
+            if (parsedState.lastSessionSubject && isSubjectValid) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                curriculumn: parsedState.lastSessionCurriculum,
+                data: parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ],
+                subject: parsedState.lastSessionSubject,
+              })
+            ) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+              setSelectedTopic(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].topic
+              );
+              setSelectedPaperType(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].paperType
+              );
+              setSelectedYear(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].year
+              );
+              setSelectedSeason(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].season
+              );
+            }
           }
+        } catch {
+          localStorage.removeItem(FILTERS_CACHE_KEY);
         }
-      } catch {
-        localStorage.removeItem(FILTERS_CACHE_KEY);
       }
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+      // Set default values
+      setIsSessionCacheEnabled(true);
+      setIsPersistantCacheEnabled(true);
+      setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
+      setLayoutStyle(DEFAULT_LAYOUT_STYLE);
+      setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
+      setShowScrollToTopButton(true);
+      setShowFinishedQuestionTint(true);
     }
 
     setTimeout(() => {
@@ -395,57 +422,66 @@ const TopicalPage = () => {
     if (!mountedRef.current) {
       return;
     }
-    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-    if (savedState) {
-      try {
-        const parsedState: FiltersCache = JSON.parse(savedState);
-        if (parsedState.isPersistantCacheEnabled) {
-          const isSubjectValid = validateSubject(
-            selectedCurriculum,
-            selectedSubject
-          );
-          if (selectedSubject && isSubjectValid) {
-            setSelectedSubject(selectedSubject);
-          }
-          if (
-            isSubjectValid &&
-            validateFilterData({
-              data: parsedState.filters[selectedCurriculum][selectedSubject],
-              curriculumn: selectedCurriculum,
-              subject: selectedSubject,
-            })
-          ) {
-            setSelectedTopic(
-              parsedState.filters[selectedCurriculum][selectedSubject].topic
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (savedState) {
+        try {
+          const parsedState: FiltersCache = JSON.parse(savedState);
+          if (parsedState.isPersistantCacheEnabled) {
+            const isSubjectValid = validateSubject(
+              selectedCurriculum,
+              selectedSubject
             );
-            setSelectedPaperType(
-              parsedState.filters[selectedCurriculum][selectedSubject].paperType
-            );
-            setSelectedYear(
-              parsedState.filters[selectedCurriculum][selectedSubject].year
-            );
-            setSelectedSeason(
-              parsedState.filters[selectedCurriculum][selectedSubject].season
-            );
+            if (selectedSubject && isSubjectValid) {
+              setSelectedSubject(selectedSubject);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                data: parsedState.filters[selectedCurriculum][selectedSubject],
+                curriculumn: selectedCurriculum,
+                subject: selectedSubject,
+              })
+            ) {
+              setSelectedTopic(
+                parsedState.filters[selectedCurriculum][selectedSubject].topic
+              );
+              setSelectedPaperType(
+                parsedState.filters[selectedCurriculum][selectedSubject]
+                  .paperType
+              );
+              setSelectedYear(
+                parsedState.filters[selectedCurriculum][selectedSubject].year
+              );
+              setSelectedSeason(
+                parsedState.filters[selectedCurriculum][selectedSubject].season
+              );
+            } else {
+              setSelectedTopic([]);
+              setSelectedYear([]);
+              setSelectedPaperType([]);
+              setSelectedSeason([]);
+            }
           } else {
             setSelectedTopic([]);
             setSelectedYear([]);
             setSelectedPaperType([]);
             setSelectedSeason([]);
           }
-        } else {
+        } catch {
           setSelectedTopic([]);
           setSelectedYear([]);
           setSelectedPaperType([]);
           setSelectedSeason([]);
         }
-      } catch {
+      } else {
         setSelectedTopic([]);
         setSelectedYear([]);
         setSelectedPaperType([]);
         setSelectedSeason([]);
       }
-    } else {
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
       setSelectedTopic([]);
       setSelectedYear([]);
       setSelectedPaperType([]);
@@ -471,42 +507,75 @@ const TopicalPage = () => {
     if (!mountedRef.current) {
       return;
     }
-    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
+    try {
+      let stateToSave: FiltersCache;
 
-    stateToSave = {
-      ...stateToSave,
-      isSessionCacheEnabled,
-      showScrollToTopButton,
-      isPersistantCacheEnabled,
-      showFinishedQuestionTint,
-      layoutStyle,
-      numberOfQuestionsPerPage,
-    };
+      try {
+        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+        stateToSave = existingStateJSON
+          ? JSON.parse(existingStateJSON)
+          : {
+              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+              layoutStyle: DEFAULT_LAYOUT_STYLE,
+              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+              isSessionCacheEnabled: true,
+              isPersistantCacheEnabled: true,
+              showFinishedQuestionTint: true,
+              showScrollToTopButton: true,
+              lastSessionCurriculum: "",
+              lastSessionSubject: "",
+              filters: {},
+            };
+      } catch {
+        // If reading fails, start with empty state
+        stateToSave = {
+          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+          layoutStyle: DEFAULT_LAYOUT_STYLE,
+          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+          isSessionCacheEnabled: true,
+          isPersistantCacheEnabled: true,
+          showFinishedQuestionTint: true,
+          showScrollToTopButton: true,
+          lastSessionCurriculum: "",
+          lastSessionSubject: "",
+          filters: {},
+        };
+      }
 
-    if (selectedCurriculum && selectedSubject) {
-      stateToSave.filters = {
-        ...stateToSave.filters,
-        [selectedCurriculum]: {
-          ...stateToSave.filters?.[selectedCurriculum],
-          [selectedSubject]: {
-            topic: selectedTopic,
-            paperType: selectedPaperType,
-            year: selectedYear,
-            season: selectedSeason,
-          },
-        },
+      stateToSave = {
+        ...stateToSave,
+        isSessionCacheEnabled,
+        showScrollToTopButton,
+        isPersistantCacheEnabled,
+        showFinishedQuestionTint,
+        layoutStyle,
+        numberOfQuestionsPerPage,
       };
+
+      if (selectedCurriculum && selectedSubject) {
+        stateToSave.filters = {
+          ...stateToSave.filters,
+          [selectedCurriculum]: {
+            ...stateToSave.filters?.[selectedCurriculum],
+            [selectedSubject]: {
+              topic: selectedTopic,
+              paperType: selectedPaperType,
+              year: selectedYear,
+              season: selectedSeason,
+            },
+          },
+        };
+      }
+      if (selectedCurriculum && isSessionCacheEnabled) {
+        stateToSave.lastSessionCurriculum = selectedCurriculum;
+      }
+      if (selectedSubject && isSessionCacheEnabled) {
+        stateToSave.lastSessionSubject = selectedSubject;
+      }
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to save settings to localStorage:", error);
     }
-    if (selectedCurriculum && isSessionCacheEnabled) {
-      stateToSave.lastSessionCurriculum = selectedCurriculum;
-    }
-    if (selectedSubject && isSessionCacheEnabled) {
-      stateToSave.lastSessionSubject = selectedSubject;
-    }
-    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
   }, [
     selectedCurriculum,
     selectedSubject,
