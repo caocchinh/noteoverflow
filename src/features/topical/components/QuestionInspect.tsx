@@ -807,6 +807,7 @@ const QuestionInspect = ({
                 <div className="flex items-center gap-2">
                   <Button
                     title="Jump to first tab"
+                    disabled={currentTab === 0}
                     onClick={() => {
                       setCurrentTab(0);
                       if (
@@ -831,6 +832,7 @@ const QuestionInspect = ({
                   </Button>
                   <Button
                     title="Jump to previous tab"
+                    disabled={currentTab === 0}
                     onClick={() => {
                       if (
                         currentTab > 0 &&
@@ -873,6 +875,9 @@ const QuestionInspect = ({
                 <div className="flex items-center gap-2">
                   <Button
                     title="Jump to next tab"
+                    disabled={
+                      currentTab === (partitionedTopicalData?.length ?? 1) - 1
+                    }
                     onClick={() => {
                       if (
                         currentTab <
@@ -902,6 +907,9 @@ const QuestionInspect = ({
                   </Button>
                   <Button
                     title="Jump to last tab"
+                    disabled={
+                      currentTab === (partitionedTopicalData?.length ?? 1) - 1
+                    }
                     onClick={() => {
                       setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
                       if (
@@ -1114,7 +1122,7 @@ const QuestionInspect = ({
                   viewportRef={questionScrollAreaRef}
                 >
                   <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <TopicDisplay question={currentQuestionData} />
+                    <QuestionInformation question={currentQuestionData} />
                   </div>
                   <InspectImages
                     imageSource={currentQuestionData?.questionImages ?? []}
@@ -1133,7 +1141,7 @@ const QuestionInspect = ({
                   viewportRef={answerScrollAreaRef}
                 >
                   <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <TopicDisplay question={currentQuestionData} />
+                    <QuestionInformation question={currentQuestionData} />
                   </div>
                   <InspectImages
                     imageSource={currentQuestionData?.answers ?? []}
@@ -1197,7 +1205,7 @@ const PastPaperLink = ({
   );
 };
 
-const TopicDisplay = ({
+const QuestionInformation = ({
   question,
 }: {
   question: SelectedQuestion | undefined;
@@ -1207,15 +1215,16 @@ const TopicDisplay = ({
   }
 
   return (
-    <>
-      <p>
-        Topic
-        {question.questionTopics?.length > 1 ? "s" : ""}:
-      </p>
+    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
       {question.questionTopics?.map((topic) => (
-        <Badge key={topic.topic}>{topic.topic}</Badge>
+        <Badge key={topic.topic} className="bg-logo-main text-white">
+          {topic.topic}
+        </Badge>
       ))}
-    </>
+      <Badge>{question.season}</Badge>
+      <Badge>{question.year}</Badge>
+      <Badge>Paper {question.paperType}</Badge>
+    </div>
   );
 };
 

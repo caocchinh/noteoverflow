@@ -745,7 +745,7 @@ const TopicalPage = () => {
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
       setCurrentChunkIndex(0);
-      overflowScrollHandler();
+
       scrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
@@ -765,6 +765,10 @@ const TopicalPage = () => {
       behavior: "instant",
     });
   }, [currentQuery]);
+
+  useEffect(() => {
+    overflowScrollHandler();
+  }, [overflowScrollHandler, fullPartitionedData]);
 
   const {
     data: userSession,
@@ -1210,7 +1214,7 @@ const TopicalPage = () => {
               viewportRef={ultilityHorizontalScrollBarRef}
             >
               <div
-                className="flex flex-row items-center justify-start gap-2 pl-4 w-max"
+                className="flex flex-row h-full items-center justify-start gap-2 pl-4 w-max"
                 ref={ultilityRef}
               >
                 <Button
@@ -1251,7 +1255,7 @@ const TopicalPage = () => {
                 </Tooltip>
                 {layoutStyle === "pagination" && !isQuestionViewDisabled && (
                   <>
-                    <Separator orientation="vertical" />
+                    <Separator orientation="vertical" className="!h-[30px]" />
                     <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
                       <Button
                         variant="outline"
