@@ -2,16 +2,26 @@
 import { Popover } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Blocks } from "lucide-react";
+import { Blocks, FileStack, Mouse } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
 import { FiltersCache, LayoutStyle } from "../constants/types";
 import { useEffect, useRef } from "react";
 import {
   DEFAULT_NUMBER_OF_COLUMNS,
+  DEFAULT_LAYOUT_STYLE,
   FILTERS_CACHE_KEY,
   MAX_NUMBER_OF_COLUMNS,
+  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
 } from "../constants/constants";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectItem,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function LayoutSetting({
   setNumberOfColumns,
@@ -37,11 +47,16 @@ export default function LayoutSetting({
       setNumberOfColumns(
         parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
       );
+      setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+      setNumberOfQuestionsPerPage(
+        parsedState.numberOfQuestionsPerPage ??
+          DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+      );
     }
     setTimeout(() => {
       isMounted.current = true;
     }, 0);
-  }, [setNumberOfColumns]);
+  }, [setLayoutStyle, setNumberOfColumns, setNumberOfQuestionsPerPage]);
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -55,9 +70,12 @@ export default function LayoutSetting({
     stateToSave = {
       ...stateToSave,
       numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
+      layoutStyle: layoutStyle ?? DEFAULT_LAYOUT_STYLE,
+      numberOfQuestionsPerPage:
+        numberOfQuestionsPerPage ?? DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
     };
     localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-  }, [numberOfColumns]);
+  }, [numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
 
   return (
     <Popover>
@@ -70,18 +88,76 @@ export default function LayoutSetting({
           Layout settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006] h-[190px] flex flex-col items-center justify-center gap-3">
-        <h4 className="text-sm font-medium text-center">
-          Number of maximum displayed columns
-        </h4>
-        <ElasticSlider
-          minValue={1}
-          startingValue={numberOfColumns}
-          maxValue={MAX_NUMBER_OF_COLUMNS}
-          isStepped
-          stepSize={1}
-          setValue={setNumberOfColumns}
-        />
+      <PopoverContent className="z-[100006]  flex flex-col items-center justify-center gap-3">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <h4 className="text-sm font-medium text-center">
+            Number of maximum displayed columns
+          </h4>
+          <ElasticSlider
+            minValue={1}
+            startingValue={numberOfColumns}
+            maxValue={MAX_NUMBER_OF_COLUMNS}
+            isStepped
+            stepSize={1}
+            setValue={setNumberOfColumns}
+          />
+        </div>
+        <Separator orientation="horizontal" />
+        <div className="flex flex-col items-center justify-center gap-3 w-full">
+          <h4 className="text-sm font-medium text-center">Layout style</h4>
+          <Select
+            value={layoutStyle}
+            onValueChange={(value) => setLayoutStyle(value as LayoutStyle)}
+          >
+            <SelectTrigger className="w-[90%] !h-max">
+              <SelectValue placeholder="Select a layout style" />
+            </SelectTrigger>
+            <SelectContent className="z-[9999999]">
+              <SelectItem value="pagination">
+                <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
+                  <FileStack className="w-4 h-4" />
+                  <div className="flex flex-col justify-center items-start">
+                    <p className="text-sm">Pagination</p>
+                    <p className="text-xs text-muted-foreground text-left whitespace-normal">
+                      Better performance on large results.
+                    </p>
+                  </div>
+                </div>
+              </SelectItem>
+              <SelectItem value="infinite">
+                <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
+                  <Mouse className="w-4 h-4" />
+                  <div className="flex flex-col justify-center items-start">
+                    <p className="text-sm wrap-anywhere">
+                      Infinite/Doom scroll
+                    </p>
+                    <p className="text-xs text-muted-foreground text-left whitespace-normal">
+                      More dopamine.
+                    </p>
+                  </div>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Separator orientation="horizontal" />
+          <div className="flex flex-col items-center justify-center gap-3 w-full">
+            <h4 className="text-sm font-medium text-center">
+              Number of questions per page
+            </h4>
+            <p className="text-xs text-muted-foreground text-center">
+              On pagination layout only , this is the number of questions
+              displayed per page.
+            </p>
+            <ElasticSlider
+              minValue={1}
+              startingValue={numberOfQuestionsPerPage}
+              maxValue={50}
+              isStepped
+              stepSize={1}
+              setValue={setNumberOfQuestionsPerPage}
+            />
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
