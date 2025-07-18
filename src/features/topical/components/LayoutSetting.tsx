@@ -13,6 +13,7 @@ import {
   FILTERS_CACHE_KEY,
   MAX_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE,
 } from "../constants/constants";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -201,7 +202,7 @@ export default function LayoutSetting({
             <ElasticSlider
               minValue={1}
               startingValue={numberOfQuestionsPerPage}
-              maxValue={50}
+              maxValue={MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE}
               isStepped
               stepSize={1}
               setValue={setNumberOfQuestionsPerPage}

@@ -215,7 +215,11 @@ const TopicalPage = () => {
     setIsResetConfirmationOpen(false);
   };
 
-  const isValidInputs = (visualFeedback = false) => {
+  const isValidInputs = ({
+    scrollOnError = true,
+  }: {
+    scrollOnError?: boolean;
+  }) => {
     const fieldsToValidate: {
       name: keyof InvalidInputs;
       value: string | string[];
@@ -278,7 +282,7 @@ const TopicalPage = () => {
         isFormValid = false;
       }
     }
-    if (visualFeedback) {
+    if (scrollOnError) {
       setInvalidInputs(newInvalidInputsState);
 
       firstInvalidRef?.current?.scrollIntoView({
@@ -592,7 +596,7 @@ const TopicalPage = () => {
   ]);
 
   const search = async () => {
-    if (isValidInputs(false)) {
+    if (isValidInputs({ scrollOnError: false })) {
       const params = new URLSearchParams();
       params.append("curriculumId", selectedCurriculum);
       params.append("subjectId", selectedSubject);

@@ -30,7 +30,7 @@ export default function ButtonUltility({
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
   isMounted: boolean;
-  isValidInput: (visualFeedback?: boolean) => boolean;
+  isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
   setIsSearchEnabled: (value: boolean) => void;
   setCurrentQuery: (
     value: {
@@ -52,7 +52,7 @@ export default function ButtonUltility({
         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
         disabled={!isMounted}
         onClick={() => {
-          if (isValidInput(true)) {
+          if (isValidInput({ scrollOnError: true })) {
             if (isMobileDevice) {
               setIsSidebarOpen(false);
             }
