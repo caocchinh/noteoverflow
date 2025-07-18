@@ -13,12 +13,14 @@ import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, X } from "lucide-react";
 import { FilterData } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { computeWeightedScoreByArrayIndex } from "../lib/utils";
 
 export default function ButtonUltility({
   isResetConfirmationOpen,
   setIsResetConfirmationOpen,
   resetEverything,
   setIsSidebarOpen,
+  setSortParameters,
   isMounted,
   isValidInput,
   setIsSearchEnabled,
@@ -29,6 +31,14 @@ export default function ButtonUltility({
   setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
+  setSortParameters: (
+    value: {
+      topic: Record<string, number>;
+      paperType: Record<string, number>;
+      year: Record<string, number>;
+      season: Record<string, number>;
+    } | null
+  ) => void;
   isMounted: boolean;
   isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
   setIsSearchEnabled: (value: boolean) => void;
@@ -60,6 +70,24 @@ export default function ButtonUltility({
             setCurrentQuery({
               ...query,
             });
+            setSortParameters({
+              paperType: computeWeightedScoreByArrayIndex({
+                data: query.paperType,
+                weightMultiplier: 1,
+              }),
+              topic: computeWeightedScoreByArrayIndex({
+                data: query.topic,
+                weightMultiplier: 1,
+              }),
+              year: computeWeightedScoreByArrayIndex({
+                data: query.year,
+                weightMultiplier: 3,
+              }),
+              season: computeWeightedScoreByArrayIndex({
+                data: query.season,
+                weightMultiplier: 1,
+              }),
+            });
           }
         }}
       >
@@ -80,7 +108,11 @@ export default function ButtonUltility({
             <BrushCleaning />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md z-[100006]">
+        <DialogContent
+          className="max-w-md z-[100007]"
+          overlayClassName="!z-[100006]"
+          showCloseButton={false}
+        >
           <DialogHeader>
             <DialogTitle>Clear all</DialogTitle>
             <DialogDescription>

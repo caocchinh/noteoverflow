@@ -48,26 +48,7 @@ const DockWrapper = () => {
           backgroundColor:
             pathname === TOPICAL_QUESTION_APP_ROUTE ? "!bg-logo-main" : "",
         },
-        {
-          icon: (
-            <Link href={TOPICAL_QUESTION_HISTORY_ROUTE} ref={dummyLinkRef2}>
-              <FileClock
-                className={cn(
-                  "text-white dark:text-black",
-                  pathname === TOPICAL_QUESTION_HISTORY_ROUTE && "!text-white"
-                )}
-                size={18}
-              />
-            </Link>
-          ),
-          label: "Recently viewed",
-          onClick: () => {
-            dummyLinkRef2.current?.click();
-            return;
-          },
-          backgroundColor:
-            pathname === TOPICAL_QUESTION_HISTORY_ROUTE ? "!bg-logo-main" : "",
-        },
+
         {
           icon: (
             <Link href={TOPICAL_QUESTION_BOOKMARK_ROUTE} ref={dummyLinkRef3}>
@@ -113,6 +94,26 @@ const DockWrapper = () => {
             pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE
               ? "!bg-logo-main"
               : "",
+        },
+        {
+          icon: (
+            <Link href={TOPICAL_QUESTION_HISTORY_ROUTE} ref={dummyLinkRef2}>
+              <FileClock
+                className={cn(
+                  "text-white dark:text-black",
+                  pathname === TOPICAL_QUESTION_HISTORY_ROUTE && "!text-white"
+                )}
+                size={18}
+              />
+            </Link>
+          ),
+          label: "Recently viewed",
+          onClick: () => {
+            dummyLinkRef2.current?.click();
+            return;
+          },
+          backgroundColor:
+            pathname === TOPICAL_QUESTION_HISTORY_ROUTE ? "!bg-logo-main" : "",
         },
       ]}
       magnification={50}

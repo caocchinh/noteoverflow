@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, X } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { AVATARS } from '@/constants/constants';
-import type { authClient } from '@/lib/auth/auth-client';
-import { cn } from '@/lib/utils';
-import { updateUserAvatarAction } from '@/server/actions';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
+import { AVATARS } from "@/constants/constants";
+import type { authClient } from "@/lib/auth/auth-client";
+import { cn } from "@/lib/utils";
+import { updateUserAvatarAction } from "@/server/actions";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -17,9 +17,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../ui/alert-dialog';
-import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 
 // Infer the return type from authClient.getSession()
 type SessionData = Awaited<ReturnType<typeof authClient.getSession>>;
@@ -37,27 +37,27 @@ const AvatarChange = ({
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatar);
   const [selectedAvatarColor, setSelectedAvatarColor] = useState<string>(
-    AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ''
+    AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ""
   );
   const queryClient = useQueryClient();
 
   const resetDefault = () => {
     setSelectedAvatar(currentAvatar);
     setSelectedAvatarColor(
-      AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ''
+      AVATARS.find((avatar) => avatar.src === currentAvatar)?.color || ""
     );
   };
 
   const updateAvatarMutation = useMutation({
     mutationFn: () => updateUserAvatarAction(userId, selectedAvatar),
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['user'] });
+      await queryClient.cancelQueries({ queryKey: ["user"] });
       // Get the previous data so we can roll back to it if the mutation fails
-      const previousData = queryClient.getQueryData<SessionData>(['user']);
+      const previousData = queryClient.getQueryData<SessionData>(["user"]);
 
       // Optimistically update to the new value
       queryClient.setQueryData<SessionData>(
-        ['user'],
+        ["user"],
         (oldData: SessionData | undefined) => {
           if (!oldData) {
             return oldData;
@@ -78,16 +78,16 @@ const AvatarChange = ({
     onError: (error, _variables, context: SessionData) => {
       // If the mutation fails, roll back to the previous value
       if (context?.previousData) {
-        queryClient.setQueryData(['user'], context.previousData);
+        queryClient.setQueryData(["user"], context.previousData);
       }
       toast.error(
         `Failed to update avatar: ${
-          error instanceof Error ? error.message : 'Unknown error'
+          error instanceof Error ? error.message : "Unknown error"
         }`
       );
     },
     onSuccess: () => {
-      toast.success('Avatar updated successfully');
+      toast.success("Avatar updated successfully");
       setIsDialogOpen(false);
     },
   });
@@ -95,7 +95,7 @@ const AvatarChange = ({
   const handleSave = () => {
     if (selectedAvatar === currentAvatar) {
       setIsDialogOpen(false);
-      toast.info('You are already using this avatar');
+      toast.info("You are already using this avatar");
       return;
     }
     updateAvatarMutation.mutate();
@@ -103,7 +103,7 @@ const AvatarChange = ({
 
   return (
     <AlertDialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-      <AlertDialogContent className="sm:!max-w-[600px] max-w-[90vw] border-foreground/50 bg-white dark:bg-[#222222]">
+      <AlertDialogContent className="sm:!max-w-[600px] max-w-[90vw] !max-h-[90vh] overflow-y-auto border-foreground/50 bg-white dark:bg-[#222222]">
         <Button
           className="!bg-transparent absolute top-0 right-0 cursor-pointer p-0"
           disabled={updateAvatarMutation.isPending}
@@ -138,10 +138,10 @@ const AvatarChange = ({
             {AVATARS.map((avatar) => (
               <Button
                 className={cn(
-                  'flex h-max cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border-2 border-foreground bg-background p-0 text-foreground hover:bg-background',
-                  'dark:bg-[#222222] dark:text-foreground ',
-                  selectedAvatar === avatar.src && 'border-2 border-red-500',
-                  selectedAvatar !== avatar.src && 'hover:border-amber-500'
+                  "flex h-max cursor-pointer flex-col items-center justify-center overflow-hidden rounded-md border-2 border-foreground bg-background p-0 text-foreground hover:bg-background",
+                  "dark:bg-[#222222] dark:text-foreground ",
+                  selectedAvatar === avatar.src && "border-2 border-red-500",
+                  selectedAvatar !== avatar.src && "hover:border-amber-500"
                 )}
                 key={avatar.src}
                 onClick={() => {
@@ -174,7 +174,7 @@ const AvatarChange = ({
             disabled={updateAvatarMutation.isPending}
             onClick={handleSave}
           >
-            {updateAvatarMutation.isPending ? 'Saving' : 'Save'}
+            {updateAvatarMutation.isPending ? "Saving" : "Save"}
             {updateAvatarMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}

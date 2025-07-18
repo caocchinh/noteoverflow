@@ -78,6 +78,7 @@ import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
+import Sort from "@/features/topical/components/Sort";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -723,6 +724,12 @@ const TopicalPage = () => {
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
+  const [sortParameters, setSortParameters] = useState<{
+    topic: Record<string, number>;
+    paperType: Record<string, number>;
+    year: Record<string, number>;
+    season: Record<string, number>;
+  } | null>(null);
 
   useEffect(() => {
     if (topicalData?.data) {
@@ -733,7 +740,38 @@ const TopicalPage = () => {
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
 
-      topicalData.data.forEach((item: SelectedQuestion) => {
+      const sortedData = topicalData.data.sort((a, b) => {
+        const aPaperTypeScore = sortParameters?.paperType[a.paperType] ?? 0;
+        const bPaperTypeScore = sortParameters?.paperType[b.paperType] ?? 0;
+        const aTopicScore = a.questionTopics.reduce((acc, curr) => {
+          if (sortParameters?.topic && curr.topic) {
+            return acc + sortParameters.topic[curr.topic];
+          }
+          return acc;
+        }, 0);
+        const bTopicScore = b.questionTopics.reduce((acc, curr) => {
+          if (sortParameters?.topic && curr.topic) {
+            return acc + sortParameters.topic[curr.topic];
+          }
+          return acc;
+        }, 0);
+        const aYearScore = sortParameters?.year[a.year] ?? 0;
+        const bYearScore = sortParameters?.year[b.year] ?? 0;
+        const aSeasonScore = sortParameters?.season[a.season] ?? 0;
+        const bSeasonScore = sortParameters?.season[b.season] ?? 0;
+        return (
+          bPaperTypeScore -
+          aPaperTypeScore +
+          bTopicScore -
+          aTopicScore +
+          bYearScore -
+          aYearScore +
+          bSeasonScore -
+          aSeasonScore
+        );
+      });
+
+      sortedData.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === chunkSize) {
           chunkedData.push(currentChunks);
           currentChunks = [];
@@ -757,6 +795,7 @@ const TopicalPage = () => {
     layoutStyle,
     numberOfQuestionsPerPage,
     overflowScrollHandler,
+    sortParameters,
   ]);
 
   useEffect(() => {
@@ -1106,13 +1145,16 @@ const TopicalPage = () => {
                       isMounted={isMounted}
                       isResetConfirmationOpen={isResetConfirmationOpen}
                       isValidInput={isValidInputs}
+                      setSortParameters={setSortParameters}
                       query={{
                         curriculumId: selectedCurriculum,
                         subjectId: selectedSubject,
-                        topic: selectedTopic,
-                        paperType: selectedPaperType,
-                        year: selectedYear,
-                        season: selectedSeason,
+                        topic: selectedTopic.toSorted(),
+                        paperType: selectedPaperType.toSorted(),
+                        year: selectedYear.toSorted(
+                          (a, b) => Number(b) - Number(a)
+                        ),
+                        season: selectedSeason.toSorted(),
                       }}
                       resetEverything={resetEverything}
                       setCurrentQuery={setCurrentQuery}
@@ -1370,6 +1412,16 @@ const TopicalPage = () => {
                         <ChevronsRight />
                       </Button>
                     </div>
+                  </>
+                )}
+                {!isQuestionViewDisabled && (
+                  <>
+                    <Separator orientation="vertical" className="!h-[30px]" />
+                    <Sort
+                      sortParameters={sortParameters}
+                      setSortParameters={setSortParameters}
+                      currentQuery={currentQuery}
+                    />
                   </>
                 )}
               </div>
