@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Fragment,
+  RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -341,7 +342,11 @@ const QuestionInspect = ({
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const handleNextQuestion = () => {
-    if (partitionedTopicalData) {
+    if (
+      partitionedTopicalData &&
+      currentTabThatContainsQuestion > -1 &&
+      partitionedTopicalData[currentTabThatContainsQuestion]
+    ) {
       if (searchInput === "") {
         if (
           currentQuestionIndex <
@@ -474,7 +479,11 @@ const QuestionInspect = ({
     }
   };
   const isHandleNextQuestionButtonDisabled = useMemo(() => {
-    if (!partitionedTopicalData) {
+    if (
+      !partitionedTopicalData ||
+      currentTabThatContainsQuestion < 0 ||
+      !partitionedTopicalData[currentTabThatContainsQuestion]
+    ) {
       return true;
     }
     if (searchInput === "") {
@@ -504,7 +513,11 @@ const QuestionInspect = ({
     currentQuestionId,
   ]);
   const isHandlePreviousQuestionButtonDisabled = useMemo(() => {
-    if (!partitionedTopicalData) {
+    if (
+      !partitionedTopicalData ||
+      currentTabThatContainsQuestion < 0 ||
+      !partitionedTopicalData[currentTabThatContainsQuestion]
+    ) {
       return true;
     }
     if (searchInput === "") {
@@ -897,6 +910,7 @@ const QuestionInspect = ({
                 <JumpToTabButton
                   tab={currentTab}
                   setCurrentTab={setCurrentTab}
+                  scrollAreaRef={listScrollAreaRef}
                   totalTabs={partitionedTopicalData?.length ?? 0}
                 />
                 <div className="flex items-center gap-2">
@@ -1292,10 +1306,12 @@ const JumpToTabButton = ({
   tab,
   setCurrentTab,
   totalTabs,
+  scrollAreaRef,
 }: {
   tab: number;
   setCurrentTab: (tab: number) => void;
   totalTabs: number;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
   const [jumpToTabInput, setJumpToTabInput] = useState(tab + 1);
   const [isInvalidInput, setIsInvalidInput] = useState(false);
@@ -1304,6 +1320,10 @@ const JumpToTabButton = ({
     if (jumpToTabInput > 0 && jumpToTabInput <= totalTabs) {
       setCurrentTab(jumpToTabInput - 1);
       setIsInvalidInput(false);
+      scrollAreaRef.current?.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
     } else {
       setIsInvalidInput(true);
     }

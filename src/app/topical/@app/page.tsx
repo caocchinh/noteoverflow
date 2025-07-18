@@ -68,6 +68,7 @@ import QuestionInspect from "@/features/topical/components/QuestionInspect";
 import CacheSetting from "@/features/topical/components/CacheSetting";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
+import { Separator } from "@/components/ui/separator";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -1050,6 +1051,7 @@ const TopicalPage = () => {
                   To inspect questions, run a search first.
                 </TooltipContent>
               </Tooltip>
+              <Separator orientation="vertical" />
             </div>
 
             <ScrollArea
