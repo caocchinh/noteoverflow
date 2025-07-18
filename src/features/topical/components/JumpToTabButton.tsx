@@ -12,11 +12,13 @@ import { cn } from "@/lib/utils";
 export const JumpToTabButton = ({
   tab,
   className,
+  prefix,
   totalTabs,
   onTabChangeCallback,
 }: {
   tab: number;
   totalTabs: number;
+  prefix?: "page" | "tab";
   className?: string;
   onTabChangeCallback: ({ tab }: { tab: number }) => void;
 }) => {
@@ -50,7 +52,7 @@ export const JumpToTabButton = ({
       <PopoverTrigger className={className}>
         <p
           className="text-md underline cursor-pointer"
-          title="Click to jump to tab"
+          title={`Click to jump to ${prefix ?? "tab"}`}
         >
           {tab + 1}/{totalTabs}
         </p>
@@ -67,11 +69,11 @@ export const JumpToTabButton = ({
         />
         <div className="flex flex-col gap-3">
           <p className={cn(isInvalidInput && "text-red-500", "text-sm")}>
-            Jump to tab
+            Jump to {prefix ?? "tab"}
           </p>
           <p className="text-xs text-muted-foreground">Max: {totalTabs}</p>
           <div className="text-xs text-muted-foreground">
-            Current tab: {tab + 1}
+            Current {prefix ?? "tab"}: {tab + 1}
           </div>
           <Input
             type="number"

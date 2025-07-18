@@ -200,3 +200,78 @@ export const parsePastPaperUrl = ({
     return "";
   }
 };
+
+export const isOverScrolling = ({
+  child,
+  parent,
+}: {
+  child: HTMLDivElement | null;
+  parent: HTMLDivElement | null;
+}): {
+  isOverScrollingLeft: boolean;
+  isOverScrollingRight: boolean;
+} => {
+  if (child && parent) {
+    if (child.clientWidth >= parent.clientWidth) {
+      const ultilityLeft = Math.abs(
+        Math.round(child.getBoundingClientRect().left)
+      );
+      const ultilityRight = Math.abs(
+        Math.round(child.getBoundingClientRect().right)
+      );
+      const sideBarInsetLeft = Math.abs(
+        Math.round(parent.getBoundingClientRect().left)
+      );
+      const sideBarInsetRight = Math.abs(
+        Math.round(parent.getBoundingClientRect().right)
+      );
+
+      const leftThreshold =
+        ((Math.max(ultilityLeft, sideBarInsetLeft) -
+          Math.min(ultilityLeft, sideBarInsetLeft)) /
+          ((ultilityLeft + sideBarInsetLeft) / 2)) *
+        100;
+      const rightThreshold =
+        ((Math.max(ultilityRight, sideBarInsetRight) -
+          Math.min(ultilityRight, sideBarInsetRight)) /
+          ((ultilityRight + sideBarInsetRight) / 2)) *
+        100;
+
+      if (
+        ultilityLeft !== sideBarInsetLeft &&
+        ultilityRight !== sideBarInsetRight &&
+        leftThreshold > 1 &&
+        rightThreshold > 1
+      ) {
+        return {
+          isOverScrollingLeft: true,
+          isOverScrollingRight: true,
+        };
+      } else if (leftThreshold > 1 && ultilityLeft > sideBarInsetLeft) {
+        return {
+          isOverScrollingLeft: true,
+          isOverScrollingRight: false,
+        };
+      } else if (rightThreshold > 1 && ultilityRight > sideBarInsetRight) {
+        return {
+          isOverScrollingLeft: false,
+          isOverScrollingRight: true,
+        };
+      }
+    } else {
+      return {
+        isOverScrollingLeft: false,
+        isOverScrollingRight: false,
+      };
+    }
+  } else {
+    return {
+      isOverScrollingLeft: false,
+      isOverScrollingRight: false,
+    };
+  }
+  return {
+    isOverScrollingLeft: false,
+    isOverScrollingRight: false,
+  };
+};

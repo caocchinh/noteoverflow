@@ -21,6 +21,7 @@ import {
   extractPaperCode,
   extractQuestionNumber,
   fuzzySearch,
+  isOverScrolling,
   parsePastPaperUrl,
 } from "../lib/utils";
 import { Button } from "@/components/ui/button";
@@ -240,55 +241,12 @@ const QuestionInspect = ({
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
 
   const overflowScrollHandler = useCallback(() => {
-    if (ultilityRef.current && sideBarInsetRef.current) {
-      if (
-        ultilityRef.current.clientWidth >= sideBarInsetRef.current.clientWidth
-      ) {
-        const ultilityLeft = Math.abs(
-          Math.round(ultilityRef.current.getBoundingClientRect().left)
-        );
-        const ultilityRight = Math.abs(
-          Math.round(ultilityRef.current.getBoundingClientRect().right)
-        );
-        const sideBarInsetLeft = Math.abs(
-          Math.round(sideBarInsetRef.current.getBoundingClientRect().left)
-        );
-        const sideBarInsetRight = Math.abs(
-          Math.round(sideBarInsetRef.current.getBoundingClientRect().right)
-        );
-
-        const rightThreshold =
-          ((Math.max(ultilityLeft, sideBarInsetLeft) -
-            Math.min(ultilityLeft, sideBarInsetLeft)) /
-            ((ultilityLeft + sideBarInsetLeft) / 2)) *
-          100;
-        const leftThreshold =
-          ((Math.max(ultilityRight, sideBarInsetRight) -
-            Math.min(ultilityRight, sideBarInsetRight)) /
-            ((ultilityRight + sideBarInsetRight) / 2)) *
-          100;
-
-        if (leftThreshold < 0.3) {
-          setIsUltilityOverflowingLeft(true);
-          setIsUltilityOverflowingRight(false);
-        } else if (rightThreshold < 0.3) {
-          setIsUltilityOverflowingRight(true);
-          setIsUltilityOverflowingLeft(false);
-        } else if (
-          ultilityLeft !== sideBarInsetLeft &&
-          ultilityRight !== sideBarInsetRight
-        ) {
-          setIsUltilityOverflowingRight(true);
-          setIsUltilityOverflowingLeft(true);
-        }
-      } else {
-        setIsUltilityOverflowingRight(false);
-        setIsUltilityOverflowingLeft(false);
-      }
-    } else {
-      setIsUltilityOverflowingRight(false);
-      setIsUltilityOverflowingLeft(false);
-    }
+    const isOverScrollingResult = isOverScrolling({
+      child: ultilityRef.current,
+      parent: sideBarInsetRef.current,
+    });
+    setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
+    setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
   }, []);
 
   useEffect(() => {

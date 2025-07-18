@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { default as NextImage } from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -56,10 +56,11 @@ import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
+  isOverScrolling,
 } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
@@ -157,6 +158,29 @@ const TopicalPage = () => {
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
+  const ultilityRef = useRef<HTMLDivElement | null>(null);
+  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
+  const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
+    useState(false);
+  const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
+    useState(false);
+  const overflowScrollHandler = useCallback(() => {
+    const isOverScrollingResult = isOverScrolling({
+      child: ultilityRef.current,
+      parent: sideBarInsetRef.current,
+    });
+    setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
+    setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
+  }, []);
+  const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    window.addEventListener("resize", overflowScrollHandler);
+
+    return () => {
+      window.removeEventListener("resize", overflowScrollHandler);
+    };
+  }, [overflowScrollHandler]);
 
   const resetEverything = () => {
     try {
@@ -721,12 +745,19 @@ const TopicalPage = () => {
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
       setCurrentChunkIndex(0);
+      overflowScrollHandler();
       scrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
       });
     }
-  }, [topicalData, numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
+  }, [
+    topicalData,
+    numberOfColumns,
+    layoutStyle,
+    numberOfQuestionsPerPage,
+    overflowScrollHandler,
+  ]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -830,7 +861,15 @@ const TopicalPage = () => {
           open={isSidebarOpen}
           openMobile={isSidebarOpen}
         >
-          <Sidebar key={sidebarKey} variant="floating">
+          <Sidebar
+            key={sidebarKey}
+            variant="floating"
+            onTransitionEnd={(e) => {
+              if (e.propertyName == "left") {
+                overflowScrollHandler();
+              }
+            }}
+          >
             <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
             <ScrollArea className="h-full" type="always">
               <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
@@ -1106,7 +1145,10 @@ const TopicalPage = () => {
             </ScrollArea>
             <SidebarRail />
           </Sidebar>
-          <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start">
+          <SidebarInset
+            className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start"
+            ref={sideBarInsetRef}
+          >
             {showScrollToTopButton && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1129,162 +1171,210 @@ const TopicalPage = () => {
                   <p>Scroll to top</p>
                 </TooltipContent>
               </Tooltip>
-            )}
-            <div className="flex flex-row items-center justify-start gap-2 ml-2 w-full">
+            )}{" "}
+            {isUltilityOverflowingRight && (
               <Button
-                className="!bg-background flex cursor-pointer items-center gap-2 border"
+                className="absolute right-0 top-6  rounded-full cursor-pointer w-7 h-7 z-[200]"
+                title="Move right"
                 onClick={() => {
-                  setIsSidebarOpen(!isSidebarOpen);
+                  if (ultilityHorizontalScrollBarRef.current) {
+                    ultilityHorizontalScrollBarRef.current.scrollBy({
+                      left: 200,
+                      behavior: "smooth",
+                    });
+                  }
                 }}
-                variant="outline"
               >
-                Filters
-                <SlidersHorizontal />
+                <ChevronRight size={5} />
               </Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      className="flex cursor-pointer items-center gap-2 border"
-                      disabled={isQuestionViewDisabled}
-                      onClick={() => {
-                        setIsQuestionViewOpen((prev) => ({
-                          ...prev,
-                          isOpen: true,
-                        }));
-                      }}
-                      variant="default"
-                    >
-                      Inspect
-                      <Monitor />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className={cn(!isQuestionViewDisabled && "hidden")}
+            )}
+            {isUltilityOverflowingLeft && (
+              <Button
+                className="absolute left-0 top-6 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                title="Move left"
+                onClick={() => {
+                  if (ultilityHorizontalScrollBarRef.current) {
+                    ultilityHorizontalScrollBarRef.current.scrollBy({
+                      left: -200,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                <ChevronLeft size={5} />
+              </Button>
+            )}
+            <ScrollArea
+              viewPortOnScroll={overflowScrollHandler}
+              className="w-full"
+              viewportRef={ultilityHorizontalScrollBarRef}
+            >
+              <div
+                className="flex flex-row items-center justify-start gap-2 pl-4 w-max"
+                ref={ultilityRef}
+              >
+                <Button
+                  className="!bg-background flex cursor-pointer items-center gap-2 border"
+                  onClick={() => {
+                    setIsSidebarOpen(!isSidebarOpen);
+                  }}
+                  variant="outline"
                 >
-                  To inspect questions, run a search first.
-                </TooltipContent>
-              </Tooltip>
-              {layoutStyle === "pagination" && !isQuestionViewDisabled && (
-                <>
-                  <Separator orientation="vertical" />
-                  <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="First page"
-                      disabled={currentChunkIndex === 0}
-                      onClick={() => {
-                        if (currentChunkIndex === 0) return;
-                        setCurrentChunkIndex(0);
-                        setDisplayedData(fullPartitionedData![0]);
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
+                  Filters
+                  <SlidersHorizontal />
+                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button
+                        className="flex cursor-pointer items-center gap-2 border"
+                        disabled={isQuestionViewDisabled}
+                        onClick={() => {
+                          setIsQuestionViewOpen((prev) => ({
+                            ...prev,
+                            isOpen: true,
+                          }));
+                        }}
+                        variant="default"
+                      >
+                        Inspect
+                        <Monitor />
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className={cn(!isQuestionViewDisabled && "hidden")}
+                  >
+                    To inspect questions, run a search first.
+                  </TooltipContent>
+                </Tooltip>
+                {layoutStyle === "pagination" && !isQuestionViewDisabled && (
+                  <>
+                    <Separator orientation="vertical" />
+                    <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer !p-[8px] rounded-[2px]"
+                        title="First page"
+                        disabled={currentChunkIndex === 0}
+                        onClick={() => {
+                          if (currentChunkIndex === 0) return;
+                          setCurrentChunkIndex(0);
+                          setDisplayedData(fullPartitionedData![0]);
+                          if (scrollUpWhenPageChange) {
+                            scrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      >
+                        <ChevronsLeft />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer !p-[8px] rounded-[2px]"
+                        title="Previous page"
+                        disabled={currentChunkIndex === 0}
+                        onClick={() => {
+                          if (currentChunkIndex === 0) return;
+                          setCurrentChunkIndex(currentChunkIndex - 1);
+                          setDisplayedData(
+                            fullPartitionedData![currentChunkIndex - 1]
+                          );
+                          if (scrollUpWhenPageChange) {
+                            scrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      >
+                        <ChevronLeft />
+                      </Button>
+                      <JumpToTabButton
+                        className="mx-4"
+                        tab={currentChunkIndex}
+                        totalTabs={fullPartitionedData!.length}
+                        prefix="page"
+                        onTabChangeCallback={({ tab }) => {
+                          setCurrentChunkIndex(tab);
+                          setDisplayedData(fullPartitionedData![tab]);
+                          if (scrollUpWhenPageChange) {
+                            scrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer !p-[8px] rounded-[2px]"
+                        title="Next page"
+                        disabled={
+                          currentChunkIndex === fullPartitionedData!.length - 1
                         }
-                      }}
-                    >
-                      <ChevronsLeft />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Previous page"
-                      disabled={currentChunkIndex === 0}
-                      onClick={() => {
-                        if (currentChunkIndex === 0) return;
-                        setCurrentChunkIndex(currentChunkIndex - 1);
-                        setDisplayedData(
-                          fullPartitionedData![currentChunkIndex - 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
+                        onClick={() => {
+                          if (
+                            currentChunkIndex ===
+                            fullPartitionedData!.length - 1
+                          )
+                            return;
+                          setCurrentChunkIndex(currentChunkIndex + 1);
+                          setDisplayedData(
+                            fullPartitionedData![currentChunkIndex + 1]
+                          );
+                          if (scrollUpWhenPageChange) {
+                            scrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      >
+                        <ChevronRight />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer !p-[8px] rounded-[2px]"
+                        title="Last page"
+                        disabled={
+                          currentChunkIndex === fullPartitionedData!.length - 1
                         }
-                      }}
-                    >
-                      <ChevronLeft />
-                    </Button>
-                    <JumpToTabButton
-                      className="mx-4"
-                      tab={currentChunkIndex}
-                      totalTabs={fullPartitionedData!.length}
-                      onTabChangeCallback={({ tab }) => {
-                        setCurrentChunkIndex(tab);
-                        setDisplayedData(fullPartitionedData![tab]);
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Next page"
-                      disabled={
-                        currentChunkIndex === fullPartitionedData!.length - 1
-                      }
-                      onClick={() => {
-                        if (
-                          currentChunkIndex ===
-                          fullPartitionedData!.length - 1
-                        )
-                          return;
-                        setCurrentChunkIndex(currentChunkIndex + 1);
-                        setDisplayedData(
-                          fullPartitionedData![currentChunkIndex + 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronRight />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Last page"
-                      disabled={
-                        currentChunkIndex === fullPartitionedData!.length - 1
-                      }
-                      onClick={() => {
-                        if (
-                          currentChunkIndex ===
-                          fullPartitionedData!.length - 1
-                        )
-                          return;
-                        setCurrentChunkIndex(fullPartitionedData!.length - 1);
-                        setDisplayedData(
-                          fullPartitionedData![fullPartitionedData!.length - 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronsRight />
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
+                        onClick={() => {
+                          if (
+                            currentChunkIndex ===
+                            fullPartitionedData!.length - 1
+                          )
+                            return;
+                          setCurrentChunkIndex(fullPartitionedData!.length - 1);
+                          setDisplayedData(
+                            fullPartitionedData![
+                              fullPartitionedData!.length - 1
+                            ]
+                          );
+                          if (scrollUpWhenPageChange) {
+                            scrollAreaRef.current?.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      >
+                        <ChevronsRight />
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
 
+              <ScrollBar
+                orientation="horizontal"
+                className="[&_.bg-border]:bg-transparent"
+              />
+            </ScrollArea>
             <ScrollArea
               viewportRef={scrollAreaRef}
               className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
