@@ -12,7 +12,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, X } from "lucide-react";
+import { useState } from "react";
 
 export default function CacheAccordion({
   isSessionCacheEnabled,
@@ -25,8 +26,9 @@ export default function CacheAccordion({
   isPersistantCacheEnabled: boolean;
   setIsPersistantCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           className="flex w-full cursor-pointer items-center justify-start gap-2"
@@ -36,7 +38,11 @@ export default function CacheAccordion({
           Cache settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006]">
+      <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+        <X
+          className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+          onClick={() => setIsPopoverOpen(false)}
+        />
         <Accordion
           className="w-full"
           collapsible

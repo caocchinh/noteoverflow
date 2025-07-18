@@ -50,7 +50,7 @@ export interface FilterData {
   season: string[];
 }
 
-export type LayoutStyle = "paginated" | "infinite";
+export type LayoutStyle = "pagination" | "infinite";
 
 export type FiltersCache = {
   numberOfColumns: number;

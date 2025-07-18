@@ -1,9 +1,10 @@
 import { Popover } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { LandPlot } from "lucide-react";
+import { LandPlot, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
 
 export default function VisualSetting({
   showFinishedQuestionTint,
@@ -16,8 +17,9 @@ export default function VisualSetting({
   showScrollToTopButton: boolean;
   setShowScrollToTopButton: (showScrollToTopButton: boolean) => void;
 }) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
-    <Popover>
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
@@ -28,6 +30,10 @@ export default function VisualSetting({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+        <X
+          className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+          onClick={() => setIsPopoverOpen(false)}
+        />
         <div className="flex flex-row items-center justify-center gap-2">
           <h4 className="text-sm font-medium text-center">
             Show green tint on finished questions?

@@ -2,11 +2,11 @@
 import { Popover } from "@/components/ui/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Blocks, FileStack, Mouse } from "lucide-react";
+import { Blocks, FileStack, Mouse, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
 import { FiltersCache, LayoutStyle } from "../constants/types";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_LAYOUT_STYLE,
@@ -39,6 +39,7 @@ export default function LayoutSetting({
   setNumberOfQuestionsPerPage: (numberOfQuestionsPerPage: number) => void;
 }) {
   const isMounted = useRef(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -123,7 +124,7 @@ export default function LayoutSetting({
   }, [numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
 
   return (
-    <Popover>
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
@@ -134,6 +135,10 @@ export default function LayoutSetting({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="z-[100006]  flex flex-col items-center justify-center gap-3">
+        <X
+          className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+          onClick={() => setIsPopoverOpen(false)}
+        />
         <div className="flex flex-col items-center justify-center gap-3">
           <h4 className="text-sm font-medium text-center">
             Number of maximum displayed columns
