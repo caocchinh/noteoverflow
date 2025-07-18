@@ -50,10 +50,14 @@ export interface FilterData {
   season: string[];
 }
 
+export type LayoutStyle = "paginated" | "infinite";
+
 export type FiltersCache = {
   numberOfColumns: number;
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
+  layoutStyle: LayoutStyle;
+  numberOfQuestionsPerPage: number;
   showFinishedQuestionTint: boolean;
   showScrollToTopButton: boolean;
   lastSessionSubject: string;

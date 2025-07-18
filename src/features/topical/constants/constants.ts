@@ -1,5 +1,5 @@
 import { ValidCurriculum } from "@/constants/types";
-import type { InvalidInputs, TopicalData } from "./types";
+import type { InvalidInputs, LayoutStyle, TopicalData } from "./types";
 
 export const TOPICAL_DATA: TopicalData[] = [
   {
@@ -194,3 +194,7 @@ export const COLUMN_BREAKPOINTS = {
 export const MAX_TOPIC_SELECTION = 5;
 export const CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
+
+export const DEFAULT_LAYOUT_STYLE: LayoutStyle = "paginated";
+export const DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE = 25;
+export const MAX_NUMBER_OF_COLUMNS = 5;

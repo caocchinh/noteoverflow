@@ -36,11 +36,14 @@ import {
   MAX_TOPIC_SELECTION,
   CHUNK_SIZE,
   CACHE_EXPIRE_TIME,
+  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  DEFAULT_LAYOUT_STYLE,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
   FiltersCache,
   InvalidInputs,
+  LayoutStyle,
   SelectedBookmark,
   SelectedFinishedQuestion,
 } from "@/features/topical/constants/types";
@@ -111,6 +114,11 @@ const TopicalPage = () => {
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
+  const [layoutStyle, setLayoutStyle] =
+    useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
+  const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
+    DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+  );
   const curriculumRef = useRef<HTMLDivElement | null>(null);
   const subjectRef = useRef<HTMLDivElement | null>(null);
   const topicRef = useRef<HTMLDivElement | null>(null);
@@ -156,6 +164,8 @@ const TopicalPage = () => {
       isPersistantCacheEnabled,
       showScrollToTopButton,
       showFinishedQuestionTint,
+      layoutStyle,
+      numberOfQuestionsPerPage,
     };
 
     stateToSave.lastSessionCurriculum = "";
@@ -313,6 +323,11 @@ const TopicalPage = () => {
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
+        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+        setNumberOfQuestionsPerPage(
+          parsedState.numberOfQuestionsPerPage ??
+            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+        );
         setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
         setShowFinishedQuestionTint(
           parsedState.showFinishedQuestionTint ?? true
@@ -467,6 +482,8 @@ const TopicalPage = () => {
       showScrollToTopButton,
       isPersistantCacheEnabled,
       showFinishedQuestionTint,
+      layoutStyle,
+      numberOfQuestionsPerPage,
     };
 
     if (selectedCurriculum && selectedSubject) {
@@ -501,6 +518,8 @@ const TopicalPage = () => {
     isPersistantCacheEnabled,
     showFinishedQuestionTint,
     showScrollToTopButton,
+    layoutStyle,
+    numberOfQuestionsPerPage,
   ]);
 
   const search = async () => {
@@ -979,7 +998,14 @@ const TopicalPage = () => {
                   setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
                   setIsSessionCacheEnabled={setIsSessionCacheEnabled}
                 />
-                <LayoutSetting setNumberOfColumns={setNumberOfColumns} />
+                <LayoutSetting
+                  layoutStyle={layoutStyle}
+                  numberOfColumns={numberOfColumns}
+                  setLayoutStyle={setLayoutStyle}
+                  setNumberOfColumns={setNumberOfColumns}
+                  numberOfQuestionsPerPage={numberOfQuestionsPerPage}
+                  setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
+                />
                 <VisualSetting
                   showFinishedQuestionTint={showFinishedQuestionTint}
                   setShowFinishedQuestionTint={setShowFinishedQuestionTint}

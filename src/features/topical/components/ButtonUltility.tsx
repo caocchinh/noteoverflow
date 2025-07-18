@@ -84,7 +84,7 @@ export default function ButtonUltility({
           <DialogHeader>
             <DialogTitle>Clear all</DialogTitle>
             <DialogDescription>
-              This will clear all the selected options and reset the form. Are
+              This will clear all the selected options and reset the filter. Are
               you sure you want to clear?
             </DialogDescription>
           </DialogHeader>

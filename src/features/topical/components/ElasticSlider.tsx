@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   animate,
   motion,
@@ -6,11 +6,6 @@ import {
   useMotionValueEvent,
   useTransform,
 } from "framer-motion";
-import {
-  DEFAULT_NUMBER_OF_COLUMNS,
-  FILTERS_CACHE_KEY,
-} from "../constants/constants";
-import { FiltersCache } from "../constants/types";
 import { Button } from "@/components/ui/button";
 import { SquareMinus, SquarePlus } from "lucide-react";
 
@@ -18,31 +13,34 @@ const MAX_OVERFLOW = 30;
 
 interface ElasticSliderProps {
   startingValue?: number;
+  minValue?: number;
   maxValue?: number;
   className?: string;
   isStepped?: boolean;
   stepSize?: number;
-  setColumnsProp: (value: number) => void;
+  setValue: (value: number) => void;
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
   startingValue = 1,
+  minValue = 1,
   maxValue = 5,
   className = "",
   isStepped = false,
   stepSize = 1,
-  setColumnsProp,
+  setValue,
 }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-4 w-48 ${className}`}
+      className={`flex flex-col items-center justify-center gap-0 w-48 ${className}`}
     >
       <Slider
         startingValue={startingValue}
+        minValue={minValue}
         maxValue={maxValue}
         isStepped={isStepped}
         stepSize={stepSize}
-        setColumnsProp={setColumnsProp}
+        setValue={setValue}
       />
     </div>
   );
@@ -50,65 +48,27 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
 
 interface SliderProps {
   startingValue: number;
+  minValue: number;
   maxValue: number;
   isStepped: boolean;
   stepSize: number;
-  setColumnsProp: (value: number) => void;
+  setValue: (value: number) => void;
 }
 
 const Slider: React.FC<SliderProps> = ({
   startingValue,
+  minValue,
   maxValue,
   isStepped,
   stepSize,
-  setColumnsProp,
+  setValue,
 }) => {
-  const [numberOfColumnsSliderValue, setNumberOfColumnsSliderValue] = useState<
-    number | null
-  >(null);
-
-  const [numberOfColumns, setNumberOfColumns] = useState<number | null>(null);
-
+  const [sliderValue, setSliderValue] = useState<number>(startingValue);
   const sliderRef = useRef<HTMLDivElement>(null);
   const [region, setRegion] = useState<"left" | "middle" | "right">("middle");
   const clientX = useMotionValue(0);
   const overflow = useMotionValue(0);
   const scale = useMotionValue(1);
-  const isMounted = useRef(false);
-
-  useEffect(() => {
-    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-    if (savedState) {
-      const parsedState: FiltersCache = JSON.parse(savedState);
-      setNumberOfColumns(
-        parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-      );
-      setNumberOfColumnsSliderValue(
-        parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-      );
-      setColumnsProp(parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS);
-    }
-    setTimeout(() => {
-      isMounted.current = true;
-    }, 0);
-  }, [setColumnsProp]);
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      return;
-    }
-    setColumnsProp(numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS);
-    const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-    let stateToSave: FiltersCache = existingStateJSON
-      ? JSON.parse(existingStateJSON)
-      : { filters: {} };
-
-    stateToSave = {
-      ...stateToSave,
-      numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
-    };
-    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-  }, [numberOfColumns, setColumnsProp]);
 
   useMotionValueEvent(clientX, "change", (latest: number) => {
     if (sliderRef.current) {
@@ -132,13 +92,12 @@ const Slider: React.FC<SliderProps> = ({
     if (e.buttons > 0 && sliderRef.current) {
       const { left, width } = sliderRef.current.getBoundingClientRect();
       let newValue =
-        startingValue +
-        ((e.clientX - left) / width) * (maxValue - startingValue);
+        minValue + ((e.clientX - left) / width) * (maxValue - minValue);
       if (isStepped) {
         newValue = Math.round(newValue / stepSize) * stepSize;
       }
-      newValue = Math.min(Math.max(newValue, startingValue), maxValue);
-      setNumberOfColumnsSliderValue(newValue);
+      newValue = Math.min(Math.max(newValue, minValue), maxValue);
+      setSliderValue(newValue);
       clientX.jump(e.clientX);
     }
   };
@@ -153,16 +112,14 @@ const Slider: React.FC<SliderProps> = ({
   };
 
   const getRangePercentage = (): number => {
-    return (
-      ((numberOfColumnsSliderValue ??
-        DEFAULT_NUMBER_OF_COLUMNS - startingValue) /
-        maxValue) *
-      100
-    );
+    return (sliderValue / maxValue) * 100;
   };
 
   return (
     <>
+      <p className=" text-foreground transform text-md font-medium tracking-wide -mb-3">
+        {Math.round(sliderValue)}
+      </p>
       <motion.div
         onHoverStart={() => animate(scale, 1.2)}
         onHoverEnd={() => animate(scale, 1)}
@@ -172,7 +129,7 @@ const Slider: React.FC<SliderProps> = ({
           scale,
           opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
         }}
-        className="flex w-full touch-none select-none items-center justify-center gap-4"
+        className="flex w-full touch-none select-none flex-row items-center justify-center gap-2"
       >
         <motion.div
           animate={{
@@ -185,21 +142,18 @@ const Slider: React.FC<SliderProps> = ({
             ),
           }}
           onClick={() => {
-            if (
-              numberOfColumnsSliderValue &&
-              numberOfColumnsSliderValue > startingValue
-            ) {
-              setNumberOfColumnsSliderValue(numberOfColumnsSliderValue - 1);
+            if (sliderValue && sliderValue > minValue) {
+              setSliderValue(sliderValue - 1);
             }
           }}
-          className="cursor-pointer"
+          className="cursor-pointer flex items-center justify-center"
         >
           <SquareMinus />
         </motion.div>
 
         <div
           ref={sliderRef}
-          className="relative flex w-full max-w-xs flex-grow cursor-grab touch-none select-none items-center py-4"
+          className="relative flex w-full flex-row max-w-xs flex-grow cursor-grab touch-none select-none items-center py-4"
           onPointerMove={handlePointerMove}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
@@ -249,25 +203,22 @@ const Slider: React.FC<SliderProps> = ({
           }}
           className="cursor-pointer"
           onClick={() => {
-            if (
-              numberOfColumnsSliderValue &&
-              numberOfColumnsSliderValue < maxValue
-            ) {
-              setNumberOfColumnsSliderValue(numberOfColumnsSliderValue + 1);
+            if (sliderValue && sliderValue < maxValue) {
+              setSliderValue(sliderValue + 1);
             }
           }}
         >
           <SquarePlus />
         </motion.div>
       </motion.div>
-      <p className="absolute text-foreground transform -translate-y-11 text-md font-medium tracking-wide">
-        {Math.round(numberOfColumnsSliderValue ?? DEFAULT_NUMBER_OF_COLUMNS)}
-      </p>
+
       <Button
-        className="w-full cursor-pointer"
+        className="w-full cursor-pointer mt-1"
         variant="outline"
         onClick={() => {
-          setNumberOfColumns(numberOfColumnsSliderValue);
+          if (sliderValue) {
+            setValue(sliderValue);
+          }
         }}
       >
         Save
