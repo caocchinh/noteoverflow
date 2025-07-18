@@ -5,14 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Blocks, FileStack, Mouse, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
-import { FiltersCache, LayoutStyle } from "../constants/types";
-import { useEffect, useRef, useState } from "react";
+import { LayoutStyle } from "../constants/types";
+import { useState } from "react";
 import {
-  DEFAULT_NUMBER_OF_COLUMNS,
-  DEFAULT_LAYOUT_STYLE,
-  FILTERS_CACHE_KEY,
   MAX_NUMBER_OF_COLUMNS,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE,
 } from "../constants/constants";
 import { Separator } from "@/components/ui/separator";
@@ -39,90 +35,7 @@ export default function LayoutSetting({
   numberOfQuestionsPerPage: number;
   setNumberOfQuestionsPerPage: (numberOfQuestionsPerPage: number) => void;
 }) {
-  const isMounted = useRef(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  useEffect(() => {
-    try {
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      if (savedState) {
-        const parsedState: FiltersCache = JSON.parse(savedState);
-        setNumberOfColumns(
-          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-        );
-        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-        setNumberOfQuestionsPerPage(
-          parsedState.numberOfQuestionsPerPage ??
-            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-        );
-      }
-    } catch (error) {
-      // Use default values if localStorage is not available
-      setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
-      setLayoutStyle(DEFAULT_LAYOUT_STYLE);
-      setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
-      console.error("Failed to access localStorage:", error);
-    }
-
-    setTimeout(() => {
-      isMounted.current = true;
-    }, 0);
-  }, [setLayoutStyle, setNumberOfColumns, setNumberOfQuestionsPerPage]);
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      return;
-    }
-
-    try {
-      let stateToSave: FiltersCache;
-
-      try {
-        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-        stateToSave = existingStateJSON
-          ? JSON.parse(existingStateJSON)
-          : {
-              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-              layoutStyle: DEFAULT_LAYOUT_STYLE,
-              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-              isSessionCacheEnabled: true,
-              isPersistantCacheEnabled: true,
-              showFinishedQuestionTint: true,
-              showScrollToTopButton: true,
-              lastSessionCurriculum: "",
-              lastSessionSubject: "",
-              filters: {},
-            };
-      } catch {
-        // If reading fails, start with empty state
-        stateToSave = {
-          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-          layoutStyle: DEFAULT_LAYOUT_STYLE,
-          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-          isSessionCacheEnabled: true,
-          isPersistantCacheEnabled: true,
-          showFinishedQuestionTint: true,
-          showScrollToTopButton: true,
-          lastSessionCurriculum: "",
-          lastSessionSubject: "",
-          filters: {},
-        };
-      }
-
-      stateToSave = {
-        ...stateToSave,
-        numberOfColumns: numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS,
-        layoutStyle: layoutStyle ?? DEFAULT_LAYOUT_STYLE,
-        numberOfQuestionsPerPage:
-          numberOfQuestionsPerPage ?? DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-      };
-
-      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-    } catch (error) {
-      // Silently handle localStorage errors - settings won't persist
-      console.error("Failed to save settings to localStorage:", error);
-    }
-  }, [numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

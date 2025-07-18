@@ -58,6 +58,7 @@ export type FiltersCache = {
   lastSessionCurriculum: string;
   layoutStyle: LayoutStyle;
   numberOfQuestionsPerPage: number;
+  scrollUpWhenPageChange: boolean;
   showFinishedQuestionTint: boolean;
   showScrollToTopButton: boolean;
   lastSessionSubject: string;

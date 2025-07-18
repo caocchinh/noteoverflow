@@ -192,7 +192,7 @@ export const COLUMN_BREAKPOINTS = {
 };
 
 export const MAX_TOPIC_SELECTION = 5;
-export const CHUNK_SIZE = 35;
+export const INFINITE_SCROLL_CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
 
 export const DEFAULT_LAYOUT_STYLE: LayoutStyle = "pagination";

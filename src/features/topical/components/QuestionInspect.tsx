@@ -1374,7 +1374,9 @@ const JumpToTabButton = ({
             className={cn(isInvalidInput && "border-red-500 text-red-500")}
             value={jumpToTabInput}
             onChange={(e) => {
-              setJumpToTabInput(parseInt(e.target.value, 10));
+              setJumpToTabInput(
+                e.target.value ? parseInt(e.target.value, 10) : NaN
+              );
               setIsInvalidInput(false);
             }}
             onKeyDown={(e) => {

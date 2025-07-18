@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowUpFromLine,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -34,7 +36,7 @@ import {
   DEFAULT_NUMBER_OF_COLUMNS,
   COLUMN_BREAKPOINTS,
   MAX_TOPIC_SELECTION,
-  CHUNK_SIZE,
+  INFINITE_SCROLL_CHUNK_SIZE,
   CACHE_EXPIRE_TIME,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_LAYOUT_STYLE,
@@ -147,6 +149,7 @@ const TopicalPage = () => {
     season: [],
   });
   const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
+  const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
@@ -155,9 +158,10 @@ const TopicalPage = () => {
   const resetEverything = () => {
     try {
       const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-      let stateToSave: FiltersCache = existingStateJSON
+      const stateToSave: FiltersCache = existingStateJSON
         ? JSON.parse(existingStateJSON)
         : {
+            scrollUpWhenPageChange: true,
             numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
             layoutStyle: DEFAULT_LAYOUT_STYLE,
             numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -169,16 +173,6 @@ const TopicalPage = () => {
             lastSessionSubject: "",
             filters: {},
           };
-
-      stateToSave = {
-        ...stateToSave,
-        isSessionCacheEnabled,
-        isPersistantCacheEnabled,
-        showScrollToTopButton,
-        showFinishedQuestionTint,
-        layoutStyle,
-        numberOfQuestionsPerPage,
-      };
 
       stateToSave.lastSessionCurriculum = "";
       stateToSave.lastSessionCurriculum = "";
@@ -343,6 +337,7 @@ const TopicalPage = () => {
           setNumberOfColumns(
             parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
           );
+          setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
           setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
           setNumberOfQuestionsPerPage(
             parsedState.numberOfQuestionsPerPage ??
@@ -525,6 +520,7 @@ const TopicalPage = () => {
               isSessionCacheEnabled: true,
               isPersistantCacheEnabled: true,
               showFinishedQuestionTint: true,
+              scrollUpWhenPageChange: true,
               showScrollToTopButton: true,
               lastSessionCurriculum: "",
               lastSessionSubject: "",
@@ -539,6 +535,7 @@ const TopicalPage = () => {
           isSessionCacheEnabled: true,
           isPersistantCacheEnabled: true,
           showFinishedQuestionTint: true,
+          scrollUpWhenPageChange: true,
           showScrollToTopButton: true,
           lastSessionCurriculum: "",
           lastSessionSubject: "",
@@ -549,9 +546,11 @@ const TopicalPage = () => {
       stateToSave = {
         ...stateToSave,
         isSessionCacheEnabled,
-        showScrollToTopButton,
         isPersistantCacheEnabled,
         showFinishedQuestionTint,
+        scrollUpWhenPageChange,
+        showScrollToTopButton,
+        numberOfColumns,
         layoutStyle,
         numberOfQuestionsPerPage,
       };
@@ -593,6 +592,8 @@ const TopicalPage = () => {
     showScrollToTopButton,
     layoutStyle,
     numberOfQuestionsPerPage,
+    scrollUpWhenPageChange,
+    numberOfColumns,
   ]);
 
   const search = async () => {
@@ -700,9 +701,13 @@ const TopicalPage = () => {
     if (topicalData?.data) {
       const chunkedData: SelectedQuestion[][] = [];
       let currentChunks: SelectedQuestion[] = [];
+      const chunkSize =
+        layoutStyle === "pagination"
+          ? numberOfQuestionsPerPage
+          : INFINITE_SCROLL_CHUNK_SIZE;
 
       topicalData.data.forEach((item: SelectedQuestion) => {
-        if (currentChunks.length === CHUNK_SIZE) {
+        if (currentChunks.length === chunkSize) {
           chunkedData.push(currentChunks);
           currentChunks = [];
         }
@@ -713,8 +718,12 @@ const TopicalPage = () => {
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
       setCurrentChunkIndex(0);
+      scrollAreaRef.current?.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
     }
-  }, [topicalData, numberOfColumns]);
+  }, [topicalData, numberOfColumns, layoutStyle, numberOfQuestionsPerPage]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -789,13 +798,16 @@ const TopicalPage = () => {
       !isSearchEnabled ||
       topicalData?.data?.length === 0 ||
       isTopicalDataError ||
+      !fullPartitionedData ||
+      fullPartitionedData.length === 0 ||
       isTopicalDataFetching ||
       !isTopicalDataFetched
     );
   }, [
     isSearchEnabled,
-    topicalData,
+    topicalData?.data?.length,
     isTopicalDataError,
+    fullPartitionedData,
     isTopicalDataFetching,
     isTopicalDataFetched,
   ]);
@@ -808,7 +820,7 @@ const TopicalPage = () => {
 
   return (
     <>
-      <div className="pt-16 h-screen overflow-hidden">
+      <div className="pt-12 h-screen overflow-hidden">
         <SidebarProvider
           onOpenChange={setIsSidebarOpen}
           onOpenChangeMobile={setIsSidebarOpen}
@@ -1084,12 +1096,14 @@ const TopicalPage = () => {
                   setShowFinishedQuestionTint={setShowFinishedQuestionTint}
                   showScrollToTopButton={showScrollToTopButton}
                   setShowScrollToTopButton={setShowScrollToTopButton}
+                  scrollUpWhenPageChange={scrollUpWhenPageChange}
+                  setScrollUpWhenPageChange={setScrollUpWhenPageChange}
                 />
               </SidebarContent>
             </ScrollArea>
             <SidebarRail />
           </Sidebar>
-          <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-6 p-4 pl-2 md:items-start">
+          <SidebarInset className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start">
             {showScrollToTopButton && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1151,11 +1165,63 @@ const TopicalPage = () => {
                 </TooltipContent>
               </Tooltip>
               <Separator orientation="vertical" />
+              {layoutStyle === "pagination" && !isQuestionViewDisabled && (
+                <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer !p-[8px] rounded-[2px]"
+                    title="Previous"
+                    disabled={currentChunkIndex === 0}
+                    onClick={() => {
+                      if (currentChunkIndex === 0) return;
+                      setCurrentChunkIndex(currentChunkIndex - 1);
+                      setDisplayedData(
+                        fullPartitionedData![currentChunkIndex - 1]
+                      );
+                      if (scrollUpWhenPageChange) {
+                        scrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                  >
+                    <ChevronLeft />
+                  </Button>
+                  <p className="text-sm">
+                    {currentChunkIndex + 1} / {fullPartitionedData!.length}
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer !p-[8px] rounded-[2px]"
+                    title="Next"
+                    disabled={
+                      currentChunkIndex === fullPartitionedData!.length - 1
+                    }
+                    onClick={() => {
+                      if (currentChunkIndex === fullPartitionedData!.length - 1)
+                        return;
+                      setCurrentChunkIndex(currentChunkIndex + 1);
+                      setDisplayedData(
+                        fullPartitionedData![currentChunkIndex + 1]
+                      );
+                      if (scrollUpWhenPageChange) {
+                        scrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </div>
+              )}
             </div>
 
             <ScrollArea
               viewportRef={scrollAreaRef}
-              className="h-[75vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+              className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
               type="always"
               viewPortOnScrollEnd={() => {
                 if (scrollAreaRef.current?.scrollTop === 0) {
@@ -1236,7 +1302,7 @@ const TopicalPage = () => {
                   ]
                 }
               >
-                <Masonry gutter="10px">
+                <Masonry gutter="11px">
                   {displayedData?.map((question) =>
                     question?.questionImages.map((imageSrc: string) => (
                       <QuestionPreview
@@ -1259,22 +1325,24 @@ const TopicalPage = () => {
                 </Masonry>
               </ResponsiveMasonry>
 
-              <InfiniteScroll
-                next={() => {
-                  if (fullPartitionedData) {
-                    setCurrentChunkIndex(currentChunkIndex + 1);
-                    setDisplayedData([
-                      ...displayedData,
-                      ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
-                    ]);
+              {layoutStyle === "infinite" && (
+                <InfiniteScroll
+                  next={() => {
+                    if (fullPartitionedData) {
+                      setCurrentChunkIndex(currentChunkIndex + 1);
+                      setDisplayedData([
+                        ...displayedData,
+                        ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+                      ]);
+                    }
+                  }}
+                  hasMore={
+                    !!fullPartitionedData &&
+                    currentChunkIndex < fullPartitionedData.length - 1
                   }
-                }}
-                hasMore={
-                  !!fullPartitionedData &&
-                  currentChunkIndex < fullPartitionedData.length - 1
-                }
-                isLoading={!fullPartitionedData}
-              />
+                  isLoading={!fullPartitionedData}
+                />
+              )}
             </ScrollArea>
           </SidebarInset>
         </SidebarProvider>

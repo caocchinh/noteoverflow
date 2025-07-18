@@ -11,11 +11,15 @@ export default function VisualSetting({
   setShowFinishedQuestionTint,
   showScrollToTopButton,
   setShowScrollToTopButton,
+  scrollUpWhenPageChange,
+  setScrollUpWhenPageChange,
 }: {
   showFinishedQuestionTint: boolean;
   setShowFinishedQuestionTint: (showFinishedQuestionTint: boolean) => void;
   showScrollToTopButton: boolean;
   setShowScrollToTopButton: (showScrollToTopButton: boolean) => void;
+  scrollUpWhenPageChange: boolean;
+  setScrollUpWhenPageChange: (scrollUpWhenPageChange: boolean) => void;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -51,6 +55,16 @@ export default function VisualSetting({
           <Switch
             checked={showScrollToTopButton}
             onCheckedChange={setShowScrollToTopButton}
+          />
+        </div>
+        <hr />
+        <div className="flex flex-row items-center justify-center gap-2">
+          <h4 className="text-sm font-medium text-center ">
+            Scroll up when page changes? (Pagination layout only)
+          </h4>
+          <Switch
+            checked={scrollUpWhenPageChange}
+            onCheckedChange={setScrollUpWhenPageChange}
           />
         </div>
       </PopoverContent>
