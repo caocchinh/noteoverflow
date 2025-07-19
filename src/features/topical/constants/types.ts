@@ -134,3 +134,22 @@ export interface ExtendedIntersectionObserverInit
   extends IntersectionObserverInit {
   scrollMargin?: string;
 }
+
+export interface SortParameters {
+  topic: {
+    data: Record<string, number>;
+    weight: number;
+  };
+  paperType: {
+    data: Record<string, number>;
+    weight: number;
+  };
+  year: {
+    data: Record<string, number>;
+    weight: number;
+  };
+  season: {
+    data: Record<string, number>;
+    weight: number;
+  };
+}

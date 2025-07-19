@@ -50,6 +50,7 @@ import type {
   LayoutStyle,
   SelectedBookmark,
   SelectedFinishedQuestion,
+  SortParameters,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -724,12 +725,9 @@ const TopicalPage = () => {
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortParameters, setSortParameters] = useState<{
-    topic: Record<string, number>;
-    paperType: Record<string, number>;
-    year: Record<string, number>;
-    season: Record<string, number>;
-  } | null>(null);
+  const [sortParameters, setSortParameters] = useState<SortParameters | null>(
+    null
+  );
 
   useEffect(() => {
     if (topicalData?.data) {
@@ -741,24 +739,26 @@ const TopicalPage = () => {
           : INFINITE_SCROLL_CHUNK_SIZE;
 
       const sortedData = topicalData.data.sort((a, b) => {
-        const aPaperTypeScore = sortParameters?.paperType[a.paperType] ?? 0;
-        const bPaperTypeScore = sortParameters?.paperType[b.paperType] ?? 0;
+        const aPaperTypeScore =
+          sortParameters?.paperType.data?.[a.paperType] ?? 0;
+        const bPaperTypeScore =
+          sortParameters?.paperType.data?.[b.paperType] ?? 0;
         const aTopicScore = a.questionTopics.reduce((acc, curr) => {
           if (sortParameters?.topic && curr.topic) {
-            return acc + sortParameters.topic[curr.topic];
+            return acc + (sortParameters.topic.data?.[curr.topic] ?? 0);
           }
           return acc;
         }, 0);
         const bTopicScore = b.questionTopics.reduce((acc, curr) => {
           if (sortParameters?.topic && curr.topic) {
-            return acc + sortParameters.topic[curr.topic];
+            return acc + (sortParameters.topic.data?.[curr.topic] ?? 0);
           }
           return acc;
         }, 0);
-        const aYearScore = sortParameters?.year[a.year] ?? 0;
-        const bYearScore = sortParameters?.year[b.year] ?? 0;
-        const aSeasonScore = sortParameters?.season[a.season] ?? 0;
-        const bSeasonScore = sortParameters?.season[b.season] ?? 0;
+        const aYearScore = sortParameters?.year.data?.[a.year] ?? 0;
+        const bYearScore = sortParameters?.year.data?.[b.year] ?? 0;
+        const aSeasonScore = sortParameters?.season.data?.[a.season] ?? 0;
+        const bSeasonScore = sortParameters?.season.data?.[b.season] ?? 0;
         return (
           bPaperTypeScore -
           aPaperTypeScore +
@@ -1420,7 +1420,6 @@ const TopicalPage = () => {
                     <Sort
                       sortParameters={sortParameters}
                       setSortParameters={setSortParameters}
-                      currentQuery={currentQuery}
                     />
                   </>
                 )}

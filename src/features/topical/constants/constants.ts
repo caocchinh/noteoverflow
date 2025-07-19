@@ -199,3 +199,8 @@ export const DEFAULT_LAYOUT_STYLE: LayoutStyle = "pagination";
 export const DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE = 50;
 export const MAX_NUMBER_OF_COLUMNS = 5;
 export const MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE = 100;
+
+export const YEAR_SORT_DEFAULT_WEIGHT = 5;
+export const PAPER_TYPE_SORT_DEFAULT_WEIGHT = 1;
+export const SEASON_SORT_DEFAULT_WEIGHT = 1;
+export const TOPIC_SORT_DEFAULT_WEIGHT = 1;

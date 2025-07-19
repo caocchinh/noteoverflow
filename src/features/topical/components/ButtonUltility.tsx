@@ -11,9 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, X } from "lucide-react";
-import { FilterData } from "../constants/types";
+import { FilterData, SortParameters } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { computeWeightedScoreByArrayIndex } from "../lib/utils";
+import {
+  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+  SEASON_SORT_DEFAULT_WEIGHT,
+  YEAR_SORT_DEFAULT_WEIGHT,
+  TOPIC_SORT_DEFAULT_WEIGHT,
+} from "../constants/constants";
 
 export default function ButtonUltility({
   isResetConfirmationOpen,
@@ -31,14 +37,7 @@ export default function ButtonUltility({
   setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
-  setSortParameters: (
-    value: {
-      topic: Record<string, number>;
-      paperType: Record<string, number>;
-      year: Record<string, number>;
-      season: Record<string, number>;
-    } | null
-  ) => void;
+  setSortParameters: (value: SortParameters | null) => void;
   isMounted: boolean;
   isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
   setIsSearchEnabled: (value: boolean) => void;
@@ -71,22 +70,34 @@ export default function ButtonUltility({
               ...query,
             });
             setSortParameters({
-              paperType: computeWeightedScoreByArrayIndex({
-                data: query.paperType,
-                weightMultiplier: 1,
-              }),
-              topic: computeWeightedScoreByArrayIndex({
-                data: query.topic,
-                weightMultiplier: 1,
-              }),
-              year: computeWeightedScoreByArrayIndex({
-                data: query.year,
-                weightMultiplier: 3,
-              }),
-              season: computeWeightedScoreByArrayIndex({
-                data: query.season,
-                weightMultiplier: 1,
-              }),
+              paperType: {
+                data: computeWeightedScoreByArrayIndex({
+                  data: query.paperType,
+                  weightMultiplier: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+                }),
+                weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+              },
+              topic: {
+                data: computeWeightedScoreByArrayIndex({
+                  data: query.topic,
+                  weightMultiplier: TOPIC_SORT_DEFAULT_WEIGHT,
+                }),
+                weight: TOPIC_SORT_DEFAULT_WEIGHT,
+              },
+              year: {
+                data: computeWeightedScoreByArrayIndex({
+                  data: query.year,
+                  weightMultiplier: YEAR_SORT_DEFAULT_WEIGHT,
+                }),
+                weight: YEAR_SORT_DEFAULT_WEIGHT,
+              },
+              season: {
+                data: computeWeightedScoreByArrayIndex({
+                  data: query.season,
+                  weightMultiplier: SEASON_SORT_DEFAULT_WEIGHT,
+                }),
+                weight: SEASON_SORT_DEFAULT_WEIGHT,
+              },
             });
           }
         }}

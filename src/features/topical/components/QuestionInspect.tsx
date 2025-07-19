@@ -597,10 +597,12 @@ const QuestionInspect = ({
                     if (searchInput === "") {
                       setCurrentTab(currentTabThatContainsQuestion);
                       if (currentQuestionId) {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: currentTabThatContainsQuestion,
-                        });
+                        setTimeout(() => {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: currentTabThatContainsQuestion,
+                          });
+                        }, 0);
                       }
                     } else {
                       const currentQuestionIndexInSearchResult =
@@ -610,9 +612,11 @@ const QuestionInspect = ({
                       if (currentQuestionIndexInSearchResult === -1) {
                         return;
                       }
-                      searchVirtualizer.scrollToIndex(
-                        currentQuestionIndexInSearchResult
-                      );
+                      setTimeout(() => {
+                        searchVirtualizer.scrollToIndex(
+                          currentQuestionIndexInSearchResult
+                        );
+                      }, 0);
                     }
                   }}
                 >
