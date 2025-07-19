@@ -180,11 +180,11 @@ const Sort = memo(
         </Tooltip>
         <DialogContent
           showCloseButton={false}
-          className="w-[1000px] !max-w-[90vw] dark:bg-accent z-[1000011] gap-0 max-h-[96dvh]"
+          className="w-[1300px] !max-w-[90vw] dark:bg-accent z-[1000011] gap-0 max-h-[96dvh]"
           overlayClassName="z-[1000010]"
         >
           <Tabs defaultValue="sort">
-            <DialogHeader className="flex flex-row itemscenter justify-between">
+            <DialogHeader className="flex flex-row itemscenter justify-between mb-2">
               <div className="text-left">
                 <DialogTitle>Weighted sort</DialogTitle>
                 <DialogDescription>
@@ -203,7 +203,7 @@ const Sort = memo(
 
             <TabsContent value="sort">
               <ScrollArea
-                className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40"
+                className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40 px-4"
                 type="always"
               >
                 <div className="flex gap-6 items-start justify-center w-full flex-wrap">
@@ -330,10 +330,10 @@ const ReorderList = memo(
     );
 
     return (
-      <div className="flex flex-col gap-3 items-center justify-center w-[200px] dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
+      <div className="flex flex-col gap-3 items-center justify-center min-w-[220px] flex-1 dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
         <h3 className="text-sm font-medium -mb-4">{label}</h3>
         <ScrollArea
-          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55"
+          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55 pr-4"
           type="always"
         >
           <Reorder.Group
@@ -343,7 +343,7 @@ const ReorderList = memo(
             onReorder={(newOrder) => {
               setItems(newOrder, weight);
             }}
-            className="min-w-[80px] w-full pr-3"
+            className="min-w-[80px] w-full"
           >
             {items.map((item, index) => (
               <Reorder.Item

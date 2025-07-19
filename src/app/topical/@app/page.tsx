@@ -178,7 +178,6 @@ const TopicalPage = () => {
     setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
   }, []);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
-  const [showBookmarkedQuestion, setShowBookmarkedQuestion] = useState(true);
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
@@ -748,26 +747,28 @@ const TopicalPage = () => {
         const bPaperTypeScore =
           (sortParameters?.paperType.data?.[b.paperType] ?? 0) *
           (sortParameters?.paperType.weight ?? 0);
-        const aTopicScore = a.questionTopics.reduce((acc, curr) => {
-          if (sortParameters?.topic && curr.topic) {
-            return (
-              acc +
-              sortParameters.topic.data?.[curr.topic] *
-                (sortParameters.topic.weight ?? 0)
-            );
-          }
-          return acc;
-        }, 0);
-        const bTopicScore = b.questionTopics.reduce((acc, curr) => {
-          if (sortParameters?.topic && curr.topic) {
-            return (
-              acc +
-              sortParameters.topic.data?.[curr.topic] *
-                (sortParameters.topic.weight ?? 0)
-            );
-          }
-          return acc;
-        }, 0);
+        const aTopicScore =
+          a.questionTopics.reduce((acc, curr) => {
+            if (sortParameters?.topic && curr.topic) {
+              return (
+                acc +
+                sortParameters.topic.data?.[curr.topic] *
+                  (sortParameters.topic.weight ?? 0)
+              );
+            }
+            return acc;
+          }, 0) / a.questionTopics.length;
+        const bTopicScore =
+          b.questionTopics.reduce((acc, curr) => {
+            if (sortParameters?.topic && curr.topic) {
+              return (
+                acc +
+                sortParameters.topic.data?.[curr.topic] *
+                  (sortParameters.topic.weight ?? 0)
+              );
+            }
+            return acc;
+          }, 0) / b.questionTopics.length;
         const aYearScore =
           (sortParameters?.year.data?.[a.year] ?? 0) *
           (sortParameters?.year.weight ?? 0);
@@ -1213,7 +1214,7 @@ const TopicalPage = () => {
             <SidebarRail />
           </Sidebar>
           <SidebarInset
-            className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start"
+            className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
             ref={sideBarInsetRef}
           >
             {showScrollToTopButton && (
@@ -1273,11 +1274,11 @@ const TopicalPage = () => {
             )}
             <ScrollArea
               viewPortOnScroll={overflowScrollHandler}
-              className="w-full"
+              className="w-full  "
               viewportRef={ultilityHorizontalScrollBarRef}
             >
               <div
-                className="flex flex-row h-full items-center justify-start gap-2 pl-4 w-max"
+                className="flex flex-row h-full items-center justify-start gap-2 w-max pl-4 pr-2"
                 ref={ultilityRef}
               >
                 <Button
@@ -1441,72 +1442,49 @@ const TopicalPage = () => {
                   setSortParameters={setSortParameters}
                   isDisabled={isQuestionViewDisabled}
                 />
-
-                <div
-                  className={cn(
-                    "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-                    isQuestionViewDisabled && "pointer-events-none opacity-50",
-                    showFinishedQuestion
-                      ? "border-green-600"
-                      : "border-muted-foreground"
-                  )}
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).tagName === "LABEL") {
-                      return;
-                    }
-                    setShowFinishedQuestion(!showFinishedQuestion);
-                  }}
-                >
-                  <Switch
-                    className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
-                    id="show-finished-question"
-                    checked={showFinishedQuestion ?? false}
-                  />
-                  <Label
-                    className={cn(
-                      showFinishedQuestion
-                        ? "text-green-600"
-                        : "text-muted-foreground",
-                      "cursor-pointer"
-                    )}
-                    htmlFor="show-finished-question"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                        isQuestionViewDisabled &&
+                          "pointer-events-none opacity-50",
+                        showFinishedQuestion
+                          ? "border-green-600"
+                          : "border-muted-foreground"
+                      )}
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).tagName === "LABEL") {
+                          return;
+                        }
+                        setShowFinishedQuestion(!showFinishedQuestion);
+                      }}
+                    >
+                      <Switch
+                        className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
+                        id="show-finished-question"
+                        checked={showFinishedQuestion ?? false}
+                      />
+                      <Label
+                        className={cn(
+                          showFinishedQuestion
+                            ? "text-green-600"
+                            : "text-muted-foreground",
+                          "cursor-pointer"
+                        )}
+                        htmlFor="show-finished-question"
+                      >
+                        Show finished questions
+                      </Label>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className={cn(!isQuestionViewDisabled && "hidden")}
                   >
-                    Show finished questions
-                  </Label>
-                </div>
-
-                <div
-                  className={cn(
-                    "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-                    isQuestionViewDisabled && "pointer-events-none opacity-50",
-                    showBookmarkedQuestion
-                      ? "border-logo-main"
-                      : "border-muted-foreground"
-                  )}
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).tagName === "LABEL") {
-                      return;
-                    }
-                    setShowBookmarkedQuestion(!showBookmarkedQuestion);
-                  }}
-                >
-                  <Switch
-                    className="border cursor-pointer border-dashed data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-solid "
-                    id="show-bookmarked-question"
-                    checked={showBookmarkedQuestion ?? false}
-                  />
-                  <Label
-                    className={cn(
-                      showBookmarkedQuestion
-                        ? "text-logo-main"
-                        : "text-muted-foreground",
-                      "cursor-pointer"
-                    )}
-                    htmlFor="show-bookmarked-question"
-                  >
-                    Show bookmarked questions
-                  </Label>
-                </div>
+                    To inspect questions, run a search first.
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               <ScrollBar
@@ -1602,27 +1580,13 @@ const TopicalPage = () => {
                     .filter((question: SelectedQuestion) => {
                       if (
                         !userFinishedQuestions ||
-                        !userSession?.data?.session ||
-                        !bookmarks
+                        !userSession?.data?.session
                       ) {
                         return true;
                       }
                       if (
-                        (!showFinishedQuestion &&
-                          userFinishedQuestions.has(question.id)) ||
-                        (!showBookmarkedQuestion &&
-                          (() => {
-                            for (const bookmark of bookmarks) {
-                              if (
-                                bookmark.userBookmarks.some(
-                                  (b) => b.questionId === question.id
-                                )
-                              ) {
-                                return true;
-                              }
-                            }
-                            return false;
-                          })())
+                        !showFinishedQuestion &&
+                        userFinishedQuestions.has(question.id)
                       ) {
                         return false;
                       }

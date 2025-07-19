@@ -261,7 +261,7 @@ export const isOverScrolling = ({
           isOverScrollingLeft: true,
           isOverScrollingRight: true,
         };
-      } else if (leftThreshold > 1 && ultilityLeft > sideBarInsetLeft) {
+      } else if (leftThreshold > 1 && ultilityLeft < sideBarInsetLeft) {
         return {
           isOverScrollingLeft: true,
           isOverScrollingRight: false,
