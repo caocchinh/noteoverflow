@@ -18,7 +18,10 @@ import {
 } from "@/components/ui/accordion";
 import { Reorder } from "motion/react";
 import { useCallback, memo, useState } from "react";
-import { computeWeightedScoreByArrayIndex } from "../lib/utils";
+import {
+  areArraysIdentical,
+  computeWeightedScoreByArrayIndex,
+} from "../lib/utils";
 import { SortParameters } from "../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -28,6 +31,8 @@ import {
   TOPIC_SORT_DEFAULT_WEIGHT,
   YEAR_SORT_DEFAULT_WEIGHT,
 } from "../constants/constants";
+import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Filters {
   topic: {
@@ -158,64 +163,108 @@ const Sort = memo(
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
-          className="w-[700px] !max-w-[90vw]"
+          className="w-[1000px] !max-w-[90vw] dark:bg-accent gap-0 max-h-[95dvh]"
         >
-          <DialogHeader>
-            <DialogTitle>Weighted sort</DialogTitle>
-            <DialogDescription>
-              Determine which questions show ups first
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex gap-5 items-start justify-center w-full">
-            {filters && (
-              <>
-                <ReorderList
-                  items={filters.year.data}
-                  weight={filters.year.weight}
-                  setItems={(items, weight) =>
-                    updateFilter("year", items, weight)
-                  }
-                  label="Year"
-                />
-                <ReorderList
-                  items={filters.paperType.data}
-                  weight={filters.paperType.weight}
-                  setItems={(items, weight) =>
-                    updateFilter("paperType", items, weight)
-                  }
-                  label="Paper Type"
-                />
-                <ReorderList
-                  items={filters.season.data}
-                  weight={filters.season.weight}
-                  setItems={(items, weight) =>
-                    updateFilter("season", items, weight)
-                  }
-                  label="Season"
-                />
-                <ReorderList
-                  items={filters.topic.data}
-                  weight={filters.topic.weight}
-                  setItems={(items, weight) =>
-                    updateFilter("topic", items, weight)
-                  }
-                  label="Topic"
-                />
-              </>
-            )}
-          </div>
-          <Accordion type="single" collapsible>
-            <AccordionItem value="how-does-this-work">
-              <AccordionTrigger>How does this work?</AccordionTrigger>
-              <AccordionContent className="w-full">
-                Questions are sorted by: Position × Weight = Priority Score.
-                Drag items to change position (higher = more important). Adjust
-                weights for greater influence. Default: Years (5×) newest-first,
-                all others (1×). Your settings determine the final question
-                order.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <Tabs defaultValue="sort">
+            <DialogHeader className="flex flex-row itemscenter justify-between  mt-4">
+              <div className="text-left">
+                <DialogTitle>Weighted sort</DialogTitle>
+                <DialogDescription>
+                  Determine which questions show ups first
+                </DialogDescription>
+              </div>
+              <TabsList className="dark:bg-input/30">
+                <TabsTrigger value="sort" className="cursor-pointer">
+                  Sort
+                </TabsTrigger>
+                <TabsTrigger value="how" className="cursor-pointer">
+                  What is this?
+                </TabsTrigger>
+              </TabsList>
+            </DialogHeader>
+
+            <TabsContent value="sort">
+              <ScrollArea
+                className="h-[full] [&_.bg-border]:bg-logo-main/40"
+                type="always"
+              >
+                <div className="flex gap-6 items-start justify-center w-full flex-wrap">
+                  {filters && (
+                    <>
+                      <ReorderList
+                        items={filters.year.data}
+                        weight={filters.year.weight}
+                        setItems={(items, weight) =>
+                          updateFilter("year", items, weight)
+                        }
+                        label="Year"
+                      />
+                      <ReorderList
+                        items={filters.paperType.data}
+                        weight={filters.paperType.weight}
+                        setItems={(items, weight) =>
+                          updateFilter("paperType", items, weight)
+                        }
+                        label="Paper Type"
+                      />
+                      <ReorderList
+                        items={filters.season.data}
+                        weight={filters.season.weight}
+                        setItems={(items, weight) =>
+                          updateFilter("season", items, weight)
+                        }
+                        label="Season"
+                      />
+                      <ReorderList
+                        items={filters.topic.data}
+                        weight={filters.topic.weight}
+                        setItems={(items, weight) =>
+                          updateFilter("topic", items, weight)
+                        }
+                        label="Topic"
+                      />
+                    </>
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="how">
+              <Accordion
+                type="single"
+                collapsible
+                defaultValue="how-does-this-work"
+              >
+                <AccordionItem value="how-does-this-work">
+                  <AccordionTrigger>How does this work?</AccordionTrigger>
+                  <AccordionContent className="w-full">
+                    Questions are sorted by: Position × Weight = Priority Score.
+                    Drag items to change position (higher up the list = more
+                    important). Adjust weights for greater influence (A weight
+                    of zero means that field has no effect on the outcome of the
+                    sorted questions).{" "}
+                    <span className="text-logo-main">
+                      Default: Years (1×) descending order, all others (0×)
+                    </span>
+                    . Your settings determine the final question order.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="unexpected-result">
+                  <AccordionTrigger>
+                    The results does not make sense
+                  </AccordionTrigger>
+                  <AccordionContent className="w-full">
+                    Try to add or reduce weight on each field. If a field is
+                    very important, set the weight of it to a very high value,
+                    keep trial and error until you get the desired outcome. If
+                    it still does not work, please try to reduce the amount of
+                    items in your filter when searching for question (e.g.
+                    reduce the amount of topics selected).
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+          </Tabs>
+
           <DialogFooter className="mt-4">
             <DialogClose asChild>
               <Button variant="outline" className="cursor-pointer">
@@ -263,9 +312,12 @@ const ReorderList = memo(
     );
 
     return (
-      <div className="flex flex-col gap-3 items-center justify-center w-full">
+      <div className="flex flex-col gap-3 items-center justify-center w-[200px] bg-muted-foreground/7 p-2 rounded-sm border border-foreground">
         <h3 className="text-sm font-medium -mb-4">{label}</h3>
-        <ScrollArea className="h-[250px] w-full" type="always">
+        <ScrollArea
+          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55"
+          type="always"
+        >
           <Reorder.Group
             axis="y"
             layoutScroll
@@ -275,17 +327,58 @@ const ReorderList = memo(
             }}
             className="min-w-[80px] w-full pr-3"
           >
-            {items.map((item) => (
+            {items.map((item, index) => (
               <Reorder.Item
                 key={item}
                 value={item}
-                className="bg-card px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border"
+                className="flex flex-row items-center justify-center gap-2"
               >
-                {item}
+                <p className="text-sm text-white">{index + 1}.</p>
+                <div className=" dark:bg-input/30 px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border">
+                  {item}
+                </div>
               </Reorder.Item>
             ))}
           </Reorder.Group>
         </ScrollArea>
+        <div className="flex flex-col gap-2 items-center justify-center w-full">
+          <Button
+            variant="outline"
+            className={cn(
+              "cursor-pointer w-full",
+              areArraysIdentical(
+                items.toSorted((a, b) => a.localeCompare(b)),
+                items
+              ) && "!bg-logo-main !text-white"
+            )}
+            onClick={() =>
+              setItems(
+                items.toSorted((a, b) => a.localeCompare(b)),
+                weight
+              )
+            }
+          >
+            Ascending
+          </Button>
+          <Button
+            variant="outline"
+            className={cn(
+              "cursor-pointer w-full",
+              areArraysIdentical(
+                items.toSorted((a, b) => b.localeCompare(a)),
+                items
+              ) && "!bg-logo-main !text-white"
+            )}
+            onClick={() =>
+              setItems(
+                items.toSorted((a, b) => b.localeCompare(a)),
+                weight
+              )
+            }
+          >
+            Descending
+          </Button>
+        </div>
         <div className="flex flex-col gap-1 items-center justify-center">
           <p className="text-sm  text-muted-foreground">Weight</p>
           <Input value={weight} onChange={handleWeightChange} type="number" />
