@@ -5,7 +5,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,11 @@ import {
 } from "../constants/constants";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Filters {
   topic: {
@@ -62,15 +66,17 @@ const Sort = memo(
     sortParameters,
     setSortParameters,
     onSortCallBack,
+    isDisabled,
     onBeforeSort,
   }: {
     sortParameters: SortParameters | null;
     setSortParameters: (value: SortParameters | null) => void;
     onSortCallBack?: () => void;
+    isDisabled: boolean;
     onBeforeSort?: () => void;
   }) => {
     const [filters, setFilters] = useState<Filters | null>(null);
-
+    const [isOpen, setIsOpen] = useState(false);
     const updateFilter = useCallback(
       (key: keyof Filters, items: string[], weight: number) => {
         setFilters((prev) => {
@@ -149,23 +155,29 @@ const Sort = memo(
     }, [sortParameters]);
 
     return (
-      <Dialog
-        onOpenChange={(open) => {
-          if (open) {
-            resetFilters();
-          }
-        }}
-      >
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="cursor-pointer rounded-[2px]"
-            title="Sort questions"
-          >
-            Sort
-            <ArrowDownWideNarrow />
-          </Button>
-        </DialogTrigger>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                variant="outline"
+                className="cursor-pointer rounded-[2px]"
+                title="Sort questions"
+                disabled={isDisabled}
+                onClick={() => {
+                  setIsOpen(true);
+                  resetFilters();
+                }}
+              >
+                Sort
+                <ArrowDownWideNarrow />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className={cn(!isDisabled && "hidden")}>
+            To sort questions, run a search first.
+          </TooltipContent>
+        </Tooltip>
         <DialogContent
           showCloseButton={false}
           className="w-[1000px] !max-w-[90vw] dark:bg-accent z-[1000011] gap-0 max-h-[96dvh]"
@@ -318,7 +330,7 @@ const ReorderList = memo(
     );
 
     return (
-      <div className="flex flex-col gap-3 items-center justify-center w-[200px] bg-muted-foreground/7 p-2 rounded-sm border border-foreground">
+      <div className="flex flex-col gap-3 items-center justify-center w-[200px] dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
         <h3 className="text-sm font-medium -mb-4">{label}</h3>
         <ScrollArea
           className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55"

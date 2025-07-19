@@ -1120,6 +1120,7 @@ const QuestionInspect = ({
                   <Sort
                     sortParameters={sortParameters}
                     setSortParameters={setSortParameters}
+                    isDisabled={false}
                     onBeforeSort={() => {
                       if (currentQuestionId) {
                         setTimeout(() => {

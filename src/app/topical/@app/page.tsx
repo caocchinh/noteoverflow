@@ -80,6 +80,8 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import Sort from "@/features/topical/components/Sort";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -141,6 +143,7 @@ const TopicalPage = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
+  const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
   const [currentQuery, setCurrentQuery] = useState<
     {
       curriculumId: string;
@@ -175,6 +178,7 @@ const TopicalPage = () => {
     setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
   }, []);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+  const [showBookmarkedQuestion, setShowBookmarkedQuestion] = useState(true);
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
@@ -1431,15 +1435,78 @@ const TopicalPage = () => {
                     </div>
                   </>
                 )}
-                {!isQuestionViewDisabled && (
-                  <>
-                    <Separator orientation="vertical" className="!h-[30px]" />
-                    <Sort
-                      sortParameters={sortParameters}
-                      setSortParameters={setSortParameters}
-                    />
-                  </>
-                )}
+                <Separator orientation="vertical" className="!h-[30px]" />
+                <Sort
+                  sortParameters={sortParameters}
+                  setSortParameters={setSortParameters}
+                  isDisabled={isQuestionViewDisabled}
+                />
+
+                <div
+                  className={cn(
+                    "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                    isQuestionViewDisabled && "pointer-events-none opacity-50",
+                    showFinishedQuestion
+                      ? "border-green-600"
+                      : "border-muted-foreground"
+                  )}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).tagName === "LABEL") {
+                      return;
+                    }
+                    setShowFinishedQuestion(!showFinishedQuestion);
+                  }}
+                >
+                  <Switch
+                    className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
+                    id="show-finished-question"
+                    checked={showFinishedQuestion ?? false}
+                  />
+                  <Label
+                    className={cn(
+                      showFinishedQuestion
+                        ? "text-green-600"
+                        : "text-muted-foreground",
+                      "cursor-pointer"
+                    )}
+                    htmlFor="show-finished-question"
+                  >
+                    Show finished questions
+                  </Label>
+                </div>
+
+                <div
+                  className={cn(
+                    "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                    isQuestionViewDisabled && "pointer-events-none opacity-50",
+                    showBookmarkedQuestion
+                      ? "border-logo-main"
+                      : "border-muted-foreground"
+                  )}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).tagName === "LABEL") {
+                      return;
+                    }
+                    setShowBookmarkedQuestion(!showBookmarkedQuestion);
+                  }}
+                >
+                  <Switch
+                    className="border cursor-pointer border-dashed data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-solid "
+                    id="show-bookmarked-question"
+                    checked={showBookmarkedQuestion ?? false}
+                  />
+                  <Label
+                    className={cn(
+                      showBookmarkedQuestion
+                        ? "text-logo-main"
+                        : "text-muted-foreground",
+                      "cursor-pointer"
+                    )}
+                    htmlFor="show-bookmarked-question"
+                  >
+                    Show bookmarked questions
+                  </Label>
+                </div>
               </div>
 
               <ScrollBar
@@ -1531,25 +1598,57 @@ const TopicalPage = () => {
                 }
               >
                 <Masonry gutter="11px">
-                  {displayedData?.map((question) =>
-                    question?.questionImages.map((imageSrc: string) => (
-                      <QuestionPreview
-                        bookmarks={bookmarks || []}
-                        question={question}
-                        setIsQuestionViewOpen={setIsQuestionViewOpen}
-                        isUserSessionPending={isUserSessionPending}
-                        userFinishedQuestions={
-                          (userFinishedQuestions as Set<string>) || new Set()
-                        }
-                        showFinishedQuestionTint={showFinishedQuestionTint}
-                        isBookmarkError={isUserSessionError || isBookmarksError}
-                        isValidSession={!!userSession?.data?.session}
-                        key={`${question.id}-${imageSrc}`}
-                        isBookmarksFetching={isBookmarksFetching}
-                        imageSrc={imageSrc}
-                      />
-                    ))
-                  )}
+                  {displayedData
+                    .filter((question: SelectedQuestion) => {
+                      if (
+                        !userFinishedQuestions ||
+                        !userSession?.data?.session ||
+                        !bookmarks
+                      ) {
+                        return true;
+                      }
+                      if (
+                        (!showFinishedQuestion &&
+                          userFinishedQuestions.has(question.id)) ||
+                        (!showBookmarkedQuestion &&
+                          (() => {
+                            for (const bookmark of bookmarks) {
+                              if (
+                                bookmark.userBookmarks.some(
+                                  (b) => b.questionId === question.id
+                                )
+                              ) {
+                                return true;
+                              }
+                            }
+                            return false;
+                          })())
+                      ) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((question) =>
+                      question?.questionImages.map((imageSrc: string) => (
+                        <QuestionPreview
+                          bookmarks={bookmarks || []}
+                          question={question}
+                          setIsQuestionViewOpen={setIsQuestionViewOpen}
+                          isUserSessionPending={isUserSessionPending}
+                          userFinishedQuestions={
+                            (userFinishedQuestions as Set<string>) || new Set()
+                          }
+                          showFinishedQuestionTint={showFinishedQuestionTint}
+                          isBookmarkError={
+                            isUserSessionError || isBookmarksError
+                          }
+                          isValidSession={!!userSession?.data?.session}
+                          key={`${question.id}-${imageSrc}`}
+                          isBookmarksFetching={isBookmarksFetching}
+                          imageSrc={imageSrc}
+                        />
+                      ))
+                    )}
                 </Masonry>
               </ResponsiveMasonry>
 
