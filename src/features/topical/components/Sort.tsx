@@ -203,7 +203,7 @@ const Sort = memo(
 
             <TabsContent value="sort">
               <ScrollArea
-                className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40 px-4"
+                className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40 px-5"
                 type="always"
               >
                 <div className="flex gap-6 items-start justify-center w-full flex-wrap">
@@ -333,7 +333,7 @@ const ReorderList = memo(
       <div className="flex flex-col gap-3 items-center justify-center min-w-[220px] flex-1 dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
         <h3 className="text-sm font-medium -mb-4">{label}</h3>
         <ScrollArea
-          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55 pr-4"
+          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55 pl-4 pr-4 sm:pr-7"
           type="always"
         >
           <Reorder.Group

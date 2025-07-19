@@ -227,33 +227,32 @@ export const isOverScrolling = ({
 } => {
   if (child && parent) {
     if (child.clientWidth >= parent.clientWidth) {
-      const ultilityLeft = Math.abs(
+      const childLeft = Math.abs(
         Math.round(child.getBoundingClientRect().left)
       );
-      const ultilityRight = Math.abs(
+      const childRight = Math.abs(
         Math.round(child.getBoundingClientRect().right)
       );
-      const sideBarInsetLeft = Math.abs(
+      const parentLeft = Math.abs(
         Math.round(parent.getBoundingClientRect().left)
       );
-      const sideBarInsetRight = Math.abs(
+      const parentRight = Math.abs(
         Math.round(parent.getBoundingClientRect().right)
       );
 
       const leftThreshold =
-        ((Math.max(ultilityLeft, sideBarInsetLeft) -
-          Math.min(ultilityLeft, sideBarInsetLeft)) /
-          ((ultilityLeft + sideBarInsetLeft) / 2)) *
+        ((Math.max(childLeft, parentLeft) - Math.min(childLeft, parentLeft)) /
+          ((childLeft + parentLeft) / 2)) *
         100;
       const rightThreshold =
-        ((Math.max(ultilityRight, sideBarInsetRight) -
-          Math.min(ultilityRight, sideBarInsetRight)) /
-          ((ultilityRight + sideBarInsetRight) / 2)) *
+        ((Math.max(childRight, parentRight) -
+          Math.min(childRight, parentRight)) /
+          ((childRight + parentRight) / 2)) *
         100;
 
       if (
-        ultilityLeft !== sideBarInsetLeft &&
-        ultilityRight !== sideBarInsetRight &&
+        childLeft !== parentLeft &&
+        childRight !== parentRight &&
         leftThreshold > 1 &&
         rightThreshold > 1
       ) {
@@ -261,12 +260,12 @@ export const isOverScrolling = ({
           isOverScrollingLeft: true,
           isOverScrollingRight: true,
         };
-      } else if (leftThreshold > 1 && ultilityLeft < sideBarInsetLeft) {
+      } else if (leftThreshold > 1 && childLeft > parentLeft) {
         return {
           isOverScrollingLeft: true,
           isOverScrollingRight: false,
         };
-      } else if (rightThreshold > 1 && ultilityRight > sideBarInsetRight) {
+      } else if (rightThreshold > 1 && childRight > parentRight) {
         return {
           isOverScrollingLeft: false,
           isOverScrollingRight: true,

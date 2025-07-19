@@ -1242,7 +1242,7 @@ const TopicalPage = () => {
             )}{" "}
             {isUltilityOverflowingRight && (
               <Button
-                className="absolute right-0 top-6  rounded-full cursor-pointer w-7 h-7 z-[200]"
+                className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"
                 title="Move right"
                 onClick={() => {
                   if (ultilityHorizontalScrollBarRef.current) {
@@ -1258,7 +1258,7 @@ const TopicalPage = () => {
             )}
             {isUltilityOverflowingLeft && (
               <Button
-                className="absolute left-0 top-6 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                className="absolute left-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"
                 title="Move left"
                 onClick={() => {
                   if (ultilityHorizontalScrollBarRef.current) {
@@ -1320,7 +1320,7 @@ const TopicalPage = () => {
                 {layoutStyle === "pagination" && !isQuestionViewDisabled && (
                   <>
                     <Separator orientation="vertical" className="!h-[30px]" />
-                    <div className="flex flex-row items-center justify-center gap-2 rounded-sm p-2">
+                    <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
                       <Button
                         variant="outline"
                         className="cursor-pointer !p-[8px] rounded-[2px]"

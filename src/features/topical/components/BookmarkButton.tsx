@@ -579,11 +579,13 @@ const BookmarkButtonConsumer = memo(
             setSearchInput("");
             return;
           }
-          setOpen(false);
-          setNewBookmarkListNameInput("");
+          if (open) {
+            setOpen(false);
+            setNewBookmarkListNameInput("");
+          }
         }
       },
-      [searchInput, setOpen, setSearchInput, setNewBookmarkListNameInput]
+      [searchInput, open, setNewBookmarkListNameInput, setSearchInput, setOpen]
     );
 
     const openUI = (e: React.MouseEvent) => {
