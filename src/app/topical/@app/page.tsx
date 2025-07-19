@@ -173,10 +173,11 @@ const TopicalPage = () => {
     const isOverScrollingResult = isOverScrolling({
       child: ultilityRef.current,
       parent: sideBarInsetRef.current,
+      specialLeftCase: !isMobileDevice,
     });
     setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
     setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
-  }, []);
+  }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

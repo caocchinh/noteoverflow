@@ -218,9 +218,11 @@ export const parsePastPaperUrl = ({
 export const isOverScrolling = ({
   child,
   parent,
+  specialLeftCase,
 }: {
   child: HTMLDivElement | null;
   parent: HTMLDivElement | null;
+  specialLeftCase?: boolean;
 }): {
   isOverScrollingLeft: boolean;
   isOverScrollingRight: boolean;
@@ -260,7 +262,11 @@ export const isOverScrolling = ({
           isOverScrollingLeft: true,
           isOverScrollingRight: true,
         };
-      } else if (leftThreshold > 1 && childLeft > parentLeft) {
+      } else if (
+        leftThreshold > 1 &&
+        ((childLeft > parentLeft && !specialLeftCase) ||
+          (childLeft < parentLeft && specialLeftCase))
+      ) {
         return {
           isOverScrollingLeft: true,
           isOverScrollingRight: false,
