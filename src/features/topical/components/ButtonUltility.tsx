@@ -73,28 +73,24 @@ export default function ButtonUltility({
               paperType: {
                 data: computeWeightedScoreByArrayIndex({
                   data: query.paperType,
-                  weightMultiplier: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
                 }),
                 weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
               },
               topic: {
                 data: computeWeightedScoreByArrayIndex({
                   data: query.topic,
-                  weightMultiplier: TOPIC_SORT_DEFAULT_WEIGHT,
                 }),
                 weight: TOPIC_SORT_DEFAULT_WEIGHT,
               },
               year: {
                 data: computeWeightedScoreByArrayIndex({
                   data: query.year,
-                  weightMultiplier: YEAR_SORT_DEFAULT_WEIGHT,
                 }),
                 weight: YEAR_SORT_DEFAULT_WEIGHT,
               },
               season: {
                 data: computeWeightedScoreByArrayIndex({
                   data: query.season,
-                  weightMultiplier: SEASON_SORT_DEFAULT_WEIGHT,
                 }),
                 weight: SEASON_SORT_DEFAULT_WEIGHT,
               },

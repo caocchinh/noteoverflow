@@ -737,28 +737,45 @@ const TopicalPage = () => {
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-
       const sortedData = topicalData.data.sort((a, b) => {
         const aPaperTypeScore =
-          sortParameters?.paperType.data?.[a.paperType] ?? 0;
+          (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
+          (sortParameters?.paperType.weight ?? 0);
         const bPaperTypeScore =
-          sortParameters?.paperType.data?.[b.paperType] ?? 0;
+          (sortParameters?.paperType.data?.[b.paperType] ?? 0) *
+          (sortParameters?.paperType.weight ?? 0);
         const aTopicScore = a.questionTopics.reduce((acc, curr) => {
           if (sortParameters?.topic && curr.topic) {
-            return acc + (sortParameters.topic.data?.[curr.topic] ?? 0);
+            return (
+              acc +
+              sortParameters.topic.data?.[curr.topic] *
+                (sortParameters.topic.weight ?? 0)
+            );
           }
           return acc;
         }, 0);
         const bTopicScore = b.questionTopics.reduce((acc, curr) => {
           if (sortParameters?.topic && curr.topic) {
-            return acc + (sortParameters.topic.data?.[curr.topic] ?? 0);
+            return (
+              acc +
+              sortParameters.topic.data?.[curr.topic] *
+                (sortParameters.topic.weight ?? 0)
+            );
           }
           return acc;
         }, 0);
-        const aYearScore = sortParameters?.year.data?.[a.year] ?? 0;
-        const bYearScore = sortParameters?.year.data?.[b.year] ?? 0;
-        const aSeasonScore = sortParameters?.season.data?.[a.season] ?? 0;
-        const bSeasonScore = sortParameters?.season.data?.[b.season] ?? 0;
+        const aYearScore =
+          (sortParameters?.year.data?.[a.year] ?? 0) *
+          (sortParameters?.year.weight ?? 0);
+        const bYearScore =
+          (sortParameters?.year.data?.[b.year] ?? 0) *
+          (sortParameters?.year.weight ?? 0);
+        const aSeasonScore =
+          (sortParameters?.season.data?.[a.season] ?? 0) *
+          (sortParameters?.season.weight ?? 0);
+        const bSeasonScore =
+          (sortParameters?.season.data?.[b.season] ?? 0) *
+          (sortParameters?.season.weight ?? 0);
         return (
           bPaperTypeScore -
           aPaperTypeScore +

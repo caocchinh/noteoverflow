@@ -279,15 +279,13 @@ export const isOverScrolling = ({
 // Lowest index has the highest weight
 export const computeWeightedScoreByArrayIndex = ({
   data,
-  weightMultiplier,
 }: {
   data: string[];
-  weightMultiplier: number;
 }): Record<string, number> => {
   const scoreObject: Record<string, number> = {};
   let weight = data.length;
   for (const item of data) {
-    const score = weight * weightMultiplier;
+    const score = weight;
     scoreObject[item] = score;
     weight--;
   }
