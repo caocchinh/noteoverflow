@@ -1583,6 +1583,8 @@ const TopicalPage = () => {
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
+        setSortParameters={setSortParameters}
+        sortParameters={sortParameters}
         isBookmarkError={isUserSessionError || isBookmarksError}
         isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
         isInspectSidebarOpen={isInspectSidebarOpen}

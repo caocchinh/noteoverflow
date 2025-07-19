@@ -61,9 +61,13 @@ const Sort = memo(
   ({
     sortParameters,
     setSortParameters,
+    onSortCallBack,
+    onBeforeSort,
   }: {
     sortParameters: SortParameters | null;
     setSortParameters: (value: SortParameters | null) => void;
+    onSortCallBack?: () => void;
+    onBeforeSort?: () => void;
   }) => {
     const [filters, setFilters] = useState<Filters | null>(null);
 
@@ -79,7 +83,7 @@ const Sort = memo(
 
     const handleApplySorting = useCallback(() => {
       if (!filters) return;
-
+      onBeforeSort?.();
       const result: SortParameters = {} as SortParameters;
 
       // Process all filter types in one loop
@@ -94,7 +98,8 @@ const Sort = memo(
       });
 
       setSortParameters(result);
-    }, [filters, setSortParameters]);
+      onSortCallBack?.();
+    }, [filters, onBeforeSort, setSortParameters, onSortCallBack]);
 
     // Reset to initial filters if dialog closes/opens
     const resetFilters = useCallback(() => {
@@ -163,10 +168,11 @@ const Sort = memo(
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
-          className="w-[1000px] !max-w-[90vw] dark:bg-accent gap-0 max-h-[95dvh]"
+          className="w-[1000px] !max-w-[90vw] dark:bg-accent z-[1000011] gap-0 max-h-[96dvh]"
+          overlayClassName="z-[1000010]"
         >
           <Tabs defaultValue="sort">
-            <DialogHeader className="flex flex-row itemscenter justify-between  mt-4">
+            <DialogHeader className="flex flex-row itemscenter justify-between">
               <div className="text-left">
                 <DialogTitle>Weighted sort</DialogTitle>
                 <DialogDescription>
@@ -185,7 +191,7 @@ const Sort = memo(
 
             <TabsContent value="sort">
               <ScrollArea
-                className="h-[full] [&_.bg-border]:bg-logo-main/40"
+                className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40"
                 type="always"
               >
                 <div className="flex gap-6 items-start justify-center w-full flex-wrap">

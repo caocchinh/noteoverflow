@@ -160,6 +160,7 @@ export const BESTEXAMHELP_DOMAIN = "https://bestexamhelp.com/exam";
 
 export const BESTEXAMHELP_SUBJECT_CODE: Record<string, string> = {
   "9702": "physics-9702",
+  "9701": "chemistry-9701",
 };
 
 export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<

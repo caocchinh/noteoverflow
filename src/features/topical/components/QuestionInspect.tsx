@@ -50,7 +50,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
-import { SelectedBookmark, SelectedQuestion } from "../constants/types";
+import {
+  SelectedBookmark,
+  SelectedQuestion,
+  SortParameters,
+} from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import {
   Sidebar,
@@ -63,6 +67,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BookmarkButton } from "./BookmarkButton";
 import { JumpToTabButton } from "./JumpToTabButton";
+import Sort from "./Sort";
 
 const QuestionInspect = ({
   isOpen,
@@ -74,6 +79,8 @@ const QuestionInspect = ({
   isBookmarksFetching,
   isBookmarkError,
   isFinishedQuestionsFetching,
+  sortParameters,
+  setSortParameters,
   isFinishedQuestionsError,
   isInspectSidebarOpen,
   setIsInspectSidebarOpen,
@@ -88,6 +95,8 @@ const QuestionInspect = ({
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark;
   isUserSessionPending: boolean;
+  sortParameters: SortParameters | null;
+  setSortParameters: (sortParameters: SortParameters | null) => void;
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: (open: boolean) => void;
@@ -1107,6 +1116,20 @@ const QuestionInspect = ({
                     isFinishedQuestionFetching={isFinishedQuestionsFetching}
                     isFinishedQuestionError={isFinishedQuestionsError}
                     isValidSession={isValidSession}
+                  />
+                  <Sort
+                    sortParameters={sortParameters}
+                    setSortParameters={setSortParameters}
+                    onBeforeSort={() => {
+                      if (currentQuestionId) {
+                        setTimeout(() => {
+                          setIsOpen({
+                            isOpen: isOpen.isOpen,
+                            questionId: currentQuestionId,
+                          });
+                        }, 0);
+                      }
+                    }}
                   />
                 </div>
                 <ScrollBar
