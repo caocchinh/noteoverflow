@@ -342,7 +342,7 @@ export const recentQuery = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
     queryKey: text("query_key").notNull(),
-    sortParams: text("sort_params").notNull(),
+    sortParams: text("sort_params"),
     lastSearch: integer("last_search", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),

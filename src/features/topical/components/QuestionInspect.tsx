@@ -223,6 +223,7 @@ const QuestionInspect = ({
     ({ questionId, tab }: { questionId: string; tab: number }) => {
       if (
         !partitionedTopicalData ||
+        !partitionedTopicalData[tab] ||
         partitionedTopicalData[tab].length === 0 ||
         !isVirtualizationReady
       ) {

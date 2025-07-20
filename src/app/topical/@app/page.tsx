@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  History,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -83,13 +82,8 @@ import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import Sort from "@/features/topical/components/Sort";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
+import { RecentQuery } from "@/features/topical/components/RecentQuery";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -186,6 +180,7 @@ const TopicalPage = () => {
     setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+  const isOverwriting = useRef(false);
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
@@ -196,6 +191,7 @@ const TopicalPage = () => {
   }, [overflowScrollHandler]);
 
   const resetEverything = () => {
+    isOverwriting.current = true;
     try {
       const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
       const stateToSave: FiltersCache = existingStateJSON
@@ -245,18 +241,25 @@ const TopicalPage = () => {
     if (!isMobileDevice) {
       setSidebarKey((prev) => prev + 1);
     }
+    setTimeout(() => {
+      isOverwriting.current = false;
+    }, 0);
   };
 
   const revert = () => {
     if (!currentQuery.curriculumId || !currentQuery.subjectId) {
       return;
     }
+    isOverwriting.current = true;
     setSelectedCurriculum(currentQuery.curriculumId as ValidCurriculum);
     setSelectedSubject(currentQuery.subjectId);
     setSelectedTopic(currentQuery.topic);
     setSelectedYear(currentQuery.year);
     setSelectedPaperType(currentQuery.paperType);
     setSelectedSeason(currentQuery.season);
+    setTimeout(() => {
+      isOverwriting.current = false;
+    }, 0);
   };
 
   const isValidInputs = ({
@@ -468,7 +471,7 @@ const TopicalPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!mountedRef.current) {
+    if (!mountedRef.current || isOverwriting.current) {
       return;
     }
     try {
@@ -541,7 +544,7 @@ const TopicalPage = () => {
   }, [selectedSubject]);
 
   useEffect(() => {
-    if (!mountedRef.current) {
+    if (!mountedRef.current || isOverwriting.current) {
       return;
     }
     setSelectedSubject("");
@@ -550,7 +553,7 @@ const TopicalPage = () => {
     setSelectedPaperType([]);
     setSelectedSeason([]);
     setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-  }, [selectedCurriculum]);
+  }, [selectedCurriculum, isOverwriting]);
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -666,7 +669,6 @@ const TopicalPage = () => {
             : "An error occurred";
         throw new Error(errorMessage);
       }
-
       return data as {
         data: SelectedQuestion[];
         isRateLimited: boolean;
@@ -715,8 +717,6 @@ const TopicalPage = () => {
               cacheExpireTime,
             };
             setCache(JSON.stringify(currentQuery), JSON.stringify(cacheData));
-          } else {
-            console.log("rate limited or no questions found");
           }
           return result;
         } catch {
@@ -733,9 +733,6 @@ const TopicalPage = () => {
             cacheExpireTime,
           };
           setCache(JSON.stringify(currentQuery), JSON.stringify(cacheData));
-          console.log("setting new cache on new query");
-        } else {
-          console.log("rate limited or no questions found");
         }
         return result;
       } catch {
@@ -851,7 +848,7 @@ const TopicalPage = () => {
 
   useEffect(() => {
     overflowScrollHandler();
-  }, [overflowScrollHandler, fullPartitionedData]);
+  }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const {
     data: userSession,
@@ -860,37 +857,6 @@ const TopicalPage = () => {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
-  });
-
-  const {
-    data: recentQuery,
-    isError: isRecentQueryError,
-    isPending: isRecentQueryPending,
-  } = useQuery({
-    queryKey: ["user_recent_query"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/recent-query", {
-        method: "GET",
-      });
-      const data: {
-        data: {
-          queryKey: string;
-          sortParams: string;
-          lastSearch: number;
-        }[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data.data;
-    },
-    enabled: !!userSession?.data?.session && !isUserSessionError,
   });
 
   const {
@@ -999,21 +965,21 @@ const TopicalPage = () => {
             <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
             <ScrollArea className="h-full" type="always">
               <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      className="w-full cursor-pointer rounded-sm"
-                      variant="outline"
-                    >
-                      <History /> Recently searched
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent showCloseButton={false}>
-                    <DialogHeader>
-                      <DialogTitle>Recently searched</DialogTitle>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
+                <RecentQuery
+                  isEnabled={
+                    !!userSession?.data?.session && !isUserSessionError
+                  }
+                  setIsSearchEnabled={setIsSearchEnabled}
+                  setCurrentQuery={setCurrentQuery}
+                  currentQuery={currentQuery}
+                  setSelectedCurriculum={setSelectedCurriculum}
+                  setSelectedSubject={setSelectedSubject}
+                  setSelectedTopic={setSelectedTopic}
+                  setSelectedYear={setSelectedYear}
+                  setSelectedPaperType={setSelectedPaperType}
+                  setSelectedSeason={setSelectedSeason}
+                  isOverwriting={isOverwriting}
+                />
                 <SidebarSeparator />
 
                 <div className="flex w-full flex-col items-center justify-start gap-4">

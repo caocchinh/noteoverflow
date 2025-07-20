@@ -5,6 +5,7 @@ import {
   finishedQuestions,
   userBookmarks,
   userBookmarkList,
+  recentQuery,
 } from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
 import {
@@ -17,6 +18,7 @@ import {
   UNAUTHORIZED,
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
+import { MAX_NUMBER_OF_RECENT_QUERIES } from "../constants/constants";
 
 export const createBookmarkListAction = async ({
   listName,
@@ -218,7 +220,7 @@ export const addFinishedQuestionAction = async ({
   questionId,
 }: {
   questionId: string;
-}) => {
+}): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -240,6 +242,10 @@ export const addFinishedQuestionAction = async ({
           updatedAt: new Date(),
         },
       });
+    return {
+      success: true,
+      data: userId,
+    };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);
@@ -253,7 +259,7 @@ export const removeFinishedQuestionAction = async ({
   questionId,
 }: {
   questionId: string;
-}) => {
+}): Promise<ServerActionResponse<string>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -269,11 +275,91 @@ export const removeFinishedQuestionAction = async ({
           eq(finishedQuestions.questionId, questionId)
         )
       );
+    return {
+      success: true,
+      data: userId,
+    };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       throw new Error(UNAUTHORIZED);
     }
     console.error(error);
     throw new Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
+export const addRecentQuery = async ({
+  queryKey,
+}: {
+  queryKey: string;
+}): Promise<
+  ServerActionResponse<{ isAnyDeleted: string; lastSearch: Date }>
+> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error(UNAUTHORIZED);
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
+
+    // Check if user already has 25 or more queries
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(recentQuery)
+      .where(eq(recentQuery.userId, userId));
+
+    let isAnyDeleted = "";
+
+    // If user has 25 or more queries, delete the oldest one
+    if (count >= MAX_NUMBER_OF_RECENT_QUERIES) {
+      const oldestQueries = await db
+        .select()
+        .from(recentQuery)
+        .where(eq(recentQuery.userId, userId))
+        .orderBy(recentQuery.lastSearch)
+        .limit(1);
+
+      if (oldestQueries.length > 0) {
+        await db
+          .delete(recentQuery)
+          .where(
+            and(
+              eq(recentQuery.userId, userId),
+              eq(recentQuery.queryKey, oldestQueries[0].queryKey)
+            )
+          );
+        isAnyDeleted = oldestQueries[0].queryKey;
+      }
+    }
+
+    // Insert the new query or update if it already exists
+    const now = new Date();
+    await db
+      .insert(recentQuery)
+      .values({
+        userId,
+        queryKey,
+        lastSearch: now,
+      })
+      .onConflictDoUpdate({
+        target: [recentQuery.userId, recentQuery.queryKey],
+        set: {
+          lastSearch: now,
+        },
+      });
+    return {
+      success: true,
+      data: {
+        isAnyDeleted,
+        lastSearch: now,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
