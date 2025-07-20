@@ -334,3 +334,20 @@ export const finishedQuestions = sqliteTable(
     return [primaryKey({ columns: [table.userId, table.questionId] })];
   }
 );
+
+export const recentQuery = sqliteTable(
+  "recent_query",
+  {
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    queryKey: text("query_key").notNull(),
+    sortParams: text("sort_params").notNull(),
+    lastSearch: integer("last_search", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.userId, table.queryKey] })];
+  }
+);

@@ -14,6 +14,7 @@ import {
   curriculum,
   questionTopic,
   finishedQuestions,
+  recentQuery,
 } from "./schema";
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -22,6 +23,7 @@ export const userRelations = relations(user, ({ many }) => ({
   bookmarks: many(userBookmarks),
   bookmarkLists: many(userBookmarkList),
   finishedQuestions: many(finishedQuestions),
+  recentQuestions: many(recentQuery),
 }));
 
 export const userBookmarkListRelations = relations(
@@ -188,4 +190,11 @@ export const topicRelations = relations(topic, ({ one, many }) => ({
   }),
   questions: many(question),
   questionTopics: many(questionTopic),
+}));
+
+export const recentQueryRelations = relations(recentQuery, ({ one }) => ({
+  user: one(user, {
+    fields: [recentQuery.userId],
+    references: [user.id],
+  }),
 }));

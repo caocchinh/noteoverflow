@@ -50,7 +50,7 @@ export const updateUserAvatarAction = async (
     .update(user)
     .set({ image: avatar })
     .where(eq(user.id, userId));
-  if (response.rowCount === 0) {
+  if (response.error) {
     throw new Error("User not found");
   }
 };

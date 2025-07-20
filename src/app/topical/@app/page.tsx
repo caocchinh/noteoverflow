@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  History,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -82,6 +83,13 @@ import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import Sort from "@/features/topical/components/Sort";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -114,7 +122,6 @@ const TopicalPage = () => {
     return availableSubjects?.find((item) => item.code === selectedSubject)
       ?.season;
   }, [availableSubjects, selectedSubject]);
-  const [isResetConfirmationOpen, setIsResetConfirmationOpen] = useState(false);
   const isMobileDevice = useIsMobile();
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
@@ -238,8 +245,18 @@ const TopicalPage = () => {
     if (!isMobileDevice) {
       setSidebarKey((prev) => prev + 1);
     }
+  };
 
-    setIsResetConfirmationOpen(false);
+  const revert = () => {
+    if (!currentQuery.curriculumId || !currentQuery.subjectId) {
+      return;
+    }
+    setSelectedCurriculum(currentQuery.curriculumId as ValidCurriculum);
+    setSelectedSubject(currentQuery.subjectId);
+    setSelectedTopic(currentQuery.topic);
+    setSelectedYear(currentQuery.year);
+    setSelectedPaperType(currentQuery.paperType);
+    setSelectedSeason(currentQuery.season);
   };
 
   const isValidInputs = ({
@@ -643,7 +660,11 @@ const TopicalPage = () => {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error);
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
       }
 
       return data as {
@@ -842,6 +863,37 @@ const TopicalPage = () => {
   });
 
   const {
+    data: recentQuery,
+    isError: isRecentQueryError,
+    isPending: isRecentQueryPending,
+  } = useQuery({
+    queryKey: ["user_recent_query"],
+    queryFn: async () => {
+      const response = await fetch("/api/topical/recent-query", {
+        method: "GET",
+      });
+      const data: {
+        data: {
+          queryKey: string;
+          sortParams: string;
+          lastSearch: number;
+        }[];
+        error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
+      }
+
+      return data.data;
+    },
+    enabled: !!userSession?.data?.session && !isUserSessionError,
+  });
+
+  const {
     data: bookmarks,
     isFetching: isBookmarksFetching,
     isError: isBookmarksError,
@@ -856,7 +908,11 @@ const TopicalPage = () => {
         error?: string;
       } = await response.json();
       if (!response.ok) {
-        throw new Error(data.error);
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
       }
 
       return data.data;
@@ -878,7 +934,11 @@ const TopicalPage = () => {
         error?: string;
       } = await response.json();
       if (!response.ok) {
-        throw new Error(data.error);
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
       }
       return new Set(
         data.data.map((item: { questionId: string }) => item.questionId)
@@ -939,6 +999,23 @@ const TopicalPage = () => {
             <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
             <ScrollArea className="h-full" type="always">
               <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="w-full cursor-pointer rounded-sm"
+                      variant="outline"
+                    >
+                      <History /> Recently searched
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent showCloseButton={false}>
+                    <DialogHeader>
+                      <DialogTitle>Recently searched</DialogTitle>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
+                <SidebarSeparator />
+
                 <div className="flex w-full flex-col items-center justify-start gap-4">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
@@ -1166,9 +1243,9 @@ const TopicalPage = () => {
                   <div className="flex w-full flex-col items-center justify-center gap-2">
                     <ButtonUltility
                       isMounted={isMounted}
-                      isResetConfirmationOpen={isResetConfirmationOpen}
                       isValidInput={isValidInputs}
                       setSortParameters={setSortParameters}
+                      revert={revert}
                       query={{
                         curriculumId: selectedCurriculum,
                         subjectId: selectedSubject,
@@ -1181,7 +1258,6 @@ const TopicalPage = () => {
                       }}
                       resetEverything={resetEverything}
                       setCurrentQuery={setCurrentQuery}
-                      setIsResetConfirmationOpen={setIsResetConfirmationOpen}
                       setIsSearchEnabled={setIsSearchEnabled}
                       setIsSidebarOpen={setIsSidebarOpen}
                     />

@@ -10,7 +10,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useTheme } from "next-themes";
-import { BrushCleaning, ScanText, X } from "lucide-react";
+import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
 import { FilterData, SortParameters } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { computeWeightedScoreByArrayIndex } from "../lib/utils";
@@ -20,23 +20,22 @@ import {
   YEAR_SORT_DEFAULT_WEIGHT,
   TOPIC_SORT_DEFAULT_WEIGHT,
 } from "../constants/constants";
+import { useState } from "react";
 
 export default function ButtonUltility({
-  isResetConfirmationOpen,
-  setIsResetConfirmationOpen,
   resetEverything,
   setIsSidebarOpen,
   setSortParameters,
   isMounted,
   isValidInput,
   setIsSearchEnabled,
+  revert,
   setCurrentQuery,
   query,
 }: {
-  isResetConfirmationOpen: boolean;
-  setIsResetConfirmationOpen: (value: boolean) => void;
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
+  revert: () => void;
   setSortParameters: (value: SortParameters | null) => void;
   isMounted: boolean;
   isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
@@ -54,6 +53,9 @@ export default function ButtonUltility({
 }) {
   const { theme } = useTheme();
   const isMobileDevice = useIsMobile();
+  const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);
+  const [isRevertConfirmationOpen, setIsRevertConfirmationOpen] =
+    useState(false);
 
   return (
     <>
@@ -102,8 +104,8 @@ export default function ButtonUltility({
         <ScanText />
       </Button>
       <Dialog
-        onOpenChange={setIsResetConfirmationOpen}
-        open={isResetConfirmationOpen}
+        onOpenChange={setIsClearConfirmationOpen}
+        open={isClearConfirmationOpen}
       >
         <DialogTrigger asChild>
           <Button
@@ -137,11 +139,56 @@ export default function ButtonUltility({
               className="cursor-pointer"
               onClick={() => {
                 resetEverything();
-                setIsResetConfirmationOpen(false);
+                setIsClearConfirmationOpen(false);
               }}
             >
               Clear
               <BrushCleaning />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        onOpenChange={setIsRevertConfirmationOpen}
+        open={isRevertConfirmationOpen}
+      >
+        <DialogTrigger asChild>
+          <Button
+            className="w-full cursor-pointer !bg-[#fd8231] !text-white"
+            disabled={!isMounted}
+            variant="outline"
+          >
+            Revert back
+            <Undo2 />
+          </Button>
+        </DialogTrigger>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Revert back</DialogTitle>
+            <DialogDescription>
+              This will revert back to the last search filter that currently
+              displaying{" "}
+              <span className="text-[#fd8231]">
+                (If you didn&apos;t search, this won&apos;t do anything)
+              </span>
+              . Are you sure you want to revert?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button className="cursor-pointer" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              className="cursor-pointer"
+              onClick={() => {
+                revert();
+                setIsRevertConfirmationOpen(false);
+              }}
+            >
+              Revert
+              <Undo2 />
             </Button>
           </DialogFooter>
         </DialogContent>
