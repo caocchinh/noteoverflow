@@ -19,6 +19,12 @@ import {
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
 import { MAX_NUMBER_OF_RECENT_QUERIES } from "../constants/constants";
+import { FilterData } from "../constants/types";
+import {
+  validateCurriculum,
+  validateFilterData,
+  validateSubject,
+} from "../lib/utils";
 
 export const createBookmarkListAction = async ({
   listName,
@@ -291,10 +297,11 @@ export const removeFinishedQuestionAction = async ({
 export const addRecentQuery = async ({
   queryKey,
 }: {
-  queryKey: string;
-}): Promise<
-  ServerActionResponse<{ isAnyDeleted: string; lastSearch: Date }>
-> => {
+  queryKey: {
+    curriculumId: string;
+    subjectId: string;
+  } & FilterData;
+}): Promise<ServerActionResponse<{ deletedKey: string; lastSearch: Date }>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -303,16 +310,46 @@ export const addRecentQuery = async ({
     const userId = session.user.id;
     const db = await getDbAsync();
 
-    // Check if user already has 25 or more queries
+    if (!validateCurriculum(queryKey.curriculumId)) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
+    if (!validateSubject(queryKey.curriculumId, queryKey.subjectId)) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
+    if (
+      !validateFilterData({
+        data: {
+          topic: queryKey.topic,
+          paperType: queryKey.paperType,
+          year: queryKey.year,
+          season: queryKey.season,
+        },
+        curriculumn: queryKey.curriculumId,
+        subject: queryKey.subjectId,
+      })
+    ) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
+
+    // Check if user already has reach the limit
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(recentQuery)
       .where(eq(recentQuery.userId, userId));
 
-    let isAnyDeleted = "";
+    let deletedKey = "";
 
-    // If user has 25 or more queries, delete the oldest one
-    if (count >= MAX_NUMBER_OF_RECENT_QUERIES) {
+    // If user has reached the limit, delete the oldest one
+    if (count > MAX_NUMBER_OF_RECENT_QUERIES) {
       const oldestQueries = await db
         .select()
         .from(recentQuery)
@@ -329,7 +366,7 @@ export const addRecentQuery = async ({
               eq(recentQuery.queryKey, oldestQueries[0].queryKey)
             )
           );
-        isAnyDeleted = oldestQueries[0].queryKey;
+        deletedKey = oldestQueries[0].queryKey;
       }
     }
 
@@ -339,7 +376,7 @@ export const addRecentQuery = async ({
       .insert(recentQuery)
       .values({
         userId,
-        queryKey,
+        queryKey: JSON.stringify(queryKey),
         lastSearch: now,
       })
       .onConflictDoUpdate({
@@ -351,7 +388,7 @@ export const addRecentQuery = async ({
     return {
       success: true,
       data: {
-        isAnyDeleted,
+        deletedKey,
         lastSearch: now,
       },
     };
@@ -364,33 +401,65 @@ export const addRecentQuery = async ({
   }
 };
 
-export const updateSortParams = async ({
+export const deleteRecentQuery = async ({
   queryKey,
-  sortParams,
 }: {
   queryKey: string;
-  sortParams: string;
-}) => {
+}): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
     if (!session) {
       throw new Error(UNAUTHORIZED);
     }
     const userId = session.user.id;
+
     const db = await getDbAsync();
 
     await db
-      .update(recentQuery)
-      .set({
-        sortParams,
-      })
+      .delete(recentQuery)
       .where(
         and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId))
       );
 
-    return;
+    return {
+      success: true,
+    };
   } catch (error) {
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
+
+// export const updateSortParams = async ({
+//   queryKey,
+//   sortParams,
+// }: {
+//   queryKey: string;
+//   sortParams: string;
+// }) => {
+//   try {
+//     const session = await verifySession();
+//     if (!session) {
+//       throw new Error(UNAUTHORIZED);
+//     }
+//     const userId = session.user.id;
+//     const db = await getDbAsync();
+
+//     await db
+//       .update(recentQuery)
+//       .set({
+//         sortParams,
+//       })
+//       .where(
+//         and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId))
+//       );
+
+//     return;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error(INTERNAL_SERVER_ERROR);
+//   }
+// };

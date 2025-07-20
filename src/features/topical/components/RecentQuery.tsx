@@ -19,15 +19,16 @@ import {
   DEFAULT_LAYOUT_STYLE,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-  TOPIC_SORT_DEFAULT_WEIGHT,
-  YEAR_SORT_DEFAULT_WEIGHT,
-  SEASON_SORT_DEFAULT_WEIGHT,
 } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { FilterData, FiltersCache, SortParameters } from "../constants/types";
+import {
+  useIsMutating,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { FilterData, FiltersCache } from "../constants/types";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -46,8 +47,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { computeWeightedScoreByArrayIndex } from "../lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  validateCurriculum,
+  validateFilterData,
+  validateSubject,
+} from "../lib/utils";
+import { toast } from "sonner";
+import { deleteRecentQuery } from "../server/actions";
 
 export const RecentQuery = ({
   isEnabled,
@@ -62,7 +69,7 @@ export const RecentQuery = ({
   setSelectedYear,
   setSelectedPaperType,
   setSelectedSeason,
-  setSortParameters,
+  setIsSidebarOpen,
 }: {
   isEnabled: boolean;
   setIsSearchEnabled: (isSearchEnabled: boolean) => void;
@@ -81,10 +88,10 @@ export const RecentQuery = ({
   setSelectedSubject: (subject: string) => void;
   setSelectedTopic: (topic: string[]) => void;
   setSelectedYear: (year: string[]) => void;
-  setSortParameters: (value: SortParameters | null) => void;
   setSelectedPaperType: (paperType: string[]) => void;
   setSelectedSeason: (season: string[]) => void;
   isOverwriting: RefObject<boolean>;
+  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }) => {
   const {
     data: recentQuery,
@@ -117,12 +124,12 @@ export const RecentQuery = ({
     enabled: isEnabled,
   });
 
-  const [accordionValue, setAccordionValue] = useState<string>("0");
+  const [accordionValue, setAccordionValue] =
+    useState<string>("skibidi toilet");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"ascending" | "descending">(
     "descending"
   );
-  const [loadSortParamsOnSearch, setLoadSortParamsOnSearch] = useState(true);
   const isMounted = useRef(false);
 
   useEffect(() => {
@@ -131,7 +138,6 @@ export const RecentQuery = ({
       if (savedState) {
         const parsedState: FiltersCache = JSON.parse(savedState);
         setSortBy(parsedState.recentlySearchSortedBy);
-        setLoadSortParamsOnSearch(parsedState.loadSortParamsOnSearch);
       }
     } catch {}
     setTimeout(() => {
@@ -166,7 +172,6 @@ export const RecentQuery = ({
         // If reading fails, start with empty state
         stateToSave = {
           recentlySearchSortedBy: "ascending",
-          loadSortParamsOnSearch: true,
           numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
           layoutStyle: DEFAULT_LAYOUT_STYLE,
           numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -183,16 +188,45 @@ export const RecentQuery = ({
       stateToSave = {
         ...stateToSave,
         recentlySearchSortedBy: sortBy,
-        loadSortParamsOnSearch: loadSortParamsOnSearch,
       };
 
       localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
     } catch (error) {
       console.error("Failed to save settings to localStorage", error);
     }
-  }, [loadSortParamsOnSearch, sortBy]);
+  }, [sortBy]);
+  const queryClient = useQueryClient();
+  const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<string | null>(
+    null
+  );
 
-  //
+  const key = ["delete_recent_query", queryThatIsDeleting];
+
+  const { mutate: deleteRecentQueryMutation } = useMutation({
+    mutationKey: key,
+    mutationFn: async (queryKey: string) => {
+      const result = await deleteRecentQuery({ queryKey: queryKey });
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return queryKey;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData<
+        {
+          queryKey: string;
+          sortParams: string | null;
+          lastSearch: number;
+        }[]
+      >(["user_recent_query"], (oldData) => {
+        if (!oldData) {
+          return oldData;
+        }
+        return oldData.filter((item) => item.queryKey !== data);
+      });
+    },
+  });
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -205,11 +239,12 @@ export const RecentQuery = ({
         className="dark:bg-accent h-[95dvh] z-[100008]"
         overlayClassName="z-[100007]"
       >
-        <DialogHeader className="flex justify-between flex-row">
+        <DialogHeader className="flex justify-between flex-row text-left gap-2">
           <div>
             <DialogTitle>Recently searched</DialogTitle>
-            <DialogDescription>
-              Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here
+            <DialogDescription className="w-[85%]">
+              Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here.
+              Synced accross devices.
             </DialogDescription>
           </div>
           <Popover>
@@ -234,14 +269,6 @@ export const RecentQuery = ({
                   <SelectItem value="descending">Oldest first</SelectItem>
                 </SelectContent>
               </Select>
-
-              <p className="text-sm mb-1 mt-5">
-                Load previous sort settings on search?
-              </p>
-              <Switch
-                checked={loadSortParamsOnSearch}
-                onCheckedChange={setLoadSortParamsOnSearch}
-              />
             </PopoverContent>
           </Popover>
         </DialogHeader>
@@ -271,6 +298,11 @@ export const RecentQuery = ({
                 Updating <Loader2 className="animate-spin" size={13} />
               </div>
             )}
+            {recentQuery && recentQuery.length == 0 && (
+              <div className="h-full w-full flex items-center justify-center">
+                No item found! Try searching for something.
+              </div>
+            )}
             {recentQuery
               ?.toSorted((a, b) => {
                 // Convert string dates to timestamps if they're not already numbers
@@ -289,148 +321,27 @@ export const RecentQuery = ({
                 return dateA - dateB; // Oldest first
               })
               .map((item, index) => {
-                const parsedQuery = JSON.parse(item.queryKey) as {
-                  curriculumId: string;
-                  subjectId: string;
-                } & FilterData;
                 return (
-                  <AccordionItem
+                  <RecentQueryItem
                     key={item.queryKey + index}
-                    value={index.toString()}
-                  >
-                    <AccordionTrigger>
-                      <div
-                        className={cn(
-                          "flex flex-col items-start justify-center",
-                          accordionValue === index.toString() &&
-                            "text-logo-main"
-                        )}
-                      >
-                        <p>
-                          {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
-                          {parsedQuery.topic.length} topic
-                          {parsedQuery.topic.length > 1 && "s"} -{" "}
-                          {parsedQuery.year.length} year
-                          {parsedQuery.year.length > 1 && "s"}
-                        </p>
-                        <p
-                          className={cn(
-                            "text-muted-foreground",
-                            accordionValue === index.toString() && "text-white"
-                          )}
-                        >
-                          {new Date(item.lastSearch).toLocaleString(undefined, {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">
-                      <div className="flex w-full flex-wrap gap-2">
-                        Topic:
-                        {parsedQuery.topic.map((topic) => (
-                          <Badge key={topic} className="flex flex-row">
-                            {topic}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Separator />
-                      <div className="flex w-full flex-wrap gap-2">
-                        Year:
-                        {parsedQuery.year.map((year) => (
-                          <Badge key={year} className="flex flex-row">
-                            {year}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Separator />
-                      <div className="flex w-full flex-wrap gap-2">
-                        Paper:
-                        {parsedQuery.paperType.map((paper) => (
-                          <Badge key={paper} className="flex flex-row">
-                            {paper}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Separator />
-                      <div className="flex w-full flex-wrap gap-2">
-                        Season:
-                        {parsedQuery.season.map((season) => (
-                          <Badge key={season} className="flex flex-row">
-                            {season}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button
-                        className="w-full mt-2 !bg-logo-main !text-white cursor-pointer"
-                        onClick={() => {
-                          const stringifiedNewQuery =
-                            JSON.stringify(parsedQuery);
-                          if (
-                            stringifiedNewQuery !== JSON.stringify(currentQuery)
-                          ) {
-                            setCurrentQuery(parsedQuery);
-                            isOverwriting.current = true;
-                            setSelectedCurriculum(
-                              parsedQuery.curriculumId as ValidCurriculum
-                            );
-                            setSelectedSubject(parsedQuery.subjectId);
-                            setSelectedTopic(parsedQuery.topic);
-                            setSelectedSeason(parsedQuery.season);
-                            setSelectedYear(parsedQuery.year);
-                            setIsSearchEnabled(true);
-                            setSelectedPaperType(parsedQuery.paperType);
-
-                            if (loadSortParamsOnSearch && item.sortParams) {
-                              setSortParameters(
-                                JSON.parse(item.sortParams) as SortParameters
-                              );
-                            } else {
-                              setSortParameters({
-                                paperType: {
-                                  data: computeWeightedScoreByArrayIndex({
-                                    data: parsedQuery.paperType,
-                                  }),
-                                  weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-                                },
-                                topic: {
-                                  data: computeWeightedScoreByArrayIndex({
-                                    data: parsedQuery.topic,
-                                  }),
-                                  weight: TOPIC_SORT_DEFAULT_WEIGHT,
-                                },
-                                year: {
-                                  data: computeWeightedScoreByArrayIndex({
-                                    data: parsedQuery.year,
-                                  }),
-                                  weight: YEAR_SORT_DEFAULT_WEIGHT,
-                                },
-                                season: {
-                                  data: computeWeightedScoreByArrayIndex({
-                                    data: parsedQuery.season,
-                                  }),
-                                  weight: SEASON_SORT_DEFAULT_WEIGHT,
-                                },
-                              });
-                            }
-
-                            setTimeout(() => {
-                              isOverwriting.current = false;
-                            }, 0);
-                          }
-                          setIsDialogOpen(false);
-                        }}
-                      >
-                        Search
-                        <ScanText />
-                      </Button>
-                    </AccordionContent>
-                  </AccordionItem>
+                    setCurrentQuery={setCurrentQuery}
+                    setSelectedCurriculum={setSelectedCurriculum}
+                    setSelectedSubject={setSelectedSubject}
+                    setSelectedTopic={setSelectedTopic}
+                    setSelectedYear={setSelectedYear}
+                    setSelectedPaperType={setSelectedPaperType}
+                    setSelectedSeason={setSelectedSeason}
+                    isOverwriting={isOverwriting}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    currentQuery={currentQuery}
+                    setIsSearchEnabled={setIsSearchEnabled}
+                    accordionValue={accordionValue}
+                    index={index}
+                    item={item}
+                    setQueryThatIsDeleting={setQueryThatIsDeleting}
+                    deleteRecentQueryMutation={deleteRecentQueryMutation}
+                    setIsDialogOpen={setIsDialogOpen}
+                  />
                 );
               })}
           </ScrollArea>
@@ -440,5 +351,201 @@ export const RecentQuery = ({
         </DialogClose>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const RecentQueryItem = ({
+  currentQuery,
+  setQueryThatIsDeleting,
+  index,
+  setCurrentQuery,
+  isOverwriting,
+  setIsSidebarOpen,
+  setIsSearchEnabled,
+  accordionValue,
+  setSelectedCurriculum,
+  setSelectedPaperType,
+  setSelectedSeason,
+  setSelectedSubject,
+  setSelectedYear,
+  setSelectedTopic,
+  setIsDialogOpen,
+  item,
+  deleteRecentQueryMutation,
+}: {
+  item: {
+    queryKey: string;
+    sortParams: string | null;
+    lastSearch: number;
+  };
+  index: number;
+  setCurrentQuery: (
+    query: {
+      curriculumId: string;
+      subjectId: string;
+    } & FilterData
+  ) => void;
+  setSelectedCurriculum: (curriculum: ValidCurriculum) => void;
+  setSelectedSubject: (subject: string) => void;
+  setSelectedTopic: (topic: string[]) => void;
+  setSelectedYear: (year: string[]) => void;
+  setSelectedPaperType: (paperType: string[]) => void;
+  setSelectedSeason: (season: string[]) => void;
+  isOverwriting: RefObject<boolean>;
+  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
+  setIsSearchEnabled: (isSearchEnabled: boolean) => void;
+  accordionValue: string;
+  currentQuery: {
+    curriculumId: string;
+    subjectId: string;
+  } & FilterData;
+  setQueryThatIsDeleting: (queryKey: string) => void;
+  setIsDialogOpen: (isDialogOpen: boolean) => void;
+  deleteRecentQueryMutation: (queryKey: string) => void;
+}) => {
+  const isMobileDevice = useIsMobile();
+  const parsedQuery = JSON.parse(item.queryKey) as {
+    curriculumId: string;
+    subjectId: string;
+  } & FilterData;
+  const isThisItemDeleting = useIsMutating({
+    mutationKey: ["delete_recent_query", item.queryKey],
+  });
+  return (
+    <AccordionItem
+      value={index.toString()}
+      className={cn(isThisItemDeleting && "opacity-50 pointer-events-none")}
+    >
+      <AccordionTrigger>
+        {index + 1}.
+        <div
+          className={cn(
+            "flex flex-col items-start justify-center",
+            accordionValue === index.toString() && "text-logo-main",
+            isThisItemDeleting && "!text-red-500"
+          )}
+        >
+          <p>
+            {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
+            {parsedQuery.topic.length} topic
+            {parsedQuery.topic.length > 1 && "s"} - {parsedQuery.year.length}{" "}
+            year
+            {parsedQuery.year.length > 1 && "s"}
+          </p>
+          <p
+            className={cn(
+              "text-muted-foreground",
+              accordionValue === index.toString() && "text-white"
+            )}
+          >
+            {new Date(item.lastSearch).toLocaleString(undefined, {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </p>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">
+        <div className="flex w-full flex-wrap gap-2">
+          Topic:
+          {parsedQuery.topic.map((topic) => (
+            <Badge key={topic} className="flex flex-row">
+              {topic}
+            </Badge>
+          ))}
+        </div>
+        <Separator />
+        <div className="flex w-full flex-wrap gap-2">
+          Year:
+          {parsedQuery.year.map((year) => (
+            <Badge key={year} className="flex flex-row">
+              {year}
+            </Badge>
+          ))}
+        </div>
+        <Separator />
+        <div className="flex w-full flex-wrap gap-2">
+          Paper:
+          {parsedQuery.paperType.map((paper) => (
+            <Badge key={paper} className="flex flex-row">
+              {paper}
+            </Badge>
+          ))}
+        </div>
+        <Separator />
+        <div className="flex w-full flex-wrap gap-2">
+          Season:
+          {parsedQuery.season.map((season) => (
+            <Badge key={season} className="flex flex-row">
+              {season}
+            </Badge>
+          ))}
+        </div>
+        <Button
+          className={cn(
+            "w-full mt-2 bg-logo-main !text-white cursor-pointer hover:bg-logo-main",
+            isThisItemDeleting && "!bg-red-500"
+          )}
+          onClick={() => {
+            if (isThisItemDeleting) {
+              return;
+            }
+            const stringifiedNewQuery = JSON.stringify(parsedQuery);
+            if (stringifiedNewQuery !== JSON.stringify(currentQuery)) {
+              if (
+                !validateCurriculum(parsedQuery.curriculumId) ||
+                !validateSubject(
+                  parsedQuery.curriculumId,
+                  parsedQuery.subjectId
+                ) ||
+                !validateFilterData({
+                  data: {
+                    topic: parsedQuery.topic,
+                    paperType: parsedQuery.paperType,
+                    year: parsedQuery.year,
+                    season: parsedQuery.season,
+                  },
+                  curriculumn: parsedQuery.curriculumId,
+                  subject: parsedQuery.subjectId,
+                })
+              ) {
+                toast.error("Outdated data. Entry will be deleted.");
+                setQueryThatIsDeleting(item.queryKey);
+                setTimeout(() => {
+                  deleteRecentQueryMutation(item.queryKey);
+                }, 0);
+                return;
+              }
+
+              setCurrentQuery(parsedQuery);
+              isOverwriting.current = true;
+              setSelectedCurriculum(
+                parsedQuery.curriculumId as ValidCurriculum
+              );
+              setSelectedSubject(parsedQuery.subjectId);
+              setSelectedTopic(parsedQuery.topic);
+              setSelectedSeason(parsedQuery.season);
+              setSelectedYear(parsedQuery.year);
+              setIsSearchEnabled(true);
+              setSelectedPaperType(parsedQuery.paperType);
+              if (isMobileDevice) {
+                setIsSidebarOpen(false);
+              }
+              setTimeout(() => {
+                isOverwriting.current = false;
+              }, 0);
+            }
+            setIsDialogOpen(false);
+          }}
+        >
+          Search
+          <ScanText />
+        </Button>
+      </AccordionContent>
+    </AccordionItem>
   );
 };

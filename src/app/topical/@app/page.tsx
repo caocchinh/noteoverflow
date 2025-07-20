@@ -584,7 +584,6 @@ const TopicalPage = () => {
         // If reading fails, start with empty state
         stateToSave = {
           recentlySearchSortedBy: "ascending",
-          loadSortParamsOnSearch: true,
           numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
           layoutStyle: DEFAULT_LAYOUT_STYLE,
           numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -683,13 +682,18 @@ const TopicalPage = () => {
   const { mutate: mutateRecentQuery, isPending: isAddRecentQueryPending } =
     useMutation({
       mutationKey: ["add_recent_query"],
-      mutationFn: async (queryKey: string) => {
+      mutationFn: async (
+        queryKey: {
+          curriculumId: string;
+          subjectId: string;
+        } & FilterData
+      ) => {
         const result = await addRecentQuery({ queryKey: queryKey });
         if (result.error) {
           throw new Error(result.error);
         }
         return {
-          isAnyDeleted: result.data?.isAnyDeleted,
+          deletedKey: result.data?.deletedKey,
           lastSearch: result.data?.lastSearch,
           realQueryKey: queryKey,
         };
@@ -707,23 +711,23 @@ const TopicalPage = () => {
           }
           if (data && data.realQueryKey) {
             let newData = oldData;
-            if (data.isAnyDeleted) {
+            if (data.deletedKey) {
               newData = newData.filter(
-                (item) => item.queryKey !== data.realQueryKey
+                (item) => item.queryKey !== data.deletedKey
               );
             }
             const isQueryAlreadyExist = newData.find(
-              (item) => item.queryKey === data.realQueryKey
+              (item) => item.queryKey === JSON.stringify(data.realQueryKey)
             );
             if (!isQueryAlreadyExist) {
               newData.unshift({
-                queryKey: data.realQueryKey,
+                queryKey: JSON.stringify(data.realQueryKey),
                 sortParams: null,
                 lastSearch: data.lastSearch?.getTime() ?? 0,
               });
             } else {
               newData = newData.map((item) => {
-                if (item.queryKey === data.realQueryKey) {
+                if (item.queryKey === JSON.stringify(data.realQueryKey)) {
                   return {
                     ...item,
                     lastSearch: data.lastSearch?.getTime() ?? 0,
@@ -748,7 +752,7 @@ const TopicalPage = () => {
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
-      mutateRecentQuery(JSON.stringify(currentQuery));
+      mutateRecentQuery(currentQuery);
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
         const currentTime = Date.now();
@@ -1035,6 +1039,7 @@ const TopicalPage = () => {
                     !!userSession?.data?.session && !isUserSessionError
                   }
                   isAddRecentQueryPending={isAddRecentQueryPending}
+                  setIsSidebarOpen={setIsSidebarOpen}
                   setIsSearchEnabled={setIsSearchEnabled}
                   setCurrentQuery={setCurrentQuery}
                   currentQuery={currentQuery}
@@ -1042,7 +1047,6 @@ const TopicalPage = () => {
                   setSelectedSubject={setSelectedSubject}
                   setSelectedTopic={setSelectedTopic}
                   setSelectedYear={setSelectedYear}
-                  setSortParameters={setSortParameters}
                   setSelectedPaperType={setSelectedPaperType}
                   setSelectedSeason={setSelectedSeason}
                   isOverwriting={isOverwriting}

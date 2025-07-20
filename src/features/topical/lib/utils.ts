@@ -2,6 +2,7 @@ import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_SUBJECT_CODE,
+  MAX_TOPIC_SELECTION,
   TOPICAL_DATA,
 } from "../constants/constants";
 import type { FilterData } from "../constants/types";
@@ -93,6 +94,9 @@ export const validateFilterData = ({
     }
 
     if (!data.topic) {
+      return false;
+    }
+    if (data.topic.length > MAX_TOPIC_SELECTION) {
       return false;
     }
     if (!isSubset(data.topic, currentSubjectData.topic)) {
