@@ -57,6 +57,8 @@ export type FiltersCache = {
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
   layoutStyle: LayoutStyle;
+  recentlySearchSortedBy: "ascending" | "descending";
+  loadSortParamsOnSearch: boolean;
   numberOfQuestionsPerPage: number;
   scrollUpWhenPageChange: boolean;
   showFinishedQuestionTint: boolean;

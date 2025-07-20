@@ -13,12 +13,22 @@ import {
   AccordionContent,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
+import {
+  FILTERS_CACHE_KEY,
+  MAX_NUMBER_OF_RECENT_QUERIES,
+  DEFAULT_LAYOUT_STYLE,
+  DEFAULT_NUMBER_OF_COLUMNS,
+  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+  TOPIC_SORT_DEFAULT_WEIGHT,
+  YEAR_SORT_DEFAULT_WEIGHT,
+  SEASON_SORT_DEFAULT_WEIGHT,
+} from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FilterData, SortParameters } from "../constants/types";
-import { RefObject, useState } from "react";
+import { FilterData, FiltersCache, SortParameters } from "../constants/types";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { addRecentQuery } from "../server/actions";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -37,6 +47,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { computeWeightedScoreByArrayIndex } from "../lib/utils";
 
 export const RecentQuery = ({
   isEnabled,
@@ -168,6 +180,75 @@ export const RecentQuery = ({
   const [sortBy, setSortBy] = useState<"ascending" | "descending">(
     "descending"
   );
+  const [loadSortParamsOnSearch, setLoadSortParamsOnSearch] = useState(true);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (savedState) {
+        const parsedState: FiltersCache = JSON.parse(savedState);
+        setSortBy(parsedState.recentlySearchSortedBy);
+        setLoadSortParamsOnSearch(parsedState.loadSortParamsOnSearch);
+      }
+    } catch {}
+    setTimeout(() => {
+      isMounted.current = true;
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+    try {
+      let stateToSave: FiltersCache;
+      try {
+        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+        stateToSave = existingStateJSON
+          ? JSON.parse(existingStateJSON)
+          : {
+              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+              layoutStyle: DEFAULT_LAYOUT_STYLE,
+              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+              isSessionCacheEnabled: true,
+              isPersistantCacheEnabled: true,
+              showFinishedQuestionTint: true,
+              scrollUpWhenPageChange: true,
+              showScrollToTopButton: true,
+              lastSessionCurriculum: "",
+              lastSessionSubject: "",
+              filters: {},
+            };
+      } catch {
+        // If reading fails, start with empty state
+        stateToSave = {
+          recentlySearchSortedBy: "ascending",
+          loadSortParamsOnSearch: true,
+          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+          layoutStyle: DEFAULT_LAYOUT_STYLE,
+          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+          isSessionCacheEnabled: true,
+          isPersistantCacheEnabled: true,
+          showFinishedQuestionTint: true,
+          scrollUpWhenPageChange: true,
+          showScrollToTopButton: true,
+          lastSessionCurriculum: "",
+          lastSessionSubject: "",
+          filters: {},
+        };
+      }
+      stateToSave = {
+        ...stateToSave,
+        recentlySearchSortedBy: sortBy,
+        loadSortParamsOnSearch: loadSortParamsOnSearch,
+      };
+
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to save settings to localStorage", error);
+    }
+  }, [loadSortParamsOnSearch, sortBy]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -194,8 +275,8 @@ export const RecentQuery = ({
                 Settings <Wrench />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="z-[100009] dark:bg-accent">
-              Sort by date
+            <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
+              <p className="text-sm mb-1">Sort by date</p>
               <Select
                 value={sortBy}
                 onValueChange={(value) => {
@@ -210,6 +291,14 @@ export const RecentQuery = ({
                   <SelectItem value="descending">Oldest first</SelectItem>
                 </SelectContent>
               </Select>
+
+              <p className="text-sm mb-1 mt-5">
+                Load previous sort settings on search?
+              </p>
+              <Switch
+                checked={loadSortParamsOnSearch}
+                onCheckedChange={setLoadSortParamsOnSearch}
+              />
             </PopoverContent>
           </Popover>
         </DialogHeader>
@@ -354,6 +443,40 @@ export const RecentQuery = ({
                             setSelectedYear(parsedQuery.year);
                             setIsSearchEnabled(true);
                             setSelectedPaperType(parsedQuery.paperType);
+
+                            if (loadSortParamsOnSearch && item.sortParams) {
+                              setSortParameters(
+                                JSON.parse(item.sortParams) as SortParameters
+                              );
+                            } else {
+                              setSortParameters({
+                                paperType: {
+                                  data: computeWeightedScoreByArrayIndex({
+                                    data: parsedQuery.paperType,
+                                  }),
+                                  weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+                                },
+                                topic: {
+                                  data: computeWeightedScoreByArrayIndex({
+                                    data: parsedQuery.topic,
+                                  }),
+                                  weight: TOPIC_SORT_DEFAULT_WEIGHT,
+                                },
+                                year: {
+                                  data: computeWeightedScoreByArrayIndex({
+                                    data: parsedQuery.year,
+                                  }),
+                                  weight: YEAR_SORT_DEFAULT_WEIGHT,
+                                },
+                                season: {
+                                  data: computeWeightedScoreByArrayIndex({
+                                    data: parsedQuery.season,
+                                  }),
+                                  weight: SEASON_SORT_DEFAULT_WEIGHT,
+                                },
+                              });
+                            }
+
                             setTimeout(() => {
                               isOverwriting.current = false;
                             }, 0);

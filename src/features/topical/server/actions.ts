@@ -363,3 +363,34 @@ export const addRecentQuery = async ({
     };
   }
 };
+
+export const updateSortParams = async ({
+  queryKey,
+  sortParams,
+}: {
+  queryKey: string;
+  sortParams: string;
+}) => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error(UNAUTHORIZED);
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
+
+    await db
+      .update(recentQuery)
+      .set({
+        sortParams,
+      })
+      .where(
+        and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId))
+      );
+
+    return;
+  } catch (error) {
+    console.error(error);
+    throw new Error(INTERNAL_SERVER_ERROR);
+  }
+};

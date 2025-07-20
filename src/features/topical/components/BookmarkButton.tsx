@@ -1299,7 +1299,7 @@ const CreateNewListAlertDialog = memo(() => {
               <SelectTrigger className="w-full py-6">
                 <SelectValue placeholder="Select a visibility" />
               </SelectTrigger>
-              <SelectContent className="z-[999999]">
+              <SelectContent className="z-[999999] dark:bg-accent">
                 <SelectItem value="public">
                   <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
                     <Globe className="w-4 h-4" />

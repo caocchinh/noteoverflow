@@ -582,6 +582,8 @@ const TopicalPage = () => {
       } catch {
         // If reading fails, start with empty state
         stateToSave = {
+          recentlySearchSortedBy: "ascending",
+          loadSortParamsOnSearch: true,
           numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
           layoutStyle: DEFAULT_LAYOUT_STYLE,
           numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -1484,6 +1486,7 @@ const TopicalPage = () => {
                 <Sort
                   sortParameters={sortParameters}
                   setSortParameters={setSortParameters}
+                  currentQuery={currentQuery}
                   isDisabled={isQuestionViewDisabled}
                 />
                 <Tooltip>
