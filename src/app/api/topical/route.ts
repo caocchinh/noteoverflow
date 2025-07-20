@@ -9,7 +9,11 @@ import { and, eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import {
+  FilterData,
+  SelectedQuestion,
+} from "@/features/topical/constants/types";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,37 +44,59 @@ export async function GET(request: NextRequest) {
 
     const session = await verifySession();
 
-    const db = await getDbAsync();
+    const { env } = await getCloudflareContext({ async: true });
+    const isRateLimited = session?.session ? false : true;
 
-    // Build query conditions
-    const conditions = [
-      eq(question.curriculumName, curriculumId),
-      eq(question.subjectId, subjectId),
-    ];
+    const currentQuery: {
+      curriculumId: string;
+      subjectId: string;
+      isRateLimited: boolean;
+    } & FilterData = {
+      curriculumId,
+      subjectId,
+      topic,
+      paperType,
+      year,
+      season,
+      isRateLimited,
+    };
 
-    // Add optional filters when they have values
+    const result = await env.TOPICAL_CACHE.get(JSON.stringify(currentQuery));
 
-    if (paperType.length > 0) {
-      const paperTypeNumbers = paperType.map((p) => Number.parseInt(p, 10));
-      conditions.push(inArray(question.paperType, paperTypeNumbers));
-    } else {
-      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
-    }
+    if (result === null) {
+      const db = await getDbAsync();
 
-    if (year.length > 0) {
-      const yearNumbers = year.map((y) => Number.parseInt(y, 10));
-      conditions.push(inArray(question.year, yearNumbers));
-    } else {
-      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
-    }
+      // Build query conditions
+      const conditions = [
+        eq(question.curriculumName, curriculumId),
+        eq(question.subjectId, subjectId),
+      ];
 
-    if (season.length > 0) {
-      conditions.push(inArray(question.season, season));
-    } else {
-      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
-    }
+      // Add optional filters when they have values
 
-    if (topic.length > 0) {
+      if (paperType.length > 0) {
+        const paperTypeNumbers = paperType.map((p) => Number.parseInt(p, 10));
+        conditions.push(inArray(question.paperType, paperTypeNumbers));
+      } else {
+        return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+      }
+
+      if (year.length > 0) {
+        const yearNumbers = year.map((y) => Number.parseInt(y, 10));
+        conditions.push(inArray(question.year, yearNumbers));
+      } else {
+        return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+      }
+
+      if (season.length > 0) {
+        conditions.push(inArray(question.season, season));
+      } else {
+        return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+      }
+      if (topic.length === 0) {
+        return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+      }
+
       const baseQuery = db
         .select({
           topic: questionTopic.topic,
@@ -122,15 +148,28 @@ export async function GET(request: NextRequest) {
       }
 
       const formattedData = Array.from(questionMap.values());
+
+      await env.TOPICAL_CACHE.put(
+        JSON.stringify(currentQuery),
+        JSON.stringify(formattedData),
+        { expirationTtl: 60 * 60 * 24 * 14 }
+      );
+
       return NextResponse.json(
         {
           data: formattedData as SelectedQuestion[],
-          isRateLimited: session?.session ? false : true,
+          isRateLimited,
         },
         { status: 200 }
       );
     } else {
-      return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
+      return NextResponse.json(
+        {
+          data: JSON.parse(result) as SelectedQuestion[],
+          isRateLimited,
+        },
+        { status: 200 }
+      );
     }
   } catch (error) {
     console.error(error);

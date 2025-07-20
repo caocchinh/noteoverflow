@@ -30,6 +30,10 @@
     {
       "binding": "NEXT_INC_CACHE_KV",
       "id": "966d0d6109f7487c819d70f64e72d4fd"
+    },
+    {
+      "binding": "TOPICAL_CACHE",
+      "id": "83f710e2d64c48e09b4606f6bd30cddb"
     }
   ],
   "durable_objects": {

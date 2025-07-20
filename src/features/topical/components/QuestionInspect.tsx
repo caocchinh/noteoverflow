@@ -253,10 +253,11 @@ const QuestionInspect = ({
     const isOverScrollingResult = isOverScrolling({
       child: ultilityRef.current,
       parent: sideBarInsetRef.current,
+      specialLeftCase: !isMobile,
     });
     setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
     setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
