@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -84,6 +84,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
+import { addRecentQuery } from "@/features/topical/server/actions";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -679,6 +680,65 @@ const TopicalPage = () => {
     throw new Error("Invalid inputs");
   };
 
+  const { mutate: mutateRecentQuery, isPending: isAddRecentQueryPending } =
+    useMutation({
+      mutationKey: ["add_recent_query"],
+      mutationFn: async (queryKey: string) => {
+        const result = await addRecentQuery({ queryKey: queryKey });
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        return {
+          isAnyDeleted: result.data?.isAnyDeleted,
+          lastSearch: result.data?.lastSearch,
+          realQueryKey: queryKey,
+        };
+      },
+      onSuccess: (data) => {
+        queryClient.setQueryData<
+          {
+            queryKey: string;
+            sortParams: string | null;
+            lastSearch: number;
+          }[]
+        >(["user_recent_query"], (oldData) => {
+          if (!oldData) {
+            return oldData;
+          }
+          if (data && data.realQueryKey) {
+            let newData = oldData;
+            if (data.isAnyDeleted) {
+              newData = newData.filter(
+                (item) => item.queryKey !== data.realQueryKey
+              );
+            }
+            const isQueryAlreadyExist = newData.find(
+              (item) => item.queryKey === data.realQueryKey
+            );
+            if (!isQueryAlreadyExist) {
+              newData.unshift({
+                queryKey: data.realQueryKey,
+                sortParams: null,
+                lastSearch: data.lastSearch?.getTime() ?? 0,
+              });
+            } else {
+              newData = newData.map((item) => {
+                if (item.queryKey === data.realQueryKey) {
+                  return {
+                    ...item,
+                    lastSearch: data.lastSearch?.getTime() ?? 0,
+                  };
+                }
+                return item;
+              });
+            }
+            return newData;
+          }
+          return oldData;
+        });
+      },
+    });
+
   const {
     data: topicalData,
     isFetching: isTopicalDataFetching,
@@ -688,6 +748,7 @@ const TopicalPage = () => {
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
+      mutateRecentQuery(JSON.stringify(currentQuery));
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
         const currentTime = Date.now();
@@ -946,6 +1007,8 @@ const TopicalPage = () => {
     }
   }, [isMobileDevice, isQuestionViewOpen.isOpen, setIsSidebarOpen]);
 
+  const queryClient = useQueryClient();
+
   return (
     <>
       <div className="pt-12 h-screen overflow-hidden">
@@ -971,6 +1034,7 @@ const TopicalPage = () => {
                   isEnabled={
                     !!userSession?.data?.session && !isUserSessionError
                   }
+                  isAddRecentQueryPending={isAddRecentQueryPending}
                   setIsSearchEnabled={setIsSearchEnabled}
                   setCurrentQuery={setCurrentQuery}
                   currentQuery={currentQuery}
@@ -1486,7 +1550,6 @@ const TopicalPage = () => {
                 <Sort
                   sortParameters={sortParameters}
                   setSortParameters={setSortParameters}
-                  currentQuery={currentQuery}
                   isDisabled={isQuestionViewDisabled}
                 />
                 <Tooltip>

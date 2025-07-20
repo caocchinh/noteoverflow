@@ -100,6 +100,7 @@ export const BookmarkButton = memo(
     setIsPopoverOpen: setOpenProp,
     setIsHovering,
     isBookmarkError,
+    setShouldOpen,
     popOverAlign = "end",
     badgeClassName,
     popOverTriggerClassName,
@@ -115,6 +116,7 @@ export const BookmarkButton = memo(
     setIsHovering?: (value: boolean) => void;
     popOverAlign?: "start" | "end";
     isBookmarksFetching: boolean;
+    setShouldOpen?: (value: boolean) => void;
     isBookmarkError: boolean;
     badgeClassName?: string;
     popOverTriggerClassName?: string;
@@ -138,11 +140,12 @@ export const BookmarkButton = memo(
         } else {
           _setOpen(newOpenState);
         }
-        if (setIsHovering && !newOpenState) {
+        if (setIsHovering && !newOpenState && setShouldOpen) {
+          setShouldOpen(false);
           setIsHovering(false);
         }
       },
-      [open, setOpenProp, setIsHovering]
+      [open, setOpenProp, setIsHovering, setShouldOpen]
     );
 
     const bookmarkStore = useRef<BookmarkStore | null>(null);

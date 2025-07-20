@@ -21,7 +21,7 @@ import {
   areArraysIdentical,
   computeWeightedScoreByArrayIndex,
 } from "../lib/utils";
-import { FilterData, SortParameters } from "../constants/types";
+import { SortParameters } from "../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,7 +37,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { updateSortParams } from "../server/actions";
+// import { updateSortParams } from "../server/actions";
 
 interface Filters {
   topic: {
@@ -69,17 +69,17 @@ const Sort = memo(
     onSortCallBack,
     isDisabled,
     onBeforeSort,
-    currentQuery,
-  }: {
+  }: // currentQuery,
+  {
     sortParameters: SortParameters | null;
     setSortParameters: (value: SortParameters | null) => void;
     onSortCallBack?: () => void;
     isDisabled: boolean;
     onBeforeSort?: () => void;
-    currentQuery: {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData;
+    // currentQuery: {
+    //   curriculumId: string;
+    //   subjectId: string;
+    // } & FilterData;
   }) => {
     const [filters, setFilters] = useState<Filters | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -108,19 +108,13 @@ const Sort = memo(
           weight: isNaN(filterData.weight) ? 0 : filterData.weight,
         };
       });
-      updateSortParams({
-        queryKey: JSON.stringify(currentQuery),
-        sortParams: JSON.stringify(result),
-      });
+      // updateSortParams({
+      //   queryKey: JSON.stringify(currentQuery),
+      //   sortParams: JSON.stringify(result),
+      // });
       setSortParameters(result);
       onSortCallBack?.();
-    }, [
-      filters,
-      onBeforeSort,
-      currentQuery,
-      setSortParameters,
-      onSortCallBack,
-    ]);
+    }, [filters, onBeforeSort, setSortParameters, onSortCallBack]);
 
     // Reset to initial filters if dialog closes/opens
     const resetFilters = useCallback(() => {

@@ -26,10 +26,9 @@ import {
 } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { FilterData, FiltersCache, SortParameters } from "../constants/types";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { addRecentQuery } from "../server/actions";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -55,6 +54,7 @@ export const RecentQuery = ({
   currentQuery,
   setIsSearchEnabled,
   setCurrentQuery,
+  isAddRecentQueryPending,
   isOverwriting,
   setSelectedCurriculum,
   setSelectedSubject,
@@ -76,6 +76,7 @@ export const RecentQuery = ({
       subjectId: string;
     } & FilterData
   ) => void;
+  isAddRecentQueryPending: boolean;
   setSelectedCurriculum: (curriculum: ValidCurriculum) => void;
   setSelectedSubject: (subject: string) => void;
   setSelectedTopic: (topic: string[]) => void;
@@ -85,8 +86,6 @@ export const RecentQuery = ({
   setSelectedSeason: (season: string[]) => void;
   isOverwriting: RefObject<boolean>;
 }) => {
-  const queryClient = useQueryClient();
-
   const {
     data: recentQuery,
     isError: isRecentQueryError,
@@ -118,63 +117,6 @@ export const RecentQuery = ({
     enabled: isEnabled,
   });
 
-  const { mutate, isPending: isAddRecentQueryPending } = useMutation({
-    mutationKey: ["add_recent_query"],
-    mutationFn: async (queryKey: string) => {
-      const result = await addRecentQuery({ queryKey: queryKey });
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      return {
-        isAnyDeleted: result.data?.isAnyDeleted,
-        lastSearch: result.data?.lastSearch,
-        realQueryKey: queryKey,
-      };
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData<
-        {
-          queryKey: string;
-          sortParams: string | null;
-          lastSearch: number;
-        }[]
-      >(["user_recent_query"], (oldData) => {
-        if (!oldData) {
-          return oldData;
-        }
-        if (data && data.realQueryKey) {
-          let newData = oldData;
-          if (data.isAnyDeleted) {
-            newData = newData.filter(
-              (item) => item.queryKey !== data.realQueryKey
-            );
-          }
-          const isQueryAlreadyExist = newData.find(
-            (item) => item.queryKey === data.realQueryKey
-          );
-          if (!isQueryAlreadyExist) {
-            newData.unshift({
-              queryKey: data.realQueryKey,
-              sortParams: null,
-              lastSearch: data.lastSearch?.getTime() ?? 0,
-            });
-          } else {
-            newData = newData.map((item) => {
-              if (item.queryKey === data.realQueryKey) {
-                return {
-                  ...item,
-                  lastSearch: data.lastSearch?.getTime() ?? 0,
-                };
-              }
-              return item;
-            });
-          }
-          return newData;
-        }
-        return oldData;
-      });
-    },
-  });
   const [accordionValue, setAccordionValue] = useState<string>("0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"ascending" | "descending">(
@@ -250,6 +192,7 @@ export const RecentQuery = ({
     }
   }, [loadSortParamsOnSearch, sortBy]);
 
+  //
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -431,7 +374,6 @@ export const RecentQuery = ({
                           if (
                             stringifiedNewQuery !== JSON.stringify(currentQuery)
                           ) {
-                            mutate(stringifiedNewQuery);
                             setCurrentQuery(parsedQuery);
                             isOverwriting.current = true;
                             setSelectedCurriculum(
