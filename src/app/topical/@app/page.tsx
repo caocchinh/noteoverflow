@@ -85,6 +85,8 @@ import { Label } from "@/components/ui/label";
 
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
 import { addRecentQuery } from "@/features/topical/server/actions";
+import { toast } from "sonner";
+import { BAD_REQUEST } from "@/constants/constants";
 
 const TopicalPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -740,6 +742,19 @@ const TopicalPage = () => {
           }
           return oldData;
         });
+      },
+      onError: (error) => {
+        if (error.message === BAD_REQUEST) {
+          toast.error(
+            "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!"
+          );
+          return;
+        }
+        toast.error(
+          "Failed to add recent search to database: " +
+            error.message +
+            ". Please refresh the page."
+        );
       },
     });
 

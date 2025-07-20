@@ -225,6 +225,13 @@ export const RecentQuery = ({
         return oldData.filter((item) => item.queryKey !== data);
       });
     },
+    onError: (error) => {
+      toast.error(
+        "Failed to delete outdated data: " +
+          error.message +
+          ". Please refresh the page."
+      );
+    },
   });
 
   return (
