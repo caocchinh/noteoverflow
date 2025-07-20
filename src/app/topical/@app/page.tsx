@@ -824,7 +824,6 @@ const TopicalPage = () => {
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
       setCurrentChunkIndex(0);
-
       scrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
@@ -844,6 +843,7 @@ const TopicalPage = () => {
       top: 0,
       behavior: "instant",
     });
+    setIsQuestionViewOpen({ isOpen: false, questionId: "" });
   }, [currentQuery]);
 
   useEffect(() => {
@@ -976,6 +976,7 @@ const TopicalPage = () => {
                   setSelectedSubject={setSelectedSubject}
                   setSelectedTopic={setSelectedTopic}
                   setSelectedYear={setSelectedYear}
+                  setSortParameters={setSortParameters}
                   setSelectedPaperType={setSelectedPaperType}
                   setSelectedSeason={setSelectedSeason}
                   isOverwriting={isOverwriting}

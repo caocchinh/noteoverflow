@@ -15,16 +15,28 @@ import {
 } from "@/components/ui/accordion";
 import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
-import { History } from "lucide-react";
+import { History, Loader2, ScanText, Wrench } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FilterData } from "../constants/types";
-import { RefObject, useEffect, useState } from "react";
+import { FilterData, SortParameters } from "../constants/types";
+import { RefObject, useState } from "react";
 import { addRecentQuery } from "../server/actions";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ValidCurriculum } from "@/constants/types";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const RecentQuery = ({
   isEnabled,
@@ -38,6 +50,7 @@ export const RecentQuery = ({
   setSelectedYear,
   setSelectedPaperType,
   setSelectedSeason,
+  setSortParameters,
 }: {
   isEnabled: boolean;
   setIsSearchEnabled: (isSearchEnabled: boolean) => void;
@@ -55,6 +68,7 @@ export const RecentQuery = ({
   setSelectedSubject: (subject: string) => void;
   setSelectedTopic: (topic: string[]) => void;
   setSelectedYear: (year: string[]) => void;
+  setSortParameters: (value: SortParameters | null) => void;
   setSelectedPaperType: (paperType: string[]) => void;
   setSelectedSeason: (season: string[]) => void;
   isOverwriting: RefObject<boolean>;
@@ -92,7 +106,7 @@ export const RecentQuery = ({
     enabled: isEnabled,
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending: isAddRecentQueryPending } = useMutation({
     mutationKey: ["add_recent_query"],
     mutationFn: async (queryKey: string) => {
       const result = await addRecentQuery({ queryKey: queryKey });
@@ -151,12 +165,9 @@ export const RecentQuery = ({
   });
   const [accordionValue, setAccordionValue] = useState<string>("0");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  useEffect(() => {
-    if (currentQuery.curriculumId && currentQuery.subjectId) {
-      mutate(JSON.stringify(currentQuery));
-    }
-  }, [currentQuery, mutate]);
+  const [sortBy, setSortBy] = useState<"ascending" | "descending">(
+    "descending"
+  );
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -170,12 +181,39 @@ export const RecentQuery = ({
         className="dark:bg-accent h-[95dvh] z-[100008]"
         overlayClassName="z-[100007]"
       >
-        <DialogHeader>
-          <DialogTitle>Recently searched</DialogTitle>
-          <DialogDescription>
-            Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here
-          </DialogDescription>
+        <DialogHeader className="flex justify-between flex-row">
+          <div>
+            <DialogTitle>Recently searched</DialogTitle>
+            <DialogDescription>
+              Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here
+            </DialogDescription>
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-max">
+                Settings <Wrench />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="z-[100009] dark:bg-accent">
+              Sort by date
+              <Select
+                value={sortBy}
+                onValueChange={(value) => {
+                  setSortBy(value as "ascending" | "descending");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="z-[1000010] dark:bg-accent">
+                  <SelectItem value="ascending">Newest first</SelectItem>
+                  <SelectItem value="descending">Oldest first</SelectItem>
+                </SelectContent>
+              </Select>
+            </PopoverContent>
+          </Popover>
         </DialogHeader>
+
         <Accordion
           value={accordionValue}
           onValueChange={setAccordionValue}
@@ -183,113 +221,157 @@ export const RecentQuery = ({
           collapsible
         >
           <ScrollArea type="always" className="h-[70vh] pr-5">
-            {recentQuery?.map((item, index) => {
-              const parsedQuery = JSON.parse(item.queryKey) as {
-                curriculumId: string;
-                subjectId: string;
-              } & FilterData;
-              return (
-                <AccordionItem
-                  key={item.queryKey + index}
-                  value={index.toString()}
-                >
-                  <AccordionTrigger>
-                    <div
-                      className={cn(
-                        "flex flex-col items-start justify-center",
-                        accordionValue === index.toString() && "text-logo-main"
-                      )}
-                    >
-                      <p>
-                        {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
-                        {parsedQuery.topic.length} topic
-                        {parsedQuery.topic.length > 1 && "s"} -{" "}
-                        {parsedQuery.year.length} year
-                        {parsedQuery.year.length > 1 && "s"}
-                      </p>
-                      <p
+            {isRecentQueryPending && (
+              <div className="flex justify-center items-center h-full">
+                <Loader2 className="animate-spin" />
+              </div>
+            )}
+            {isRecentQueryError && (
+              <div className="flex justify-center items-center h-full">
+                <p className="text-red-500">
+                  An error occurred while fetching recent queries! Please
+                  refresh the page.
+                </p>
+              </div>
+            )}
+            {isAddRecentQueryPending && (
+              <div className="flex justify-center items-center text-sm gap-2">
+                Updating <Loader2 className="animate-spin" size={13} />
+              </div>
+            )}
+            {recentQuery
+              ?.toSorted((a, b) => {
+                // Convert string dates to timestamps if they're not already numbers
+                const dateA =
+                  typeof a.lastSearch === "number"
+                    ? a.lastSearch
+                    : new Date(a.lastSearch).getTime();
+                const dateB =
+                  typeof b.lastSearch === "number"
+                    ? b.lastSearch
+                    : new Date(b.lastSearch).getTime();
+
+                if (sortBy === "ascending") {
+                  return dateB - dateA; // Newest first
+                }
+                return dateA - dateB; // Oldest first
+              })
+              .map((item, index) => {
+                const parsedQuery = JSON.parse(item.queryKey) as {
+                  curriculumId: string;
+                  subjectId: string;
+                } & FilterData;
+                return (
+                  <AccordionItem
+                    key={item.queryKey + index}
+                    value={index.toString()}
+                  >
+                    <AccordionTrigger>
+                      <div
                         className={cn(
-                          "text-muted-foreground",
-                          accordionValue === index.toString() && "text-white"
+                          "flex flex-col items-start justify-center",
+                          accordionValue === index.toString() &&
+                            "text-logo-main"
                         )}
                       >
-                        {new Date(item.lastSearch).toLocaleString(undefined, {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">
-                    <div className="flex w-full flex-wrap gap-2">
-                      Topic:
-                      {parsedQuery.topic.map((topic) => (
-                        <Badge key={topic} className="flex flex-row">
-                          {topic}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Separator />
-                    <div className="flex w-full flex-wrap gap-2">
-                      Year:
-                      {parsedQuery.year.map((year) => (
-                        <Badge key={year} className="flex flex-row">
-                          {year}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Separator />
-                    <div className="flex w-full flex-wrap gap-2">
-                      Paper:
-                      {parsedQuery.paperType.map((paper) => (
-                        <Badge key={paper} className="flex flex-row">
-                          {paper}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Separator />
-                    <div className="flex w-full flex-wrap gap-2">
-                      Season:
-                      {parsedQuery.season.map((season) => (
-                        <Badge key={season} className="flex flex-row">
-                          {season}
-                        </Badge>
-                      ))}
-                    </div>
-                    <Button
-                      className="w-full mt-2 !bg-logo-main !text-white cursor-pointer"
-                      onClick={() => {
-                        setCurrentQuery(parsedQuery);
-                        setIsDialogOpen(false);
-                        setIsSearchEnabled(true);
-                        isOverwriting.current = true;
-                        setSelectedCurriculum(
-                          parsedQuery.curriculumId as ValidCurriculum
-                        );
-                        setSelectedSubject(parsedQuery.subjectId);
-                        setSelectedTopic(parsedQuery.topic);
-                        setSelectedSeason(parsedQuery.season);
-                        setSelectedYear(parsedQuery.year);
-                        setSelectedPaperType(parsedQuery.paperType);
-                        setTimeout(() => {
-                          isOverwriting.current = false;
-                        }, 0);
-                      }}
-                    >
-                      Search
-                    </Button>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
+                        <p>
+                          {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
+                          {parsedQuery.topic.length} topic
+                          {parsedQuery.topic.length > 1 && "s"} -{" "}
+                          {parsedQuery.year.length} year
+                          {parsedQuery.year.length > 1 && "s"}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-muted-foreground",
+                            accordionValue === index.toString() && "text-white"
+                          )}
+                        >
+                          {new Date(item.lastSearch).toLocaleString(undefined, {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">
+                      <div className="flex w-full flex-wrap gap-2">
+                        Topic:
+                        {parsedQuery.topic.map((topic) => (
+                          <Badge key={topic} className="flex flex-row">
+                            {topic}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Separator />
+                      <div className="flex w-full flex-wrap gap-2">
+                        Year:
+                        {parsedQuery.year.map((year) => (
+                          <Badge key={year} className="flex flex-row">
+                            {year}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Separator />
+                      <div className="flex w-full flex-wrap gap-2">
+                        Paper:
+                        {parsedQuery.paperType.map((paper) => (
+                          <Badge key={paper} className="flex flex-row">
+                            {paper}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Separator />
+                      <div className="flex w-full flex-wrap gap-2">
+                        Season:
+                        {parsedQuery.season.map((season) => (
+                          <Badge key={season} className="flex flex-row">
+                            {season}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Button
+                        className="w-full mt-2 !bg-logo-main !text-white cursor-pointer"
+                        onClick={() => {
+                          const stringifiedNewQuery =
+                            JSON.stringify(parsedQuery);
+                          if (
+                            stringifiedNewQuery !== JSON.stringify(currentQuery)
+                          ) {
+                            mutate(stringifiedNewQuery);
+                            setCurrentQuery(parsedQuery);
+                            isOverwriting.current = true;
+                            setSelectedCurriculum(
+                              parsedQuery.curriculumId as ValidCurriculum
+                            );
+                            setSelectedSubject(parsedQuery.subjectId);
+                            setSelectedTopic(parsedQuery.topic);
+                            setSelectedSeason(parsedQuery.season);
+                            setSelectedYear(parsedQuery.year);
+                            setIsSearchEnabled(true);
+                            setSelectedPaperType(parsedQuery.paperType);
+                            setTimeout(() => {
+                              isOverwriting.current = false;
+                            }, 0);
+                          }
+                          setIsDialogOpen(false);
+                        }}
+                      >
+                        Search
+                        <ScanText />
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
           </ScrollArea>
         </Accordion>
         <DialogClose asChild>
-          <Button>Close</Button>
+          <Button className="cursor-pointer">Close</Button>
         </DialogClose>
       </DialogContent>
     </Dialog>
