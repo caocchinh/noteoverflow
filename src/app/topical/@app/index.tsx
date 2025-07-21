@@ -1364,7 +1364,7 @@ const TopicalClient = ({
             <SidebarRail />
           </Sidebar>
           <SidebarInset
-            className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
+            className="!relative flex flex-col items-center justify-start !px-0 gap-4 p-4 pl-2 md:items-start w-full overflow-hidden"
             ref={sideBarInsetRef}
           >
             {showScrollToTopButton && (

@@ -1245,7 +1245,7 @@ const QuestionInformation = ({
   }
 
   return (
-    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
+    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start mb-3">
       {question.questionTopics?.map((topic) => (
         <Badge key={topic.topic} className="bg-logo-main text-white">
           {topic.topic}
@@ -1254,6 +1254,9 @@ const QuestionInformation = ({
       <Badge>{question.season}</Badge>
       <Badge>{question.year}</Badge>
       <Badge>Paper {question.paperType}</Badge>
+      <Badge>
+        Question {extractQuestionNumber({ questionId: question.id })}
+      </Badge>
     </div>
   );
 };

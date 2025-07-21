@@ -293,12 +293,11 @@ export const RecentQuery = ({
           collapsible
         >
           <ScrollArea type="always" className="h-[65vh] pr-5">
-            {isRecentQueryFetching ||
-              (isUserSessionPending && (
-                <div className="flex justify-center items-center h-full">
-                  <Loader2 className="animate-spin" />
-                </div>
-              ))}
+            {isRecentQueryFetching && (
+              <div className="flex justify-center items-center h-full">
+                Fetching <Loader2 className="animate-spin" />
+              </div>
+            )}
             {!isValidSession && (
               <div className="flex justify-center items-center h-full">
                 <p className="text-red-500">
@@ -353,6 +352,7 @@ export const RecentQuery = ({
                     setSelectedTopic={setSelectedTopic}
                     setSelectedYear={setSelectedYear}
                     setSelectedPaperType={setSelectedPaperType}
+                    setAccordionValue={setAccordionValue}
                     isUserSessionPending={isUserSessionPending}
                     isValidSession={isValidSession}
                     setSelectedSeason={setSelectedSeason}
@@ -401,6 +401,7 @@ const RecentQueryItem = ({
   setSortParameters,
   isUserSessionPending,
   isValidSession,
+  setAccordionValue,
 }: {
   item: {
     queryKey: string;
@@ -419,6 +420,7 @@ const RecentQueryItem = ({
   setSelectedTopic: (topic: string[]) => void;
   setSelectedYear: (year: string[]) => void;
   setSelectedPaperType: (paperType: string[]) => void;
+  setAccordionValue: (accordionValue: string) => void;
   setSelectedSeason: (season: string[]) => void;
   isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
@@ -467,7 +469,8 @@ const RecentQueryItem = ({
           <p
             className={cn(
               "text-muted-foreground",
-              accordionValue === index.toString() && "text-white"
+              accordionValue === index.toString() &&
+                "dark:text-white text-black"
             )}
           >
             {new Date(item.lastSearch).toLocaleString(undefined, {
@@ -552,6 +555,7 @@ const RecentQueryItem = ({
                 }, 0);
                 return;
               }
+              setAccordionValue("dom dom yes yes");
               setCurrentQuery(parsedQuery);
               updateSearchParams({ query: JSON.stringify(parsedQuery) });
               isOverwriting.current = true;
@@ -572,12 +576,13 @@ const RecentQueryItem = ({
                   season: parsedQuery.season,
                 })
               );
-              if (isMobileDevice) {
-                setIsSidebarOpen(false);
-              }
+
               setTimeout(() => {
                 isOverwriting.current = false;
               }, 0);
+            }
+            if (isMobileDevice) {
+              setIsSidebarOpen(false);
             }
             setIsDialogOpen(false);
           }}

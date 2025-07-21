@@ -8,7 +8,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowDownWideNarrow, Check } from "lucide-react";
+import { ArrowDown, ArrowDownWideNarrow, ArrowUp, Check } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -16,7 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Reorder } from "motion/react";
-import { useCallback, memo, useState } from "react";
+import { useCallback, memo, useState, useRef } from "react";
 import {
   areArraysIdentical,
   computeWeightedScoreByArrayIndex,
@@ -337,37 +337,68 @@ const ReorderList = memo(
       },
       [items, setItems]
     );
+    const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
     return (
-      <div className="flex flex-col gap-3 items-center justify-center min-w-[220px] flex-1 dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
-        <h3 className="text-sm font-medium -mb-4">{label}</h3>
-        <ScrollArea
-          className="h-[235px] w-full [&_.bg-border]:!bg-muted-foreground/55 pl-4 pr-4 sm:pr-7"
-          type="always"
-        >
-          <Reorder.Group
-            axis="y"
-            layoutScroll
-            values={items}
-            onReorder={(newOrder) => {
-              setItems(newOrder, weight);
-            }}
-            className="min-w-[80px] w-full"
+      <div className="flex flex-col gap-3 items-center justify-center min-w-[210px] flex-1 dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
+        <h3 className="text-sm font-medium">{label}</h3>
+
+        <div className="flex flex-row w-full items-stretch justify-center">
+          <div className="flex flex-col items-center justify-between h-full">
+            <Button
+              className="rounded-full w-7 h-7 cursor-pointer"
+              variant="outline"
+              onClick={() => {
+                scrollAreaRef.current?.scrollBy({
+                  top: -145,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              <ArrowUp className="w-4 h-4" />
+            </Button>
+            <Button
+              className="rounded-full w-7 h-7 cursor-pointer"
+              variant="outline"
+              onClick={() => {
+                scrollAreaRef.current?.scrollBy({
+                  top: 145,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              <ArrowDown className="w-4 h-4" />
+            </Button>
+          </div>
+          <ScrollArea
+            className="h-[225px] w-full [&_.bg-border]:!bg-muted-foreground/55 pr-4 sm:pr-7"
+            type="always"
+            viewportRef={scrollAreaRef}
           >
-            {items.map((item, index) => (
-              <Reorder.Item
-                key={item}
-                value={item}
-                className="flex flex-row items-center justify-center gap-2"
-              >
-                <p className="text-sm text-white">{index + 1}.</p>
-                <div className=" dark:bg-input/30 px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border">
-                  {item}
-                </div>
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </ScrollArea>
+            <Reorder.Group
+              axis="y"
+              layoutScroll
+              values={items}
+              onReorder={(newOrder) => {
+                setItems(newOrder, weight);
+              }}
+              className="min-w-[80px] w-full"
+            >
+              {items.map((item, index) => (
+                <Reorder.Item
+                  key={item}
+                  value={item}
+                  className="flex flex-row items-center justify-center gap-2"
+                >
+                  <p className="text-sm text-white">{index + 1}.</p>
+                  <div className=" dark:bg-input/30 px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border">
+                    {item}
+                  </div>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </ScrollArea>
+        </div>
         <div className="flex flex-col gap-2 items-center justify-center w-full">
           <Button
             variant="outline"
