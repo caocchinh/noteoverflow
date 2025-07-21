@@ -28,7 +28,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { FilterData, FiltersCache } from "../constants/types";
+import { FilterData, FiltersCache, SortParameters } from "../constants/types";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,7 @@ import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
+  computeDefaultSortParams,
 } from "../lib/utils";
 import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
@@ -63,6 +64,7 @@ export const RecentQuery = ({
   setIsSearchEnabled,
   setCurrentQuery,
   isAddRecentQueryPending,
+  setSortParameters,
   isOverwriting,
   setSelectedCurriculum,
   setSelectedSubject,
@@ -88,6 +90,7 @@ export const RecentQuery = ({
   setSelectedCurriculum: (curriculum: ValidCurriculum) => void;
   setSelectedSubject: (subject: string) => void;
   setSelectedTopic: (topic: string[]) => void;
+  setSortParameters: (sortParameters: SortParameters) => void;
   setSelectedYear: (year: string[]) => void;
   setSelectedPaperType: (paperType: string[]) => void;
   setSelectedSeason: (season: string[]) => void;
@@ -349,6 +352,7 @@ export const RecentQuery = ({
                     setQueryThatIsDeleting={setQueryThatIsDeleting}
                     deleteRecentQueryMutation={deleteRecentQueryMutation}
                     setIsDialogOpen={setIsDialogOpen}
+                    setSortParameters={setSortParameters}
                   />
                 );
               })}
@@ -380,6 +384,7 @@ const RecentQueryItem = ({
   setIsDialogOpen,
   item,
   deleteRecentQueryMutation,
+  setSortParameters,
 }: {
   item: {
     queryKey: string;
@@ -410,6 +415,7 @@ const RecentQueryItem = ({
   setQueryThatIsDeleting: (queryKey: string) => void;
   setIsDialogOpen: (isDialogOpen: boolean) => void;
   deleteRecentQueryMutation: (queryKey: string) => void;
+  setSortParameters: (sortParameters: SortParameters) => void;
 }) => {
   const isMobileDevice = useIsMobile();
   const parsedQuery = JSON.parse(item.queryKey) as {
@@ -540,6 +546,14 @@ const RecentQueryItem = ({
               setSelectedYear(parsedQuery.year);
               setIsSearchEnabled(true);
               setSelectedPaperType(parsedQuery.paperType);
+              setSortParameters(
+                computeDefaultSortParams({
+                  paperType: parsedQuery.paperType,
+                  topic: parsedQuery.topic,
+                  year: parsedQuery.year,
+                  season: parsedQuery.season,
+                })
+              );
               if (isMobileDevice) {
                 setIsSidebarOpen(false);
               }

@@ -12,17 +12,8 @@ import {
 import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
 import { FilterData, SortParameters } from "../constants/types";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  computeWeightedScoreByArrayIndex,
-  updateSearchParams,
-} from "../lib/utils";
-import {
-  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-  SEASON_SORT_DEFAULT_WEIGHT,
-  YEAR_SORT_DEFAULT_WEIGHT,
-  TOPIC_SORT_DEFAULT_WEIGHT,
-} from "../constants/constants";
+import { computeDefaultSortParams, updateSearchParams } from "../lib/utils";
+
 import { useState } from "react";
 
 export default function ButtonUltility({
@@ -55,7 +46,6 @@ export default function ButtonUltility({
   } & FilterData;
 }) {
   const { theme } = useTheme();
-  const isMobileDevice = useIsMobile();
   const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);
   const [isRevertConfirmationOpen, setIsRevertConfirmationOpen] =
     useState(false);
@@ -67,42 +57,20 @@ export default function ButtonUltility({
         disabled={!isMounted}
         onClick={() => {
           if (isValidInput({ scrollOnError: true })) {
-            if (isMobileDevice) {
-              setIsSidebarOpen(false);
-            }
             setIsSearchEnabled(true);
             setCurrentQuery({
               ...query,
             });
-
             // Update URL parameters without page reload
             updateSearchParams({ query: JSON.stringify(query) });
-            setSortParameters({
-              paperType: {
-                data: computeWeightedScoreByArrayIndex({
-                  data: query.paperType,
-                }),
-                weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-              },
-              topic: {
-                data: computeWeightedScoreByArrayIndex({
-                  data: query.topic,
-                }),
-                weight: TOPIC_SORT_DEFAULT_WEIGHT,
-              },
-              year: {
-                data: computeWeightedScoreByArrayIndex({
-                  data: query.year,
-                }),
-                weight: YEAR_SORT_DEFAULT_WEIGHT,
-              },
-              season: {
-                data: computeWeightedScoreByArrayIndex({
-                  data: query.season,
-                }),
-                weight: SEASON_SORT_DEFAULT_WEIGHT,
-              },
-            });
+            setSortParameters(
+              computeDefaultSortParams({
+                paperType: query.paperType,
+                topic: query.topic,
+                year: query.year,
+                season: query.season,
+              })
+            );
           }
         }}
       >

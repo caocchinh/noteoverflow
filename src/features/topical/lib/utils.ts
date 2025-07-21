@@ -7,7 +7,11 @@ import {
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   FILTERS_CACHE_KEY,
   MAX_TOPIC_SELECTION,
+  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+  SEASON_SORT_DEFAULT_WEIGHT,
+  TOPIC_SORT_DEFAULT_WEIGHT,
   TOPICAL_DATA,
+  YEAR_SORT_DEFAULT_WEIGHT,
 } from "../constants/constants";
 import type { FilterData, FiltersCache, LayoutStyle } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
@@ -349,14 +353,14 @@ export const syncFilterCacheToLocalStorage = ({
   selectedYear,
   selectedSeason,
 }: {
-  isSessionCacheEnabled: boolean;
-  isPersistantCacheEnabled: boolean;
-  layoutStyle: LayoutStyle;
-  showFinishedQuestionTint: boolean;
-  scrollUpWhenPageChange: boolean;
-  showScrollToTopButton: boolean;
-  numberOfColumns: number;
-  numberOfQuestionsPerPage: number;
+  isSessionCacheEnabled?: boolean;
+  isPersistantCacheEnabled?: boolean;
+  layoutStyle?: LayoutStyle;
+  showFinishedQuestionTint?: boolean;
+  scrollUpWhenPageChange?: boolean;
+  showScrollToTopButton?: boolean;
+  numberOfColumns?: number;
+  numberOfQuestionsPerPage?: number;
   selectedCurriculum: string;
   selectedSubject: string;
   selectedTopic: string[];
@@ -407,14 +411,20 @@ export const syncFilterCacheToLocalStorage = ({
 
     stateToSave = {
       ...stateToSave,
-      isSessionCacheEnabled,
-      isPersistantCacheEnabled,
-      showFinishedQuestionTint,
-      scrollUpWhenPageChange,
-      showScrollToTopButton,
-      numberOfColumns,
-      layoutStyle,
-      numberOfQuestionsPerPage,
+      isSessionCacheEnabled:
+        isSessionCacheEnabled ?? stateToSave.isSessionCacheEnabled,
+      isPersistantCacheEnabled:
+        isPersistantCacheEnabled ?? stateToSave.isPersistantCacheEnabled,
+      showFinishedQuestionTint:
+        showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
+      scrollUpWhenPageChange:
+        scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
+      showScrollToTopButton:
+        showScrollToTopButton ?? stateToSave.showScrollToTopButton,
+      numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
+      layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
+      numberOfQuestionsPerPage:
+        numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
     };
 
     if (selectedCurriculum && selectedSubject) {
@@ -441,4 +451,43 @@ export const syncFilterCacheToLocalStorage = ({
   } catch (error) {
     console.error("Failed to save settings to localStorage:", error);
   }
+};
+
+export const computeDefaultSortParams = ({
+  paperType,
+  topic,
+  year,
+  season,
+}: {
+  paperType: string[];
+  topic: string[];
+  year: string[];
+  season: string[];
+}) => {
+  return {
+    paperType: {
+      data: computeWeightedScoreByArrayIndex({
+        data: paperType,
+      }),
+      weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
+    },
+    topic: {
+      data: computeWeightedScoreByArrayIndex({
+        data: topic,
+      }),
+      weight: TOPIC_SORT_DEFAULT_WEIGHT,
+    },
+    year: {
+      data: computeWeightedScoreByArrayIndex({
+        data: year,
+      }),
+      weight: YEAR_SORT_DEFAULT_WEIGHT,
+    },
+    season: {
+      data: computeWeightedScoreByArrayIndex({
+        data: season,
+      }),
+      weight: SEASON_SORT_DEFAULT_WEIGHT,
+    },
+  };
 };

@@ -59,6 +59,7 @@ import {
   validateSubject,
   isOverScrolling,
   syncFilterCacheToLocalStorage,
+  computeDefaultSortParams,
 } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -421,13 +422,21 @@ const TopicalClient = ({
         setIsValidSearchParams(true);
         setCurrentQuery(parsedQueryFromSearchParams);
         setIsSearchEnabled(true);
+        setSortParameters(
+          computeDefaultSortParams({
+            paperType: parsedQueryFromSearchParams.paperType,
+            topic: parsedQueryFromSearchParams.topic,
+            year: parsedQueryFromSearchParams.year,
+            season: parsedQueryFromSearchParams.season,
+          })
+        );
       }
     }
 
     try {
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      if (savedState) {
-        try {
+      try {
+        if (savedState && !parsedQueryFromSearchParams) {
           const parsedState: FiltersCache = JSON.parse(savedState);
           setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
           setIsPersistantCacheEnabled(
@@ -446,84 +455,75 @@ const TopicalClient = ({
           setShowFinishedQuestionTint(
             parsedState.showFinishedQuestionTint ?? true
           );
-          if (!parsedQueryFromSearchParams) {
-            if (
-              parsedState.isSessionCacheEnabled &&
-              parsedState.lastSessionCurriculum &&
-              validateCurriculum(parsedState.lastSessionCurriculum)
-            ) {
-              setSelectedCurriculum(
-                parsedState.lastSessionCurriculum as ValidCurriculum
-              );
-              const isSubjectValid = validateSubject(
-                parsedState.lastSessionCurriculum,
-                parsedState.lastSessionSubject
-              );
-              if (parsedState.lastSessionSubject && isSubjectValid) {
-                setSelectedSubject(parsedState.lastSessionSubject);
-              }
-              if (
-                isSubjectValid &&
-                validateFilterData({
-                  curriculumn: parsedState.lastSessionCurriculum,
-                  data: parsedState.filters[parsedState.lastSessionCurriculum][
-                    parsedState.lastSessionSubject
-                  ],
-                  subject: parsedState.lastSessionSubject,
-                })
-              ) {
-                setSelectedSubject(parsedState.lastSessionSubject);
-                setSelectedTopic(
-                  parsedState.filters[parsedState.lastSessionCurriculum][
-                    parsedState.lastSessionSubject
-                  ].topic
-                );
-                setSelectedPaperType(
-                  parsedState.filters[parsedState.lastSessionCurriculum][
-                    parsedState.lastSessionSubject
-                  ].paperType
-                );
-                setSelectedYear(
-                  parsedState.filters[parsedState.lastSessionCurriculum][
-                    parsedState.lastSessionSubject
-                  ].year
-                );
-                setSelectedSeason(
-                  parsedState.filters[parsedState.lastSessionCurriculum][
-                    parsedState.lastSessionSubject
-                  ].season
-                );
-              }
-            }
-          } else {
+
+          if (
+            parsedState.isSessionCacheEnabled &&
+            parsedState.lastSessionCurriculum &&
+            validateCurriculum(parsedState.lastSessionCurriculum)
+          ) {
             setSelectedCurriculum(
-              parsedQueryFromSearchParams.curriculumId as ValidCurriculum
+              parsedState.lastSessionCurriculum as ValidCurriculum
             );
-            setSelectedSubject(parsedQueryFromSearchParams.subjectId);
-            setSelectedPaperType(parsedQueryFromSearchParams.paperType);
-            setSelectedTopic(parsedQueryFromSearchParams.topic);
-            setSelectedYear(parsedQueryFromSearchParams.year);
-            setSelectedSeason(parsedQueryFromSearchParams.season);
-            syncFilterCacheToLocalStorage({
-              isSessionCacheEnabled: parsedState.isSessionCacheEnabled,
-              isPersistantCacheEnabled: parsedState.isPersistantCacheEnabled,
-              showFinishedQuestionTint: parsedState.showFinishedQuestionTint,
-              scrollUpWhenPageChange: parsedState.scrollUpWhenPageChange,
-              showScrollToTopButton: parsedState.showScrollToTopButton,
-              numberOfColumns: parsedState.numberOfColumns,
-              layoutStyle: parsedState.layoutStyle,
-              numberOfQuestionsPerPage: parsedState.numberOfQuestionsPerPage,
-              selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
-              selectedSubject: parsedQueryFromSearchParams.subjectId,
-              selectedTopic: parsedQueryFromSearchParams.topic,
-              selectedPaperType: parsedQueryFromSearchParams.paperType,
-              selectedYear: parsedQueryFromSearchParams.year,
-              selectedSeason: parsedQueryFromSearchParams.season,
-            });
+            const isSubjectValid = validateSubject(
+              parsedState.lastSessionCurriculum,
+              parsedState.lastSessionSubject
+            );
+            if (parsedState.lastSessionSubject && isSubjectValid) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                curriculumn: parsedState.lastSessionCurriculum,
+                data: parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ],
+                subject: parsedState.lastSessionSubject,
+              })
+            ) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+              setSelectedTopic(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].topic
+              );
+              setSelectedPaperType(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].paperType
+              );
+              setSelectedYear(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].year
+              );
+              setSelectedSeason(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].season
+              );
+            }
           }
-        } catch {
-          localStorage.removeItem(FILTERS_CACHE_KEY);
+        } else if (parsedQueryFromSearchParams) {
+          setSelectedCurriculum(
+            parsedQueryFromSearchParams.curriculumId as ValidCurriculum
+          );
+          setSelectedSubject(parsedQueryFromSearchParams.subjectId);
+          setSelectedPaperType(parsedQueryFromSearchParams.paperType);
+          setSelectedTopic(parsedQueryFromSearchParams.topic);
+          setSelectedYear(parsedQueryFromSearchParams.year);
+          setSelectedSeason(parsedQueryFromSearchParams.season);
+          syncFilterCacheToLocalStorage({
+            selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
+            selectedSubject: parsedQueryFromSearchParams.subjectId,
+            selectedTopic: parsedQueryFromSearchParams.topic,
+            selectedPaperType: parsedQueryFromSearchParams.paperType,
+            selectedYear: parsedQueryFromSearchParams.year,
+            selectedSeason: parsedQueryFromSearchParams.season,
+          });
         }
+      } catch {
+        localStorage.removeItem(FILTERS_CACHE_KEY);
       }
     } catch (error) {
       console.error("Failed to access localStorage:", error);
@@ -685,6 +685,7 @@ const TopicalClient = ({
             : "An error occurred";
         throw new Error(errorMessage);
       }
+
       return data as {
         data: SelectedQuestion[];
         isRateLimited: boolean;
@@ -779,7 +780,9 @@ const TopicalClient = ({
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
-      mutateRecentQuery(currentQuery);
+      if (userSession?.data?.session) {
+        mutateRecentQuery(currentQuery);
+      }
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
         const currentTime = Date.now();
@@ -941,6 +944,12 @@ const TopicalClient = ({
   }, [currentQuery]);
 
   useEffect(() => {
+    if (isMobileDevice) {
+      setIsSidebarOpen(false);
+    }
+  }, [currentQuery, isMobileDevice, setIsSidebarOpen]);
+
+  useEffect(() => {
     overflowScrollHandler();
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
@@ -1066,6 +1075,7 @@ const TopicalClient = ({
                     !!userSession?.data?.session && !isUserSessionError
                   }
                   isAddRecentQueryPending={isAddRecentQueryPending}
+                  setSortParameters={setSortParameters}
                   setIsSidebarOpen={setIsSidebarOpen}
                   setIsSearchEnabled={setIsSearchEnabled}
                   setCurrentQuery={setCurrentQuery}
