@@ -15,12 +15,14 @@ import { FilterData, SortParameters } from "../constants/types";
 import { computeDefaultSortParams, updateSearchParams } from "../lib/utils";
 
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ButtonUltility({
   resetEverything,
   setIsSidebarOpen,
   setSortParameters,
   isMounted,
+  currentQuery,
   isValidInput,
   setIsSearchEnabled,
   revert,
@@ -32,6 +34,10 @@ export default function ButtonUltility({
   revert: () => void;
   setSortParameters: (value: SortParameters | null) => void;
   isMounted: boolean;
+  currentQuery: {
+    curriculumId: string;
+    subjectId: string;
+  } & FilterData;
   isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
   setIsSearchEnabled: (value: boolean) => void;
   setCurrentQuery: (
@@ -49,14 +55,16 @@ export default function ButtonUltility({
   const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);
   const [isRevertConfirmationOpen, setIsRevertConfirmationOpen] =
     useState(false);
-
+  const isMobileDevice = useIsMobile();
   return (
     <>
       <Button
         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
         disabled={!isMounted}
         onClick={() => {
-          if (isValidInput({ scrollOnError: true })) {
+          const isSameQuery =
+            JSON.stringify(currentQuery) == JSON.stringify(query);
+          if (isValidInput({ scrollOnError: true }) && !isSameQuery) {
             setIsSearchEnabled(true);
             setCurrentQuery({
               ...query,
@@ -71,6 +79,8 @@ export default function ButtonUltility({
                 season: query.season,
               })
             );
+          } else if (isSameQuery && isMobileDevice) {
+            setIsSidebarOpen(false);
           }
         }}
       >

@@ -59,7 +59,8 @@ import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
 
 export const RecentQuery = ({
-  isEnabled,
+  isUserSessionPending,
+  isValidSession,
   currentQuery,
   setIsSearchEnabled,
   setCurrentQuery,
@@ -74,7 +75,8 @@ export const RecentQuery = ({
   setSelectedSeason,
   setIsSidebarOpen,
 }: {
-  isEnabled: boolean;
+  isUserSessionPending: boolean;
+  isValidSession: boolean;
   setIsSearchEnabled: (isSearchEnabled: boolean) => void;
   currentQuery: {
     curriculumId: string;
@@ -100,7 +102,7 @@ export const RecentQuery = ({
   const {
     data: recentQuery,
     isError: isRecentQueryError,
-    isPending: isRecentQueryPending,
+    isFetching: isRecentQueryFetching,
   } = useQuery({
     queryKey: ["user_recent_query"],
     queryFn: async () => {
@@ -125,7 +127,7 @@ export const RecentQuery = ({
 
       return data.data;
     },
-    enabled: isEnabled,
+    enabled: !isUserSessionPending && isValidSession,
   });
 
   const [accordionValue, setAccordionValue] =
@@ -291,9 +293,17 @@ export const RecentQuery = ({
           collapsible
         >
           <ScrollArea type="always" className="h-[65vh] pr-5">
-            {isRecentQueryPending && (
+            {isRecentQueryFetching ||
+              (isUserSessionPending && (
+                <div className="flex justify-center items-center h-full">
+                  <Loader2 className="animate-spin" />
+                </div>
+              ))}
+            {!isValidSession && (
               <div className="flex justify-center items-center h-full">
-                <Loader2 className="animate-spin" />
+                <p className="text-red-500">
+                  Please sign in to view recently searched queries.
+                </p>
               </div>
             )}
             {isRecentQueryError && (
@@ -304,11 +314,13 @@ export const RecentQuery = ({
                 </p>
               </div>
             )}
-            {isAddRecentQueryPending && (
-              <div className="flex justify-center items-center text-sm gap-2">
-                Updating <Loader2 className="animate-spin" size={13} />
-              </div>
-            )}
+            {isAddRecentQueryPending &&
+              !isUserSessionPending &&
+              isValidSession && (
+                <div className="flex justify-center items-center text-sm gap-2">
+                  Updating <Loader2 className="animate-spin" size={13} />
+                </div>
+              )}
             {recentQuery && recentQuery.length == 0 && (
               <div className="h-full w-full flex items-center justify-center">
                 No item found! Try searching for something.
@@ -341,6 +353,8 @@ export const RecentQuery = ({
                     setSelectedTopic={setSelectedTopic}
                     setSelectedYear={setSelectedYear}
                     setSelectedPaperType={setSelectedPaperType}
+                    isUserSessionPending={isUserSessionPending}
+                    isValidSession={isValidSession}
                     setSelectedSeason={setSelectedSeason}
                     isOverwriting={isOverwriting}
                     setIsSidebarOpen={setIsSidebarOpen}
@@ -385,6 +399,8 @@ const RecentQueryItem = ({
   item,
   deleteRecentQueryMutation,
   setSortParameters,
+  isUserSessionPending,
+  isValidSession,
 }: {
   item: {
     queryKey: string;
@@ -416,6 +432,8 @@ const RecentQueryItem = ({
   setIsDialogOpen: (isDialogOpen: boolean) => void;
   deleteRecentQueryMutation: (queryKey: string) => void;
   setSortParameters: (sortParameters: SortParameters) => void;
+  isUserSessionPending: boolean;
+  isValidSession: boolean;
 }) => {
   const isMobileDevice = useIsMobile();
   const parsedQuery = JSON.parse(item.queryKey) as {
@@ -505,7 +523,7 @@ const RecentQueryItem = ({
             isThisItemDeleting && "!bg-red-500"
           )}
           onClick={() => {
-            if (isThisItemDeleting) {
+            if (isThisItemDeleting || isUserSessionPending || !isValidSession) {
               return;
             }
             const stringifiedNewQuery = JSON.stringify(parsedQuery);

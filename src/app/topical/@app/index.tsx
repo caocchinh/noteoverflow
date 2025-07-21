@@ -780,9 +780,8 @@ const TopicalClient = ({
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
-      if (userSession?.data?.session) {
-        mutateRecentQuery(currentQuery);
-      }
+      mutateRecentQuery(currentQuery);
+
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
         const currentTime = Date.now();
@@ -1071,14 +1070,13 @@ const TopicalClient = ({
             <ScrollArea className="h-full" type="always">
               <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
                 <RecentQuery
-                  isEnabled={
-                    !!userSession?.data?.session && !isUserSessionError
-                  }
                   isAddRecentQueryPending={isAddRecentQueryPending}
                   setSortParameters={setSortParameters}
                   setIsSidebarOpen={setIsSidebarOpen}
                   setIsSearchEnabled={setIsSearchEnabled}
                   setCurrentQuery={setCurrentQuery}
+                  isUserSessionPending={isUserSessionPending}
+                  isValidSession={!!userSession?.data?.session}
                   currentQuery={currentQuery}
                   setSelectedCurriculum={setSelectedCurriculum}
                   setSelectedSubject={setSelectedSubject}
@@ -1317,6 +1315,7 @@ const TopicalClient = ({
                   <div className="flex w-full flex-col items-center justify-center gap-2">
                     <ButtonUltility
                       isMounted={isMounted}
+                      currentQuery={currentQuery}
                       isValidInput={isValidInputs}
                       setSortParameters={setSortParameters}
                       revert={revert}

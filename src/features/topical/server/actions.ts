@@ -305,7 +305,9 @@ export const addRecentQuery = async ({
   try {
     const session = await verifySession();
     if (!session) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        success: true,
+      };
     }
     const userId = session.user.id;
     const db = await getDbAsync();

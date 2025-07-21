@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ImageIcon,
-  LayoutDashboard,
   Loader2,
   LogOut,
   RefreshCcw,
@@ -57,6 +56,8 @@ const User = () => {
     onSuccess: () => {
       queryClient.setQueryData(["user"], null);
       queryClient.setQueryData(["all_user_bookmarks"], null);
+      queryClient.setQueryData(["user_recent_query"], null);
+      queryClient.setQueryData(["user_finished_questions"], null);
       setIsMenuOpen(false);
       router.push("/authentication");
     },
@@ -255,22 +256,6 @@ const User = () => {
             </>
           )}
 
-          <DropdownMenuSeparator className="!mx-0 !my-0" />
-          <DropdownMenuItem asChild title="Dashboard">
-            <Button
-              asChild
-              className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
-              variant="ghost"
-            >
-              <Link
-                className="flex w-full items-center justify-start gap-2"
-                href="/dashboard"
-              >
-                <LayoutDashboard />
-                Dashboard
-              </Link>
-            </Button>
-          </DropdownMenuItem>
           <DropdownMenuSeparator className="!mx-0 !my-0" />
 
           <DropdownMenuItem
