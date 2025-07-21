@@ -13,7 +13,10 @@ import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
 import { FilterData, SortParameters } from "../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { computeWeightedScoreByArrayIndex } from "../lib/utils";
+import {
+  computeWeightedScoreByArrayIndex,
+  updateSearchParams,
+} from "../lib/utils";
 import {
   PAPER_TYPE_SORT_DEFAULT_WEIGHT,
   SEASON_SORT_DEFAULT_WEIGHT,
@@ -71,6 +74,9 @@ export default function ButtonUltility({
             setCurrentQuery({
               ...query,
             });
+
+            // Update URL parameters without page reload
+            updateSearchParams({ query: JSON.stringify(query) });
             setSortParameters({
               paperType: {
                 data: computeWeightedScoreByArrayIndex({

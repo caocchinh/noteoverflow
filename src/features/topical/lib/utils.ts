@@ -2,10 +2,14 @@ import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_SUBJECT_CODE,
+  DEFAULT_LAYOUT_STYLE,
+  DEFAULT_NUMBER_OF_COLUMNS,
+  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  FILTERS_CACHE_KEY,
   MAX_TOPIC_SELECTION,
   TOPICAL_DATA,
 } from "../constants/constants";
-import type { FilterData } from "../constants/types";
+import type { FilterData, FiltersCache, LayoutStyle } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 
 export const validateCurriculum = (curriculum: string): boolean => {
@@ -313,4 +317,128 @@ export const computeWeightedScoreByArrayIndex = ({
     weight--;
   }
   return scoreObject;
+};
+
+export const updateSearchParams = ({ query }: { query: string }) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const params = new URLSearchParams(window.location.search);
+  params.set("queryKey", JSON.stringify(query));
+
+  window.history.pushState(
+    {},
+    "",
+    `${window.location.pathname}?${params.toString()}`
+  );
+};
+
+export const syncFilterCacheToLocalStorage = ({
+  isSessionCacheEnabled,
+  isPersistantCacheEnabled,
+  showFinishedQuestionTint,
+  scrollUpWhenPageChange,
+  showScrollToTopButton,
+  numberOfColumns,
+  layoutStyle,
+  numberOfQuestionsPerPage,
+  selectedCurriculum,
+  selectedSubject,
+  selectedTopic,
+  selectedPaperType,
+  selectedYear,
+  selectedSeason,
+}: {
+  isSessionCacheEnabled: boolean;
+  isPersistantCacheEnabled: boolean;
+  layoutStyle: LayoutStyle;
+  showFinishedQuestionTint: boolean;
+  scrollUpWhenPageChange: boolean;
+  showScrollToTopButton: boolean;
+  numberOfColumns: number;
+  numberOfQuestionsPerPage: number;
+  selectedCurriculum: string;
+  selectedSubject: string;
+  selectedTopic: string[];
+  selectedPaperType: string[];
+  selectedYear: string[];
+  selectedSeason: string[];
+}) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    let stateToSave: FiltersCache;
+
+    try {
+      const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+      stateToSave = existingStateJSON
+        ? JSON.parse(existingStateJSON)
+        : {
+            numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+            layoutStyle: DEFAULT_LAYOUT_STYLE,
+            numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+            isSessionCacheEnabled: true,
+            isPersistantCacheEnabled: true,
+            showFinishedQuestionTint: true,
+            scrollUpWhenPageChange: true,
+            showScrollToTopButton: true,
+            lastSessionCurriculum: "",
+            lastSessionSubject: "",
+            filters: {},
+          };
+    } catch {
+      // If reading fails, start with empty state
+      stateToSave = {
+        recentlySearchSortedBy: "ascending",
+        numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+        layoutStyle: DEFAULT_LAYOUT_STYLE,
+        numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+        isSessionCacheEnabled: true,
+        isPersistantCacheEnabled: true,
+        showFinishedQuestionTint: true,
+        scrollUpWhenPageChange: true,
+        showScrollToTopButton: true,
+        lastSessionCurriculum: "",
+        lastSessionSubject: "",
+        filters: {},
+      };
+    }
+
+    stateToSave = {
+      ...stateToSave,
+      isSessionCacheEnabled,
+      isPersistantCacheEnabled,
+      showFinishedQuestionTint,
+      scrollUpWhenPageChange,
+      showScrollToTopButton,
+      numberOfColumns,
+      layoutStyle,
+      numberOfQuestionsPerPage,
+    };
+
+    if (selectedCurriculum && selectedSubject) {
+      stateToSave.filters = {
+        ...stateToSave.filters,
+        [selectedCurriculum]: {
+          ...stateToSave.filters?.[selectedCurriculum],
+          [selectedSubject]: {
+            topic: selectedTopic,
+            paperType: selectedPaperType,
+            year: selectedYear,
+            season: selectedSeason,
+          },
+        },
+      };
+    }
+    if (selectedCurriculum) {
+      stateToSave.lastSessionCurriculum = selectedCurriculum;
+    }
+    if (selectedSubject) {
+      stateToSave.lastSessionSubject = selectedSubject;
+    }
+    localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+  } catch (error) {
+    console.error("Failed to save settings to localStorage:", error);
+  }
 };

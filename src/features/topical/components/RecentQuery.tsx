@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
+  updateSearchParams,
   validateCurriculum,
   validateFilterData,
   validateSubject,
@@ -137,7 +138,7 @@ export const RecentQuery = ({
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
       if (savedState) {
         const parsedState: FiltersCache = JSON.parse(savedState);
-        setSortBy(parsedState.recentlySearchSortedBy);
+        setSortBy(parsedState.recentlySearchSortedBy ?? "descending");
       }
     } catch {}
     setTimeout(() => {
@@ -286,7 +287,7 @@ export const RecentQuery = ({
           type="single"
           collapsible
         >
-          <ScrollArea type="always" className="h-[70vh] pr-5">
+          <ScrollArea type="always" className="h-[65vh] pr-5">
             {isRecentQueryPending && (
               <div className="flex justify-center items-center h-full">
                 <Loader2 className="animate-spin" />
@@ -527,8 +528,8 @@ const RecentQueryItem = ({
                 }, 0);
                 return;
               }
-
               setCurrentQuery(parsedQuery);
+              updateSearchParams({ query: JSON.stringify(parsedQuery) });
               isOverwriting.current = true;
               setSelectedCurriculum(
                 parsedQuery.curriculumId as ValidCurriculum
