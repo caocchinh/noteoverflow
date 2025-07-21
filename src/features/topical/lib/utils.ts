@@ -327,8 +327,8 @@ export const updateSearchParams = ({ query }: { query: string }) => {
   if (typeof window === "undefined") {
     return;
   }
-  const params = new URLSearchParams(window.location.search);
-  params.set("queryKey", JSON.stringify(query));
+  const params = new URLSearchParams();
+  params.set("queryKey", query);
 
   window.history.pushState(
     {},

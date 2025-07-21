@@ -83,17 +83,18 @@ import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import Sort from "@/features/topical/components/Sort";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
 import { addRecentQuery } from "@/features/topical/server/actions";
 import { toast } from "sonner";
 import { BAD_REQUEST } from "@/constants/constants";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
 
 const TopicalClient = ({
   searchParams,
+  BETTER_AUTH_URL,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
+  BETTER_AUTH_URL: string;
 }) => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     ValidCurriculum | ""
@@ -392,7 +393,7 @@ const TopicalClient = ({
     if (searchParams.queryKey) {
       try {
         parsedQueryFromSearchParams = JSON.parse(
-          JSON.parse(searchParams.queryKey as string)
+          searchParams.queryKey as string
         );
       } catch {
         parsedQueryFromSearchParams = undefined;
@@ -1597,14 +1598,13 @@ const TopicalClient = ({
                     <div
                       className={cn(
                         "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-                        isQuestionViewDisabled &&
-                          "pointer-events-none opacity-50",
+                        isQuestionViewDisabled && "opacity-50",
                         showFinishedQuestion
                           ? "border-green-600"
                           : "border-muted-foreground"
                       )}
-                      onClick={(e) => {
-                        if ((e.target as HTMLElement).tagName === "LABEL") {
+                      onClick={() => {
+                        if (isQuestionViewDisabled) {
                           return;
                         }
                         setShowFinishedQuestion(!showFinishedQuestion);
@@ -1615,26 +1615,30 @@ const TopicalClient = ({
                         id="show-finished-question"
                         checked={showFinishedQuestion ?? false}
                       />
-                      <Label
+                      <p
                         className={cn(
                           showFinishedQuestion
                             ? "text-green-600"
                             : "text-muted-foreground",
-                          "cursor-pointer"
+                          "cursor-pointer text-sm"
                         )}
-                        htmlFor="show-finished-question"
                       >
                         Show finished questions
-                      </Label>
+                      </p>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent
                     side="bottom"
                     className={cn(!isQuestionViewDisabled && "hidden")}
                   >
-                    To inspect questions, run a search first.
+                    To toggle this, run a search first.
                   </TooltipContent>
                 </Tooltip>
+                <ShareFilter
+                  isQuestionViewDisabled={isQuestionViewDisabled}
+                  currentQuery={currentQuery}
+                  BETTER_AUTH_URL={BETTER_AUTH_URL}
+                />
               </div>
 
               <ScrollBar

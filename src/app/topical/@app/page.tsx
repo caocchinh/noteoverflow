@@ -5,5 +5,10 @@ type SearchParams = {
 };
 
 export default async function TopicalPage({ searchParams }: SearchParams) {
-  return <TopicalClient searchParams={await searchParams} />;
+  return (
+    <TopicalClient
+      searchParams={await searchParams}
+      BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
+    />
+  );
 }
