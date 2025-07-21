@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Send } from "lucide-react";
+import { Link as LinkIcon, Send } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useMemo, useRef, useState } from "react";
 import { FilterData } from "../constants/types";
@@ -97,7 +97,8 @@ export const ShareFilter = ({
               }, 2000);
             }}
           >
-            {copied ? "Copied!" : "Copy link"}
+            {copied ? "Copied" : "Copy link"}
+            <LinkIcon />
           </Button>
         </DialogContent>
       </Dialog>

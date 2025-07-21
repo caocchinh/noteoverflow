@@ -58,7 +58,7 @@ export default function Home() {
             brico.className
           )}
         >
-          CIE Exams Preparation.
+          CIE Exams Preparation
         </motion.h1>
 
         <motion.div

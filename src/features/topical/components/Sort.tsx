@@ -343,7 +343,7 @@ const ReorderList = memo(
       <div className="flex flex-col gap-3 items-center justify-center min-w-[210px] flex-1 dark:bg-muted-foreground/7 bg-white p-2 rounded-sm border border-foreground">
         <h3 className="text-sm font-medium">{label}</h3>
 
-        <div className="flex flex-row w-full items-stretch justify-center">
+        <div className="flex flex-row w-full items-stretch justify-center gap-2">
           <div className="flex flex-col items-center justify-between h-[inherit]">
             <Button
               className="rounded-full w-7 h-7 cursor-pointer"
