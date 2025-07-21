@@ -12,7 +12,7 @@ import {
 import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
 import { FilterData, SortParameters } from "../constants/types";
-import { computeDefaultSortParams, updateSearchParams } from "../lib/utils";
+import { computeDefaultSortParams } from "../lib/utils";
 
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -70,7 +70,6 @@ export default function ButtonUltility({
               ...query,
             });
             // Update URL parameters without page reload
-            updateSearchParams({ query: JSON.stringify(query) });
             setSortParameters(
               computeDefaultSortParams({
                 paperType: query.paperType,

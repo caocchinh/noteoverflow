@@ -52,6 +52,7 @@ import {
 import { ValidSeason } from "@/constants/types";
 import {
   SelectedBookmark,
+  SelectedFinishedQuestion,
   SelectedQuestion,
   SortParameters,
 } from "../constants/types";
@@ -104,7 +105,7 @@ const QuestionInspect = ({
   isBookmarkError: boolean;
   isFinishedQuestionsFetching: boolean;
   isFinishedQuestionsError: boolean;
-  userFinishedQuestions: Set<string>;
+  userFinishedQuestions: SelectedFinishedQuestion;
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -672,10 +673,12 @@ const QuestionInspect = ({
                                 partitionedTopicalData?.[currentTab][
                                   virtualItem.index
                                 ]?.id && "!bg-logo-main text-white",
-                              userFinishedQuestions?.has(
-                                partitionedTopicalData?.[currentTab][
-                                  virtualItem.index
-                                ]?.id
+                              userFinishedQuestions?.some(
+                                (item) =>
+                                  item.id ===
+                                  partitionedTopicalData?.[currentTab][
+                                    virtualItem.index
+                                  ]?.id
                               ) &&
                                 "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
                             )}
@@ -756,8 +759,9 @@ const QuestionInspect = ({
                             currentQuestionId ===
                               searchResults[virtualItem.index]?.id &&
                               "!bg-logo-main text-white",
-                            userFinishedQuestions?.has(
-                              searchResults[virtualItem.index]?.id
+                            userFinishedQuestions?.some(
+                              (item) =>
+                                item.id === searchResults[virtualItem.index]?.id
                             ) &&
                               "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
                           )}
@@ -1111,14 +1115,16 @@ const QuestionInspect = ({
                       isInView={true}
                     />
                   )}
-                  <QuestionInspectFinishedCheckbox
-                    finishedQuestions={userFinishedQuestions}
-                    questionId={currentQuestionId}
-                    isFinishedQuestionDisabled={isUserSessionPending}
-                    isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                    isFinishedQuestionError={isFinishedQuestionsError}
-                    isValidSession={isValidSession}
-                  />
+                  {currentQuestionData && (
+                    <QuestionInspectFinishedCheckbox
+                      finishedQuestions={userFinishedQuestions}
+                      question={currentQuestionData}
+                      isFinishedQuestionDisabled={isUserSessionPending}
+                      isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                      isFinishedQuestionError={isFinishedQuestionsError}
+                      isValidSession={isValidSession}
+                    />
+                  )}
                   <Sort
                     sortParameters={sortParameters}
                     setSortParameters={setSortParameters}

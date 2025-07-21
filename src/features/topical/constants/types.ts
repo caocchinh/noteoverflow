@@ -97,10 +97,15 @@ export type SelectedBookmark = {
   }[];
 }[];
 
-export type SelectedFinishedQuestion = {
+export type SelectedFinishedQuestion = (Omit<
+  SelectedQuestion,
+  "questionTopics"
+> & {
+  questionTopics: Array<{
+    topic: string | null;
+  }>;
   updatedAt: Date;
-  questionId: string;
-}[];
+})[];
 
 export interface MultiSelectContextProps {
   value: string[];

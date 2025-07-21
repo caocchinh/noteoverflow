@@ -60,6 +60,7 @@ import {
   isOverScrolling,
   syncFilterCacheToLocalStorage,
   computeDefaultSortParams,
+  updateSearchParams,
 } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -618,6 +619,18 @@ const TopicalClient = ({
   }, [selectedSubject]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !mountedRef.current) {
+      return;
+    }
+    console.log(searchParams.queryKey);
+    if (currentQuery.curriculumId && currentQuery.subjectId) {
+      updateSearchParams({
+        query: JSON.stringify(currentQuery),
+      });
+    }
+  }, [currentQuery, searchParams]);
+
+  useEffect(() => {
     if (!mountedRef.current || isOverwriting.current) {
       return;
     }
@@ -952,6 +965,7 @@ const TopicalClient = ({
   useEffect(() => {
     overflowScrollHandler();
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
+  const queryClient = useQueryClient();
 
   const {
     data: userSession,
@@ -960,6 +974,7 @@ const TopicalClient = ({
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
+    enabled: !queryClient.getQueryData(["user"]),
   });
 
   const {
@@ -987,7 +1002,10 @@ const TopicalClient = ({
       return data.data;
     },
     enabled:
-      isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
+      isSearchEnabled &&
+      !!userSession?.data?.session &&
+      !isUserSessionError &&
+      !queryClient.getQueryData(["all_user_bookmarks"]),
   });
 
   const {
@@ -1009,12 +1027,13 @@ const TopicalClient = ({
             : "An error occurred";
         throw new Error(errorMessage);
       }
-      return new Set(
-        data.data.map((item: { questionId: string }) => item.questionId)
-      );
+      return data.data;
     },
     enabled:
-      isSearchEnabled && !!userSession?.data?.session && !isUserSessionError,
+      isSearchEnabled &&
+      !!userSession?.data?.session &&
+      !isUserSessionError &&
+      !queryClient.getQueryData(["user_finished_questions"]),
   });
 
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -1046,8 +1065,6 @@ const TopicalClient = ({
       setIsSidebarOpen(false);
     }
   }, [isMobileDevice, isQuestionViewOpen.isOpen, setIsSidebarOpen]);
-
-  const queryClient = useQueryClient();
 
   return (
     <>
@@ -1748,7 +1765,9 @@ const TopicalClient = ({
                       }
                       if (
                         !showFinishedQuestion &&
-                        userFinishedQuestions.has(question.id)
+                        userFinishedQuestions.some(
+                          (item) => item.id === question.id
+                        )
                       ) {
                         return false;
                       }
@@ -1761,9 +1780,7 @@ const TopicalClient = ({
                           question={question}
                           setIsQuestionViewOpen={setIsQuestionViewOpen}
                           isUserSessionPending={isUserSessionPending}
-                          userFinishedQuestions={
-                            (userFinishedQuestions as Set<string>) || new Set()
-                          }
+                          userFinishedQuestions={userFinishedQuestions || []}
                           showFinishedQuestionTint={showFinishedQuestionTint}
                           isBookmarkError={
                             isUserSessionError || isBookmarksError
@@ -1815,7 +1832,7 @@ const TopicalClient = ({
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
-        userFinishedQuestions={userFinishedQuestions as Set<string>}
+        userFinishedQuestions={userFinishedQuestions || []}
       />
     </>
   );

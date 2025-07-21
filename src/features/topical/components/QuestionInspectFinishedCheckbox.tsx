@@ -13,18 +13,19 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
+import { SelectedFinishedQuestion, SelectedQuestion } from "../constants/types";
 
 export const QuestionInspectFinishedCheckbox = ({
   finishedQuestions,
-  questionId,
+  question,
   isFinishedQuestionDisabled,
   isFinishedQuestionFetching,
   isFinishedQuestionError,
   className,
   isValidSession,
 }: {
-  finishedQuestions: Set<string> | null;
-  questionId: string | undefined;
+  finishedQuestions: SelectedFinishedQuestion | null;
+  question: SelectedQuestion;
   isFinishedQuestionDisabled: boolean;
   isFinishedQuestionFetching: boolean;
   isFinishedQuestionError: boolean;
@@ -33,17 +34,17 @@ export const QuestionInspectFinishedCheckbox = ({
 }) => {
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["user_finished_questions", questionId],
+      mutationKey: ["user_finished_questions", question.id],
     }) > 0;
 
   const isFinished = useMemo(() => {
-    return finishedQuestions?.has(questionId ?? "");
-  }, [finishedQuestions, questionId]);
+    return finishedQuestions?.some((item) => item.id === question.id);
+  }, [finishedQuestions, question.id]);
 
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationKey: ["user_finished_questions", questionId],
+    mutationKey: ["user_finished_questions", question.id],
     mutationFn: async ({
       realQuestionId,
       isRealFinished,
@@ -70,14 +71,26 @@ export const QuestionInspectFinishedCheckbox = ({
         isRealFinished,
       }: { realQuestionId: string; isRealFinished: boolean }
     ) => {
-      queryClient.setQueryData<Set<string>>(
+      queryClient.setQueryData<SelectedFinishedQuestion>(
         ["user_finished_questions"],
         (prev) => {
-          const next = new Set(prev ?? []);
+          const next = prev ?? [];
           if (isRealFinished) {
-            next.delete(realQuestionId);
+            next.splice(
+              next.findIndex((item) => item.id === realQuestionId),
+              1
+            );
           } else {
-            next.add(realQuestionId);
+            next.push({
+              id: realQuestionId,
+              year: question.year,
+              paperType: question.paperType,
+              season: question.season,
+              questionImages: question.questionImages,
+              answers: question.answers,
+              questionTopics: question.questionTopics,
+              updatedAt: new Date(),
+            });
           }
           return next;
         }
@@ -102,7 +115,7 @@ export const QuestionInspectFinishedCheckbox = ({
     retry: false,
   });
 
-  if (!questionId) {
+  if (!question.id) {
     return null;
   }
 
@@ -140,7 +153,7 @@ export const QuestionInspectFinishedCheckbox = ({
           return;
         }
         mutate({
-          realQuestionId: questionId,
+          realQuestionId: question.id,
           isRealFinished: isFinished ?? false,
         });
       }}

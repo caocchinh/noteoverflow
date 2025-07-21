@@ -27,6 +27,9 @@ export const ShareFilter = ({
   const qrRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
   const url = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
     const params = new URLSearchParams(window.location.search);
     params.set("queryKey", JSON.stringify(currentQuery));
     return `${BETTER_AUTH_URL}/topical?${params.toString()}`;

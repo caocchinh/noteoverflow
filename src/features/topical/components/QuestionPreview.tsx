@@ -5,7 +5,11 @@ import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
 import { memo, useState } from "react";
-import { SelectedBookmark, SelectedQuestion } from "../constants/types";
+import {
+  SelectedBookmark,
+  SelectedFinishedQuestion,
+  SelectedQuestion,
+} from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -36,7 +40,7 @@ const QuestionPreview = memo(
     isUserSessionPending: boolean;
     isBookmarkError: boolean;
     isValidSession: boolean;
-    userFinishedQuestions: Set<string>;
+    userFinishedQuestions: SelectedFinishedQuestion;
     showFinishedQuestionTint: boolean;
   }) => {
     const mutationKey = ["all_user_bookmarks", question.id];
@@ -68,7 +72,8 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
-            userFinishedQuestions?.has(question.id) && showFinishedQuestionTint
+            userFinishedQuestions?.some((item) => item.id === question.id) &&
+              showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}
