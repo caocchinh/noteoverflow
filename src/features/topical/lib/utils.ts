@@ -209,11 +209,11 @@ export const extractCurriculumCode = ({
   questionId,
 }: {
   questionId: string;
-}): string => {
+}): ValidCurriculum | undefined => {
   try {
     return questionId.split(";")[0] as ValidCurriculum;
   } catch {
-    return "";
+    return undefined;
   }
 };
 

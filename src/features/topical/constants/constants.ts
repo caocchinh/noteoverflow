@@ -1,13 +1,42 @@
 import { ValidCurriculum } from "@/constants/types";
 import type { InvalidInputs, LayoutStyle, TopicalData } from "./types";
 
+export const CURRICULUM_COVER_IMAGE: Record<ValidCurriculum, string> = {
+  "CIE A-LEVEL": "/assets/cover/alevels-logo1.jpg",
+  "CIE IGCSE": "/assets/cover/igcse-logo1.jpg",
+};
+
+export const SUBJECT_COVER_IMAGE: Record<
+  ValidCurriculum,
+  Record<string, string>
+> = {
+  "CIE A-LEVEL": {
+    "Physics (9702)": "/assets/cover/Physics (9702).jpg",
+    "Chemistry (9701)": "/assets/cover/Chemistry (9701).jpg",
+    "Biology (9700)": "/assets/cover/Biology (9700).jpg",
+    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).jpg",
+    "Mechanics (9709)": "/assets/cover/Mechanics (9709).jpg",
+    "Probability & Statistics 1 (9709)":
+      "/assets/cover/Probability & Statistics 1 (9709).jpg",
+    "Probability & Statistics 2 (9709)":
+      "/assets/cover/Probability & Statistics 2 (9709).jpg",
+    "Pure Mathematics 2 & 3 (9709)": "/assets/cover/Pure 2&3 (9709).jpg",
+  },
+  "CIE IGCSE": {
+    "Physics (9702)": "/assets/cover/Physics (9702).jpg",
+    "Chemistry (9701)": "/assets/cover/Chemistry (9701).jpg",
+    "Biology (9700)": "/assets/cover/Biology (9700).jpg",
+    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).jpg",
+  },
+};
+
 export const TOPICAL_DATA: TopicalData[] = [
   {
     curriculum: "CIE A-LEVEL",
-    coverImage: "/assets/cover/alevels-logo1.jpg",
+    coverImage: CURRICULUM_COVER_IMAGE["CIE A-LEVEL"],
     subject: [
       {
-        coverImage: "/assets/cover/Physics (9702).jpg",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Physics (9702)"],
         code: "Physics (9702)",
         topic: [
           "PHYSICAL QUANTITIES & UNITS",
@@ -47,7 +76,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Chemistry (9701).jpg",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Chemistry (9701)"],
         code: "Chemistry (9701)",
         topic: [
           "ATOMS, MOLECULES & STOICHIOMETRY",
@@ -82,7 +111,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Biology (9700).jpg",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Biology (9700)"],
         code: "Biology (9700)",
         topic: [
           "CELL STRUCTURE",
@@ -113,7 +142,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Pure 1 (9709).jpg",
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 1 (9709)"],
         code: "Pure Mathematics 1 (9709)",
         topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
         year: [2024, 2023, 2022, 2021],
@@ -121,7 +151,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Mechanics (9709).jpg",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
         code: "Mechanics (9709)",
         topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
         year: [2024, 2023, 2022, 2021],
@@ -129,7 +159,10 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Probability & Statistics 1 (9709).jpg",
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
+            "Probability & Statistics 1 (9709)"
+          ],
         code: "Probability & Statistics 1 (9709)",
         topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
         year: [2024, 2023, 2022, 2021],
@@ -137,7 +170,10 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Probability & Statistics 2 (9709).jpg",
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
+            "Probability & Statistics 2 (9709)"
+          ],
         code: "Probability & Statistics 2 (9709)",
         topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
         year: [2024, 2023, 2022, 2021],
@@ -145,7 +181,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage: "/assets/cover/Pure 2&3 (9709).jpg",
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 2 & 3 (9709)"],
         code: "Pure Mathematics 2 & 3 (9709)",
         topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
         year: [2024, 2023, 2022, 2021],

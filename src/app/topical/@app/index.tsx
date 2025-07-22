@@ -1766,7 +1766,7 @@ const TopicalClient = ({
                       if (
                         !showFinishedQuestion &&
                         userFinishedQuestions.some(
-                          (item) => item.questionId === question.id
+                          (item) => item.question.id === question.id
                         )
                       ) {
                         return false;
@@ -1776,11 +1776,11 @@ const TopicalClient = ({
                     .map((question) =>
                       question?.questionImages.map((imageSrc: string) => (
                         <QuestionPreview
-                          bookmarks={bookmarks || []}
+                          bookmarks={bookmarks ?? []}
                           question={question}
                           setIsQuestionViewOpen={setIsQuestionViewOpen}
                           isUserSessionPending={isUserSessionPending}
-                          userFinishedQuestions={userFinishedQuestions || []}
+                          userFinishedQuestions={userFinishedQuestions ?? []}
                           showFinishedQuestionTint={showFinishedQuestionTint}
                           isBookmarkError={
                             isUserSessionError || isBookmarksError
@@ -1821,7 +1821,7 @@ const TopicalClient = ({
         isOpen={isQuestionViewOpen}
         setIsOpen={setIsQuestionViewOpen}
         partitionedTopicalData={fullPartitionedData}
-        bookmarks={bookmarks || []}
+        bookmarks={bookmarks ?? []}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
@@ -1832,7 +1832,7 @@ const TopicalClient = ({
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
-        userFinishedQuestions={userFinishedQuestions || []}
+        userFinishedQuestions={userFinishedQuestions ?? []}
       />
     </>
   );

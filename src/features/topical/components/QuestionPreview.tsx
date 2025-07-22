@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
@@ -50,16 +50,25 @@ const QuestionPreview = memo(
     const [isHovering, setIsHovering] = useState(false);
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
+    const isMutatingFinishedQuestions =
+      useIsMutating({
+        mutationKey: ["user_finished_questions", question.id],
+      }) > 0;
+
+    const doesThisQuestionFinished = useMemo(() => {
+      if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
+        return false;
+      }
+      return userFinishedQuestions.some(
+        (item) => item.question.id === question.id
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userFinishedQuestions, question.id, isMutatingFinishedQuestions]);
 
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: mutationKey,
       }) > 0;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    useIsMutating({
-      mutationKey: ["user_finished_questions", question.id],
-    }) > 0;
 
     return (
       <div
@@ -77,9 +86,7 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
-            userFinishedQuestions?.some(
-              (item) => item.question.id === question.id
-            ) && showFinishedQuestionTint
+            doesThisQuestionFinished && showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}
