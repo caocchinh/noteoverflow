@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { SelectedBookmark } from "../constants/types";
+import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 
 // Define a type for the mutation function
 type MutateFunction = (params: {
-  realQuestionId: string;
+  realQuestion: SelectedQuestion;
   realBookmarkListName: string;
   isRealBookmarked: boolean;
   isCreateNew: boolean;
@@ -19,7 +19,7 @@ export type BookmarkState = {
   isInputError: boolean;
   isAddNewListDialogOpen: boolean;
   visibility: "public" | "private";
-  questionId: string;
+  question: SelectedQuestion;
   bookmarkListName: string;
   newBookmarkListNameInput: string;
   searchInput: string;
@@ -54,7 +54,7 @@ export type BookmarkProps = {
   isBookmarkDisabled: boolean;
   isBookmarkError: boolean;
   isValidSession: boolean;
-  questionId: string;
+  question: SelectedQuestion;
   chosenBookmarkListName: Set<string>;
   bookmarks: SelectedBookmark;
   popOverAlign?: "start" | "end";
@@ -77,7 +77,7 @@ const createBookmarkStore = (props: BookmarkProps) => {
     isInputError: false,
     isAddNewListDialogOpen: false,
     visibility: "private",
-    questionId: props.questionId,
+    question: props.question,
     bookmarkListName: "",
     newBookmarkListNameInput: "",
     searchInput: "",

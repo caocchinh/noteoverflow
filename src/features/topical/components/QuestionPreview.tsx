@@ -77,8 +77,9 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
-            userFinishedQuestions?.some((item) => item.id === question.id) &&
-              showFinishedQuestionTint
+            userFinishedQuestions?.some(
+              (item) => item.questionId === question.id
+            ) && showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}
@@ -132,7 +133,7 @@ const QuestionPreview = memo(
           badgeClassName="hidden"
           bookmarks={bookmarks}
           isBookmarkError={isBookmarkError}
-          questionId={question.id}
+          question={question}
           setIsPopoverOpen={setIsPopoverOpen}
           isPopoverOpen={isPopoverOpen}
           setShouldOpen={setShouldOpen}

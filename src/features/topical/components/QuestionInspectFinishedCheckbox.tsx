@@ -36,7 +36,9 @@ export const QuestionInspectFinishedCheckbox = ({
       mutationKey: ["user_finished_questions", question.id],
     }) > 0;
 
-  const isFinished = finishedQuestions?.some((item) => item.id === question.id);
+  const isFinished = finishedQuestions?.some(
+    (item) => item.questionId === question.id
+  );
 
   const queryClient = useQueryClient();
 
@@ -74,18 +76,20 @@ export const QuestionInspectFinishedCheckbox = ({
           const next = prev ?? [];
           if (isRealFinished) {
             next.splice(
-              next.findIndex((item) => item.id === realQuestionId),
+              next.findIndex((item) => item.questionId === realQuestionId),
               1
             );
           } else {
             next.push({
-              id: realQuestionId,
-              year: question.year,
-              paperType: question.paperType,
-              season: question.season,
-              questionImages: question.questionImages,
-              answers: question.answers,
-              questionTopics: question.questionTopics,
+              questionId: realQuestionId,
+              question: {
+                year: question.year,
+                paperType: question.paperType,
+                season: question.season,
+                questionImages: question.questionImages,
+                answers: question.answers,
+                questionTopics: question.questionTopics,
+              },
               updatedAt: new Date(),
             });
           }

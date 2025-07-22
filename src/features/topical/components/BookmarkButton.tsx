@@ -26,7 +26,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SelectedBookmark } from "../constants/types";
+import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 import {
   Command,
   CommandEmpty,
@@ -93,7 +93,7 @@ function useBookmarkContext<T>(selector: (state: BookmarkState) => T): T {
 export const BookmarkButton = memo(
   ({
     bookmarks,
-    questionId,
+    question,
     isBookmarkDisabled,
     isBookmarksFetching,
     isPopoverOpen: openProp,
@@ -109,7 +109,7 @@ export const BookmarkButton = memo(
     isInView,
   }: {
     bookmarks: SelectedBookmark;
-    questionId: string;
+    question: SelectedQuestion;
     isBookmarkDisabled: boolean;
     isPopoverOpen?: boolean;
     setIsPopoverOpen?: (open: boolean) => void;
@@ -157,12 +157,12 @@ export const BookmarkButton = memo(
         isBookmarkDisabled,
         isBookmarkError,
         isValidSession,
-        questionId,
+        question,
         chosenBookmarkListName: (() => {
           const set = new Set<string>();
           for (const bookmark of bookmarks) {
             if (
-              bookmark.userBookmarks.some((b) => b.questionId === questionId)
+              bookmark.userBookmarks.some((b) => b.questionId === question.id)
             ) {
               set.add(bookmark.listName + " " + bookmark.visibility);
             }
@@ -191,12 +191,12 @@ export const BookmarkButton = memo(
           isBookmarkDisabled,
           isBookmarkError,
           isValidSession,
-          questionId,
+          question,
           chosenBookmarkListName: (() => {
             const set = new Set<string>();
             for (const bookmark of bookmarks) {
               if (
-                bookmark.userBookmarks.some((b) => b.questionId === questionId)
+                bookmark.userBookmarks.some((b) => b.questionId === question.id)
               ) {
                 set.add(bookmark.listName + " " + bookmark.visibility);
               }
@@ -217,7 +217,7 @@ export const BookmarkButton = memo(
       isBookmarkDisabled,
       isBookmarkError,
       isValidSession,
-      questionId,
+      question,
       bookmarks,
       popOverAlign,
       badgeClassName,
@@ -249,7 +249,7 @@ const BookmarkButtonConsumer = memo(
     open: boolean;
     setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   }) => {
-    const questionId = useBookmarkContext((state) => state.questionId);
+    const question = useBookmarkContext((state) => state.question);
     const bookmarkListName = useBookmarkContext(
       (state) => state.bookmarkListName
     );
@@ -276,7 +276,7 @@ const BookmarkButtonConsumer = memo(
     const isValidSession = useBookmarkContext((state) => state.isValidSession);
     const mutationKey = [
       "all_user_bookmarks",
-      questionId,
+      question.id,
       bookmarkListName,
       visibility,
     ];
@@ -321,20 +321,19 @@ const BookmarkButtonConsumer = memo(
     const { mutate } = useMutation({
       mutationKey: mutationKey,
       mutationFn: async ({
-        realQuestionId,
+        realQuestion,
         realBookmarkListName,
         isRealBookmarked,
         realVisibility,
         isCreateNew,
       }: {
-        realQuestionId: string;
+        realQuestion: SelectedQuestion;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
         realVisibility: "public" | "private";
         isCreateNew: boolean;
       }): Promise<{
-        userId: string;
-        realQuestionId: string;
+        realQuestion: SelectedQuestion;
         realBookmarkListName: string;
         isRealBookmarked: boolean;
         isCreateNew: boolean;
@@ -352,13 +351,15 @@ const BookmarkButtonConsumer = memo(
         }
         if (isRealBookmarked) {
           const result = await removeBookmarkAction({
-            questionId: realQuestionId,
+            questionId: realQuestion.id,
             bookmarkListName: realBookmarkListName,
             visibility: realVisibility,
           });
+          if (result.error) {
+            throw new Error(result.error);
+          }
           return {
-            userId: result.data!,
-            realQuestionId: realQuestionId,
+            realQuestion: realQuestion,
             realBookmarkListName: realBookmarkListName,
             isRealBookmarked: true,
             isCreateNew: isCreateNew,
@@ -366,16 +367,15 @@ const BookmarkButtonConsumer = memo(
           };
         } else {
           const result = await addBookmarkAction({
-            questionId: realQuestionId,
+            questionId: realQuestion.id,
             bookmarkListName: realBookmarkListName,
             visibility: realVisibility,
           });
-          if (!result.success) {
+          if (result.error) {
             throw new Error(result.error + "bookmark");
           }
           return {
-            userId: result.data!,
-            realQuestionId: realQuestionId,
+            realQuestion: realQuestion,
             realBookmarkListName: realBookmarkListName,
             isRealBookmarked: false,
             isCreateNew: isCreateNew,
@@ -384,18 +384,16 @@ const BookmarkButtonConsumer = memo(
         }
       },
       onSuccess: ({
-        realQuestionId: newQuestionId,
+        realQuestion: newQuestion,
         isRealBookmarked,
         realBookmarkListName: newBookmarkListName,
         isCreateNew,
-        userId,
         realVisibility,
       }: {
-        realQuestionId: string;
+        realQuestion: SelectedQuestion;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
         isCreateNew: boolean;
-        userId: string;
         realVisibility: "public" | "private";
       }) => {
         queryClient.setQueryData<SelectedBookmark>(
@@ -437,11 +435,16 @@ const BookmarkButtonConsumer = memo(
                 );
                 if (existingList) {
                   existingList.userBookmarks.push({
-                    questionId: newQuestionId,
+                    question: {
+                      year: newQuestion.year,
+                      season: newQuestion.season,
+                      paperType: newQuestion.paperType,
+                      questionImages: newQuestion.questionImages,
+                      answers: newQuestion.answers,
+                      questionTopics: newQuestion.questionTopics,
+                    },
+                    questionId: newQuestion.id,
                     updatedAt: new Date(),
-                    userId,
-                    listName: newBookmarkListName,
-                    visibility: realVisibility,
                   });
                 }
               } else {
@@ -452,16 +455,20 @@ const BookmarkButtonConsumer = memo(
                 prev.push({
                   createdAt: new Date(),
                   updatedAt: new Date(),
-                  userId,
                   listName: newBookmarkListName,
-                  visibility: realVisibility,
+                  visibility: realVisibility as "public" | "private",
                   userBookmarks: [
                     {
-                      questionId: newQuestionId,
+                      question: {
+                        year: newQuestion.year,
+                        season: newQuestion.season,
+                        paperType: newQuestion.paperType,
+                        questionImages: newQuestion.questionImages,
+                        answers: newQuestion.answers,
+                        questionTopics: newQuestion.questionTopics,
+                      },
+                      questionId: newQuestion.id,
                       updatedAt: new Date(),
-                      userId,
-                      listName: newBookmarkListName,
-                      visibility: realVisibility,
                     },
                   ],
                 });
@@ -483,11 +490,16 @@ const BookmarkButtonConsumer = memo(
               );
               if (existingList) {
                 existingList.userBookmarks.push({
-                  questionId: newQuestionId,
+                  question: {
+                    year: newQuestion.year,
+                    season: newQuestion.season,
+                    paperType: newQuestion.paperType,
+                    questionImages: newQuestion.questionImages,
+                    answers: newQuestion.answers,
+                    questionTopics: newQuestion.questionTopics,
+                  },
+                  questionId: newQuestion.id,
                   updatedAt: new Date(),
-                  visibility: realVisibility,
-                  userId,
-                  listName: newBookmarkListName,
                 });
               }
             } else if (!isCreateNew && isRealBookmarked) {
@@ -498,13 +510,12 @@ const BookmarkButtonConsumer = memo(
               const existingList = prev.find(
                 (bookmark) =>
                   bookmark.listName === newBookmarkListName &&
-                  bookmark.visibility === realVisibility
+                  bookmark.visibility ===
+                    (realVisibility as "public" | "private")
               );
               if (existingList) {
                 existingList.userBookmarks = existingList.userBookmarks.filter(
-                  (bookmark) =>
-                    bookmark.questionId !== newQuestionId &&
-                    bookmark.visibility !== realVisibility
+                  (bookmark) => bookmark.questionId !== newQuestion.id
                 );
               }
             }
@@ -777,11 +788,11 @@ const BookmarkTrigger = memo(() => {
   const isBookmarkDisabled = useBookmarkContext(
     (state) => state.isBookmarkDisabled
   );
-  const questionId = useBookmarkContext((state) => state.questionId);
+  const question = useBookmarkContext((state) => state.question);
 
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["all_user_bookmarks", questionId],
+      mutationKey: ["all_user_bookmarks", question.id],
     }) > 0;
 
   const queryClient = useQueryClient();
@@ -790,7 +801,7 @@ const BookmarkTrigger = memo(() => {
     "all_user_bookmarks",
   ]);
   const isBookmarked = bookmarks?.some((bookmark) =>
-    bookmark.userBookmarks.some((b) => b.questionId === questionId)
+    bookmark.userBookmarks.some((b) => b.questionId === question.id)
   );
 
   if (isMutatingThisQuestion) {
@@ -881,7 +892,7 @@ const BookmarkList = memo(
       (state) => state.chosenBookmarkListName
     );
     const bookmarks = useBookmarkContext((state) => state.bookmarks);
-    const questionId = useBookmarkContext((state) => state.questionId);
+    const question = useBookmarkContext((state) => state.question);
     const setBookmarkListName = useBookmarkContext(
       (state) => state.actions.setBookmarkListName
     );
@@ -918,7 +929,7 @@ const BookmarkList = memo(
       setBookmarkListName(bookmark.listName);
       setTimeout(() => {
         mutate?.({
-          realQuestionId: questionId,
+          realQuestion: question,
           realBookmarkListName: bookmark.listName,
           isRealBookmarked: isItemBookmarked,
           isCreateNew: false,
@@ -1000,12 +1011,16 @@ const BookmarkList = memo(
                                 onListSelect({
                                   bookmark,
                                   isItemBookmarked: true,
-                                  visibility: bookmark.visibility,
+                                  visibility: bookmark.visibility as
+                                    | "public"
+                                    | "private",
                                 });
                               }}
                               listName={bookmark.listName}
                               isPlaceholder={true}
-                              visibility={bookmark.visibility}
+                              visibility={
+                                bookmark.visibility as "public" | "private"
+                              }
                               searchInputRef={searchInputRef}
                             />
                           ))}
@@ -1031,11 +1046,15 @@ const BookmarkList = memo(
                               onListSelect({
                                 bookmark,
                                 isItemBookmarked,
-                                visibility: bookmark.visibility,
+                                visibility: bookmark.visibility as
+                                  | "public"
+                                  | "private",
                               });
                             }}
                             listName={bookmark.listName}
-                            visibility={bookmark.visibility}
+                            visibility={
+                              bookmark.visibility as "public" | "private"
+                            }
                             isPlaceholder={false}
                             searchInputRef={searchInputRef}
                           />
@@ -1070,7 +1089,7 @@ const BookmarkItem = memo(
     onSelect: () => void;
     searchInputRef: React.RefObject<HTMLInputElement | null>;
   }) => {
-    const questionId = useBookmarkContext((state) => state.questionId);
+    const question = useBookmarkContext((state) => state.question);
     const setIsBlockingInput = useBookmarkContext(
       (state) => state.actions.setIsBlockingInput
     );
@@ -1080,7 +1099,7 @@ const BookmarkItem = memo(
     );
     const isMutating =
       useIsMutating({
-        mutationKey: ["all_user_bookmarks", questionId, listName, visibility],
+        mutationKey: ["all_user_bookmarks", question.id, listName, visibility],
       }) > 0;
 
     return (
@@ -1163,14 +1182,14 @@ const CreateNewListAlertDialog = memo(() => {
   const setNewBookmarkListNameInput = useBookmarkContext(
     (state) => state.actions.setNewBookmarkListNameInput
   );
-  const questionId = useBookmarkContext((state) => state.questionId);
+  const question = useBookmarkContext((state) => state.question);
   const isInputError = useBookmarkContext((state) => state.isInputError);
   const isAddNewListDialogOpen = useBookmarkContext(
     (state) => state.isAddNewListDialogOpen
   );
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["all_user_bookmarks", questionId],
+      mutationKey: ["all_user_bookmarks", question.id],
     }) > 0;
   const mutate = useBookmarkContext((state) => state.mutate);
 
@@ -1199,7 +1218,7 @@ const CreateNewListAlertDialog = memo(() => {
     setNewBookmarkListNameInput(newBookmarkListNameInput.trim());
     setTimeout(() => {
       mutate?.({
-        realQuestionId: questionId,
+        realQuestion: question,
         realBookmarkListName: newBookmarkListNameInput.trim(),
         isRealBookmarked: false,
         isCreateNew: true,

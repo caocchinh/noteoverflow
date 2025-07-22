@@ -85,27 +85,38 @@ export type SelectedQuestion = Pick<
 export type SelectedBookmark = {
   createdAt: Date;
   updatedAt: Date;
-  visibility: "private" | "public";
-  userId: string;
   listName: string;
+  visibility: string;
   userBookmarks: {
-    questionId: string;
     updatedAt: Date;
-    userId: string;
-    listName: string;
-    visibility: "private" | "public";
+    questionId: string;
+    question: {
+      year: number;
+      season: string;
+      paperType: number;
+      questionImages: string[];
+      answers: string[];
+      questionTopics: {
+        topic: string | null;
+      }[];
+    };
   }[];
 }[];
 
-export type SelectedFinishedQuestion = (Omit<
-  SelectedQuestion,
-  "questionTopics"
-> & {
-  questionTopics: Array<{
-    topic: string | null;
-  }>;
+export type SelectedFinishedQuestion = {
   updatedAt: Date;
-})[];
+  questionId: string;
+  question: {
+    year: number;
+    season: string;
+    paperType: number;
+    questionImages: string[];
+    answers: string[];
+    questionTopics: {
+      topic: string | null;
+    }[];
+  };
+}[];
 
 export interface MultiSelectContextProps {
   value: string[];

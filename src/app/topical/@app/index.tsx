@@ -1766,7 +1766,7 @@ const TopicalClient = ({
                       if (
                         !showFinishedQuestion &&
                         userFinishedQuestions.some(
-                          (item) => item.id === question.id
+                          (item) => item.questionId === question.id
                         )
                       ) {
                         return false;

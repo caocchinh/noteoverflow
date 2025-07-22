@@ -675,7 +675,7 @@ const QuestionInspect = ({
                                 ]?.id && "!bg-logo-main text-white",
                               userFinishedQuestions?.some(
                                 (item) =>
-                                  item.id ===
+                                  item.questionId ===
                                   partitionedTopicalData?.[currentTab][
                                     virtualItem.index
                                   ]?.id
@@ -718,10 +718,10 @@ const QuestionInspect = ({
                             <BookmarkButton
                               triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
                               badgeClassName="h-[26px] min-h-[26px] !static"
-                              questionId={
+                              question={
                                 partitionedTopicalData?.[currentTab][
                                   virtualItem.index
-                                ]?.id
+                                ]
                               }
                               isBookmarkDisabled={isUserSessionPending}
                               bookmarks={bookmarks}
@@ -761,7 +761,8 @@ const QuestionInspect = ({
                               "!bg-logo-main text-white",
                             userFinishedQuestions?.some(
                               (item) =>
-                                item.id === searchResults[virtualItem.index]?.id
+                                item.questionId ===
+                                searchResults[virtualItem.index]?.id
                             ) &&
                               "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
                           )}
@@ -801,7 +802,7 @@ const QuestionInspect = ({
                           <BookmarkButton
                             triggerButtonClassName="h-[26px] w-[26px] border-black border"
                             badgeClassName="h-[26px] min-h-[26px] !static"
-                            questionId={searchResults[virtualItem.index]?.id}
+                            question={searchResults[virtualItem.index]}
                             isBookmarkDisabled={isUserSessionPending}
                             bookmarks={bookmarks}
                             isValidSession={isValidSession}
@@ -1101,11 +1102,11 @@ const QuestionInspect = ({
                     Toggle
                     <PanelsTopLeft />
                   </Button>
-                  {currentQuestionId && (
+                  {currentQuestionData && (
                     <BookmarkButton
                       triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
                       badgeClassName="h-[35px] min-h-[35px] !static"
-                      questionId={currentQuestionId}
+                      question={currentQuestionData}
                       isBookmarkDisabled={isUserSessionPending}
                       bookmarks={bookmarks}
                       popOverAlign="start"

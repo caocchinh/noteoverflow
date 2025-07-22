@@ -2,6 +2,7 @@ import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
 import { finishedQuestions } from "@/drizzle/schema";
+import { SelectedFinishedQuestion } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -15,16 +16,45 @@ export async function GET() {
     const db = await getDbAsync();
     const finishedQuestionsData = await db.query.finishedQuestions.findMany({
       where: eq(finishedQuestions.userId, userId),
+      columns: {
+        questionId: true,
+        updatedAt: true,
+      },
       with: {
         question: {
+          columns: {
+            paperType: true,
+            answers: true,
+            questionImages: true,
+            season: true,
+            year: true,
+          },
           with: {
-            questionTopics: true,
+            questionTopics: {
+              columns: {
+                topic: true,
+              },
+            },
           },
         },
       },
     });
 
-    return NextResponse.json({ data: finishedQuestionsData }, { status: 200 });
+    const data: SelectedFinishedQuestion = finishedQuestionsData.map((item) => {
+      return {
+        updatedAt: item.updatedAt,
+        questionId: item.questionId,
+        question: {
+          ...item.question,
+          questionImages: JSON.parse(item.question.questionImages ?? "[]"),
+          answers: JSON.parse(item.question.answers ?? "[]"),
+        },
+      };
+    });
+
+    console.log(data, data.length);
+
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });

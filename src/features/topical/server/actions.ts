@@ -32,7 +32,7 @@ export const createBookmarkListAction = async ({
 }: {
   listName: string;
   visibility: "public" | "private";
-}): Promise<ServerActionResponse<string>> => {
+}): Promise<ServerActionResponse<void>> => {
   if (listName.trim() === "" || listName.length > 100) {
     return {
       error: BAD_REQUEST,
@@ -71,7 +71,6 @@ export const createBookmarkListAction = async ({
 
     return {
       success: true,
-      data: session.user.id,
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
@@ -96,7 +95,7 @@ export const addBookmarkAction = async ({
   questionId: string;
   bookmarkListName: string;
   visibility: "public" | "private";
-}): Promise<ServerActionResponse<string>> => {
+}): Promise<ServerActionResponse<void>> => {
   if (bookmarkListName.trim() === "" || bookmarkListName.length > 100) {
     return {
       error: BAD_REQUEST,
@@ -166,7 +165,6 @@ export const addBookmarkAction = async ({
     }
     return {
       success: true,
-      data: userId,
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
@@ -191,7 +189,7 @@ export const removeBookmarkAction = async ({
   questionId: string;
   bookmarkListName: string;
   visibility: "public" | "private";
-}): Promise<ServerActionResponse<string>> => {
+}): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -211,7 +209,6 @@ export const removeBookmarkAction = async ({
       );
     return {
       success: true,
-      data: userId,
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
@@ -226,7 +223,7 @@ export const addFinishedQuestionAction = async ({
   questionId,
 }: {
   questionId: string;
-}): Promise<ServerActionResponse<string>> => {
+}): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -250,7 +247,6 @@ export const addFinishedQuestionAction = async ({
       });
     return {
       success: true,
-      data: userId,
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
@@ -265,7 +261,7 @@ export const removeFinishedQuestionAction = async ({
   questionId,
 }: {
   questionId: string;
-}): Promise<ServerActionResponse<string>> => {
+}): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -283,7 +279,6 @@ export const removeFinishedQuestionAction = async ({
       );
     return {
       success: true,
-      data: userId,
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
