@@ -622,7 +622,6 @@ const TopicalClient = ({
     if (typeof window === "undefined" || !mountedRef.current) {
       return;
     }
-    console.log(searchParams.queryKey);
     if (currentQuery.curriculumId && currentQuery.subjectId) {
       updateSearchParams({
         query: JSON.stringify(currentQuery),
@@ -953,7 +952,7 @@ const TopicalClient = ({
       top: 0,
       behavior: "instant",
     });
-    setIsQuestionViewOpen({ isOpen: false, questionId: "" });
+    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
   }, [currentQuery]);
 
   useEffect(() => {
@@ -988,7 +987,7 @@ const TopicalClient = ({
         method: "GET",
       });
       const data: {
-        data: SelectedBookmark;
+        data: SelectedBookmark[];
         error?: string;
       } = await response.json();
       if (!response.ok) {
@@ -1017,7 +1016,7 @@ const TopicalClient = ({
     queryFn: async () => {
       const response = await fetch("/api/topical/finished");
       const data: {
-        data: SelectedFinishedQuestion;
+        data: SelectedFinishedQuestion[];
         error?: string;
       } = await response.json();
       if (!response.ok) {
@@ -1037,7 +1036,7 @@ const TopicalClient = ({
   });
 
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const [isQuestionViewOpen, setIsQuestionViewOpen] = useState({
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] = useState({
     isOpen: false,
     questionId: "",
   });
@@ -1061,10 +1060,10 @@ const TopicalClient = ({
   ]);
 
   useEffect(() => {
-    if (isQuestionViewOpen.isOpen && isMobileDevice) {
+    if (isQuestionInspectOpen.isOpen && isMobileDevice) {
       setIsSidebarOpen(false);
     }
-  }, [isMobileDevice, isQuestionViewOpen.isOpen, setIsSidebarOpen]);
+  }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsSidebarOpen]);
 
   return (
     <>
@@ -1466,7 +1465,7 @@ const TopicalClient = ({
                         className="flex cursor-pointer items-center gap-2 border"
                         disabled={isQuestionViewDisabled}
                         onClick={() => {
-                          setIsQuestionViewOpen((prev) => ({
+                          setIsQuestionInspectOpen((prev) => ({
                             ...prev,
                             isOpen: true,
                           }));
@@ -1778,7 +1777,7 @@ const TopicalClient = ({
                         <QuestionPreview
                           bookmarks={bookmarks ?? []}
                           question={question}
-                          setIsQuestionViewOpen={setIsQuestionViewOpen}
+                          setIsQuestionInspectOpen={setIsQuestionInspectOpen}
                           isUserSessionPending={isUserSessionPending}
                           userFinishedQuestions={userFinishedQuestions ?? []}
                           showFinishedQuestionTint={showFinishedQuestionTint}
@@ -1818,8 +1817,8 @@ const TopicalClient = ({
         </SidebarProvider>
       </div>
       <QuestionInspect
-        isOpen={isQuestionViewOpen}
-        setIsOpen={setIsQuestionViewOpen}
+        isOpen={isQuestionInspectOpen}
+        setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
         bookmarks={bookmarks ?? []}
         isValidSession={!!userSession?.data?.session}

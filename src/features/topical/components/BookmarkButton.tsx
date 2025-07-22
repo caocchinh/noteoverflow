@@ -108,7 +108,7 @@ export const BookmarkButton = memo(
     isValidSession,
     isInView,
   }: {
-    bookmarks: SelectedBookmark;
+    bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
     isBookmarkDisabled: boolean;
     isPopoverOpen?: boolean;
@@ -398,9 +398,9 @@ const BookmarkButtonConsumer = memo(
         isCreateNew: boolean;
         realVisibility: "public" | "private";
       }) => {
-        queryClient.setQueryData<SelectedBookmark>(
+        queryClient.setQueryData<SelectedBookmark[]>(
           ["all_user_bookmarks"],
-          (prev: SelectedBookmark | undefined) => {
+          (prev: SelectedBookmark[] | undefined) => {
             if (!prev) {
               return prev;
             }
@@ -800,7 +800,7 @@ const BookmarkTrigger = memo(() => {
 
   const queryClient = useQueryClient();
 
-  const bookmarks = queryClient.getQueryData<SelectedBookmark>([
+  const bookmarks = queryClient.getQueryData<SelectedBookmark[]>([
     "all_user_bookmarks",
   ]);
   const isBookmarked = bookmarks?.some((bookmark) =>
@@ -908,7 +908,7 @@ const BookmarkList = memo(
       isItemBookmarked,
       visibility,
     }: {
-      bookmark: SelectedBookmark[number];
+      bookmark: SelectedBookmark;
       isItemBookmarked: boolean;
       visibility: "public" | "private";
     }) => {

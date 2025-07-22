@@ -94,7 +94,7 @@ const QuestionInspect = ({
 
   setIsOpen: (open: { isOpen: boolean; questionId: string }) => void;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
-  bookmarks: SelectedBookmark;
+  bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
   sortParameters: SortParameters | null;
   setSortParameters: (sortParameters: SortParameters | null) => void;
@@ -105,7 +105,7 @@ const QuestionInspect = ({
   isBookmarkError: boolean;
   isFinishedQuestionsFetching: boolean;
   isFinishedQuestionsError: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion;
+  userFinishedQuestions: SelectedFinishedQuestion[];
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =

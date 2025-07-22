@@ -50,7 +50,7 @@ export async function GET() {
       },
     });
 
-    const data: SelectedBookmark = bookmarks.map((bookmark) => {
+    const data: SelectedBookmark[] = bookmarks.map((bookmark) => {
       return {
         ...bookmark,
         userBookmarks: bookmark.userBookmarks.map((userBookmark) => {

@@ -19,7 +19,7 @@ import { toast } from "sonner";
 const QuestionPreview = memo(
   ({
     bookmarks,
-    setIsQuestionViewOpen,
+    setIsQuestionInspectOpen,
     isBookmarksFetching,
     isUserSessionPending,
     imageSrc,
@@ -29,9 +29,9 @@ const QuestionPreview = memo(
     question,
     userFinishedQuestions,
   }: {
-    bookmarks: SelectedBookmark;
+    bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
-    setIsQuestionViewOpen: (open: {
+    setIsQuestionInspectOpen: (open: {
       isOpen: boolean;
       questionId: string;
     }) => void;
@@ -40,7 +40,7 @@ const QuestionPreview = memo(
     isUserSessionPending: boolean;
     isBookmarkError: boolean;
     isValidSession: boolean;
-    userFinishedQuestions: SelectedFinishedQuestion;
+    userFinishedQuestions: SelectedFinishedQuestion[];
     showFinishedQuestionTint: boolean;
   }) => {
     const mutationKey = ["all_user_bookmarks", question.id];
@@ -74,7 +74,7 @@ const QuestionPreview = memo(
       <div
         className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]"
         onClick={() =>
-          setIsQuestionViewOpen({ isOpen: true, questionId: question.id })
+          setIsQuestionInspectOpen({ isOpen: true, questionId: question.id })
         }
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {

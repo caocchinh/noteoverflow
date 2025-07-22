@@ -69,7 +69,7 @@ export type FiltersCache = {
   };
 };
 
-export type SelectedQuestion = {
+export interface SelectedQuestion {
   year: number;
   season: string;
   id: string;
@@ -79,9 +79,9 @@ export type SelectedQuestion = {
   questionTopics: {
     topic: string | null;
   }[];
-};
+}
 
-export type SelectedBookmark = {
+export interface SelectedBookmark {
   createdAt: Date;
   updatedAt: Date;
   listName: string;
@@ -90,12 +90,12 @@ export type SelectedBookmark = {
     updatedAt: Date;
     question: SelectedQuestion;
   }[];
-}[];
+}
 
-export type SelectedFinishedQuestion = {
+export interface SelectedFinishedQuestion {
   updatedAt: Date;
   question: SelectedQuestion;
-}[];
+}
 
 export interface MultiSelectContextProps {
   value: string[];

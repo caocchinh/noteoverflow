@@ -50,6 +50,11 @@ function isSubset(array1: string[], array2: string[]): boolean {
   return true;
 }
 
+export function hasOverlap(arr1: string[], arr2: string[]): boolean {
+  const set1 = new Set(arr1);
+  return arr2.some((item) => set1.has(item));
+}
+
 export const areArraysIdentical = <T>(array1: T[], array2: T[]): boolean => {
   if (array1.length !== array2.length) {
     return false;

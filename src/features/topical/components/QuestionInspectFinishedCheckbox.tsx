@@ -23,7 +23,7 @@ export const QuestionInspectFinishedCheckbox = ({
   className,
   isValidSession,
 }: {
-  finishedQuestions: SelectedFinishedQuestion | null;
+  finishedQuestions: SelectedFinishedQuestion[] | null;
   question: SelectedQuestion;
   isFinishedQuestionDisabled: boolean;
   isFinishedQuestionFetching: boolean;
@@ -70,7 +70,7 @@ export const QuestionInspectFinishedCheckbox = ({
         isRealFinished,
       }: { realQuestionId: string; isRealFinished: boolean }
     ) => {
-      queryClient.setQueryData<SelectedFinishedQuestion>(
+      queryClient.setQueryData<SelectedFinishedQuestion[]>(
         ["user_finished_questions"],
         (prev) => {
           const next = prev ?? [];

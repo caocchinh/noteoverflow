@@ -40,17 +40,19 @@ export async function GET() {
       },
     });
 
-    const data: SelectedFinishedQuestion = finishedQuestionsData.map((item) => {
-      return {
-        updatedAt: item.updatedAt,
-        questionId: item.question.id,
-        question: {
-          ...item.question,
-          questionImages: JSON.parse(item.question.questionImages ?? "[]"),
-          answers: JSON.parse(item.question.answers ?? "[]"),
-        },
-      };
-    });
+    const data: SelectedFinishedQuestion[] = finishedQuestionsData.map(
+      (item) => {
+        return {
+          updatedAt: item.updatedAt,
+          questionId: item.question.id,
+          question: {
+            ...item.question,
+            questionImages: JSON.parse(item.question.questionImages ?? "[]"),
+            answers: JSON.parse(item.question.answers ?? "[]"),
+          },
+        };
+      }
+    );
 
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {

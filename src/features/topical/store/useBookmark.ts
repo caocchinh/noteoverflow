@@ -23,7 +23,7 @@ export type BookmarkState = {
   bookmarkListName: string;
   newBookmarkListNameInput: string;
   searchInput: string;
-  bookmarks: SelectedBookmark;
+  bookmarks: SelectedBookmark[];
   chosenBookmarkListName: Set<string>;
   popOverAlign: "start" | "end";
   badgeClassName?: string;
@@ -56,7 +56,7 @@ export type BookmarkProps = {
   isValidSession: boolean;
   question: SelectedQuestion;
   chosenBookmarkListName: Set<string>;
-  bookmarks: SelectedBookmark;
+  bookmarks: SelectedBookmark[];
   popOverAlign?: "start" | "end";
   badgeClassName?: string;
   popOverTriggerClassName?: string;
