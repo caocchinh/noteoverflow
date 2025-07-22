@@ -96,8 +96,8 @@ const QuestionInspect = ({
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
-  sortParameters: SortParameters | null;
-  setSortParameters: (sortParameters: SortParameters | null) => void;
+  sortParameters?: SortParameters | null;
+  setSortParameters?: (sortParameters: SortParameters | null) => void;
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: (open: boolean) => void;
@@ -1126,21 +1126,23 @@ const QuestionInspect = ({
                       isValidSession={isValidSession}
                     />
                   )}
-                  <Sort
-                    sortParameters={sortParameters}
-                    setSortParameters={setSortParameters}
-                    isDisabled={false}
-                    onBeforeSort={() => {
-                      if (currentQuestionId) {
-                        setTimeout(() => {
-                          setIsOpen({
-                            isOpen: isOpen.isOpen,
-                            questionId: currentQuestionId,
-                          });
-                        }, 0);
-                      }
-                    }}
-                  />
+                  {sortParameters && setSortParameters && (
+                    <Sort
+                      sortParameters={sortParameters}
+                      setSortParameters={setSortParameters}
+                      isDisabled={false}
+                      onBeforeSort={() => {
+                        if (currentQuestionId) {
+                          setTimeout(() => {
+                            setIsOpen({
+                              isOpen: isOpen.isOpen,
+                              questionId: currentQuestionId,
+                            });
+                          }, 0);
+                        }
+                      }}
+                    />
+                  )}
                 </div>
                 <ScrollBar
                   orientation="horizontal"

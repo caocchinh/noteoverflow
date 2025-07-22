@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
-  ArrowUpFromLine,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -89,6 +88,7 @@ import { addRecentQuery } from "@/features/topical/server/actions";
 import { toast } from "sonner";
 import { BAD_REQUEST } from "@/constants/constants";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 
 const TopicalClient = ({
   searchParams,
@@ -1384,29 +1384,13 @@ const TopicalClient = ({
             className="!relative flex flex-col items-center justify-start !px-0 gap-4 p-4 pl-2 md:items-start w-full overflow-hidden"
             ref={sideBarInsetRef}
           >
-            {showScrollToTopButton && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className={cn(
-                      "fixed cursor-pointer !px-[10px] bottom-[3%] right-[1.5%] rounded-sm z-[10]",
-                      !isScrollingAndShouldShowScrollButton && "!hidden"
-                    )}
-                    onClick={() =>
-                      scrollAreaRef.current?.scrollTo({
-                        top: 0,
-                        behavior: "instant",
-                      })
-                    }
-                  >
-                    <ArrowUpFromLine />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p>Scroll to top</p>
-                </TooltipContent>
-              </Tooltip>
-            )}{" "}
+            <ScrollToTopButton
+              showScrollToTopButton={showScrollToTopButton}
+              isScrollingAndShouldShowScrollButton={
+                isScrollingAndShouldShowScrollButton
+              }
+              scrollAreaRef={scrollAreaRef}
+            />
             {isUltilityOverflowingRight && (
               <Button
                 className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"
