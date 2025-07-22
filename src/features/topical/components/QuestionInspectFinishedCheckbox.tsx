@@ -11,7 +11,6 @@ import {
 } from "../server/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { SelectedFinishedQuestion, SelectedQuestion } from "../constants/types";
 
@@ -37,9 +36,7 @@ export const QuestionInspectFinishedCheckbox = ({
       mutationKey: ["user_finished_questions", question.id],
     }) > 0;
 
-  const isFinished = useMemo(() => {
-    return finishedQuestions?.some((item) => item.id === question.id);
-  }, [finishedQuestions, question.id]);
+  const isFinished = finishedQuestions?.some((item) => item.id === question.id);
 
   const queryClient = useQueryClient();
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { SelectedFinishedQuestion } from "@/features/topical/constants/types";
@@ -36,9 +37,7 @@ const FinishedQuestionsPage = () => {
             : "An error occurred";
         throw new Error(errorMessage);
       }
-      return new Set(
-        data.data.map((item: { questionId: string }) => item.questionId)
-      );
+      return new Set(data.data);
     },
     enabled:
       !!userSession?.data?.session &&

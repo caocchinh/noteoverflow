@@ -56,6 +56,11 @@ const QuestionPreview = memo(
         mutationKey: mutationKey,
       }) > 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    useIsMutating({
+      mutationKey: ["user_finished_questions", question.id],
+    }) > 0;
+
     return (
       <div
         className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]"
