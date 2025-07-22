@@ -17,7 +17,6 @@ export async function GET() {
       where: eq(recentQuery.userId, userId),
       columns: {
         queryKey: true,
-        sortParams: true,
         lastSearch: true,
       },
     });

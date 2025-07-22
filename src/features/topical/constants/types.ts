@@ -1,6 +1,4 @@
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
-import { question } from "@/drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
 import { Dispatch, SetStateAction, RefObject } from "react";
 
 export interface TopicalData {
@@ -71,15 +69,16 @@ export type FiltersCache = {
   };
 };
 
-export type SelectedQuestion = Pick<
-  InferSelectModel<typeof question>,
-  "id" | "year" | "paperType" | "season"
-> & {
+export type SelectedQuestion = {
+  year: number;
+  season: string;
+  id: string;
+  paperType: number;
   questionImages: string[];
   answers: string[];
-  questionTopics: Array<{
+  questionTopics: {
     topic: string | null;
-  }>;
+  }[];
 };
 
 export type SelectedBookmark = {
@@ -89,33 +88,13 @@ export type SelectedBookmark = {
   visibility: string;
   userBookmarks: {
     updatedAt: Date;
-    questionId: string;
-    question: {
-      year: number;
-      season: string;
-      paperType: number;
-      questionImages: string[];
-      answers: string[];
-      questionTopics: {
-        topic: string | null;
-      }[];
-    };
+    question: SelectedQuestion;
   }[];
 }[];
 
 export type SelectedFinishedQuestion = {
   updatedAt: Date;
-  questionId: string;
-  question: {
-    year: number;
-    season: string;
-    paperType: number;
-    questionImages: string[];
-    answers: string[];
-    questionTopics: {
-      topic: string | null;
-    }[];
-  };
+  question: SelectedQuestion;
 }[];
 
 export interface MultiSelectContextProps {

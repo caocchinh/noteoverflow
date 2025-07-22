@@ -145,23 +145,27 @@ export const validateFilterData = ({
 };
 
 export const fuzzySearch = (query: string, text: string): boolean => {
-  if (!query) {
-    return true;
-  }
-  if (!text) {
+  try {
+    if (!query) {
+      return true;
+    }
+    if (!text) {
+      return false;
+    }
+    const lowerQuery = query.toLowerCase();
+    const lowerText = text.toLowerCase();
+    let queryIndex = 0;
+    let textIndex = 0;
+    while (queryIndex < lowerQuery.length && textIndex < lowerText.length) {
+      if (lowerQuery[queryIndex] === lowerText[textIndex]) {
+        queryIndex++;
+      }
+      textIndex++;
+    }
+    return queryIndex === lowerQuery.length;
+  } catch {
     return false;
   }
-  const lowerQuery = query.toLowerCase();
-  const lowerText = text.toLowerCase();
-  let queryIndex = 0;
-  let textIndex = 0;
-  while (queryIndex < lowerQuery.length && textIndex < lowerText.length) {
-    if (lowerQuery[queryIndex] === lowerText[textIndex]) {
-      queryIndex++;
-    }
-    textIndex++;
-  }
-  return queryIndex === lowerQuery.length;
 };
 
 export const extractPaperCode = ({
@@ -199,6 +203,30 @@ const getShortSeason = (season: ValidSeason): string | undefined => {
     return "m";
   }
   return undefined;
+};
+
+export const extractCurriculumCode = ({
+  questionId,
+}: {
+  questionId: string;
+}): string => {
+  try {
+    return questionId.split(";")[0] as ValidCurriculum;
+  } catch {
+    return "";
+  }
+};
+
+export const extractSubjectCode = ({
+  questionId,
+}: {
+  questionId: string;
+}): string => {
+  try {
+    return questionId.split(";")[1] as ValidCurriculum;
+  } catch {
+    return "";
+  }
 };
 
 export const parsePastPaperUrl = ({
@@ -239,54 +267,61 @@ export const isOverScrolling = ({
   isOverScrollingLeft: boolean;
   isOverScrollingRight: boolean;
 } => {
-  if (child && parent) {
-    if (child.clientWidth >= parent.clientWidth) {
-      const childLeft = Math.abs(
-        Math.round(child.getBoundingClientRect().left)
-      );
-      const childRight = Math.abs(
-        Math.round(child.getBoundingClientRect().right)
-      );
-      const parentLeft = Math.abs(
-        Math.round(parent.getBoundingClientRect().left)
-      );
-      const parentRight = Math.abs(
-        Math.round(parent.getBoundingClientRect().right)
-      );
+  try {
+    if (child && parent) {
+      if (child.clientWidth >= parent.clientWidth) {
+        const childLeft = Math.abs(
+          Math.round(child.getBoundingClientRect().left)
+        );
+        const childRight = Math.abs(
+          Math.round(child.getBoundingClientRect().right)
+        );
+        const parentLeft = Math.abs(
+          Math.round(parent.getBoundingClientRect().left)
+        );
+        const parentRight = Math.abs(
+          Math.round(parent.getBoundingClientRect().right)
+        );
 
-      const leftThreshold =
-        ((Math.max(childLeft, parentLeft) - Math.min(childLeft, parentLeft)) /
-          ((childLeft + parentLeft) / 2)) *
-        100;
-      const rightThreshold =
-        ((Math.max(childRight, parentRight) -
-          Math.min(childRight, parentRight)) /
-          ((childRight + parentRight) / 2)) *
-        100;
+        const leftThreshold =
+          ((Math.max(childLeft, parentLeft) - Math.min(childLeft, parentLeft)) /
+            ((childLeft + parentLeft) / 2)) *
+          100;
+        const rightThreshold =
+          ((Math.max(childRight, parentRight) -
+            Math.min(childRight, parentRight)) /
+            ((childRight + parentRight) / 2)) *
+          100;
 
-      if (
-        childLeft !== parentLeft &&
-        childRight !== parentRight &&
-        leftThreshold > 1 &&
-        rightThreshold > 1
-      ) {
-        return {
-          isOverScrollingLeft: true,
-          isOverScrollingRight: true,
-        };
-      } else if (
-        leftThreshold > 1 &&
-        ((childLeft > parentLeft && !specialLeftCase) ||
-          (childLeft < parentLeft && specialLeftCase))
-      ) {
-        return {
-          isOverScrollingLeft: true,
-          isOverScrollingRight: false,
-        };
-      } else if (rightThreshold > 1 && childRight > parentRight) {
+        if (
+          childLeft !== parentLeft &&
+          childRight !== parentRight &&
+          leftThreshold > 1 &&
+          rightThreshold > 1
+        ) {
+          return {
+            isOverScrollingLeft: true,
+            isOverScrollingRight: true,
+          };
+        } else if (
+          leftThreshold > 1 &&
+          ((childLeft > parentLeft && !specialLeftCase) ||
+            (childLeft < parentLeft && specialLeftCase))
+        ) {
+          return {
+            isOverScrollingLeft: true,
+            isOverScrollingRight: false,
+          };
+        } else if (rightThreshold > 1 && childRight > parentRight) {
+          return {
+            isOverScrollingLeft: false,
+            isOverScrollingRight: true,
+          };
+        }
+      } else {
         return {
           isOverScrollingLeft: false,
-          isOverScrollingRight: true,
+          isOverScrollingRight: false,
         };
       }
     } else {
@@ -295,16 +330,16 @@ export const isOverScrolling = ({
         isOverScrollingRight: false,
       };
     }
-  } else {
+    return {
+      isOverScrollingLeft: false,
+      isOverScrollingRight: false,
+    };
+  } catch {
     return {
       isOverScrollingLeft: false,
       isOverScrollingRight: false,
     };
   }
-  return {
-    isOverScrollingLeft: false,
-    isOverScrollingRight: false,
-  };
 };
 
 // Lowest index has the highest weight
@@ -313,28 +348,36 @@ export const computeWeightedScoreByArrayIndex = ({
 }: {
   data: string[];
 }): Record<string, number> => {
-  const scoreObject: Record<string, number> = {};
-  let weight = data.length;
-  for (const item of data) {
-    const score = weight;
-    scoreObject[item] = score;
-    weight--;
+  try {
+    const scoreObject: Record<string, number> = {};
+    let weight = data.length;
+    for (const item of data) {
+      const score = weight;
+      scoreObject[item] = score;
+      weight--;
+    }
+    return scoreObject;
+  } catch {
+    return {};
   }
-  return scoreObject;
 };
 
 export const updateSearchParams = ({ query }: { query: string }) => {
-  if (typeof window === "undefined") {
+  try {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("queryKey", query);
+
+    window.history.pushState(
+      {},
+      "",
+      `${window.location.pathname}?${params.toString()}`
+    );
+  } catch {
     return;
   }
-  const params = new URLSearchParams();
-  params.set("queryKey", query);
-
-  window.history.pushState(
-    {},
-    "",
-    `${window.location.pathname}?${params.toString()}`
-  );
 };
 
 export const syncFilterCacheToLocalStorage = ({

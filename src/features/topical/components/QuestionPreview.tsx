@@ -78,7 +78,7 @@ const QuestionPreview = memo(
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
             userFinishedQuestions?.some(
-              (item) => item.questionId === question.id
+              (item) => item.question.id === question.id
             ) && showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
@@ -189,7 +189,7 @@ const QuestionPreview = memo(
                   for (const bookmark of bookmarks) {
                     if (
                       bookmark.userBookmarks.some(
-                        (b) => b.questionId === question.id
+                        (b) => b.question.id === question.id
                       )
                     ) {
                       return true;

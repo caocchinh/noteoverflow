@@ -37,7 +37,7 @@ export const QuestionInspectFinishedCheckbox = ({
     }) > 0;
 
   const isFinished = finishedQuestions?.some(
-    (item) => item.questionId === question.id
+    (item) => item.question.id === question.id
   );
 
   const queryClient = useQueryClient();
@@ -76,14 +76,14 @@ export const QuestionInspectFinishedCheckbox = ({
           const next = prev ?? [];
           if (isRealFinished) {
             next.splice(
-              next.findIndex((item) => item.questionId === realQuestionId),
+              next.findIndex((item) => item.question.id === realQuestionId),
               1
             );
           } else {
             next.push({
-              questionId: realQuestionId,
               question: {
                 year: question.year,
+                id: realQuestionId,
                 paperType: question.paperType,
                 season: question.season,
                 questionImages: question.questionImages,

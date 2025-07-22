@@ -26,11 +26,11 @@ export async function GET() {
         userBookmarks: {
           columns: {
             updatedAt: true,
-            questionId: true,
           },
           with: {
             question: {
               columns: {
+                id: true,
                 paperType: true,
                 answers: true,
                 questionImages: true,

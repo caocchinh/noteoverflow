@@ -675,7 +675,7 @@ const QuestionInspect = ({
                                 ]?.id && "!bg-logo-main text-white",
                               userFinishedQuestions?.some(
                                 (item) =>
-                                  item.questionId ===
+                                  item.question.id ===
                                   partitionedTopicalData?.[currentTab][
                                     virtualItem.index
                                   ]?.id
@@ -761,7 +761,7 @@ const QuestionInspect = ({
                               "!bg-logo-main text-white",
                             userFinishedQuestions?.some(
                               (item) =>
-                                item.questionId ===
+                                item.question.id ===
                                 searchResults[virtualItem.index]?.id
                             ) &&
                               "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"

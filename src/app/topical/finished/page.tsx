@@ -1,9 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { SelectedFinishedQuestion } from "@/features/topical/constants/types";
+import {
+  extractCurriculumCode,
+  extractSubjectCode,
+} from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
@@ -44,8 +48,32 @@ const FinishedQuestionsPage = () => {
       !isUserSessionError &&
       !queryClient.getQueryData(["user_finished_questions"]),
   });
+  const metadata = useMemo(() => {
+    const tempMetadata: {
+      subject: Set<string>;
+      curriculum: Set<string>;
+    } = {
+      subject: new Set<string>(),
+      curriculum: new Set<string>(),
+    };
+    userFinishedQuestions?.forEach((question) => {
+      tempMetadata.curriculum.add(
+        extractCurriculumCode({ questionId: question.question.id })
+      );
+      tempMetadata.subject.add(
+        extractSubjectCode({ questionId: question.question.id })
+      );
+    });
+    return tempMetadata;
+  }, [userFinishedQuestions]);
 
-  return <div></div>;
+  console.log(metadata);
+
+  return (
+    <div>
+      <div>Finished questions</div>
+    </div>
+  );
 };
 
 export default FinishedQuestionsPage;

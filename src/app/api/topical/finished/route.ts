@@ -17,12 +17,12 @@ export async function GET() {
     const finishedQuestionsData = await db.query.finishedQuestions.findMany({
       where: eq(finishedQuestions.userId, userId),
       columns: {
-        questionId: true,
         updatedAt: true,
       },
       with: {
         question: {
           columns: {
+            id: true,
             paperType: true,
             answers: true,
             questionImages: true,
@@ -43,7 +43,7 @@ export async function GET() {
     const data: SelectedFinishedQuestion = finishedQuestionsData.map((item) => {
       return {
         updatedAt: item.updatedAt,
-        questionId: item.questionId,
+        questionId: item.question.id,
         question: {
           ...item.question,
           questionImages: JSON.parse(item.question.questionImages ?? "[]"),
@@ -51,8 +51,6 @@ export async function GET() {
         },
       };
     });
-
-    console.log(data, data.length);
 
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {

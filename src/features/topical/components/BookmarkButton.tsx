@@ -162,7 +162,7 @@ export const BookmarkButton = memo(
           const set = new Set<string>();
           for (const bookmark of bookmarks) {
             if (
-              bookmark.userBookmarks.some((b) => b.questionId === question.id)
+              bookmark.userBookmarks.some((b) => b.question.id === question.id)
             ) {
               set.add(bookmark.listName + " " + bookmark.visibility);
             }
@@ -196,7 +196,9 @@ export const BookmarkButton = memo(
             const set = new Set<string>();
             for (const bookmark of bookmarks) {
               if (
-                bookmark.userBookmarks.some((b) => b.questionId === question.id)
+                bookmark.userBookmarks.some(
+                  (b) => b.question.id === question.id
+                )
               ) {
                 set.add(bookmark.listName + " " + bookmark.visibility);
               }
@@ -442,8 +444,8 @@ const BookmarkButtonConsumer = memo(
                       questionImages: newQuestion.questionImages,
                       answers: newQuestion.answers,
                       questionTopics: newQuestion.questionTopics,
+                      id: newQuestion.id,
                     },
-                    questionId: newQuestion.id,
                     updatedAt: new Date(),
                   });
                 }
@@ -457,6 +459,7 @@ const BookmarkButtonConsumer = memo(
                   updatedAt: new Date(),
                   listName: newBookmarkListName,
                   visibility: realVisibility as "public" | "private",
+
                   userBookmarks: [
                     {
                       question: {
@@ -466,8 +469,8 @@ const BookmarkButtonConsumer = memo(
                         questionImages: newQuestion.questionImages,
                         answers: newQuestion.answers,
                         questionTopics: newQuestion.questionTopics,
+                        id: newQuestion.id,
                       },
-                      questionId: newQuestion.id,
                       updatedAt: new Date(),
                     },
                   ],
@@ -497,8 +500,8 @@ const BookmarkButtonConsumer = memo(
                     questionImages: newQuestion.questionImages,
                     answers: newQuestion.answers,
                     questionTopics: newQuestion.questionTopics,
+                    id: newQuestion.id,
                   },
-                  questionId: newQuestion.id,
                   updatedAt: new Date(),
                 });
               }
@@ -515,7 +518,7 @@ const BookmarkButtonConsumer = memo(
               );
               if (existingList) {
                 existingList.userBookmarks = existingList.userBookmarks.filter(
-                  (bookmark) => bookmark.questionId !== newQuestion.id
+                  (bookmark) => bookmark.question.id !== newQuestion.id
                 );
               }
             }
@@ -801,7 +804,7 @@ const BookmarkTrigger = memo(() => {
     "all_user_bookmarks",
   ]);
   const isBookmarked = bookmarks?.some((bookmark) =>
-    bookmark.userBookmarks.some((b) => b.questionId === question.id)
+    bookmark.userBookmarks.some((b) => b.question.id === question.id)
   );
 
   if (isMutatingThisQuestion) {
