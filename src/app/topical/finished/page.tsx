@@ -12,6 +12,8 @@ import {
   SUBJECT_COVER_IMAGE,
   FILTERS_CACHE_KEY,
   COLUMN_BREAKPOINTS,
+  DEFAULT_CACHE,
+  DEFAULT_SORT_BY,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -67,6 +69,7 @@ import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { SortBy } from "@/features/topical/components/SortBy";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
@@ -282,6 +285,9 @@ const FinishedQuestionsPage = () => {
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
+        setSortBy(
+          parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_BY
+        );
         setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
         setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
         setNumberOfQuestionsPerPage(
@@ -430,46 +436,21 @@ const FinishedQuestionsPage = () => {
         const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
         stateToSave = existingStateJSON
           ? JSON.parse(existingStateJSON)
-          : {
-              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-              layoutStyle: DEFAULT_LAYOUT_STYLE,
-              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-              isSessionCacheEnabled: true,
-              isPersistantCacheEnabled: true,
-              showFinishedQuestionTint: true,
-              scrollUpWhenPageChange: true,
-              showScrollToTopButton: true,
-              lastSessionCurriculum: "",
-              lastSessionSubject: "",
-              filters: {},
-            };
+          : { ...DEFAULT_CACHE };
       } catch {
-        // If reading fails, start with empty state
-        stateToSave = {
-          recentlySearchSortedBy: "ascending",
-          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-          layoutStyle: DEFAULT_LAYOUT_STYLE,
-          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-          isSessionCacheEnabled: true,
-          isPersistantCacheEnabled: true,
-          showFinishedQuestionTint: true,
-          scrollUpWhenPageChange: true,
-          showScrollToTopButton: true,
-          lastSessionCurriculum: "",
-          lastSessionSubject: "",
-          filters: {},
-        };
+        stateToSave = { ...DEFAULT_CACHE };
       }
 
       stateToSave = {
         ...stateToSave,
-
         showFinishedQuestionTint:
           showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
         scrollUpWhenPageChange:
           scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
         showScrollToTopButton:
           showScrollToTopButton ?? stateToSave.showScrollToTopButton,
+        finishedQuestionsSearchSortedBy:
+          sortBy ?? stateToSave.finishedQuestionsSearchSortedBy,
         numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
         layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
         numberOfQuestionsPerPage:
@@ -481,13 +462,13 @@ const FinishedQuestionsPage = () => {
       console.error("Failed to save settings to localStorage:", error);
     }
   }, [
-    ,
     layoutStyle,
     numberOfColumns,
     numberOfQuestionsPerPage,
     scrollUpWhenPageChange,
     showFinishedQuestionTint,
     showScrollToTopButton,
+    sortBy,
   ]);
 
   const isQuestionViewDisabled = useMemo(() => {
@@ -584,16 +565,29 @@ const FinishedQuestionsPage = () => {
               className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
               ref={ultilityRef}
             >
-              <Button
-                className="!bg-background flex cursor-pointer items-center gap-2 border"
-                onClick={() => {
-                  setIsSidebarOpen(!isSidebarOpen);
-                }}
-                variant="outline"
-              >
-                Filters
-                <SlidersHorizontal />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      className="!bg-background flex cursor-pointer items-center gap-2 border"
+                      onClick={() => {
+                        setIsSidebarOpen(!isSidebarOpen);
+                      }}
+                      disabled={isQuestionViewDisabled}
+                      variant="outline"
+                    >
+                      Filters
+                      <SlidersHorizontal />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className={cn(!isQuestionViewDisabled && "hidden")}
+                >
+                  To filter questions, select a subject first
+                </TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div>
@@ -738,6 +732,7 @@ const FinishedQuestionsPage = () => {
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
+              <SortBy sortBy={sortBy} setSortBy={setSortBy} />
             </div>
 
             <ScrollBar
@@ -882,7 +877,7 @@ const FinishedQuestionsPage = () => {
         )}
       </div>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent>
+        <SheetContent className="z-[100006]">
           <SheetHeader className="sr-only">
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>

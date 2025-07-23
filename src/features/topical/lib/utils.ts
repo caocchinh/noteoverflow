@@ -2,9 +2,7 @@ import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_SUBJECT_CODE,
-  DEFAULT_LAYOUT_STYLE,
-  DEFAULT_NUMBER_OF_COLUMNS,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
   MAX_TOPIC_SELECTION,
   PAPER_TYPE_SORT_DEFAULT_WEIGHT,
@@ -426,35 +424,10 @@ export const syncFilterCacheToLocalStorage = ({
       const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
       stateToSave = existingStateJSON
         ? JSON.parse(existingStateJSON)
-        : {
-            numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-            layoutStyle: DEFAULT_LAYOUT_STYLE,
-            numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-            isSessionCacheEnabled: true,
-            isPersistantCacheEnabled: true,
-            showFinishedQuestionTint: true,
-            scrollUpWhenPageChange: true,
-            showScrollToTopButton: true,
-            lastSessionCurriculum: "",
-            lastSessionSubject: "",
-            filters: {},
-          };
+        : { ...DEFAULT_CACHE };
     } catch {
       // If reading fails, start with empty state
-      stateToSave = {
-        recentlySearchSortedBy: "ascending",
-        numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-        layoutStyle: DEFAULT_LAYOUT_STYLE,
-        numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-        isSessionCacheEnabled: true,
-        isPersistantCacheEnabled: true,
-        showFinishedQuestionTint: true,
-        scrollUpWhenPageChange: true,
-        showScrollToTopButton: true,
-        lastSessionCurriculum: "",
-        lastSessionSubject: "",
-        filters: {},
-      };
+      stateToSave = { ...DEFAULT_CACHE };
     }
 
     stateToSave = {

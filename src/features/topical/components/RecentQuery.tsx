@@ -19,6 +19,7 @@ import {
   DEFAULT_LAYOUT_STYLE,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  DEFAULT_SORT_BY,
 } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
@@ -40,13 +41,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   updateSearchParams,
@@ -57,6 +52,7 @@ import {
 } from "../lib/utils";
 import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
+import { SortBy } from "./SortBy";
 
 export const RecentQuery = ({
   isUserSessionPending,
@@ -134,7 +130,7 @@ export const RecentQuery = ({
     useState<string>("skibidi toilet");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"ascending" | "descending">(
-    "descending"
+    DEFAULT_SORT_BY
   );
   const isMounted = useRef(false);
 
@@ -143,7 +139,7 @@ export const RecentQuery = ({
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
       if (savedState) {
         const parsedState: FiltersCache = JSON.parse(savedState);
-        setSortBy(parsedState.recentlySearchSortedBy ?? "descending");
+        setSortBy(parsedState.recentlySearchSortedBy ?? DEFAULT_SORT_BY);
       }
     } catch {}
     setTimeout(() => {
@@ -177,9 +173,10 @@ export const RecentQuery = ({
       } catch {
         // If reading fails, start with empty state
         stateToSave = {
-          recentlySearchSortedBy: "ascending",
+          recentlySearchSortedBy: DEFAULT_SORT_BY,
           numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
           layoutStyle: DEFAULT_LAYOUT_STYLE,
+          finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,
           numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
           isSessionCacheEnabled: true,
           isPersistantCacheEnabled: true,
@@ -268,20 +265,7 @@ export const RecentQuery = ({
             </PopoverTrigger>
             <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
               <p className="text-sm mb-1">Sort by date</p>
-              <Select
-                value={sortBy}
-                onValueChange={(value) => {
-                  setSortBy(value as "ascending" | "descending");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent className="z-[1000010] dark:bg-accent">
-                  <SelectItem value="ascending">Newest first</SelectItem>
-                  <SelectItem value="descending">Oldest first</SelectItem>
-                </SelectContent>
-              </Select>
+              <SortBy sortBy={sortBy} setSortBy={setSortBy} />
             </PopoverContent>
           </Popover>
         </DialogHeader>
@@ -337,7 +321,7 @@ export const RecentQuery = ({
                     ? b.lastSearch
                     : new Date(b.lastSearch).getTime();
 
-                if (sortBy === "ascending") {
+                if (sortBy === "descending") {
                   return dateB - dateA; // Newest first
                 }
                 return dateA - dateB; // Oldest first

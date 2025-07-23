@@ -1,5 +1,10 @@
 import { ValidCurriculum } from "@/constants/types";
-import type { InvalidInputs, LayoutStyle, TopicalData } from "./types";
+import type {
+  FiltersCache,
+  InvalidInputs,
+  LayoutStyle,
+  TopicalData,
+} from "./types";
 
 export const CURRICULUM_COVER_IMAGE: Record<ValidCurriculum, string> = {
   "CIE A-LEVEL": "/assets/cover/alevels-logo1.jpg",
@@ -243,3 +248,20 @@ export const PAPER_TYPE_SORT_DEFAULT_WEIGHT = 0;
 export const SEASON_SORT_DEFAULT_WEIGHT = 0;
 export const TOPIC_SORT_DEFAULT_WEIGHT = 0;
 export const MAX_NUMBER_OF_RECENT_QUERIES = 30;
+export const DEFAULT_SORT_BY: "ascending" | "descending" = "descending";
+
+export const DEFAULT_CACHE: FiltersCache = {
+  recentlySearchSortedBy: DEFAULT_SORT_BY,
+  numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+  layoutStyle: DEFAULT_LAYOUT_STYLE,
+  numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  isSessionCacheEnabled: true,
+  isPersistantCacheEnabled: true,
+  showFinishedQuestionTint: true,
+  finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,
+  scrollUpWhenPageChange: true,
+  showScrollToTopButton: true,
+  lastSessionCurriculum: "",
+  lastSessionSubject: "",
+  filters: {},
+};

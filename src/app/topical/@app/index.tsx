@@ -41,6 +41,7 @@ import {
   CACHE_EXPIRE_TIME,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_LAYOUT_STYLE,
+  DEFAULT_CACHE,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -208,19 +209,7 @@ const TopicalClient = ({
       const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
       const stateToSave: FiltersCache = existingStateJSON
         ? JSON.parse(existingStateJSON)
-        : {
-            scrollUpWhenPageChange: true,
-            numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-            layoutStyle: DEFAULT_LAYOUT_STYLE,
-            numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-            isSessionCacheEnabled: true,
-            isPersistantCacheEnabled: true,
-            showFinishedQuestionTint: true,
-            showScrollToTopButton: true,
-            lastSessionCurriculum: "",
-            lastSessionSubject: "",
-            filters: {},
-          };
+        : { ...DEFAULT_CACHE };
 
       stateToSave.lastSessionCurriculum = "";
       stateToSave.lastSessionCurriculum = "";
