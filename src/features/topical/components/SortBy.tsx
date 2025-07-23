@@ -25,8 +25,8 @@ export const SortBy = ({
         <SelectValue placeholder="Sort by" />
       </SelectTrigger>
       <SelectContent className="z-[1000010] dark:bg-accent">
-        <SelectItem value="ascending">Oldest first</SelectItem>
         <SelectItem value="descending">Newest first</SelectItem>
+        <SelectItem value="ascending">Oldest first</SelectItem>
       </SelectContent>
     </Select>
   );

@@ -393,7 +393,7 @@ const FinishedQuestionsPage = () => {
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-      const sortedData: SelectedFinishedQuestion[] = topicalData.sort(
+      const sortedData: SelectedFinishedQuestion[] = topicalData.toSorted(
         (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
           const aIndex = new Date(a.updatedAt).getTime();
           const bIndex = new Date(b.updatedAt).getTime();
@@ -884,6 +884,8 @@ const FinishedQuestionsPage = () => {
         </SheetContent>
       </Sheet>
       <QuestionInspect
+        sortBy={sortBy}
+        setSortBy={setSortBy}
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}

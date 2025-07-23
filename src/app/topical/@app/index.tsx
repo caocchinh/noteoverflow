@@ -857,7 +857,7 @@ const TopicalClient = ({
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-      const sortedData = topicalData.data.sort((a, b) => {
+      const sortedData = topicalData.data.toSorted((a, b) => {
         const aPaperTypeScore =
           (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
           (sortParameters?.paperType.weight ?? 0);

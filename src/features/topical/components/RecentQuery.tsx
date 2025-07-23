@@ -16,10 +16,8 @@ import {
 import {
   FILTERS_CACHE_KEY,
   MAX_NUMBER_OF_RECENT_QUERIES,
-  DEFAULT_LAYOUT_STYLE,
-  DEFAULT_NUMBER_OF_COLUMNS,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_SORT_BY,
+  DEFAULT_CACHE,
 } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
@@ -157,36 +155,10 @@ export const RecentQuery = ({
         const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
         stateToSave = existingStateJSON
           ? JSON.parse(existingStateJSON)
-          : {
-              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-              layoutStyle: DEFAULT_LAYOUT_STYLE,
-              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-              isSessionCacheEnabled: true,
-              isPersistantCacheEnabled: true,
-              showFinishedQuestionTint: true,
-              scrollUpWhenPageChange: true,
-              showScrollToTopButton: true,
-              lastSessionCurriculum: "",
-              lastSessionSubject: "",
-              filters: {},
-            };
+          : { ...DEFAULT_CACHE };
       } catch {
         // If reading fails, start with empty state
-        stateToSave = {
-          recentlySearchSortedBy: DEFAULT_SORT_BY,
-          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
-          layoutStyle: DEFAULT_LAYOUT_STYLE,
-          finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,
-          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-          isSessionCacheEnabled: true,
-          isPersistantCacheEnabled: true,
-          showFinishedQuestionTint: true,
-          scrollUpWhenPageChange: true,
-          showScrollToTopButton: true,
-          lastSessionCurriculum: "",
-          lastSessionSubject: "",
-          filters: {},
-        };
+        stateToSave = { ...DEFAULT_CACHE };
       }
       stateToSave = {
         ...stateToSave,

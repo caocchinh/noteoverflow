@@ -8,7 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Dispatch,
   Fragment,
+  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -69,6 +71,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { BookmarkButton } from "./BookmarkButton";
 import { JumpToTabButton } from "./JumpToTabButton";
 import Sort from "./Sort";
+import { SortBy } from "./SortBy";
 
 const QuestionInspect = ({
   isOpen,
@@ -80,6 +83,8 @@ const QuestionInspect = ({
   isBookmarksFetching,
   isBookmarkError,
   isFinishedQuestionsFetching,
+  sortBy,
+  setSortBy,
   sortParameters,
   setSortParameters,
   isFinishedQuestionsError,
@@ -96,6 +101,8 @@ const QuestionInspect = ({
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
+  sortBy?: "ascending" | "descending";
+  setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
   sortParameters?: SortParameters | null;
   setSortParameters?: (sortParameters: SortParameters | null) => void;
   isValidSession: boolean;
@@ -1125,6 +1132,9 @@ const QuestionInspect = ({
                       isFinishedQuestionError={isFinishedQuestionsError}
                       isValidSession={isValidSession}
                     />
+                  )}
+                  {sortBy && setSortBy && (
+                    <SortBy sortBy={sortBy} setSortBy={setSortBy} />
                   )}
                   {sortParameters && setSortParameters && (
                     <Sort
