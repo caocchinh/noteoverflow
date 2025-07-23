@@ -316,6 +316,18 @@ const FinishedQuestionsPage = () => {
     }
   }, [subjectMetadata]);
 
+  useEffect(() => {
+    window.addEventListener("resize", overflowScrollHandler);
+
+    return () => {
+      window.removeEventListener("resize", overflowScrollHandler);
+    };
+  }, [overflowScrollHandler]);
+
+  useEffect(() => {
+    overflowScrollHandler();
+  }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
+
   const topicalData = useMemo(() => {
     if (
       !userFinishedQuestions ||
@@ -407,11 +419,99 @@ const FinishedQuestionsPage = () => {
     sortBy,
   ]);
 
+  useEffect(() => {
+    if (!isMounted.current || typeof window === "undefined") {
+      return;
+    }
+    try {
+      let stateToSave: FiltersCache;
+
+      try {
+        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+        stateToSave = existingStateJSON
+          ? JSON.parse(existingStateJSON)
+          : {
+              numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+              layoutStyle: DEFAULT_LAYOUT_STYLE,
+              numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+              isSessionCacheEnabled: true,
+              isPersistantCacheEnabled: true,
+              showFinishedQuestionTint: true,
+              scrollUpWhenPageChange: true,
+              showScrollToTopButton: true,
+              lastSessionCurriculum: "",
+              lastSessionSubject: "",
+              filters: {},
+            };
+      } catch {
+        // If reading fails, start with empty state
+        stateToSave = {
+          recentlySearchSortedBy: "ascending",
+          numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
+          layoutStyle: DEFAULT_LAYOUT_STYLE,
+          numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+          isSessionCacheEnabled: true,
+          isPersistantCacheEnabled: true,
+          showFinishedQuestionTint: true,
+          scrollUpWhenPageChange: true,
+          showScrollToTopButton: true,
+          lastSessionCurriculum: "",
+          lastSessionSubject: "",
+          filters: {},
+        };
+      }
+
+      stateToSave = {
+        ...stateToSave,
+
+        showFinishedQuestionTint:
+          showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
+        scrollUpWhenPageChange:
+          scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
+        showScrollToTopButton:
+          showScrollToTopButton ?? stateToSave.showScrollToTopButton,
+        numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
+        layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
+        numberOfQuestionsPerPage:
+          numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
+      };
+
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to save settings to localStorage:", error);
+    }
+  }, [
+    ,
+    layoutStyle,
+    numberOfColumns,
+    numberOfQuestionsPerPage,
+    scrollUpWhenPageChange,
+    showFinishedQuestionTint,
+    showScrollToTopButton,
+  ]);
+
+  const isQuestionViewDisabled = useMemo(() => {
+    return (
+      !selectedCurriculumn ||
+      !selectedSubject ||
+      !currentFilter ||
+      !fullPartitionedData
+    );
+  }, [
+    selectedCurriculumn,
+    selectedSubject,
+    currentFilter,
+    fullPartitionedData,
+  ]);
+
   return (
     <>
-      <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-center p-4">
-        <div className="flex flex-row items-center justify-between w-[95%] mb-4 flex-wrap gap-2">
-          <Breadcrumb className="self-end">
+      <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-center p-4 overflow-hidden">
+        <div
+          className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
+          ref={sideBarInsetRef}
+        >
+          <Breadcrumb className="self-end mr-0 sm:mr-6 max-w-full w-max">
             <BreadcrumbList>
               <BreadcrumbItem
                 className="cursor-pointer"
@@ -445,9 +545,41 @@ const FinishedQuestionsPage = () => {
           </Breadcrumb>
           <ScrollArea
             viewPortOnScroll={overflowScrollHandler}
-            className="w-max"
+            className="max-w-full w-max relative"
             viewportRef={ultilityHorizontalScrollBarRef}
           >
+            {isUltilityOverflowingRight && (
+              <Button
+                className="absolute right-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                title="Move right"
+                onClick={() => {
+                  if (ultilityHorizontalScrollBarRef.current) {
+                    ultilityHorizontalScrollBarRef.current.scrollBy({
+                      left: 200,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                <ChevronRight size={5} />
+              </Button>
+            )}
+            {isUltilityOverflowingLeft && (
+              <Button
+                className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                title="Move left"
+                onClick={() => {
+                  if (ultilityHorizontalScrollBarRef.current) {
+                    ultilityHorizontalScrollBarRef.current.scrollBy({
+                      left: -200,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                <ChevronLeft size={5} />
+              </Button>
+            )}
             <div
               className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
               ref={ultilityRef}
@@ -467,7 +599,7 @@ const FinishedQuestionsPage = () => {
                   <div>
                     <Button
                       className="flex cursor-pointer items-center gap-2 border"
-                      disabled={topicalData?.length === 0}
+                      disabled={isQuestionViewDisabled}
                       onClick={() => {
                         setIsQuestionInspectOpen((prev) => ({
                           ...prev,
@@ -483,12 +615,12 @@ const FinishedQuestionsPage = () => {
                 </TooltipTrigger>
                 <TooltipContent
                   side="bottom"
-                  className={cn(fullPartitionedData?.length === 0 && "hidden")}
+                  className={cn(!isQuestionViewDisabled && "hidden")}
                 >
                   To inspect questions, select a subject first
                 </TooltipContent>
               </Tooltip>
-              {layoutStyle === "pagination" && fullPartitionedData && (
+              {layoutStyle === "pagination" && !isQuestionViewDisabled && (
                 <>
                   <Separator orientation="vertical" className="!h-[30px]" />
                   <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
@@ -690,7 +822,7 @@ const FinishedQuestionsPage = () => {
         {displayedData.length > 0 && (
           <ScrollArea
             viewportRef={scrollAreaRef}
-            className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+            className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
             type="always"
             viewPortOnScrollEnd={() => {
               if (scrollAreaRef.current?.scrollTop === 0) {

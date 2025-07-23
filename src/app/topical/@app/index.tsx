@@ -943,7 +943,6 @@ const TopicalClient = ({
     numberOfColumns,
     layoutStyle,
     numberOfQuestionsPerPage,
-    overflowScrollHandler,
     sortParameters,
   ]);
 
