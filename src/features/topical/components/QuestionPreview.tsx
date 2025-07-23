@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { Dispatch, memo, SetStateAction, useMemo, useState } from "react";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
@@ -31,10 +31,12 @@ const QuestionPreview = memo(
   }: {
     bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
-    setIsQuestionInspectOpen: (open: {
-      isOpen: boolean;
-      questionId: string;
-    }) => void;
+    setIsQuestionInspectOpen: Dispatch<
+      SetStateAction<{
+        isOpen: boolean;
+        questionId: string;
+      }>
+    >;
     isBookmarksFetching: boolean;
     imageSrc: string;
     isUserSessionPending: boolean;

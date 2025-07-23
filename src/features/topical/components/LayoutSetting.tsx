@@ -6,7 +6,7 @@ import { Blocks, FileStack, Mouse, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
 import { LayoutStyle } from "../constants/types";
-import { useState } from "react";
+import { SetStateAction, Dispatch, useState } from "react";
 import {
   MAX_NUMBER_OF_COLUMNS,
   MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -28,12 +28,12 @@ export default function LayoutSetting({
   numberOfQuestionsPerPage,
   setNumberOfQuestionsPerPage,
 }: {
-  setNumberOfColumns: (numberOfColumns: number) => void;
+  setNumberOfColumns: Dispatch<SetStateAction<number>>;
   layoutStyle: LayoutStyle;
   numberOfColumns: number;
-  setLayoutStyle: (layoutStyle: LayoutStyle) => void;
+  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
   numberOfQuestionsPerPage: number;
-  setNumberOfQuestionsPerPage: (numberOfQuestionsPerPage: number) => void;
+  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

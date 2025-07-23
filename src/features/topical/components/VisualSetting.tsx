@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LandPlot, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export default function VisualSetting({
   showFinishedQuestionTint,
@@ -15,11 +15,11 @@ export default function VisualSetting({
   setScrollUpWhenPageChange,
 }: {
   showFinishedQuestionTint: boolean;
-  setShowFinishedQuestionTint: (showFinishedQuestionTint: boolean) => void;
+  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
   showScrollToTopButton: boolean;
-  setShowScrollToTopButton: (showScrollToTopButton: boolean) => void;
+  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
   scrollUpWhenPageChange: boolean;
-  setScrollUpWhenPageChange: (scrollUpWhenPageChange: boolean) => void;
+  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (

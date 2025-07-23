@@ -16,7 +16,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Reorder } from "motion/react";
-import { useCallback, memo, useState, useRef } from "react";
+import {
+  useCallback,
+  memo,
+  useState,
+  useRef,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import {
   areArraysIdentical,
   computeWeightedScoreByArrayIndex,
@@ -72,7 +79,7 @@ const Sort = memo(
   }: // currentQuery,
   {
     sortParameters: SortParameters | null;
-    setSortParameters: (value: SortParameters | null) => void;
+    setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
     onSortCallBack?: () => void;
     isDisabled: boolean;
     onBeforeSort?: () => void;

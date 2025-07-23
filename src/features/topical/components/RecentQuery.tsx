@@ -27,8 +27,20 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { FilterData, FiltersCache, SortParameters } from "../constants/types";
-import { RefObject, useEffect, useRef, useState } from "react";
+import {
+  CurrentQuery,
+  FilterData,
+  FiltersCache,
+  SortParameters,
+} from "../constants/types";
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -71,25 +83,17 @@ export const RecentQuery = ({
 }: {
   isUserSessionPending: boolean;
   isValidSession: boolean;
-  setIsSearchEnabled: (isSearchEnabled: boolean) => void;
-  currentQuery: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
-  setCurrentQuery: (
-    query: {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData
-  ) => void;
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
+  currentQuery: CurrentQuery;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
   isAddRecentQueryPending: boolean;
-  setSelectedCurriculum: (curriculum: ValidCurriculum) => void;
-  setSelectedSubject: (subject: string) => void;
-  setSelectedTopic: (topic: string[]) => void;
-  setSortParameters: (sortParameters: SortParameters) => void;
-  setSelectedYear: (year: string[]) => void;
-  setSelectedPaperType: (paperType: string[]) => void;
-  setSelectedSeason: (season: string[]) => void;
+  setSelectedCurriculum: Dispatch<SetStateAction<"" | ValidCurriculum>>;
+  setSelectedSubject: Dispatch<SetStateAction<string>>;
+  setSelectedTopic: Dispatch<SetStateAction<string[]>>;
+  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
+  setSelectedYear: Dispatch<SetStateAction<string[]>>;
+  setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
+  setSelectedSeason: Dispatch<SetStateAction<string[]>>;
   isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }) => {
@@ -365,31 +369,23 @@ const RecentQueryItem = ({
     lastSearch: number;
   };
   index: number;
-  setCurrentQuery: (
-    query: {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData
-  ) => void;
-  setSelectedCurriculum: (curriculum: ValidCurriculum) => void;
-  setSelectedSubject: (subject: string) => void;
-  setSelectedTopic: (topic: string[]) => void;
-  setSelectedYear: (year: string[]) => void;
-  setSelectedPaperType: (paperType: string[]) => void;
-  setAccordionValue: (accordionValue: string) => void;
-  setSelectedSeason: (season: string[]) => void;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
+  setSelectedCurriculum: Dispatch<SetStateAction<"" | ValidCurriculum>>;
+  setSelectedSubject: Dispatch<SetStateAction<string>>;
+  setSelectedTopic: Dispatch<SetStateAction<string[]>>;
+  setSelectedYear: Dispatch<SetStateAction<string[]>>;
+  setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
+  setAccordionValue: Dispatch<SetStateAction<string>>;
+  setSelectedSeason: Dispatch<SetStateAction<string[]>>;
   isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
-  setIsSearchEnabled: (isSearchEnabled: boolean) => void;
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
   accordionValue: string;
-  currentQuery: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
-  setQueryThatIsDeleting: (queryKey: string) => void;
-  setIsDialogOpen: (isDialogOpen: boolean) => void;
+  currentQuery: CurrentQuery;
+  setQueryThatIsDeleting: Dispatch<SetStateAction<string | null>>;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   deleteRecentQueryMutation: (queryKey: string) => void;
-  setSortParameters: (sortParameters: SortParameters) => void;
+  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
   isUserSessionPending: boolean;
   isValidSession: boolean;
 }) => {

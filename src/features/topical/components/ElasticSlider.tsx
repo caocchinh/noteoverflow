@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import {
   animate,
   motion,
@@ -18,7 +18,7 @@ interface ElasticSliderProps {
   className?: string;
   isStepped?: boolean;
   stepSize?: number;
-  setValue: (value: number) => void;
+  setValue: Dispatch<SetStateAction<number>>;
 }
 
 const ElasticSlider: React.FC<ElasticSliderProps> = ({
@@ -52,7 +52,7 @@ interface SliderProps {
   maxValue: number;
   isStepped: boolean;
   stepSize: number;
-  setValue: (value: number) => void;
+  setValue: Dispatch<SetStateAction<number>>;
 }
 
 const Slider: React.FC<SliderProps> = ({

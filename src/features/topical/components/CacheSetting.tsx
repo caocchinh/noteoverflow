@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Settings, X } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 export default function CacheAccordion({
   isSessionCacheEnabled,
@@ -22,9 +22,9 @@ export default function CacheAccordion({
   setIsPersistantCacheEnabled,
 }: {
   isSessionCacheEnabled: boolean;
-  setIsSessionCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSessionCacheEnabled: Dispatch<SetStateAction<boolean>>;
   isPersistantCacheEnabled: boolean;
-  setIsPersistantCacheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsPersistantCacheEnabled: Dispatch<SetStateAction<boolean>>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (

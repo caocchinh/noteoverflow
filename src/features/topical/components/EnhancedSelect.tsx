@@ -1,7 +1,7 @@
 "use client";
 import { ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { SetStateAction, Dispatch, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -37,7 +37,7 @@ const EnhancedSelect = ({
   prerequisite: string;
   data: { code: string; coverImage: string }[];
   selectedValue: string;
-  setSelectedValue: (value: string) => void;
+  setSelectedValue: Dispatch<SetStateAction<string>>;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);

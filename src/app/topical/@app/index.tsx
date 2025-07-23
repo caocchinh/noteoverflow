@@ -51,6 +51,7 @@ import type {
   SelectedBookmark,
   SelectedFinishedQuestion,
   SortParameters,
+  CurrentQuery,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -157,12 +158,7 @@ const TopicalClient = ({
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
-  const [currentQuery, setCurrentQuery] = useState<
-    {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData
-  >({
+  const [currentQuery, setCurrentQuery] = useState<CurrentQuery>({
     curriculumId: "",
     subjectId: "",
     topic: [],

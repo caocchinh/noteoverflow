@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Link as LinkIcon, Send } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { useMemo, useRef, useState } from "react";
-import { FilterData } from "../constants/types";
+import { CurrentQuery } from "../constants/types";
 
 export const ShareFilter = ({
   isQuestionViewDisabled,
@@ -17,10 +17,7 @@ export const ShareFilter = ({
   BETTER_AUTH_URL,
 }: {
   isQuestionViewDisabled: boolean;
-  currentQuery: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
+  currentQuery: CurrentQuery;
   BETTER_AUTH_URL: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);

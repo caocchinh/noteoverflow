@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { useTheme } from "next-themes";
 import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
-import { FilterData, SortParameters } from "../constants/types";
+import { CurrentQuery, SortParameters } from "../constants/types";
 import { computeDefaultSortParams } from "../lib/utils";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ButtonUltility({
@@ -32,24 +32,13 @@ export default function ButtonUltility({
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
   revert: () => void;
-  setSortParameters: (value: SortParameters | null) => void;
+  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
   isMounted: boolean;
-  currentQuery: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
+  currentQuery: CurrentQuery;
   isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
-  setIsSearchEnabled: (value: boolean) => void;
-  setCurrentQuery: (
-    value: {
-      curriculumId: string;
-      subjectId: string;
-    } & FilterData
-  ) => void;
-  query: {
-    curriculumId: string;
-    subjectId: string;
-  } & FilterData;
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
+  query: CurrentQuery;
 }) {
   const { theme } = useTheme();
   const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);

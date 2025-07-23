@@ -97,17 +97,17 @@ const QuestionInspect = ({
     questionId: string;
   };
 
-  setIsOpen: (open: { isOpen: boolean; questionId: string }) => void;
+  setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
   sortBy?: "ascending" | "descending";
   setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
   sortParameters?: SortParameters | null;
-  setSortParameters?: (sortParameters: SortParameters | null) => void;
+  setSortParameters?: Dispatch<SetStateAction<SortParameters | null>>;
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
-  setIsInspectSidebarOpen: (open: boolean) => void;
+  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   isBookmarksFetching: boolean;
   isBookmarkError: boolean;
   isFinishedQuestionsFetching: boolean;
@@ -181,7 +181,7 @@ const QuestionInspect = ({
           setIsVirtualizationReady(true);
         } else if (!isMobile) {
           setIsVirtualizationReady(true);
-        } else {
+        } else if (isMobile && !isInspectSidebarOpen) {
           setIsVirtualizationReady(false);
           setIsOpen({
             isOpen: true,
@@ -276,12 +276,24 @@ const QuestionInspect = ({
     };
   }, [overflowScrollHandler]);
 
+  useEffect(() => {
+    setIsOpen((prev) => {
+      return {
+        ...prev,
+        questionId: currentQuestionId ?? prev.questionId,
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortParameters, setIsOpen]);
+
   // Hydrate inspector on open
   useEffect(() => {
     if (!isOpen.isOpen) {
       return;
     }
     overflowScrollHandler();
+    console.log("aaa");
+
     const tab = isOpen.questionId
       ? partitionedTopicalData?.findIndex((partition) =>
           partition.some((question) => question.id === isOpen.questionId)
@@ -1141,16 +1153,6 @@ const QuestionInspect = ({
                       sortParameters={sortParameters}
                       setSortParameters={setSortParameters}
                       isDisabled={false}
-                      onBeforeSort={() => {
-                        if (currentQuestionId) {
-                          setTimeout(() => {
-                            setIsOpen({
-                              isOpen: isOpen.isOpen,
-                              questionId: currentQuestionId,
-                            });
-                          }, 0);
-                        }
-                      }}
                     />
                   )}
                 </div>

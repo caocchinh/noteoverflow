@@ -103,7 +103,7 @@ export interface MultiSelectContextProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValueChange: (value: any, option?: "selectAll" | "removeAll") => void;
   open: boolean;
-  setOpen: (value: boolean) => void;
+  setOpen: Dispatch<SetStateAction<boolean>>;
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
   inputRef: RefObject<HTMLInputElement | null>;
@@ -150,3 +150,8 @@ export interface SortParameters {
     weight: number;
   };
 }
+
+export type CurrentQuery = {
+  curriculumId: string;
+  subjectId: string;
+} & FilterData;

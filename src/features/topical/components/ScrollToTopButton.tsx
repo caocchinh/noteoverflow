@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpFromLine } from "lucide-react";
+import { RefObject } from "react";
 
 export const ScrollToTopButton = ({
   showScrollToTopButton,
@@ -14,7 +15,7 @@ export const ScrollToTopButton = ({
 }: {
   showScrollToTopButton: boolean;
   isScrollingAndShouldShowScrollButton: boolean;
-  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
   return (
     showScrollToTopButton && (
