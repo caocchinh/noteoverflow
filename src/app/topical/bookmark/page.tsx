@@ -863,6 +863,7 @@ const BookmarkPage = () => {
                     {Object.keys(metadata.public).map((list) => (
                       <ListFolder
                         listName={list}
+                        listId={list.}
                         visibility="public"
                         key={list}
                       />
@@ -870,6 +871,13 @@ const BookmarkPage = () => {
                   </div>
                 </div>
               )}
+              {Object.keys(metadata.private).length === 0 &&
+                Object.keys(metadata.public).length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No lists found. Search for questions and add them to a new
+                    list!
+                  </p>
+                )}
             </div>
           </div>
         )}

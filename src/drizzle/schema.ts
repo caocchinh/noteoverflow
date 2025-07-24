@@ -260,60 +260,39 @@ export const questionTopic = sqliteTable(
   }
 );
 
-export const userBookmarkList = sqliteTable(
-  "user_bookmark_list",
-  {
-    userId: text("user_id")
-      .references(() => user.id, { onDelete: "cascade" })
-      .notNull(),
-    listName: text("list_name").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
-    visibility: text("visibility").notNull().default("private"),
-  },
-  (table) => {
-    return [
-      primaryKey({ columns: [table.userId, table.listName, table.visibility] }),
-    ];
-  }
-);
+export const userBookmarkList = sqliteTable("user_bookmark_list", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  listName: text("list_name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  visibility: text("visibility").notNull().default("private"),
+});
 
 export const userBookmarks = sqliteTable(
   "user_bookmarks",
   {
-    userId: text("user_id").notNull(),
-    listName: text("list_name").notNull(),
-    visibility: text("visibility").notNull().default("private"),
+    listId: text("list_id")
+      .references(() => userBookmarkList.id, { onDelete: "cascade" })
+      .notNull(),
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => {
-    return [
-      primaryKey({
-        columns: [
-          table.userId,
-          table.listName,
-          table.visibility,
-          table.questionId,
-        ],
-      }),
-      foreignKey({
-        columns: [table.userId, table.listName, table.visibility],
-        foreignColumns: [
-          userBookmarkList.userId,
-          userBookmarkList.listName,
-          userBookmarkList.visibility,
-        ],
-      }),
-    ];
+    return [primaryKey({ columns: [table.listId, table.questionId] })];
   }
 );
 

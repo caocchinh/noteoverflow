@@ -84,6 +84,7 @@ export interface SelectedQuestion {
 }
 
 export interface SelectedBookmark {
+  id: string;
   createdAt: Date;
   updatedAt: Date;
   listName: string;

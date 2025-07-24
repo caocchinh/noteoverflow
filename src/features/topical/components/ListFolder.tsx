@@ -30,34 +30,33 @@ import { useState } from "react";
 export const ListFolder = ({
   listName,
   visibility,
+  listId,
 }: {
   listName: string;
+  listId: string;
   visibility: "public" | "private";
 }) => {
   const queryClient = useQueryClient();
   const mutationKey = ["delete_bookmark_list", listName, visibility];
   const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
 
-  const { mutate } = useMutation({
+  const { mutate: deleteList } = useMutation({
     mutationKey,
     mutationFn: async ({
-      realListName,
-      realVisibility,
+      realListId,
     }: {
-      realListName: string;
+      realListId: string;
       realVisibility: "public" | "private";
     }) => {
       await deleteBookmarkListAction({
-        listName: realListName,
-        visibility: realVisibility,
+        listId: realListId,
       });
     },
     onSuccess: (
       _,
       {
-        realListName,
-        realVisibility,
-      }: { realListName: string; realVisibility: "public" | "private" }
+        realListId,
+      }: { realListId: string; realVisibility: "public" | "private" }
     ) => {
       toast.success("List deleted successfully");
       setIsDeleteAlertDialogOpen(false);
@@ -67,13 +66,7 @@ export const ListFolder = ({
           if (!prev) {
             return prev;
           }
-          return prev.filter(
-            (bookmark) =>
-              !(
-                bookmark.listName == realListName &&
-                bookmark.visibility == realVisibility
-              )
-          );
+          return prev.filter((bookmark) => !(bookmark.id === realListId));
         }
       );
     },
@@ -123,6 +116,8 @@ export const ListFolder = ({
                   This action cannot be undone. All bookmark saved in this list
                   will be deleted.
                 </AlertDialogDescription>
+                <p>List name: {listName}</p>
+                <p>Visibility: {visibility}</p>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="cursor-pointer">
@@ -133,8 +128,8 @@ export const ListFolder = ({
                   className="cursor-pointer"
                   disabled={isMutatingThisList}
                   onClick={() =>
-                    mutate({
-                      realListName: listName,
+                    deleteList({
+                      realListId: listId,
                       realVisibility: visibility,
                     })
                   }

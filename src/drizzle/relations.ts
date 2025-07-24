@@ -38,17 +38,13 @@ export const userBookmarkListRelations = relations(
 );
 
 export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
-  user: one(user, {
-    fields: [userBookmarks.userId],
-    references: [user.id],
-  }),
   question: one(question, {
     fields: [userBookmarks.questionId],
     references: [question.id],
   }),
-  listName: one(userBookmarkList, {
-    fields: [userBookmarks.listName],
-    references: [userBookmarkList.listName],
+  list: one(userBookmarkList, {
+    fields: [userBookmarks.listId],
+    references: [userBookmarkList.id],
   }),
 }));
 

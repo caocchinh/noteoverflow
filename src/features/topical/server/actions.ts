@@ -26,13 +26,74 @@ import {
   validateSubject,
 } from "../lib/utils";
 
-export const createBookmarkListAction = async ({
+const addBookmark = async ({
+  userId,
+  listId,
+  questionId,
+}: {
+  userId: string;
+  listId: string;
+  questionId: string;
+}) => {
+  const db = await getDbAsync();
+
+  const [{ total }] = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(userBookmarks)
+    .where(
+      and(eq(userBookmarks.listId, listId), eq(userBookmarks.userId, userId))
+    );
+
+  if (total >= MAXIMUM_BOOKMARKS_PER_LIST) {
+    return {
+      error: LIMIT_EXCEEDED,
+      success: false,
+    };
+  }
+
+  try {
+    await db
+      .insert(userBookmarks)
+      .values({
+        questionId,
+        listId,
+        userId,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [userBookmarks.listId, userBookmarks.questionId],
+        set: { updatedAt: new Date() },
+      });
+    return {
+      success: true,
+    };
+  } catch (e) {
+    console.log(e);
+    if (
+      e instanceof Error &&
+      /FOREIGN KEY constraint failed/i.test(e.message)
+    ) {
+      return {
+        error: DOES_NOT_EXIST,
+        success: false,
+      };
+    }
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
+  }
+};
+
+export const createBookmarkListAndAddBookmarkAction = async ({
   listName,
   visibility,
+  questionId,
 }: {
   listName: string;
   visibility: "public" | "private";
-}): Promise<ServerActionResponse<void>> => {
+  questionId: string;
+}): Promise<ServerActionResponse<string>> => {
   if (listName.trim() === "" || listName.length > 100) {
     return {
       error: BAD_REQUEST,
@@ -47,31 +108,64 @@ export const createBookmarkListAction = async ({
     const userId = session.user.id;
     const db = await getDbAsync();
 
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)` })
+    const existingList = await db
+      .select()
       .from(userBookmarkList)
-      .where(eq(userBookmarkList.userId, userId));
+      .where(
+        and(
+          eq(userBookmarkList.userId, userId),
+          eq(userBookmarkList.listName, listName),
+          eq(userBookmarkList.visibility, visibility)
+        )
+      );
 
-    if (total >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
+    if (existingList.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
       return {
         error: LIMIT_EXCEEDED,
         success: false,
       };
     }
+    const newListId = crypto.randomUUID();
 
-    await db
-      .insert(userBookmarkList)
-      .values({
+    if (existingList.length === 0) {
+      await db
+        .insert(userBookmarkList)
+        .values({
+          id: newListId,
+          userId,
+          listName,
+          updatedAt: new Date(),
+          visibility,
+        })
+        .onConflictDoNothing();
+
+      await db.insert(userBookmarks).values({
+        questionId,
+        listId: newListId,
         userId,
-        listName,
         updatedAt: new Date(),
-        visibility,
-      })
-      .onConflictDoNothing();
-
-    return {
-      success: true,
-    };
+      });
+      return {
+        success: true,
+        data: newListId,
+      };
+    } else {
+      const result = await addBookmark({
+        userId,
+        listId: existingList[0].id,
+        questionId,
+      });
+      if (result.error) {
+        return {
+          error: result.error,
+          success: false,
+        };
+      }
+      return {
+        success: true,
+        data: existingList[0].id,
+      };
+    }
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return {
@@ -89,14 +183,12 @@ export const createBookmarkListAction = async ({
 
 export const addBookmarkAction = async ({
   questionId,
-  bookmarkListName,
-  visibility,
+  listId,
 }: {
   questionId: string;
-  bookmarkListName: string;
-  visibility: "public" | "private";
+  listId: string;
 }): Promise<ServerActionResponse<void>> => {
-  if (bookmarkListName.trim() === "" || bookmarkListName.length > 100) {
+  if (listId.trim() === "") {
     return {
       error: BAD_REQUEST,
       success: false,
@@ -108,64 +200,7 @@ export const addBookmarkAction = async ({
       throw new Error(UNAUTHORIZED);
     }
     const userId = session.user.id;
-    const db = await getDbAsync();
-
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)` })
-      .from(userBookmarks)
-      .where(
-        and(
-          eq(userBookmarks.userId, userId),
-          eq(userBookmarks.listName, bookmarkListName),
-          eq(userBookmarks.visibility, visibility)
-        )
-      );
-
-    if (total >= MAXIMUM_BOOKMARKS_PER_LIST) {
-      return {
-        error: LIMIT_EXCEEDED,
-        success: false,
-      };
-    }
-
-    try {
-      await db
-        .insert(userBookmarks)
-        .values({
-          userId,
-          questionId,
-          listName: bookmarkListName,
-          updatedAt: new Date(),
-          visibility,
-        })
-        .onConflictDoUpdate({
-          target: [
-            userBookmarks.userId,
-            userBookmarks.questionId,
-            userBookmarks.listName,
-            userBookmarks.visibility,
-          ],
-          set: { updatedAt: new Date() },
-        });
-    } catch (e) {
-      console.log(e);
-      if (
-        e instanceof Error &&
-        /FOREIGN KEY constraint failed/i.test(e.message)
-      ) {
-        return {
-          error: DOES_NOT_EXIST,
-          success: false,
-        };
-      }
-      return {
-        error: INTERNAL_SERVER_ERROR,
-        success: false,
-      };
-    }
-    return {
-      success: true,
-    };
+    return await addBookmark({ userId, listId, questionId });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return {
@@ -183,28 +218,25 @@ export const addBookmarkAction = async ({
 
 export const removeBookmarkAction = async ({
   questionId,
-  bookmarkListName,
-  visibility,
+  listId,
 }: {
   questionId: string;
-  bookmarkListName: string;
-  visibility: "public" | "private";
+  listId: string;
 }): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
     if (!session) {
       throw new Error(UNAUTHORIZED);
     }
-    const userId = session.user.id;
     const db = await getDbAsync();
+    const userId = session.user.id;
     await db
       .delete(userBookmarks)
       .where(
         and(
-          eq(userBookmarks.userId, userId),
           eq(userBookmarks.questionId, questionId),
-          eq(userBookmarks.listName, bookmarkListName),
-          eq(userBookmarks.visibility, visibility)
+          eq(userBookmarks.listId, listId),
+          eq(userBookmarks.userId, userId)
         )
       );
     return {
@@ -431,11 +463,9 @@ export const deleteRecentQuery = async ({
 };
 
 export const deleteBookmarkListAction = async ({
-  listName,
-  visibility,
+  listId,
 }: {
-  listName: string;
-  visibility: "public" | "private";
+  listId: string;
 }): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();
@@ -444,22 +474,13 @@ export const deleteBookmarkListAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
-    await db
-      .delete(userBookmarks)
-      .where(
-        and(
-          eq(userBookmarks.userId, userId),
-          eq(userBookmarks.listName, listName),
-          eq(userBookmarks.visibility, visibility)
-        )
-      );
+
     await db
       .delete(userBookmarkList)
       .where(
         and(
-          eq(userBookmarkList.userId, userId),
-          eq(userBookmarkList.listName, listName),
-          eq(userBookmarkList.visibility, visibility)
+          eq(userBookmarkList.id, listId),
+          eq(userBookmarkList.userId, userId)
         )
       );
     return {
@@ -470,6 +491,37 @@ export const deleteBookmarkListAction = async ({
     throw new Error(INTERNAL_SERVER_ERROR);
   }
 };
+
+// export const renameBookmarkListAction = async ({
+//   listName,
+//   newName,
+//   visibility,
+// }: {
+//   listName: string;
+//   newName: string;
+//   visibility: "public" | "private";
+// }): Promise<ServerActionResponse<void>> => {
+//   try {
+//     const session = await verifySession();
+//     if (!session) {
+//       throw new Error(UNAUTHORIZED);
+//     }
+//     const userId = session.user.id;
+//     const db = await getDbAsync();
+
+//     if (newName.trim() === "" || newName.length > 100) {
+//       return {
+//         error: BAD_REQUEST,
+//         success: false,
+//       };
+//     }
+//     await db
+//       .update(userBookmarkList)
+//       .set({ listName: newName })
+//       .where(
+//         and(eq(userBookmarkList.userId, userId), eq(userBookmarkList.listName, listName), eq(userBookmarkList.visibility, visibility))
+//       );
+//     return {
 
 // export const updateSortParams = async ({
 //   queryKey,

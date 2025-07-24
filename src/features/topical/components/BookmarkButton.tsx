@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ChevronsUpDown, Globe, Loader2, Lock, Plus, X } from "lucide-react";
 import { Bookmark } from "lucide-react";
 import {
-  createBookmarkListAction,
+  createBookmarkListAndAddBookmarkAction,
   removeBookmarkAction,
 } from "../server/actions";
 import { addBookmarkAction } from "../server/actions";
@@ -327,41 +327,52 @@ const BookmarkButtonConsumer = memo(
         realBookmarkListName,
         isRealBookmarked,
         realVisibility,
+        realListId,
         isCreateNew,
       }: {
         realQuestion: SelectedQuestion;
         isRealBookmarked: boolean;
         realBookmarkListName: string;
         realVisibility: "public" | "private";
+        realListId: string;
         isCreateNew: boolean;
       }): Promise<{
         realQuestion: SelectedQuestion;
         realBookmarkListName: string;
         isRealBookmarked: boolean;
+        realListId: string;
         isCreateNew: boolean;
         realVisibility: "public" | "private";
       }> => {
         if (isCreateNew) {
-          // If create new, visibility is always available
-          const result = await createBookmarkListAction({
+          const result = await createBookmarkListAndAddBookmarkAction({
             listName: realBookmarkListName,
             visibility: realVisibility,
+            questionId: realQuestion.id,
           });
           if (!result.success) {
             throw new Error(result.error + "list");
           }
+          return {
+            realQuestion: realQuestion,
+            realBookmarkListName: realBookmarkListName,
+            isRealBookmarked: false,
+            realListId: result.data as string,
+            isCreateNew: true,
+            realVisibility: realVisibility,
+          };
         }
         if (isRealBookmarked) {
           const result = await removeBookmarkAction({
             questionId: realQuestion.id,
-            bookmarkListName: realBookmarkListName,
-            visibility: realVisibility,
+            listId: realListId,
           });
           if (result.error) {
             throw new Error(result.error);
           }
           return {
             realQuestion: realQuestion,
+            realListId: realListId,
             realBookmarkListName: realBookmarkListName,
             isRealBookmarked: true,
             isCreateNew: isCreateNew,
@@ -370,8 +381,7 @@ const BookmarkButtonConsumer = memo(
         } else {
           const result = await addBookmarkAction({
             questionId: realQuestion.id,
-            bookmarkListName: realBookmarkListName,
-            visibility: realVisibility,
+            listId: realListId,
           });
           if (result.error) {
             throw new Error(result.error + "bookmark");
@@ -379,6 +389,7 @@ const BookmarkButtonConsumer = memo(
           return {
             realQuestion: realQuestion,
             realBookmarkListName: realBookmarkListName,
+            realListId: realListId,
             isRealBookmarked: false,
             isCreateNew: isCreateNew,
             realVisibility: realVisibility,
@@ -388,12 +399,14 @@ const BookmarkButtonConsumer = memo(
       onSuccess: ({
         realQuestion: newQuestion,
         isRealBookmarked,
+        realListId,
         realBookmarkListName: newBookmarkListName,
         isCreateNew,
         realVisibility,
       }: {
         realQuestion: SelectedQuestion;
         isRealBookmarked: boolean;
+        realListId: string;
         realBookmarkListName: string;
         isCreateNew: boolean;
         realVisibility: "public" | "private";
@@ -408,9 +421,7 @@ const BookmarkButtonConsumer = memo(
             // Modify data in-place to avoid re-renders caused by new references
             if (isCreateNew) {
               const isListAlreadyExist = prev.some(
-                (bookmark) =>
-                  bookmark.listName === newBookmarkListName &&
-                  bookmark.visibility === realVisibility
+                (bookmark) => bookmark.id === realListId
               );
 
               setIsAddNewListDialogOpen(false);
@@ -431,9 +442,7 @@ const BookmarkButtonConsumer = memo(
                   newBookmarkListName + " " + realVisibility
                 );
                 const existingList = prev.find(
-                  (bookmark) =>
-                    bookmark.listName === newBookmarkListName &&
-                    bookmark.visibility === realVisibility
+                  (bookmark) => bookmark.id === realListId
                 );
                 if (existingList) {
                   existingList.userBookmarks.push({
@@ -455,6 +464,7 @@ const BookmarkButtonConsumer = memo(
                   newBookmarkListName + " " + realVisibility
                 );
                 prev.push({
+                  id: realListId,
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   listName: newBookmarkListName,
@@ -487,9 +497,7 @@ const BookmarkButtonConsumer = memo(
                 newBookmarkListName + " " + realVisibility
               );
               const existingList = prev.find(
-                (bookmark) =>
-                  bookmark.listName === newBookmarkListName &&
-                  bookmark.visibility === realVisibility
+                (bookmark) => bookmark.id === realListId
               );
               if (existingList) {
                 existingList.userBookmarks.push({
@@ -511,10 +519,7 @@ const BookmarkButtonConsumer = memo(
                 newBookmarkListName + " " + realVisibility
               );
               const existingList = prev.find(
-                (bookmark) =>
-                  bookmark.listName === newBookmarkListName &&
-                  bookmark.visibility ===
-                    (realVisibility as "public" | "private")
+                (bookmark) => bookmark.id === realListId
               );
               if (existingList) {
                 existingList.userBookmarks = existingList.userBookmarks.filter(
@@ -933,6 +938,7 @@ const BookmarkList = memo(
       setTimeout(() => {
         mutate?.({
           realQuestion: question,
+          realListId: bookmark.id,
           realBookmarkListName: bookmark.listName,
           isRealBookmarked: isItemBookmarked,
           isCreateNew: false,
@@ -1222,6 +1228,7 @@ const CreateNewListAlertDialog = memo(() => {
     setTimeout(() => {
       mutate?.({
         realQuestion: question,
+        realListId: "",
         realBookmarkListName: newBookmarkListNameInput.trim(),
         isRealBookmarked: false,
         isCreateNew: true,

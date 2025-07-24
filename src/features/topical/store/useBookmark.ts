@@ -5,6 +5,7 @@ import { SelectedBookmark, SelectedQuestion } from "../constants/types";
 type MutateFunction = (params: {
   realQuestion: SelectedQuestion;
   realBookmarkListName: string;
+  realListId: string;
   isRealBookmarked: boolean;
   isCreateNew: boolean;
   realVisibility: "public" | "private";

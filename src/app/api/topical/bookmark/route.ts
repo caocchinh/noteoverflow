@@ -17,6 +17,7 @@ export async function GET() {
     const bookmarks = await db.query.userBookmarkList.findMany({
       where: eq(userBookmarkList.userId, userId),
       columns: {
+        id: true,
         listName: true,
         visibility: true,
         createdAt: true,
