@@ -24,6 +24,7 @@ const QuestionPreview = memo(
     isUserSessionPending,
     imageSrc,
     isBookmarkError,
+    imageTheme,
     isValidSession,
     showFinishedQuestionTint,
     question,
@@ -44,6 +45,7 @@ const QuestionPreview = memo(
     isValidSession: boolean;
     userFinishedQuestions: SelectedFinishedQuestion[];
     showFinishedQuestionTint: boolean;
+    imageTheme: "dark" | "light";
   }) => {
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
@@ -74,7 +76,10 @@ const QuestionPreview = memo(
 
     return (
       <div
-        className="w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]"
+        className={cn(
+          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]",
+          imageTheme === "dark" && "!bg-black dark:!border-white"
+        )}
         onClick={() =>
           setIsQuestionInspectOpen({ isOpen: true, questionId: question.id })
         }
@@ -87,14 +92,19 @@ const QuestionPreview = memo(
       >
         <div
           className={cn(
-            "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
+            "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-[12]",
             doesThisQuestionFinished && showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}
         />
 
-        <div className="absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%]"></div>
+        <div
+          className={cn(
+            "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%] z-[10]",
+            imageTheme === "dark" && "!bg-white"
+          )}
+        ></div>
         {loading && (
           <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
             <Loader />
@@ -106,7 +116,7 @@ const QuestionPreview = memo(
           </div>
         )}
 
-        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-[11]">
           {((isHovering && !isMobileDevice) || isMobileDevice) && (
             <div className="flex flex-wrap gap-2 items-center justify-center content-start">
               {question?.questionTopics?.map((topic) => (
@@ -193,7 +203,7 @@ const QuestionPreview = memo(
             <Button
               className={cn(
                 "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
-                "rounded-[3px]",
+                "rounded-[3px] z-[11]",
                 (() => {
                   for (const bookmark of bookmarks) {
                     if (
@@ -241,7 +251,10 @@ const QuestionPreview = memo(
           )}
 
         <img
-          className="w-full h-full object-contain"
+          className={cn(
+            "w-full h-full object-contain",
+            imageTheme === "dark" && "!invert"
+          )}
           src={imageSrc}
           alt="Question preview"
           loading="lazy"

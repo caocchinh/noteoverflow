@@ -395,6 +395,7 @@ export const syncFilterCacheToLocalStorage = ({
   selectedCurriculum,
   selectedSubject,
   selectedTopic,
+  imageTheme,
   selectedPaperType,
   selectedYear,
   selectedSeason,
@@ -403,6 +404,7 @@ export const syncFilterCacheToLocalStorage = ({
   isPersistantCacheEnabled?: boolean;
   layoutStyle?: LayoutStyle;
   showFinishedQuestionTint?: boolean;
+  imageTheme?: "dark" | "light";
   scrollUpWhenPageChange?: boolean;
   showScrollToTopButton?: boolean;
   numberOfColumns?: number;
@@ -446,6 +448,7 @@ export const syncFilterCacheToLocalStorage = ({
       layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
       numberOfQuestionsPerPage:
         numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
+      imageTheme: imageTheme ?? stateToSave.imageTheme,
     };
 
     if (selectedCurriculum && selectedSubject) {

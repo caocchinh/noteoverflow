@@ -42,6 +42,7 @@ import {
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_LAYOUT_STYLE,
   DEFAULT_CACHE,
+  DEFAULT_IMAGE_THEME,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -190,6 +191,9 @@ const TopicalClient = ({
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const isOverwriting = useRef(false);
   const [isValidSearchParams, setIsValidSearchParams] = useState(true);
+  const [imageTheme, setImageTheme] = useState<"dark" | "light">(
+    DEFAULT_IMAGE_THEME
+  );
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
@@ -632,6 +636,7 @@ const TopicalClient = ({
     }
     syncFilterCacheToLocalStorage({
       isSessionCacheEnabled,
+      imageTheme,
       isPersistantCacheEnabled,
       showFinishedQuestionTint,
       scrollUpWhenPageChange,
@@ -654,6 +659,7 @@ const TopicalClient = ({
     selectedYear,
     selectedSeason,
     isSessionCacheEnabled,
+    imageTheme,
     isPersistantCacheEnabled,
     showFinishedQuestionTint,
     showScrollToTopButton,
@@ -1359,6 +1365,8 @@ const TopicalClient = ({
                   setShowScrollToTopButton={setShowScrollToTopButton}
                   scrollUpWhenPageChange={scrollUpWhenPageChange}
                   setScrollUpWhenPageChange={setScrollUpWhenPageChange}
+                  imageTheme={imageTheme}
+                  setImageTheme={setImageTheme}
                 />
               </SidebarContent>
             </ScrollArea>
@@ -1745,6 +1753,7 @@ const TopicalClient = ({
                         <QuestionPreview
                           bookmarks={bookmarks ?? []}
                           question={question}
+                          imageTheme={imageTheme}
                           setIsQuestionInspectOpen={setIsQuestionInspectOpen}
                           isUserSessionPending={isUserSessionPending}
                           userFinishedQuestions={userFinishedQuestions ?? []}
@@ -1789,6 +1798,7 @@ const TopicalClient = ({
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
         bookmarks={bookmarks ?? []}
+        imageTheme={imageTheme}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}

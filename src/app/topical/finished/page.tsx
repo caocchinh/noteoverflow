@@ -14,6 +14,7 @@ import {
   COLUMN_BREAKPOINTS,
   DEFAULT_CACHE,
   DEFAULT_SORT_BY,
+  DEFAULT_IMAGE_THEME,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -223,6 +224,9 @@ const FinishedQuestionsPage = () => {
   const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
   const [selectedPaperType, setSelectedPaperType] = useState<string[] | null>(
     null
+  );
+  const [imageTheme, setImageTheme] = useState<"dark" | "light">(
+    DEFAULT_IMAGE_THEME
   );
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
@@ -449,6 +453,7 @@ const FinishedQuestionsPage = () => {
           scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
         showScrollToTopButton:
           showScrollToTopButton ?? stateToSave.showScrollToTopButton,
+        imageTheme: imageTheme ?? stateToSave.imageTheme,
         finishedQuestionsSearchSortedBy:
           sortBy ?? stateToSave.finishedQuestionsSearchSortedBy,
         numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
@@ -469,6 +474,7 @@ const FinishedQuestionsPage = () => {
     showFinishedQuestionTint,
     showScrollToTopButton,
     sortBy,
+    imageTheme,
   ]);
 
   const isQuestionViewDisabled = useMemo(() => {
@@ -849,6 +855,7 @@ const FinishedQuestionsPage = () => {
                       key={`${question.id}-${imageSrc}`}
                       isBookmarksFetching={isBookmarksFetching}
                       imageSrc={imageSrc}
+                      imageTheme={imageTheme}
                     />
                   ))
                 )}
@@ -889,6 +896,7 @@ const FinishedQuestionsPage = () => {
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
+        imageTheme={imageTheme}
         bookmarks={bookmarks ?? []}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}

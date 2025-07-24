@@ -78,6 +78,7 @@ const QuestionInspect = ({
   setIsOpen,
   partitionedTopicalData,
   bookmarks,
+  imageTheme,
   isUserSessionPending,
   isValidSession,
   isBookmarksFetching,
@@ -100,6 +101,7 @@ const QuestionInspect = ({
   setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
+  imageTheme: "dark" | "light";
   isUserSessionPending: boolean;
   sortBy?: "ascending" | "descending";
   setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
@@ -1178,6 +1180,7 @@ const QuestionInspect = ({
                   <InspectImages
                     imageSource={currentQuestionData?.questionImages ?? []}
                     currentQuestionId={currentQuestionData?.id}
+                    imageTheme={imageTheme}
                   />
                 </ScrollArea>
               </div>
@@ -1197,6 +1200,7 @@ const QuestionInspect = ({
                   <InspectImages
                     imageSource={currentQuestionData?.answers ?? []}
                     currentQuestionId={currentQuestionData?.id}
+                    imageTheme={imageTheme}
                   />
                 </ScrollArea>
               </div>
@@ -1285,9 +1289,11 @@ const QuestionInformation = ({
 const InspectImages = ({
   imageSource,
   currentQuestionId,
+  imageTheme,
 }: {
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
+  imageTheme: "dark" | "light";
 }) => {
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
@@ -1308,7 +1314,10 @@ const InspectImages = ({
         >
           {item.includes("http") ? (
             <img
-              className="w-full h-full object-contain relative z-10 !max-w-[800px]"
+              className={cn(
+                "w-full h-full object-contain relative z-10 !max-w-[800px]",
+                imageTheme === "dark" && "!invert"
+              )}
               src={item}
               alt="Question image"
               loading="lazy"

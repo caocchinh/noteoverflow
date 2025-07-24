@@ -249,8 +249,10 @@ export const SEASON_SORT_DEFAULT_WEIGHT = 0;
 export const TOPIC_SORT_DEFAULT_WEIGHT = 0;
 export const MAX_NUMBER_OF_RECENT_QUERIES = 30;
 export const DEFAULT_SORT_BY: "ascending" | "descending" = "descending";
+export const DEFAULT_IMAGE_THEME = "light";
 
 export const DEFAULT_CACHE: FiltersCache = {
+  imageTheme: DEFAULT_IMAGE_THEME,
   recentlySearchSortedBy: DEFAULT_SORT_BY,
   numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
   layoutStyle: DEFAULT_LAYOUT_STYLE,

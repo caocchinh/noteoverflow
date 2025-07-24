@@ -5,6 +5,13 @@ import { LandPlot, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Dispatch, SetStateAction, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectValue,
+  SelectTrigger,
+  SelectItem,
+} from "@/components/ui/select";
 
 export default function VisualSetting({
   showFinishedQuestionTint,
@@ -13,6 +20,8 @@ export default function VisualSetting({
   setShowScrollToTopButton,
   scrollUpWhenPageChange,
   setScrollUpWhenPageChange,
+  imageTheme,
+  setImageTheme,
 }: {
   showFinishedQuestionTint: boolean;
   setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
@@ -20,6 +29,8 @@ export default function VisualSetting({
   setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
   scrollUpWhenPageChange: boolean;
   setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
+  imageTheme: "dark" | "light";
+  setImageTheme: Dispatch<SetStateAction<"dark" | "light">>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -66,6 +77,26 @@ export default function VisualSetting({
             checked={scrollUpWhenPageChange}
             onCheckedChange={setScrollUpWhenPageChange}
           />
+        </div>
+        <hr />
+        <div className="flex flex-row items-center justify-center gap-2">
+          <h4 className="text-sm font-medium text-center ">
+            Question & Answer image theme
+          </h4>
+          <Select
+            value={imageTheme}
+            onValueChange={(value) => {
+              setImageTheme(value as "dark" | "light");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Image theme" />
+            </SelectTrigger>
+            <SelectContent className="z-[1000010] dark:bg-accent">
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </PopoverContent>
     </Popover>
