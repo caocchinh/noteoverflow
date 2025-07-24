@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -15,6 +14,7 @@ import {
   DEFAULT_CACHE,
   DEFAULT_SORT_BY,
   DEFAULT_IMAGE_THEME,
+  INVALID_INPUTS_DEFAULT,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -22,12 +22,14 @@ import {
   LayoutStyle,
   FiltersCache,
   SelectedBookmark,
+  InvalidInputs,
 } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
   extractSubjectCode,
   hasOverlap,
   isOverScrolling,
+  isValidInputs as isValidInputsUtils,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,6 +47,7 @@ import {
   ChevronsRight,
   Loader2,
   Monitor,
+  ScanText,
 } from "lucide-react";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -71,6 +74,10 @@ import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { SortBy } from "@/features/topical/components/SortBy";
+import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
+import LayoutSetting from "@/features/topical/components/LayoutSetting";
+import VisualSetting from "@/features/topical/components/VisualSetting";
+import ButtonUltility from "@/features/topical/components/ButtonUltility";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
@@ -271,7 +278,13 @@ const FinishedQuestionsPage = () => {
     DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
   );
   const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
-
+  const topicRef = useRef<HTMLDivElement | null>(null);
+  const yearRef = useRef<HTMLDivElement | null>(null);
+  const paperTypeRef = useRef<HTMLDivElement | null>(null);
+  const seasonRef = useRef<HTMLDivElement | null>(null);
+  const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
+    ...INVALID_INPUTS_DEFAULT,
+  });
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
   );
@@ -279,7 +292,7 @@ const FinishedQuestionsPage = () => {
   const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
     useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const isMounted = useRef(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
@@ -292,6 +305,7 @@ const FinishedQuestionsPage = () => {
         setSortBy(
           parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_BY
         );
+        setImageTheme(parsedState.imageTheme ?? DEFAULT_IMAGE_THEME);
         setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
         setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
         setNumberOfQuestionsPerPage(
@@ -307,7 +321,7 @@ const FinishedQuestionsPage = () => {
       localStorage.removeItem(FILTERS_CACHE_KEY);
     }
     setTimeout(() => {
-      isMounted.current = true;
+      setIsMounted(true);
     }, 0);
   }, []);
 
@@ -327,12 +341,44 @@ const FinishedQuestionsPage = () => {
   }, [subjectMetadata]);
 
   useEffect(() => {
+    if (selectedTopic && selectedTopic.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, topic: false }));
+    }
+  }, [selectedTopic]);
+
+  useEffect(() => {
+    if (selectedPaperType && selectedPaperType.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
+    }
+  }, [selectedPaperType]);
+
+  useEffect(() => {
+    if (selectedYear && selectedYear.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, year: false }));
+    }
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (selectedSeason && selectedSeason.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, season: false }));
+    }
+  }, [selectedSeason]);
+
+  useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
 
     return () => {
       window.removeEventListener("resize", overflowScrollHandler);
     };
   }, [overflowScrollHandler]);
+
+  useEffect(() => {
+    scrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
+  }, [currentFilter]);
 
   useEffect(() => {
     overflowScrollHandler();
@@ -429,8 +475,28 @@ const FinishedQuestionsPage = () => {
     sortBy,
   ]);
 
+  const isValidInputs = ({
+    scrollOnError = true,
+  }: {
+    scrollOnError?: boolean;
+  }) => {
+    return isValidInputsUtils({
+      topicLengthConstraint: false,
+      scrollOnError,
+      topicRef: topicRef,
+      yearRef: yearRef,
+      paperTypeRef: paperTypeRef,
+      seasonRef: seasonRef,
+      selectedTopic: selectedTopic ?? [],
+      selectedYear: selectedYear ?? [],
+      selectedPaperType: selectedPaperType ?? [],
+      selectedSeason: selectedSeason ?? [],
+      setInvalidInputs: setInvalidInputs,
+    });
+  };
+
   useEffect(() => {
-    if (!isMounted.current || typeof window === "undefined") {
+    if (!isMounted || typeof window === "undefined") {
       return;
     }
     try {
@@ -475,6 +541,7 @@ const FinishedQuestionsPage = () => {
     showScrollToTopButton,
     sortBy,
     imageTheme,
+    isMounted,
   ]);
 
   const isQuestionViewDisabled = useMemo(() => {
@@ -493,7 +560,7 @@ const FinishedQuestionsPage = () => {
 
   return (
     <>
-      <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-center p-4 overflow-hidden">
+      <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-start p-4 overflow-hidde h-screen">
         <div
           className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
           ref={sideBarInsetRef}
@@ -884,10 +951,190 @@ const FinishedQuestionsPage = () => {
         )}
       </div>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent className="z-[100006]">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Filters</SheetTitle>
-          </SheetHeader>
+        <SheetContent
+          className="z-[100006] overflow-hidden  py-2"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
+          <ScrollArea className="h-full" type="always">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="flex w-full flex-col items-center justify-start gap-4">
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={topicRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.topic && "text-destructive"
+                  )}
+                >
+                  Topic
+                </h3>
+                <EnhancedMultiSelect
+                  data={subjectMetadata?.topic}
+                  label="Topic"
+                  onValuesChange={(values) =>
+                    setSelectedTopic(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedTopic ?? []}
+                />
+                {invalidInputs.topic && (
+                  <p className="text-destructive text-sm">Topic is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={paperTypeRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.paperType && "text-destructive"
+                  )}
+                >
+                  Paper
+                </h3>
+                <EnhancedMultiSelect
+                  data={subjectMetadata?.paperType}
+                  label="Paper"
+                  onValuesChange={(values) =>
+                    setSelectedPaperType(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedPaperType ?? []}
+                />
+                {invalidInputs.paperType && (
+                  <p className="text-destructive text-sm">Paper is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={yearRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.year && "text-destructive"
+                  )}
+                >
+                  Year
+                </h3>
+                <EnhancedMultiSelect
+                  data={subjectMetadata?.year}
+                  label="Year"
+                  onValuesChange={(values) =>
+                    setSelectedYear(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedYear ?? []}
+                />
+                {invalidInputs.year && (
+                  <p className="text-destructive text-sm">Year is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={seasonRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.season && "text-destructive"
+                  )}
+                >
+                  Season
+                </h3>
+                <EnhancedMultiSelect
+                  data={subjectMetadata?.season}
+                  label="Season"
+                  onValuesChange={(values) =>
+                    setSelectedSeason(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedSeason ?? []}
+                />
+                {invalidInputs.season && (
+                  <p className="text-destructive text-sm">Season is required</p>
+                )}
+              </div>
+            </div>
+            <div className="flex w-full flex-col items-center justify-center gap-4 px-4 mt-2">
+              <ButtonUltility
+                isMounted={isMounted}
+                setIsSidebarOpen={setIsSidebarOpen}
+                revert={() => {
+                  setSelectedTopic(currentFilter?.topic ?? []);
+                  setSelectedYear(currentFilter?.year ?? []);
+                  setSelectedPaperType(currentFilter?.paperType ?? []);
+                  setSelectedSeason(currentFilter?.season ?? []);
+                }}
+                resetEverything={() => {
+                  setSelectedPaperType([]);
+                  setSelectedTopic([]);
+                  setSelectedYear([]);
+                  setSelectedSeason([]);
+                  setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+                }}
+              >
+                <Button
+                  className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+                  disabled={!isMounted}
+                  onClick={() => {
+                    const filter = {
+                      curriculumId: selectedCurriculumn,
+                      subjectId: selectedSubject,
+                      topic: selectedTopic?.toSorted() ?? [],
+                      paperType: selectedPaperType?.toSorted() ?? [],
+                      year:
+                        selectedYear?.toSorted(
+                          (a, b) => Number(b) - Number(a)
+                        ) ?? [],
+                      season: selectedSeason?.toSorted() ?? [],
+                    };
+                    const isSameQuery =
+                      JSON.stringify(currentFilter) == JSON.stringify(filter);
+                    if (
+                      isValidInputs({ scrollOnError: true }) &&
+                      !isSameQuery
+                    ) {
+                      setCurrentFilter({
+                        ...filter,
+                      });
+                      // Update URL parameters without page reload
+                    } else if (isSameQuery) {
+                      setIsSidebarOpen(false);
+                    }
+                  }}
+                >
+                  Search
+                  <ScanText />
+                </Button>
+              </ButtonUltility>
+              <Separator />
+
+              <LayoutSetting
+                layoutStyle={layoutStyle}
+                numberOfColumns={numberOfColumns}
+                setLayoutStyle={setLayoutStyle}
+                setNumberOfColumns={setNumberOfColumns}
+                numberOfQuestionsPerPage={numberOfQuestionsPerPage}
+                setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
+              />
+              <VisualSetting
+                showFinishedQuestionTint={showFinishedQuestionTint}
+                setShowFinishedQuestionTint={setShowFinishedQuestionTint}
+                showScrollToTopButton={showScrollToTopButton}
+                setShowScrollToTopButton={setShowScrollToTopButton}
+                scrollUpWhenPageChange={scrollUpWhenPageChange}
+                setScrollUpWhenPageChange={setScrollUpWhenPageChange}
+                imageTheme={imageTheme}
+                setImageTheme={setImageTheme}
+              />
+            </div>
+          </ScrollArea>
         </SheetContent>
       </Sheet>
       <QuestionInspect

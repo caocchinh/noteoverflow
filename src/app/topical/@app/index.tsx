@@ -11,12 +11,12 @@ import {
   Monitor,
   OctagonAlert,
   RefreshCcw,
+  ScanText,
   SlidersHorizontal,
 } from "lucide-react";
 import { default as NextImage } from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-
 import {
   Sidebar,
   SidebarContent,
@@ -63,6 +63,7 @@ import {
   syncFilterCacheToLocalStorage,
   computeDefaultSortParams,
   updateSearchParams,
+  isValidInputs as isValidInputsUtils,
 } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -261,85 +262,6 @@ const TopicalClient = ({
     setTimeout(() => {
       isOverwriting.current = false;
     }, 0);
-  };
-
-  const isValidInputs = ({
-    scrollOnError = true,
-  }: {
-    scrollOnError?: boolean;
-  }) => {
-    const fieldsToValidate: {
-      name: keyof InvalidInputs;
-      value: string | string[];
-      ref: React.RefObject<HTMLDivElement | null>;
-      isInvalid: boolean;
-    }[] = [
-      {
-        name: "curriculum",
-        value: selectedCurriculum,
-        ref: curriculumRef,
-        isInvalid: !selectedCurriculum,
-      },
-      {
-        name: "subject",
-        value: selectedSubject,
-        ref: subjectRef,
-        isInvalid: !selectedSubject,
-      },
-      {
-        name: "topic",
-        value: selectedTopic,
-        ref: topicRef,
-        isInvalid:
-          selectedTopic.length === 0 ||
-          selectedTopic.length > MAX_TOPIC_SELECTION,
-      },
-      {
-        name: "year",
-        value: selectedYear,
-        ref: yearRef,
-        isInvalid: selectedYear.length === 0,
-      },
-      {
-        name: "paperType",
-        value: selectedPaperType,
-        ref: paperTypeRef,
-        isInvalid: selectedPaperType.length === 0,
-      },
-      {
-        name: "season",
-        value: selectedSeason,
-        ref: seasonRef,
-        isInvalid: selectedSeason.length === 0,
-      },
-    ];
-
-    const newInvalidInputsState: InvalidInputs = {
-      ...INVALID_INPUTS_DEFAULT,
-    };
-
-    let isFormValid = true;
-    let firstInvalidRef: React.RefObject<HTMLDivElement | null> | null = null;
-
-    for (const field of fieldsToValidate) {
-      if (field.isInvalid) {
-        newInvalidInputsState[field.name] = true;
-        if (isFormValid) {
-          firstInvalidRef = field.ref;
-        }
-        isFormValid = false;
-      }
-    }
-    if (scrollOnError) {
-      setInvalidInputs(newInvalidInputsState);
-
-      firstInvalidRef?.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-
-    return isFormValid;
   };
 
   useEffect(() => {
@@ -668,6 +590,29 @@ const TopicalClient = ({
     scrollUpWhenPageChange,
     numberOfColumns,
   ]);
+
+  const isValidInputs = ({
+    scrollOnError = true,
+  }: {
+    scrollOnError?: boolean;
+  }) => {
+    return isValidInputsUtils({
+      scrollOnError,
+      curriculumRef: curriculumRef,
+      subjectRef: subjectRef,
+      topicRef: topicRef,
+      yearRef: yearRef,
+      paperTypeRef: paperTypeRef,
+      seasonRef: seasonRef,
+      selectedCurriculum: selectedCurriculum,
+      selectedSubject: selectedSubject,
+      selectedTopic: selectedTopic,
+      selectedYear: selectedYear,
+      selectedPaperType: selectedPaperType,
+      selectedSeason: selectedSeason,
+      setInvalidInputs: setInvalidInputs,
+    });
+  };
 
   const search = async () => {
     if (isValidInputs({ scrollOnError: false })) {
@@ -1322,25 +1267,53 @@ const TopicalClient = ({
                   <div className="flex w-full flex-col items-center justify-center gap-2">
                     <ButtonUltility
                       isMounted={isMounted}
-                      currentQuery={currentQuery}
-                      isValidInput={isValidInputs}
-                      setSortParameters={setSortParameters}
                       revert={revert}
-                      query={{
-                        curriculumId: selectedCurriculum,
-                        subjectId: selectedSubject,
-                        topic: selectedTopic.toSorted(),
-                        paperType: selectedPaperType.toSorted(),
-                        year: selectedYear.toSorted(
-                          (a, b) => Number(b) - Number(a)
-                        ),
-                        season: selectedSeason.toSorted(),
-                      }}
                       resetEverything={resetEverything}
-                      setCurrentQuery={setCurrentQuery}
-                      setIsSearchEnabled={setIsSearchEnabled}
                       setIsSidebarOpen={setIsSidebarOpen}
-                    />
+                    >
+                      <Button
+                        className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+                        disabled={!isMounted}
+                        onClick={() => {
+                          const query = {
+                            curriculumId: selectedCurriculum,
+                            subjectId: selectedSubject,
+                            topic: selectedTopic.toSorted(),
+                            paperType: selectedPaperType.toSorted(),
+                            year: selectedYear.toSorted(
+                              (a, b) => Number(b) - Number(a)
+                            ),
+                            season: selectedSeason.toSorted(),
+                          };
+                          const isSameQuery =
+                            JSON.stringify(currentQuery) ==
+                            JSON.stringify(query);
+                          if (
+                            isValidInputs({ scrollOnError: true }) &&
+                            !isSameQuery
+                          ) {
+                            setIsSearchEnabled(true);
+                            setCurrentQuery({
+                              ...query,
+                            });
+                            // Update URL parameters without page reload
+                            setSortParameters(
+                              computeDefaultSortParams({
+                                paperType: query.paperType,
+                                topic: query.topic,
+                                year: query.year,
+                                season: query.season,
+                              })
+                            );
+                          } else if (isSameQuery && isMobileDevice) {
+                            setIsSidebarOpen(false);
+                          }
+                        }}
+                      >
+                        Search
+                        <ScanText />
+                      </Button>
+                    </ButtonUltility>
                   </div>
                 </div>
                 <SidebarSeparator />

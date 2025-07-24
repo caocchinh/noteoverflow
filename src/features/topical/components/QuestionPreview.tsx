@@ -142,11 +142,11 @@ const QuestionPreview = memo(
 
         <BookmarkButton
           triggerButtonClassName={cn(
-            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
           )}
           popOverTriggerClassName={cn(
-            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer",
+            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
           )}
           badgeClassName="hidden"
@@ -203,7 +203,7 @@ const QuestionPreview = memo(
             <Button
               className={cn(
                 "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
-                "rounded-[3px] z-[11]",
+                "rounded-[3px] z-[30]",
                 (() => {
                   for (const bookmark of bookmarks) {
                     if (

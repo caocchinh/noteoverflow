@@ -4,6 +4,7 @@ import {
   BESTEXAMHELP_SUBJECT_CODE,
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
+  INVALID_INPUTS_DEFAULT,
   MAX_TOPIC_SELECTION,
   PAPER_TYPE_SORT_DEFAULT_WEIGHT,
   SEASON_SORT_DEFAULT_WEIGHT,
@@ -11,8 +12,14 @@ import {
   TOPICAL_DATA,
   YEAR_SORT_DEFAULT_WEIGHT,
 } from "../constants/constants";
-import type { FilterData, FiltersCache, LayoutStyle } from "../constants/types";
+import type {
+  FilterData,
+  FiltersCache,
+  InvalidInputs,
+  LayoutStyle,
+} from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
+import { Dispatch, RefObject, SetStateAction } from "react";
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
@@ -514,4 +521,117 @@ export const computeDefaultSortParams = ({
       weight: SEASON_SORT_DEFAULT_WEIGHT,
     },
   };
+};
+
+export const isValidInputs = ({
+  setInvalidInputs,
+  scrollOnError = true,
+  selectedCurriculum,
+  curriculumRef,
+  selectedSubject,
+  subjectRef,
+  selectedTopic,
+  topicRef,
+  selectedYear,
+  yearRef,
+  selectedPaperType,
+  paperTypeRef,
+  selectedSeason,
+  seasonRef,
+  topicLengthConstraint = true,
+}: {
+  setInvalidInputs: Dispatch<SetStateAction<InvalidInputs>>;
+  scrollOnError?: boolean;
+  curriculumRef?: RefObject<HTMLDivElement | null>;
+  subjectRef?: RefObject<HTMLDivElement | null>;
+  topicRef: RefObject<HTMLDivElement | null>;
+  yearRef: RefObject<HTMLDivElement | null>;
+  paperTypeRef: RefObject<HTMLDivElement | null>;
+  seasonRef: RefObject<HTMLDivElement | null>;
+  selectedCurriculum?: string;
+  selectedSubject?: string;
+
+  selectedTopic: string[];
+  selectedYear: string[];
+  selectedPaperType: string[];
+  selectedSeason: string[];
+  topicLengthConstraint?: boolean;
+}) => {
+  const fieldsToValidate: {
+    name: keyof InvalidInputs;
+    value: string | string[];
+    ref: React.RefObject<HTMLDivElement | null>;
+    isInvalid: boolean;
+  }[] = [
+    {
+      name: "topic",
+      value: selectedTopic,
+      ref: topicRef,
+      isInvalid:
+        selectedTopic.length === 0 ||
+        (selectedTopic.length > MAX_TOPIC_SELECTION && topicLengthConstraint),
+    },
+    {
+      name: "year",
+      value: selectedYear,
+      ref: yearRef,
+      isInvalid: selectedYear.length === 0,
+    },
+    {
+      name: "paperType",
+      value: selectedPaperType,
+      ref: paperTypeRef,
+      isInvalid: selectedPaperType.length === 0,
+    },
+    {
+      name: "season",
+      value: selectedSeason,
+      ref: seasonRef,
+      isInvalid: selectedSeason.length === 0,
+    },
+  ];
+
+  if (selectedCurriculum && curriculumRef) {
+    fieldsToValidate.push({
+      name: "curriculum",
+      value: selectedCurriculum,
+      ref: curriculumRef,
+      isInvalid: !selectedCurriculum,
+    });
+  }
+  if (selectedSubject && subjectRef) {
+    fieldsToValidate.push({
+      name: "subject",
+      value: selectedSubject,
+      ref: subjectRef,
+      isInvalid: !selectedSubject,
+    });
+  }
+
+  const newInvalidInputsState: InvalidInputs = {
+    ...INVALID_INPUTS_DEFAULT,
+  };
+
+  let isFormValid = true;
+  let firstInvalidRef: React.RefObject<HTMLDivElement | null> | null = null;
+
+  for (const field of fieldsToValidate) {
+    if (field.isInvalid) {
+      newInvalidInputsState[field.name] = true;
+      if (isFormValid) {
+        firstInvalidRef = field.ref;
+      }
+      isFormValid = false;
+    }
+  }
+  if (scrollOnError) {
+    setInvalidInputs(newInvalidInputsState);
+
+    firstInvalidRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
+  return isFormValid;
 };

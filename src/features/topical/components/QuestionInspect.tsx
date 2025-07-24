@@ -211,6 +211,14 @@ const QuestionInspect = ({
   ]);
 
   useEffect(() => {
+    questionScrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+    answerScrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
     setCurrentView("question");
   }, [currentQuestionId]);
 
@@ -1066,7 +1074,7 @@ const QuestionInspect = ({
                       <PastPaperLink question={currentQuestionData} type="qp">
                         {currentQuestionData?.year === 2009
                           ? "Only supported year 2010 and above"
-                          : "View paper"}
+                          : "View entire paper"}
                       </PastPaperLink>
                     </TooltipContent>
                   </Tooltip>
@@ -1089,7 +1097,7 @@ const QuestionInspect = ({
                       <PastPaperLink question={currentQuestionData} type="ms">
                         {currentQuestionData?.year === 2009
                           ? "Only supported year 2010 and above"
-                          : "View mark scheme"}
+                          : "View entire mark scheme"}
                       </PastPaperLink>
                     </TooltipContent>
                   </Tooltip>

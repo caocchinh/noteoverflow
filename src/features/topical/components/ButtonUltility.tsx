@@ -10,71 +10,29 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useTheme } from "next-themes";
-import { BrushCleaning, ScanText, Undo2, X } from "lucide-react";
-import { CurrentQuery, SortParameters } from "../constants/types";
-import { computeDefaultSortParams } from "../lib/utils";
-
-import { Dispatch, SetStateAction, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { BrushCleaning, Undo2, X } from "lucide-react";
+import { ReactNode, useState } from "react";
 
 export default function ButtonUltility({
   resetEverything,
   setIsSidebarOpen,
-  setSortParameters,
   isMounted,
-  currentQuery,
-  isValidInput,
-  setIsSearchEnabled,
   revert,
-  setCurrentQuery,
-  query,
+  children,
 }: {
   resetEverything: () => void;
   setIsSidebarOpen: (value: boolean) => void;
   revert: () => void;
-  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
   isMounted: boolean;
-  currentQuery: CurrentQuery;
-  isValidInput: ({ scrollOnError }: { scrollOnError?: boolean }) => boolean;
-  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
-  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  query: CurrentQuery;
+  children?: ReactNode;
 }) {
   const { theme } = useTheme();
   const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);
   const [isRevertConfirmationOpen, setIsRevertConfirmationOpen] =
     useState(false);
-  const isMobileDevice = useIsMobile();
   return (
     <>
-      <Button
-        className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-        disabled={!isMounted}
-        onClick={() => {
-          const isSameQuery =
-            JSON.stringify(currentQuery) == JSON.stringify(query);
-          if (isValidInput({ scrollOnError: true }) && !isSameQuery) {
-            setIsSearchEnabled(true);
-            setCurrentQuery({
-              ...query,
-            });
-            // Update URL parameters without page reload
-            setSortParameters(
-              computeDefaultSortParams({
-                paperType: query.paperType,
-                topic: query.topic,
-                year: query.year,
-                season: query.season,
-              })
-            );
-          } else if (isSameQuery && isMobileDevice) {
-            setIsSidebarOpen(false);
-          }
-        }}
-      >
-        Search
-        <ScanText />
-      </Button>
+      {children}
       <Dialog
         onOpenChange={setIsClearConfirmationOpen}
         open={isClearConfirmationOpen}
@@ -134,7 +92,11 @@ export default function ButtonUltility({
             <Undo2 />
           </Button>
         </DialogTrigger>
-        <DialogContent showCloseButton={false}>
+        <DialogContent
+          showCloseButton={false}
+          className="z-[100008]"
+          overlayClassName="z-[100008]"
+        >
           <DialogHeader>
             <DialogTitle>Revert back</DialogTitle>
             <DialogDescription>
