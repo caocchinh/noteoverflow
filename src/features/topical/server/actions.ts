@@ -430,6 +430,47 @@ export const deleteRecentQuery = async ({
   }
 };
 
+export const deleteBookmarkListAction = async ({
+  listName,
+  visibility,
+}: {
+  listName: string;
+  visibility: "public" | "private";
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error(UNAUTHORIZED);
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
+    await db
+      .delete(userBookmarks)
+      .where(
+        and(
+          eq(userBookmarks.userId, userId),
+          eq(userBookmarks.listName, listName),
+          eq(userBookmarks.visibility, visibility)
+        )
+      );
+    await db
+      .delete(userBookmarkList)
+      .where(
+        and(
+          eq(userBookmarkList.userId, userId),
+          eq(userBookmarkList.listName, listName),
+          eq(userBookmarkList.visibility, visibility)
+        )
+      );
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
 // export const updateSortParams = async ({
 //   queryKey,
 //   sortParams,

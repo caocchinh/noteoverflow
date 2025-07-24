@@ -900,6 +900,7 @@ const FinishedQuestionsPage = () => {
               }
             }}
           >
+            <p> {topicalData.length} items</p>
             <ResponsiveMasonry
               columnsCountBreakPoints={
                 COLUMN_BREAKPOINTS[
