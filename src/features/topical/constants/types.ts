@@ -100,6 +100,11 @@ export interface SelectedFinishedQuestion {
   question: SelectedQuestion;
 }
 
+export interface SelectedPublickBookmark {
+  updatedAt: Date;
+  question: SelectedQuestion;
+}
+
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

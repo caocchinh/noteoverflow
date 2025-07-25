@@ -1,20 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-
-import { ValidCurriculum } from "@/constants/types";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import ButtonUltility from "@/features/topical/components/ButtonUltility";
+import QuestionInspect from "@/features/topical/components/QuestionInspect";
+import {
+  COLUMN_BREAKPOINTS,
   CURRICULUM_COVER_IMAGE,
+  DEFAULT_CACHE,
+  DEFAULT_IMAGE_THEME,
+  DEFAULT_LAYOUT_STYLE,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  DEFAULT_LAYOUT_STYLE,
-  INFINITE_SCROLL_CHUNK_SIZE,
-  SUBJECT_COVER_IMAGE,
-  FILTERS_CACHE_KEY,
-  COLUMN_BREAKPOINTS,
-  DEFAULT_CACHE,
   DEFAULT_SORT_BY,
-  DEFAULT_IMAGE_THEME,
+  FILTERS_CACHE_KEY,
+  INFINITE_SCROLL_CHUNK_SIZE,
   INVALID_INPUTS_DEFAULT,
+  SUBJECT_COVER_IMAGE,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -23,68 +31,61 @@ import {
   FiltersCache,
   SelectedBookmark,
   InvalidInputs,
+  SelectedPublickBookmark,
 } from "@/features/topical/constants/types";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Loader2,
+  Monitor,
+  ScanText,
+  SlidersHorizontal,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   extractCurriculumCode,
   extractSubjectCode,
   hasOverlap,
-  isOverScrolling,
   isValidInputs as isValidInputsUtils,
-  truncateListName,
+  isOverScrolling,
 } from "@/features/topical/lib/utils";
-import { authClient } from "@/lib/auth/auth-client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Globe,
-  Lock,
-  Loader2,
-  Monitor,
-  ScanText,
-} from "lucide-react";
-
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
-import QuestionPreview from "@/features/topical/components/QuestionPreview";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import QuestionInspect from "@/features/topical/components/QuestionInspect";
-import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth/auth-client";
 import { cn } from "@/lib/utils";
+import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import { SortBy } from "@/features/topical/components/SortBy";
+import { ValidCurriculum } from "@/constants/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
-import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
-import ButtonUltility from "@/features/topical/components/ButtonUltility";
-import { ListFolder } from "@/features/topical/components/ListFolder";
-import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import QuestionPreview from "@/features/topical/components/QuestionPreview";
+import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 
-const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
+export const BookmarkView = ({
+  data,
+  BETTER_AUTH_URL,
+}: {
+  data: SelectedPublickBookmark[];
+  BETTER_AUTH_URL: string;
+}) => {
   const queryClient = useQueryClient();
 
   const {
@@ -158,82 +159,31 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [chosenList, setChosenList] = useState<{
-    id: string;
-    visibility: "public" | "private";
-    listName: string;
-  } | null>(null);
 
   const metadata = useMemo(() => {
-    const tempMetadata: Record<
-      "public" | "private",
-      Record<
-        string,
-        {
-          listName: string;
-          data: Record<Partial<ValidCurriculum>, string[]>;
-        }
-      >
-    > = {
-      public: {},
-      private: {},
-    };
-    bookmarks?.forEach((bookmark) => {
-      if (!tempMetadata[bookmark.visibility as "public" | "private"]) {
-        tempMetadata[bookmark.visibility as "public" | "private"] = {};
-      }
-      if (
-        !tempMetadata[bookmark.visibility as "public" | "private"][bookmark.id]
-      ) {
-        tempMetadata[bookmark.visibility as "public" | "private"][
-          bookmark.id
-          // @ts-expect-error - this is a temporary fix to avoid type errors
-        ] = { listName: bookmark.listName, data: {} };
-      }
-      bookmark.userBookmarks.forEach((userBookmark) => {
-        const extractedCurriculumn = extractCurriculumCode({
-          questionId: userBookmark.question.id,
-        });
-        const extractedSubjectCode = extractSubjectCode({
-          questionId: userBookmark.question.id,
-        });
-        if (extractedCurriculumn) {
-          if (
-            !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn]
-          ) {
-            tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn] = [];
-          }
-          if (
-            !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn].includes(extractedSubjectCode)
-          ) {
-            tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn].push(extractedSubjectCode);
-          }
-        }
+    // @ts-expect-error bruh
+    const tempMetadata: Record<Partial<ValidCurriculum>, string[]> = {};
+    data?.forEach((question) => {
+      const extractedCurriculumn = extractCurriculumCode({
+        questionId: question.question.id,
       });
+      if (extractedCurriculumn) {
+        const extractedSubjectCode = extractSubjectCode({
+          questionId: question.question.id,
+        });
+        if (!tempMetadata[extractedCurriculumn]) {
+          tempMetadata[extractedCurriculumn] = [];
+        }
+        if (
+          !tempMetadata[extractedCurriculumn].includes(extractedSubjectCode)
+        ) {
+          tempMetadata[extractedCurriculumn].push(extractedSubjectCode);
+        }
+      }
     });
 
     return tempMetadata;
-  }, [bookmarks]);
-
-  const curriculumnMetadata = useMemo(() => {
-    if (!chosenList) return null;
-    return metadata[chosenList.visibility][chosenList.id].data;
-  }, [chosenList, metadata]);
-
-  const questionUnderThatBookmarkList = useMemo(() => {
-    if (!chosenList) return null;
-    return bookmarks?.find((bookmark) => bookmark.id === chosenList.id)
-      ?.userBookmarks;
-  }, [chosenList, bookmarks]);
-
+  }, [userFinishedQuestions]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
@@ -251,7 +201,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       paperType: [],
       season: [],
     };
-    questionUnderThatBookmarkList?.forEach((question) => {
+    data?.forEach((question) => {
       const extractedCurriculumn = extractCurriculumCode({
         questionId: question.question.id,
       });
@@ -281,7 +231,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       }
     });
     return temp;
-  }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
+  }, [data, selectedCurriculumn, selectedSubject]);
   const isMobileDevice = useIsMobile();
   const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
@@ -349,7 +299,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
-  console.log(metadata);
+
   useEffect(() => {
     const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
     try {
@@ -442,13 +392,13 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const topicalData = useMemo(() => {
     if (
-      !questionUnderThatBookmarkList ||
+      !userFinishedQuestions ||
       !currentFilter ||
       !selectedCurriculumn ||
       !selectedSubject
     )
       return [];
-    return questionUnderThatBookmarkList.filter((item) => {
+    return data.filter((item) => {
       const extractedCurriculumn = extractCurriculumCode({
         questionId: item.question.id,
       });
@@ -486,9 +436,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     });
   }, [
     currentFilter,
-    questionUnderThatBookmarkList,
+    data,
     selectedCurriculumn,
     selectedSubject,
+    userFinishedQuestions,
   ]);
 
   useEffect(() => {
@@ -499,14 +450,14 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-      const sortedData: SelectedFinishedQuestion[] = topicalData.toSorted(
-        (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
+      const sortedData: SelectedPublickBookmark[] = topicalData.toSorted(
+        (a: SelectedPublickBookmark, b: SelectedPublickBookmark) => {
           const aIndex = new Date(a.updatedAt).getTime();
           const bIndex = new Date(b.updatedAt).getTime();
           return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
         }
       );
-      sortedData.forEach((item: SelectedFinishedQuestion) => {
+      sortedData.forEach((item: SelectedPublickBookmark) => {
         if (currentChunks.length === chunkSize) {
           chunkedData.push(currentChunks);
           currentChunks = [];
@@ -602,7 +553,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const isQuestionViewDisabled = useMemo(() => {
     return (
-      !chosenList ||
       !selectedCurriculumn ||
       !selectedSubject ||
       !currentFilter ||
@@ -611,7 +561,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       displayedData.length === 0
     );
   }, [
-    chosenList,
     selectedCurriculumn,
     selectedSubject,
     currentFilter,
@@ -631,40 +580,13 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               <BreadcrumbItem
                 className="cursor-pointer"
                 onClick={() => {
-                  setChosenList(null);
                   setSelectedCurriculum(null);
                   setSelecteSubject(null);
                 }}
               >
-                {chosenList ? (
-                  <>
-                    {chosenList.visibility === "public" ? (
-                      <Globe size={13} />
-                    ) : (
-                      <Lock size={13} />
-                    )}
-                    {truncateListName({ listName: chosenList.listName })}
-                  </>
-                ) : (
-                  "List"
-                )}
+                Curriculum
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-
-              {chosenList && (
-                <>
-                  <BreadcrumbItem
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setSelectedCurriculum(null);
-                      setSelecteSubject(null);
-                    }}
-                  >
-                    Curriculum
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                </>
-              )}
               {selectedCurriculumn && (
                 <>
                   <BreadcrumbItem
@@ -898,13 +820,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 setSortBy={setSortBy}
                 disabled={isQuestionViewDisabled}
               />
-              {chosenList && chosenList.visibility === "public" && (
-                <ShareFilter
-                  isDisabled={isQuestionViewDisabled}
-                  type="bookmark"
-                  url={`${BETTER_AUTH_URL}/topical/bookmark/${chosenList.id}`}
-                />
-              )}
             </div>
 
             <ScrollBar
@@ -914,92 +829,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           </ScrollArea>
         </div>
 
-        {metadata && !chosenList && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your list</h1>
-            <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
-              {metadata.private && Object.keys(metadata.private).length > 0 && (
-                <div className="flex flex-col gap-2 w-full items-start justify-center">
-                  <h2 className="font text-lg text-logo-main">Private</h2>
-                  <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                    {Object.keys(metadata.private).map((listId) => (
-                      <ListFolder
-                        BETTER_AUTH_URL={BETTER_AUTH_URL}
-                        listId={listId}
-                        listName={metadata.private[listId].listName}
-                        visibility="private"
-                        key={listId}
-                        metadata={metadata}
-                        setChosenList={setChosenList}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {metadata.public && Object.keys(metadata.public).length > 0 && (
-                <div className="flex flex-col gap-2 w-full items-start justify-center">
-                  <h2 className="font text-lg text-logo-main">Public</h2>
-                  <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                    {Object.keys(metadata.public).map((listId) => (
-                      <ListFolder
-                        listName={metadata.public[listId].listName}
-                        BETTER_AUTH_URL={BETTER_AUTH_URL}
-                        listId={listId}
-                        visibility="public"
-                        metadata={metadata}
-                        key={listId}
-                        setChosenList={setChosenList}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {Object.keys(metadata.private).length === 0 &&
-                Object.keys(metadata.public).length === 0 &&
-                !isBookmarksFetching &&
-                !isUserSessionPending &&
-                userSession?.data?.session && (
-                  <p className="text-sm text-muted-foreground">
-                    No lists found. Search for questions and add them to a new
-                    list!
-                  </p>
-                )}
-              {Object.keys(metadata.private).length === 0 &&
-                Object.keys(metadata.public).length === 0 &&
-                !isBookmarksFetching &&
-                !isUserSessionPending &&
-                !userSession?.data?.session && (
-                  <p className="text-sm  text-red-500">
-                    You are not signed in. Please sign to create a list!
-                  </p>
-                )}
-            </div>
-          </div>
-        )}
-        {(isBookmarksFetching || isUserSessionPending) && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
-
-        <ScrollToTopButton
-          showScrollToTopButton={showScrollToTopButton}
-          isScrollingAndShouldShowScrollButton={
-            isScrollingAndShouldShowScrollButton && displayedData.length > 0
-          }
-          scrollAreaRef={scrollAreaRef}
-        />
-        {curriculumnMetadata && !selectedCurriculumn && (
+        {metadata && !selectedCurriculumn && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
-            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
-              {Object.keys(curriculumnMetadata).length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No curriculums found. Search for questions and add them to a
-                  this list!
-                </p>
-              )}
-              {Object.keys(curriculumnMetadata).map((curriculum) => (
+            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+              {Object.keys(metadata).map((curriculum) => (
                 <div
                   key={curriculum}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -1024,11 +858,33 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             </div>
           </div>
         )}
-        {curriculumnMetadata && selectedCurriculumn && !selectedSubject && (
+        {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+
+        {!isUserSessionPending && !userSession?.data?.session && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <p className="text-sm text-red-500">
+              You are not signed in. Please sign to view your finished
+              questions!
+            </p>
+          </div>
+        )}
+
+        <ScrollToTopButton
+          showScrollToTopButton={showScrollToTopButton}
+          isScrollingAndShouldShowScrollButton={
+            isScrollingAndShouldShowScrollButton && displayedData.length > 0
+          }
+          scrollAreaRef={scrollAreaRef}
+        />
+        {metadata && selectedCurriculumn && !selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {curriculumnMetadata[selectedCurriculumn].map((subject) => (
+              {metadata[selectedCurriculumn].map((subject) => (
                 <div
                   key={subject}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -1053,7 +909,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             </div>
           </div>
         )}
-        {!isQuestionViewDisabled && (
+
+        {displayedData.length > 0 && (
           <ScrollArea
             viewportRef={scrollAreaRef}
             className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
@@ -1083,7 +940,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       setIsQuestionInspectOpen={setIsQuestionInspectOpen}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      showFinishedQuestionTint={showFinishedQuestionTint}
+                      showFinishedQuestionTint={false}
                       isBookmarkError={isUserSessionError || isBookmarksError}
                       isValidSession={!!userSession?.data?.session}
                       key={`${question.id}-${imageSrc}`}
@@ -1116,16 +973,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             )}
           </ScrollArea>
         )}
-        {displayedData.length === 0 && selectedSubject && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-muted-foreground">
-              No questions found. Search for questions and add them to this
-              list!
-            </p>
-          </div>
-        )}
       </div>
-
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent
           className="z-[100006] overflow-hidden  py-2"
@@ -1334,5 +1182,3 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     </>
   );
 };
-
-export default BookmarkClient;
