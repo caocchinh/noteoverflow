@@ -1,5 +1,12 @@
 "use client";
-import { EllipsisVertical, Folder, Loader2, Trash2 } from "lucide-react";
+import {
+  EllipsisVertical,
+  Folder,
+  Loader2,
+  Telescope,
+  Trash2,
+  Type as TypeIcon,
+} from "lucide-react";
 import { truncateListName } from "../lib/utils";
 import {
   Popover,
@@ -22,35 +29,76 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { deleteBookmarkListAction } from "../server/actions";
+import {
+  deleteBookmarkListAction,
+  changeBookmarkListVisibilityAction,
+  renameBookmarkListAction,
+} from "../server/actions";
 import { toast } from "sonner";
 import { SelectedBookmark } from "../constants/types";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { ValidCurriculum } from "@/constants/types";
+import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
+import { SelectVisibility } from "./SelectVisibility";
 
 export const ListFolder = ({
   listName,
   visibility,
   listId,
+  metadata,
 }: {
   listName: string;
   listId: string;
   visibility: "public" | "private";
+  metadata: Record<
+    "public" | "private",
+    Record<
+      string,
+      {
+        listName: string;
+        data: Record<Partial<ValidCurriculum>, string[]>;
+      }
+    >
+  >;
 }) => {
   const queryClient = useQueryClient();
   const mutationKey = ["delete_bookmark_list", listName, visibility];
   const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
-
+  const [isRenameAlertDialogOpen, setIsRenameAlertDialogOpen] = useState(false);
+  const [newListName, setNewListName] = useState(listName);
+  const allListNameUnderCurrentVisibility = useMemo(() => {
+    return Object.keys(metadata[visibility]).map(
+      (listId) => metadata[visibility][listId].listName
+    );
+  }, [metadata, visibility]);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [changeVisibilityError, setChangeVisibilityError] = useState<
+    string | null
+  >(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isBlockingInput, setIsBlockingInput] = useState(false);
+  const [newVisibility, setNewVisibility] = useState<"public" | "private">(
+    visibility
+  );
+  const allListNameUnderNewVisibility = useMemo(() => {
+    return Object.keys(metadata[newVisibility]).map(
+      (listId) => metadata[newVisibility][listId].listName
+    );
+  }, [metadata, newVisibility]);
+  const [
+    isChangeVisibilityAlertDialogOpen,
+    setIsChangeVisibilityAlertDialogOpen,
+  ] = useState(false);
   const { mutate: deleteList } = useMutation({
     mutationKey,
-    mutationFn: async ({
-      realListId,
-    }: {
-      realListId: string;
-      realVisibility: "public" | "private";
-    }) => {
-      await deleteBookmarkListAction({
+    mutationFn: async ({ realListId }: { realListId: string }) => {
+      const result = await deleteBookmarkListAction({
         listId: realListId,
       });
+      if (result.error) {
+        throw new Error(result.error);
+      }
     },
     onSuccess: (
       _,
@@ -79,6 +127,107 @@ export const ListFolder = ({
     retry: false,
   });
 
+  const { mutate: renameList } = useMutation({
+    mutationKey,
+    mutationFn: async ({
+      realListId,
+      realNewName,
+    }: {
+      realListId: string;
+      realNewName: string;
+    }) => {
+      const result = await renameBookmarkListAction({
+        listId: realListId,
+        newName: realNewName,
+      });
+      if (result.error) {
+        throw new Error(result.error);
+      }
+    },
+    onSuccess: (
+      _,
+      { realListId, realNewName }: { realListId: string; realNewName: string }
+    ) => {
+      toast.success("List renamed successfully");
+      setIsRenameAlertDialogOpen(false);
+      queryClient.setQueryData<SelectedBookmark[]>(
+        ["all_user_bookmarks"],
+        (prev: SelectedBookmark[] | undefined) => {
+          if (!prev) {
+            return prev;
+          }
+          setNewListName("");
+          setIsRenameAlertDialogOpen(false);
+          return prev.map((bookmark) => {
+            if (bookmark.id === realListId) {
+              return { ...bookmark, listName: realNewName };
+            }
+            return bookmark;
+          });
+        }
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        "Failed to rename bookmark list: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
+    },
+    retry: false,
+  });
+
+  const { mutate: changeVisibility } = useMutation({
+    mutationKey,
+    mutationFn: async ({
+      realListId,
+      realNewVisibility,
+    }: {
+      realListId: string;
+      realNewVisibility: "public" | "private";
+    }) => {
+      const result = await changeBookmarkListVisibilityAction({
+        listId: realListId,
+        newVisibility: realNewVisibility,
+      });
+      if (result.error) {
+        throw new Error(result.error);
+      }
+    },
+    onSuccess: (
+      _,
+      {
+        realListId,
+        realNewVisibility,
+      }: { realListId: string; realNewVisibility: "public" | "private" }
+    ) => {
+      toast.success("List visibility changed successfully");
+      setIsRenameAlertDialogOpen(false);
+      queryClient.setQueryData<SelectedBookmark[]>(
+        ["all_user_bookmarks"],
+        (prev: SelectedBookmark[] | undefined) => {
+          if (!prev) {
+            return prev;
+          }
+          setNewListName("");
+          setIsRenameAlertDialogOpen(false);
+          return prev.map((bookmark) => {
+            if (bookmark.id === realListId) {
+              return { ...bookmark, visibility: realNewVisibility };
+            }
+            return bookmark;
+          });
+        }
+      );
+    },
+    onError: (error) => {
+      toast.error(
+        "Failed to change visibility of bookmark list: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
+    },
+    retry: false,
+  });
+
   const isMutatingThisList = useIsMutating({ mutationKey }) > 0;
 
   return (
@@ -93,16 +242,19 @@ export const ListFolder = ({
         </h3>
       </div>
       <Popover>
-        <PopoverTrigger className="cursor-pointer">
+        <PopoverTrigger
+          className="cursor-pointer"
+          disabled={isMutatingThisList}
+        >
           <EllipsisVertical size={18} />
         </PopoverTrigger>
-        <PopoverContent className="!p-2 w-[180px]">
+        <PopoverContent className="!p-2 w-[190px] gap-2 flex flex-col items-center justify-center">
           <AlertDialog
             open={isDeleteAlertDialogOpen}
             onOpenChange={setIsDeleteAlertDialogOpen}
           >
             <AlertDialogTrigger
-              className="flex flex-row gap-2 items-center justify-center w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
               disabled={isMutatingThisList}
             >
               <Trash2 className="text-red-500" /> Remove list
@@ -120,7 +272,10 @@ export const ListFolder = ({
                 <p>Visibility: {visibility}</p>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="cursor-pointer">
+                <AlertDialogCancel
+                  className="cursor-pointer"
+                  disabled={isMutatingThisList}
+                >
                   Cancel
                 </AlertDialogCancel>
                 <Button
@@ -135,6 +290,174 @@ export const ListFolder = ({
                   }
                 >
                   Delete
+                  {isMutatingThisList && <Loader2 className="animate-spin" />}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <AlertDialog
+            open={isRenameAlertDialogOpen}
+            onOpenChange={(value) => {
+              setIsRenameAlertDialogOpen(value);
+              if (value === true) {
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 0);
+              }
+            }}
+          >
+            <AlertDialogTrigger
+              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+              disabled={isMutatingThisList}
+            >
+              <TypeIcon /> Rename list
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Rename this list</AlertDialogTitle>
+                <AlertDialogDescription className="sr-only">
+                  Rename this list
+                </AlertDialogDescription>
+                <p>Current list name: {listName}</p>
+                <p>Visibility: {visibility}</p>
+              </AlertDialogHeader>
+              <Input
+                ref={inputRef}
+                disabled={isBlockingInput}
+                placeholder="New list name"
+                value={newListName}
+                onChange={(e) => {
+                  setNewListName(e.target.value);
+                  if (e.target.value.trim().length > LIST_NAME_MAX_LENGTH) {
+                    setRenameError(
+                      `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
+                    );
+                  } else {
+                    setRenameError(null);
+                  }
+                }}
+              />
+              {renameError && (
+                <p className="text-red-500 text-xs">{renameError}</p>
+              )}
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  className="cursor-pointer"
+                  disabled={isMutatingThisList}
+                  onClick={() => {
+                    setIsBlockingInput(true);
+                    setTimeout(() => {
+                      setIsBlockingInput(false);
+                    }, 0);
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <Button
+                  className="cursor-pointer"
+                  disabled={isMutatingThisList}
+                  onClick={() => {
+                    if (newListName.trim() === listName) {
+                      setRenameError(
+                        "You are not allowed to rename to the same name"
+                      );
+                      return;
+                    } else if (
+                      allListNameUnderCurrentVisibility.includes(
+                        newListName.trim()
+                      )
+                    ) {
+                      setRenameError(
+                        "List name already exists with same visibility"
+                      );
+                      return;
+                    } else if (newListName.trim() === "") {
+                      setRenameError("List name cannot be empty");
+                      return;
+                    } else if (
+                      newListName.trim().length > LIST_NAME_MAX_LENGTH
+                    ) {
+                      setRenameError(
+                        `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
+                      );
+                      return;
+                    } else {
+                      renameList({
+                        realListId: listId,
+                        realNewName: newListName.trim(),
+                      });
+                    }
+                  }}
+                >
+                  Rename
+                  {isMutatingThisList && <Loader2 className="animate-spin" />}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <AlertDialog
+            open={isChangeVisibilityAlertDialogOpen}
+            onOpenChange={setIsChangeVisibilityAlertDialogOpen}
+          >
+            <AlertDialogTrigger
+              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+              disabled={isMutatingThisList}
+            >
+              <Telescope /> Change visibility
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Change visibility</AlertDialogTitle>
+                <AlertDialogDescription className="sr-only">
+                  Change visibility
+                </AlertDialogDescription>
+                <p>Current list name: {listName}</p>
+                <p>Visibility: {visibility}</p>
+              </AlertDialogHeader>
+              <SelectVisibility
+                isMutatingThisQuestion={isMutatingThisList}
+                visibility={newVisibility}
+                setVisibility={setNewVisibility}
+              />
+              {changeVisibilityError && (
+                <p className="text-red-500 text-xs">{changeVisibilityError}</p>
+              )}
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  className="cursor-pointer"
+                  disabled={isMutatingThisList}
+                  onClick={() => {
+                    setIsBlockingInput(true);
+                    setTimeout(() => {
+                      setIsBlockingInput(false);
+                    }, 0);
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <Button
+                  className="cursor-pointer"
+                  disabled={isMutatingThisList}
+                  onClick={() => {
+                    if (newVisibility === visibility) {
+                      setChangeVisibilityError(
+                        "You are not allowed to change to the same visibility"
+                      );
+                      return;
+                    }
+                    if (allListNameUnderNewVisibility.includes(listName)) {
+                      setChangeVisibilityError(
+                        "List name already exists with same visibility"
+                      );
+                      return;
+                    }
+                    changeVisibility({
+                      realListId: listId,
+                      realNewVisibility: newVisibility,
+                    });
+                  }}
+                >
+                  Change visibility
                   {isMutatingThisList && <Loader2 className="animate-spin" />}
                 </Button>
               </AlertDialogFooter>

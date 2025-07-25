@@ -815,12 +815,6 @@ const FinishedQuestionsPage = () => {
           </ScrollArea>
         </div>
 
-        {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
-
         {metadata && !selectedCurriculumn && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
@@ -850,6 +844,12 @@ const FinishedQuestionsPage = () => {
             </div>
           </div>
         )}
+        {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <Loader2 className="animate-spin" />
+          </div>
+        )}
+
         <ScrollToTopButton
           showScrollToTopButton={showScrollToTopButton}
           isScrollingAndShouldShowScrollButton={

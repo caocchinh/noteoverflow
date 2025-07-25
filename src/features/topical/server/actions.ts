@@ -18,7 +18,10 @@ import {
   UNAUTHORIZED,
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
-import { MAX_NUMBER_OF_RECENT_QUERIES } from "../constants/constants";
+import {
+  LIST_NAME_MAX_LENGTH,
+  MAX_NUMBER_OF_RECENT_QUERIES,
+} from "../constants/constants";
 import { FilterData } from "../constants/types";
 import {
   validateCurriculum,
@@ -94,7 +97,7 @@ export const createBookmarkListAndAddBookmarkAction = async ({
   visibility: "public" | "private";
   questionId: string;
 }): Promise<ServerActionResponse<string>> => {
-  if (listName.trim() === "" || listName.length > 100) {
+  if (listName.trim() === "" || listName.length > LIST_NAME_MAX_LENGTH) {
     return {
       error: BAD_REQUEST,
       success: false,
@@ -197,17 +200,14 @@ export const addBookmarkAction = async ({
   try {
     const session = await verifySession();
     if (!session) {
-      throw new Error(UNAUTHORIZED);
-    }
-    const userId = session.user.id;
-    return await addBookmark({ userId, listId, questionId });
-  } catch (error) {
-    if (error instanceof Error && error.message === UNAUTHORIZED) {
       return {
         error: UNAUTHORIZED,
         success: false,
       };
     }
+    const userId = session.user.id;
+    return await addBookmark({ userId, listId, questionId });
+  } catch (error) {
     console.error(error);
     return {
       error: INTERNAL_SERVER_ERROR,
@@ -226,7 +226,10 @@ export const removeBookmarkAction = async ({
   try {
     const session = await verifySession();
     if (!session) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     const db = await getDbAsync();
     const userId = session.user.id;
@@ -243,11 +246,11 @@ export const removeBookmarkAction = async ({
       success: true,
     };
   } catch (error) {
-    if (error instanceof Error && error.message === UNAUTHORIZED) {
-      throw new Error(UNAUTHORIZED);
-    }
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
@@ -282,10 +285,16 @@ export const addFinishedQuestionAction = async ({
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
@@ -314,10 +323,16 @@ export const removeFinishedQuestionAction = async ({
     };
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
@@ -438,7 +453,10 @@ export const deleteRecentQuery = async ({
   try {
     const session = await verifySession();
     if (!session) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     const userId = session.user.id;
 
@@ -470,7 +488,10 @@ export const deleteBookmarkListAction = async ({
   try {
     const session = await verifySession();
     if (!session) {
-      throw new Error(UNAUTHORIZED);
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
     }
     const userId = session.user.id;
     const db = await getDbAsync();
@@ -488,40 +509,112 @@ export const deleteBookmarkListAction = async ({
     };
   } catch (error) {
     console.error(error);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
   }
 };
 
-// export const renameBookmarkListAction = async ({
-//   listName,
-//   newName,
-//   visibility,
-// }: {
-//   listName: string;
-//   newName: string;
-//   visibility: "public" | "private";
-// }): Promise<ServerActionResponse<void>> => {
-//   try {
-//     const session = await verifySession();
-//     if (!session) {
-//       throw new Error(UNAUTHORIZED);
-//     }
-//     const userId = session.user.id;
-//     const db = await getDbAsync();
+export const renameBookmarkListAction = async ({
+  listId,
+  newName,
+}: {
+  listId: string;
+  newName: string;
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
 
-//     if (newName.trim() === "" || newName.length > 100) {
-//       return {
-//         error: BAD_REQUEST,
-//         success: false,
-//       };
-//     }
-//     await db
-//       .update(userBookmarkList)
-//       .set({ listName: newName })
-//       .where(
-//         and(eq(userBookmarkList.userId, userId), eq(userBookmarkList.listName, listName), eq(userBookmarkList.visibility, visibility))
-//       );
-//     return {
+    if (newName.trim() === "" || newName.length > LIST_NAME_MAX_LENGTH) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
+    await db
+      .update(userBookmarkList)
+      .set({ listName: newName })
+      .where(
+        and(
+          eq(userBookmarkList.userId, userId),
+          eq(userBookmarkList.id, listId)
+        )
+      );
+    return {
+      success: true,
+    };
+  } catch (e) {
+    if (
+      e instanceof Error &&
+      /FOREIGN KEY constraint failed/i.test(e.message)
+    ) {
+      return {
+        error: DOES_NOT_EXIST,
+        success: false,
+      };
+    }
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
+  }
+};
+
+export const changeBookmarkListVisibilityAction = async ({
+  listId,
+  newVisibility,
+}: {
+  listId: string;
+  newVisibility: "public" | "private";
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
+    }
+    const userId = session.user.id;
+    const db = await getDbAsync();
+
+    await db
+      .update(userBookmarkList)
+      .set({ visibility: newVisibility })
+      .where(
+        and(
+          eq(userBookmarkList.id, listId),
+          eq(userBookmarkList.userId, userId)
+        )
+      );
+    return {
+      success: true,
+    };
+  } catch (e) {
+    if (
+      e instanceof Error &&
+      /FOREIGN KEY constraint failed/i.test(e.message)
+    ) {
+      return {
+        error: DOES_NOT_EXIST,
+        success: false,
+      };
+    }
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
+  }
+};
 
 // export const updateSortParams = async ({
 //   queryKey,

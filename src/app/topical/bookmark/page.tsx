@@ -134,7 +134,13 @@ const BookmarkPage = () => {
   const metadata = useMemo(() => {
     const tempMetadata: Record<
       "public" | "private",
-      Record<string, Record<Partial<ValidCurriculum>, string[]>>
+      Record<
+        string,
+        {
+          listName: string;
+          data: Record<Partial<ValidCurriculum>, string[]>;
+        }
+      >
     > = {
       public: {},
       private: {},
@@ -153,30 +159,31 @@ const BookmarkPage = () => {
           }
           if (
             !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
+              bookmark.id
             ]
           ) {
             tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
-            ] = {};
+              bookmark.id
+            ] = { listName: bookmark.listName, data: {} };
+          }
+
+          if (
+            !tempMetadata[bookmark.visibility as "public" | "private"][
+              bookmark.id
+            ].data[extractedCurriculumn]
+          ) {
+            tempMetadata[bookmark.visibility as "public" | "private"][
+              bookmark.id
+            ].data[extractedCurriculumn] = [];
           }
           if (
             !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
-            ][extractedCurriculumn]
+              bookmark.id
+            ].data[extractedCurriculumn].includes(extractedSubjectCode)
           ) {
             tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
-            ][extractedCurriculumn] = [];
-          }
-          if (
-            !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
-            ][extractedCurriculumn].includes(extractedSubjectCode)
-          ) {
-            tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.listName
-            ][extractedCurriculumn].push(extractedSubjectCode);
+              bookmark.id
+            ].data[extractedCurriculumn].push(extractedSubjectCode);
           }
         }
       });
@@ -300,7 +307,7 @@ const BookmarkPage = () => {
     useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
-
+  console.log(metadata);
   useEffect(() => {
     const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
     try {
@@ -553,12 +560,14 @@ const BookmarkPage = () => {
 
   const isQuestionViewDisabled = useMemo(() => {
     return (
+      !chosenList ||
       !selectedCurriculumn ||
       !selectedSubject ||
       !currentFilter ||
       !fullPartitionedData
     );
   }, [
+    chosenList,
     selectedCurriculumn,
     selectedSubject,
     currentFilter,
@@ -846,11 +855,13 @@ const BookmarkPage = () => {
                 <div className="flex flex-col gap-2 w-full items-start justify-center">
                   <h2 className="font text-lg text-logo-main">Private</h2>
                   <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                    {Object.keys(metadata.private).map((list) => (
+                    {Object.keys(metadata.private).map((listId) => (
                       <ListFolder
-                        listName={list}
+                        listId={listId}
+                        listName={metadata.private[listId].listName}
                         visibility="private"
-                        key={list}
+                        key={listId}
+                        metadata={metadata}
                       />
                     ))}
                   </div>
@@ -860,19 +871,22 @@ const BookmarkPage = () => {
                 <div className="flex flex-col gap-2 w-full items-start justify-center">
                   <h2 className="font text-lg text-logo-main">Public</h2>
                   <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                    {Object.keys(metadata.public).map((list) => (
+                    {Object.keys(metadata.public).map((listId) => (
                       <ListFolder
-                        listName={list}
-                        listId={list.}
+                        listName={metadata.public[listId].listName}
+                        listId={listId}
                         visibility="public"
-                        key={list}
+                        metadata={metadata}
+                        key={listId}
                       />
                     ))}
                   </div>
                 </div>
               )}
               {Object.keys(metadata.private).length === 0 &&
-                Object.keys(metadata.public).length === 0 && (
+                Object.keys(metadata.public).length === 0 &&
+                !isBookmarksFetching &&
+                !isUserSessionPending && (
                   <p className="text-sm text-muted-foreground">
                     No lists found. Search for questions and add them to a new
                     list!

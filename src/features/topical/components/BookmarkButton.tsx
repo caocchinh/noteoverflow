@@ -74,13 +74,9 @@ import createBookmarkStore, {
 } from "../store/useBookmark";
 import { createContext, useContext } from "react";
 import { useStore } from "zustand";
-import {
-  Select,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
+import { SelectVisibility } from "./SelectVisibility";
 
 const BookmarkContext = createContext<BookmarkStore | null>(null);
 
@@ -1207,7 +1203,7 @@ const CreateNewListAlertDialog = memo(() => {
 
     if (
       newBookmarkListNameInput.trim() === "" ||
-      newBookmarkListNameInput.length > 100
+      newBookmarkListNameInput.length > LIST_NAME_MAX_LENGTH
     ) {
       setIsInputError(true);
       return;
@@ -1275,7 +1271,7 @@ const CreateNewListAlertDialog = memo(() => {
           <div className="flex items-center justify-center gap-2 w-full">
             <Input
               onChange={(e) => {
-                if (e.target.value.length > 100) {
+                if (e.target.value.length > LIST_NAME_MAX_LENGTH) {
                   setIsInputError(true);
                 } else {
                   setIsInputError(false);
@@ -1320,47 +1316,17 @@ const CreateNewListAlertDialog = memo(() => {
           </div>
           <p className="text-sm w-full text-left mt-3 mb-1">Visibility</p>
           <div className="flex items-center justify-center gap-2 w-full">
-            <Select
-              disabled={isMutatingThisQuestion}
-              defaultValue="private"
-              onValueChange={(value) =>
-                setVisibility(value as "public" | "private")
-              }
-              value={visibility}
-            >
-              <SelectTrigger className="w-full py-6">
-                <SelectValue placeholder="Select a visibility" />
-              </SelectTrigger>
-              <SelectContent className="z-[999999] dark:bg-accent">
-                <SelectItem value="public">
-                  <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
-                    <Globe className="w-4 h-4" />
-                    <div className="flex flex-col justify-center items-start">
-                      <p className="text-sm">Public</p>
-                      <p className="text-xs text-muted-foreground">
-                        Anyone can see this list
-                      </p>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="private">
-                  <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
-                    <Lock className="w-4 h-4" />
-                    <div className="flex flex-col justify-center items-start">
-                      <p className="text-sm">Private</p>
-                      <p className="text-xs text-muted-foreground">
-                        Only you can see this list
-                      </p>
-                    </div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <SelectVisibility
+              isMutatingThisQuestion={isMutatingThisQuestion}
+              visibility={visibility}
+              setVisibility={setVisibility}
+            />
           </div>
         </div>
         {isInputError && (
           <p className="text-red-500 text-xs mt-1 text-center">
-            Please enter valid a list name. Max 100 characters.
+            Please enter valid a list name. Max {LIST_NAME_MAX_LENGTH}{" "}
+            characters.
           </p>
         )}
         <p className="text-xs text-muted-foreground mt-1 text-left">

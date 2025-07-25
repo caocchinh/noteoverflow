@@ -267,3 +267,5 @@ export const DEFAULT_CACHE: FiltersCache = {
   lastSessionSubject: "",
   filters: {},
 };
+
+export const LIST_NAME_MAX_LENGTH = 100;

@@ -57,9 +57,19 @@ export const QuestionInspectFinishedCheckbox = ({
         );
       }
       if (isRealFinished) {
-        await removeFinishedQuestionAction({ questionId: realQuestionId });
+        const result = await removeFinishedQuestionAction({
+          questionId: realQuestionId,
+        });
+        if (result.error) {
+          throw new Error(result.error);
+        }
       } else {
-        await addFinishedQuestionAction({ questionId: realQuestionId });
+        const result = await addFinishedQuestionAction({
+          questionId: realQuestionId,
+        });
+        if (result.error) {
+          throw new Error(result.error);
+        }
       }
     },
 
