@@ -12,9 +12,11 @@ import { QR } from "./QR";
 export const ShareFilter = ({
   isDisabled,
   url,
+  type = "filter",
 }: {
   isDisabled: boolean;
   url: string;
+  type?: "filter" | "bookmark";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,9 +46,9 @@ export const ShareFilter = ({
           arrowClassName="!bg-logo-main !fill-logo-main"
         >
           {isDisabled ? (
-            <> To share filter, run a search first.</>
+            <> To share {type}, run a search first.</>
           ) : (
-            <>Share filter</>
+            <>Share {type}</>
           )}
         </TooltipContent>
       </Tooltip>

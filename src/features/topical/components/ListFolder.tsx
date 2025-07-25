@@ -37,7 +37,14 @@ import {
 } from "../server/actions";
 import { toast } from "sonner";
 import { SelectedBookmark } from "../constants/types";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { ValidCurriculum } from "@/constants/types";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
@@ -50,6 +57,7 @@ export const ListFolder = ({
   BETTER_AUTH_URL,
   listId,
   metadata,
+  setChosenList,
 }: {
   listName: string;
   listId: string;
@@ -64,6 +72,13 @@ export const ListFolder = ({
         data: Record<Partial<ValidCurriculum>, string[]>;
       }
     >
+  >;
+  setChosenList: Dispatch<
+    SetStateAction<{
+      id: string;
+      visibility: "public" | "private";
+      listName: string;
+    } | null>
   >;
 }) => {
   const queryClient = useQueryClient();
@@ -243,6 +258,13 @@ export const ListFolder = ({
       <div
         className="flex flex-row gap-2 bg-[#f0f4f9] w-[250px] p-2 rounded-sm items-center justify-between"
         title={listName}
+        onClick={() => {
+          setChosenList({
+            id: listId,
+            visibility,
+            listName,
+          });
+        }}
       >
         <div className="flex flex-row gap-4 items-center justify-center">
           <Folder fill="black" />
@@ -254,6 +276,9 @@ export const ListFolder = ({
           <PopoverTrigger
             className="cursor-pointer"
             disabled={isMutatingThisList}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <EllipsisVertical size={18} />
           </PopoverTrigger>
@@ -265,10 +290,17 @@ export const ListFolder = ({
               <AlertDialogTrigger
                 className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
                 disabled={isMutatingThisList}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
               >
                 <Trash2 className="text-red-500" /> Remove list
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <AlertDialogHeader>
                   <AlertDialogTitle>
                     Are you absolutely sure you want to delete this list?
@@ -318,10 +350,17 @@ export const ListFolder = ({
               <AlertDialogTrigger
                 className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
                 disabled={isMutatingThisList}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
               >
                 <TypeIcon /> Rename list
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <AlertDialogHeader>
                   <AlertDialogTitle>Rename this list</AlertDialogTitle>
                   <AlertDialogDescription className="sr-only">
@@ -411,10 +450,18 @@ export const ListFolder = ({
               <AlertDialogTrigger
                 className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
                 disabled={isMutatingThisList}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
               >
                 <Telescope /> Change visibility
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsQRDialogOpen(true);
+                }}
+              >
                 <AlertDialogHeader>
                   <AlertDialogTitle>Change visibility</AlertDialogTitle>
                   <AlertDialogDescription className="sr-only">
@@ -475,12 +522,7 @@ export const ListFolder = ({
               </AlertDialogContent>
             </AlertDialog>
             {visibility === "public" && (
-              <div
-                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
-                onClick={() => {
-                  setIsQRDialogOpen(true);
-                }}
-              >
+              <div className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer">
                 <Send /> Share list
               </div>
             )}

@@ -10,9 +10,11 @@ import { Dispatch, SetStateAction } from "react";
 export const SortBy = ({
   sortBy,
   setSortBy,
+  disabled = false,
 }: {
   sortBy: "ascending" | "descending";
   setSortBy: Dispatch<SetStateAction<"ascending" | "descending">>;
+  disabled?: boolean;
 }) => {
   return (
     <Select
@@ -20,6 +22,7 @@ export const SortBy = ({
       onValueChange={(value) => {
         setSortBy(value as "ascending" | "descending");
       }}
+      disabled={disabled}
     >
       <SelectTrigger>
         <SelectValue placeholder="Sort by" />

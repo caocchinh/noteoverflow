@@ -30,6 +30,7 @@ import {
   hasOverlap,
   isOverScrolling,
   isValidInputs as isValidInputsUtils,
+  truncateListName,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,9 +46,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Folder,
-  Loader2,
+  Globe,
   Lock,
+  Loader2,
   Monitor,
   ScanText,
 } from "lucide-react";
@@ -81,6 +82,7 @@ import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { ListFolder } from "@/features/topical/components/ListFolder";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
@@ -97,6 +99,33 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [isQuestionInspectOpen, setIsQuestionInspectOpen] = useState({
     isOpen: false,
     questionId: "",
+  });
+
+  const {
+    data: userFinishedQuestions,
+    isFetching: isUserFinishedQuestionsFetching,
+    isError: isUserFinishedQuestionsError,
+  } = useQuery({
+    queryKey: ["user_finished_questions"],
+    queryFn: async () => {
+      const response = await fetch("/api/topical/finished");
+      const data: {
+        data: SelectedFinishedQuestion[];
+        error?: string;
+      } = await response.json();
+      if (!response.ok) {
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
+      }
+      return data.data;
+    },
+    enabled:
+      !!userSession?.data?.session &&
+      !isUserSessionError &&
+      !queryClient.getQueryData(["user_finished_questions"]),
   });
 
   const {
@@ -129,7 +158,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [chosenList, setChosenList] = useState<string | null>(null);
+  const [chosenList, setChosenList] = useState<{
+    id: string;
+    visibility: "public" | "private";
+    listName: string;
+  } | null>(null);
 
   const metadata = useMemo(() => {
     const tempMetadata: Record<
@@ -164,6 +197,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           ) {
             tempMetadata[bookmark.visibility as "public" | "private"][
               bookmark.id
+              // @ts-expect-error - this is a temporary fix to avoid type errors
             ] = { listName: bookmark.listName, data: {} };
           }
 
@@ -192,54 +226,65 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     return tempMetadata;
   }, [bookmarks]);
 
+  const curriculumnMetadata = useMemo(() => {
+    if (!chosenList) return null;
+    return metadata[chosenList.visibility][chosenList.id].data;
+  }, [chosenList, metadata]);
+
+  const questionUnderThatBookmarkList = useMemo(() => {
+    if (!chosenList) return null;
+    return bookmarks?.find((bookmark) => bookmark.id === chosenList.id)
+      ?.userBookmarks;
+  }, [chosenList, bookmarks]);
+
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
 
-  // const subjectMetadata = useMemo(() => {
-  //   if (!selectedCurriculumn || !selectedSubject) return null;
-  //   const temp: {
-  //     topic: string[];
-  //     year: string[];
-  //     paperType: string[];
-  //     season: string[];
-  //   } = {
-  //     topic: [],
-  //     year: [],
-  //     paperType: [],
-  //     season: [],
-  //   };
-  //   userFinishedQuestions?.forEach((question) => {
-  //     const extractedCurriculumn = extractCurriculumCode({
-  //       questionId: question.question.id,
-  //     });
-  //     const extractedSubjectCode = extractSubjectCode({
-  //       questionId: question.question.id,
-  //     });
-  //     if (
-  //       extractedCurriculumn === selectedCurriculumn &&
-  //       extractedSubjectCode === selectedSubject
-  //     ) {
-  //       question.question.questionTopics.forEach((topic) => {
-  //         if (topic.topic) {
-  //           if (!temp.topic.includes(topic.topic)) {
-  //             temp.topic.push(topic.topic);
-  //           }
-  //         }
-  //       });
-  //       if (!temp.year.includes(question.question.year.toString())) {
-  //         temp.year.push(question.question.year.toString());
-  //       }
-  //       if (!temp.paperType.includes(question.question.paperType.toString())) {
-  //         temp.paperType.push(question.question.paperType.toString());
-  //       }
-  //       if (!temp.season.includes(question.question.season)) {
-  //         temp.season.push(question.question.season);
-  //       }
-  //     }
-  //   });
-  //   return temp;
-  // }, [selectedCurriculumn, selectedSubject, userFinishedQuestions]);
+  const subjectMetadata = useMemo(() => {
+    if (!selectedCurriculumn || !selectedSubject) return null;
+    const temp: {
+      topic: string[];
+      year: string[];
+      paperType: string[];
+      season: string[];
+    } = {
+      topic: [],
+      year: [],
+      paperType: [],
+      season: [],
+    };
+    questionUnderThatBookmarkList?.forEach((question) => {
+      const extractedCurriculumn = extractCurriculumCode({
+        questionId: question.question.id,
+      });
+      const extractedSubjectCode = extractSubjectCode({
+        questionId: question.question.id,
+      });
+      if (
+        extractedCurriculumn === selectedCurriculumn &&
+        extractedSubjectCode === selectedSubject
+      ) {
+        question.question.questionTopics.forEach((topic) => {
+          if (topic.topic) {
+            if (!temp.topic.includes(topic.topic)) {
+              temp.topic.push(topic.topic);
+            }
+          }
+        });
+        if (!temp.year.includes(question.question.year.toString())) {
+          temp.year.push(question.question.year.toString());
+        }
+        if (!temp.paperType.includes(question.question.paperType.toString())) {
+          temp.paperType.push(question.question.paperType.toString());
+        }
+        if (!temp.season.includes(question.question.season)) {
+          temp.season.push(question.question.season);
+        }
+      }
+    });
+    return temp;
+  }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
   const isMobileDevice = useIsMobile();
   const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
@@ -339,20 +384,20 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     }, 0);
   }, []);
 
-  // useEffect(() => {
-  //   if (subjectMetadata) {
-  //     setSelectedTopic(subjectMetadata.topic);
-  //     setSelectedYear(subjectMetadata.year);
-  //     setSelectedPaperType(subjectMetadata.paperType);
-  //     setSelectedSeason(subjectMetadata.season);
-  //     setCurrentFilter({
-  //       topic: subjectMetadata.topic,
-  //       year: subjectMetadata.year,
-  //       paperType: subjectMetadata.paperType,
-  //       season: subjectMetadata.season,
-  //     });
-  //   }
-  // }, [subjectMetadata]);
+  useEffect(() => {
+    if (subjectMetadata) {
+      setSelectedTopic(subjectMetadata.topic);
+      setSelectedYear(subjectMetadata.year);
+      setSelectedPaperType(subjectMetadata.paperType);
+      setSelectedSeason(subjectMetadata.season);
+      setCurrentFilter({
+        topic: subjectMetadata.topic,
+        year: subjectMetadata.year,
+        paperType: subjectMetadata.paperType,
+        season: subjectMetadata.season,
+      });
+    }
+  }, [subjectMetadata]);
 
   useEffect(() => {
     if (selectedTopic && selectedTopic.length > 0) {
@@ -398,96 +443,96 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     overflowScrollHandler();
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
-  // const topicalData = useMemo(() => {
-  //   if (
-  //     !userFinishedQuestions ||
-  //     !currentFilter ||
-  //     !selectedCurriculumn ||
-  //     !selectedSubject
-  //   )
-  //     return [];
-  //   return userFinishedQuestions.filter((item) => {
-  //     const extractedCurriculumn = extractCurriculumCode({
-  //       questionId: item.question.id,
-  //     });
-  //     if (extractedCurriculumn !== selectedCurriculumn) {
-  //       return false;
-  //     }
-  //     const extractedSubjectCode = extractSubjectCode({
-  //       questionId: item.question.id,
-  //     });
-  //     if (extractedSubjectCode !== selectedSubject) {
-  //       return false;
-  //     }
-  //     if (
-  //       !currentFilter.paperType.includes(item.question.paperType.toString())
-  //     ) {
-  //       return false;
-  //     }
-  //     if (!currentFilter.year.includes(item.question.year.toString())) {
-  //       return false;
-  //     }
-  //     if (
-  //       !hasOverlap(
-  //         item.question.questionTopics
-  //           .map((topic) => topic.topic)
-  //           .filter((topic) => topic !== null),
-  //         currentFilter.topic
-  //       )
-  //     ) {
-  //       return false;
-  //     }
-  //     if (!currentFilter.season.includes(item.question.season)) {
-  //       return false;
-  //     }
-  //     return true;
-  //   });
-  // }, [
-  //   currentFilter,
-  //   selectedCurriculumn,
-  //   selectedSubject,
-  //   userFinishedQuestions,
-  // ]);
+  const topicalData = useMemo(() => {
+    if (
+      !questionUnderThatBookmarkList ||
+      !currentFilter ||
+      !selectedCurriculumn ||
+      !selectedSubject
+    )
+      return [];
+    return questionUnderThatBookmarkList.filter((item) => {
+      const extractedCurriculumn = extractCurriculumCode({
+        questionId: item.question.id,
+      });
+      if (extractedCurriculumn !== selectedCurriculumn) {
+        return false;
+      }
+      const extractedSubjectCode = extractSubjectCode({
+        questionId: item.question.id,
+      });
+      if (extractedSubjectCode !== selectedSubject) {
+        return false;
+      }
+      if (
+        !currentFilter.paperType.includes(item.question.paperType.toString())
+      ) {
+        return false;
+      }
+      if (!currentFilter.year.includes(item.question.year.toString())) {
+        return false;
+      }
+      if (
+        !hasOverlap(
+          item.question.questionTopics
+            .map((topic) => topic.topic)
+            .filter((topic) => topic !== null),
+          currentFilter.topic
+        )
+      ) {
+        return false;
+      }
+      if (!currentFilter.season.includes(item.question.season)) {
+        return false;
+      }
+      return true;
+    });
+  }, [
+    currentFilter,
+    questionUnderThatBookmarkList,
+    selectedCurriculumn,
+    selectedSubject,
+  ]);
 
-  // useEffect(() => {
-  //   if (topicalData) {
-  //     const chunkedData: SelectedQuestion[][] = [];
-  //     let currentChunks: SelectedQuestion[] = [];
-  //     const chunkSize =
-  //       layoutStyle === "pagination"
-  //         ? numberOfQuestionsPerPage
-  //         : INFINITE_SCROLL_CHUNK_SIZE;
-  //     const sortedData: SelectedFinishedQuestion[] = topicalData.toSorted(
-  //       (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
-  //         const aIndex = new Date(a.updatedAt).getTime();
-  //         const bIndex = new Date(b.updatedAt).getTime();
-  //         return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
-  //       }
-  //     );
-  //     sortedData.forEach((item: SelectedFinishedQuestion) => {
-  //       if (currentChunks.length === chunkSize) {
-  //         chunkedData.push(currentChunks);
-  //         currentChunks = [];
-  //       }
-  //       currentChunks.push(item.question);
-  //     });
-  //     chunkedData.push(currentChunks);
+  useEffect(() => {
+    if (topicalData) {
+      const chunkedData: SelectedQuestion[][] = [];
+      let currentChunks: SelectedQuestion[] = [];
+      const chunkSize =
+        layoutStyle === "pagination"
+          ? numberOfQuestionsPerPage
+          : INFINITE_SCROLL_CHUNK_SIZE;
+      const sortedData: SelectedFinishedQuestion[] = topicalData.toSorted(
+        (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
+          const aIndex = new Date(a.updatedAt).getTime();
+          const bIndex = new Date(b.updatedAt).getTime();
+          return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
+        }
+      );
+      sortedData.forEach((item: SelectedFinishedQuestion) => {
+        if (currentChunks.length === chunkSize) {
+          chunkedData.push(currentChunks);
+          currentChunks = [];
+        }
+        currentChunks.push(item.question);
+      });
+      chunkedData.push(currentChunks);
 
-  //     setFullPartitionedData(chunkedData);
-  //     setDisplayedData(chunkedData[0]);
-  //     setCurrentChunkIndex(0);
-  //     scrollAreaRef.current?.scrollTo({
-  //       top: 0,
-  //       behavior: "instant",
-  //     });
-  //   }
-  // }, [
-  //   topicalData,
-  //   numberOfColumns,
-  //   layoutStyle,
-  //   numberOfQuestionsPerPage,
-  //   sortBy,
-  // ]);
+      setFullPartitionedData(chunkedData);
+      setDisplayedData(chunkedData[0]);
+      setCurrentChunkIndex(0);
+      scrollAreaRef.current?.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
+    }
+  }, [
+    topicalData,
+    numberOfColumns,
+    layoutStyle,
+    numberOfQuestionsPerPage,
+    sortBy,
+  ]);
 
   const isValidInputs = ({
     scrollOnError = true,
@@ -564,7 +609,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       !selectedCurriculumn ||
       !selectedSubject ||
       !currentFilter ||
-      !fullPartitionedData
+      !fullPartitionedData ||
+      !displayedData ||
+      displayedData.length === 0
     );
   }, [
     chosenList,
@@ -572,6 +619,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     selectedSubject,
     currentFilter,
     fullPartitionedData,
+    displayedData,
   ]);
 
   return (
@@ -591,7 +639,18 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   setSelecteSubject(null);
                 }}
               >
-                List
+                {chosenList ? (
+                  <>
+                    {chosenList.visibility === "public" ? (
+                      <Globe size={13} />
+                    ) : (
+                      <Lock size={13} />
+                    )}
+                    {truncateListName({ listName: chosenList.listName })}
+                  </>
+                ) : (
+                  "List"
+                )}
               </BreadcrumbItem>
               <BreadcrumbSeparator />
 
@@ -837,7 +896,18 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
-              <SortBy sortBy={sortBy} setSortBy={setSortBy} />
+              <SortBy
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                disabled={isQuestionViewDisabled}
+              />
+              {chosenList && chosenList.visibility === "public" && (
+                <ShareFilter
+                  isDisabled={isQuestionViewDisabled}
+                  type="bookmark"
+                  url={`${BETTER_AUTH_URL}/topical/bookmark/${chosenList.id}`}
+                />
+              )}
             </div>
 
             <ScrollBar
@@ -863,6 +933,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                         visibility="private"
                         key={listId}
                         metadata={metadata}
+                        setChosenList={setChosenList}
                       />
                     ))}
                   </div>
@@ -880,6 +951,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                         visibility="public"
                         metadata={metadata}
                         key={listId}
+                        setChosenList={setChosenList}
                       />
                     ))}
                   </div>
@@ -910,11 +982,40 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           }
           scrollAreaRef={scrollAreaRef}
         />
-        {/* {metadata && selectedCurriculumn && !selectedSubject && (
+        {curriculumnMetadata && !selectedCurriculumn && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
+            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+              {Object.keys(curriculumnMetadata).map((curriculum) => (
+                <div
+                  key={curriculum}
+                  className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  onClick={() => {
+                    setSelectedCurriculum(curriculum as ValidCurriculum);
+                  }}
+                  title={curriculum}
+                >
+                  <img
+                    loading="lazy"
+                    className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
+                    alt="Curriculum cover image"
+                    src={
+                      CURRICULUM_COVER_IMAGE[
+                        curriculum as keyof typeof CURRICULUM_COVER_IMAGE
+                      ]
+                    }
+                  />
+                  <p>{curriculum}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {curriculumnMetadata && selectedCurriculumn && !selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {metadata[selectedCurriculumn].map((subject) => (
+              {curriculumnMetadata[selectedCurriculumn].map((subject) => (
                 <div
                   key={subject}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -938,9 +1039,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               ))}
             </div>
           </div>
-        )} */}
-      </div>
-      {/* {bookmarks && (
+        )}
+        {!isQuestionViewDisabled && (
           <ScrollArea
             viewportRef={scrollAreaRef}
             className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
@@ -970,7 +1070,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       setIsQuestionInspectOpen={setIsQuestionInspectOpen}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      showFinishedQuestionTint={false}
+                      showFinishedQuestionTint={showFinishedQuestionTint}
                       isBookmarkError={isUserSessionError || isBookmarksError}
                       isValidSession={!!userSession?.data?.session}
                       key={`${question.id}-${imageSrc}`}
@@ -1003,7 +1103,16 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             )}
           </ScrollArea>
         )}
+        {displayedData.length === 0 && selectedSubject && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <p className="text-sm text-muted-foreground">
+              No questions found. Search for questions and add them to this
+              list!
+            </p>
+          </div>
+        )}
       </div>
+
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent
           className="z-[100006] overflow-hidden  py-2"
@@ -1208,7 +1317,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
-      /> * */}
+      />
     </>
   );
 };

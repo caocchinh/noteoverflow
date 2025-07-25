@@ -549,13 +549,16 @@ const FinishedQuestionsPage = () => {
       !selectedCurriculumn ||
       !selectedSubject ||
       !currentFilter ||
-      !fullPartitionedData
+      !fullPartitionedData ||
+      !displayedData ||
+      displayedData.length === 0
     );
   }, [
     selectedCurriculumn,
     selectedSubject,
     currentFilter,
     fullPartitionedData,
+    displayedData,
   ]);
 
   return (
@@ -805,7 +808,11 @@ const FinishedQuestionsPage = () => {
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
-              <SortBy sortBy={sortBy} setSortBy={setSortBy} />
+              <SortBy
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                disabled={isQuestionViewDisabled}
+              />
             </div>
 
             <ScrollBar
