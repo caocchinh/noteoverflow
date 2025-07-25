@@ -960,10 +960,20 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               {Object.keys(metadata.private).length === 0 &&
                 Object.keys(metadata.public).length === 0 &&
                 !isBookmarksFetching &&
-                !isUserSessionPending && (
+                !isUserSessionPending &&
+                userSession?.data?.session && (
                   <p className="text-sm text-muted-foreground">
                     No lists found. Search for questions and add them to a new
                     list!
+                  </p>
+                )}
+              {Object.keys(metadata.private).length === 0 &&
+                Object.keys(metadata.public).length === 0 &&
+                !isBookmarksFetching &&
+                !isUserSessionPending &&
+                !userSession?.data?.session && (
+                  <p className="text-sm  text-red-500">
+                    You are not signed in. Please sign to create a list!
                   </p>
                 )}
             </div>

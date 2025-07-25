@@ -857,6 +857,15 @@ const FinishedQuestionsPage = () => {
           </div>
         )}
 
+        {!isUserSessionPending && !userSession?.data?.session && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <p className="text-sm text-red-500">
+              You are not signed in. Please sign to view your finished
+              questions!
+            </p>
+          </div>
+        )}
+
         <ScrollToTopButton
           showScrollToTopButton={showScrollToTopButton}
           isScrollingAndShouldShowScrollButton={

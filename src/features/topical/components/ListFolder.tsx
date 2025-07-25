@@ -459,7 +459,6 @@ export const ListFolder = ({
               <AlertDialogContent
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsQRDialogOpen(true);
                 }}
               >
                 <AlertDialogHeader>
@@ -522,7 +521,13 @@ export const ListFolder = ({
               </AlertDialogContent>
             </AlertDialog>
             {visibility === "public" && (
-              <div className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer">
+              <div
+                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsQRDialogOpen(true);
+                }}
+              >
                 <Send /> Share list
               </div>
             )}
