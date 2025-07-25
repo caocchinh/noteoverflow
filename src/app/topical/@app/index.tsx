@@ -195,6 +195,14 @@ const TopicalClient = ({
   const [imageTheme, setImageTheme] = useState<"dark" | "light">(
     DEFAULT_IMAGE_THEME
   );
+  const url = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+    const params = new URLSearchParams(window.location.search);
+    params.set("queryKey", JSON.stringify(currentQuery));
+    return `${BETTER_AUTH_URL}/topical?${params.toString()}`;
+  }, [BETTER_AUTH_URL, currentQuery]);
 
   useEffect(() => {
     window.addEventListener("resize", overflowScrollHandler);
@@ -1599,11 +1607,7 @@ const TopicalClient = ({
                     To toggle this, run a search first.
                   </TooltipContent>
                 </Tooltip>
-                <ShareFilter
-                  isQuestionViewDisabled={isQuestionViewDisabled}
-                  currentQuery={currentQuery}
-                  BETTER_AUTH_URL={BETTER_AUTH_URL}
-                />
+                <ShareFilter isDisabled={isQuestionViewDisabled} url={url} />
               </div>
 
               <ScrollBar

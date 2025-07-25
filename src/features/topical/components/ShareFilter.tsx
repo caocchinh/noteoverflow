@@ -1,36 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Link as LinkIcon, Send } from "lucide-react";
-import { QRCodeCanvas } from "qrcode.react";
-import { useMemo, useRef, useState } from "react";
-import { CurrentQuery } from "../constants/types";
+import { Send } from "lucide-react";
+import { useState } from "react";
+import { QR } from "./QR";
 
 export const ShareFilter = ({
-  isQuestionViewDisabled,
-  currentQuery,
-  BETTER_AUTH_URL,
+  isDisabled,
+  url,
 }: {
-  isQuestionViewDisabled: boolean;
-  currentQuery: CurrentQuery;
-  BETTER_AUTH_URL: string;
+  isDisabled: boolean;
+  url: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const qrRef = useRef<HTMLCanvasElement>(null);
-  const [copied, setCopied] = useState(false);
-  const url = useMemo(() => {
-    if (typeof window === "undefined") {
-      return "";
-    }
-    const params = new URLSearchParams(window.location.search);
-    params.set("queryKey", JSON.stringify(currentQuery));
-    return `${BETTER_AUTH_URL}/topical?${params.toString()}`;
-  }, [BETTER_AUTH_URL, currentQuery]);
 
   return (
     <>
@@ -39,10 +25,10 @@ export const ShareFilter = ({
           <Button
             className={cn(
               "rounded-sm w-9 cursor-pointer !bg-logo-main !text-white",
-              isQuestionViewDisabled && "opacity-50"
+              isDisabled && "opacity-50"
             )}
             onClick={() => {
-              if (isQuestionViewDisabled) {
+              if (isDisabled) {
                 return;
               }
 
@@ -57,51 +43,14 @@ export const ShareFilter = ({
           className="!bg-logo-main !text-white"
           arrowClassName="!bg-logo-main !fill-logo-main"
         >
-          {isQuestionViewDisabled ? (
+          {isDisabled ? (
             <> To share filter, run a search first.</>
           ) : (
             <>Share filter</>
           )}
         </TooltipContent>
       </Tooltip>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent">
-          <DialogTitle className="sr-only">QR Code</DialogTitle>
-          <QRCodeCanvas
-            className="rounded-md w-full h-full min-h-[300px] min-w-[300px]"
-            ref={qrRef}
-            value={typeof window != "undefined" ? url : ""}
-            title={"Noteoverflow"}
-            size={300}
-            marginSize={2}
-            bgColor={"#ffffff"}
-            fgColor={"#000000"}
-            level={"H"}
-            imageSettings={{
-              src: "/assets/logo-bg-colorised-modified-small.webp",
-              x: undefined,
-              y: undefined,
-              height: 32,
-              width: 32,
-              opacity: 1,
-              excavate: true,
-            }}
-          />
-          <Button
-            className="flex items-center w-full gap-2 mt-3 rounded-sm cursor-pointer active:opacity-80"
-            onClick={() => {
-              navigator.clipboard.writeText(url);
-              setCopied(true);
-              setTimeout(() => {
-                setCopied(false);
-              }, 2000);
-            }}
-          >
-            {copied ? "Copied" : "Copy link"}
-            <LinkIcon />
-          </Button>
-        </DialogContent>
-      </Dialog>
+      <QR isOpen={isOpen} setIsOpen={setIsOpen} url={url} />
     </>
   );
 };

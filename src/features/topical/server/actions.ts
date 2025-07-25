@@ -540,6 +540,22 @@ export const renameBookmarkListAction = async ({
         success: false,
       };
     }
+    const existingList = await db
+      .select()
+      .from(userBookmarkList)
+      .where(
+        and(
+          eq(userBookmarkList.userId, userId),
+          eq(userBookmarkList.id, listId),
+          eq(userBookmarkList.listName, newName)
+        )
+      );
+    if (existingList.length > 0) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
     await db
       .update(userBookmarkList)
       .set({ listName: newName })
@@ -586,6 +602,22 @@ export const changeBookmarkListVisibilityAction = async ({
     }
     const userId = session.user.id;
     const db = await getDbAsync();
+    const existingList = await db
+      .select()
+      .from(userBookmarkList)
+      .where(
+        and(
+          eq(userBookmarkList.id, listId),
+          eq(userBookmarkList.userId, userId),
+          eq(userBookmarkList.visibility, newVisibility)
+        )
+      );
+    if (existingList.length > 0) {
+      return {
+        error: BAD_REQUEST,
+        success: false,
+      };
+    }
 
     await db
       .update(userBookmarkList)

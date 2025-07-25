@@ -3,6 +3,7 @@ import {
   EllipsisVertical,
   Folder,
   Loader2,
+  Send,
   Telescope,
   Trash2,
   Type as TypeIcon,
@@ -36,20 +37,23 @@ import {
 } from "../server/actions";
 import { toast } from "sonner";
 import { SelectedBookmark } from "../constants/types";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { ValidCurriculum } from "@/constants/types";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
+import { QR } from "./QR";
 
 export const ListFolder = ({
   listName,
   visibility,
+  BETTER_AUTH_URL,
   listId,
   metadata,
 }: {
   listName: string;
   listId: string;
+  BETTER_AUTH_URL: string;
   visibility: "public" | "private";
   metadata: Record<
     "public" | "private",
@@ -228,243 +232,266 @@ export const ListFolder = ({
     retry: false,
   });
 
+  useEffect(() => {
+    setChangeVisibilityError(null);
+  }, [newVisibility]);
+  const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
   const isMutatingThisList = useIsMutating({ mutationKey }) > 0;
 
   return (
-    <div
-      className="flex flex-row gap-2 bg-[#f0f4f9] w-[250px] p-2 rounded-sm items-center justify-between"
-      title={listName}
-    >
-      <div className="flex flex-row gap-4 items-center justify-center">
-        <Folder fill="black" />
-        <h3 className=" text-lg text-black">
-          {truncateListName({ listName })}
-        </h3>
-      </div>
-      <Popover>
-        <PopoverTrigger
-          className="cursor-pointer"
-          disabled={isMutatingThisList}
-        >
-          <EllipsisVertical size={18} />
-        </PopoverTrigger>
-        <PopoverContent className="!p-2 w-[190px] gap-2 flex flex-col items-center justify-center">
-          <AlertDialog
-            open={isDeleteAlertDialogOpen}
-            onOpenChange={setIsDeleteAlertDialogOpen}
+    <>
+      <div
+        className="flex flex-row gap-2 bg-[#f0f4f9] w-[250px] p-2 rounded-sm items-center justify-between"
+        title={listName}
+      >
+        <div className="flex flex-row gap-4 items-center justify-center">
+          <Folder fill="black" />
+          <h3 className=" text-lg text-black">
+            {truncateListName({ listName })}
+          </h3>
+        </div>
+        <Popover>
+          <PopoverTrigger
+            className="cursor-pointer"
+            disabled={isMutatingThisList}
           >
-            <AlertDialogTrigger
-              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
-              disabled={isMutatingThisList}
+            <EllipsisVertical size={18} />
+          </PopoverTrigger>
+          <PopoverContent className="!p-2 w-[190px] gap-2 flex flex-col items-center justify-center">
+            <AlertDialog
+              open={isDeleteAlertDialogOpen}
+              onOpenChange={setIsDeleteAlertDialogOpen}
             >
-              <Trash2 className="text-red-500" /> Remove list
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Are you absolutely sure you want to delete this list?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. All bookmark saved in this list
-                  will be deleted.
-                </AlertDialogDescription>
-                <p>List name: {listName}</p>
-                <p>Visibility: {visibility}</p>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                >
-                  Cancel
-                </AlertDialogCancel>
-                <Button
-                  variant="destructive"
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                  onClick={() =>
-                    deleteList({
-                      realListId: listId,
-                      realVisibility: visibility,
-                    })
-                  }
-                >
-                  Delete
-                  {isMutatingThisList && <Loader2 className="animate-spin" />}
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog
-            open={isRenameAlertDialogOpen}
-            onOpenChange={(value) => {
-              setIsRenameAlertDialogOpen(value);
-              if (value === true) {
-                setTimeout(() => {
-                  inputRef.current?.focus();
-                }, 0);
-              }
-            }}
-          >
-            <AlertDialogTrigger
-              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
-              disabled={isMutatingThisList}
+              <AlertDialogTrigger
+                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+                disabled={isMutatingThisList}
+              >
+                <Trash2 className="text-red-500" /> Remove list
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Are you absolutely sure you want to delete this list?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. All bookmark saved in this
+                    list will be deleted.
+                  </AlertDialogDescription>
+                  <p>List name: {listName}</p>
+                  <p>Visibility: {visibility}</p>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <Button
+                    variant="destructive"
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                    onClick={() =>
+                      deleteList({
+                        realListId: listId,
+                        realVisibility: visibility,
+                      })
+                    }
+                  >
+                    Delete
+                    {isMutatingThisList && <Loader2 className="animate-spin" />}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog
+              open={isRenameAlertDialogOpen}
+              onOpenChange={(value) => {
+                setIsRenameAlertDialogOpen(value);
+                if (value === true) {
+                  setTimeout(() => {
+                    inputRef.current?.focus();
+                  }, 0);
+                }
+              }}
             >
-              <TypeIcon /> Rename list
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Rename this list</AlertDialogTitle>
-                <AlertDialogDescription className="sr-only">
-                  Rename this list
-                </AlertDialogDescription>
-                <p>Current list name: {listName}</p>
-                <p>Visibility: {visibility}</p>
-              </AlertDialogHeader>
-              <Input
-                ref={inputRef}
-                disabled={isBlockingInput}
-                placeholder="New list name"
-                value={newListName}
-                onChange={(e) => {
-                  setNewListName(e.target.value);
-                  if (e.target.value.trim().length > LIST_NAME_MAX_LENGTH) {
-                    setRenameError(
-                      `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
-                    );
-                  } else {
-                    setRenameError(null);
-                  }
-                }}
-              />
-              {renameError && (
-                <p className="text-red-500 text-xs">{renameError}</p>
-              )}
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                  onClick={() => {
-                    setIsBlockingInput(true);
-                    setTimeout(() => {
-                      setIsBlockingInput(false);
-                    }, 0);
-                  }}
-                >
-                  Cancel
-                </AlertDialogCancel>
-                <Button
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                  onClick={() => {
-                    if (newListName.trim() === listName) {
-                      setRenameError(
-                        "You are not allowed to rename to the same name"
-                      );
-                      return;
-                    } else if (
-                      allListNameUnderCurrentVisibility.includes(
-                        newListName.trim()
-                      )
-                    ) {
-                      setRenameError(
-                        "List name already exists with same visibility"
-                      );
-                      return;
-                    } else if (newListName.trim() === "") {
-                      setRenameError("List name cannot be empty");
-                      return;
-                    } else if (
-                      newListName.trim().length > LIST_NAME_MAX_LENGTH
-                    ) {
+              <AlertDialogTrigger
+                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+                disabled={isMutatingThisList}
+              >
+                <TypeIcon /> Rename list
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Rename this list</AlertDialogTitle>
+                  <AlertDialogDescription className="sr-only">
+                    Rename this list
+                  </AlertDialogDescription>
+                  <p>Current list name: {listName}</p>
+                  <p>Visibility: {visibility}</p>
+                </AlertDialogHeader>
+                <Input
+                  ref={inputRef}
+                  disabled={isBlockingInput}
+                  placeholder="New list name"
+                  value={newListName}
+                  onChange={(e) => {
+                    setNewListName(e.target.value);
+                    if (e.target.value.trim().length > LIST_NAME_MAX_LENGTH) {
                       setRenameError(
                         `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
                       );
-                      return;
                     } else {
-                      renameList({
-                        realListId: listId,
-                        realNewName: newListName.trim(),
-                      });
+                      setRenameError(null);
                     }
                   }}
-                >
-                  Rename
-                  {isMutatingThisList && <Loader2 className="animate-spin" />}
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog
-            open={isChangeVisibilityAlertDialogOpen}
-            onOpenChange={setIsChangeVisibilityAlertDialogOpen}
-          >
-            <AlertDialogTrigger
-              className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
-              disabled={isMutatingThisList}
+                />
+                {renameError && (
+                  <p className="text-red-500 text-xs">{renameError}</p>
+                )}
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                    onClick={() => {
+                      setIsBlockingInput(true);
+                      setTimeout(() => {
+                        setIsBlockingInput(false);
+                      }, 0);
+                    }}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <Button
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                    onClick={() => {
+                      if (newListName.trim() === listName) {
+                        setRenameError(
+                          "You are not allowed to rename to the same name"
+                        );
+                        return;
+                      } else if (
+                        allListNameUnderCurrentVisibility.includes(
+                          newListName.trim()
+                        )
+                      ) {
+                        setRenameError(
+                          "List name already exists with same visibility"
+                        );
+                        return;
+                      } else if (newListName.trim() === "") {
+                        setRenameError("List name cannot be empty");
+                        return;
+                      } else if (
+                        newListName.trim().length > LIST_NAME_MAX_LENGTH
+                      ) {
+                        setRenameError(
+                          `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
+                        );
+                        return;
+                      } else {
+                        renameList({
+                          realListId: listId,
+                          realNewName: newListName.trim(),
+                        });
+                      }
+                    }}
+                  >
+                    Rename
+                    {isMutatingThisList && <Loader2 className="animate-spin" />}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog
+              open={isChangeVisibilityAlertDialogOpen}
+              onOpenChange={setIsChangeVisibilityAlertDialogOpen}
             >
-              <Telescope /> Change visibility
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Change visibility</AlertDialogTitle>
-                <AlertDialogDescription className="sr-only">
-                  Change visibility
-                </AlertDialogDescription>
-                <p>Current list name: {listName}</p>
-                <p>Visibility: {visibility}</p>
-              </AlertDialogHeader>
-              <SelectVisibility
-                isMutatingThisQuestion={isMutatingThisList}
-                visibility={newVisibility}
-                setVisibility={setNewVisibility}
-              />
-              {changeVisibilityError && (
-                <p className="text-red-500 text-xs">{changeVisibilityError}</p>
-              )}
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                  onClick={() => {
-                    setIsBlockingInput(true);
-                    setTimeout(() => {
-                      setIsBlockingInput(false);
-                    }, 0);
-                  }}
-                >
-                  Cancel
-                </AlertDialogCancel>
-                <Button
-                  className="cursor-pointer"
-                  disabled={isMutatingThisList}
-                  onClick={() => {
-                    if (newVisibility === visibility) {
-                      setChangeVisibilityError(
-                        "You are not allowed to change to the same visibility"
-                      );
-                      return;
-                    }
-                    if (allListNameUnderNewVisibility.includes(listName)) {
-                      setChangeVisibilityError(
-                        "List name already exists with same visibility"
-                      );
-                      return;
-                    }
-                    changeVisibility({
-                      realListId: listId,
-                      realNewVisibility: newVisibility,
-                    });
-                  }}
-                >
-                  Change visibility
-                  {isMutatingThisList && <Loader2 className="animate-spin" />}
-                </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </PopoverContent>
-      </Popover>
-    </div>
+              <AlertDialogTrigger
+                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+                disabled={isMutatingThisList}
+              >
+                <Telescope /> Change visibility
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Change visibility</AlertDialogTitle>
+                  <AlertDialogDescription className="sr-only">
+                    Change visibility
+                  </AlertDialogDescription>
+                  <p>Current list name: {listName}</p>
+                  <p>Visibility: {visibility}</p>
+                </AlertDialogHeader>
+                <SelectVisibility
+                  isMutatingThisQuestion={isMutatingThisList}
+                  visibility={newVisibility}
+                  setVisibility={setNewVisibility}
+                />
+                {changeVisibilityError && (
+                  <p className="text-red-500 text-xs">
+                    {changeVisibilityError}
+                  </p>
+                )}
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                    onClick={() => {
+                      setIsBlockingInput(true);
+                      setTimeout(() => {
+                        setIsBlockingInput(false);
+                      }, 0);
+                    }}
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <Button
+                    className="cursor-pointer"
+                    disabled={isMutatingThisList}
+                    onClick={() => {
+                      if (newVisibility === visibility) {
+                        setChangeVisibilityError(
+                          "You are not allowed to change to the same visibility"
+                        );
+                        return;
+                      }
+                      if (allListNameUnderNewVisibility.includes(listName)) {
+                        setChangeVisibilityError(
+                          "List name already exists with same visibility"
+                        );
+                        return;
+                      }
+                      changeVisibility({
+                        realListId: listId,
+                        realNewVisibility: newVisibility,
+                      });
+                    }}
+                  >
+                    Change visibility
+                    {isMutatingThisList && <Loader2 className="animate-spin" />}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            {visibility === "public" && (
+              <div
+                className="flex flex-row gap-2 items-center justify-start w-full hover:bg-muted-foreground/10 p-1 rounded-md cursor-pointer"
+                onClick={() => {
+                  setIsQRDialogOpen(true);
+                }}
+              >
+                <Send /> Share list
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
+      <QR
+        isOpen={isQRDialogOpen && visibility === "public"}
+        setIsOpen={setIsQRDialogOpen}
+        url={`${BETTER_AUTH_URL}/topical/bookmark/${listId}`}
+      />
+    </>
   );
 };
