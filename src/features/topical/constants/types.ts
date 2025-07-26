@@ -78,9 +78,7 @@ export interface SelectedQuestion {
   paperType: number;
   questionImages: string[];
   answers: string[];
-  questionTopics: {
-    topic: string | null;
-  }[];
+  topics: string[];
 }
 
 export interface SelectedBookmark {

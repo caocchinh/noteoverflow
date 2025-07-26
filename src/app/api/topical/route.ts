@@ -97,35 +97,14 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
       }
 
-      const baseQuery = db
-        .select({
-          topic: questionTopic.topic,
-          season: question.season,
-          year: question.year,
-          paperType: question.paperType,
-          id: question.id,
-          answers: question.answers,
-          questionImages: question.questionImages,
-        })
-        .from(questionTopic)
-        .innerJoin(
-          question,
-          and(
-            eq(questionTopic.questionId, question.id),
-            inArray(questionTopic.topic, topic)
-          )
-        )
-        .where(and(...conditions));
+      const baseQuery = db.query.question.findMany({
+        where: and(...conditions),
+      });
 
       // Apply rate limit only for unauthenticated users
 
       const rows = await (session?.session ? baseQuery : baseQuery.limit(5));
-      const questionMap = new Map<
-        string,
-        Omit<SelectedQuestion, "questionTopics"> & {
-          questionTopics: Array<{ topic: string | null }>;
-        }
-      >();
+      const questionMap = new Map<string, SelectedQuestion>();
 
       for (const row of rows) {
         const parsedImages = JSON.parse(row.questionImages ?? "[]");

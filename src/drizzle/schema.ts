@@ -205,6 +205,7 @@ export const question = sqliteTable(
     subjectId: text("subject_id").notNull(),
     curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),
+    topics: text("topics"),
   },
   (table) => [
     index("idx_question_filter").on(
@@ -230,34 +231,16 @@ export const question = sqliteTable(
         paperType.curriculumName,
       ],
     }),
+    foreignKey({
+      columns: [table.topics, table.subjectId, table.curriculumName],
+      foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
+    }),
 
     foreignKey({
       columns: [table.subjectId, table.curriculumName],
       foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
   ]
-);
-
-export const questionTopic = sqliteTable(
-  "question_topic",
-  {
-    questionId: text("question_id")
-      .references(() => question.id, { onDelete: "cascade" })
-      .notNull(),
-    topic: text("topic"),
-    subjectId: text("subject_id"),
-    curriculumName: text("curriculum_name"),
-  },
-  (table) => {
-    return [
-      index("idx_question_topic").on(table.topic, table.questionId),
-      primaryKey({ columns: [table.questionId, table.topic] }),
-      foreignKey({
-        columns: [table.topic, table.subjectId, table.curriculumName],
-        foreignColumns: [topic.topic, topic.subjectId, topic.curriculumName],
-      }),
-    ];
-  }
 );
 
 export const userBookmarkList = sqliteTable("user_bookmark_list", {

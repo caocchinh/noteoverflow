@@ -12,7 +12,6 @@ import {
   topic,
   subject,
   curriculum,
-  questionTopic,
   finishedQuestions,
   recentQuery,
 } from "./schema";
@@ -98,7 +97,7 @@ export const subjectRelations = relations(subject, ({ many }) => ({
   years: many(year),
 }));
 
-export const questionRelations = relations(question, ({ one, many }) => ({
+export const questionRelations = relations(question, ({ one }) => ({
   subject: one(subject, {
     fields: [question.subjectId],
     references: [subject.subjectId],
@@ -120,20 +119,8 @@ export const questionRelations = relations(question, ({ one, many }) => ({
     fields: [question.year, question.subjectId, question.curriculumName],
     references: [year.year, year.subjectId, year.curriculumName],
   }),
-  questionTopics: many(questionTopic),
-}));
-
-export const questionTopicRelations = relations(questionTopic, ({ one }) => ({
-  question: one(question, {
-    fields: [questionTopic.questionId],
-    references: [question.id],
-  }),
-  topic: one(topic, {
-    fields: [
-      questionTopic.topic,
-      questionTopic.subjectId,
-      questionTopic.curriculumName,
-    ],
+  topics: one(topic, {
+    fields: [question.topics, question.subjectId, question.curriculumName],
     references: [topic.topic, topic.subjectId, topic.curriculumName],
   }),
 }));
@@ -185,7 +172,6 @@ export const topicRelations = relations(topic, ({ one, many }) => ({
     references: [curriculum.name],
   }),
   questions: many(question),
-  questionTopics: many(questionTopic),
 }));
 
 export const recentQueryRelations = relations(recentQuery, ({ one }) => ({

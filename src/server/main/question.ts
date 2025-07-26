@@ -1,7 +1,7 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db";
-import { question, questionTopic } from "@/drizzle/schema";
+import { question } from "@/drizzle/schema";
 
 export const isQuestionExists = async (
   questionId: string
@@ -71,40 +71,4 @@ export const createQuestion = async ({
     field.answers = answers;
   }
   await db.insert(question).values(field);
-};
-
-export const createQuestionTopic = async ({
-  questionId,
-  topic,
-  subjectId,
-  curriculumName,
-}: {
-  questionId: string;
-  topic: string;
-  subjectId: string;
-  curriculumName: string;
-}) => {
-  try {
-    const db = await getDbAsync();
-    const existingQuestionTopic = await db
-      .select()
-      .from(questionTopic)
-      .where(
-        and(
-          eq(questionTopic.questionId, questionId),
-          eq(questionTopic.topic, topic)
-        )
-      );
-    if (existingQuestionTopic.length > 0) {
-      return;
-    }
-    await db.insert(questionTopic).values({
-      questionId,
-      topic,
-      subjectId,
-      curriculumName,
-    });
-  } catch (error) {
-    console.error("Error creating question topic:", error);
-  }
 };

@@ -11,11 +11,7 @@ import { verifySession } from "@/dal/verifySession";
 import { isValidQuestionId } from "@/lib/utils";
 import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
 import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
-import {
-  createQuestion,
-  createQuestionTopic,
-  isQuestionExists,
-} from "@/server/main/question";
+import { createQuestion, isQuestionExists } from "@/server/main/question";
 import { createSeason, isSeasonExists } from "@/server/main/season";
 import { createSubject, isSubjectExists } from "@/server/main/subject";
 import { createTopic, isTopicExists } from "@/server/main/topic";
@@ -30,7 +26,7 @@ import {
   validateTopic,
   validateYear,
 } from "../../content/lib/utils";
-import { question } from "@/drizzle/schema";
+import { question, topic as topicTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db";
 
@@ -188,9 +184,15 @@ export const legacyUploadAction = async ({
 
       // Check and create topic if needed
       (async () => {
-        if (!(await isTopicExists(topic, subjectFullName, curriculum))) {
+        if (
+          !(await isTopicExists(
+            JSON.stringify([topic]),
+            subjectFullName,
+            curriculum
+          ))
+        ) {
           await createTopic({
-            topic,
+            topic: JSON.stringify([topic]),
             subjectId: subjectFullName,
             curriculumName: curriculum,
           });
@@ -313,13 +315,36 @@ export const legacyUploadAction = async ({
           .where(eq(question.id, questionId));
       }
     }
+    const db = await getDbAsync();
 
-    await createQuestionTopic({
-      questionId,
-      topic,
-      subjectId: subjectFullName,
-      curriculumName: curriculum,
-    });
+    const existingTopics = await db
+      .select({ topics: question.topics })
+      .from(question)
+      .where(eq(question.id, questionId));
+
+    const parsedTopics = JSON.parse(
+      existingTopics[0] && existingTopics[0].topics
+        ? existingTopics[0].topics
+        : "[]"
+    ) as string[];
+    if (!parsedTopics.includes(topic)) {
+      parsedTopics.push(topic);
+      await db
+        .insert(topicTable)
+        .values({
+          topic: JSON.stringify(parsedTopics.toSorted()),
+          subjectId: subjectFullName,
+          curriculumName: curriculum,
+        })
+        .onConflictDoNothing();
+      await db
+        .update(question)
+        .set({
+          topics: JSON.stringify(parsedTopics.toSorted()),
+        })
+        .where(eq(question.id, questionId));
+    }
+
     return {
       success: true,
     };

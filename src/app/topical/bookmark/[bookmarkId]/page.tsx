@@ -66,13 +66,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
           paperVariant: true,
           answers: true,
           questionImages: true,
-        },
-        with: {
-          questionTopics: {
-            columns: {
-              topic: true,
-            },
-          },
+          topics: true,
         },
       },
     },
@@ -83,10 +77,12 @@ const BookmarkViewPage = async (props: { params: Params }) => {
       return {
         updatedAt: item.updatedAt,
         questionId: item.question.id,
+
         question: {
           ...item.question,
           questionImages: JSON.parse(item.question.questionImages ?? "[]"),
           answers: JSON.parse(item.question.answers ?? "[]"),
+          topics: JSON.parse(item.question.topics ?? "[]"),
         },
       };
     }
