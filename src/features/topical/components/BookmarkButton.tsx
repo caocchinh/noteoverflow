@@ -8,7 +8,15 @@ import React, {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronsUpDown, Globe, Loader2, Lock, Plus, X } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Globe,
+  Loader2,
+  Lock,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Bookmark } from "lucide-react";
 import {
   createBookmarkListAndAddBookmarkAction,
@@ -98,6 +106,7 @@ export const BookmarkButton = memo(
     isBookmarkError,
     setShouldOpen,
     popOverAlign = "end",
+    listId,
     badgeClassName,
     popOverTriggerClassName,
     triggerButtonClassName,
@@ -114,6 +123,7 @@ export const BookmarkButton = memo(
     isBookmarksFetching: boolean;
     setShouldOpen?: (value: boolean) => void;
     isBookmarkError: boolean;
+    listId?: string;
     badgeClassName?: string;
     popOverTriggerClassName?: string;
     triggerButtonClassName?: string;
@@ -154,13 +164,13 @@ export const BookmarkButton = memo(
         isBookmarkError,
         isValidSession,
         question,
-        chosenBookmarkListName: (() => {
+        chosenBookmarkList: (() => {
           const set = new Set<string>();
           for (const bookmark of bookmarks) {
             if (
               bookmark.userBookmarks.some((b) => b.question.id === question.id)
             ) {
-              set.add(bookmark.listName + " " + bookmark.visibility);
+              set.add(bookmark.id);
             }
           }
           return set;
@@ -172,6 +182,7 @@ export const BookmarkButton = memo(
         triggerButtonClassName,
         open,
         isInView,
+        listId,
       });
     }
 
@@ -188,7 +199,7 @@ export const BookmarkButton = memo(
           isBookmarkError,
           isValidSession,
           question,
-          chosenBookmarkListName: (() => {
+          chosenBookmarkList: (() => {
             const set = new Set<string>();
             for (const bookmark of bookmarks) {
               if (
@@ -196,7 +207,7 @@ export const BookmarkButton = memo(
                   (b) => b.question.id === question.id
                 )
               ) {
-                set.add(bookmark.listName + " " + bookmark.visibility);
+                set.add(bookmark.id);
               }
             }
             return set;
@@ -208,6 +219,7 @@ export const BookmarkButton = memo(
           triggerButtonClassName,
           open,
           isInView,
+          listId,
         }));
       }
     }, [
@@ -223,6 +235,7 @@ export const BookmarkButton = memo(
       triggerButtonClassName,
       open,
       isInView,
+      listId,
     ]);
 
     if (!isInView) {
@@ -285,6 +298,9 @@ const BookmarkButtonConsumer = memo(
     const setIsAddNewListDialogOpen = useBookmarkContext(
       (state) => state.actions.setIsAddNewListDialogOpen
     );
+    const setIsRemoveFromListDialogOpen = useBookmarkContext(
+      (state) => state.actions.setIsRemoveFromListDialogOpen
+    );
     const setNewBookmarkListNameInput = useBookmarkContext(
       (state) => state.actions.setNewBookmarkListNameInput
     );
@@ -309,11 +325,11 @@ const BookmarkButtonConsumer = memo(
     const isMobileDevice = useIsMobile();
     const setMutate = useBookmarkContext((state) => state.actions.setMutate);
 
-    const addChosenBookmarkListName = useBookmarkContext(
-      (state) => state.actions.addChosenBookmarkListName
+    const addChosenBookmarkList = useBookmarkContext(
+      (state) => state.actions.addChosenBookmarkList
     );
-    const removeChosenBookmarkListName = useBookmarkContext(
-      (state) => state.actions.removeChosenBookmarkListName
+    const removeChosenBookmarkList = useBookmarkContext(
+      (state) => state.actions.removeChosenBookmarkList
     );
 
     const { mutate } = useMutation({
@@ -434,9 +450,7 @@ const BookmarkButtonConsumer = memo(
 
               if (isListAlreadyExist) {
                 // Add bookmark to existing list
-                addChosenBookmarkListName(
-                  newBookmarkListName + " " + realVisibility
-                );
+                addChosenBookmarkList(realListId);
                 const existingList = prev.find(
                   (bookmark) => bookmark.id === realListId
                 );
@@ -456,9 +470,7 @@ const BookmarkButtonConsumer = memo(
                 }
               } else {
                 // Create new list and add bookmark
-                addChosenBookmarkListName(
-                  newBookmarkListName + " " + realVisibility
-                );
+                addChosenBookmarkList(realListId);
                 prev.push({
                   id: realListId,
                   createdAt: new Date(),
@@ -489,9 +501,7 @@ const BookmarkButtonConsumer = memo(
               }
             } else if (!isCreateNew && !isRealBookmarked) {
               // Add bookmark to existing list
-              addChosenBookmarkListName(
-                newBookmarkListName + " " + realVisibility
-              );
+              addChosenBookmarkList(realListId);
               const existingList = prev.find(
                 (bookmark) => bookmark.id === realListId
               );
@@ -511,9 +521,8 @@ const BookmarkButtonConsumer = memo(
               }
             } else if (!isCreateNew && isRealBookmarked) {
               // Remove bookmark from list
-              removeChosenBookmarkListName(
-                newBookmarkListName + " " + realVisibility
-              );
+              removeChosenBookmarkList(realListId);
+              setIsRemoveFromListDialogOpen(false);
               const existingList = prev.find(
                 (bookmark) => bookmark.id === realListId
               );
@@ -892,8 +901,8 @@ const BookmarkList = memo(
     const setIsBlockingInput = useBookmarkContext(
       (state) => state.actions.setIsBlockingInput
     );
-    const chosenBookmarkListName = useBookmarkContext(
-      (state) => state.chosenBookmarkListName
+    const chosenBookmarkList = useBookmarkContext(
+      (state) => state.chosenBookmarkList
     );
     const bookmarks = useBookmarkContext((state) => state.bookmarks);
     const question = useBookmarkContext((state) => state.question);
@@ -985,33 +994,27 @@ const BookmarkList = memo(
                       <h3
                         className={cn(
                           "font-medium text-xs",
-                          chosenBookmarkListName.size > 0
+                          chosenBookmarkList.size > 0
                             ? "text-logo-main"
                             : "text-muted-foreground"
                         )}
                       >
-                        {`${chosenBookmarkListName.size} selected`}
+                        {`${chosenBookmarkList.size} selected`}
                       </h3>
                       <ChevronsUpDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                   )}
-                  <CommandGroup
-                    value={`${chosenBookmarkListName.size} selected`}
-                  >
+                  <CommandGroup value={`${chosenBookmarkList.size} selected`}>
                     <CollapsibleContent>
-                      {chosenBookmarkListName.size > 0 &&
+                      {chosenBookmarkList.size > 0 &&
                         !searchInput &&
                         bookmarks
                           .filter((bookmark) =>
-                            chosenBookmarkListName.has(
-                              bookmark.listName + " " + bookmark.visibility
-                            )
+                            chosenBookmarkList.has(bookmark.id)
                           )
                           .map((bookmark) => (
                             <BookmarkItem
-                              key={
-                                bookmark.listName + " " + bookmark.visibility
-                              }
+                              key={bookmark.id}
                               onSelect={() => {
                                 onListSelect({
                                   bookmark,
@@ -1023,6 +1026,7 @@ const BookmarkList = memo(
                               }}
                               listName={bookmark.listName}
                               isPlaceholder={true}
+                              listId={bookmark.id}
                               visibility={
                                 bookmark.visibility as "public" | "private"
                               }
@@ -1040,13 +1044,13 @@ const BookmarkList = memo(
                   {bookmarks.length > 0 && (
                     <>
                       {bookmarks.map((bookmark) => {
-                        const isItemBookmarked = chosenBookmarkListName.has(
-                          bookmark.listName + " " + bookmark.visibility
+                        const isItemBookmarked = chosenBookmarkList.has(
+                          bookmark.id
                         );
 
                         return (
                           <BookmarkItem
-                            key={bookmark.listName + " " + bookmark.visibility}
+                            key={bookmark.id}
                             onSelect={() => {
                               onListSelect({
                                 bookmark,
@@ -1057,6 +1061,7 @@ const BookmarkList = memo(
                               });
                             }}
                             listName={bookmark.listName}
+                            listId={bookmark.id}
                             visibility={
                               bookmark.visibility as "public" | "private"
                             }
@@ -1072,7 +1077,7 @@ const BookmarkList = memo(
             )}
           </CommandList>
         </ScrollArea>
-        <CreateNewListAlertDialog />
+        <ActionDialogs />
       </div>
     );
   }
@@ -1084,11 +1089,13 @@ const BookmarkItem = memo(
   ({
     listName,
     visibility,
+    listId,
     isPlaceholder,
     onSelect,
     searchInputRef,
   }: {
     listName: string;
+    listId: string;
     visibility: "public" | "private";
     isPlaceholder: boolean;
     onSelect: () => void;
@@ -1099,8 +1106,8 @@ const BookmarkItem = memo(
       (state) => state.actions.setIsBlockingInput
     );
     const searchInput = useBookmarkContext((state) => state.searchInput);
-    const chosenBookmarkListName = useBookmarkContext(
-      (state) => state.chosenBookmarkListName
+    const chosenBookmarkList = useBookmarkContext(
+      (state) => state.chosenBookmarkList
     );
     const isMutating =
       useIsMutating({
@@ -1152,7 +1159,7 @@ const BookmarkItem = memo(
       >
         <div className="flex items-center justify-start gap-2">
           <Checkbox
-            checked={chosenBookmarkListName.has(listName + " " + visibility)}
+            checked={chosenBookmarkList.has(listId)}
             className="data-[state=checked]:!bg-logo-main "
           />
           {listName}
@@ -1172,7 +1179,7 @@ const BookmarkItem = memo(
 
 BookmarkItem.displayName = "BookmarkItem";
 
-const CreateNewListAlertDialog = memo(() => {
+const ActionDialogs = memo(() => {
   const newBookmarkListNameInput = useBookmarkContext(
     (state) => state.newBookmarkListNameInput
   );
@@ -1191,6 +1198,12 @@ const CreateNewListAlertDialog = memo(() => {
   const isInputError = useBookmarkContext((state) => state.isInputError);
   const isAddNewListDialogOpen = useBookmarkContext(
     (state) => state.isAddNewListDialogOpen
+  );
+  const setIsRemoveFromListDialogOpen = useBookmarkContext(
+    (state) => state.actions.setIsRemoveFromListDialogOpen
+  );
+  const isRemoveFromListDialogOpen = useBookmarkContext(
+    (state) => state.isRemoveFromListDialogOpen
   );
   const isMutatingThisQuestion =
     useIsMutating({
@@ -1233,142 +1246,237 @@ const CreateNewListAlertDialog = memo(() => {
       setIsBlockingDialogInput(false);
     }, 0);
   };
+  const chosenBookmarkList = useBookmarkContext(
+    (state) => state.chosenBookmarkList
+  );
+
+  const removeFromList = ({ listId }: { listId: string }) => {
+    const list = bookmarks.find((bookmark) => bookmark.id === listId);
+    if (!list) {
+      toast.error("List not found, please refresh the page!", {
+        duration: 2000,
+        position: isMobileDevice ? "top-center" : "bottom-right",
+      });
+      return;
+    }
+    if (!chosenBookmarkList.has(listId)) {
+      toast.error("The question is not in this list already!", {
+        duration: 2000,
+        position: isMobileDevice ? "top-center" : "bottom-right",
+      });
+      setIsRemoveFromListDialogOpen(false);
+      return;
+    }
+    mutate?.({
+      realQuestion: question,
+      realListId: listId,
+      realBookmarkListName: list.listName,
+      isRealBookmarked: true,
+      isCreateNew: false,
+      realVisibility: list.visibility as "public" | "private",
+    });
+  };
+
   const setVisibility = useBookmarkContext(
     (state) => state.actions.setVisibility
   );
   const visibility = useBookmarkContext((state) => state.visibility);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
+  const listId = useBookmarkContext((state) => state.listId);
 
   return (
-    <AlertDialog
-      open={isAddNewListDialogOpen}
-      onOpenChange={(value) => {
-        setIsAddNewListDialogOpen(value);
-        if (value === true) {
-          setTimeout(() => {
-            inputRef.current?.focus();
-          }, 0);
-        }
-      }}
-    >
-      <AlertDialogTrigger asChild>
-        <div className="px-2 w-full">
-          <Button className="w-full mt-2 cursor-pointer" variant="outline">
-            <Plus /> New list
-          </Button>
-        </div>
-      </AlertDialogTrigger>
-      <AlertDialogContent
-        className="z-[100008] dark:bg-accent"
-        overlayClassName="z-[100007] "
+    <div className="flex w-full items-center justify-center gap-2 px-2">
+      <AlertDialog
+        open={isAddNewListDialogOpen}
+        onOpenChange={(value) => {
+          setIsAddNewListDialogOpen(value);
+          if (value === true) {
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 0);
+          }
+        }}
       >
-        <AlertDialogHeader>
-          <AlertDialogTitle>New list</AlertDialogTitle>
-        </AlertDialogHeader>
-        <div className="flex items-center justify-center flex-col">
-          <p className="text-sm w-full text-left mb-1">List name</p>
-          <div className="flex items-center justify-center gap-2 w-full">
-            <Input
-              onChange={(e) => {
-                if (e.target.value.length > LIST_NAME_MAX_LENGTH) {
-                  setIsInputError(true);
-                } else {
-                  setIsInputError(false);
-                }
-                setNewBookmarkListNameInput(e.target.value);
-              }}
-              ref={inputRef}
-              readOnly={isBlockingDialogInput}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  createNewList();
-                }
-              }}
-              onClick={() => {
-                inputRef.current?.focus();
-                setIsBlockingDialogInput(false);
-              }}
-              disabled={isMutatingThisQuestion}
-              value={newBookmarkListNameInput}
-              placeholder="e.g. Super hard questions"
-              className="placeholder:text-[13px]"
-            />
-            <X
-              className={cn(
-                "cursor-pointer text-red-500",
-                isMutatingThisQuestion && "opacity-50"
-              )}
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onClick={() => {
-                if (isMutatingThisQuestion) return;
-                setNewBookmarkListNameInput("");
-                inputRef.current?.focus();
-                setIsBlockingDialogInput(false);
-                setIsInputError(false);
-              }}
-              size={20}
-            />
-          </div>
-          <p className="text-sm w-full text-left mt-3 mb-1">Visibility</p>
-          <div className="flex items-center justify-center gap-2 w-full">
-            <SelectVisibility
-              isMutatingThisQuestion={isMutatingThisQuestion}
-              visibility={visibility}
-              setVisibility={setVisibility}
-            />
-          </div>
-        </div>
-        {isInputError && (
-          <p className="text-red-500 text-xs mt-1 text-center">
-            Please enter valid a list name. Max {LIST_NAME_MAX_LENGTH}{" "}
-            characters.
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground mt-1 text-left">
-          If list name with the same visibility already exists, the question
-          will be added to the list.
-        </p>
-        <div className="flex gap-2 w-full">
-          <AlertDialogCancel asChild>
-            <Button
-              className="w-1/2 mt-2 cursor-pointer"
-              variant="outline"
-              onClick={() => {
-                setIsBlockingDialogInput(true);
-                setTimeout(() => {
-                  setIsBlockingDialogInput(false);
-                }, 0);
-              }}
-            >
-              Back
+        <AlertDialogTrigger asChild>
+          <div className="flex-1">
+            <Button className="w-full mt-2 cursor-pointer" variant="outline">
+              <Plus /> New list
             </Button>
-          </AlertDialogCancel>
-          <Button
-            className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
-            disabled={isInputError || isMutatingThisQuestion}
-            onClick={createNewList}
+          </div>
+        </AlertDialogTrigger>
+        <AlertDialogContent
+          className="z-[100008] dark:bg-accent"
+          overlayClassName="z-[100007] "
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>New list</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="flex items-center justify-center flex-col">
+            <p className="text-sm w-full text-left mb-1">List name</p>
+            <div className="flex items-center justify-center gap-2 w-full">
+              <Input
+                onChange={(e) => {
+                  if (e.target.value.length > LIST_NAME_MAX_LENGTH) {
+                    setIsInputError(true);
+                  } else {
+                    setIsInputError(false);
+                  }
+                  setNewBookmarkListNameInput(e.target.value);
+                }}
+                ref={inputRef}
+                readOnly={isBlockingDialogInput}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    createNewList();
+                  }
+                }}
+                onClick={() => {
+                  inputRef.current?.focus();
+                  setIsBlockingDialogInput(false);
+                }}
+                disabled={isMutatingThisQuestion}
+                value={newBookmarkListNameInput}
+                placeholder="e.g. Super hard questions"
+                className="placeholder:text-[13px]"
+              />
+              <X
+                className={cn(
+                  "cursor-pointer text-red-500",
+                  isMutatingThisQuestion && "opacity-50"
+                )}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onClick={() => {
+                  if (isMutatingThisQuestion) return;
+                  setNewBookmarkListNameInput("");
+                  inputRef.current?.focus();
+                  setIsBlockingDialogInput(false);
+                  setIsInputError(false);
+                }}
+                size={20}
+              />
+            </div>
+            <p className="text-sm w-full text-left mt-3 mb-1">Visibility</p>
+            <div className="flex items-center justify-center gap-2 w-full">
+              <SelectVisibility
+                isMutatingThisQuestion={isMutatingThisQuestion}
+                visibility={visibility}
+                setVisibility={setVisibility}
+              />
+            </div>
+          </div>
+          {isInputError && (
+            <p className="text-red-500 text-xs mt-1 text-center">
+              Please enter valid a list name. Max {LIST_NAME_MAX_LENGTH}{" "}
+              characters.
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1 text-left">
+            If list name with the same visibility already exists, the question
+            will be added to the list.
+          </p>
+          <div className="flex gap-2 w-full">
+            <AlertDialogCancel asChild>
+              <Button
+                className="w-1/2 mt-2 cursor-pointer"
+                variant="outline"
+                onClick={() => {
+                  setIsBlockingDialogInput(true);
+                  setTimeout(() => {
+                    setIsBlockingDialogInput(false);
+                  }, 0);
+                }}
+              >
+                Back
+              </Button>
+            </AlertDialogCancel>
+            <Button
+              className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+              disabled={isInputError || isMutatingThisQuestion}
+              onClick={createNewList}
+            >
+              {isMutatingThisQuestion ? (
+                <>
+                  Processing
+                  <Loader2 className="animate-spin ml-1" />
+                </>
+              ) : (
+                <>
+                  <Plus />
+                  Create
+                </>
+              )}
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+      {listId && (
+        <AlertDialog
+          open={isRemoveFromListDialogOpen}
+          onOpenChange={(value) => {
+            setIsRemoveFromListDialogOpen(value);
+          }}
+        >
+          <AlertDialogTrigger asChild>
+            <div className="flex-1">
+              <Button
+                className="w-full mt-2 cursor-pointer"
+                variant="destructive"
+              >
+                <Trash2 />
+                Remove
+              </Button>
+            </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent
+            className="z-[100008] dark:bg-accent"
+            overlayClassName="z-[100007] "
           >
-            {isMutatingThisQuestion ? (
-              <>
-                Processing
-                <Loader2 className="animate-spin ml-1" />
-              </>
-            ) : (
-              <>
-                <Plus />
-                Create
-              </>
-            )}
-          </Button>
-        </div>
-      </AlertDialogContent>
-    </AlertDialog>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove from this list</AlertDialogTitle>
+            </AlertDialogHeader>
+            <div className="flex items-center justify-center flex-col">
+              <p className="text-sm w-full text-left mb-1">
+                Do you want to remove this question from this bookmark list.
+              </p>
+
+              <div className="flex gap-2 w-full">
+                <AlertDialogCancel asChild>
+                  <Button
+                    className="w-1/2 mt-2 cursor-pointer"
+                    variant="outline"
+                  >
+                    Back
+                  </Button>
+                </AlertDialogCancel>
+                <Button
+                  className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+                  disabled={isMutatingThisQuestion}
+                  onClick={() => removeFromList({ listId })}
+                >
+                  {isMutatingThisQuestion ? (
+                    <>
+                      Processing
+                      <Loader2 className="animate-spin ml-1" />
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 />
+                      Remove from this list
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </div>
   );
 });
 
-CreateNewListAlertDialog.displayName = "CreateNewListAlertDialog";
+ActionDialogs.displayName = "ActionDialogs";

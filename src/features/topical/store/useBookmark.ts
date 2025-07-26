@@ -19,13 +19,15 @@ export type BookmarkState = {
   isBlockingInput: boolean;
   isInputError: boolean;
   isAddNewListDialogOpen: boolean;
+  isRemoveFromListDialogOpen: boolean;
   visibility: "public" | "private";
   question: SelectedQuestion;
+  listId?: string;
   bookmarkListName: string;
   newBookmarkListNameInput: string;
   searchInput: string;
   bookmarks: SelectedBookmark[];
-  chosenBookmarkListName: Set<string>;
+  chosenBookmarkList: Set<string>;
   popOverAlign: "start" | "end";
   badgeClassName?: string;
   popOverTriggerClassName?: string;
@@ -39,13 +41,14 @@ export type BookmarkState = {
     setIsBlockingInput: (value: boolean) => void;
     setIsHovering?: (value: boolean) => void;
     setSearchInput: (value: string) => void;
-    addChosenBookmarkListName: (value: string) => void;
-    removeChosenBookmarkListName: (value: string) => void;
+    addChosenBookmarkList: (value: string) => void;
+    removeChosenBookmarkList: (value: string) => void;
     setMutate: (mutate: MutateFunction | null) => void;
     setBookmarkListName: (value: string) => void;
     setNewBookmarkListNameInput: (value: string) => void;
     setIsInputError: (value: boolean) => void;
     setIsAddNewListDialogOpen: (value: boolean) => void;
+    setIsRemoveFromListDialogOpen: (value: boolean) => void;
     setVisibility: (value: "public" | "private") => void;
   };
 };
@@ -54,9 +57,10 @@ export type BookmarkProps = {
   isBookmarksFetching: boolean;
   isBookmarkDisabled: boolean;
   isBookmarkError: boolean;
+  listId?: string;
   isValidSession: boolean;
   question: SelectedQuestion;
-  chosenBookmarkListName: Set<string>;
+  chosenBookmarkList: Set<string>;
   bookmarks: SelectedBookmark[];
   popOverAlign?: "start" | "end";
   badgeClassName?: string;
@@ -73,17 +77,19 @@ const createBookmarkStore = (props: BookmarkProps) => {
     isBookmarksFetching: props.isBookmarksFetching,
     isBookmarkDisabled: props.isBookmarkDisabled,
     isBookmarkError: props.isBookmarkError,
+    listId: props.listId ?? "",
     isValidSession: props.isValidSession,
     isBlockingInput: false,
     isInputError: false,
     isAddNewListDialogOpen: false,
+    isRemoveFromListDialogOpen: false,
     visibility: "private",
     question: props.question,
     bookmarkListName: "",
     newBookmarkListNameInput: "",
     searchInput: "",
     bookmarks: props.bookmarks,
-    chosenBookmarkListName: props.chosenBookmarkListName,
+    chosenBookmarkList: props.chosenBookmarkList,
     popOverAlign: props.popOverAlign ?? "end",
     badgeClassName: props.badgeClassName,
     popOverTriggerClassName: props.popOverTriggerClassName,
@@ -109,20 +115,20 @@ const createBookmarkStore = (props: BookmarkProps) => {
           ...state,
           searchInput: value,
         })),
-      addChosenBookmarkListName: (value: string) =>
+      addChosenBookmarkList: (value: string) =>
         set((state) => {
-          state.chosenBookmarkListName.add(value);
+          state.chosenBookmarkList.add(value);
           return {
             ...state,
-            chosenBookmarkListName: new Set(state.chosenBookmarkListName),
+            chosenBookmarkList: new Set(state.chosenBookmarkList),
           };
         }),
-      removeChosenBookmarkListName: (value: string) =>
+      removeChosenBookmarkList: (value: string) =>
         set((state) => {
-          state.chosenBookmarkListName.delete(value);
+          state.chosenBookmarkList.delete(value);
           return {
             ...state,
-            chosenBookmarkListName: new Set(state.chosenBookmarkListName),
+            chosenBookmarkList: new Set(state.chosenBookmarkList),
           };
         }),
       setMutate: (mutate: MutateFunction | null) =>
@@ -149,6 +155,11 @@ const createBookmarkStore = (props: BookmarkProps) => {
         set((state) => ({
           ...state,
           isAddNewListDialogOpen: value,
+        })),
+      setIsRemoveFromListDialogOpen: (value: boolean) =>
+        set((state) => ({
+          ...state,
+          isRemoveFromListDialogOpen: value,
         })),
       setVisibility: (value: "public" | "private") =>
         set((state) => ({

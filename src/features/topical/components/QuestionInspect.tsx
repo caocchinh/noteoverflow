@@ -83,6 +83,7 @@ const QuestionInspect = ({
   isValidSession,
   isBookmarksFetching,
   isBookmarkError,
+  listId,
   isFinishedQuestionsFetching,
   sortBy,
   setSortBy,
@@ -115,6 +116,7 @@ const QuestionInspect = ({
   isFinishedQuestionsFetching: boolean;
   isFinishedQuestionsError: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
+  listId?: string;
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -755,6 +757,7 @@ const QuestionInspect = ({
                               isBookmarkDisabled={isUserSessionPending}
                               bookmarks={bookmarks}
                               isValidSession={isValidSession}
+                              listId={listId}
                               isBookmarksFetching={isBookmarksFetching}
                               isBookmarkError={isBookmarkError}
                               isInView={true}
@@ -838,6 +841,7 @@ const QuestionInspect = ({
                             isBookmarksFetching={isBookmarksFetching}
                             isBookmarkError={isBookmarkError}
                             isInView={true}
+                            listId={listId}
                           />
                         </div>
                         <SelectSeparator />
@@ -1137,6 +1141,7 @@ const QuestionInspect = ({
                       badgeClassName="h-[35px] min-h-[35px] !static"
                       question={currentQuestionData}
                       isBookmarkDisabled={isUserSessionPending}
+                      listId={listId}
                       bookmarks={bookmarks}
                       popOverAlign="start"
                       isValidSession={isValidSession}

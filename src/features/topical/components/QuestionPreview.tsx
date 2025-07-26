@@ -25,6 +25,7 @@ const QuestionPreview = memo(
     imageSrc,
     isBookmarkError,
     imageTheme,
+    listId,
     isValidSession,
     showFinishedQuestionTint,
     question,
@@ -46,6 +47,7 @@ const QuestionPreview = memo(
     userFinishedQuestions: SelectedFinishedQuestion[];
     showFinishedQuestionTint: boolean;
     imageTheme: "dark" | "light";
+    listId?: string;
   }) => {
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
@@ -161,10 +163,11 @@ const QuestionPreview = memo(
           isBookmarkDisabled={isUserSessionPending}
           isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
           isInView={shouldOpen}
+          listId={listId}
         />
         {isMutatingThisQuestion && (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px]"
+            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

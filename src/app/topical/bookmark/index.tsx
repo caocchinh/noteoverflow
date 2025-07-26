@@ -1043,7 +1043,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {curriculumnMetadata[selectedCurriculumn].map((subject) => (
+              {curriculumnMetadata[selectedCurriculumn]?.map((subject) => (
                 <div
                   key={subject}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -1104,6 +1104,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       key={`${question.id}-${imageSrc}`}
                       isBookmarksFetching={isBookmarksFetching}
                       imageSrc={imageSrc}
+                      listId={chosenList?.id}
                       imageTheme={imageTheme}
                     />
                   ))
@@ -1339,6 +1340,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
+        listId={chosenList?.id}
         isBookmarkError={isUserSessionError || isBookmarksError}
         isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
         isInspectSidebarOpen={isInspectSidebarOpen}

@@ -958,6 +958,7 @@ export const BookmarkView = ({
                       key={`${question.id}-${imageSrc}`}
                       isBookmarksFetching={isBookmarksFetching}
                       imageSrc={imageSrc}
+                      listId={listId}
                       imageTheme={imageTheme}
                     />
                   ))
@@ -1181,6 +1182,7 @@ export const BookmarkView = ({
         partitionedTopicalData={fullPartitionedData}
         imageTheme={imageTheme}
         bookmarks={bookmarks ?? []}
+        listId={listId}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
