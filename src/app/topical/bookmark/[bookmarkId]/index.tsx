@@ -38,7 +38,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Loader2,
   Monitor,
   ScanText,
   SlidersHorizontal,
@@ -78,13 +77,22 @@ import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import Link from "next/link";
 
 export const BookmarkView = ({
   data,
   BETTER_AUTH_URL,
+  listId,
+  ownerInfo,
 }: {
   data: SelectedPublickBookmark[];
   BETTER_AUTH_URL: string;
+  listId: string;
+  ownerInfo: {
+    ownerName: string;
+    listName: string;
+  };
 }) => {
   const queryClient = useQueryClient();
 
@@ -183,7 +191,7 @@ export const BookmarkView = ({
     });
 
     return tempMetadata;
-  }, [userFinishedQuestions]);
+  }, [data]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
@@ -391,12 +399,7 @@ export const BookmarkView = ({
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const topicalData = useMemo(() => {
-    if (
-      !userFinishedQuestions ||
-      !currentFilter ||
-      !selectedCurriculumn ||
-      !selectedSubject
-    )
+    if (!currentFilter || !selectedCurriculumn || !selectedSubject || !data)
       return [];
     return data.filter((item) => {
       const extractedCurriculumn = extractCurriculumCode({
@@ -434,13 +437,7 @@ export const BookmarkView = ({
       }
       return true;
     });
-  }, [
-    currentFilter,
-    data,
-    selectedCurriculumn,
-    selectedSubject,
-    userFinishedQuestions,
-  ]);
+  }, [currentFilter, data, selectedCurriculumn, selectedSubject]);
 
   useEffect(() => {
     if (topicalData) {
@@ -820,6 +817,11 @@ export const BookmarkView = ({
                 setSortBy={setSortBy}
                 disabled={isQuestionViewDisabled}
               />
+              <ShareFilter
+                isDisabled={false}
+                type="bookmark"
+                url={`${BETTER_AUTH_URL}/topical/bookmark/${listId}`}
+              />
             </div>
 
             <ScrollBar
@@ -828,48 +830,55 @@ export const BookmarkView = ({
             />
           </ScrollArea>
         </div>
-
-        {metadata && !selectedCurriculumn && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
-            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {Object.keys(metadata).map((curriculum) => (
-                <div
-                  key={curriculum}
-                  className="flex flex-col items-center justify-center gap-1 cursor-pointer"
-                  onClick={() => {
-                    setSelectedCurriculum(curriculum as ValidCurriculum);
-                  }}
-                  title={curriculum}
-                >
-                  <img
-                    loading="lazy"
-                    className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
-                    alt="Curriculum cover image"
-                    src={
-                      CURRICULUM_COVER_IMAGE[
-                        curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                      ]
-                    }
-                  />
-                  <p>{curriculum}</p>
-                </div>
-              ))}
+        <div className="flex flex-row items-center justify-start w-full">
+          <p className="text-sm text-logo-main">
+            {ownerInfo.ownerName}&apos;s list - {ownerInfo.listName}
+          </p>
+        </div>
+        {metadata &&
+          !selectedCurriculumn &&
+          Object.keys(metadata).length > 0 && (
+            <div className="flex flex-col gap-4 items-center justify-center w-full">
+              <h1 className="font-semibold text-2xl">
+                Choose your curriculumn
+              </h1>
+              <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+                {Object.keys(metadata).map((curriculum) => (
+                  <div
+                    key={curriculum}
+                    className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    onClick={() => {
+                      setSelectedCurriculum(curriculum as ValidCurriculum);
+                    }}
+                    title={curriculum}
+                  >
+                    <img
+                      loading="lazy"
+                      className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
+                      alt="Curriculum cover image"
+                      src={
+                        CURRICULUM_COVER_IMAGE[
+                          curriculum as keyof typeof CURRICULUM_COVER_IMAGE
+                        ]
+                      }
+                    />
+                    <p>{curriculum}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-        {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <Loader2 className="animate-spin" />
-          </div>
-        )}
+          )}
 
-        {!isUserSessionPending && !userSession?.data?.session && (
+        {Object.keys(metadata).length === 0 && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-red-500">
-              You are not signed in. Please sign to view your finished
-              questions!
+            <p className="text-sm text-muted-foreground">
+              Nothing found in this bookmark list!
             </p>
+            <Button className="!bg-logo-main !text-white" asChild>
+              <Link href="/topical/bookmark" className="w-[250px]">
+                Go back to your bookmark
+              </Link>
+            </Button>
           </div>
         )}
 

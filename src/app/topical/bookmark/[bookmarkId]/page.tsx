@@ -17,6 +17,13 @@ const BookmarkViewPage = async (props: { params: Params }) => {
   const db = await getDbAsync();
   const bookmarkList = await db.query.userBookmarkList.findFirst({
     where: eq(userBookmarkList.id, bookmarkId),
+    with: {
+      user: {
+        columns: {
+          name: true,
+        },
+      },
+    },
   });
 
   if (!bookmarkList) {
@@ -90,6 +97,11 @@ const BookmarkViewPage = async (props: { params: Params }) => {
         <BookmarkView
           data={data}
           BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
+          listId={bookmarkId}
+          ownerInfo={{
+            ownerName: bookmarkList.user.name,
+            listName: bookmarkList.listName,
+          }}
         />
       </Suspense>
     );

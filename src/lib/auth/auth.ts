@@ -62,6 +62,7 @@ export const auth = async (database: any) =>
               listName: "My bookmarks",
               createdAt: new Date(),
               updatedAt: new Date(),
+              id: crypto.randomUUID(),
             });
           },
         },

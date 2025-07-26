@@ -267,7 +267,7 @@ export const ListFolder = ({
         }}
       >
         <div className="flex flex-row gap-4 items-center justify-center">
-          <Folder fill="black" />
+          <Folder className="!text-black" fill="black" />
           <h3 className=" text-lg text-black">
             {truncateListName({ listName })}
           </h3>
@@ -280,7 +280,7 @@ export const ListFolder = ({
               e.stopPropagation();
             }}
           >
-            <EllipsisVertical size={18} />
+            <EllipsisVertical size={18} className="!text-black" />
           </PopoverTrigger>
           <PopoverContent className="!p-2 w-[190px] gap-2 flex flex-col items-center justify-center">
             <AlertDialog

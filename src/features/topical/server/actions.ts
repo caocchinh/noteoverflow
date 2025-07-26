@@ -71,10 +71,9 @@ const addBookmark = async ({
       success: true,
     };
   } catch (e) {
-    console.log(e);
     if (
       e instanceof Error &&
-      /FOREIGN KEY constraint failed/i.test(e.message)
+      /FOREIGN KEY constraint failed/i.test(e.cause as string)
     ) {
       return {
         error: DOES_NOT_EXIST,

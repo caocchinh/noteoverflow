@@ -78,6 +78,7 @@ import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSele
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
+import Link from "next/link";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
@@ -822,33 +823,50 @@ const FinishedQuestionsPage = () => {
           </ScrollArea>
         </div>
 
-        {metadata && !selectedCurriculumn && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
-            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {Object.keys(metadata).map((curriculum) => (
-                <div
-                  key={curriculum}
-                  className="flex flex-col items-center justify-center gap-1 cursor-pointer"
-                  onClick={() => {
-                    setSelectedCurriculum(curriculum as ValidCurriculum);
-                  }}
-                  title={curriculum}
-                >
-                  <img
-                    loading="lazy"
-                    className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
-                    alt="Curriculum cover image"
-                    src={
-                      CURRICULUM_COVER_IMAGE[
-                        curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                      ]
-                    }
-                  />
-                  <p>{curriculum}</p>
-                </div>
-              ))}
+        {metadata &&
+          !selectedCurriculumn &&
+          Object.keys(metadata).length > 0 && (
+            <div className="flex flex-col gap-4 items-center justify-center w-full">
+              <h1 className="font-semibold text-2xl">
+                Choose your curriculumn
+              </h1>
+              <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+                {Object.keys(metadata).map((curriculum) => (
+                  <div
+                    key={curriculum}
+                    className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                    onClick={() => {
+                      setSelectedCurriculum(curriculum as ValidCurriculum);
+                    }}
+                    title={curriculum}
+                  >
+                    <img
+                      loading="lazy"
+                      className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
+                      alt="Curriculum cover image"
+                      src={
+                        CURRICULUM_COVER_IMAGE[
+                          curriculum as keyof typeof CURRICULUM_COVER_IMAGE
+                        ]
+                      }
+                    />
+                    <p>{curriculum}</p>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
+        {Object.keys(metadata).length === 0 && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <p className="text-sm text-muted-foreground">
+              Start searching for questions and add them to your finished
+              questions!
+            </p>
+            <Button className="!bg-logo-main !text-white" asChild>
+              <Link href="/topical" className="w-[250px]">
+                Search for questions <ScanText />
+              </Link>
+            </Button>
           </div>
         )}
         {(isUserFinishedQuestionsFetching || isUserSessionPending) && (

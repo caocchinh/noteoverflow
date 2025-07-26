@@ -83,6 +83,7 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { ListFolder } from "@/features/topical/components/ListFolder";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import Link from "next/link";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
@@ -224,7 +225,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }, [bookmarks]);
 
   const curriculumnMetadata = useMemo(() => {
-    if (!chosenList) return null;
+    if (
+      !chosenList ||
+      !metadata[chosenList.visibility] ||
+      !metadata[chosenList.visibility][chosenList.id]
+    )
+      return null;
     return metadata[chosenList.visibility][chosenList.id].data;
   }, [chosenList, metadata]);
 
@@ -349,7 +355,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
-  console.log(metadata);
   useEffect(() => {
     const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
     try {
@@ -900,7 +905,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               />
               {chosenList && chosenList.visibility === "public" && (
                 <ShareFilter
-                  isDisabled={isQuestionViewDisabled}
+                  isDisabled={false}
                   type="bookmark"
                   url={`${BETTER_AUTH_URL}/topical/bookmark/${chosenList.id}`}
                 />
@@ -994,10 +999,17 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
               {Object.keys(curriculumnMetadata).length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No curriculums found. Search for questions and add them to a
-                  this list!
-                </p>
+                <div className="flex flex-col gap-4 items-center justify-center w-full">
+                  <p className="text-sm text-muted-foreground">
+                    No curriculums found. Search for questions and add them to a
+                    this list!
+                  </p>
+                  <Button className="!bg-logo-main !text-white" asChild>
+                    <Link href="/topical" className="w-[250px]">
+                      Search for questions <ScanText />
+                    </Link>
+                  </Button>
+                </div>
               )}
               {Object.keys(curriculumnMetadata).map((curriculum) => (
                 <div
