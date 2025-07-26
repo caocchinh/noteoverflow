@@ -79,6 +79,7 @@ import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import Link from "next/link";
+import Image from "next/image";
 
 export const BookmarkView = ({
   data,
@@ -852,7 +853,9 @@ export const BookmarkView = ({
                     }}
                     title={curriculum}
                   >
-                    <img
+                    <Image
+                      width={182}
+                      height={80}
                       loading="lazy"
                       className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
                       alt="Curriculum cover image"

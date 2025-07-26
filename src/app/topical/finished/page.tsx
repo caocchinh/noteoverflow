@@ -79,6 +79,7 @@ import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import Link from "next/link";
+import Image from "next/image";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
@@ -840,7 +841,9 @@ const FinishedQuestionsPage = () => {
                     }}
                     title={curriculum}
                   >
-                    <img
+                    <Image
+                      width={182}
+                      height={80}
                       loading="lazy"
                       className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
                       alt="Curriculum cover image"

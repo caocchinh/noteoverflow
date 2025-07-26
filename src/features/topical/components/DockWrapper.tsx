@@ -3,7 +3,7 @@
 import {
   BookOpenCheck,
   Bookmark,
-  FileClock,
+  // FileClock,
   LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { useRef } from "react";
 import {
   TOPICAL_QUESTION_APP_ROUTE,
   TOPICAL_QUESTION_BOOKMARK_ROUTE,
-  TOPICAL_QUESTION_HISTORY_ROUTE,
+  // TOPICAL_QUESTION_HISTORY_ROUTE,
   TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE,
 } from "@/constants/constants";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ import Dock from "./Dock";
 const DockWrapper = () => {
   const pathname = usePathname();
   const dummyLinkRef1 = useRef<HTMLAnchorElement>(null);
-  const dummyLinkRef2 = useRef<HTMLAnchorElement>(null);
+  // const dummyLinkRef2 = useRef<HTMLAnchorElement>(null);
   const dummyLinkRef3 = useRef<HTMLAnchorElement>(null);
   const dummyLinkRef4 = useRef<HTMLAnchorElement>(null);
   return (
@@ -95,26 +95,26 @@ const DockWrapper = () => {
               ? "!bg-logo-main"
               : "",
         },
-        {
-          icon: (
-            <Link href={TOPICAL_QUESTION_HISTORY_ROUTE} ref={dummyLinkRef2}>
-              <FileClock
-                className={cn(
-                  "text-white dark:text-black",
-                  pathname === TOPICAL_QUESTION_HISTORY_ROUTE && "!text-white"
-                )}
-                size={18}
-              />
-            </Link>
-          ),
-          label: "Recently viewed",
-          onClick: () => {
-            dummyLinkRef2.current?.click();
-            return;
-          },
-          backgroundColor:
-            pathname === TOPICAL_QUESTION_HISTORY_ROUTE ? "!bg-logo-main" : "",
-        },
+        // {
+        //   icon: (
+        //     <Link href={TOPICAL_QUESTION_HISTORY_ROUTE} ref={dummyLinkRef2}>
+        //       <FileClock
+        //         className={cn(
+        //           "text-white dark:text-black",
+        //           pathname === TOPICAL_QUESTION_HISTORY_ROUTE && "!text-white"
+        //         )}
+        //         size={18}
+        //       />
+        //     </Link>
+        //   ),
+        //   label: "Recently viewed",
+        //   onClick: () => {
+        //     dummyLinkRef2.current?.click();
+        //     return;
+        //   },
+        //   backgroundColor:
+        //     pathname === TOPICAL_QUESTION_HISTORY_ROUTE ? "!bg-logo-main" : "",
+        // },
       ]}
       magnification={50}
       panelHeight={30}

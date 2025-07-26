@@ -56,14 +56,21 @@ export const auth = async (database: any) =>
             };
           },
           after: async (user: User) => {
-            const db = await database();
-            await db.insert(schema.userBookmarkList).values({
-              userId: user.id,
-              listName: "My bookmarks",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              id: crypto.randomUUID(),
-            });
+            try {
+              const db = await database();
+              await db
+                .insert(schema.userBookmarkList)
+                .values({
+                  userId: user.id,
+                  listName: "My bookmarks",
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  id: crypto.randomUUID(),
+                })
+                .onConflictDoNothing();
+            } catch (error) {
+              console.log(error);
+            }
           },
         },
       },

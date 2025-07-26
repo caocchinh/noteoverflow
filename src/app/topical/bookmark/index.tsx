@@ -84,6 +84,7 @@ import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { ListFolder } from "@/features/topical/components/ListFolder";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import Link from "next/link";
+import Image from "next/image";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
@@ -1020,7 +1021,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   }}
                   title={curriculum}
                 >
-                  <img
+                  <Image
+                    width={182}
+                    height={80}
                     loading="lazy"
                     className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
                     alt="Curriculum cover image"

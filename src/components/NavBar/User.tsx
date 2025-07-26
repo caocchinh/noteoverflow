@@ -170,8 +170,8 @@ const User = () => {
                     src={data.data.user.image || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(" ")[0].charAt(0) +
-                      data.data.user.name.split(" ")[1].charAt(0)}
+                    {data.data.user.name.split(" ")[0]?.charAt(0) +
+                      data.data.user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </GlareHover>
               </Avatar>
@@ -203,8 +203,8 @@ const User = () => {
                     src={data.data?.user.image || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(" ")[0].charAt(0) +
-                      data.data.user.name.split(" ")[1].charAt(0)}
+                    {data.data.user.name.split(" ")[0]?.charAt(0) +
+                      data.data.user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <p className="w-max max-w-[120px] whitespace-pre-line font-medium text-sm">
