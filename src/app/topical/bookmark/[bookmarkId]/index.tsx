@@ -92,6 +92,7 @@ export const BookmarkView = ({
   listId: string;
   ownerInfo: {
     ownerName: string;
+    ownerId: string;
     listName: string;
   };
 }) => {
@@ -958,8 +959,12 @@ export const BookmarkView = ({
                       key={`${question.id}-${imageSrc}`}
                       isBookmarksFetching={isBookmarksFetching}
                       imageSrc={imageSrc}
-                      listId={listId}
                       imageTheme={imageTheme}
+                      listId={
+                        ownerInfo.ownerId === userSession?.data?.user?.id
+                          ? listId
+                          : undefined
+                      }
                     />
                   ))
                 )}
@@ -1182,7 +1187,6 @@ export const BookmarkView = ({
         partitionedTopicalData={fullPartitionedData}
         imageTheme={imageTheme}
         bookmarks={bookmarks ?? []}
-        listId={listId}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
@@ -1192,6 +1196,9 @@ export const BookmarkView = ({
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
+        listId={
+          ownerInfo.ownerId === userSession?.data?.user?.id ? listId : undefined
+        }
       />
     </>
   );

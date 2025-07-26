@@ -21,6 +21,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
       user: {
         columns: {
           name: true,
+          id: true,
         },
       },
     },
@@ -99,6 +100,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
           BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
           listId={bookmarkId}
           ownerInfo={{
+            ownerId: bookmarkList.user.id,
             ownerName: bookmarkList.user.name,
             listName: bookmarkList.listName,
           }}
