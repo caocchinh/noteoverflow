@@ -40,6 +40,23 @@ const addBookmark = async ({
 }) => {
   const db = await getDbAsync();
 
+  const doesTheUserOwnThisList = await db.query.userBookmarkList.findFirst({
+    where: eq(userBookmarkList.id, listId),
+  });
+  if (!doesTheUserOwnThisList) {
+    return {
+      error: DOES_NOT_EXIST,
+      success: false,
+    };
+  }
+
+  if (doesTheUserOwnThisList.userId !== userId) {
+    return {
+      error: UNAUTHORIZED,
+      success: false,
+    };
+  }
+
   const [{ total }] = await db
     .select({ total: sql<number>`count(*)` })
     .from(userBookmarks)
