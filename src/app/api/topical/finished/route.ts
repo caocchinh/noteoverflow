@@ -28,13 +28,7 @@ export async function GET() {
             questionImages: true,
             season: true,
             year: true,
-          },
-          with: {
-            questionTopics: {
-              columns: {
-                topic: true,
-              },
-            },
+            topics: true,
           },
         },
       },
@@ -49,6 +43,7 @@ export async function GET() {
             ...item.question,
             questionImages: JSON.parse(item.question.questionImages ?? "[]"),
             answers: JSON.parse(item.question.answers ?? "[]"),
+            topics: JSON.parse(item.question.topics ?? "[]"),
           },
         };
       }

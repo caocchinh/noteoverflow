@@ -121,12 +121,12 @@ const QuestionPreview = memo(
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-[11]">
           {((isHovering && !isMobileDevice) || isMobileDevice) && (
             <div className="flex flex-wrap gap-2 items-center justify-center content-start">
-              {question?.questionTopics?.map((topic) => (
+              {question?.topics?.map((topic) => (
                 <Badge
-                  key={topic.topic}
+                  key={topic}
                   className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
                 >
-                  {topic.topic}
+                  {topic}
                 </Badge>
               ))}
               <Badge className="h-max bg-white !text-black text-center">

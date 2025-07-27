@@ -208,10 +208,10 @@ const FinishedQuestionsPage = () => {
         extractedCurriculumn === selectedCurriculumn &&
         extractedSubjectCode === selectedSubject
       ) {
-        question.question.questionTopics.forEach((topic) => {
-          if (topic.topic) {
-            if (!temp.topic.includes(topic.topic)) {
-              temp.topic.push(topic.topic);
+        question.question.topics.forEach((topic) => {
+          if (topic) {
+            if (!temp.topic.includes(topic)) {
+              temp.topic.push(topic);
             }
           }
         });
@@ -417,8 +417,8 @@ const FinishedQuestionsPage = () => {
       }
       if (
         !hasOverlap(
-          item.question.questionTopics
-            .map((topic) => topic.topic)
+          item.question.topics
+            .map((topic) => topic)
             .filter((topic) => topic !== null),
           currentFilter.topic
         )

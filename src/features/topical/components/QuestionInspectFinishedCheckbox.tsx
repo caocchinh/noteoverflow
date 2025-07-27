@@ -98,7 +98,7 @@ export const QuestionInspectFinishedCheckbox = ({
                 season: question.season,
                 questionImages: question.questionImages,
                 answers: question.answers,
-                questionTopics: question.questionTopics,
+                topics: question.topics,
               },
               updatedAt: new Date(),
             });

@@ -269,10 +269,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         extractedCurriculumn === selectedCurriculumn &&
         extractedSubjectCode === selectedSubject
       ) {
-        question.question.questionTopics.forEach((topic) => {
-          if (topic.topic) {
-            if (!temp.topic.includes(topic.topic)) {
-              temp.topic.push(topic.topic);
+        question.question.topics.forEach((topic) => {
+          if (topic) {
+            if (!temp.topic.includes(topic)) {
+              temp.topic.push(topic);
             }
           }
         });
@@ -477,8 +477,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       }
       if (
         !hasOverlap(
-          item.question.questionTopics
-            .map((topic) => topic.topic)
+          item.question.topics
+            .map((topic) => topic)
             .filter((topic) => topic !== null),
           currentFilter.topic
         )

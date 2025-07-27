@@ -4,8 +4,8 @@ import {
   validateSubject,
 } from "@/features/topical/lib/utils";
 import { validateFilterData } from "@/features/topical/lib/utils";
-import { question, questionTopic } from "@/drizzle/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { question } from "@/drizzle/schema";
+import { and, eq, inArray, like, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
@@ -96,47 +96,47 @@ export async function GET(request: NextRequest) {
       if (topic.length === 0) {
         return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
       }
+      const topicsCondition = topic.map((t) =>
+        like(question.topics, "%" + t + "%")
+      );
+      // @ts-expect-error fuck this shit
+      conditions.push(or(...topicsCondition));
 
-      const baseQuery = db.query.question.findMany({
+      const result = await db.query.question.findMany({
         where: and(...conditions),
+        columns: {
+          id: true,
+          year: true,
+          paperType: true,
+          season: true,
+          questionImages: true,
+          topics: true,
+          answers: true,
+        },
+        limit: !session?.session ? 5 : undefined,
       });
 
-      // Apply rate limit only for unauthenticated users
-
-      const rows = await (session?.session ? baseQuery : baseQuery.limit(5));
-      const questionMap = new Map<string, SelectedQuestion>();
-
-      for (const row of rows) {
-        const parsedImages = JSON.parse(row.questionImages ?? "[]");
-        const parsedAnswers = JSON.parse(row.answers ?? "[]");
-        const existing = questionMap.get(row.id);
-
-        if (!existing) {
-          questionMap.set(row.id, {
-            id: row.id,
-            year: row.year,
-            paperType: row.paperType,
-            season: row.season,
-            questionImages: parsedImages,
-            answers: parsedAnswers,
-            questionTopics: [{ topic: row.topic }],
-          });
-        } else {
-          existing.questionTopics.push({ topic: row.topic });
-        }
-      }
-
-      const formattedData = Array.from(questionMap.values());
+      const data: SelectedQuestion[] = result.map((item) => {
+        return {
+          id: item.id,
+          year: item.year,
+          paperType: item.paperType,
+          season: item.season,
+          questionImages: JSON.parse(item.questionImages ?? "[]"),
+          answers: JSON.parse(item.answers ?? "[]"),
+          topics: JSON.parse(item.topics ?? "[]"),
+        };
+      });
 
       await env.TOPICAL_CACHE.put(
         JSON.stringify(currentQuery),
-        JSON.stringify(formattedData),
+        JSON.stringify(data),
         { expirationTtl: 60 * 60 * 24 * 14 }
       );
 
       return NextResponse.json(
         {
-          data: formattedData as SelectedQuestion[],
+          data: data,
           isRateLimited,
         },
         { status: 200 }

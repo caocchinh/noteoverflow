@@ -812,58 +812,61 @@ const TopicalClient = ({
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-      const sortedData = topicalData.data.toSorted((a, b) => {
-        const aPaperTypeScore =
-          (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
-          (sortParameters?.paperType.weight ?? 0);
-        const bPaperTypeScore =
-          (sortParameters?.paperType.data?.[b.paperType] ?? 0) *
-          (sortParameters?.paperType.weight ?? 0);
-        const aTopicScore =
-          a.questionTopics.reduce((acc, curr) => {
-            if (sortParameters?.topic && curr.topic) {
-              return (
-                acc +
-                sortParameters.topic.data?.[curr.topic] *
-                  (sortParameters.topic.weight ?? 0)
-              );
-            }
-            return acc;
-          }, 0) / a.questionTopics.length;
-        const bTopicScore =
-          b.questionTopics.reduce((acc, curr) => {
-            if (sortParameters?.topic && curr.topic) {
-              return (
-                acc +
-                sortParameters.topic.data?.[curr.topic] *
-                  (sortParameters.topic.weight ?? 0)
-              );
-            }
-            return acc;
-          }, 0) / b.questionTopics.length;
-        const aYearScore =
-          (sortParameters?.year.data?.[a.year] ?? 0) *
-          (sortParameters?.year.weight ?? 0);
-        const bYearScore =
-          (sortParameters?.year.data?.[b.year] ?? 0) *
-          (sortParameters?.year.weight ?? 0);
-        const aSeasonScore =
-          (sortParameters?.season.data?.[a.season] ?? 0) *
-          (sortParameters?.season.weight ?? 0);
-        const bSeasonScore =
-          (sortParameters?.season.data?.[b.season] ?? 0) *
-          (sortParameters?.season.weight ?? 0);
-        return (
-          bPaperTypeScore -
-          aPaperTypeScore +
-          bTopicScore -
-          aTopicScore +
-          bYearScore -
-          aYearScore +
-          bSeasonScore -
-          aSeasonScore
-        );
-      });
+      const sortedData = topicalData.data.toSorted(
+        (a: SelectedQuestion, b: SelectedQuestion) => {
+          const aPaperTypeScore =
+            (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
+            (sortParameters?.paperType.weight ?? 0);
+          const bPaperTypeScore =
+            (sortParameters?.paperType.data?.[b.paperType] ?? 0) *
+            (sortParameters?.paperType.weight ?? 0);
+          const aTopicScore =
+            a.topics.reduce((acc, curr) => {
+              if (sortParameters?.topic && curr) {
+                return (
+                  acc +
+                  sortParameters.topic.data?.[curr] *
+                    (sortParameters.topic.weight ?? 0)
+                );
+              }
+              return acc;
+            }, 0) / a.topics.length;
+          const bTopicScore =
+            b.topics.reduce((acc, curr) => {
+              if (sortParameters?.topic && curr) {
+                return (
+                  acc +
+                  sortParameters.topic.data?.[curr] *
+                    (sortParameters.topic.weight ?? 0)
+                );
+              }
+              return acc;
+            }, 0) / b.topics.length;
+
+          const aYearScore =
+            (sortParameters?.year.data?.[a.year] ?? 0) *
+            (sortParameters?.year.weight ?? 0);
+          const bYearScore =
+            (sortParameters?.year.data?.[b.year] ?? 0) *
+            (sortParameters?.year.weight ?? 0);
+          const aSeasonScore =
+            (sortParameters?.season.data?.[a.season] ?? 0) *
+            (sortParameters?.season.weight ?? 0);
+          const bSeasonScore =
+            (sortParameters?.season.data?.[b.season] ?? 0) *
+            (sortParameters?.season.weight ?? 0);
+          return (
+            bPaperTypeScore -
+            aPaperTypeScore +
+            (!Number.isNaN(bTopicScore) ? bTopicScore : 0) -
+            (!Number.isNaN(aTopicScore) ? aTopicScore : 0) +
+            bYearScore -
+            aYearScore +
+            bSeasonScore -
+            aSeasonScore
+          );
+        }
+      );
 
       sortedData.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === chunkSize) {

@@ -1284,9 +1284,9 @@ const QuestionInformation = ({
 
   return (
     <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start mb-3">
-      {question.questionTopics?.map((topic) => (
-        <Badge key={topic.topic} className="bg-logo-main text-white">
-          {topic.topic}
+      {question.topics?.map((topic) => (
+        <Badge key={topic} className="bg-logo-main text-white">
+          {topic}
         </Badge>
       ))}
       <Badge>{question.season}</Badge>
