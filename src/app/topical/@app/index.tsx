@@ -1284,7 +1284,7 @@ const TopicalClient = ({
                     >
                       <Button
                         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-                        disabled={!isMounted}
+                        disabled={!isMounted || isTopicalDataFetching}
                         onClick={() => {
                           const query = {
                             curriculumId: selectedCurriculum,
@@ -1321,7 +1321,7 @@ const TopicalClient = ({
                           }
                         }}
                       >
-                        Search
+                        {isTopicalDataFetching ? "Searching" : "Search"}
                         <ScanText />
                       </Button>
                     </ButtonUltility>

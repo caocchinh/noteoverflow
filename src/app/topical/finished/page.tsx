@@ -83,7 +83,6 @@ import Image from "next/image";
 
 const FinishedQuestionsPage = () => {
   const queryClient = useQueryClient();
-
   const {
     data: userSession,
     isError: isUserSessionError,
@@ -379,7 +378,6 @@ const FinishedQuestionsPage = () => {
       top: 0,
       behavior: "instant",
     });
-    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
   }, [currentFilter]);
 
   useEffect(() => {
@@ -859,19 +857,21 @@ const FinishedQuestionsPage = () => {
               </div>
             </div>
           )}
-        {Object.keys(metadata).length === 0 && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-muted-foreground">
-              Start searching for questions and add them to your finished
-              questions!
-            </p>
-            <Button className="!bg-logo-main !text-white" asChild>
-              <Link href="/topical" className="w-[250px]">
-                Search for questions <ScanText />
-              </Link>
-            </Button>
-          </div>
-        )}
+        {Object.keys(metadata).length === 0 &&
+          !isUserFinishedQuestionsFetching &&
+          !isUserSessionPending && (
+            <div className="flex flex-col gap-4 items-center justify-center w-full">
+              <p className="text-sm text-muted-foreground">
+                Start searching for questions and add them to your finished
+                questions!
+              </p>
+              <Button className="!bg-logo-main !text-white" asChild>
+                <Link href="/topical" className="w-[250px]">
+                  Search for questions <ScanText />
+                </Link>
+              </Button>
+            </div>
+          )}
         {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
@@ -898,7 +898,7 @@ const FinishedQuestionsPage = () => {
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {metadata[selectedCurriculumn].map((subject) => (
+              {metadata[selectedCurriculumn]?.map((subject) => (
                 <div
                   key={subject}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"
