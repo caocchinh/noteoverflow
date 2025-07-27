@@ -647,7 +647,7 @@ const BookmarkButtonConsumer = memo(
     return (
       <Command
         onKeyDown={handleKeyDown}
-        className=" bg-transparent overflow-visible !w-max"
+        className="!h-max bg-transparent overflow-visible !w-max"
       >
         {isMobileDevice ? (
           <Drawer

@@ -12,6 +12,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { BookmarkButton } from "@/features/topical/components/BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspectFinishedCheckbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
+import { InspectImages } from "@/features/topical/components/InspectImages";
 
 export const QuestionView = ({
   data,
@@ -93,7 +96,7 @@ export const QuestionView = ({
   });
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
-      <div className="flex items-center justify-start w-full gap-4">
+      <div className="flex items-center justify-start w-full gap-4 flex-wrap">
         <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
           <Button
             onClick={() => setCurrentView("question")}
@@ -133,11 +136,53 @@ export const QuestionView = ({
           isValidSession={!!userSession?.data?.session}
           question={data}
           isFinishedQuestionDisabled={isUserSessionPending}
+          className="!h-max"
         />
         <ShareFilter
           isDisabled={false}
           url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(data.id)}`}
+          type="question"
         />
+      </div>
+      <div
+        className={cn(currentView === "question" ? "block w-full" : "hidden")}
+      >
+        <ScrollArea
+          className="h-[76dvh]  w-full [&_.bg-border]:bg-transparent"
+          type="always"
+        >
+          <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+            <QuestionInformation
+              question={data}
+              showCurriculumn={true}
+              showSubject={true}
+            />
+          </div>
+          <InspectImages
+            imageSource={data?.questionImages ?? []}
+            currentQuestionId={data?.id}
+            imageTheme={"light"}
+          />
+        </ScrollArea>
+      </div>
+      <div className={cn(currentView === "answer" ? "block w-full" : "hidden")}>
+        <ScrollArea
+          className="h-[76dvh] w-full [&_.bg-border]:bg-transparent"
+          type="always"
+        >
+          <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+            <QuestionInformation
+              question={data}
+              showCurriculumn={true}
+              showSubject={true}
+            />
+          </div>
+          <InspectImages
+            imageSource={data?.answers ?? []}
+            currentQuestionId={data?.id}
+            imageTheme={"light"}
+          />
+        </ScrollArea>
       </div>
     </div>
   );

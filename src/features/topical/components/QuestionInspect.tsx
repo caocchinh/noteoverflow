@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import {
   Dialog,
@@ -35,7 +34,6 @@ import {
   ChevronsRight,
   ChevronUp,
   FastForward,
-  Loader2,
   PanelsTopLeft,
   PencilLine,
   ScrollText,
@@ -45,7 +43,6 @@ import {
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -73,6 +70,8 @@ import { JumpToTabButton } from "./JumpToTabButton";
 import Sort from "./Sort";
 import { SortBy } from "./SortBy";
 import { ShareFilter } from "./ShareFilter";
+import { QuestionInformation } from "./QuestionInformation";
+import { InspectImages } from "./InspectImages";
 
 const QuestionInspect = ({
   isOpen,
@@ -1198,7 +1197,11 @@ const QuestionInspect = ({
                   viewportRef={questionScrollAreaRef}
                 >
                   <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <QuestionInformation question={currentQuestionData} />
+                    <QuestionInformation
+                      question={currentQuestionData}
+                      showCurriculumn={false}
+                      showSubject={false}
+                    />
                   </div>
                   <InspectImages
                     imageSource={currentQuestionData?.questionImages ?? []}
@@ -1218,7 +1221,11 @@ const QuestionInspect = ({
                   viewportRef={answerScrollAreaRef}
                 >
                   <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <QuestionInformation question={currentQuestionData} />
+                    <QuestionInformation
+                      question={currentQuestionData}
+                      showCurriculumn={false}
+                      showSubject={false}
+                    />
                   </div>
                   <InspectImages
                     imageSource={currentQuestionData?.answers ?? []}
@@ -1280,76 +1287,5 @@ const PastPaperLink = ({
     >
       {children}
     </a>
-  );
-};
-
-const QuestionInformation = ({
-  question,
-}: {
-  question: SelectedQuestion | undefined;
-}) => {
-  if (!question) {
-    return null;
-  }
-
-  return (
-    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start mb-3">
-      {question.topics?.map((topic) => (
-        <Badge key={topic} className="bg-logo-main text-white">
-          {topic}
-        </Badge>
-      ))}
-      <Badge>{question.season}</Badge>
-      <Badge>{question.year}</Badge>
-      <Badge>Paper {question.paperType}</Badge>
-      <Badge>
-        Question {extractQuestionNumber({ questionId: question.id })}
-      </Badge>
-    </div>
-  );
-};
-
-const InspectImages = ({
-  imageSource,
-  currentQuestionId,
-  imageTheme,
-}: {
-  imageSource: string[] | undefined;
-  currentQuestionId: string | undefined;
-  imageTheme: "dark" | "light";
-}) => {
-  if (!imageSource || imageSource.length === 0) {
-    return <p className="text-center text-red-600">Unable to fetch resource</p>;
-  }
-  return (
-    <div className="flex flex-col flex-wrap w-full gap-2 relative items-center">
-      {imageSource[0]?.includes("http") && (
-        <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
-      )}
-      {imageSource.map((item) => (
-        <Fragment
-          key={`${item}${currentQuestionId}${
-            currentQuestionId &&
-            extractQuestionNumber({
-              questionId: currentQuestionId,
-            })
-          }`}
-        >
-          {item.includes("http") ? (
-            <img
-              className={cn(
-                "w-full h-full object-contain relative z-10 !max-w-[800px]",
-                imageTheme === "dark" && "!invert"
-              )}
-              src={item}
-              alt="Question image"
-              loading="lazy"
-            />
-          ) : (
-            <p>{item}</p>
-          )}
-        </Fragment>
-      ))}
-    </div>
   );
 };
