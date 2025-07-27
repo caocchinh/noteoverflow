@@ -72,6 +72,7 @@ import { BookmarkButton } from "./BookmarkButton";
 import { JumpToTabButton } from "./JumpToTabButton";
 import Sort from "./Sort";
 import { SortBy } from "./SortBy";
+import { ShareFilter } from "./ShareFilter";
 
 const QuestionInspect = ({
   isOpen,
@@ -86,6 +87,7 @@ const QuestionInspect = ({
   listId,
   isFinishedQuestionsFetching,
   sortBy,
+  BETTER_AUTH_URL,
   setSortBy,
   sortParameters,
   setSortParameters,
@@ -117,6 +119,7 @@ const QuestionInspect = ({
   isFinishedQuestionsError: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
   listId?: string;
+  BETTER_AUTH_URL: string;
 }) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -1170,6 +1173,11 @@ const QuestionInspect = ({
                       isDisabled={false}
                     />
                   )}
+                  <ShareFilter
+                    type="question"
+                    isDisabled={false}
+                    url={`${BETTER_AUTH_URL}/topical/${currentQuestionData?.id}`}
+                  />
                 </div>
                 <ScrollBar
                   orientation="horizontal"

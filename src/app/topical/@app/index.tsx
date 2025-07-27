@@ -1782,6 +1782,7 @@ const TopicalClient = ({
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}
+        BETTER_AUTH_URL={BETTER_AUTH_URL}
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}
         isBookmarkError={isUserSessionError || isBookmarksError}

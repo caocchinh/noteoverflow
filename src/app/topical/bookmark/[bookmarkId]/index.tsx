@@ -1182,6 +1182,7 @@ export const BookmarkView = ({
       <QuestionInspect
         sortBy={sortBy}
         setSortBy={setSortBy}
+        BETTER_AUTH_URL={BETTER_AUTH_URL}
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}

@@ -16,7 +16,7 @@ export const ShareFilter = ({
 }: {
   isDisabled: boolean;
   url: string;
-  type?: "filter" | "bookmark";
+  type?: "filter" | "bookmark" | "question";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
