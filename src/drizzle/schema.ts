@@ -15,6 +15,7 @@ export const user = sqliteTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  selectedImage: text("selected_image"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -27,7 +28,6 @@ export const user = sqliteTable("user", {
     .notNull(),
   banReason: text("ban_reason"),
   banExpiresAt: integer("ban_expires_at", { mode: "timestamp" }),
-  bookmarks: text("bookmarks"),
 });
 
 export const session = sqliteTable(

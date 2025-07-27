@@ -18,6 +18,14 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const auth = async (database: any) =>
   betterAuth({
+    user: {
+      additionalFields: {
+        selectedImage: {
+          type: "string",
+          required: false,
+        },
+      },
+    },
     database: drizzleAdapter(await database(), {
       provider: "sqlite",
       schema,
@@ -51,7 +59,9 @@ export const auth = async (database: any) =>
             return {
               data: {
                 ...user,
-                image: AVATARS[Math.floor(Math.random() * AVATARS.length)].src,
+                selectedImage: user.image
+                  ? user.image
+                  : AVATARS[Math.floor(Math.random() * AVATARS.length)].src,
               },
             };
           },

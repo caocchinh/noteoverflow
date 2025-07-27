@@ -167,7 +167,9 @@ const User = () => {
                 >
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={data.data.user.image || "/assets/avatar/blue.webp"}
+                    src={
+                      data.data.user.selectedImage || "/assets/avatar/blue.webp"
+                    }
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
                     {data.data.user.name.split(" ")[0]?.charAt(0) +
@@ -200,7 +202,10 @@ const User = () => {
                 <Avatar>
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={data.data?.user.image || "/assets/avatar/blue.webp"}
+                    src={
+                      data.data?.user.selectedImage ||
+                      "/assets/avatar/blue.webp"
+                    }
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
                     {data.data.user.name.split(" ")[0]?.charAt(0) +
