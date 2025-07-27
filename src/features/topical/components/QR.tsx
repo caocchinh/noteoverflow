@@ -18,7 +18,10 @@ export const QR = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent">
+      <DialogContent
+        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-[999999]"
+        overlayClassName="z-[999998]"
+      >
         <DialogTitle className="sr-only">QR Code</DialogTitle>
         <QRCodeCanvas
           className="rounded-md w-full h-full min-h-[300px] min-w-[300px]"

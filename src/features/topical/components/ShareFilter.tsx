@@ -42,7 +42,7 @@ export const ShareFilter = ({
         </TooltipTrigger>
         <TooltipContent
           side="bottom"
-          className="!bg-logo-main !text-white"
+          className="!bg-logo-main !text-white z-[99999999]"
           arrowClassName="!bg-logo-main !fill-logo-main"
         >
           {isDisabled ? (

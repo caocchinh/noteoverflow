@@ -1176,7 +1176,9 @@ const QuestionInspect = ({
                   <ShareFilter
                     type="question"
                     isDisabled={false}
-                    url={`${BETTER_AUTH_URL}/topical/${currentQuestionData?.id}`}
+                    url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(
+                      currentQuestionData?.id ?? ""
+                    )}`}
                   />
                 </div>
                 <ScrollBar

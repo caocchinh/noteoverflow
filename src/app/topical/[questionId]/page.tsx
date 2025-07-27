@@ -19,13 +19,13 @@ const QuestionViewPage = async (props: { params: Params }) => {
     if (result === null) {
       const db = await getDbAsync();
       const question = await db.query.question.findFirst({
-        where: eq(questionTable.id, questionId),
+        where: eq(questionTable.id, decodeURIComponent(questionId)),
       });
 
       if (!question) {
         return (
           <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
-            The list that you are looking for do not exist!
+            The question that you are looking for do not exist!
           </div>
         );
       }
@@ -37,7 +37,7 @@ const QuestionViewPage = async (props: { params: Params }) => {
         topics: JSON.parse(question.topics ?? "[]"),
       };
       await env.TOPICAL_CACHE.put(
-        JSON.stringify(questionId),
+        JSON.stringify(decodeURIComponent(questionId)),
         JSON.stringify(data)
       );
       result = data;
@@ -45,7 +45,10 @@ const QuestionViewPage = async (props: { params: Params }) => {
 
     return (
       <Suspense fallback={<Loader />}>
-        <QuestionView data={result} />
+        <QuestionView
+          data={result}
+          BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
+        />
       </Suspense>
     );
   } catch {
