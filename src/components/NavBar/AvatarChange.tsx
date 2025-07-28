@@ -29,11 +29,13 @@ const AvatarChange = ({
   setIsDialogOpen,
   currentAvatar,
   userId,
+  defaultAvatar,
 }: {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   currentAvatar: string;
   userId: string;
+  defaultAvatar?: string | null;
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatar);
   const [selectedAvatarColor, setSelectedAvatarColor] = useState<string>(
@@ -67,7 +69,7 @@ const AvatarChange = ({
               ...oldData.data,
               user: {
                 ...oldData.data.user,
-                image: selectedAvatar,
+                selectedImage: selectedAvatar,
               },
             },
           };
@@ -120,10 +122,21 @@ const AvatarChange = ({
             Choose your avatar
           </AlertDialogTitle>
 
-          <div
-            className="h-5 w-5 rounded-xs"
-            style={{ backgroundColor: selectedAvatarColor }}
-          />
+          {selectedAvatar !== defaultAvatar && (
+            <div
+              className="h-5 w-5 rounded-xs"
+              style={{ backgroundColor: selectedAvatarColor }}
+            />
+          )}
+          {selectedAvatar === defaultAvatar && (
+            <Image
+              alt="avatar"
+              className="h-5 w-5 rounded-xs"
+              src={defaultAvatar}
+              width={20}
+              height={20}
+            />
+          )}
           <AlertDialogDescription className="sr-only">
             Select an avatar from the list below.
           </AlertDialogDescription>
@@ -132,6 +145,24 @@ const AvatarChange = ({
           <p className="-mt-4 text-center text-red-500 text-sm">
             Error updating avatar
           </p>
+        )}
+        {defaultAvatar && (
+          <Button
+            onClick={() => {
+              setSelectedAvatar(defaultAvatar);
+              setSelectedAvatarColor(
+                AVATARS.find((avatar) => avatar.src === currentAvatar)?.color ||
+                  ""
+              );
+            }}
+            className={cn(
+              "cursor-pointer",
+              selectedAvatar === defaultAvatar &&
+                "border-2 border-red-500 !bg-logo-main !text-white"
+            )}
+          >
+            Default
+          </Button>
         )}
         <ScrollArea className=" h-[300px]">
           <div className="flex flex-row flex-wrap justify-center gap-4">

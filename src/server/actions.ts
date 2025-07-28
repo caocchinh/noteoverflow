@@ -48,7 +48,7 @@ export const updateUserAvatarAction = async (
   const db = await getDbAsync();
   const response = await db
     .update(user)
-    .set({ image: avatar })
+    .set({ selectedImage: avatar })
     .where(eq(user.id, userId));
   if (response.error) {
     throw new Error("User not found");

@@ -135,10 +135,13 @@ const User = () => {
   return (
     <>
       <AvatarChange
-        currentAvatar={data.data.user.image || "/assets/avatar/blue.webp"}
+        currentAvatar={
+          data.data.user.selectedImage || "/assets/avatar/blue.webp"
+        }
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         userId={data.data.user.id}
+        defaultAvatar={data.data.user.image}
       />
 
       <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
@@ -148,7 +151,7 @@ const User = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               initial={{ opacity: 0, scale: 0.8 }}
-              key={data.data.user.image}
+              key={data.data.user.selectedImage}
               transition={{
                 duration: 0.3,
                 ease: "easeInOut",
