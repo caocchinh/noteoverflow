@@ -259,6 +259,9 @@ export const parsePastPaperUrl = ({
     const newPaperCode = `${subjectCode}-${shortSeason}${year.slice(
       2
     )}-${type}-${paper}`;
+    if (newPaperCode === "9608_w15_qp_12") {
+      return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
+    }
     return `${BESTEXAMHELP_DOMAIN}/${BESTEXAMHELP_CURRICULUM_CODE_PREFIX[curriculum]}/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
   } catch {
     return "";
