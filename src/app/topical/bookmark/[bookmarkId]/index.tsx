@@ -171,8 +171,7 @@ export const BookmarkView = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
-    // @ts-expect-error bruh
-    const tempMetadata: Record<Partial<ValidCurriculum>, string[]> = {};
+    const tempMetadata: Partial<Record<ValidCurriculum, string[]>> = {};
     data?.forEach((question) => {
       const extractedCurriculumn = extractCurriculumCode({
         questionId: question.question.id,
@@ -897,7 +896,7 @@ export const BookmarkView = ({
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
             <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {metadata[selectedCurriculumn].map((subject) => (
+              {metadata[selectedCurriculumn]?.map((subject) => (
                 <div
                   key={subject}
                   className="flex flex-col items-center justify-center gap-1 cursor-pointer"

@@ -160,8 +160,7 @@ const FinishedQuestionsClient = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
-    // @ts-expect-error bruh
-    const tempMetadata: Record<Partial<ValidCurriculum>, string[]> = {};
+    const tempMetadata: Partial<Record<ValidCurriculum, string[]>> = {};
     userFinishedQuestions?.forEach((question) => {
       const extractedCurriculumn = extractCurriculumCode({
         questionId: question.question.id,

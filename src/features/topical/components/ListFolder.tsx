@@ -69,7 +69,7 @@ export const ListFolder = ({
       string,
       {
         listName: string;
-        data: Record<Partial<ValidCurriculum>, string[]>;
+        data: Partial<Record<ValidCurriculum, string[]>>;
       }
     >
   >;

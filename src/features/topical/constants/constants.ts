@@ -25,7 +25,7 @@ export const SUBJECT_COVER_IMAGE: Record<
       "/assets/cover/Probability & Statistics 1 (9709).jpg",
     "Probability & Statistics 2 (9709)":
       "/assets/cover/Probability & Statistics 2 (9709).jpg",
-    "Pure Mathematics 2 & 3 (9709)": "/assets/cover/Pure 2&3 (9709).jpg",
+    "Mathematics Pure Math 2,3 (9709)": "/assets/cover/Pure 2&3 (9709).jpg",
   },
   "CIE IGCSE": {
     "Physics (9702)": "/assets/cover/Physics (9702).jpg",
@@ -77,7 +77,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
           2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4],
+        paperType: [1, 2, 3, 4, 5],
         season: ["Summer", "Winter"],
       },
       {
@@ -112,7 +112,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
           2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4],
+        paperType: [1, 2, 3, 4, 5],
         season: ["Summer", "Winter"],
       },
       {
@@ -143,24 +143,45 @@ export const TOPICAL_DATA: TopicalData[] = [
           2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
           2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4],
+        paperType: [1, 2, 3, 4, 5],
         season: ["Summer", "Winter"],
       },
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 1 (9709)"],
         code: "Pure Mathematics 1 (9709)",
-        topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
-        year: [2024, 2023, 2022, 2021],
-        paperType: [1, 2, 3, 4],
+        topic: [
+          "COORDINATES GEOMETRY",
+          "FUNCTIONS",
+          "INTERSECTION POINTS",
+          "DIFFERENTIATION",
+          "SEQUENCES & SERIES",
+          "BINOMIAL THEOREM",
+          "TRIGONOMETRY",
+          "VECTORS",
+          "INTEGRATION",
+          "RADIANS",
+        ],
+        year: [
+          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
+          2013, 2012, 2011, 2010, 2009,
+        ],
+        paperType: [1],
         season: ["Summer", "Winter"],
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
         code: "Mechanics (9709)",
-        topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
-        year: [2024, 2023, 2022, 2021],
-        paperType: [1, 2, 3, 4],
+        topic: [
+          "FORCES & EQUILIBRIUM",
+          "KINEMATICS OF MOTION IN A STRAIGHT LINE",
+          "NEWTON'S LAWS OF MOTION",
+          "ENERGY, WORK & POWER",
+          "GENERAL MOTION IN STRAIGHT LINE",
+          "MOMENTUM",
+        ],
+        year: [2024, 2023, 2022, 2021, 2020],
+        paperType: [4],
         season: ["Summer", "Winter"],
       },
       {
@@ -169,9 +190,17 @@ export const TOPICAL_DATA: TopicalData[] = [
             "Probability & Statistics 1 (9709)"
           ],
         code: "Probability & Statistics 1 (9709)",
-        topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
-        year: [2024, 2023, 2022, 2021],
-        paperType: [1, 2, 3, 4],
+        topic: [
+          "REPRESENTATION OF DATA",
+          "PERMUTATION & COMBINATION",
+          "PROBABILITY",
+          "DISCRETE RANDOM VARIABLES",
+          "THE NORMAL DISTRIBUTION",
+          "THE BINOMIAL DISTRIBUTION",
+          "GEOMETRIC DISTRIBUTION",
+        ],
+        year: [2024, 2023, 2022, 2021, 2020],
+        paperType: [5],
         season: ["Summer", "Winter"],
       },
       {
@@ -180,18 +209,40 @@ export const TOPICAL_DATA: TopicalData[] = [
             "Probability & Statistics 2 (9709)"
           ],
         code: "Probability & Statistics 2 (9709)",
-        topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
-        year: [2024, 2023, 2022, 2021],
-        paperType: [1, 2, 3, 4],
+        topic: [
+          "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
+          "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",
+          "POISSON DISTRIBUTION",
+          "LINEAR COMBINATION OF RANDOM VARIABLES",
+          "CONTINUOUS RANDOM VARIABLES",
+          "SAMPLING",
+        ],
+        year: [2024, 2023, 2022, 2021, 2020],
+        paperType: [6],
         season: ["Summer", "Winter"],
       },
       {
         coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 2 & 3 (9709)"],
-        code: "Pure Mathematics 2 & 3 (9709)",
-        topic: ["Algebra", "Geometry", "Calculus", "Statistics"],
-        year: [2024, 2023, 2022, 2021],
-        paperType: [1, 2, 3, 4],
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
+            "Mathematics Pure Math 2,3 (9709)"
+          ],
+        code: "Mathematics Pure Math 2,3 (9709)",
+        topic: [
+          "ALGEBRA",
+          "LOGARITHMIC & EXPONENTIAL FUNCTIONS",
+          "TRIGONOMETRY",
+          "DIFFERENTIATION",
+          "INTEGRATION",
+          "DIFFERENTIAL EQUATION",
+          "NUMERICAL METHODS",
+          "COMPLEX NUMBERS",
+          "VECTORS",
+        ],
+        year: [
+          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
+          2013, 2012, 2011, 2010, 2009,
+        ],
+        paperType: [2, 3],
         season: ["Summer", "Winter"],
       },
     ],
@@ -203,6 +254,14 @@ export const BESTEXAMHELP_DOMAIN = "https://bestexamhelp.com/exam";
 export const BESTEXAMHELP_SUBJECT_CODE: Record<string, string> = {
   "9702": "physics-9702",
   "9701": "chemistry-9701",
+  "9709": "mathematics-9709",
+  "9618": "computer-science-9618",
+  "9608": "computer-science-9608",
+  "9700": "biology-9700",
+  "9708": "economics-9708",
+  "9609": "business-9609",
+  "9990": "psychology-9990",
+  "9231": "mathematics-further-9231",
 };
 
 export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<

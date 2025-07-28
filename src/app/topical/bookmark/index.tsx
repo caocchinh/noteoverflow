@@ -173,7 +173,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         string,
         {
           listName: string;
-          data: Record<Partial<ValidCurriculum>, string[]>;
+          data: Partial<Record<ValidCurriculum, string[]>>;
         }
       >
     > = {
@@ -187,10 +187,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       if (
         !tempMetadata[bookmark.visibility as "public" | "private"][bookmark.id]
       ) {
-        tempMetadata[bookmark.visibility as "public" | "private"][
-          bookmark.id
-          // @ts-expect-error - this is a temporary fix to avoid type errors
-        ] = { listName: bookmark.listName, data: {} };
+        tempMetadata[bookmark.visibility as "public" | "private"][bookmark.id] =
+          { listName: bookmark.listName, data: {} };
       }
       bookmark.userBookmarks.forEach((userBookmark) => {
         const extractedCurriculumn = extractCurriculumCode({
@@ -212,11 +210,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           if (
             !tempMetadata[bookmark.visibility as "public" | "private"][
               bookmark.id
-            ].data[extractedCurriculumn].includes(extractedSubjectCode)
+            ].data[extractedCurriculumn]?.includes(extractedSubjectCode)
           ) {
             tempMetadata[bookmark.visibility as "public" | "private"][
               bookmark.id
-            ].data[extractedCurriculumn].push(extractedSubjectCode);
+            ].data[extractedCurriculumn]?.push(extractedSubjectCode);
           }
         }
       });
