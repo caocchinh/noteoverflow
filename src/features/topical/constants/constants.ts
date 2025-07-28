@@ -21,9 +21,9 @@ export const SUBJECT_COVER_IMAGE: Record<
     "Biology (9700)": "/assets/cover/Biology (9700).jpg",
     "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).jpg",
     "Mechanics (9709)": "/assets/cover/Mechanics (9709).jpg",
-    "Probability & Statistics 1 (9709)":
+    "Mathematics Probability & Statistics 1 (9709)":
       "/assets/cover/Probability & Statistics 1 (9709).jpg",
-    "Probability & Statistics 2 (9709)":
+    "Mathematics Probability & Statistics 2 (9709)":
       "/assets/cover/Probability & Statistics 2 (9709).jpg",
     "Mathematics Pure Math 2,3 (9709)": "/assets/cover/Pure 2&3 (9709).jpg",
     "Computer Science (9608)": "/assets/cover/Computer Science (9608).jpg",
@@ -201,9 +201,9 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Probability & Statistics 1 (9709)"
+            "Mathematics Probability & Statistics 1 (9709)"
           ],
-        code: "Probability & Statistics 1 (9709)",
+        code: "Mathematics Probability & Statistics 1 (9709)",
         topic: [
           "REPRESENTATION OF DATA",
           "PERMUTATION & COMBINATION",
@@ -220,9 +220,9 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Probability & Statistics 2 (9709)"
+            "Mathematics Probability & Statistics 2 (9709)"
           ],
-        code: "Probability & Statistics 2 (9709)",
+        code: "Mathematics Probability & Statistics 2 (9709)",
         topic: [
           "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
           "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",

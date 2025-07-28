@@ -168,7 +168,7 @@ const TopicalClient = ({
     year: [],
     season: [],
   });
-  const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
+  const [showScrollToTopButton, setShowScrollToTopButton] = useState(true);
   const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,

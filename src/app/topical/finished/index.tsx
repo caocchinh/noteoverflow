@@ -292,7 +292,7 @@ const FinishedQuestionsClient = ({
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
   );
-  const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
+  const [showScrollToTopButton, setShowScrollToTopButton] = useState(true);
   const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
     useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
