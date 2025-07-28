@@ -209,6 +209,7 @@ export const legacyUploadAction = async ({
           .from(question)
           .where(eq(question.id, questionId));
         if (
+          existingQuestionImages[0] &&
           existingQuestionImages[0].questionImages &&
           existingQuestionImages[0].questionImages.length > 0
         ) {
@@ -262,7 +263,11 @@ export const legacyUploadAction = async ({
         .select({ answers: question.answers })
         .from(question)
         .where(eq(question.id, questionId));
-      if (existingAnswers[0].answers && existingAnswers[0].answers.length > 0) {
+      if (
+        existingAnswers[0] &&
+        existingAnswers[0].answers &&
+        existingAnswers[0].answers.length > 0
+      ) {
         const parsedAnswers = JSON.parse(
           existingAnswers[0].answers as unknown as string
         ) as string[];
