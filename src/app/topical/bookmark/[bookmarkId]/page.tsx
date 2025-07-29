@@ -23,6 +23,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
           columns: {
             name: true,
             id: true,
+            selectedImage: true,
           },
         },
       },
@@ -99,6 +100,8 @@ const BookmarkViewPage = async (props: { params: Params }) => {
             ownerId: bookmarkList.user.id,
             ownerName: bookmarkList.user.name,
             listName: bookmarkList.listName,
+            ownerAvatar:
+              bookmarkList.user.selectedImage ?? "/assets/avatar/blue.webp",
           }}
         />
       </Suspense>

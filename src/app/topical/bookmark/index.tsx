@@ -918,7 +918,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           </ScrollArea>
         </div>
 
-        {metadata && !chosenList && (
+        {metadata && !chosenList && userSession?.data?.session && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your list</h1>
             <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
@@ -968,18 +968,18 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     list!
                   </p>
                 )}
-              {Object.keys(metadata.private).length === 0 &&
-                Object.keys(metadata.public).length === 0 &&
-                !isBookmarksFetching &&
-                !isUserSessionPending &&
-                !userSession?.data?.session && (
-                  <p className="text-sm  text-red-500">
-                    You are not signed in. Please sign to create a list!
-                  </p>
-                )}
             </div>
           </div>
         )}
+        {Object.keys(metadata.private).length === 0 &&
+          Object.keys(metadata.public).length === 0 &&
+          !isBookmarksFetching &&
+          !isUserSessionPending &&
+          !userSession?.data?.session && (
+            <p className="text-sm  text-red-500">
+              You are not signed in. Please sign to create a list!
+            </p>
+          )}
         {(isBookmarksFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />

@@ -94,6 +94,7 @@ export const BookmarkView = ({
     ownerName: string;
     ownerId: string;
     listName: string;
+    ownerAvatar: string;
   };
 }) => {
   const queryClient = useQueryClient();
@@ -831,7 +832,15 @@ export const BookmarkView = ({
             />
           </ScrollArea>
         </div>
-        <div className="flex flex-row items-center justify-start w-full">
+        <div className="flex flex-row items-center justify-start w-full gap-1 mb-1">
+          <Image
+            src={ownerInfo.ownerAvatar}
+            alt="owner avatar"
+            width={25}
+            height={25}
+            loading="lazy"
+            className="rounded-full"
+          />
           <p className="text-sm text-logo-main">
             {ownerInfo.ownerName}&apos;s list - {ownerInfo.listName}
           </p>

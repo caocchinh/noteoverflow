@@ -862,7 +862,8 @@ const FinishedQuestionsClient = ({
           )}
         {Object.keys(metadata).length === 0 &&
           !isUserFinishedQuestionsFetching &&
-          !isUserSessionPending && (
+          !isUserSessionPending &&
+          userSession?.data?.session && (
             <div className="flex flex-col gap-4 items-center justify-center w-full">
               <p className="text-sm text-muted-foreground">
                 Start searching for questions and add them to your finished
