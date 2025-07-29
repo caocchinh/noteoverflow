@@ -42,7 +42,7 @@ const User = () => {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile({ breakpoint: 515 });
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       return await authClient.getSession();
@@ -70,7 +70,7 @@ const User = () => {
     signOutMutation.mutate();
   }
 
-  if (error) {
+  if (isError) {
     return (
       <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
         <DropdownMenuTrigger asChild>

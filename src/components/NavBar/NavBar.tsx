@@ -19,7 +19,7 @@ const NavBar = () => {
       <nav className="flex w-full items-center justify-center gap-3 sm:justify-between sm:gap-8">
         {pathname !== "/" ? (
           <>
-            <Link className="hidden sm:block" href="/">
+            <Link className="hidden lg:block" href="/">
               <Image
                 alt="logo"
                 height={28}
@@ -27,7 +27,7 @@ const NavBar = () => {
                 width={245}
               />
             </Link>
-            <Link className="block sm:hidden" href="/">
+            <Link className="block lg:hidden" href="/">
               <Image
                 alt="logo"
                 height={40}
@@ -38,7 +38,7 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <a className="hidden sm:block" href="#" title="Home">
+            <a className="hidden lg:block" href="#" title="Home">
               <Image
                 alt="logo"
                 height={28}
@@ -46,7 +46,7 @@ const NavBar = () => {
                 width={245}
               />
             </a>
-            <a className="block sm:hidden" href="#" title="Home">
+            <a className="block lg:hidden" href="#" title="Home">
               <Image
                 alt="logo"
                 height={40}

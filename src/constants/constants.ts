@@ -1,3 +1,5 @@
+import { ValidCurriculum } from "./types";
+
 export const LOGO_MAIN_COLOR = "#0084ff";
 
 export const AVATARS = [
@@ -26,5 +28,28 @@ export const TOPICAL_QUESTION_HISTORY_ROUTE = "/topical/history";
 export const TOPICAL_QUESTION_BOOKMARK_ROUTE = "/topical/bookmark";
 export const TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE = "/topical/finished";
 
-export const MAXIMUM_BOOKMARK_LISTS_PER_USER = 69;
-export const MAXIMUM_BOOKMARKS_PER_LIST = 100;
+export const MAXIMUM_BOOKMARK_LISTS_PER_USER = 30;
+export const MAXIMUM_BOOKMARKS_PER_LIST = 300;
+
+export const BESTEXAMHELP_DOMAIN = "https://bestexamhelp.com/exam";
+
+export const BESTEXAMHELP_SUBJECT_CODE: Record<string, string> = {
+  "9702": "physics-9702",
+  "9701": "chemistry-9701",
+  "9709": "mathematics-9709",
+  "9618": "computer-science-9618",
+  "9608": "computer-science-9608",
+  "9700": "biology-9700",
+  "9708": "economics-9708",
+  "9609": "business-9609",
+  "9990": "psychology-9990",
+  "9231": "mathematics-further-9231",
+};
+
+export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<
+  ValidCurriculum,
+  string
+> = {
+  "CIE A-LEVEL": "cambridge-international-a-level",
+  "CIE IGCSE": "",
+};

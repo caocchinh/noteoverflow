@@ -5,6 +5,7 @@ import {
   Link as LinkIcon,
   RefreshCcw,
   TriangleAlert,
+  ArrowLeft,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -36,6 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -224,7 +226,7 @@ const AuthPageClient = ({
   return (
     <>
       <AlertDialog open={isEmbededBrowser}>
-        <AlertDialogContent className="flex flex-col items-center justify-center gap-4 border border-red-500">
+        <AlertDialogContent className="flex flex-col items-center justify-center gap-3 !py-4 border border-red-500">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600 text-4xl font-bold">
               Warning
@@ -259,11 +261,18 @@ const AuthPageClient = ({
               {copied ? "Copied!" : "Copy link"}
               <LinkIcon />
             </Button>
+            <Link
+              className="flex items-center justify-center gap-2 p-2 text-sm rounded-sm cursor-pointer w-full bg-logo-main text-white"
+              href="/topical"
+            >
+              <ArrowLeft size={15} />
+              Back to topical question app
+            </Link>
 
             <h5 className="font-light text-center text-red-500 text-sm w-full">
               {isAppleDevice()
-                ? "If you are using iOS version 15 and below, please open external browser manually!"
-                : "If Chrome hasn't been installed, please open external browser manually!"}
+                ? "If you are using iOS version 15 and below, please open any external browser manually!"
+                : "If Chrome hasn't been installed, please open any external browser manually!"}
             </h5>
           </AlertDialogFooter>
         </AlertDialogContent>
