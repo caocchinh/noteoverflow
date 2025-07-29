@@ -235,6 +235,16 @@ export default function EnhancedMultiSelect({
                     setIsBlockingInput(true);
                   }}
                 >
+                  <Button
+                    className="flex-1/3 cursor-pointer"
+                    onClick={() => {
+                      onValueChange([]);
+                    }}
+                    variant="destructive"
+                  >
+                    Remove all
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                   {!maxLength && (
                     <Button
                       className="flex-1/3 cursor-pointer"
@@ -246,16 +256,6 @@ export default function EnhancedMultiSelect({
                       <Sparkles className="h-4 w-4" />
                     </Button>
                   )}
-                  <Button
-                    className="flex-1/3 cursor-pointer"
-                    onClick={() => {
-                      onValueChange([]);
-                    }}
-                    variant="destructive"
-                  >
-                    Remove all
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                   <Button
                     className="flex-1/3 cursor-pointer"
                     onClick={() => {
