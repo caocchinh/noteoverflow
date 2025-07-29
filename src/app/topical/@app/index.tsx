@@ -1367,6 +1367,7 @@ const TopicalClient = ({
               }
               scrollAreaRef={scrollAreaRef}
             />
+
             {isUltilityOverflowingRight && (
               <Button
                 className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"

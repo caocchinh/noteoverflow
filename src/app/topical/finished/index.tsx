@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
@@ -901,30 +900,39 @@ const FinishedQuestionsClient = ({
         {metadata && selectedCurriculumn && !selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
-            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-              {metadata[selectedCurriculumn]?.map((subject) => (
-                <div
-                  key={subject}
-                  className="flex flex-col items-center justify-center gap-1 cursor-pointer"
-                  onClick={() => {
-                    setSelecteSubject(subject);
-                  }}
-                >
-                  <img
-                    loading="lazy"
-                    title={subject}
-                    className="!h-[200px] w-40 object-cover rounded-[1px] "
-                    alt="Curriculum cover image"
-                    src={
-                      SUBJECT_COVER_IMAGE[
-                        selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                      ][subject]
-                    }
-                  />
-                  <p>{subject}</p>
-                </div>
-              ))}
-            </div>
+            <ScrollArea
+              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+              type="always"
+            >
+              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+                {metadata[selectedCurriculumn]?.map((subject) => (
+                  <div
+                    key={subject}
+                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[160px]"
+                    onClick={() => {
+                      setSelecteSubject(subject);
+                    }}
+                  >
+                    <Image
+                      width={160}
+                      height={200}
+                      loading="lazy"
+                      title={subject}
+                      className="!h-[200px] w-40 object-cover rounded-[1px] "
+                      alt="Curriculum cover image"
+                      src={
+                        SUBJECT_COVER_IMAGE[
+                          selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                        ][subject]
+                      }
+                    />
+                    <p className="text-sm text-muted-foreground text-center px-1">
+                      {subject}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         )}
 

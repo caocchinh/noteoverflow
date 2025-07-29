@@ -42,7 +42,7 @@ export default function Home() {
         >
           <Image
             alt="NoteOverflow"
-            className="relative z-10"
+            className="relative z-10 mb-4"
             height={65}
             src="/assets/logo-bg-colorised-modified-small.webp"
             width={65}
