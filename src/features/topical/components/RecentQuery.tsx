@@ -403,37 +403,39 @@ const RecentQueryItem = ({
       className={cn(isThisItemDeleting && "opacity-50 pointer-events-none")}
     >
       <AccordionTrigger>
-        {index + 1}.
-        <div
-          className={cn(
-            "flex flex-col items-start justify-center",
-            accordionValue === index.toString() && "text-logo-main",
-            isThisItemDeleting && "!text-red-500"
-          )}
-        >
-          <p>
-            {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
-            {parsedQuery.topic.length} topic
-            {parsedQuery.topic.length > 1 && "s"} - {parsedQuery.year.length}{" "}
-            year
-            {parsedQuery.year.length > 1 && "s"}
-          </p>
-          <p
+        <div className="flex flex-row items-center justify-start w-full gap-4">
+          {index + 1}.
+          <div
             className={cn(
-              "text-muted-foreground",
-              accordionValue === index.toString() &&
-                "dark:text-white text-black"
+              "flex flex-col items-start justify-center",
+              accordionValue === index.toString() && "text-logo-main",
+              isThisItemDeleting && "!text-red-500"
             )}
           >
-            {new Date(item.lastSearch).toLocaleString(undefined, {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}
-          </p>
+            <p>
+              {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
+              {parsedQuery.topic.length} topic
+              {parsedQuery.topic.length > 1 && "s"} - {parsedQuery.year.length}{" "}
+              year
+              {parsedQuery.year.length > 1 && "s"}
+            </p>
+            <p
+              className={cn(
+                "text-muted-foreground",
+                accordionValue === index.toString() &&
+                  "dark:text-white text-black"
+              )}
+            >
+              {new Date(item.lastSearch).toLocaleString(undefined, {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+            </p>
+          </div>
         </div>
       </AccordionTrigger>
       <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">

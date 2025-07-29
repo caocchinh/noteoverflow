@@ -56,17 +56,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://noteoverflow.com/",
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
 };
 
 export default function RootLayout({
@@ -84,7 +73,18 @@ export default function RootLayout({
         <meta name="image" content="/assets/thumbnail.webp" />
         <meta name="author" content="Mr. Cao Cu Chinh" />
         <meta name="theme-color" content={LOGO_MAIN_COLOR} />
-        <meta name="robots" content="index, follow" />
+        <meta name="og:image" content="/assets/thumbnail.webp" />
+        <meta name="og:title" content="NoteOverflow" />
+        <meta
+          name="og:description"
+          content="World's most comprehensive IGCSE, AS & A-level study materials platform"
+        />
+        <meta name="og:url" content="https://noteoverflow.com/" />
+        <meta name="og:type" content="website" />
+        <meta name="og:locale" content="en_US" />
+        <meta name="og:site_name" content="NoteOverflow" />
+        <meta name="og:image:width" content="1200" />
+        <meta name="og:image:height" content="627" />
         <meta property="article:author" content="Mr. Cao Cu Chinh" />
         <meta property="article:publisher" content="Mr. Cao Cu Chinh" />
         <meta
