@@ -99,8 +99,10 @@ export async function GET(request: NextRequest) {
       const topicsCondition = topic.map((t) =>
         like(question.topics, "%" + t + "%")
       );
-      // @ts-expect-error fuck this shit
-      conditions.push(or(...topicsCondition));
+      const topicsOrCondition = or(...topicsCondition);
+      if (topicsOrCondition) {
+        conditions.push(topicsOrCondition);
+      }
 
       const result = await db.query.question.findMany({
         where: and(...conditions),

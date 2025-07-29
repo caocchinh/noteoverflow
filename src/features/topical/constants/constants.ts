@@ -7,8 +7,8 @@ import type {
 } from "./types";
 
 export const CURRICULUM_COVER_IMAGE: Record<ValidCurriculum, string> = {
-  "CIE A-LEVEL": "/assets/cover/alevels-logo1.jpg",
-  "CIE IGCSE": "/assets/cover/igcse-logo1.jpg",
+  "CIE A-LEVEL": "/assets/cover/alevels-logo1.webp",
+  "CIE IGCSE": "/assets/cover/igcse-logo1.webp",
 };
 
 export const SUBJECT_COVER_IMAGE: Record<
@@ -16,36 +16,36 @@ export const SUBJECT_COVER_IMAGE: Record<
   Record<string, string>
 > = {
   "CIE A-LEVEL": {
-    "Physics (9702)": "/assets/cover/Physics (9702).jpg",
-    "Chemistry (9701)": "/assets/cover/Chemistry (9701).jpg",
-    "Biology (9700)": "/assets/cover/Biology (9700).jpg",
-    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).jpg",
-    "Mechanics (9709)": "/assets/cover/Mechanics (9709).jpg",
+    "Physics (9702)": "/assets/cover/Physics (9702).webp",
+    "Chemistry (9701)": "/assets/cover/Chemistry (9701).webp",
+    "Biology (9700)": "/assets/cover/Biology (9700).webp",
+    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).webp",
+    "Mechanics (9709)": "/assets/cover/Mechanics (9709).webp",
     "Mathematics Probability & Statistics 1 (9709)":
-      "/assets/cover/Probability & Statistics 1 (9709).jpg",
+      "/assets/cover/Probability & Statistics 1 (9709).webp",
     "Mathematics Probability & Statistics 2 (9709)":
-      "/assets/cover/Probability & Statistics 2 (9709).jpg",
-    "Mathematics Pure Math 2,3 (9709)": "/assets/cover/Pure 2&3 (9709).jpg",
-    "Computer Science (9608)": "/assets/cover/Computer Science (9608).jpg",
-    "Computer Science (9618)": "/assets/cover/Computer Science (9618).jpg",
+      "/assets/cover/Probability & Statistics 2 (9709).webp",
+    "Mathematics Pure Math 2,3 (9709)": "/assets/cover/Pure 2&3 (9709).webp",
+    "Computer Science (9608)": "/assets/cover/Computer Science (9608).webp",
+    "Computer Science (9618)": "/assets/cover/Computer Science (9618).webp",
     "Further Mathematics (9231)":
-      "/assets/cover/Further Mathematics (9231).jpg",
-    "Economics (9708)": "/assets/cover/Economics (9708).jpg",
-    "Psychology (9990)": "/assets/cover/Psychology (9990).jpg",
+      "/assets/cover/Further Mathematics (9231).webp",
+    "Economics (9708)": "/assets/cover/Economics (9708).webp",
+    "Psychology (9990)": "/assets/cover/Psychology (9990).webp",
     "Mathematics Mechanics 1 (9709)":
-      "/assets/cover/Mathematics Mechanics 1 (9709).jpg",
+      "/assets/cover/Mathematics Mechanics 1 (9709).webp",
     "Mathematics Mechanics 2 (9709)":
-      "/assets/cover/Mathematics Mechanics 2 (9709).jpg",
+      "/assets/cover/Mathematics Mechanics 2 (9709).webp",
     "Mathematics Statistics 1 (9709)":
-      "/assets/cover/Mathematics Statistics 1 (9709).jpg",
+      "/assets/cover/Mathematics Statistics 1 (9709).webp",
     "Mathematics Statistics 2 (9709)":
-      "/assets/cover/Mathematics Statistics 2 (9709).jpg",
+      "/assets/cover/Mathematics Statistics 2 (9709).webp",
   },
   "CIE IGCSE": {
-    "Physics (9702)": "/assets/cover/Physics (9702).jpg",
-    "Chemistry (9701)": "/assets/cover/Chemistry (9701).jpg",
-    "Biology (9700)": "/assets/cover/Biology (9700).jpg",
-    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).jpg",
+    "Physics (9702)": "/assets/cover/Physics (9702).webp",
+    "Chemistry (9701)": "/assets/cover/Chemistry (9701).webp",
+    "Biology (9700)": "/assets/cover/Biology (9700).webp",
+    "Pure Mathematics 1 (9709)": "/assets/cover/Pure 1 (9709).webp",
   },
 };
 
@@ -106,7 +106,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           "ELECTROCHEMISTRY",
           "EQUILIBRIA",
           "REACTION KINETICS",
-          "THE PERIODIC TABLE: CHEMICAL PERIODICITY",
+          "THE PERIODIC TABLE- CHEMICAL PERIODICITY",
           "GROUP 2",
           "GROUP 17",
           "AN INTRODUCTION TO THE CHEMISTRY OF TRANSITION ELEMENTS",
@@ -366,7 +366,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
           2013, 2012,
         ],
-        paperType: [1, 2, 3],
+        paperType: [1, 3],
         season: ["Summer", "Winter"],
       },
       {
@@ -411,12 +411,12 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 2 (9709)"],
         code: "Mathematics Mechanics 2 (9709)",
         topic: [
-          "FORCES & EQUILIBRIUM",
-          "KINEMATICS OF MOTION IN A STRAIGHT LINE",
-          "NEWTON'S LAWS OF MOTION",
-          "ENERGY, WORK & POWER",
-          "GENERAL MOTION IN STRAIGHT LINE",
-          "MOMENTUM",
+          "MOTION OF A PROJECTILE",
+          "MOMENTS OF FORCES",
+          "CENTRE OF MASS",
+          "UNIFORM MOTION IN A CIRCLE",
+          "HOOK'S LAW",
+          "LINEAR MOTION UNDER A VARIABLE FORCE",
         ],
         year: [2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012],
         paperType: [5],
@@ -505,7 +505,7 @@ export const COLUMN_BREAKPOINTS = {
   5: { 0: 1, 1: 2, 500: 3, 790: 4, 900: 5 },
 };
 
-export const MAX_TOPIC_SELECTION = 5;
+export const MAX_TOPIC_SELECTION = 10;
 export const INFINITE_SCROLL_CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
 

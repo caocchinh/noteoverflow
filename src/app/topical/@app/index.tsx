@@ -1093,7 +1093,7 @@ const TopicalClient = ({
                               alt="default subject"
                               className="self-center"
                               height={100}
-                              src="/assets/pointing.png"
+                              src="/assets/pointing.webp"
                               width={100}
                             />
                           </motion.div>
