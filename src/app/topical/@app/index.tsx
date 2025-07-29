@@ -1655,6 +1655,7 @@ const TopicalClient = ({
                     input manually using the filter on the left.
                   </div>
                 )}
+
               {topicalData?.data && topicalData?.data.length > 0 && (
                 <p className="text-sm text-left mb-1">
                   {topicalData?.data.length} question

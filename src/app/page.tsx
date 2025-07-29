@@ -39,6 +39,7 @@ const items = Array.from({ length: 22 }, (_, i) => {
       key={`logo${num}`}
       src={`/assets/demo/${num}.webp`}
       width={65}
+      loading="lazy"
     />
   );
 });
@@ -177,12 +178,12 @@ export default function HomePage() {
                 delay={0}
                 direction="up"
                 duration={2}
-                from={100_000}
-                to={200_000}
+                from={50_000}
+                to={100_000}
               />
               <span className="font-bold text-5xl text-logo-main">+</span>
             </div>
-            <h1 className="w-full font-bold text-4xl text-[var(--home-page-text)]">
+            <h1 className="w-full fo1t-bold text-4xl text-[var(--home-page-text)]">
               Convenient topical past paper questions
             </h1>
             <p className="mt-2 w-full text-[var(--home-page-text-muted)] text-lg">
@@ -203,7 +204,7 @@ export default function HomePage() {
               />
             </Link>
           }
-          src={`/assets/screen.png`}
+          src={`/assets/screen.webp`}
           showGradient={false}
         />
         <section

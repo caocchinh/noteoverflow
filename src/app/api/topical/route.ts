@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
       }
       const topicsCondition = topic.map((t) =>
-        like(question.topics, "%" + t + "%")
+        like(question.topics, "%" + t.slice(0, 45) + "%")
       );
       const topicsOrCondition = or(...topicsCondition);
       if (topicsOrCondition) {
