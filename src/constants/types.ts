@@ -45,3 +45,16 @@ export type ServerActionResponse<T> = {
 export type ValidSeason = "Summer" | "Winter" | "Spring";
 export type ValidContentType = "questions" | "answers";
 export type ValidCurriculum = "CIE IGCSE" | "CIE A-LEVEL";
+
+export interface TopicalData {
+  curriculum: ValidCurriculum;
+  coverImage: string;
+  subject: {
+    coverImage: string;
+    code: string;
+    topic: string[];
+    year: number[];
+    paperType: number[];
+    season: ValidSeason[];
+  }[];
+}

@@ -33,7 +33,6 @@ import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider"
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
-  TOPICAL_DATA,
   DEFAULT_NUMBER_OF_COLUMNS,
   COLUMN_BREAKPOINTS,
   MAX_TOPIC_SELECTION,
@@ -90,7 +89,7 @@ import { Switch } from "@/components/ui/switch";
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
 import { addRecentQuery } from "@/features/topical/server/actions";
 import { toast } from "sonner";
-import { BAD_REQUEST } from "@/constants/constants";
+import { BAD_REQUEST, TOPICAL_DATA } from "@/constants/constants";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 

@@ -96,8 +96,8 @@ export const QuestionView = ({
   });
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
-      <div className="flex items-center justify-start w-full gap-4 flex-wrap">
-        <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
+      <div className="flex items-center justify-start w-full gap-4 flex-wrap mb-3 ">
+        <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md  ">
           <Button
             onClick={() => setCurrentView("question")}
             className={cn(

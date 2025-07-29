@@ -187,7 +187,7 @@ export default function HomePage() {
               Convenient topical past paper questions
             </h1>
             <p className="mt-2 w-full text-[var(--home-page-text-muted)] text-lg">
-              from 2009 of the most popular IGCSE, AS & A-level subjects
+              from 2009 of the most popular AS & A-level subjects
             </p>
           </div>
         </section>

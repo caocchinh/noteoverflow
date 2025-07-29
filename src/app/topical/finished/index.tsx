@@ -2,12 +2,10 @@
 
 import { ValidCurriculum } from "@/constants/types";
 import {
-  CURRICULUM_COVER_IMAGE,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_LAYOUT_STYLE,
   INFINITE_SCROLL_CHUNK_SIZE,
-  SUBJECT_COVER_IMAGE,
   FILTERS_CACHE_KEY,
   COLUMN_BREAKPOINTS,
   DEFAULT_CACHE,
@@ -79,6 +77,10 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  CURRICULUM_COVER_IMAGE,
+  SUBJECT_COVER_IMAGE,
+} from "@/constants/constants";
 
 const FinishedQuestionsClient = ({
   BETTER_AUTH_URL,

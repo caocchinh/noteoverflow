@@ -11,7 +11,6 @@ import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import QuestionInspect from "@/features/topical/components/QuestionInspect";
 import {
   COLUMN_BREAKPOINTS,
-  CURRICULUM_COVER_IMAGE,
   DEFAULT_CACHE,
   DEFAULT_IMAGE_THEME,
   DEFAULT_LAYOUT_STYLE,
@@ -21,7 +20,6 @@ import {
   FILTERS_CACHE_KEY,
   INFINITE_SCROLL_CHUNK_SIZE,
   INVALID_INPUTS_DEFAULT,
-  SUBJECT_COVER_IMAGE,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -79,6 +77,10 @@ import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButt
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  CURRICULUM_COVER_IMAGE,
+  SUBJECT_COVER_IMAGE,
+} from "@/constants/constants";
 
 export const BookmarkView = ({
   data,
