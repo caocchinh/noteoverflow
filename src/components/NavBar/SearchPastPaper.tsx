@@ -3,9 +3,15 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
-const Search = () => {
+const SearchPastPaper = () => {
   const [input, setInput] = useState("");
   const breakpoint = useIsMobile({ breakpoint: 735 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,7 +40,10 @@ const Search = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Search</DialogTitle>
+            <DialogTitle>AS & A-Level Past Papers Search</DialogTitle>
+            <DialogDescription className="sr-only">
+              Search for past papers by subject, topic, year, and more.
+            </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
@@ -42,4 +51,4 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default SearchPastPaper;

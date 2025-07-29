@@ -7,7 +7,7 @@ import ShinyText from "@/components/ShinyText";
 import { Button } from "@/components/ui/button";
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
-import Search from "./Search";
+import SearchPastPaper from "./SearchPastPaper";
 import { ModeToggle } from "./ThemeToggle";
 import User from "./User";
 
@@ -57,7 +57,7 @@ const NavBar = () => {
           </>
         )}
 
-        <Search />
+        <SearchPastPaper />
         <div className="header-content-group flex items-center gap-4">
           <Button
             asChild

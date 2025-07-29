@@ -306,7 +306,6 @@ const QuestionInspect = ({
       return;
     }
     overflowScrollHandler();
-    console.log("aaa");
 
     const tab = isOpen.questionId
       ? partitionedTopicalData?.findIndex((partition) =>

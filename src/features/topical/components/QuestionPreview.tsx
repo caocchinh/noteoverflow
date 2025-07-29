@@ -177,14 +177,20 @@ const QuestionPreview = memo(
               if (isBookmarkError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
-                  position: isMobileDevice ? "top-center" : "bottom-right",
+                  position:
+                    isMobileDevice && isPopoverOpen
+                      ? "top-center"
+                      : "bottom-right",
                 });
                 return;
               }
               if (!isValidSession) {
                 toast.error("Please sign in to bookmark questions.", {
                   duration: 2000,
-                  position: isMobileDevice ? "top-center" : "bottom-right",
+                  position:
+                    isMobileDevice && isPopoverOpen
+                      ? "top-center"
+                      : "bottom-right",
                 });
                 return;
               }
@@ -230,14 +236,20 @@ const QuestionPreview = memo(
                 if (isBookmarkError) {
                   toast.error("Bookmark error. Please refresh the page.", {
                     duration: 2000,
-                    position: isMobileDevice ? "top-center" : "bottom-right",
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
                   });
                   return;
                 }
                 if (!isValidSession) {
                   toast.error("Please sign in to bookmark questions.", {
                     duration: 2000,
-                    position: isMobileDevice ? "top-center" : "bottom-right",
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
                   });
                   return;
                 }

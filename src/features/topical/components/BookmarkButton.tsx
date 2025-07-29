@@ -331,6 +331,7 @@ const BookmarkButtonConsumer = memo(
     const removeChosenBookmarkList = useBookmarkContext(
       (state) => state.actions.removeChosenBookmarkList
     );
+    const isOpen = useBookmarkContext((state) => state.open);
 
     const { mutate } = useMutation({
       mutationKey: mutationKey,
@@ -630,7 +631,7 @@ const BookmarkButtonConsumer = memo(
       if (!isValidSession) {
         toast.error("Please sign in to bookmark questions.", {
           duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
+          position: isMobileDevice && isOpen ? "top-center" : "bottom-right",
         });
         return;
       }

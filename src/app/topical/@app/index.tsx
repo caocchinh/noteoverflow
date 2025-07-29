@@ -92,6 +92,7 @@ import { toast } from "sonner";
 import { BAD_REQUEST, TOPICAL_DATA } from "@/constants/constants";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
+import { ArrowDown } from "lucide-react";
 
 const TopicalClient = ({
   searchParams,
@@ -1645,6 +1646,16 @@ const TopicalClient = ({
                     content layout, cache behaviour, and visual related settings
                     to your own preference.
                   </div>
+                  <div className="w-full md:w-[500px] text-center m-auto text-logo-main">
+                    You can bookmark questions and save them to your own list
+                    and share them with your friends. Or mark a question as
+                    completed to track your progress and for revision.
+                  </div>
+
+                  <div className="w-full md:w-[500px] text-center m-auto text-muted-foreground mt-2">
+                    Use the mini menu bar below to navigate.
+                  </div>
+                  <ArrowDown size={20} strokeWidth={1.5} />
                 </div>
               )}
               {!isTopicalDataFetching &&
