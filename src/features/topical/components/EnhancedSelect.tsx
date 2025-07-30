@@ -160,7 +160,7 @@ const EnhancedSelect = ({
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup>
                   {data
-                    .filter((item) => fuzzySearch(inputValue, item.code))
+                    ?.filter((item) => fuzzySearch(inputValue, item.code))
                     .map((item) => (
                       <EnhancedSelectItem
                         key={item.code}
@@ -215,6 +215,10 @@ const EnhancedSelectItem = ({
           className={cn("cursor-pointer", !isOpen && "pointer-events-none")}
           key={item.code}
           onSelect={(currentValue) => {
+            setIsBlockingInput(true);
+            setTimeout(() => {
+              setIsBlockingInput(false);
+            }, 0);
             setSelectedValue(currentValue);
             setIsOpen(false);
             setInputValue("");

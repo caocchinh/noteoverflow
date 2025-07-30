@@ -909,13 +909,13 @@ const FinishedQuestionsClient = ({
                 {metadata[selectedCurriculumn]?.map((subject) => (
                   <div
                     key={subject}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[160px]"
+                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
                     onClick={() => {
                       setSelecteSubject(subject);
                     }}
                   >
                     <Image
-                      width={160}
+                      width={150}
                       height={200}
                       loading="lazy"
                       title={subject}
