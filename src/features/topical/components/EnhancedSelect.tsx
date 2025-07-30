@@ -38,15 +38,23 @@ import { fuzzySearch } from "../lib/utils";
 const EnhancedSelect = ({
   label,
   prerequisite,
+  side,
   data,
   selectedValue,
+  triggerClassName,
   setSelectedValue,
+  popoverContentClassName,
+  modal,
 }: {
   label: string;
   prerequisite: string;
+  side?: "left" | "right" | "bottom" | "top";
   data: { code: string; coverImage: string }[];
+  popoverContentClassName?: string;
   selectedValue: string;
+  triggerClassName?: string;
   setSelectedValue: Dispatch<SetStateAction<string>>;
+  modal?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);
@@ -97,11 +105,14 @@ const EnhancedSelect = ({
 
   return (
     <div className="flex flex-col gap-1" ref={containerRef}>
-      <Popover modal={isMobileDevice} open={isOpen}>
+      <Popover modal={modal || isMobileDevice} open={isOpen}>
         <PopoverTrigger asChild>
           <Button
             aria-expanded={isOpen}
-            className="h-max w-[200px] justify-between whitespace-pre-wrap"
+            className={cn(
+              "h-max w-[200px] justify-between whitespace-pre-wrap",
+              triggerClassName
+            )}
             disabled={!!prerequisite}
             variant="outline"
             onClick={() => {
@@ -127,8 +138,11 @@ const EnhancedSelect = ({
         </PopoverTrigger>
         <PopoverContent
           align="center"
-          className="z-[1000000000000000] w-[300px] p-0 sm:w-max"
-          side={isMobileDevice ? "bottom" : "right"}
+          className={cn(
+            "z-[1000000000000000] w-[300px] p-0 sm:w-max",
+            popoverContentClassName
+          )}
+          side={side || (isMobileDevice ? "bottom" : "right")}
           avoidCollisions={isMobileDevice ? false : true}
         >
           <Command shouldFilter={false} onKeyDown={handleKeyDown}>

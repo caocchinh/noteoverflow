@@ -14,10 +14,12 @@ export const QR = ({
   isOpen,
   setIsOpen,
   url,
+  type = "filter",
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   url: string;
+  type?: "filter" | "bookmark" | "question";
 }) => {
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -36,7 +38,7 @@ export const QR = ({
       >
         <DialogTitle className="sr-only">QR Code</DialogTitle>
         <DialogDescription>
-          Share the filter with your friends
+          Share the {type} with your friends!
         </DialogDescription>
         <QRCodeCanvas
           ref={canvasRef}

@@ -87,7 +87,7 @@ export const RecentQuery = ({
   currentQuery: CurrentQuery;
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
   isAddRecentQueryPending: boolean;
-  setSelectedCurriculum: Dispatch<SetStateAction<"" | ValidCurriculum>>;
+  setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
   setSelectedSubject: Dispatch<SetStateAction<string>>;
   setSelectedTopic: Dispatch<SetStateAction<string[]>>;
   setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
@@ -370,7 +370,7 @@ const RecentQueryItem = ({
   };
   index: number;
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  setSelectedCurriculum: Dispatch<SetStateAction<"" | ValidCurriculum>>;
+  setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
   setSelectedSubject: Dispatch<SetStateAction<string>>;
   setSelectedTopic: Dispatch<SetStateAction<string[]>>;
   setSelectedYear: Dispatch<SetStateAction<string[]>>;

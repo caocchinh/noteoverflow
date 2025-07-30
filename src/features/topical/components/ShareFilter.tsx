@@ -52,7 +52,7 @@ export const ShareFilter = ({
           )}
         </TooltipContent>
       </Tooltip>
-      <QR isOpen={isOpen} setIsOpen={setIsOpen} url={url} />
+      <QR isOpen={isOpen} setIsOpen={setIsOpen} url={url} type={type} />
     </>
   );
 };

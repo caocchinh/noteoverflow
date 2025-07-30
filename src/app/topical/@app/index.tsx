@@ -102,9 +102,8 @@ const TopicalClient = ({
   searchParams: { [key: string]: string | string[] | undefined };
   BETTER_AUTH_URL: string;
 }) => {
-  const [selectedCurriculum, setSelectedCurriculum] = useState<
-    ValidCurriculum | ""
-  >("");
+  const [selectedCurriculum, setSelectedCurriculum] =
+    useState<ValidCurriculum>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
   const availableSubjects = useMemo(() => {
@@ -243,7 +242,7 @@ const TopicalClient = ({
       console.error("Failed to access localStorage:", error);
     }
 
-    setSelectedCurriculum("");
+    setSelectedCurriculum("CIE A-LEVEL");
     setSelectedSubject("");
     setSelectedTopic([]);
     setSelectedYear([]);

@@ -27,8 +27,8 @@ export const SelectVisibility = ({
       <SelectTrigger className="w-full py-6">
         <SelectValue placeholder="Select a visibility" />
       </SelectTrigger>
-      <SelectContent className="z-[999999] dark:bg-accent">
-        <SelectItem value="public">
+      <SelectContent className="z-[999999] dark:bg-accent w-[var(--radix-select-trigger-width)]">
+        <SelectItem value="public" className="w-full">
           <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
             <Globe className="w-4 h-4" />
             <div className="flex flex-col justify-center items-start">
@@ -39,7 +39,7 @@ export const SelectVisibility = ({
             </div>
           </div>
         </SelectItem>
-        <SelectItem value="private">
+        <SelectItem value="private" className="w-full">
           <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
             <Lock className="w-4 h-4" />
             <div className="flex flex-col justify-center items-start">
