@@ -8,7 +8,6 @@ import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
-  MAX_TOPIC_SELECTION,
   PAPER_TYPE_SORT_DEFAULT_WEIGHT,
   SEASON_SORT_DEFAULT_WEIGHT,
   TOPIC_SORT_DEFAULT_WEIGHT,
@@ -116,9 +115,7 @@ export const validateFilterData = ({
     if (!data.topic) {
       return false;
     }
-    if (data.topic.length > MAX_TOPIC_SELECTION) {
-      return false;
-    }
+
     if (!isSubset(data.topic, currentSubjectData.topic)) {
       return false;
     }
@@ -543,7 +540,6 @@ export const isValidInputs = ({
   paperTypeRef,
   selectedSeason,
   seasonRef,
-  topicLengthConstraint = true,
 }: {
   setInvalidInputs: Dispatch<SetStateAction<InvalidInputs>>;
   scrollOnError?: boolean;
@@ -560,7 +556,6 @@ export const isValidInputs = ({
   selectedYear: string[];
   selectedPaperType: string[];
   selectedSeason: string[];
-  topicLengthConstraint?: boolean;
 }) => {
   const fieldsToValidate: {
     name: keyof InvalidInputs;
@@ -572,9 +567,7 @@ export const isValidInputs = ({
       name: "topic",
       value: selectedTopic,
       ref: topicRef,
-      isInvalid:
-        selectedTopic.length === 0 ||
-        (selectedTopic.length > MAX_TOPIC_SELECTION && topicLengthConstraint),
+      isInvalid: selectedTopic.length === 0,
     },
     {
       name: "year",

@@ -15,6 +15,18 @@ import {
 } from "@/features/topical/constants/types";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
+// Function to hash the query string
+async function hashQuery(queryString: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(queryString);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -61,7 +73,9 @@ export async function GET(request: NextRequest) {
       isRateLimited,
     };
 
-    const result = await env.TOPICAL_CACHE.get(JSON.stringify(currentQuery));
+    const queryString = JSON.stringify(currentQuery);
+    const hashedKey = await hashQuery(queryString);
+    const result = await env.TOPICAL_CACHE.get(hashedKey);
 
     if (result === null) {
       const db = await getDbAsync();
@@ -130,11 +144,9 @@ export async function GET(request: NextRequest) {
         };
       });
 
-      await env.TOPICAL_CACHE.put(
-        JSON.stringify(currentQuery),
-        JSON.stringify(data),
-        { expirationTtl: 60 * 60 * 24 * 14 }
-      );
+      await env.TOPICAL_CACHE.put(hashedKey, JSON.stringify(data), {
+        expirationTtl: 60 * 60 * 24 * 14,
+      });
 
       return NextResponse.json(
         {

@@ -543,7 +543,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     scrollOnError?: boolean;
   }) => {
     return isValidInputsUtils({
-      topicLengthConstraint: false,
       scrollOnError,
       topicRef: topicRef,
       yearRef: yearRef,

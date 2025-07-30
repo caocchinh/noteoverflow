@@ -21,7 +21,6 @@ export const COLUMN_BREAKPOINTS = {
   5: { 0: 1, 1: 2, 500: 3, 790: 4, 900: 5 },
 };
 
-export const MAX_TOPIC_SELECTION = 5;
 export const INFINITE_SCROLL_CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
 

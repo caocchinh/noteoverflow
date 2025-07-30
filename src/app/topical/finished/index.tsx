@@ -485,7 +485,6 @@ const FinishedQuestionsClient = ({
     scrollOnError?: boolean;
   }) => {
     return isValidInputsUtils({
-      topicLengthConstraint: false,
       scrollOnError,
       topicRef: topicRef,
       yearRef: yearRef,

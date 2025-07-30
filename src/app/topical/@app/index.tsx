@@ -35,7 +35,6 @@ import {
   INVALID_INPUTS_DEFAULT,
   DEFAULT_NUMBER_OF_COLUMNS,
   COLUMN_BREAKPOINTS,
-  MAX_TOPIC_SELECTION,
   INFINITE_SCROLL_CHUNK_SIZE,
   CACHE_EXPIRE_TIME,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -1177,19 +1176,17 @@ const TopicalClient = ({
                       <EnhancedMultiSelect
                         data={availableTopics}
                         label="Topic"
-                        maxLength={MAX_TOPIC_SELECTION}
                         onValuesChange={(values) =>
                           setSelectedTopic(values as string[])
                         }
                         prerequisite="Subject"
                         values={selectedTopic}
                       />
-                      {invalidInputs.topic &&
-                        selectedTopic.length < MAX_TOPIC_SELECTION && (
-                          <p className="text-destructive text-sm">
-                            Topic is required
-                          </p>
-                        )}
+                      {invalidInputs.topic && (
+                        <p className="text-destructive text-sm">
+                          Topic is required
+                        </p>
+                      )}
                     </div>
                     <div
                       className="flex flex-col items-start justify-start gap-1"
