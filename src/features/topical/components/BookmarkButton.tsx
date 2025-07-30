@@ -16,6 +16,7 @@ import {
   Plus,
   Trash2,
   X,
+  XIcon,
 } from "lucide-react";
 import { Bookmark } from "lucide-react";
 import {
@@ -802,11 +803,6 @@ const BookmarkButtonConsumer = memo(
               align={popOverAlign}
               ref={containerRef}
             >
-              <X
-                className="absolute top-1 right-1 cursor-pointer"
-                onClick={() => setOpen(false)}
-                size={15}
-              />
               <BookmarkList
                 scrollAreaRef={scrollAreaRef}
                 searchInputRef={searchInputRef}
@@ -901,20 +897,33 @@ const BookmarkSearchInput = memo(
     );
     const searchInput = useBookmarkContext((state) => state.searchInput);
     return (
-      <CommandInput
-        placeholder="Search bookmark lists"
-        wrapperClassName="border-b border-border mb-2 p-2 pb-5"
-        onClick={(e) => {
-          e.currentTarget.focus();
-        }}
-        value={searchInput}
-        ref={searchInputRef}
-        onValueChange={setSearchInput}
-        readOnly={isBlockingInput}
-        onDoubleClick={(e) => {
-          e.currentTarget.select();
-        }}
-      />
+      <div className="flex w-full items-center justify-between gap-1 dark:bg-accent mb-2 pb-3 border-b border-border ">
+        <CommandInput
+          placeholder="Search bookmark lists"
+          wrapperClassName="w-full  ml-2"
+          onClick={(e) => {
+            e.currentTarget.focus();
+          }}
+          value={searchInput}
+          ref={searchInputRef}
+          onValueChange={setSearchInput}
+          readOnly={isBlockingInput}
+          onDoubleClick={(e) => {
+            e.currentTarget.select();
+          }}
+        />
+        <XIcon
+          className="!bg-transparent cursor-pointer mr-2 text-destructive"
+          size={20}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSearchInput("");
+            if (searchInput) {
+              searchInputRef.current?.focus();
+            }
+          }}
+        />
+      </div>
     );
   }
 );

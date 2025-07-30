@@ -1,5 +1,5 @@
 "use client";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, XIcon } from "lucide-react";
 import Image from "next/image";
 import {
   SetStateAction,
@@ -96,7 +96,7 @@ const EnhancedSelect = ({
   );
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1" ref={containerRef}>
       <Popover modal={isMobileDevice} open={isOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -105,7 +105,7 @@ const EnhancedSelect = ({
             disabled={!!prerequisite}
             variant="outline"
             onClick={() => {
-              setIsOpen(true);
+              setIsOpen(!isOpen);
               setIsBlockingInput(true);
               setTimeout(() => {
                 setIsBlockingInput(false);
@@ -130,23 +130,31 @@ const EnhancedSelect = ({
           className="z-[1000000000000000] w-[300px] p-0 sm:w-max"
           side={isMobileDevice ? "bottom" : "right"}
           avoidCollisions={isMobileDevice ? false : true}
-          ref={containerRef}
         >
           <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-            <CommandInput
-              className="h-9 border-none"
-              placeholder={`Search ${label.toLowerCase()}`}
-              readOnly={isBlockingInput}
-              ref={inputRef}
-              onClick={() => {
-                inputRef.current?.focus();
-              }}
-              value={inputValue}
-              wrapperClassName="w-full p-4 border-b py-6 dark:bg-accent"
-              onValueChange={(value) => {
-                setInputValue(value);
-              }}
-            />
+            <div className="flex items-center gap-1 dark:bg-accent">
+              <CommandInput
+                className="h-9 border-none"
+                placeholder={`Search ${label.toLowerCase()}`}
+                readOnly={isBlockingInput}
+                ref={inputRef}
+                onClick={() => {
+                  inputRef.current?.focus();
+                }}
+                value={inputValue}
+                wrapperClassName="w-full p-4 border-b py-6 "
+                onValueChange={(value) => {
+                  setInputValue(value);
+                }}
+              />
+              <XIcon
+                className="!bg-transparent cursor-pointer mr-2 text-destructive"
+                size={20}
+                onClick={() => {
+                  setInputValue("");
+                }}
+              />
+            </div>
             <ScrollArea viewPortClassName="max-h-[195px]" type="always">
               <CommandList className="dark:bg-accent">
                 <CommandEmpty>No results found.</CommandEmpty>

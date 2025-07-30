@@ -579,42 +579,63 @@ const MultiSelectorList = () => {
     };
   }, [inputRef, isMobileDevice, open, setIsBlockingInput]);
   return (
-    <div className="flex h-full flex-col gap-2">
-      <CommandInput
-        className="w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-        enterKeyHint="search"
-        onBlur={() => {
-          if (!(isClickingScrollArea || isBlockingInput)) {
-            setOpen(false);
-            setInputValue("");
-          }
-        }}
+    <div
+      className="flex h-full flex-col gap-2"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      <div
+        className="flex items-center gap-1 dark:bg-accent"
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
-        onValueChange={(e) => {
-          setInputValue(e);
-          if (!e) {
-            setTimeout(() => {
-              commandListRef.current?.scrollTo({
-                top: 0,
-                behavior: "instant",
-              });
-            }, 100);
+      >
+        <CommandInput
+          className="w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+          enterKeyHint="search"
+          onBlur={() => {
+            if (!(isClickingScrollArea || isBlockingInput)) {
+              setOpen(false);
+              setInputValue("");
+            }
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onValueChange={(e) => {
+            setInputValue(e);
+            if (!e) {
+              setTimeout(() => {
+                commandListRef.current?.scrollTo({
+                  top: 0,
+                  behavior: "instant",
+                });
+              }, 100);
+            }
+          }}
+          placeholder={
+            allAvailableOptions
+              ? `Search ${label.toLowerCase()}`
+              : `Select ${prerequisite.toLowerCase()} first`
           }
-        }}
-        placeholder={
-          allAvailableOptions
-            ? `Search ${label.toLowerCase()}`
-            : `Select ${prerequisite.toLowerCase()} first`
-        }
-        readOnly={isBlockingInput}
-        ref={inputRef}
-        tabIndex={0}
-        value={inputValue}
-        wrapperClassName="w-full py-6 px-4 border-b"
-      />
+          readOnly={isBlockingInput}
+          ref={inputRef}
+          tabIndex={0}
+          value={inputValue}
+          wrapperClassName="w-full py-6 px-4 border-b"
+        />
+        <RemoveIcon
+          className="!bg-transparent cursor-pointer mr-2 text-destructive"
+          size={20}
+          onClick={(e) => {
+            e.stopPropagation();
+            setInputValue("");
+          }}
+        />
+      </div>
       <ScrollArea viewPortClassName="max-h-[50vh]" type="always">
         <CommandList
           className={cn(
