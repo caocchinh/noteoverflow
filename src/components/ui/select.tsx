@@ -118,7 +118,7 @@ function SelectItem({
   return (
     <SelectPrimitiveItem
       className={cn(
-        "size-'])]:size-4 text-'])]:text-muted-foreground relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden [&_svg:not([class*= [&_svg:not([class*= focus:bg-card focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "size-'])]:size-4 text-'])]:text-muted-foreground relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden [&_svg:not([class*= [&_svg:not([class*= dark:focus:bg-card focus:bg-input/70 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className
       )}
       data-slot="select-item"
