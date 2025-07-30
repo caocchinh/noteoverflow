@@ -5,6 +5,7 @@ import {
   Search as SearchIcon,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -56,12 +57,14 @@ const SearchPastPaper = () => {
     variant: false,
   });
   const currentYear = new Date().getFullYear();
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
 
   const updateManualInputs = (): void => {
     const extractedComponents = quickCodeInput.split("/");
     const subject = availableSubjects?.find((s) =>
       s.code.includes(extractedComponents[0])
     );
+
     setSelectedSubject(subject?.code ?? "");
     setSelectedPaperType(extractedComponents[1][0]);
     setSelectedVariant(extractedComponents[1][1]);
@@ -84,7 +87,7 @@ const SearchPastPaper = () => {
   };
 
   const validateQuickCode = ({ code }: { code: string }): string => {
-    if (!code) return "Skibidi toilet";
+    if (!code) return "";
 
     const regex = /^(\d{4})\/(\d{2})\/(F\/M|M\/J|O\/N)\/(\d{2})$/;
 
@@ -128,6 +131,7 @@ const SearchPastPaper = () => {
       setQuickCodeError(error);
       if (!error) {
         updateManualInputs();
+        setIsInfoDialogOpen(true);
       }
     }
   };
@@ -230,73 +234,116 @@ const SearchPastPaper = () => {
         <SearchIcon />
       </Button>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="dark:bg-muted">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              AS & A-Level Past Papers Search
-            </DialogTitle>
+        <DialogContent className="dark:bg-muted max-w-2xl">
+          <DialogHeader className="space-y-3 !pb-0">
+            <div className="relative">
+              <DialogTitle className="relative text-center text-xl font-bold">
+                AS & A-Level Past Papers Search
+              </DialogTitle>
+            </div>
+
             <DialogDescription className="sr-only">
               Search for past papers by subject, topic, year, and more.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-[calc(100dvh-150px)] pr-4" type="always">
-            <div className="flex flex-col gap-3 items-start px-5 py-2 justify-center mb-5 h-full border-2  rounded-sm relative">
-              <h4 className="text-sm text-logo-main">Quick Paper Code</h4>
-              <div className="flex justify-center gap-2 w-full sm:flex-row flex-col">
-                <Input
-                  id="quick-code"
-                  placeholder="e.g. 9702/42/M/J/20"
-                  value={quickCodeInput}
-                  onChange={handleQuickCodeInputChange}
-                  className={`w-full text-center ${
-                    quickCodeError ? "border-red-500" : ""
-                  }`}
-                />
-                <div className="h-full relative">
-                  <GlowEffect
-                    colors={["#FF5733", "#33FF57", "#3357FF", "#F1C40F"]}
-                    mode="colorShift"
-                    blur="soft"
-                    duration={3}
-                  />
-                  <Button
-                    onClick={handleQuickCodeSubmit}
-                    className={`cursor-pointer h-full sm:w-auto w-full relative z-10 ${
-                      !!quickCodeError || quickCodeInput === ""
-                        ? "opacity-50"
-                        : ""
-                    }`}
-                    disabled={!!quickCodeError || quickCodeInput === ""}
-                  >
-                    Find
-                    <Search className="w-4 h-4 ml" />
-                  </Button>
+            <div className="relative overflow-hidden bg-gradient-to-br from-background via-accent/20 to-accent/40 rounded-xl border border-border/50shadow-md">
+              <div className="relative z-10 ">
+                <div className="flex items-center gap-2 px-4 pt-2 pb-0 ">
+                  <div className="absolute inset-0 bg-gradient-to-r from-logo-main/5 via-transparent to-logo-main/5" />
+                  <h4 className="text-base font-semibold text-logo-main">
+                    ⚡ Quick Paper Code
+                  </h4>
+                </div>
+
+                <div className="flex justify-center px-4 py-2 gap-5 w-full sm:flex-row flex-col">
+                  <div className="relative flex-1">
+                    <Input
+                      id="quick-code"
+                      placeholder="e.g. 9702/42/M/J/20"
+                      value={quickCodeInput}
+                      onChange={handleQuickCodeInputChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleQuickCodeSubmit();
+                        }
+                      }}
+                      className={`w-full text-center font-mono text-sm bg-background/80 border-2 transition-all duration-200 ${
+                        quickCodeError
+                          ? "border-red-500 focus:border-red-600"
+                          : "border-border/50 focus:border-logo-main/50"
+                      }`}
+                    />
+                  </div>
+
+                  <div className="relative sm:w-auto w-full">
+                    <GlowEffect
+                      colors={["#FF5733", "#33FF57", "#3357FF", "#F1C40F"]}
+                      mode="colorShift"
+                      blur="soft"
+                      duration={3}
+                    />
+                    <Button
+                      onClick={handleQuickCodeSubmit}
+                      className={`cursor-pointer h-full sm:w-auto w-full relative z-10 font-semibold transition-all duration-200 ${
+                        !!quickCodeError || quickCodeInput === ""
+                          ? "opacity-50"
+                          : "hover:scale-105"
+                      }`}
+                      disabled={!!quickCodeError || quickCodeInput === ""}
+                    >
+                      Find Paper
+                      <Search className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="px-4 py-2">
+                  {quickCodeError ? (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-lg">
+                      <div className="w-2 h-2 rounded-full bg-red-500" />
+                      <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                        {quickCodeError}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30 rounded-lg">
+                        <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
+                        <div className="space-y-1">
+                          <p className="text-xs text-blue-700 dark:text-blue-300">
+                            <span className="font-semibold">Format:</span>{" "}
+                            [Subject Code]/[Paper Number]/[Season]/[Year]
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            <span className="font-semibold">💡 Tip:</span> Press
+                            Enter twice to access marking schemes quickly
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            <span className="font-semibold">📝 Note:</span>{" "}
+                            Quick search updates manual input fields
+                            automatically
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-              {quickCodeError ? (
-                <p className="text-xs text-red-500">{quickCodeError}</p>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-bold">Enter code in format: </span>
-                    [Subject Code]/[Paper Number]/[Season]/[Year]
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-bold">Tip:</span> Press enter twice to
-                    access the marking scheme quickly
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-bold">Note:</span> Using quick search
-                    will update the manual input fields
-                  </p>
-                </>
-              )}
             </div>
-            <div className="flex flex-col gap-4 h-full border-2 px-5 py-3 rounded-sm relative">
-              <div className="flex flex-col gap-2">
-                <h4 className="text-sm text-logo-main">Manual Search</h4>
-                <div className="flex flex-col gap-2">
-                  <h5 className="text-xs font-semibold">Curriculum</h5>
+            <div className="flex flex-col gap-5 items-center justify-center overflow-hidden rounded-xl border border-border p-4 shadow-md mt-6">
+              <h4 className="text-base self-start font-semibold text-logo-main">
+                🎯 Manual Input
+              </h4>
+              <div className="relative w-full">
+                <div className=" rounded-lg w-full">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold mb-1 text-foreground">
+                      📚 Curriculum
+                    </span>
+                  </div>
                   <EnhancedSelect
                     data={TOPICAL_DATA.map((item) => ({
                       code: item.curriculum,
@@ -304,7 +351,7 @@ const SearchPastPaper = () => {
                     }))}
                     label="Curriculum"
                     prerequisite=""
-                    triggerClassName="w-full"
+                    triggerClassName="w-full "
                     side="bottom"
                     popoverContentClassName="!w-[var(--radix-popover-trigger-width)]"
                     selectedValue={selectedCurriculum}
@@ -314,136 +361,178 @@ const SearchPastPaper = () => {
                     }}
                   />
                   {invalidInputs.curriculum && (
-                    <p className="text-xs text-red-500">
-                      Curriculum is required
-                    </p>
+                    <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                        Curriculum is required
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <h5 className="text-xs font-semibold">Subject</h5>
+
+              <div className="w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold mb-1 text-foreground">
+                    🎓 Subject
+                  </span>
+                </div>
                 <EnhancedSelect
                   data={availableSubjects}
                   label="Subject"
                   modal={true}
                   popoverContentClassName="!w-[var(--radix-popover-trigger-width)]"
                   side="bottom"
-                  triggerClassName="w-full"
+                  triggerClassName="w-full "
                   prerequisite={selectedCurriculum ? "" : "Curriculum"}
                   selectedValue={selectedSubject}
                   setSelectedValue={setSelectedSubject}
                 />
                 {invalidInputs.subject && (
-                  <p className="text-xs text-red-500">Subject is required</p>
+                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                      Subject is required
+                    </p>
+                  </div>
                 )}
               </div>
-              <div className="flex flex-row gap-2 justify-between items-center">
-                <div className="flex flex-col items-start justify-center gap-2 w-[45%] ">
-                  <h5 className="text-xs font-semibold">Paper Type</h5>
-                  <div className="flex flex-row items-center justify-center gap-2 w-full">
-                    <Button
-                      className="w-[35px] rounded-sm cursor-pointer"
-                      variant="outline"
-                      title="Decrease"
-                      onClick={() => {
-                        const current = parseInt(selectedPaperType) || 1;
-                        setSelectedPaperType(
-                          (current > 1 ? current - 1 : 9).toString()
-                        );
-                      }}
-                    >
-                      <Minus />
-                    </Button>
-                    <Input
-                      placeholder="e.g. 4"
-                      max={9}
-                      min={1}
-                      value={selectedPaperType}
-                      type="number"
-                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
-                      onChange={(e) => setSelectedPaperType(e.target.value)}
-                    />
-                    <Button
-                      className="w-[35px] rounded-sm cursor-pointer"
-                      variant="outline"
-                      title="Increase"
-                      onClick={() => {
-                        const current = parseInt(selectedPaperType) || 1;
-                        setSelectedPaperType(
-                          (current < 9 ? current + 1 : 1).toString()
-                        );
-                      }}
-                    >
-                      <Plus />
-                    </Button>
-                  </div>
-                  {invalidInputs.paperType && (
-                    <p className="text-xs text-red-500 text-center">
-                      {parseInt(selectedPaperType) < 1 ||
-                      parseInt(selectedPaperType) > 9 ||
-                      isNaN(parseInt(selectedPaperType))
-                        ? "Paper type must be between 1 and 9"
-                        : "Paper type is required"}
-                    </p>
-                  )}
+
+              <div className="  w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-foreground">
+                    📄 Paper Details
+                  </span>
                 </div>
-                <div className="flex flex-col items-start justify-center gap-2 w-[45%] ">
-                  <h5 className="text-xs font-semibold">Variant</h5>
-                  <div className="flex flex-row items-center justify-center gap-2 w-full  ">
-                    <Button
-                      className="w-[35px] rounded-sm cursor-pointer"
-                      variant="outline"
-                      title="Decrease"
-                      onClick={() => {
-                        const current = parseInt(selectedVariant) || 1;
-                        setSelectedVariant(
-                          (current > 1 ? current - 1 : 9).toString()
-                        );
-                      }}
-                    >
-                      <Minus />
-                    </Button>
-                    <Input
-                      placeholder="e.g. 2"
-                      value={selectedVariant}
-                      type="number"
-                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
-                      max={9}
-                      min={1}
-                      onChange={(e) => setSelectedVariant(e.target.value)}
-                    />
-                    <Button
-                      className="w-[35px] rounded-sm cursor-pointer"
-                      variant="outline"
-                      title="Increase"
-                      onClick={() => {
-                        const current = parseInt(selectedVariant) || 1;
-                        setSelectedVariant(
-                          (current < 9 ? current + 1 : 1).toString()
-                        );
-                      }}
-                    >
-                      <Plus />
-                    </Button>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Paper Type
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        className="w-8 h-8 rounded-lg cursor-pointer "
+                        variant="outline"
+                        size="sm"
+                        title="Decrease"
+                        onClick={() => {
+                          const current = parseInt(selectedPaperType) || 1;
+                          setSelectedPaperType(
+                            (current > 1 ? current - 1 : 9).toString()
+                          );
+                        }}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <Input
+                        placeholder="e.g. 4"
+                        max={9}
+                        min={1}
+                        value={selectedPaperType}
+                        type="number"
+                        className="text-center font-mono font-semibold  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
+                        onChange={(e) => setSelectedPaperType(e.target.value)}
+                      />
+                      <Button
+                        className="w-8 h-8 rounded-lg cursor-pointer "
+                        variant="outline"
+                        size="sm"
+                        title="Increase"
+                        onClick={() => {
+                          const current = parseInt(selectedPaperType) || 1;
+                          setSelectedPaperType(
+                            (current < 9 ? current + 1 : 1).toString()
+                          );
+                        }}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    {invalidInputs.paperType && (
+                      <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                          {parseInt(selectedPaperType) < 1 ||
+                          parseInt(selectedPaperType) > 9 ||
+                          isNaN(parseInt(selectedPaperType))
+                            ? "Paper type must be between 1 and 9"
+                            : "Paper type is required"}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {invalidInputs.variant && (
-                    <p className="text-xs text-red-500 text-center">
-                      {parseInt(selectedVariant) < 1 ||
-                      parseInt(selectedVariant) > 9 ||
-                      isNaN(parseInt(selectedVariant))
-                        ? "Variant must be between 1 and 9"
-                        : "Variant is required"}
-                    </p>
-                  )}
+
+                  <div className="">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Variant
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        className="w-8 h-8 rounded-lg cursor-pointer "
+                        variant="outline"
+                        size="sm"
+                        title="Decrease"
+                        onClick={() => {
+                          const current = parseInt(selectedVariant) || 1;
+                          setSelectedVariant(
+                            (current > 1 ? current - 1 : 9).toString()
+                          );
+                        }}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <Input
+                        placeholder="e.g. 2"
+                        value={selectedVariant}
+                        type="number"
+                        className="text-center font-mono font-semibold  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
+                        max={9}
+                        min={1}
+                        onChange={(e) => setSelectedVariant(e.target.value)}
+                      />
+                      <Button
+                        className="w-8 h-8 rounded-lg cursor-pointer "
+                        variant="outline"
+                        size="sm"
+                        title="Increase"
+                        onClick={() => {
+                          const current = parseInt(selectedVariant) || 1;
+                          setSelectedVariant(
+                            (current < 9 ? current + 1 : 1).toString()
+                          );
+                        }}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    {invalidInputs.variant && (
+                      <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                          {parseInt(selectedVariant) < 1 ||
+                          parseInt(selectedVariant) > 9 ||
+                          isNaN(parseInt(selectedVariant))
+                            ? "Variant must be between 1 and 9"
+                            : "Variant is required"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <h5 className="text-xs font-semibold">Exam season</h5>
+
+              <div className=" w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold mb-1 text-foreground">
+                    🗓️ Exam Season
+                  </span>
+                </div>
                 <Select
                   value={selectedSeason}
                   onValueChange={(value) => setSelectedSeason(value)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full ">
                     <SelectValue placeholder="Select exam season" />
                   </SelectTrigger>
                   <SelectContent
@@ -451,26 +540,37 @@ const SearchPastPaper = () => {
                     side="bottom"
                   >
                     <SelectItem value="Spring">
-                      F/M - Febuary/March (Spring)
+                      🌱 F/M - February/March (Spring)
                     </SelectItem>
                     <SelectItem value="Summer">
-                      M/J - May/June (Summer)
+                      ☀️ M/J - May/June (Summer)
                     </SelectItem>
                     <SelectItem value="Winter">
-                      O/N - October/November (Winter)
+                      ❄️ O/N - October/November (Winter)
                     </SelectItem>
                   </SelectContent>
                 </Select>
                 {invalidInputs.season && (
-                  <p className="text-xs text-red-500">Season is required</p>
+                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                      Season is required
+                    </p>
+                  </div>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
-                <h5 className="text-xs font-semibold">Year</h5>
-                <div className="flex flex-row items-center justify-center gap-2 w-full">
+
+              <div className="w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold mb-1 text-foreground">
+                    📅 Year
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
                   <Button
-                    className="w-[35px] rounded-sm cursor-pointer"
+                    className="w-8 h-8 rounded-lg cursor-pointer "
                     variant="outline"
+                    size="sm"
                     title="Decrease"
                     onClick={() => {
                       const current = parseInt(selectedYear) || currentYear;
@@ -479,21 +579,22 @@ const SearchPastPaper = () => {
                       );
                     }}
                   >
-                    <Minus />
+                    <Minus className="w-3 h-3" />
                   </Button>
                   <Input
-                    placeholder="e.g. 2024"
+                    placeholder={`e.g. ${currentYear}`}
                     max={currentYear}
                     min={2009}
                     defaultValue={new Date().getFullYear()}
                     value={selectedYear}
                     type="number"
-                    className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
+                    className="text-center font-mono font-semibold  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
                     onChange={(e) => setSelectedYear(e.target.value)}
                   />
                   <Button
-                    className="w-[35px] rounded-sm cursor-pointer"
+                    className="w-8 h-8 rounded-lg cursor-pointer "
                     variant="outline"
+                    size="sm"
                     title="Increase"
                     onClick={() => {
                       const current = parseInt(selectedYear) || currentYear;
@@ -502,59 +603,171 @@ const SearchPastPaper = () => {
                       );
                     }}
                   >
-                    <Plus />
+                    <Plus className="w-3 h-3" />
                   </Button>
                 </div>
                 {invalidInputs.year && (
-                  <p className="text-xs text-red-500">
-                    {parseInt(selectedYear) < 2009 ||
-                    parseInt(selectedYear) > currentYear ||
-                    isNaN(parseInt(selectedYear))
-                      ? "Year must be between 2009 and " + currentYear
-                      : "Year is required"}
-                  </p>
+                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                      {parseInt(selectedYear) < 2009 ||
+                      parseInt(selectedYear) > currentYear ||
+                      isNaN(parseInt(selectedYear))
+                        ? "Year must be between 2009 and " + currentYear
+                        : "Year is required"}
+                    </p>
+                  </div>
                 )}
               </div>
-              <Button
-                className="w-full cursor-pointer"
-                onClick={() => {
-                  if (validateManuaInputs()) {
-                    updateQuickCode();
-                  }
-                }}
-              >
-                Find paper
-              </Button>
+
+              <div className="relative pt-2 w-full">
+                <Button
+                  className="relative w-full cursor-pointer font-semibold bg-logo-main hover:bg-logo-main/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+                  onClick={() => {
+                    if (validateManuaInputs()) {
+                      updateQuickCode();
+                      setIsInfoDialogOpen(true);
+                    }
+                  }}
+                >
+                  Find Paper
+                </Button>
+              </div>
+
+              <div className="relative pt-0 w-full">
+                <Button
+                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+                  variant="destructive"
+                  onClick={() => {
+                    setSelectedCurriculum("CIE A-LEVEL");
+                    setSelectedSubject("");
+                    setSelectedPaperType("");
+                    setSelectedVariant("");
+                    setSelectedSeason("");
+                    setQuickCodeInput("");
+                    setQuickCodeError(null);
+                    setSelectedYear("");
+                  }}
+                >
+                  Clear Everything
+                  <Trash2 className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+
+              <div className="pt-2 text-center">
+                <p className="text-xs text-muted-foreground">
+                  ⚡ Powered by{" "}
+                  <a
+                    href="https://bestexamhelp.com"
+                    target="_blank"
+                    title="Visit BestExamHelp.com"
+                    className="text-logo-main hover:text-logo-main/80 font-semibold transition-colors duration-200"
+                  >
+                    BestExamHelp.com
+                  </a>
+                </p>
+              </div>
             </div>
-            <Button
-              className="w-full cursor-pointer mt-2"
-              variant="destructive"
-              onClick={() => {
-                setSelectedCurriculum("CIE A-LEVEL");
-                setSelectedSubject("");
-                setSelectedPaperType("");
-                setSelectedVariant("");
-                setSelectedSeason("");
-                setQuickCodeInput("");
-                setQuickCodeError(null);
-                setSelectedYear("");
-              }}
-            >
-              Clear everything
-              <Trash2 />
-            </Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Powered by{" "}
-              <a
-                href="https://bestexamhelp.com"
-                target="_blank"
-                title="visit"
-                className="text-green-700"
-              >
-                BestExamHelp.com
-              </a>
-            </p>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
+        <DialogContent
+          className="dark:bg-muted z-[9999999] !max-w-[475px] w-[85%]"
+          overlayClassName="z-[999999]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-center">Paper details</DialogTitle>
+            <DialogDescription className="sr-only">
+              Check the paper details before visiting the paper
+            </DialogDescription>
+          </DialogHeader>
+          <div className="w-full ">
+            <div className="relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
+              <div className="relative z-10 grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Curriculum
+                    </span>
+                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                      {selectedCurriculum}
+                    </span>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Subject
+                    </span>
+                    <span
+                      className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border truncate"
+                      title={selectedSubject}
+                    >
+                      {selectedSubject}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Paper
+                    </span>
+                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                      Paper {selectedPaperType} Variant {selectedVariant}
+                    </span>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Year
+                    </span>
+                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                      {selectedYear}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Exam Season
+                  </span>
+                  <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                    {selectedSeason}{" "}
+                    {selectedSeason === "Spring"
+                      ? "(F/M)"
+                      : selectedSeason === "Summer"
+                      ? "(M/J)"
+                      : "(O/N)"}
+                  </span>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Paper code
+                  </span>
+                  <span
+                    className="text-sm font-semibold cursor-pointer  text-foreground bg-accent/50 px-3 py-2 rounded-lg border"
+                    title="Click to copy paper code"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(quickCodeInput);
+                        toast.success("Paper code copied to clipboard!", {
+                          description: `${quickCodeInput} is now in your clipboard`,
+                          duration: 3000,
+                        });
+                      } catch {
+                        toast.error("Failed to copy to clipboard", {
+                          description:
+                            "Please try selecting and copying manually",
+                          duration: 3000,
+                        });
+                      }
+                    }}
+                  >
+                    {quickCodeInput}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -79,7 +79,6 @@ export default function EnhancedMultiSelect({
   const [open, setOpen] = useState<boolean>(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isClickingScrollArea, setIsClickingScrollArea] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const commandListRef = useRef<HTMLDivElement | null>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const isMobileDevice = useIsMobile();
@@ -90,24 +89,6 @@ export default function EnhancedMultiSelect({
   ) {
     throw new Error("maxLength must be greater than 0");
   }
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        open
-      ) {
-        setOpen(false);
-        setInputValue("");
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open]);
 
   const onValueChangeHandler = useCallback(
     (val: string, option?: "selectAll" | "removeAll") => {
@@ -168,7 +149,6 @@ export default function EnhancedMultiSelect({
         className={cn(
           "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
         )}
-        ref={containerRef}
         onKeyDown={handleKeyDown}
       >
         {isMobileDevice ? (

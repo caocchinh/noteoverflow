@@ -8,7 +8,6 @@ import {
   useState,
   useCallback,
   KeyboardEvent,
-  useEffect,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -61,28 +60,7 @@ const EnhancedSelect = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isMobileDevice = useIsMobile();
   const [inputValue, setInputValue] = useState<string>("");
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const isWithinHoverCard =
-        target.closest("[data-radix-popper-content-wrapper]") !== null;
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        isOpen &&
-        !isWithinHoverCard
-      ) {
-        setIsOpen(false);
-        setInputValue("");
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -104,10 +82,11 @@ const EnhancedSelect = ({
   );
 
   return (
-    <div className="flex flex-col gap-1" ref={containerRef}>
+    <div className="flex flex-col gap-1">
       <Popover modal={modal || isMobileDevice} open={isOpen}>
         <PopoverTrigger asChild>
           <Button
+            ref={triggerRef}
             aria-expanded={isOpen}
             className={cn(
               "h-max w-[200px] justify-between whitespace-pre-wrap",
@@ -137,6 +116,13 @@ const EnhancedSelect = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent
+          onInteractOutside={(e) => {
+            if (triggerRef.current?.contains(e.target as Node)) {
+              return;
+            }
+            setIsOpen(false);
+            setInputValue("");
+          }}
           align="center"
           className={cn(
             "z-[1000000000000000] w-[300px] p-0 sm:w-max",

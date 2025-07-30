@@ -323,42 +323,6 @@ const BookmarkButtonConsumer = memo(
       }
     }, [store]);
 
-    const containerRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-
-        const isWithinAlertDialog =
-          target.closest('[role="alertdialog"]') !== null;
-
-        const isWithinDialog = target.closest('[role="dialog"]') !== null;
-
-        const isWithinSelect =
-          target.closest('[data-slot="select-content"]') !== null;
-
-        const isAlertDialogOverlay =
-          target.closest('[data-slot="alert-dialog-overlay"]') !== null;
-
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node) &&
-          open &&
-          !isWithinAlertDialog &&
-          !isWithinDialog &&
-          !isWithinSelect &&
-          !isAlertDialogOverlay
-        ) {
-          setOpen(false);
-          setSearchInput("");
-        }
-      };
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [open, setOpen, setSearchInput]);
-
     const isMobileDevice = useIsMobile();
     const setMutate = useBookmarkContext((state) => state.actions.setMutate);
 
@@ -369,6 +333,7 @@ const BookmarkButtonConsumer = memo(
       (state) => state.actions.removeChosenBookmarkList
     );
     const isOpen = useBookmarkContext((state) => state.open);
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
 
     const { mutate } = useMutation({
       mutationKey: mutationKey,
@@ -785,6 +750,7 @@ const BookmarkButtonConsumer = memo(
               onClick={(e) => {
                 openUI(e);
               }}
+              ref={triggerRef}
               asChild
             >
               <div
@@ -801,7 +767,13 @@ const BookmarkButtonConsumer = memo(
               className="h-full z-[100006] w-[300px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
-              ref={containerRef}
+              onInteractOutside={(e) => {
+                if (triggerRef.current?.contains(e.target as Node)) {
+                  return;
+                }
+                setOpen(false);
+                setSearchInput("");
+              }}
             >
               <BookmarkList
                 scrollAreaRef={scrollAreaRef}
