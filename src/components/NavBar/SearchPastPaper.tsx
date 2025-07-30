@@ -1,12 +1,14 @@
 import {
+  ExternalLink,
   Minus,
   Plus,
   Search,
+  X as XIcon,
   Search as SearchIcon,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,7 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { TOPICAL_DATA } from "@/constants/constants";
+import {
+  BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
+  BESTEXAMHELP_DOMAIN,
+  BESTEXAMHELP_SUBJECT_CODE,
+  TOPICAL_DATA,
+} from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { ValidCurriculum, ValidSeason } from "@/constants/types";
@@ -45,6 +52,7 @@ const SearchPastPaper = () => {
   const [selectedVariant, setSelectedVariant] = useState<string>("");
   const [selectedSeason, setSelectedSeason] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("");
+  const markingSchemeButtonRef = useRef<HTMLAnchorElement | null>(null);
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
       TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
@@ -132,6 +140,9 @@ const SearchPastPaper = () => {
       if (!error) {
         updateManualInputs();
         setIsInfoDialogOpen(true);
+        setTimeout(() => {
+          markingSchemeButtonRef.current?.focus();
+        }, 0);
       }
     }
   };
@@ -211,6 +222,38 @@ const SearchPastPaper = () => {
     setQuickCodeError(null);
   };
 
+  const parseLink = ({ type }: { type: "qp" | "ms" }) => {
+    const shortSeason = getShortSeason({
+      season: selectedSeason as ValidSeason,
+      verbose: false,
+    });
+    const paperType = parseInt(selectedPaperType);
+    const variant = parseInt(selectedVariant);
+    const year = parseInt(selectedYear);
+    const subjectCode = selectedSubject.split("(")[1]?.slice(0, 4);
+
+    const newPaperCode = `${subjectCode}-${shortSeason}${year
+      .toString()
+      .slice(2)}-${type}-${paperType}${variant}`;
+    if (newPaperCode === "9608_w15_qp_12") {
+      return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
+    }
+    return `${BESTEXAMHELP_DOMAIN}/${
+      BESTEXAMHELP_CURRICULUM_CODE_PREFIX[selectedCurriculum as ValidCurriculum]
+    }/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
+  };
+
+  const clearEverything = () => {
+    setSelectedCurriculum("CIE A-LEVEL");
+    setSelectedSubject("");
+    setSelectedPaperType("");
+    setSelectedVariant("");
+    setSelectedSeason("");
+    setQuickCodeInput("");
+    setQuickCodeError(null);
+    setSelectedYear("");
+  };
+
   return (
     <>
       <div
@@ -238,7 +281,7 @@ const SearchPastPaper = () => {
           <DialogHeader className="space-y-3 !pb-0">
             <div className="relative">
               <DialogTitle className="relative text-center text-xl font-bold">
-                AS & A-Level Past Papers Search
+                AS & A-Level Past Papers Navigator
               </DialogTitle>
             </div>
 
@@ -627,6 +670,9 @@ const SearchPastPaper = () => {
                     if (validateManuaInputs()) {
                       updateQuickCode();
                       setIsInfoDialogOpen(true);
+                      setTimeout(() => {
+                        markingSchemeButtonRef.current?.focus();
+                      }, 0);
                     }
                   }}
                 >
@@ -638,16 +684,7 @@ const SearchPastPaper = () => {
                 <Button
                   className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
                   variant="destructive"
-                  onClick={() => {
-                    setSelectedCurriculum("CIE A-LEVEL");
-                    setSelectedSubject("");
-                    setSelectedPaperType("");
-                    setSelectedVariant("");
-                    setSelectedSeason("");
-                    setQuickCodeInput("");
-                    setQuickCodeError(null);
-                    setSelectedYear("");
-                  }}
+                  onClick={clearEverything}
                 >
                   Clear Everything
                   <Trash2 className="w-4 h-4 ml-2" />
@@ -767,6 +804,41 @@ const SearchPastPaper = () => {
                 </div>
               </div>
             </div>
+            <Button className="w-full mt-3 cursor-pointer" asChild>
+              <a
+                href={parseLink({ type: "ms" })}
+                target="_blank"
+                rel="noopener noreferrer"
+                ref={markingSchemeButtonRef}
+              >
+                Open marking scheme <ExternalLink />
+              </a>
+            </Button>
+            <Button className="w-full mt-3 cursor-pointer" asChild>
+              <a
+                href={parseLink({ type: "qp" })}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open question paper <ExternalLink />
+              </a>
+            </Button>
+            <Button
+              className="w-full mt-3 cursor-pointer"
+              onClick={() => setIsInfoDialogOpen(false)}
+            >
+              Close <XIcon />
+            </Button>
+            <Button
+              className="w-full mt-3 cursor-pointer"
+              variant="destructive"
+              onClick={() => {
+                clearEverything();
+                setIsInfoDialogOpen(false);
+              }}
+            >
+              Clear Everything <Trash2 />
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
