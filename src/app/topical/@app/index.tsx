@@ -12,6 +12,7 @@ import {
   OctagonAlert,
   RefreshCcw,
   ScanText,
+  Send,
   SlidersHorizontal,
 } from "lucide-react";
 import { default as NextImage } from "next/image";
@@ -92,6 +93,7 @@ import { BAD_REQUEST, TOPICAL_DATA } from "@/constants/constants";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import { ArrowDown } from "lucide-react";
+import { QR } from "@/features/topical/components/QR";
 
 const TopicalClient = ({
   searchParams,
@@ -898,7 +900,7 @@ const TopicalClient = ({
       behavior: "instant",
     });
     setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
-  }, [currentQuery]);
+  }, [fullPartitionedData]);
 
   useEffect(() => {
     if (isMobileDevice) {
@@ -1321,6 +1323,10 @@ const TopicalClient = ({
                         {isTopicalDataFetching ? "Searching" : "Search"}
                         <ScanText />
                       </Button>
+                      <ShareFilterButton
+                        isQuestionViewDisabled={isQuestionViewDisabled}
+                        url={url}
+                      />
                     </ButtonUltility>
                   </div>
                 </div>
@@ -1806,3 +1812,28 @@ const TopicalClient = ({
 };
 
 export default TopicalClient;
+
+const ShareFilterButton = ({
+  isQuestionViewDisabled,
+  url,
+}: {
+  isQuestionViewDisabled: boolean;
+  url: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button
+        className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+        disabled={isQuestionViewDisabled}
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Share filter
+        <Send />
+      </Button>
+      <QR url={url} isOpen={isOpen} setIsOpen={setIsOpen} />
+    </>
+  );
+};

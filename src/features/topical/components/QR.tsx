@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { QRCodeCanvas } from "qrcode.react";
-import { Link as LinkIcon } from "lucide-react";
+import { Download, Link as LinkIcon } from "lucide-react";
 
 export const QR = ({
   isOpen,
@@ -15,15 +20,26 @@ export const QR = ({
   url: string;
 }) => {
   const [copied, setCopied] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(value) => {
+        console.log("value", value);
+        setIsOpen(value);
+      }}
+    >
       <DialogContent
-        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-[999999]"
+        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-[9999999]"
         overlayClassName="z-[999998]"
       >
         <DialogTitle className="sr-only">QR Code</DialogTitle>
+        <DialogDescription>
+          Share the filter with your friends
+        </DialogDescription>
         <QRCodeCanvas
+          ref={canvasRef}
           className="rounded-md w-full h-full min-h-[300px] min-w-[300px]"
           value={typeof window != "undefined" ? url : ""}
           title={"Noteoverflow"}
@@ -31,7 +47,7 @@ export const QR = ({
           marginSize={2}
           bgColor={"#ffffff"}
           fgColor={"#000000"}
-          level={"H"}
+          level={"Q"}
           imageSettings={{
             src: "/assets/logo-bg-colorised-modified-small.webp",
             x: undefined,
@@ -44,6 +60,21 @@ export const QR = ({
         />
         <Button
           className="flex items-center w-full gap-2 mt-3 rounded-sm cursor-pointer active:opacity-80"
+          onClick={() => {
+            if (canvasRef.current) {
+              const canvas = canvasRef.current;
+              const link = document.createElement("a");
+              link.href = canvas.toDataURL();
+              link.download = "Noteoverflow.jpg";
+              link.click();
+            }
+          }}
+        >
+          Download QR code
+          <Download />
+        </Button>
+        <Button
+          className="flex items-center w-full gap-2 !bg-logo-main !text-white rounded-sm cursor-pointer active:opacity-80"
           onClick={() => {
             navigator.clipboard.writeText(url);
             setCopied(true);

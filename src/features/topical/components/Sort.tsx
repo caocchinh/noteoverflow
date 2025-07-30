@@ -397,8 +397,10 @@ const ReorderList = memo(
                   value={item}
                   className="flex flex-row items-center justify-center gap-2"
                 >
-                  <p className="text-sm text-white">{index + 1}.</p>
-                  <div className=" dark:bg-input/30 px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border">
+                  <p className="text-sm dark:text-white text-black">
+                    {index + 1}.
+                  </p>
+                  <div className=" dark:!bg-gray-500 bg-gray-100 px-3 py-2 my-2 w-full rounded cursor-grab active:cursor-grabbing border border-border">
                     {item}
                   </div>
                 </Reorder.Item>
