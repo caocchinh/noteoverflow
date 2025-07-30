@@ -1,3 +1,4 @@
+import { ValidSeason } from "@/constants/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -69,4 +70,21 @@ export const openInExternalBrowser = (url: string) => {
     window.location.href = `intent:${url}#Intent;package=com.android.chrome;end`;
     return;
   }
+};
+
+export const getShortSeason = ({
+  season,
+  verbose,
+}: {
+  season: ValidSeason;
+  verbose: boolean;
+}): string | undefined => {
+  if (season === "Summer") {
+    return verbose ? "M/J" : "s";
+  } else if (season === "Winter") {
+    return verbose ? "O/N" : "w";
+  } else if (season === "Spring") {
+    return verbose ? "M/J" : "m";
+  }
+  return undefined;
 };

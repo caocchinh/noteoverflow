@@ -21,6 +21,7 @@ import type {
 } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
+import { getShortSeason } from "@/lib/utils";
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
@@ -203,17 +204,6 @@ export const extractQuestionNumber = ({
   }
 };
 
-const getShortSeason = (season: ValidSeason): string | undefined => {
-  if (season === "Summer") {
-    return "s";
-  } else if (season === "Winter") {
-    return "w";
-  } else if (season === "Spring") {
-    return "m";
-  }
-  return undefined;
-};
-
 export const extractCurriculumCode = ({
   questionId,
 }: {
@@ -254,7 +244,7 @@ export const parsePastPaperUrl = ({
     const subjectCode = splitedQuestionId[2].split("_")[0];
     const paper = splitedQuestionId[2].split("_")[1];
     const curriculum = splitedQuestionId[0] as ValidCurriculum;
-    const shortSeason = getShortSeason(season);
+    const shortSeason = getShortSeason({ season, verbose: false });
     const newPaperCode = `${subjectCode}-${shortSeason}${year.slice(
       2
     )}-${type}-${paper}`;

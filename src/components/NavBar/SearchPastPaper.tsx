@@ -1,5 +1,11 @@
-import { Minus, Plus, Search, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Minus,
+  Plus,
+  Search,
+  Search as SearchIcon,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,7 +19,7 @@ import {
 import { TOPICAL_DATA } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
-import { ValidCurriculum } from "@/constants/types";
+import { ValidCurriculum, ValidSeason } from "@/constants/types";
 import {
   Select,
   SelectContent,
@@ -24,9 +30,9 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { INVALID_INPUTS_DEFAULT } from "@/features/topical/constants/constants";
 import { InvalidInputs } from "@/features/topical/constants/types";
+import { getShortSeason } from "@/lib/utils";
 
 const SearchPastPaper = () => {
-  const [input, setInput] = useState("");
   const breakpoint = useIsMobile({ breakpoint: 735 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quickCodeError, setQuickCodeError] = useState<string | null>(null);
@@ -34,10 +40,10 @@ const SearchPastPaper = () => {
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<string>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [selectedPaperType, setSelectedPaperType] = useState<number>(NaN);
-  const [selectedVariant, setSelectedVariant] = useState<number>(NaN);
+  const [selectedPaperType, setSelectedPaperType] = useState<string>("");
+  const [selectedVariant, setSelectedVariant] = useState<string>("");
   const [selectedSeason, setSelectedSeason] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number>(NaN);
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
       TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
@@ -51,8 +57,34 @@ const SearchPastPaper = () => {
   });
   const currentYear = new Date().getFullYear();
 
+  const updateManualInputs = (): void => {
+    const extractedComponents = quickCodeInput.split("/");
+    const subject = availableSubjects?.find((s) =>
+      s.code.includes(extractedComponents[0])
+    );
+    setSelectedSubject(subject?.code ?? "");
+    setSelectedPaperType(extractedComponents[1][0]);
+    setSelectedVariant(extractedComponents[1][1]);
+    setSelectedYear("20" + extractedComponents[4]);
+    switch (extractedComponents[2]) {
+      case "M":
+        setSelectedSeason("Summer");
+        break;
+      case "J":
+        setSelectedSeason("Spring");
+        break;
+      case "O":
+        setSelectedSeason("Winter");
+        break;
+    }
+    setInvalidInputs({
+      ...INVALID_INPUTS_DEFAULT,
+      variant: false,
+    });
+  };
+
   const validateQuickCode = ({ code }: { code: string }): string => {
-    if (!code) return "";
+    if (!code) return "Skibidi toilet";
 
     const regex = /^(\d{4})\/(\d{2})\/(F\/M|M\/J|O\/N)\/(\d{2})$/;
 
@@ -92,36 +124,31 @@ const SearchPastPaper = () => {
 
   const handleQuickCodeSubmit = () => {
     if (quickCodeInput) {
-      setQuickCodeError(validateQuickCode({ code: quickCodeInput }));
+      const error = validateQuickCode({ code: quickCodeInput });
+      setQuickCodeError(error);
+      if (!error) {
+        updateManualInputs();
+      }
     }
   };
 
   useEffect(() => {
-    if (
-      !isNaN(selectedPaperType) &&
-      selectedPaperType > 0 &&
-      selectedPaperType < 10
-    ) {
+    const paperType = parseInt(selectedPaperType);
+    if (!isNaN(paperType) && paperType > 0 && paperType < 10) {
       setInvalidInputs((prev) => ({ ...prev, paperType: false }));
     }
   }, [selectedPaperType]);
 
   useEffect(() => {
-    if (
-      !isNaN(selectedVariant) &&
-      selectedVariant > 0 &&
-      selectedVariant < 10
-    ) {
+    const variant = parseInt(selectedVariant);
+    if (!isNaN(variant) && variant > 0 && variant < 10) {
       setInvalidInputs((prev) => ({ ...prev, variant: false }));
     }
   }, [selectedVariant]);
 
   useEffect(() => {
-    if (
-      !isNaN(selectedYear) &&
-      selectedYear > 2009 &&
-      selectedYear <= currentYear
-    ) {
+    const year = parseInt(selectedYear);
+    if (!isNaN(year) && year >= 2009 && year <= currentYear) {
       setInvalidInputs((prev) => ({ ...prev, year: false }));
     }
   }, [currentYear, selectedYear]);
@@ -145,24 +172,39 @@ const SearchPastPaper = () => {
   }, [selectedSubject]);
 
   const validateManuaInputs = (): boolean => {
+    const paperType = parseInt(selectedPaperType);
+    const variant = parseInt(selectedVariant);
+    const year = parseInt(selectedYear);
+
     const invalidInputs = {
       ...INVALID_INPUTS_DEFAULT,
       curriculum: !selectedCurriculum,
       subject: !selectedSubject,
-      paperType:
-        isNaN(selectedPaperType) ||
-        selectedPaperType < 1 ||
-        selectedPaperType > 9,
-      variant:
-        isNaN(selectedVariant) || selectedVariant < 1 || selectedVariant > 9,
+      paperType: isNaN(paperType) || paperType < 1 || paperType > 9,
+      variant: isNaN(variant) || variant < 1 || variant > 9,
       season: !selectedSeason,
-      year:
-        isNaN(selectedYear) ||
-        selectedYear < 2009 ||
-        selectedYear > currentYear,
+      year: isNaN(year) || year < 2009 || year > currentYear,
     };
     setInvalidInputs(invalidInputs);
     return Object.values(invalidInputs).every((value) => value === false);
+  };
+
+  const updateQuickCode = (): void => {
+    const shortSeason = getShortSeason({
+      season: selectedSeason as ValidSeason,
+      verbose: true,
+    });
+    setQuickCodeInput(
+      `${selectedSubject
+        .split("(")[1]
+        .slice(
+          0,
+          4
+        )}/${selectedPaperType}${selectedVariant}/${shortSeason}/${selectedYear.slice(
+        2
+      )}`
+    );
+    setQuickCodeError(null);
   };
 
   return (
@@ -174,7 +216,7 @@ const SearchPastPaper = () => {
         <Input
           className="h-full w-full max-w-md rounded-xl rounded-r-none border border-[var(--navbar-input-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] placeholder:text-white/50 dark:bg-[var(--navbar-bg)]"
           placeholder={breakpoint ? "Search" : "Search past papers"}
-          value={input}
+          value=""
           readOnly={true}
         />
         <Button className="h-full w-10 rounded-xl rounded-l-none border border-[var(--navbar-input-border)] bg-[var(--navbar-button-bg)] hover:cursor-pointer hover:bg-[var(--navbar-border)] lg:w-14">
@@ -303,11 +345,12 @@ const SearchPastPaper = () => {
                       className="w-[35px] rounded-sm cursor-pointer"
                       variant="outline"
                       title="Decrease"
-                      onClick={() =>
+                      onClick={() => {
+                        const current = parseInt(selectedPaperType) || 1;
                         setSelectedPaperType(
-                          selectedPaperType > 1 ? selectedPaperType - 1 : 9
-                        )
-                      }
+                          (current > 1 ? current - 1 : 9).toString()
+                        );
+                      }}
                     >
                       <Minus />
                     </Button>
@@ -318,28 +361,27 @@ const SearchPastPaper = () => {
                       value={selectedPaperType}
                       type="number"
                       className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
-                      onChange={(e) =>
-                        setSelectedPaperType(parseInt(e.target.value))
-                      }
+                      onChange={(e) => setSelectedPaperType(e.target.value)}
                     />
                     <Button
                       className="w-[35px] rounded-sm cursor-pointer"
                       variant="outline"
                       title="Increase"
-                      onClick={() =>
+                      onClick={() => {
+                        const current = parseInt(selectedPaperType) || 1;
                         setSelectedPaperType(
-                          selectedPaperType < 9 ? selectedPaperType + 1 : 1
-                        )
-                      }
+                          (current < 9 ? current + 1 : 1).toString()
+                        );
+                      }}
                     >
                       <Plus />
                     </Button>
                   </div>
                   {invalidInputs.paperType && (
                     <p className="text-xs text-red-500 text-center">
-                      {selectedPaperType < 1 ||
-                      selectedPaperType > 9 ||
-                      isNaN(selectedPaperType)
+                      {parseInt(selectedPaperType) < 1 ||
+                      parseInt(selectedPaperType) > 9 ||
+                      isNaN(parseInt(selectedPaperType))
                         ? "Paper type must be between 1 and 9"
                         : "Paper type is required"}
                     </p>
@@ -352,43 +394,43 @@ const SearchPastPaper = () => {
                       className="w-[35px] rounded-sm cursor-pointer"
                       variant="outline"
                       title="Decrease"
-                      onClick={() =>
+                      onClick={() => {
+                        const current = parseInt(selectedVariant) || 1;
                         setSelectedVariant(
-                          selectedVariant > 1 ? selectedVariant - 1 : 9
-                        )
-                      }
+                          (current > 1 ? current - 1 : 9).toString()
+                        );
+                      }}
                     >
                       <Minus />
                     </Button>
                     <Input
-                      placeholder="e.g. 4"
+                      placeholder="e.g. 2"
                       value={selectedVariant}
                       type="number"
                       className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
                       max={9}
                       min={1}
-                      onChange={(e) =>
-                        setSelectedVariant(parseInt(e.target.value))
-                      }
+                      onChange={(e) => setSelectedVariant(e.target.value)}
                     />
                     <Button
                       className="w-[35px] rounded-sm cursor-pointer"
                       variant="outline"
                       title="Increase"
-                      onClick={() =>
+                      onClick={() => {
+                        const current = parseInt(selectedVariant) || 1;
                         setSelectedVariant(
-                          selectedVariant < 9 ? selectedVariant + 1 : 1
-                        )
-                      }
+                          (current < 9 ? current + 1 : 1).toString()
+                        );
+                      }}
                     >
                       <Plus />
                     </Button>
                   </div>
                   {invalidInputs.variant && (
                     <p className="text-xs text-red-500 text-center">
-                      {selectedVariant < 1 ||
-                      selectedVariant > 9 ||
-                      isNaN(selectedVariant)
+                      {parseInt(selectedVariant) < 1 ||
+                      parseInt(selectedVariant) > 9 ||
+                      isNaN(parseInt(selectedVariant))
                         ? "Variant must be between 1 and 9"
                         : "Variant is required"}
                     </p>
@@ -430,13 +472,12 @@ const SearchPastPaper = () => {
                     className="w-[35px] rounded-sm cursor-pointer"
                     variant="outline"
                     title="Decrease"
-                    onClick={() =>
+                    onClick={() => {
+                      const current = parseInt(selectedYear) || currentYear;
                       setSelectedYear(
-                        selectedYear > 2009
-                          ? selectedYear - 1
-                          : new Date().getFullYear()
-                      )
-                    }
+                        (current > 2009 ? current - 1 : currentYear).toString()
+                      );
+                    }}
                   >
                     <Minus />
                   </Button>
@@ -448,26 +489,27 @@ const SearchPastPaper = () => {
                     value={selectedYear}
                     type="number"
                     className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    onChange={(e) => setSelectedYear(e.target.value)}
                   />
                   <Button
                     className="w-[35px] rounded-sm cursor-pointer"
                     variant="outline"
                     title="Increase"
-                    onClick={() =>
+                    onClick={() => {
+                      const current = parseInt(selectedYear) || currentYear;
                       setSelectedYear(
-                        selectedYear < currentYear ? selectedYear + 1 : 2009
-                      )
-                    }
+                        (current < currentYear ? current + 1 : 2009).toString()
+                      );
+                    }}
                   >
                     <Plus />
                   </Button>
                 </div>
                 {invalidInputs.year && (
                   <p className="text-xs text-red-500">
-                    {selectedYear < 2009 ||
-                    selectedYear > currentYear ||
-                    isNaN(selectedYear)
+                    {parseInt(selectedYear) < 2009 ||
+                    parseInt(selectedYear) > currentYear ||
+                    isNaN(parseInt(selectedYear))
                       ? "Year must be between 2009 and " + currentYear
                       : "Year is required"}
                   </p>
@@ -477,7 +519,7 @@ const SearchPastPaper = () => {
                 className="w-full cursor-pointer"
                 onClick={() => {
                   if (validateManuaInputs()) {
-                    console.log("valid");
+                    updateQuickCode();
                   }
                 }}
               >
@@ -490,15 +532,16 @@ const SearchPastPaper = () => {
               onClick={() => {
                 setSelectedCurriculum("CIE A-LEVEL");
                 setSelectedSubject("");
-                setSelectedPaperType(NaN);
-                setSelectedVariant(NaN);
+                setSelectedPaperType("");
+                setSelectedVariant("");
                 setSelectedSeason("");
                 setQuickCodeInput("");
                 setQuickCodeError(null);
-                setSelectedYear(NaN);
+                setSelectedYear("");
               }}
             >
               Clear everything
+              <Trash2 />
             </Button>
             <p className="text-xs text-muted-foreground text-center mt-2">
               Powered by{" "}
