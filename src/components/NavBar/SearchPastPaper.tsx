@@ -12,7 +12,7 @@ import {
 } from "../ui/dialog";
 
 const SearchPastPaper = () => {
-  const [input, setInput] = useState("");
+  // const [input, setInput] = useState("");
   const breakpoint = useIsMobile({ breakpoint: 735 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
@@ -24,7 +24,7 @@ const SearchPastPaper = () => {
         <Input
           className="h-full w-full max-w-md rounded-xl rounded-r-none border border-[var(--navbar-input-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] placeholder:text-white/50 dark:bg-[var(--navbar-bg)]"
           placeholder={breakpoint ? "Search" : "Search past papers"}
-          value={input}
+          // value={input}
           readOnly={true}
         />
         <Button className="h-full w-10 rounded-xl rounded-l-none border border-[var(--navbar-input-border)] bg-[var(--navbar-button-bg)] hover:cursor-pointer hover:bg-[var(--navbar-border)] lg:w-14">

@@ -322,6 +322,42 @@ const BookmarkButtonConsumer = memo(
       }
     }, [store]);
 
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+
+        const isWithinAlertDialog =
+          target.closest('[role="alertdialog"]') !== null;
+
+        const isWithinDialog = target.closest('[role="dialog"]') !== null;
+
+        const isWithinSelect =
+          target.closest('[data-slot="select-content"]') !== null;
+
+        const isAlertDialogOverlay =
+          target.closest('[data-slot="alert-dialog-overlay"]') !== null;
+
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(event.target as Node) &&
+          open &&
+          !isWithinAlertDialog &&
+          !isWithinDialog &&
+          !isWithinSelect &&
+          !isAlertDialogOverlay
+        ) {
+          setOpen(false);
+          setSearchInput("");
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [open, setOpen, setSearchInput]);
+
     const isMobileDevice = useIsMobile();
     const setMutate = useBookmarkContext((state) => state.actions.setMutate);
 
@@ -424,6 +460,14 @@ const BookmarkButtonConsumer = memo(
         isCreateNew: boolean;
         realVisibility: "public" | "private";
       }) => {
+        setIsBlockingInput(true);
+        setTimeout(() => {
+          searchInputRef?.current?.focus();
+          setTimeout(() => {
+            setIsBlockingInput(false);
+          }, 0);
+        }, 0);
+
         queryClient.setQueryData<SelectedBookmark[]>(
           ["all_user_bookmarks"],
           (prev: SelectedBookmark[] | undefined) => {
@@ -440,10 +484,7 @@ const BookmarkButtonConsumer = memo(
               setIsAddNewListDialogOpen(false);
               setIsInputError(false);
               setNewBookmarkListNameInput("");
-              setIsBlockingInput(true);
-              setTimeout(() => {
-                setIsBlockingInput(false);
-              }, 0);
+
               // Use the scrollAreaRef directly from the component
               scrollAreaRef?.current?.scrollTo({
                 top: 0,
@@ -738,16 +779,7 @@ const BookmarkButtonConsumer = memo(
             </DrawerContent>
           </Drawer>
         ) : (
-          <Popover
-            modal={true}
-            open={open}
-            onOpenChange={(value) => {
-              setOpen(value);
-              if (!value) {
-                setNewBookmarkListNameInput("");
-              }
-            }}
-          >
+          <Popover modal={true} open={open}>
             <PopoverTrigger
               onClick={(e) => {
                 openUI(e);
@@ -768,6 +800,7 @@ const BookmarkButtonConsumer = memo(
               className="h-full z-[100006] w-[300px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
+              ref={containerRef}
             >
               <X
                 className="absolute top-1 right-1 cursor-pointer"
@@ -1285,6 +1318,10 @@ const ActionDialogs = memo(() => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
   const listId = useBookmarkContext((state) => state.listId);
+  const setIsBlockingSearchInput = useBookmarkContext(
+    (state) => state.actions.setIsBlockingInput
+  );
+  const searchInputRef = useBookmarkContext((state) => state.searchInputRef);
 
   return (
     <div className="flex w-full items-center justify-center gap-2 px-2">
@@ -1387,8 +1424,13 @@ const ActionDialogs = memo(() => {
                 variant="outline"
                 onClick={() => {
                   setIsBlockingDialogInput(true);
+                  setIsBlockingSearchInput(true);
                   setTimeout(() => {
+                    searchInputRef?.current?.focus();
                     setIsBlockingDialogInput(false);
+                    setTimeout(() => {
+                      setIsBlockingSearchInput(false);
+                    }, 0);
                   }, 0);
                 }}
               >
