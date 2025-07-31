@@ -42,6 +42,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Info,
   Loader2,
   Monitor,
   ScanText,
@@ -662,8 +663,12 @@ const FinishedQuestionsClient = ({
                 </TooltipTrigger>
                 <TooltipContent
                   side="bottom"
-                  className={cn(!isQuestionViewDisabled && "hidden")}
+                  className={cn(
+                    !isQuestionViewDisabled && "!hidden",
+                    "flex justify-center items-center gap-2"
+                  )}
                 >
+                  <Info className="w-4 h-4" />
                   To filter questions, select a subject first
                 </TooltipContent>
               </Tooltip>
@@ -688,8 +693,12 @@ const FinishedQuestionsClient = ({
                 </TooltipTrigger>
                 <TooltipContent
                   side="bottom"
-                  className={cn(!isQuestionViewDisabled && "hidden")}
+                  className={cn(
+                    !isQuestionViewDisabled && "!hidden",
+                    "flex justify-center items-center gap-2"
+                  )}
                 >
+                  <Info className="w-4 h-4" />
                   To inspect questions, select a subject first
                 </TooltipContent>
               </Tooltip>

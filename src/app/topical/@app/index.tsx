@@ -1447,7 +1447,7 @@ const TopicalClient = ({
                   <TooltipContent
                     side="bottom"
                     className={cn(
-                      !isQuestionViewDisabled && "hidden",
+                      !isQuestionViewDisabled && "!hidden",
                       "flex justify-center items-center gap-2"
                     )}
                   >
@@ -1617,7 +1617,7 @@ const TopicalClient = ({
                   <TooltipContent
                     side="bottom"
                     className={cn(
-                      !isQuestionViewDisabled && "hidden",
+                      !isQuestionViewDisabled && "!hidden",
                       "flex justify-center items-center gap-2"
                     )}
                   >
