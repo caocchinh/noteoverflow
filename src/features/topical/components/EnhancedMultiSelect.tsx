@@ -122,6 +122,7 @@ export default function EnhancedMultiSelect({
     },
     [inputValue, open]
   );
+  const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <MultiSelectContext.Provider
@@ -254,7 +255,7 @@ export default function EnhancedMultiSelect({
         ) : (
           <Popover modal={false} open={open}>
             <PopoverTrigger asChild>
-              <div>
+              <div ref={popoverTriggerRef}>
                 <MultiSelectorTrigger />
                 {maxLength && value.length > maxLength && (
                   <h3 className="w-max font-medium text-sm text-destructive mt-1">
@@ -269,6 +270,13 @@ export default function EnhancedMultiSelect({
               align="center"
               className="z-[1000000000000] m-0 border-1 p-0 shadow-none dark:bg-accent"
               side="right"
+              onInteractOutside={(e) => {
+                if (popoverTriggerRef.current?.contains(e.target as Node)) {
+                  return;
+                }
+                setInputValue("");
+                setOpen(false);
+              }}
             >
               <MultiSelectorList />
             </PopoverContent>
