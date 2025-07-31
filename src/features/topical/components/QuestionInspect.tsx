@@ -35,6 +35,7 @@ import {
   ChevronsRight,
   ChevronUp,
   FastForward,
+  Loader2,
   PanelsTopLeft,
   PencilLine,
   ScrollText,
@@ -80,6 +81,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import Loader from "./Loader/Loader";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { useIsMutating } from "@tanstack/react-query";
 
 const QuestionHoverCard = ({
   question,
@@ -92,6 +96,7 @@ const QuestionHoverCard = ({
   userFinishedQuestions,
   bookmarks,
   isUserSessionPending,
+  isMobileDevice,
   isValidSession,
   listId,
   isBookmarksFetching,
@@ -103,7 +108,10 @@ const QuestionHoverCard = ({
   const [hoverCardOpen, setHoverCardOpen] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["all_user_bookmarks", question.id],
+    }) > 0;
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
@@ -111,13 +119,20 @@ const QuestionHoverCard = ({
       }
     };
   }, []);
+  const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
 
   return (
-    <HoverCard open={(hoverCardOpen || isPopoverOpen) && isInspectSidebarOpen}>
+    <HoverCard
+      open={
+        ((hoverCardOpen && !isPopoverOpen) ||
+          (isPopoverOpen && !hoverCardBreakPoint)) &&
+        isInspectSidebarOpen
+      }
+    >
       <HoverCardTrigger asChild>
         <div
           className={cn(
-            "cursor-pointer p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
+            "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
             currentQuestionId === question?.id && "!bg-logo-main text-white",
             userFinishedQuestions?.some(
               (item) => item.question.id === question?.id
@@ -127,7 +142,7 @@ const QuestionHoverCard = ({
           onMouseEnter={() => {
             hoverTimeoutRef.current = setTimeout(() => {
               setHoverCardOpen(true);
-            }, 250);
+            }, 300);
           }}
           onMouseLeave={() => {
             if (!isPopoverOpen) {
@@ -163,7 +178,10 @@ const QuestionHoverCard = ({
           </p>
           <BookmarkButton
             triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
-            badgeClassName="h-[26px] min-h-[26px] !static"
+            popOverTriggerClassName={cn(
+              "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]"
+            )}
+            badgeClassName="hidden"
             question={question}
             isBookmarkDisabled={isUserSessionPending}
             bookmarks={bookmarks}
@@ -176,11 +194,51 @@ const QuestionHoverCard = ({
             isBookmarkError={isBookmarkError}
             isInView={true}
           />
+          {isMutatingThisQuestion && (
+            <Badge
+              className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (isUserSessionPending) {
+                  return;
+                }
+                if (isBookmarkError) {
+                  toast.error("Bookmark error. Please refresh the page.", {
+                    duration: 2000,
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
+                  });
+                  return;
+                }
+                if (!isValidSession) {
+                  toast.error("Please sign in to bookmark questions.", {
+                    duration: 2000,
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
+                  });
+                  return;
+                }
+                setIsPopoverOpen(true);
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              Saving
+              <Loader2 className="animate-spin" />
+            </Badge>
+          )}
         </div>
       </HoverCardTrigger>
       <HoverCardContent
         className={cn(
-          "z-[100007] w-max p-0 overflow-hidden border-none max-w-md min-h-[100px] !bg-white lg:flex hidden items-center justify-center rounded-md border-2 border-logo-main ",
+          "z-[100007] w-max p-0 overflow-hidden border-none max-w-md min-h-[100px] !bg-white md:flex hidden   items-center justify-center rounded-sm",
           currentQuestionId === question?.id && "!hidden"
         )}
         side="right"
@@ -206,7 +264,8 @@ const QuestionHoverCard = ({
           }}
           src={question?.questionImages[0]}
           alt="Question image"
-          width={350}
+          width={400}
+          className="max-h-[70dvh] overflow-hidden object-cover object-top"
         />
       </HoverCardContent>
     </HoverCard>
@@ -861,6 +920,7 @@ const QuestionInspect = ({
                             isBookmarksFetching={isBookmarksFetching}
                             isBookmarkError={isBookmarkError}
                             isInspectSidebarOpen={isInspectSidebarOpen}
+                            isMobileDevice={isMobile}
                           />
                           <SelectSeparator />
                         </Fragment>
@@ -902,6 +962,7 @@ const QuestionInspect = ({
                           isBookmarkError={isBookmarkError}
                           setCurrentQuestionId={setCurrentQuestionId}
                           isInspectSidebarOpen={isInspectSidebarOpen}
+                          isMobileDevice={isMobile}
                         />
                         <SelectSeparator />
                       </Fragment>

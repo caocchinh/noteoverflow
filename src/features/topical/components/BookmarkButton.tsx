@@ -774,6 +774,7 @@ const BookmarkButtonConsumer = memo(
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
               side="left"
+              sideOffset={10}
               onInteractOutside={(e) => {
                 if (triggerRef.current?.contains(e.target as Node)) {
                   return;

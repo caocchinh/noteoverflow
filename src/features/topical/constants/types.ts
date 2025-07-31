@@ -162,5 +162,6 @@ export interface QuestionHoverCardProps {
   isValidSession: boolean;
   listId?: string;
   isBookmarksFetching: boolean;
+  isMobileDevice: boolean;
   isBookmarkError: boolean;
 }
