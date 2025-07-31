@@ -54,9 +54,22 @@ const SearchPastPaper = () => {
   const [selectedYear, setSelectedYear] = useState<string>("");
   const markingSchemeButtonRef = useRef<HTMLAnchorElement | null>(null);
   const availableSubjects = useMemo(() => {
-    return TOPICAL_DATA[
-      TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-    ]?.subject;
+    let subjects =
+      TOPICAL_DATA[
+        TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
+      ]?.subject;
+    if (selectedCurriculum === "CIE A-LEVEL") {
+      subjects = subjects?.filter((subject) => !subject.code.includes("9709"));
+      subjects.unshift({
+        code: "Mathematics (9709)",
+        coverImage: "/assets/cover/Mathematics (9709).webp",
+        topic: [],
+        year: [],
+        paperType: [1, 2, 3, 4, 5, 6, 7],
+        season: [],
+      });
+    }
+    return subjects;
   }, [selectedCurriculum]);
   const [invalidInputs, setInvalidInputs] = useState<
     InvalidInputs & { variant: boolean }
@@ -235,7 +248,8 @@ const SearchPastPaper = () => {
     const newPaperCode = `${subjectCode}-${shortSeason}${year
       .toString()
       .slice(2)}-${type}-${paperType}${variant}`;
-    if (newPaperCode === "9608_w15_qp_12") {
+    console.log(newPaperCode);
+    if (newPaperCode === "9608-w15-qp-12") {
       return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
     }
     return `${BESTEXAMHELP_DOMAIN}/${
@@ -432,8 +446,7 @@ const SearchPastPaper = () => {
                   setSelectedValue={setSelectedSubject}
                 />
                 {invalidInputs.subject && (
-                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
                     <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                       Subject is required
                     </p>
@@ -449,7 +462,7 @@ const SearchPastPaper = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-3">
+                  <div>
                     <span className="text-xs font-medium text-muted-foreground">
                       Paper Type
                     </span>
@@ -493,8 +506,7 @@ const SearchPastPaper = () => {
                       </Button>
                     </div>
                     {invalidInputs.paperType && (
-                      <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
                         <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                           {parseInt(selectedPaperType) < 1 ||
                           parseInt(selectedPaperType) > 9 ||
@@ -506,7 +518,7 @@ const SearchPastPaper = () => {
                     )}
                   </div>
 
-                  <div className="">
+                  <div>
                     <span className="text-xs font-medium text-muted-foreground">
                       Variant
                     </span>
@@ -550,8 +562,7 @@ const SearchPastPaper = () => {
                       </Button>
                     </div>
                     {invalidInputs.variant && (
-                      <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border mt-2 border-red-200 dark:border-red-800/30 rounded-md">
                         <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                           {parseInt(selectedVariant) < 1 ||
                           parseInt(selectedVariant) > 9 ||
@@ -594,8 +605,7 @@ const SearchPastPaper = () => {
                   </SelectContent>
                 </Select>
                 {invalidInputs.season && (
-                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
                     <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                       Season is required
                     </p>
@@ -650,8 +660,7 @@ const SearchPastPaper = () => {
                   </Button>
                 </div>
                 {invalidInputs.year && (
-                  <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
                     <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                       {parseInt(selectedYear) < 2009 ||
                       parseInt(selectedYear) > currentYear ||
@@ -719,7 +728,7 @@ const SearchPastPaper = () => {
               Check the paper details before visiting the paper
             </DialogDescription>
           </DialogHeader>
-          <div className="w-full ">
+          <ScrollArea className="w-full h-[83dvh]" type="always">
             <div className="relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -839,7 +848,7 @@ const SearchPastPaper = () => {
             >
               Clear Everything <Trash2 />
             </Button>
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>
