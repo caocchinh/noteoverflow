@@ -219,7 +219,7 @@ const Sort = memo(
             </motion.div>
           </TooltipTrigger>
           <TooltipContent side="bottom" className={cn(!isDisabled && "hidden")}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-center">
               <Info className="w-4 h-4" />
               To sort questions, run a search first.
             </div>

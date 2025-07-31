@@ -274,6 +274,10 @@ export default function EnhancedMultiSelect({
                 if (popoverTriggerRef.current?.contains(e.target as Node)) {
                   return;
                 }
+                setIsBlockingInput(true);
+                setTimeout(() => {
+                  setIsBlockingInput(false);
+                }, 0);
                 setInputValue("");
                 setOpen(false);
               }}

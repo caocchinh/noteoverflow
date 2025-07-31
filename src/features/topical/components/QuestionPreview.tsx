@@ -86,6 +86,8 @@ const QuestionPreview = memo(
           setIsQuestionInspectOpen({ isOpen: true, questionId: question.id })
         }
         onMouseEnter={() => setIsHovering(true)}
+        onFocus={() => setIsHovering(true)}
+        onBlur={() => setIsHovering(false)}
         onMouseLeave={() => {
           if (!isPopoverOpen) {
             setIsHovering(false);
@@ -119,27 +121,25 @@ const QuestionPreview = memo(
         )}
 
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-[11]">
-          {((isHovering && !isMobileDevice) || isMobileDevice) && (
-            <div className="flex flex-wrap gap-2 items-center justify-center content-start">
-              {question?.topics?.map((topic) => (
-                <Badge
-                  key={topic}
-                  className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
-                >
-                  {topic}
-                </Badge>
-              ))}
-              <Badge className="h-max bg-white !text-black text-center">
-                {question?.year}
+          <div className="flex flex-wrap gap-2 items-center justify-center content-start">
+            {question?.topics?.map((topic) => (
+              <Badge
+                key={topic}
+                className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
+              >
+                {topic}
               </Badge>
-              <Badge className="h-max bg-white !text-black text-center">
-                Paper {question?.paperType}
-              </Badge>
-              <Badge className="h-max bg-white !text-black text-center">
-                {question?.season}
-              </Badge>
-            </div>
-          )}
+            ))}
+            <Badge className="h-max bg-white !text-black text-center">
+              {question?.year}
+            </Badge>
+            <Badge className="h-max bg-white !text-black text-center">
+              Paper {question?.paperType}
+            </Badge>
+            <Badge className="h-max bg-white !text-black text-center">
+              {question?.season}
+            </Badge>
+          </div>
         </div>
 
         <BookmarkButton

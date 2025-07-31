@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Send } from "lucide-react";
+import { Info, Send } from "lucide-react";
 import { useState } from "react";
 import { QR } from "./QR";
 
@@ -42,11 +42,14 @@ export const ShareFilter = ({
         </TooltipTrigger>
         <TooltipContent
           side="bottom"
-          className="!bg-logo-main !text-white z-[99999999]"
+          className="!bg-logo-main !text-white z-[99999999] flex justify-center items-center gap-2"
           arrowClassName="!bg-logo-main !fill-logo-main"
         >
           {isDisabled ? (
-            <> To share {type}, run a search first.</>
+            <>
+              <Info className="w-4 h-4" />
+              To share {type}, run a search first.
+            </>
           ) : (
             <>Share {type}</>
           )}

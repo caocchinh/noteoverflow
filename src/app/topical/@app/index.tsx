@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Info,
   Loader2,
   Monitor,
   OctagonAlert,
@@ -1276,7 +1277,7 @@ const TopicalClient = ({
                       )}
                     </div>
                   </div>
-                  <div className="flex w-full flex-col items-center justify-center gap-2">
+                  <div className="flex w-full flex-col items-center justify-center gap-3">
                     <ButtonUltility
                       isMounted={isMounted}
                       revert={revert}
@@ -1445,8 +1446,12 @@ const TopicalClient = ({
                   </TooltipTrigger>
                   <TooltipContent
                     side="bottom"
-                    className={cn(!isQuestionViewDisabled && "hidden")}
+                    className={cn(
+                      !isQuestionViewDisabled && "hidden",
+                      "flex justify-center items-center gap-2"
+                    )}
                   >
+                    <Info className="w-4 h-4" />
                     To inspect questions, run a search first.
                   </TooltipContent>
                 </Tooltip>
@@ -1611,8 +1616,12 @@ const TopicalClient = ({
                   </TooltipTrigger>
                   <TooltipContent
                     side="bottom"
-                    className={cn(!isQuestionViewDisabled && "hidden")}
+                    className={cn(
+                      !isQuestionViewDisabled && "hidden",
+                      "flex justify-center items-center gap-2"
+                    )}
                   >
+                    <Info className="w-4 h-4" />
                     To toggle this, run a search first.
                   </TooltipContent>
                 </Tooltip>
