@@ -894,12 +894,15 @@ const TopicalClient = ({
   ]);
 
   useEffect(() => {
+    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
+  }, [fullPartitionedData]);
+
+  useEffect(() => {
     scrollAreaRef.current?.scrollTo({
       top: 0,
       behavior: "instant",
     });
-    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
-  }, [fullPartitionedData]);
+  }, [currentQuery]);
 
   useEffect(() => {
     if (isMobileDevice) {
