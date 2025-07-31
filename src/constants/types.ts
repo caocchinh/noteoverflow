@@ -58,3 +58,13 @@ export interface TopicalData {
     season: ValidSeason[];
   }[];
 }
+
+export type PastPaperNavigatorCache = {
+  curriculum: ValidCurriculum;
+  subject: string;
+  paperType: string;
+  variant: string;
+  year: string;
+  season: ValidSeason;
+  quickCode: string;
+};

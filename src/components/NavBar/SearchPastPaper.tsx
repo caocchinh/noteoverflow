@@ -23,11 +23,16 @@ import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_SUBJECT_CODE,
+  PAST_PAPER_NAVIGATOR_CACHE_KEY,
   TOPICAL_DATA,
 } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
-import { ValidCurriculum, ValidSeason } from "@/constants/types";
+import {
+  PastPaperNavigatorCache,
+  ValidCurriculum,
+  ValidSeason,
+} from "@/constants/types";
 import {
   Select,
   SelectContent,
@@ -38,7 +43,7 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { INVALID_INPUTS_DEFAULT } from "@/features/topical/constants/constants";
 import { InvalidInputs } from "@/features/topical/constants/types";
-import { getShortSeason } from "@/lib/utils";
+import { cn, getShortSeason } from "@/lib/utils";
 
 const SearchPastPaper = () => {
   const breakpoint = useIsMobile({ breakpoint: 735 });
@@ -78,7 +83,28 @@ const SearchPastPaper = () => {
     variant: false,
   });
   const currentYear = new Date().getFullYear();
+  const [isMounted, setIsMounted] = useState(false);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const savedState = localStorage.getItem(PAST_PAPER_NAVIGATOR_CACHE_KEY);
+    if (savedState) {
+      const parsedState: PastPaperNavigatorCache = JSON.parse(savedState);
+      setSelectedCurriculum(parsedState.curriculum);
+      setSelectedSubject(parsedState.subject);
+      setSelectedPaperType(parsedState.paperType);
+      setSelectedVariant(parsedState.variant);
+      setSelectedYear(parsedState.year);
+      setSelectedSeason(parsedState.season);
+      setQuickCodeInput(parsedState.quickCode);
+      setQuickCodeError(validateQuickCode({ code: parsedState.quickCode }));
+    }
+
+    setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateManualInputs = (): void => {
     const extractedComponents = quickCodeInput.split("/");
@@ -130,9 +156,9 @@ const SearchPastPaper = () => {
       return `Year cannot exceed current year (${currentYear})`;
     }
 
-    // Validate the year is 2009 or later
-    if (fullYear < 2009) {
-      return "Year must be 2009 or later";
+    // Validate the year is 2010 or later
+    if (fullYear < 2010) {
+      return "Year must be 2010 or later";
     }
 
     return "";
@@ -176,7 +202,7 @@ const SearchPastPaper = () => {
 
   useEffect(() => {
     const year = parseInt(selectedYear);
-    if (!isNaN(year) && year >= 2009 && year <= currentYear) {
+    if (!isNaN(year) && year >= 2010 && year <= currentYear) {
       setInvalidInputs((prev) => ({ ...prev, year: false }));
     }
   }, [currentYear, selectedYear]);
@@ -211,7 +237,7 @@ const SearchPastPaper = () => {
       paperType: isNaN(paperType) || paperType < 1 || paperType > 9,
       variant: isNaN(variant) || variant < 1 || variant > 9,
       season: !selectedSeason,
-      year: isNaN(year) || year < 2009 || year > currentYear,
+      year: isNaN(year) || year < 2010 || year > currentYear,
     };
     setInvalidInputs(invalidInputs);
     return Object.values(invalidInputs).every((value) => value === false);
@@ -248,7 +274,6 @@ const SearchPastPaper = () => {
     const newPaperCode = `${subjectCode}-${shortSeason}${year
       .toString()
       .slice(2)}-${type}-${paperType}${variant}`;
-    console.log(newPaperCode);
     if (newPaperCode === "9608-w15-qp-12") {
       return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
     }
@@ -267,6 +292,32 @@ const SearchPastPaper = () => {
     setQuickCodeError(null);
     setSelectedYear("");
   };
+
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem(
+        PAST_PAPER_NAVIGATOR_CACHE_KEY,
+        JSON.stringify({
+          curriculum: selectedCurriculum,
+          subject: selectedSubject,
+          paperType: selectedPaperType,
+          variant: selectedVariant,
+          year: selectedYear,
+          season: selectedSeason,
+          quickCode: quickCodeInput,
+        })
+      );
+    }
+  }, [
+    isMounted,
+    selectedCurriculum,
+    selectedSubject,
+    selectedPaperType,
+    selectedVariant,
+    selectedYear,
+    selectedSeason,
+    quickCodeInput,
+  ]);
 
   return (
     <>
@@ -327,11 +378,12 @@ const SearchPastPaper = () => {
                           handleQuickCodeSubmit();
                         }
                       }}
-                      className={`w-full text-center font-mono text-sm bg-background/80 border-2 transition-all duration-200 ${
+                      className={cn(
+                        "w-full text-center font-mono text-sm bg-background/80 border-2 transition-all duration-200",
                         quickCodeError
                           ? "border-red-500 focus:border-red-600"
                           : "border-border/50 focus:border-logo-main/50"
-                      }`}
+                      )}
                     />
                   </div>
 
@@ -344,11 +396,12 @@ const SearchPastPaper = () => {
                     />
                     <Button
                       onClick={handleQuickCodeSubmit}
-                      className={`cursor-pointer h-full sm:w-auto w-full relative z-10 font-semibold transition-all duration-200 ${
+                      className={cn(
+                        "cursor-pointer h-full sm:w-auto w-full relative z-10 font-semibold transition-all duration-200",
                         !!quickCodeError || quickCodeInput === ""
                           ? "opacity-50"
                           : "hover:scale-105"
-                      }`}
+                      )}
                       disabled={!!quickCodeError || quickCodeInput === ""}
                     >
                       Find Paper
@@ -360,7 +413,6 @@ const SearchPastPaper = () => {
                 <div className="px-4 py-2">
                   {quickCodeError ? (
                     <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-lg">
-                      <div className="w-2 h-2 rounded-full bg-red-500" />
                       <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                         {quickCodeError}
                       </p>
@@ -368,7 +420,6 @@ const SearchPastPaper = () => {
                   ) : (
                     <div className="space-y-2">
                       <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30 rounded-lg">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0" />
                         <div className="space-y-1">
                           <p className="text-xs text-blue-700 dark:text-blue-300">
                             <span className="font-semibold">Format:</span>{" "}
@@ -628,7 +679,7 @@ const SearchPastPaper = () => {
                     onClick={() => {
                       const current = parseInt(selectedYear) || currentYear;
                       setSelectedYear(
-                        (current > 2009 ? current - 1 : currentYear).toString()
+                        (current > 2010 ? current - 1 : currentYear).toString()
                       );
                     }}
                   >
@@ -637,8 +688,7 @@ const SearchPastPaper = () => {
                   <Input
                     placeholder={`e.g. ${currentYear}`}
                     max={currentYear}
-                    min={2009}
-                    defaultValue={new Date().getFullYear()}
+                    min={2010}
                     value={selectedYear}
                     type="number"
                     className="text-center font-mono font-semibold  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
@@ -652,7 +702,7 @@ const SearchPastPaper = () => {
                     onClick={() => {
                       const current = parseInt(selectedYear) || currentYear;
                       setSelectedYear(
-                        (current < currentYear ? current + 1 : 2009).toString()
+                        (current < currentYear ? current + 1 : 2010).toString()
                       );
                     }}
                   >
@@ -662,10 +712,10 @@ const SearchPastPaper = () => {
                 {invalidInputs.year && (
                   <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
                     <p className="text-xs text-red-600 dark:text-red-400 font-medium">
-                      {parseInt(selectedYear) < 2009 ||
+                      {parseInt(selectedYear) < 2010 ||
                       parseInt(selectedYear) > currentYear ||
                       isNaN(parseInt(selectedYear))
-                        ? "Year must be between 2009 and " + currentYear
+                        ? "Year must be between 2010 and " + currentYear
                         : "Year is required"}
                     </p>
                   </div>
@@ -729,7 +779,7 @@ const SearchPastPaper = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="w-full h-[83dvh]" type="always">
-            <div className="relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
+            <div className="relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-1">
