@@ -784,10 +784,18 @@ const MultiSelectorList = () => {
           e.preventDefault();
           e.stopPropagation();
         }}
+        onTouchEnd={() => {
+          setTimeout(() => {
+            setIsBlockingInput(false);
+          }, 0);
+        }}
+        onTouchStart={() => {
+          setIsBlockingInput(true);
+        }}
       >
         {!maxLength && (
           <Button
-            className="cursor-pointer flex-1/2 "
+            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
             onClick={() => {
               onValueChange(allAvailableOptions ?? [], "selectAll");
             }}
@@ -797,7 +805,7 @@ const MultiSelectorList = () => {
           </Button>
         )}
         <Button
-          className="cursor-pointer flex-1/2"
+          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
           onClick={() => {
             onValueChange(value, "removeAll");
           }}
