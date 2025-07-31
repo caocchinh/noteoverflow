@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import {
   Dialog,
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
 import {
+  QuestionHoverCardProps,
   SelectedBookmark,
   SelectedFinishedQuestion,
   SelectedQuestion,
@@ -72,6 +74,144 @@ import { SortBy } from "./SortBy";
 import { ShareFilter } from "./ShareFilter";
 import { QuestionInformation } from "./QuestionInformation";
 import { InspectImages } from "./InspectImages";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import Loader from "./Loader/Loader";
+
+const QuestionHoverCard = ({
+  question,
+  currentTab,
+  currentQuestionId,
+  setCurrentQuestionId,
+  questionScrollAreaRef,
+  answerScrollAreaRef,
+  setCurrentTabThatContainsQuestion,
+  userFinishedQuestions,
+  bookmarks,
+  isUserSessionPending,
+  isValidSession,
+  listId,
+  isBookmarksFetching,
+  isBookmarkError,
+  isInspectSidebarOpen,
+}: QuestionHoverCardProps) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isImageError, setIsImageError] = useState(false);
+  const [hoverCardOpen, setHoverCardOpen] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <HoverCard open={(hoverCardOpen || isPopoverOpen) && isInspectSidebarOpen}>
+      <HoverCardTrigger asChild>
+        <div
+          className={cn(
+            "cursor-pointer p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
+            currentQuestionId === question?.id && "!bg-logo-main text-white",
+            userFinishedQuestions?.some(
+              (item) => item.question.id === question?.id
+            ) &&
+              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+          )}
+          onMouseEnter={() => {
+            hoverTimeoutRef.current = setTimeout(() => {
+              setHoverCardOpen(true);
+            }, 250);
+          }}
+          onMouseLeave={() => {
+            if (!isPopoverOpen) {
+              setHoverCardOpen(false);
+            }
+            if (hoverTimeoutRef.current) {
+              clearTimeout(hoverTimeoutRef.current);
+              hoverTimeoutRef.current = null;
+            }
+          }}
+          onClick={() => {
+            setCurrentQuestionId(question?.id);
+            questionScrollAreaRef.current?.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+            answerScrollAreaRef.current?.scrollTo({
+              top: 0,
+              behavior: "instant",
+            });
+
+            setCurrentTabThatContainsQuestion(currentTab);
+          }}
+        >
+          <p>
+            {extractPaperCode({
+              questionId: question?.id,
+            })}{" "}
+            Q
+            {extractQuestionNumber({
+              questionId: question?.id,
+            })}
+          </p>
+          <BookmarkButton
+            triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
+            badgeClassName="h-[26px] min-h-[26px] !static"
+            question={question}
+            isBookmarkDisabled={isUserSessionPending}
+            bookmarks={bookmarks}
+            setIsHovering={setHoverCardOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            isPopoverOpen={isPopoverOpen}
+            isValidSession={isValidSession}
+            listId={listId}
+            isBookmarksFetching={isBookmarksFetching}
+            isBookmarkError={isBookmarkError}
+            isInView={true}
+          />
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        className={cn(
+          "z-[100007] w-max p-0 overflow-hidden border-none max-w-md min-h-[100px] !bg-white lg:flex hidden items-center justify-center rounded-md border-2 border-logo-main ",
+          currentQuestionId === question?.id && "!hidden"
+        )}
+        side="right"
+        sideOffset={25}
+      >
+        {!isImageLoaded && !isImageError && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <Loader />
+          </div>
+        )}
+        {isImageError && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <p className="text-red-500 text-sm">Image failed to load</p>
+          </div>
+        )}
+        <img
+          onLoad={() => {
+            setIsImageLoaded(true);
+          }}
+          loading="lazy"
+          onError={() => {
+            setIsImageError(true);
+          }}
+          src={question?.questionImages[0]}
+          alt="Question image"
+          width={350}
+        />
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
 
 const QuestionInspect = ({
   isOpen,
@@ -337,6 +477,7 @@ const QuestionInspect = ({
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
+
   const handleNextQuestion = () => {
     if (
       partitionedTopicalData &&
@@ -698,72 +839,29 @@ const QuestionInspect = ({
                         virtualItem.index
                       ] && (
                         <Fragment key={virtualItem.index}>
-                          <div
-                            className={cn(
-                              "cursor-pointer p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
-                              currentQuestionId ===
-                                partitionedTopicalData?.[currentTab][
-                                  virtualItem.index
-                                ]?.id && "!bg-logo-main text-white",
-                              userFinishedQuestions?.some(
-                                (item) =>
-                                  item.question.id ===
-                                  partitionedTopicalData?.[currentTab][
-                                    virtualItem.index
-                                  ]?.id
-                              ) &&
-                                "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-                            )}
-                            onClick={() => {
-                              setCurrentQuestionId(
-                                partitionedTopicalData?.[currentTab][
-                                  virtualItem.index
-                                ]?.id
-                              );
-                              questionScrollAreaRef.current?.scrollTo({
-                                top: 0,
-                                behavior: "instant",
-                              });
-                              answerScrollAreaRef.current?.scrollTo({
-                                top: 0,
-                                behavior: "instant",
-                              });
-
-                              setCurrentTabThatContainsQuestion(currentTab);
-                            }}
-                          >
-                            <p>
-                              {extractPaperCode({
-                                questionId:
-                                  partitionedTopicalData?.[currentTab][
-                                    virtualItem.index
-                                  ]?.id,
-                              })}{" "}
-                              Q
-                              {extractQuestionNumber({
-                                questionId:
-                                  partitionedTopicalData?.[currentTab][
-                                    virtualItem.index
-                                  ]?.id,
-                              })}
-                            </p>
-                            <BookmarkButton
-                              triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
-                              badgeClassName="h-[26px] min-h-[26px] !static"
-                              question={
-                                partitionedTopicalData?.[currentTab][
-                                  virtualItem.index
-                                ]
-                              }
-                              isBookmarkDisabled={isUserSessionPending}
-                              bookmarks={bookmarks}
-                              isValidSession={isValidSession}
-                              listId={listId}
-                              isBookmarksFetching={isBookmarksFetching}
-                              isBookmarkError={isBookmarkError}
-                              isInView={true}
-                            />
-                          </div>
+                          <QuestionHoverCard
+                            question={
+                              partitionedTopicalData[currentTab][
+                                virtualItem.index
+                              ]
+                            }
+                            currentTab={currentTab}
+                            currentQuestionId={currentQuestionId}
+                            setCurrentQuestionId={setCurrentQuestionId}
+                            questionScrollAreaRef={questionScrollAreaRef}
+                            answerScrollAreaRef={answerScrollAreaRef}
+                            setCurrentTabThatContainsQuestion={
+                              setCurrentTabThatContainsQuestion
+                            }
+                            userFinishedQuestions={userFinishedQuestions}
+                            bookmarks={bookmarks}
+                            isUserSessionPending={isUserSessionPending}
+                            isValidSession={isValidSession}
+                            listId={listId}
+                            isBookmarksFetching={isBookmarksFetching}
+                            isBookmarkError={isBookmarkError}
+                            isInspectSidebarOpen={isInspectSidebarOpen}
+                          />
                           <SelectSeparator />
                         </Fragment>
                       )}
@@ -786,65 +884,25 @@ const QuestionInspect = ({
                       data-index={virtualItem.index}
                     >
                       <Fragment key={searchResults[virtualItem.index]?.id}>
-                        <div
-                          className={cn(
-                            "cursor-pointer p-2 rounded-sm  hover:bg-foreground/10 flex items-center justify-between",
-                            currentQuestionId ===
-                              searchResults[virtualItem.index]?.id &&
-                              "!bg-logo-main text-white",
-                            userFinishedQuestions?.some(
-                              (item) =>
-                                item.question.id ===
-                                searchResults[virtualItem.index]?.id
-                            ) &&
-                              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-                          )}
-                          onClick={() => {
-                            setCurrentQuestionId(
-                              searchResults[virtualItem.index]?.id
-                            );
-                            questionScrollAreaRef.current?.scrollTo({
-                              top: 0,
-                              behavior: "instant",
-                            });
-                            answerScrollAreaRef.current?.scrollTo({
-                              top: 0,
-                              behavior: "instant",
-                            });
-                            const newTabIndex =
-                              partitionedTopicalData?.findIndex((partition) =>
-                                partition.some(
-                                  (q) =>
-                                    q.id ===
-                                    searchResults[virtualItem.index]?.id
-                                )
-                              );
-                            if (newTabIndex !== undefined && newTabIndex > -1) {
-                              setCurrentTab(newTabIndex);
-                              setCurrentTabThatContainsQuestion(newTabIndex);
-                            }
-                          }}
-                        >
-                          {extractPaperCode({
-                            questionId: searchResults[virtualItem.index]?.id,
-                          })}{" "}
-                          Q
-                          {extractQuestionNumber({
-                            questionId: searchResults[virtualItem.index]?.id,
-                          })}
-                          <BookmarkButton
-                            triggerButtonClassName="h-[26px] w-[26px] border-black border"
-                            badgeClassName="h-[26px] min-h-[26px] !static"
-                            question={searchResults[virtualItem.index]}
-                            isBookmarkDisabled={isUserSessionPending}
-                            bookmarks={bookmarks}
-                            isValidSession={isValidSession}
-                            isBookmarksFetching={isBookmarksFetching}
-                            isBookmarkError={isBookmarkError}
-                            isInView={true}
-                            listId={listId}
-                          />
-                        </div>
+                        <QuestionHoverCard
+                          question={searchResults[virtualItem.index]}
+                          currentTab={currentTab}
+                          currentQuestionId={currentQuestionId}
+                          questionScrollAreaRef={questionScrollAreaRef}
+                          answerScrollAreaRef={answerScrollAreaRef}
+                          setCurrentTabThatContainsQuestion={
+                            setCurrentTabThatContainsQuestion
+                          }
+                          userFinishedQuestions={userFinishedQuestions}
+                          bookmarks={bookmarks}
+                          isUserSessionPending={isUserSessionPending}
+                          isValidSession={isValidSession}
+                          listId={listId}
+                          isBookmarksFetching={isBookmarksFetching}
+                          isBookmarkError={isBookmarkError}
+                          setCurrentQuestionId={setCurrentQuestionId}
+                          isInspectSidebarOpen={isInspectSidebarOpen}
+                        />
                         <SelectSeparator />
                       </Fragment>
                     </div>

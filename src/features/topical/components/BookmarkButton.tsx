@@ -147,9 +147,11 @@ export const BookmarkButton = memo(
         } else {
           _setOpen(newOpenState);
         }
-        if (setIsHovering && !newOpenState && setShouldOpen) {
-          setShouldOpen(false);
+        if (setIsHovering && !newOpenState) {
           setIsHovering(false);
+        }
+        if (setShouldOpen && !newOpenState) {
+          setShouldOpen(false);
         }
       },
       [open, setOpenProp, setIsHovering, setShouldOpen]
@@ -695,6 +697,10 @@ const BookmarkButtonConsumer = memo(
                 e.stopPropagation();
                 e.preventDefault();
               }}
+              onInteractOutside={() => {
+                setSearchInput("");
+                setOpen(false);
+              }}
             >
               <DrawerHeader className="sr-only">
                 <DrawerTitle>Select</DrawerTitle>
@@ -764,9 +770,10 @@ const BookmarkButtonConsumer = memo(
               </div>
             </PopoverTrigger>
             <PopoverContent
-              className="h-full z-[100006] w-[300px] !px-0 dark:bg-accent"
+              className="flex flex-col z-[100006] w-[300px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
+              side="left"
               onInteractOutside={(e) => {
                 if (triggerRef.current?.contains(e.target as Node)) {
                   return;
@@ -780,6 +787,17 @@ const BookmarkButtonConsumer = memo(
                 searchInputRef={searchInputRef}
                 isMobileDevice={false}
               />
+              <div className="w-full px-2 mt-2 flex items-center justify-center">
+                <Button
+                  className="w-full cursor-pointer"
+                  variant="destructive"
+                  onClick={() => {
+                    setOpen(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
             </PopoverContent>
           </Popover>
         )}

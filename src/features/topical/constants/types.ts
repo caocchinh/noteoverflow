@@ -146,3 +146,21 @@ export type CurrentQuery = {
   curriculumId: string;
   subjectId: string;
 } & FilterData;
+
+export interface QuestionHoverCardProps {
+  question: SelectedQuestion;
+  currentTab: number;
+  currentQuestionId?: string;
+  isInspectSidebarOpen: boolean;
+  setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
+  questionScrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  answerScrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
+  userFinishedQuestions?: SelectedFinishedQuestion[];
+  bookmarks: SelectedBookmark[];
+  isUserSessionPending: boolean;
+  isValidSession: boolean;
+  listId?: string;
+  isBookmarksFetching: boolean;
+  isBookmarkError: boolean;
+}
