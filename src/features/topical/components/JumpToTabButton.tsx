@@ -80,7 +80,7 @@ export const JumpToTabButton = ({
             min={1}
             max={totalTabs}
             className={cn(isInvalidInput && "border-red-500 text-red-500")}
-            value={jumpToTabInput}
+            value={Number.isNaN(jumpToTabInput) ? "" : jumpToTabInput}
             onChange={(e) => {
               setJumpToTabInput(
                 e.target.value.length > 0 ? parseInt(e.target.value, 10) : NaN
