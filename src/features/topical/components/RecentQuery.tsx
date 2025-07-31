@@ -442,7 +442,7 @@ const RecentQueryItem = ({
         <div className="flex w-full flex-wrap gap-2">
           Topic:
           {parsedQuery.topic.map((topic) => (
-            <Badge key={topic} className="flex flex-row">
+            <Badge key={topic} className="flex flex-row whitespace-pre-wrap">
               {topic}
             </Badge>
           ))}
@@ -451,7 +451,7 @@ const RecentQueryItem = ({
         <div className="flex w-full flex-wrap gap-2">
           Year:
           {parsedQuery.year.map((year) => (
-            <Badge key={year} className="flex flex-row">
+            <Badge key={year} className="flex flex-row whitespace-pre-wrap">
               {year}
             </Badge>
           ))}
@@ -460,7 +460,7 @@ const RecentQueryItem = ({
         <div className="flex w-full flex-wrap gap-2">
           Paper:
           {parsedQuery.paperType.map((paper) => (
-            <Badge key={paper} className="flex flex-row">
+            <Badge key={paper} className="flex flex-row whitespace-pre-wrap">
               {paper}
             </Badge>
           ))}
@@ -469,7 +469,7 @@ const RecentQueryItem = ({
         <div className="flex w-full flex-wrap gap-2">
           Season:
           {parsedQuery.season.map((season) => (
-            <Badge key={season} className="flex flex-row">
+            <Badge key={season} className="flex flex-row whitespace-pre-wrap">
               {season}
             </Badge>
           ))}
