@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   ArrowDownWideNarrow,
-  Check,
   GripVertical,
   Sparkles,
   RotateCcw,
@@ -22,6 +21,8 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronsUp,
+  Minus,
+  Plus,
 } from "lucide-react";
 import {
   Accordion,
@@ -195,11 +196,12 @@ const Sort = memo(
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              tabIndex={-1}
             >
               <Button
                 variant="outline"
                 className={cn(
-                  "cursor-pointer rounded-lg group transition-all duration-200",
+                  "cursor-pointer rounded-sm group transition-all duration-200",
                   "hover:bg-gradient-to-r hover:from-logo-main/10 hover:to-purple-500/10",
                   "hover:border-logo-main/50 hover:shadow-md",
                   !isDisabled && "hover:shadow-logo-main/20"
@@ -211,7 +213,6 @@ const Sort = memo(
                   resetFilters();
                 }}
               >
-                <Sparkles className="w-4 h-4 mr-2 group-hover:text-logo-main transition-colors" />
                 Sort
                 <ArrowDownWideNarrow className="ml-2 w-4 h-4 group-hover:rotate-12 transition-transform duration-200" />
               </Button>
@@ -362,107 +363,110 @@ const Sort = memo(
               </TabsContent>
 
               <TabsContent value="how" className="mt-0">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="how-does-this-work"
-                    className="space-y-4"
+                <ScrollArea className="h-[55dvh] sm:h-[70dvh] [&_.bg-border]:bg-logo-main/40 px-6 py-2">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <AccordionItem
-                      value="how-does-this-work"
-                      className="border border-border/50 rounded-lg px-4 bg-gradient-to-r from-logo-main/5 to-purple-500/5"
+                    <Accordion
+                      type="single"
+                      collapsible
+                      defaultValue="how-does-this-work"
+                      className="space-y-4"
                     >
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 text-logo-main" />
-                          How does this work?
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="w-full text-muted-foreground leading-relaxed">
-                        <div className="space-y-3">
-                          <p>Questions are sorted using this formula:</p>
-                          <div className="bg-muted p-4 rounded-lg border-l-4 border-logo-main">
-                            <code className="text-lg font-mono">
-                              Position × Weight = Priority Score
-                            </code>
+                      <AccordionItem
+                        value="how-does-this-work"
+                        className="border border-border/50 rounded-lg px-4 bg-gradient-to-r from-logo-main/5 to-purple-500/5"
+                      >
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-logo-main" />
+                            How does this work?
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div className="space-y-2">
-                              <h4 className="font-semibold text-foreground">
-                                Drag to reorder:
-                              </h4>
-                              <p className="text-sm">
-                                Higher position = more important
-                              </p>
+                        </AccordionTrigger>
+                        <AccordionContent className="w-full text-muted-foreground leading-relaxed">
+                          <div className="space-y-3">
+                            <p>Questions are sorted using this formula:</p>
+                            <div className="bg-muted p-4 rounded-lg border-l-4 border-logo-main">
+                              <code className="text-lg font-mono">
+                                Position × Weight = Priority Score
+                              </code>
                             </div>
-                            <div className="space-y-2">
-                              <h4 className="font-semibold text-foreground">
-                                Adjust weights:
-                              </h4>
-                              <p className="text-sm">
-                                Higher weight = greater influence
-                              </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground">
+                                  Drag to reorder:
+                                </h4>
+                                <p className="text-sm">
+                                  Higher position = more important
+                                </p>
+                              </div>
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground">
+                                  Adjust weights:
+                                </h4>
+                                <p className="text-sm">
+                                  Higher weight = greater influence
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          <div className="bg-logo-main/10 p-4 rounded-lg mt-4">
-                            <Badge variant="secondary" className="mb-2">
-                              Default Settings
-                            </Badge>
-                            <p className="text-sm">
-                              Years (1×) descending order, all others (0×)
-                            </p>
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem
-                      value="unexpected-result"
-                      className="border border-border/50 rounded-lg px-4 bg-gradient-to-r from-orange-500/5 to-red-500/5"
-                    >
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <Info className="w-5 h-5 text-orange-500" />
-                          Unexpected results?
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="w-full text-muted-foreground leading-relaxed">
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <h4 className="font-semibold text-foreground flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4" />
-                                Try adjusting weights:
-                              </h4>
+                            <div className="bg-logo-main/10 p-4 rounded-lg mt-4">
+                              <Badge variant="secondary" className="mb-2">
+                                Default Settings
+                              </Badge>
                               <p className="text-sm">
-                                Set important fields to higher values
-                              </p>
-                            </div>
-                            <div className="space-y-2">
-                              <h4 className="font-semibold text-foreground flex items-center gap-2">
-                                <TrendingDown className="w-4 h-4" />
-                                Simplify filters:
-                              </h4>
-                              <p className="text-sm">
-                                Reduce selected topics/criteria
+                                Years (1× weight) descending order, all others
+                                (0× weight)
                               </p>
                             </div>
                           </div>
-                          <div className="bg-orange-500/10 p-4 rounded-lg mt-4">
-                            <p className="text-sm font-medium">
-                              💡 Pro tip: Start with one field at a time to
-                              understand the impact
-                            </p>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem
+                        value="unexpected-result"
+                        className="border border-border/50 rounded-lg px-4 bg-gradient-to-r from-orange-500/5 to-red-500/5"
+                      >
+                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                          <div className="flex items-center gap-2">
+                            <Info className="w-5 h-5 text-orange-500" />
+                            Unexpected results?
                           </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </motion.div>
+                        </AccordionTrigger>
+                        <AccordionContent className="w-full text-muted-foreground leading-relaxed">
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                  <TrendingUp className="w-4 h-4" />
+                                  Try adjusting weights:
+                                </h4>
+                                <p className="text-sm">
+                                  Set important fields to higher values
+                                </p>
+                              </div>
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                  <TrendingDown className="w-4 h-4" />
+                                  Simplify filters:
+                                </h4>
+                                <p className="text-sm">
+                                  Reduce selected topics/criteria
+                                </p>
+                              </div>
+                            </div>
+                            <div className="bg-orange-500/10 p-4 rounded-lg mt-4">
+                              <p className="text-sm font-medium">
+                                💡 Pro tip: Start with one field at a time to
+                                understand the impact
+                              </p>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </motion.div>
+                </ScrollArea>
               </TabsContent>
             </Tabs>
 
@@ -483,14 +487,13 @@ const Sort = memo(
                 >
                   <Button
                     className={cn(
-                      "cursor-pointer transition-all duration-200 shadow-lg text-white hover:shadow-xl relative",
+                      "cursor-pointer transition-all duration-200 shadow-lg w-full sm:w-max text-white hover:shadow-xl relative",
                       "bg-gradient-to-r from-logo-main to-purple-600 hover:from-logo-main/90 hover:to-purple-600/90"
                     )}
                     onClick={handleApplySorting}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     Apply Sort
-                    <Check className="ml-2 h-4 w-4" />
                   </Button>
                 </motion.div>
               </DialogClose>
@@ -764,12 +767,12 @@ const ReorderList = memo(
                 variant="outline"
                 disabled={isEmpty}
                 className={cn(
-                  "cursor-pointer flex-1 transition-all duration-200",
+                  "cursor-pointer w-1/2 transition-all duration-200",
                   areArraysIdentical(
                     items.toSorted((a, b) => a.localeCompare(b)),
                     items
                   ) &&
-                    "bg-logo-main text-white border-logo-main hover:bg-logo-main/90"
+                    "!bg-logo-main !text-white border-logo-main hover:bg-logo-main/90"
                 )}
                 onClick={() =>
                   setItems(
@@ -794,12 +797,12 @@ const ReorderList = memo(
                 variant="outline"
                 disabled={isEmpty}
                 className={cn(
-                  "cursor-pointer flex-1 transition-all duration-200",
+                  "cursor-pointer w-1/2 transition-all duration-200",
                   areArraysIdentical(
                     items.toSorted((a, b) => b.localeCompare(a)),
                     items
                   ) &&
-                    "bg-logo-main text-white border-logo-main hover:bg-logo-main/90"
+                    "!bg-logo-main !text-white border-logo-main hover:bg-logo-main/90"
                 )}
                 onClick={() =>
                   setItems(
@@ -827,36 +830,45 @@ const ReorderList = memo(
                 Weight
               </span>
             </div>
-            {!isDefault && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleResetWeight}
-                    className="h-6 px-2 text-xs hover:bg-logo-main/10 hover:text-logo-main"
-                  >
-                    <RotateCcw className="w-3 h-3 mr-1" />
-                    Reset
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="z-[9999999]">
-                  Reset to default weight ({defaultWeight})
-                </TooltipContent>
-              </Tooltip>
-            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleResetWeight}
+                  className={cn(
+                    "h-6 px-2 text-xs hover:bg-logo-main/10 hover:text-logo-main ",
+                    isDefault && "opacity-0"
+                  )}
+                >
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="z-[9999999]">
+                Reset to default weight ({defaultWeight})
+              </TooltipContent>
+            </Tooltip>
           </div>
 
-          <div className="relative">
+          <div className="relative flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWeight(weight - 1);
+                setItems(items, weight - 1);
+              }}
+              className="h-10 cursor-pointer"
+            >
+              <Minus className="w-3 h-3" />
+            </Button>
             <Input
               value={weight || ""}
               onChange={handleWeightChange}
               type="number"
-              min="0"
-              max="100"
-              step="1"
               className={cn(
-                "text-center font-mono transition-all duration-200",
+                "text-center font-mono transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                 weight === 0 &&
                   "border-orange-300 bg-orange-50/50 dark:bg-orange-950/20",
                 weight > 0 &&
@@ -867,19 +879,17 @@ const ReorderList = memo(
               )}
               placeholder="0"
             />
-            <span
-              className={cn(
-                "text-xs transition-colors",
-                weight === 0 && "text-orange-600 dark:text-orange-400",
-                weight > 0 &&
-                  weight <= defaultWeight &&
-                  "text-green-600 dark:text-green-400",
-                weight > defaultWeight && "text-blue-600 dark:text-blue-400",
-                weight === defaultWeight && "text-muted-foreground"
-              )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWeight(weight + 1);
+                setItems(items, weight + 1);
+              }}
+              className="h-10 cursor-pointer"
             >
-              {weight === defaultWeight && "Default"}
-            </span>
+              <Plus className="w-3 h-3" />
+            </Button>
           </div>
         </div>
       </motion.div>

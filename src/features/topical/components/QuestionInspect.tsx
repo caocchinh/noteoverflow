@@ -148,6 +148,9 @@ const QuestionHoverCard = ({
             if (touchStartTimeRef.current) {
               return;
             }
+            if (isPopoverOpen) {
+              return;
+            }
             hoverTimeoutRef.current = setTimeout(() => {
               setHoverCardOpen(true);
             }, 300);
@@ -1164,7 +1167,7 @@ const QuestionInspect = ({
                 viewportRef={ultilityHorizontalScrollBarRef}
               >
                 <div
-                  className="flex items-stretch w-max justify-center gap-4 mb-2 relative"
+                  className="flex pt-1 items-stretch w-max justify-center gap-4 mb-2 relative"
                   ref={ultilityRef}
                 >
                   <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
