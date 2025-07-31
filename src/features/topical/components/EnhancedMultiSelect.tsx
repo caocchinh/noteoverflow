@@ -540,6 +540,7 @@ const MultiSelectorList = () => {
     isClickingScrollArea,
     setOpen,
     isMobileDevice,
+    maxLength,
   } = useMultiSelect();
 
   useEffect(() => {
@@ -562,6 +563,10 @@ const MultiSelectorList = () => {
     <div
       className="flex h-full flex-col gap-2"
       onClick={(e) => {
+        e.stopPropagation();
+      }}
+      onMouseDown={(e) => {
+        e.preventDefault();
         e.stopPropagation();
       }}
     >
@@ -616,6 +621,7 @@ const MultiSelectorList = () => {
           }}
         />
       </div>
+
       <ScrollArea viewPortClassName="max-h-[50vh]" type="always">
         <CommandList
           className={cn(
@@ -772,6 +778,35 @@ const MultiSelectorList = () => {
           </CommandEmpty>
         </CommandList>
       </ScrollArea>
+      <div
+        className="flex flex-row gap-2 m-2"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        {!maxLength && (
+          <Button
+            className="cursor-pointer flex-1/2 "
+            onClick={() => {
+              onValueChange(allAvailableOptions ?? [], "selectAll");
+            }}
+          >
+            Select all
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          className="cursor-pointer flex-1/2"
+          onClick={() => {
+            onValueChange(value, "removeAll");
+          }}
+          variant="destructive"
+        >
+          Remove all
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };

@@ -108,6 +108,7 @@ const QuestionHoverCard = ({
   const [hoverCardOpen, setHoverCardOpen] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const touchStartTimeRef = useRef<number | null>(null);
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["all_user_bookmarks", question.id],
@@ -117,6 +118,7 @@ const QuestionHoverCard = ({
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
       }
+      touchStartTimeRef.current = null;
     };
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
@@ -139,12 +141,21 @@ const QuestionHoverCard = ({
             ) &&
               "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
           )}
+          onTouchStart={() => {
+            touchStartTimeRef.current = Date.now();
+          }}
           onMouseEnter={() => {
+            if (touchStartTimeRef.current) {
+              return;
+            }
             hoverTimeoutRef.current = setTimeout(() => {
               setHoverCardOpen(true);
             }, 300);
           }}
           onMouseLeave={() => {
+            if (touchStartTimeRef.current) {
+              return;
+            }
             if (!isPopoverOpen) {
               setHoverCardOpen(false);
             }
@@ -227,7 +238,6 @@ const QuestionHoverCard = ({
               }}
               onTouchStart={(e) => {
                 e.stopPropagation();
-                e.preventDefault();
               }}
             >
               Saving
