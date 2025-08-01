@@ -9,6 +9,8 @@ import {
   RefreshCcw,
   ShieldUser,
   SquareUserRound,
+  MessageCircle,
+  Mail,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
@@ -33,6 +35,14 @@ import {
 } from "../ui/dropdown-menu";
 import { Skeleton } from "../ui/skeleton";
 import AvatarChange from "./AvatarChange";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -263,6 +273,41 @@ const User = () => {
               </DropdownMenuItem>{" "}
             </>
           )}
+
+          <DropdownMenuSeparator className="!mx-0 !my-0" />
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                className="flex w-full cursor-pointer items-center justify-start px-3 py-2 hover:bg-muted data-[variant=destructive]:*:[svg]:!text-destructive relative  select-none  gap-2 rounded-sm text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                size="icon"
+                variant="ghost"
+              >
+                <MessageCircle />
+                Feedback
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Feedback</DialogTitle>
+              </DialogHeader>
+              <DialogDescription>
+                Send me your feedback, suggestions or critiques thorugh my
+                email.
+              </DialogDescription>
+              <Button
+                className="text-sm !text-background dark:hover:bg-white hover:bg-foreground-secondary bg-foreground w-max cursor-pointer rounded-md px-2 py-1"
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText("founder@noteoverflow.com");
+                  toast.success("Email copied to clipboard");
+                }}
+              >
+                <Mail />
+                founder@noteoverflow.com
+              </Button>
+            </DialogContent>
+          </Dialog>
 
           <DropdownMenuSeparator className="!mx-0 !my-0" />
 
