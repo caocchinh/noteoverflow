@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
           topics: true,
           answers: true,
         },
-        limit: !session?.session ? 5 : undefined,
+        limit: !session?.session ? 25 : undefined,
       });
 
       const data: SelectedQuestion[] = result.map((item) => {
