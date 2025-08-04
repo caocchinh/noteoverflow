@@ -1192,6 +1192,27 @@ const QuestionInspect = ({
                       Answer
                     </Button>
                   </div>
+
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="w-9 rounded-sm cursor-pointer"
+                      onClick={handleNextQuestion}
+                      title="Next question"
+                      disabled={isHandleNextQuestionButtonDisabled}
+                    >
+                      <ChevronDown />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-9 rounded-sm cursor-pointer"
+                      onClick={handlePreviousQuestion}
+                      title="Previous question"
+                      disabled={isHandlePreviousQuestionButtonDisabled}
+                    >
+                      <ChevronUp />
+                    </Button>
+                  </div>
                   <Tooltip>
                     <TooltipTrigger className="cursor-pointer" asChild>
                       <Button
@@ -1238,26 +1259,6 @@ const QuestionInspect = ({
                       </PastPaperLink>
                     </TooltipContent>
                   </Tooltip>
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      className="w-9 rounded-sm cursor-pointer"
-                      onClick={handleNextQuestion}
-                      title="Next question"
-                      disabled={isHandleNextQuestionButtonDisabled}
-                    >
-                      <ChevronDown />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-9 rounded-sm cursor-pointer"
-                      onClick={handlePreviousQuestion}
-                      title="Previous question"
-                      disabled={isHandlePreviousQuestionButtonDisabled}
-                    >
-                      <ChevronUp />
-                    </Button>
-                  </div>
                   <Button
                     variant="outline"
                     className="cursor-pointer"

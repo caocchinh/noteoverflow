@@ -895,8 +895,10 @@ const TopicalClient = ({
   ]);
 
   useEffect(() => {
-    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
-  }, [fullPartitionedData]);
+    if (topicalData) {
+      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
+    }
+  }, [topicalData]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
