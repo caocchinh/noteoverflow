@@ -12,6 +12,7 @@ import {
   DEFAULT_SORT_BY,
   DEFAULT_IMAGE_THEME,
   INVALID_INPUTS_DEFAULT,
+  MANSONRY_GUTTER_BREAKPOINTS,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -966,8 +967,10 @@ const FinishedQuestionsClient = ({
                   numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                 ]
               }
+              // @ts-expect-error - gutterBreakPoints is not typed by the library
+              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
             >
-              <Masonry gutter="11px">
+              <Masonry>
                 {displayedData.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview

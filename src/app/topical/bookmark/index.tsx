@@ -11,6 +11,7 @@ import {
   DEFAULT_CACHE,
   DEFAULT_SORT_BY,
   DEFAULT_IMAGE_THEME,
+  MANSONRY_GUTTER_BREAKPOINTS,
   INVALID_INPUTS_DEFAULT,
 } from "@/features/topical/constants/constants";
 
@@ -1105,8 +1106,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                 ]
               }
+              // @ts-expect-error - gutterBreakPoints is not typed by the library
+              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
             >
-              <Masonry gutter="11px">
+              <Masonry>
                 {displayedData.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview

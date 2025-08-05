@@ -14,6 +14,7 @@ import {
   DEFAULT_CACHE,
   DEFAULT_IMAGE_THEME,
   DEFAULT_LAYOUT_STYLE,
+  MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_SORT_BY,
@@ -960,8 +961,10 @@ export const BookmarkView = ({
                   numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                 ]
               }
+              // @ts-expect-error - gutterBreakPoints is not typed by the library
+              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
             >
-              <Masonry gutter="11px">
+              <Masonry>
                 {displayedData.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview

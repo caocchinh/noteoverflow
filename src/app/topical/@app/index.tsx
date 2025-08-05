@@ -43,6 +43,7 @@ import {
   DEFAULT_LAYOUT_STYLE,
   DEFAULT_CACHE,
   DEFAULT_IMAGE_THEME,
+  MANSONRY_GUTTER_BREAKPOINTS,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -1736,8 +1737,10 @@ const TopicalClient = ({
                     numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                   ]
                 }
+                // @ts-expect-error - gutterBreakPoints is not typed by the library
+                gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
               >
-                <Masonry gutter="11px">
+                <Masonry>
                   {displayedData
                     .filter((question: SelectedQuestion) => {
                       if (

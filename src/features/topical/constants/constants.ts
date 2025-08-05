@@ -55,3 +55,4 @@ export const DEFAULT_CACHE: FiltersCache = {
 };
 
 export const LIST_NAME_MAX_LENGTH = 100;
+export const MANSONRY_GUTTER_BREAKPOINTS = { 0: "15px" };
