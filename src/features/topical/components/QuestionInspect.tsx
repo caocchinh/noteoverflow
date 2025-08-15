@@ -153,7 +153,7 @@ const QuestionHoverCard = ({
             }
             hoverTimeoutRef.current = setTimeout(() => {
               setHoverCardOpen(true);
-            }, 300);
+            }, 100);
           }}
           onMouseLeave={() => {
             if (touchStartTimeRef.current) {
