@@ -15,7 +15,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth/auth-client";
@@ -76,9 +76,17 @@ const User = () => {
     },
   });
 
-  function handleSignOut() {
+  const handleSignOut = useCallback(() => {
     signOutMutation.mutate();
-  }
+  }, [signOutMutation]);
+
+  useEffect(() => {
+    if (data && data.data) {
+      if (data.data?.user.banned) {
+        handleSignOut();
+      }
+    }
+  }, [data, handleSignOut]);
 
   if (isError) {
     return (
