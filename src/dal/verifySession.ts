@@ -12,5 +12,8 @@ export const verifySession = cache(async () => {
   if (!session) {
     return null;
   }
+  if (session.user?.banned) {
+    return null;
+  }
   return session;
 });
