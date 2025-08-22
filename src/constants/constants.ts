@@ -44,6 +44,7 @@ export const BESTEXAMHELP_SUBJECT_CODE: Record<string, string> = {
   "9609": "business-9609",
   "9990": "psychology-9990",
   "9231": "mathematics-further-9231",
+  "9699": "sociology-9699",
 };
 
 export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<
@@ -88,6 +89,7 @@ export const SUBJECT_COVER_IMAGE: Record<
       "/assets/cover/Mathematics Statistics 1 (9709).webp",
     "Mathematics Statistics 2 (9709)":
       "/assets/cover/Mathematics Statistics 2 (9709).webp",
+    "Sociology (9699)": "/assets/cover/Sociology (9699).webp",
   },
   "CIE IGCSE": {
     "Physics (9702)": "/assets/cover/Physics (9702).webp",
@@ -136,11 +138,11 @@ export const TOPICAL_DATA: TopicalData[] = [
           "ASTRONOMY & COSMOLOGY",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012, 2011, 2010, 2009,
         ],
         paperType: [1, 2, 3, 4, 5],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Chemistry (9701)"],
@@ -171,11 +173,11 @@ export const TOPICAL_DATA: TopicalData[] = [
           "ORGANIC SYNTHESIS",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012, 2011, 2010, 2009,
         ],
         paperType: [1, 2, 3, 4, 5],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Biology (9700)"],
@@ -202,11 +204,11 @@ export const TOPICAL_DATA: TopicalData[] = [
           "GENETIC TECHNOLOGY",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012, 2011, 2010, 2009,
         ],
         paperType: [1, 2, 3, 4, 5],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage:
@@ -351,6 +353,24 @@ export const TOPICAL_DATA: TopicalData[] = [
           "ORGANISATIONAL PSYCHOLOGY",
         ],
         year: [2024, 2023, 2022, 2021, 2020, 2019, 2018],
+        paperType: [1, 2, 3, 4],
+        season: ["Summer", "Winter"],
+      },
+      {
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Sociology (9699)"],
+        code: "Sociology (9699)",
+        topic: [
+          "THE FAMILY",
+          "THEORY AND METHODS",
+          "SOCIAL INEQUALITY AND OPPORTUNITY - EDUCATION",
+          "SOCIAL INEQUALITY AND OPPORTUNITY - GLOBAL DEVELOPMENT",
+          "SOCIAL INEQUALITY AND OPPORTUNITY - MEDIA",
+          "SOCIAL INEQUALITY AND OPPORTUNITY - RELIGION",
+          "SOCIALISATION, IDENTITY AND METHODS OF RESEARCH",
+          "EDUCATION",
+          "GLOBALISATION, MEDIA AND RELIGION",
+        ],
+        year: [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015],
         paperType: [1, 2, 3, 4],
         season: ["Summer", "Winter"],
       },

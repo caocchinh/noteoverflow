@@ -63,5 +63,5 @@
     }
   ],
 
-  "placement": { "mode": "smart" }
+  "placement": { "mode": "off" }
 }
