@@ -30,14 +30,24 @@ async function hashQuery(queryString: string): Promise<string> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const curriculumId = searchParams.get("curriculumId") as string;
-    const subjectId = searchParams.get("subjectId") as string;
-    const topic = JSON.parse(searchParams.get("topic") as string) as string[];
-    const paperType = JSON.parse(
-      searchParams.get("paperType") as string
+    const curriculumId = decodeURIComponent(
+      searchParams.get("curriculumId") as string
+    );
+    const subjectId = decodeURIComponent(
+      searchParams.get("subjectId") as string
+    );
+    const topic = JSON.parse(
+      decodeURIComponent(searchParams.get("topic") as string)
     ) as string[];
-    const year = JSON.parse(searchParams.get("year") as string) as string[];
-    const season = JSON.parse(searchParams.get("season") as string) as string[];
+    const paperType = JSON.parse(
+      decodeURIComponent(searchParams.get("paperType") as string)
+    ) as string[];
+    const year = JSON.parse(
+      decodeURIComponent(searchParams.get("year") as string)
+    ) as string[];
+    const season = JSON.parse(
+      decodeURIComponent(searchParams.get("season") as string)
+    ) as string[];
     if (!validateCurriculum(curriculumId)) {
       return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }

@@ -627,12 +627,18 @@ const TopicalClient = ({
   const search = async () => {
     if (isValidInputs({ scrollOnError: false })) {
       const params = new URLSearchParams();
-      params.append("curriculumId", selectedCurriculum);
-      params.append("subjectId", selectedSubject);
-      params.append("topic", JSON.stringify(selectedTopic));
-      params.append("paperType", JSON.stringify(selectedPaperType));
-      params.append("year", JSON.stringify(selectedYear));
-      params.append("season", JSON.stringify(selectedSeason));
+      params.append("curriculumId", encodeURIComponent(selectedCurriculum));
+      params.append("subjectId", encodeURIComponent(selectedSubject));
+      params.append("topic", encodeURIComponent(JSON.stringify(selectedTopic)));
+      params.append(
+        "paperType",
+        encodeURIComponent(JSON.stringify(selectedPaperType))
+      );
+      params.append("year", encodeURIComponent(JSON.stringify(selectedYear)));
+      params.append(
+        "season",
+        encodeURIComponent(JSON.stringify(selectedSeason))
+      );
       const response = await fetch(`/api/topical?${params.toString()}`, {
         method: "GET",
       });
