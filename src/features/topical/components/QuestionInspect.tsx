@@ -802,8 +802,13 @@ const QuestionInspect = ({
           >
             <SidebarHeader className="sr-only">Search questions</SidebarHeader>
             <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
-              <FinishedTracker allQuestionsLength={allQuestions?.length} />
-              <div className="flex items-center justify-start w-full gap-2 px-1 mt-4">
+              <FinishedTracker
+                allQuestions={allQuestions}
+                isFinishedQuestionsFetching={isFinishedQuestionsFetching}
+                isValidSession={isValidSession}
+                isUserSessionPending={isUserSessionPending}
+              />
+              <div className="flex items-center justify-start w-full gap-2 px-1 mt-5">
                 <div className="flex items-center gap-2 border-b border-border">
                   <Search />
                   <Input
@@ -1424,9 +1429,15 @@ const PastPaperLink = ({
 };
 
 const FinishedTracker = ({
-  allQuestionsLength,
+  allQuestions,
+  isValidSession,
+  isFinishedQuestionsFetching,
+  isUserSessionPending,
 }: {
-  allQuestionsLength: number;
+  allQuestions: SelectedQuestion[];
+  isValidSession: boolean;
+  isFinishedQuestionsFetching: boolean;
+  isUserSessionPending: boolean;
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isMutatingFinishedQuestion =
@@ -1437,8 +1448,30 @@ const FinishedTracker = ({
   const userFinishedQuestions: SelectedFinishedQuestion[] | undefined =
     queryClient.getQueryData(["user_finished_questions"]);
   return (
-    <div className="absolute w-full h-6 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm cursor-pointer">
-      Finished {userFinishedQuestions?.length} out of {allQuestionsLength}
+    <div className="absolute w-full h-7 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm">
+      {!isFinishedQuestionsFetching &&
+        !isUserSessionPending &&
+        isValidSession && (
+          <>
+            Finished{" "}
+            {
+              allQuestions.filter((q) =>
+                userFinishedQuestions?.some((fq) => fq.question.id === q.id)
+              ).length
+            }{" "}
+            out of {allQuestions.length}
+          </>
+        )}
+      {(isUserSessionPending || isFinishedQuestionsFetching) && (
+        <span className="text-xs flex items-center justify-center gap-2">
+          Fetching data <Loader2 className="animate-spin " size={12} />
+        </span>
+      )}
+      {!isValidSession && !isUserSessionPending && (
+        <span className="text-xs flex items-center justify-center gap-2">
+          Sign in to track progress
+        </span>
+      )}
     </div>
   );
 };
