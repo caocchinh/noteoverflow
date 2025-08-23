@@ -83,7 +83,7 @@ import {
 import Loader from "./Loader/Loader";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useIsMutating } from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 
 const QuestionHoverCard = ({
   question,
@@ -801,8 +801,9 @@ const QuestionInspect = ({
             }}
           >
             <SidebarHeader className="sr-only">Search questions</SidebarHeader>
-            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1">
-              <div className="flex items-center justify-start w-full gap-2 px-1">
+            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
+              <FinishedTracker allQuestionsLength={allQuestions?.length} />
+              <div className="flex items-center justify-start w-full gap-2 px-1 mt-4">
                 <div className="flex items-center gap-2 border-b border-border">
                   <Search />
                   <Input
@@ -1419,5 +1420,25 @@ const PastPaperLink = ({
     >
       {children}
     </a>
+  );
+};
+
+const FinishedTracker = ({
+  allQuestionsLength,
+}: {
+  allQuestionsLength: number;
+}) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isMutatingFinishedQuestion =
+    useIsMutating({
+      mutationKey: ["user_finished_questions"],
+    }) > 0;
+  const queryClient = useQueryClient();
+  const userFinishedQuestions: SelectedFinishedQuestion[] | undefined =
+    queryClient.getQueryData(["user_finished_questions"]);
+  return (
+    <div className="absolute w-full h-6 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm cursor-pointer">
+      Finished {userFinishedQuestions?.length} out of {allQuestionsLength}
+    </div>
   );
 };
