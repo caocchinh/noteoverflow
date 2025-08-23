@@ -153,7 +153,7 @@ const QuestionHoverCard = ({
             }
             hoverTimeoutRef.current = setTimeout(() => {
               setHoverCardOpen(true);
-            }, 100);
+            }, 375);
           }}
           onMouseLeave={() => {
             if (touchStartTimeRef.current) {
@@ -1272,7 +1272,7 @@ const QuestionInspect = ({
                       setIsInspectSidebarOpen(!isInspectSidebarOpen)
                     }
                   >
-                    Toggle
+                    {isInspectSidebarOpen ? "Hide" : "Show"}
                     <PanelsTopLeft />
                   </Button>
                   {currentQuestionData && (
@@ -1330,7 +1330,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-transparent"
+                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
                   type="always"
                   viewportRef={questionScrollAreaRef}
                 >
@@ -1354,7 +1354,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-transparent"
+                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
                   type="always"
                   viewportRef={answerScrollAreaRef}
                 >
