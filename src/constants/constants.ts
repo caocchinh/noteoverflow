@@ -227,11 +227,11 @@ export const TOPICAL_DATA: TopicalData[] = [
           "RADIANS",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012, 2011, 2010, 2009,
         ],
         paperType: [1],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage:
@@ -259,7 +259,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           "COMPUTATIONAL THINKING AND PROBLEM SOLVING",
           "FURTHER PROGRAMMING",
         ],
-        year: [2024, 2023, 2022, 2021],
+        year: [2025, 2024, 2023, 2022, 2021],
         paperType: [1, 3],
         season: ["Summer", "Winter"],
       },
@@ -274,9 +274,9 @@ export const TOPICAL_DATA: TopicalData[] = [
           "GENERAL MOTION IN STRAIGHT LINE",
           "MOMENTUM",
         ],
-        year: [2024, 2023, 2022, 2021, 2020],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
         paperType: [4],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
 
       {
@@ -313,8 +313,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           "HOOK'S LAW",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012,
         ],
         paperType: [1, 2, 3, 4],
         season: ["Summer", "Winter"],
@@ -331,8 +331,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           "INTERNATIONAL ECONOMIC ISSUES",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012,
         ],
         paperType: [1, 3],
         season: ["Summer", "Winter"],
@@ -352,7 +352,7 @@ export const TOPICAL_DATA: TopicalData[] = [
           "HEALTH PSYCHOLOGY",
           "ORGANISATIONAL PSYCHOLOGY",
         ],
-        year: [2024, 2023, 2022, 2021, 2020, 2019, 2018],
+        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018],
         paperType: [1, 2, 3, 4],
         season: ["Summer", "Winter"],
       },
@@ -370,7 +370,9 @@ export const TOPICAL_DATA: TopicalData[] = [
           "EDUCATION",
           "GLOBALISATION, MEDIA AND RELIGION",
         ],
-        year: [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015],
+        year: [
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+        ],
         paperType: [1, 2, 3, 4],
         season: ["Summer", "Winter"],
       },
@@ -389,9 +391,9 @@ export const TOPICAL_DATA: TopicalData[] = [
           "THE BINOMIAL DISTRIBUTION",
           "GEOMETRIC DISTRIBUTION",
         ],
-        year: [2024, 2023, 2022, 2021, 2020],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
         paperType: [5],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage:
@@ -407,9 +409,9 @@ export const TOPICAL_DATA: TopicalData[] = [
           "CONTINUOUS RANDOM VARIABLES",
           "SAMPLING",
         ],
-        year: [2024, 2023, 2022, 2021, 2020],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
         paperType: [6],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage:
@@ -429,11 +431,11 @@ export const TOPICAL_DATA: TopicalData[] = [
           "VECTORS",
         ],
         year: [
-          2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014,
-          2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012, 2011, 2010, 2009,
         ],
         paperType: [2, 3],
-        season: ["Summer", "Winter"],
+        season: ["Summer", "Winter", "Spring"],
       },
       {
         coverImage:
