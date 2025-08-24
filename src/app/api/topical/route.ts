@@ -38,16 +38,16 @@ export async function GET(request: NextRequest) {
     );
     const topic = JSON.parse(
       decodeURIComponent(searchParams.get("topic") as string)
-    ) as string[];
+    ).toSorted() as string[];
     const paperType = JSON.parse(
       decodeURIComponent(searchParams.get("paperType") as string)
-    ) as string[];
+    ).toSorted() as string[];
     const year = JSON.parse(
       decodeURIComponent(searchParams.get("year") as string)
-    ) as string[];
+    ).toSorted() as string[];
     const season = JSON.parse(
       decodeURIComponent(searchParams.get("season") as string)
-    ) as string[];
+    ).toSorted() as string[];
     if (!validateCurriculum(curriculumId)) {
       return NextResponse.json({ error: BAD_REQUEST }, { status: 400 });
     }
@@ -139,7 +139,6 @@ export async function GET(request: NextRequest) {
           topics: true,
           answers: true,
         },
-        limit: !session?.session ? 25 : undefined,
       });
 
       const data: SelectedQuestion[] = result.map((item) => {
@@ -154,13 +153,42 @@ export async function GET(request: NextRequest) {
         };
       });
 
-      await env.TOPICAL_CACHE.put(hashedKey, JSON.stringify(data), {
-        expirationTtl: 60 * 60 * 24 * 14,
-      });
+      const baseQuery: {
+        curriculumId: string;
+        subjectId: string;
+        isRateLimited?: boolean;
+      } & FilterData = {
+        curriculumId,
+        subjectId,
+        topic,
+        paperType,
+        year,
+        season,
+      };
+
+      const rateLimitedHash = await hashQuery(
+        JSON.stringify({ ...baseQuery, isRateLimited: true })
+      );
+      const nonRateLimitedHash = await hashQuery(
+        JSON.stringify({ ...baseQuery, isRateLimited: false })
+      );
+
+      await Promise.all([
+        env.TOPICAL_CACHE.put(
+          rateLimitedHash,
+          JSON.stringify(data.toSpliced(0, 25)),
+          {
+            expirationTtl: 60 * 60 * 24 * 14,
+          }
+        ),
+        env.TOPICAL_CACHE.put(nonRateLimitedHash, JSON.stringify(data), {
+          expirationTtl: 60 * 60 * 24 * 14,
+        }),
+      ]);
 
       return NextResponse.json(
         {
-          data: data,
+          data: isRateLimited ? data.toSpliced(0, 25) : data,
           isRateLimited,
         },
         { status: 200 }
