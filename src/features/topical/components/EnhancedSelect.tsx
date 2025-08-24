@@ -68,7 +68,6 @@ const EnhancedSelect = ({
 
       if (e.key === "Escape") {
         if (inputValue) {
-          console.log("escape");
           setInputValue("");
           return;
         }

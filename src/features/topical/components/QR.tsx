@@ -28,7 +28,6 @@ export const QR = ({
     <Dialog
       open={isOpen}
       onOpenChange={(value) => {
-        console.log("value", value);
         setIsOpen(value);
       }}
     >
