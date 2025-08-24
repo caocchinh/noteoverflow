@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
       await Promise.all([
         env.TOPICAL_CACHE.put(
           rateLimitedHash,
-          JSON.stringify(data.toSpliced(0, 25)),
+          JSON.stringify(data.toSpliced(25)),
           {
             expirationTtl: 60 * 60 * 24 * 14,
           }
@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(
         {
-          data: isRateLimited ? data.toSpliced(0, 25) : data,
+          data: isRateLimited ? data.toSpliced(25) : data,
           isRateLimited,
         },
         { status: 200 }
