@@ -658,14 +658,16 @@ const QuestionInspect = ({
                   .length - 1
               ].id
             );
-            scrollToQuestion({
-              questionId:
-                partitionedTopicalData[currentTabThatContainsQuestion - 1][
-                  partitionedTopicalData[currentTabThatContainsQuestion - 1]
-                    .length - 1
-                ].id,
-              tab: currentTabThatContainsQuestion - 1,
-            });
+            setTimeout(() => {
+              scrollToQuestion({
+                questionId:
+                  partitionedTopicalData[currentTabThatContainsQuestion - 1][
+                    partitionedTopicalData[currentTabThatContainsQuestion - 1]
+                      .length - 1
+                  ].id,
+                tab: currentTabThatContainsQuestion - 1,
+              });
+            }, 0);
           }
         }
       } else {
@@ -769,54 +771,7 @@ const QuestionInspect = ({
     searchResults,
     currentQuestionId,
   ]);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout | null = null;
-    const down = (e: KeyboardEvent) => {
-      if (timeout) return;
-      if (
-        e.key === "ArrowUp" &&
-        (e.metaKey || e.ctrlKey) &&
-        !isHandlePreviousQuestionDisabled
-      ) {
-        e.preventDefault();
-        handlePreviousQuestion();
-        timeout = setTimeout(() => {
-          timeout = null;
-        }, 200);
-      } else if (
-        e.key === "ArrowDown" &&
-        (e.metaKey || e.ctrlKey) &&
-        !isHandleNextQuestionDisabled
-      ) {
-        e.preventDefault();
-        handleNextQuestion();
-        timeout = setTimeout(() => {
-          timeout = null;
-        }, 200);
-      }
-    };
-
-    const up = () => {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    document.addEventListener("keyup", up);
-    return () => {
-      document.removeEventListener("keydown", down);
-      document.removeEventListener("keyup", up);
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [
-    handleNextQuestion,
-    handlePreviousQuestion,
-    isHandleNextQuestionDisabled,
-    isHandlePreviousQuestionDisabled,
-  ]);
+  const [isCoolDown, setIsCoolDown] = useState(false);
 
   return (
     <Dialog
@@ -838,6 +793,48 @@ const QuestionInspect = ({
       <DialogContent
         className="w-[90vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
+        onKeyDown={(e) => {
+          console.log(e.key);
+          if (e.key === "e") {
+            e.preventDefault();
+            if (currentView === "question") {
+              setCurrentView("answer");
+            } else {
+              setCurrentView("question");
+            }
+          }
+          if (isCoolDown) return;
+          if (
+            (e.key === "ArrowUp" ||
+              e.key === "ArrowLeft" ||
+              e.key === "s" ||
+              e.key === "a") &&
+            !isHandlePreviousQuestionDisabled
+          ) {
+            e.preventDefault();
+            handlePreviousQuestion();
+            setIsCoolDown(true);
+            setTimeout(() => {
+              setIsCoolDown(false);
+            }, 25);
+          } else if (
+            e.key === "ArrowDown" ||
+            e.key === "ArrowRight" ||
+            e.key === "w" ||
+            (e.key === "d" && !isHandleNextQuestionDisabled)
+          ) {
+            e.preventDefault();
+            handleNextQuestion();
+
+            setIsCoolDown(true);
+            setTimeout(() => {
+              setIsCoolDown(false);
+            }, 25);
+          }
+        }}
+        onKeyUp={() => {
+          setIsCoolDown(false);
+        }}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>Question and answer inspector</DialogTitle>
