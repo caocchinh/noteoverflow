@@ -33,7 +33,7 @@ export const InspectImages = ({
           {item.includes("http") ? (
             <img
               className={cn(
-                "w-full h-full object-contain relative z-10 !max-w-[720px]",
+                "w-full h-full object-contain relative z-10 !max-w-[750px]",
                 imageTheme === "dark" && "!invert"
               )}
               src={item}

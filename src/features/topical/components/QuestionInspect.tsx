@@ -550,7 +550,7 @@ const QuestionInspect = ({
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = useCallback(() => {
     if (
       partitionedTopicalData &&
       currentTabThatContainsQuestion > -1 &&
@@ -619,8 +619,17 @@ const QuestionInspect = ({
         }
       }
     }
-  };
-  const handlePreviousQuestion = () => {
+  }, [
+    currentQuestionId,
+    currentQuestionIndex,
+    currentTabThatContainsQuestion,
+    partitionedTopicalData,
+    scrollToQuestion,
+    searchInput,
+    searchResults,
+    searchVirtualizer,
+  ]);
+  const handlePreviousQuestion = useCallback(() => {
     if (partitionedTopicalData) {
       if (searchInput === "") {
         if (currentQuestionIndex > 0) {
@@ -686,8 +695,17 @@ const QuestionInspect = ({
         }
       }
     }
-  };
-  const isHandleNextQuestionButtonDisabled = useMemo(() => {
+  }, [
+    currentQuestionId,
+    currentQuestionIndex,
+    currentTabThatContainsQuestion,
+    partitionedTopicalData,
+    scrollToQuestion,
+    searchInput,
+    searchResults,
+    searchVirtualizer,
+  ]);
+  const isHandleNextQuestionDisabled = useMemo(() => {
     if (
       !partitionedTopicalData ||
       currentTabThatContainsQuestion < 0 ||
@@ -721,7 +739,7 @@ const QuestionInspect = ({
     searchResults,
     currentQuestionId,
   ]);
-  const isHandlePreviousQuestionButtonDisabled = useMemo(() => {
+  const isHandlePreviousQuestionDisabled = useMemo(() => {
     if (
       !partitionedTopicalData ||
       currentTabThatContainsQuestion < 0 ||
@@ -750,6 +768,54 @@ const QuestionInspect = ({
     currentTabThatContainsQuestion,
     searchResults,
     currentQuestionId,
+  ]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | null = null;
+    const down = (e: KeyboardEvent) => {
+      if (timeout) return;
+      if (
+        e.key === "ArrowUp" &&
+        (e.metaKey || e.ctrlKey) &&
+        !isHandlePreviousQuestionDisabled
+      ) {
+        e.preventDefault();
+        handlePreviousQuestion();
+        timeout = setTimeout(() => {
+          timeout = null;
+        }, 200);
+      } else if (
+        e.key === "ArrowDown" &&
+        (e.metaKey || e.ctrlKey) &&
+        !isHandleNextQuestionDisabled
+      ) {
+        e.preventDefault();
+        handleNextQuestion();
+        timeout = setTimeout(() => {
+          timeout = null;
+        }, 200);
+      }
+    };
+
+    const up = () => {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    document.addEventListener("keyup", up);
+    return () => {
+      document.removeEventListener("keydown", down);
+      document.removeEventListener("keyup", up);
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [
+    handleNextQuestion,
+    handlePreviousQuestion,
+    isHandleNextQuestionDisabled,
+    isHandlePreviousQuestionDisabled,
   ]);
 
   return (
@@ -784,6 +850,7 @@ const QuestionInspect = ({
           openMobile={isInspectSidebarOpen}
           onOpenChangeMobile={setIsInspectSidebarOpen}
           open={isInspectSidebarOpen}
+          className="!min-h-[inherit]"
           style={
             {
               "--sidebar-width": "299.6px",
@@ -1132,7 +1199,7 @@ const QuestionInspect = ({
           </Sidebar>
           <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
             <div
-              className="w-full flex flex-col gap-2 items-center justify-start relative"
+              className="w-full h-[inherit] flex flex-col gap-2 items-center justify-start relative"
               ref={sideBarInsetRef}
             >
               {isUltilityOverflowingRight && (
@@ -1205,7 +1272,7 @@ const QuestionInspect = ({
                       className="w-9 rounded-sm cursor-pointer"
                       onClick={handleNextQuestion}
                       title="Next question"
-                      disabled={isHandleNextQuestionButtonDisabled}
+                      disabled={isHandleNextQuestionDisabled}
                     >
                       <ChevronDown />
                     </Button>
@@ -1214,7 +1281,7 @@ const QuestionInspect = ({
                       className="w-9 rounded-sm cursor-pointer"
                       onClick={handlePreviousQuestion}
                       title="Previous question"
-                      disabled={isHandlePreviousQuestionButtonDisabled}
+                      disabled={isHandlePreviousQuestionDisabled}
                     >
                       <ChevronUp />
                     </Button>
@@ -1330,7 +1397,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                  className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
                   type="always"
                   viewportRef={questionScrollAreaRef}
                 >
@@ -1354,7 +1421,7 @@ const QuestionInspect = ({
                 )}
               >
                 <ScrollArea
-                  className="h-[76dvh] lg:h-[80dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                  className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
                   type="always"
                   viewportRef={answerScrollAreaRef}
                 >
