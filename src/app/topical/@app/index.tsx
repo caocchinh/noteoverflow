@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowLeft,
+  ArrowUp,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -1660,13 +1661,20 @@ const TopicalClient = ({
                     Topical questions
                   </h1>
 
-                  <div className="flex mb-1 flex-row items-center justify-center w-full gap-2  px-4 rounded-lg ">
+                  <div className="flex mb-1 flex-row items-center justify-center w-full gap-2 px-4 rounded-lg ">
                     <ArrowLeft
-                      className="hidden md:block text-green-600 dark:text-green-400"
+                      className="hidden md:block text-green-600 dark:text-green-700"
                       size={20}
                     />
-                    <span className="text-green-700 dark:text-green-400 text-lg font-medium">
-                      Use the sidebar/filter on the left to search for questions
+                    <ArrowUp
+                      className="md:hidden block text-green-600 dark:text-green-700"
+                      size={20}
+                    />
+                    <span className="text-green-700 dark:text-green-700 text-lg text-center font-medium">
+                      Use the sidebar/filter on the{" "}
+                      <span className="hidden md:inline">left</span>
+                      <span className="md:hidden inline">top</span> to search
+                      for questions
                     </span>
                   </div>
 
