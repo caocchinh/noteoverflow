@@ -354,6 +354,7 @@ const QuestionInspect = ({
     currentTabThatContainsQuestion,
     currentQuestionId,
   ]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const currentQuestionData = useMemo(() => {
     return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
       currentQuestionIndex
@@ -393,7 +394,6 @@ const QuestionInspect = ({
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (isOpen.isOpen) {
-      setIsBlockingInput(true);
       timeout = setTimeout(() => {
         if (isMobile && isInspectSidebarOpen) {
           setIsVirtualizationReady(true);
@@ -410,7 +410,6 @@ const QuestionInspect = ({
               "",
           });
         }
-        setIsBlockingInput(false);
       }, 0);
     } else {
       setIsVirtualizationReady(false);
@@ -548,7 +547,6 @@ const QuestionInspect = ({
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
-  const [isBlockingInput, setIsBlockingInput] = useState(false);
 
   const handleNextQuestion = useCallback(() => {
     if (
@@ -779,6 +777,8 @@ const QuestionInspect = ({
       onOpenChange={(open) => {
         if (open) {
           setCurrentView("question");
+        } else {
+          setIsInputFocused(false);
         }
         setIsOpen({
           isOpen: open,
@@ -794,8 +794,7 @@ const QuestionInspect = ({
         className="w-[90vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
         onKeyDown={(e) => {
-          console.log(e.key);
-          if (e.key === "e") {
+          if (e.key === "e" && !isInputFocused) {
             e.preventDefault();
             if (currentView === "question") {
               setCurrentView("answer");
@@ -804,11 +803,11 @@ const QuestionInspect = ({
             }
           }
           if (isCoolDown) return;
+
           if (
             (e.key === "ArrowUp" ||
-              e.key === "ArrowLeft" ||
-              e.key === "s" ||
-              e.key === "a") &&
+              ((e.key === "w" || e.key === "a" || e.key === "ArrowLeft") &&
+                !isInputFocused)) &&
             !isHandlePreviousQuestionDisabled
           ) {
             e.preventDefault();
@@ -818,10 +817,10 @@ const QuestionInspect = ({
               setIsCoolDown(false);
             }, 25);
           } else if (
-            e.key === "ArrowDown" ||
-            e.key === "ArrowRight" ||
-            e.key === "w" ||
-            (e.key === "d" && !isHandleNextQuestionDisabled)
+            (e.key === "ArrowDown" ||
+              ((e.key === "s" || e.key === "d" || e.key === "ArrowRight") &&
+                !isInputFocused)) &&
+            !isHandleNextQuestionDisabled
           ) {
             e.preventDefault();
             handleNextQuestion();
@@ -876,10 +875,12 @@ const QuestionInspect = ({
                 <div className="flex items-center gap-2 border-b border-border">
                   <Search />
                   <Input
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
                     className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
                     placeholder="Search questions"
                     value={searchInput}
-                    readOnly={isBlockingInput}
+                    tabIndex={-1}
                     onChange={(e) => {
                       if (searchInput == "") {
                         listScrollAreaRef.current?.scrollTo({
@@ -1026,10 +1027,18 @@ const QuestionInspect = ({
                       key={virtualItem.key}
                       data-index={virtualItem.index}
                     >
-                      <Fragment key={searchResults[virtualItem.index]?.id}>
+                      <Fragment key={virtualItem.index}>
                         <QuestionHoverCard
                           question={searchResults[virtualItem.index]}
-                          currentTab={currentTab}
+                          currentTab={
+                            partitionedTopicalData?.findIndex((tab) =>
+                              tab.some(
+                                (question) =>
+                                  question.id ===
+                                  searchResults[virtualItem.index]?.id
+                              )
+                            ) ?? 0
+                          }
                           currentQuestionId={currentQuestionId}
                           questionScrollAreaRef={questionScrollAreaRef}
                           answerScrollAreaRef={answerScrollAreaRef}
