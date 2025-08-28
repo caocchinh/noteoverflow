@@ -237,7 +237,7 @@ const EnhancedSelectItem = ({
         >
           <Checkbox
             checked={selectedValue === item.code}
-            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main rounded-full"
           />
           {item.code}
         </CommandItem>

@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { QueryProvider } from "@/context/QueryProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -66,6 +67,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17511343513"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17511343513');
+          `}
+        </Script>
+
         <meta
           content="World's most comprehensive AS & A-level study materials platform"
           name="description"

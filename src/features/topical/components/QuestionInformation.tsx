@@ -19,6 +19,16 @@ export const QuestionInformation = ({
     return null;
   }
 
+  const temporaryFix = (item: string) => {
+    if (item === "Winter") {
+      return "Winter - O/N";
+    } else if (item === "Summer") {
+      return "Summer - M/J";
+    } else if (item === "Spring") {
+      return "Spring - F/M";
+    }
+  };
+
   return (
     <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start mb-3">
       {showCurriculumn && (
@@ -36,7 +46,7 @@ export const QuestionInformation = ({
           {topic}
         </Badge>
       ))}
-      <Badge>{question.season}</Badge>
+      <Badge>{temporaryFix(question.season) ?? question.season}</Badge>
       <Badge>{question.year}</Badge>
       <Badge>Paper {question.paperType}</Badge>
       <Badge>

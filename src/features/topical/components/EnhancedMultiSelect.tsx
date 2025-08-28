@@ -327,6 +327,18 @@ const MultiSelectorTrigger = () => {
     }
   }, [value]);
 
+  const temporaryFix = (item: string) => {
+    if (label === "Season") {
+      if (item === "Winter") {
+        return "Winter - O/N";
+      } else if (item === "Summer") {
+        return "Summer - M/J";
+      } else if (item === "Spring") {
+        return "Spring - F/M";
+      }
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -496,7 +508,7 @@ const MultiSelectorTrigger = () => {
                 }}
                 variant={"secondary"}
               >
-                <span className="text-xs">{item}</span>
+                <span className="text-xs">{temporaryFix(item) ?? item}</span>
                 <button
                   aria-label={`Remove ${item} option`}
                   aria-roledescription="button to remove option"
@@ -554,6 +566,18 @@ const MultiSelectorList = () => {
     isMobileDevice,
     maxLength,
   } = useMultiSelect();
+
+  const temporaryFix = (item: string) => {
+    if (label === "Season") {
+      if (item === "Winter") {
+        return "Winter - O/N";
+      } else if (item === "Summer") {
+        return "Summer - M/J";
+      } else if (item === "Spring") {
+        return "Spring - F/M";
+      }
+    }
+  };
 
   useEffect(() => {
     let focusTimeoutId: NodeJS.Timeout;
@@ -713,7 +737,7 @@ const MultiSelectorList = () => {
                         className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
                         defaultChecked={true}
                       />
-                      {item}
+                      {temporaryFix(item) ?? item}
 
                       <span className="hidden">skibidi toilet</span>
                     </CommandItem>
@@ -780,7 +804,7 @@ const MultiSelectorList = () => {
                     checked={value.includes(item)}
                     className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
                   />
-                  {item}
+                  {temporaryFix(item) ?? item}
                 </CommandItem>
               ))}
             </CommandGroup>
