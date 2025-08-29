@@ -654,6 +654,10 @@ const MultiSelectorList = () => {
           onClick={(e) => {
             e.stopPropagation();
             if (inputValue === "") {
+              setIsBlockingInput(true);
+              setTimeout(() => {
+                setIsBlockingInput(false);
+              }, 0);
               setOpen(false);
             } else {
               setInputValue("");
