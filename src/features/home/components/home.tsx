@@ -79,7 +79,6 @@ export default function Home() {
         <div>
           <AnimatedText
             className="relative z-10 mx-auto max-w-2xl text-[var(--home-page-text-muted)]"
-            delay={1}
             text="World's most robust AS & A-level study materials platform."
           />
 
