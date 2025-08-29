@@ -1756,6 +1756,16 @@ const TopicalClient = ({
                   complete access.
                 </p>
               )}
+
+              {topicalData?.isRateLimited &&
+                window.location.href ===
+                  "https://noteoverflow.com/topical?queryKey=%7B%22curriculumId%22%3A%22CIE+A-LEVEL%22%2C%22subjectId%22%3A%22Physics+%289702%29%22%2C%22topic%22%3A%5B%22GRAVITATIONAL+FIELDS%22%2C%22MOTION+IN+A+CIRCLE%22%5D%2C%22paperType%22%3A%5B%224%22%5D%2C%22year%22%3A%5B%222025%22%2C%222024%22%2C%222023%22%2C%222022%22%2C%222021%22%2C%222020%22%2C%222019%22%2C%222018%22%2C%222017%22%2C%222016%22%2C%222015%22%2C%222014%22%2C%222013%22%2C%222012%22%2C%222011%22%2C%222010%22%2C%222009%22%5D%2C%22season%22%3A%5B%22Spring%22%2C%22Summer%22%2C%22Winter%22%5D%7D" && (
+                  <p className="text-md text-center mb-2 text-green-600">
+                    New user here? Look around these questions and try out the
+                    website, or use the filter at the top left to choose another
+                    subject
+                  </p>
+                )}
               {isTopicalDataError &&
                 !isTopicalDataFetching &&
                 isTopicalDataFetched && (

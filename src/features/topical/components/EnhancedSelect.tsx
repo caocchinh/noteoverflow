@@ -150,7 +150,11 @@ const EnhancedSelect = ({
                 className="!bg-transparent cursor-pointer mr-2 text-destructive"
                 size={20}
                 onClick={() => {
-                  setInputValue("");
+                  if (inputValue) {
+                    setInputValue("");
+                  } else {
+                    setIsOpen(false);
+                  }
                 }}
               />
             </div>
