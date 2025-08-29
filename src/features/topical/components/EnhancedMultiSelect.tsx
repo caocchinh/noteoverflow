@@ -653,7 +653,11 @@ const MultiSelectorList = () => {
           size={20}
           onClick={(e) => {
             e.stopPropagation();
-            setInputValue("");
+            if (inputValue === "") {
+              setOpen(false);
+            } else {
+              setInputValue("");
+            }
           }}
         />
       </div>
