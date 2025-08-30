@@ -23,11 +23,11 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "NoteOverflow",
   description:
-    "World's most comprehensive AS & A-level study materials platform",
+    "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
   openGraph: {
     title: "NoteOverflow",
     description:
-      "World's most comprehensive AS & A-level study materials platform",
+      "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
     url: "https://noteoverflow.com/",
     siteName: "NoteOverflow",
     images: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         url: "/assets/thumbnail.webp",
         width: 1200,
         height: 627,
-        alt: "NoteOverflow - AS & A-level study materials platform",
+        alt: "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
         type: "image/webp",
       },
     ],
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/assets/thumbnail.webp",
-        alt: "NoteOverflow - AS & A-level study materials platform",
+        alt: "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
       },
     ],
   },
@@ -81,7 +81,7 @@ export default function RootLayout({
         </Script>
 
         <meta
-          content="World's most comprehensive AS & A-level study materials platform"
+          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
           name="description"
         />
         <meta name="image" content="/assets/thumbnail.webp" />
@@ -91,7 +91,7 @@ export default function RootLayout({
         <meta name="og:title" content="NoteOverflow" />
         <meta
           name="og:description"
-          content="World's most comprehensive AS & A-level study materials platform"
+          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
         />
         <meta name="og:url" content="https://noteoverflow.com/" />
         <meta name="og:type" content="website" />
@@ -103,11 +103,11 @@ export default function RootLayout({
         <meta property="article:publisher" content="Mr. Cao Cu Chinh" />
         <meta
           name="twitter:image:alt"
-          content="NoteOverflow - AS & A-level study materials platform"
+          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
         />
         <meta
           property="og:image:alt"
-          content="NoteOverflow - AS & A-level study materials platform"
+          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
         />
         <link href="/assets/favicon.ico" rel="icon" />
         <link rel="apple-touch-icon" href="/assets/favicon.ico" />
