@@ -44,6 +44,7 @@ export const DEFAULT_CACHE: FiltersCache = {
   layoutStyle: DEFAULT_LAYOUT_STYLE,
   numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   isSessionCacheEnabled: true,
+  isStrictModeEnabled: false,
   isPersistantCacheEnabled: true,
   showFinishedQuestionTint: true,
   finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,

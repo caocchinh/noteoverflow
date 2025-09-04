@@ -41,6 +41,7 @@ export type FiltersCache = {
   isSessionCacheEnabled: boolean;
   lastSessionCurriculum: string;
   layoutStyle: LayoutStyle;
+  isStrictModeEnabled: boolean;
   imageTheme: "dark" | "light";
   recentlySearchSortedBy: "ascending" | "descending";
   finishedQuestionsSearchSortedBy: "ascending" | "descending";

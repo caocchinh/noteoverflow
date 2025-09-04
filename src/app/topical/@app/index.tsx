@@ -67,6 +67,7 @@ import {
   computeDefaultSortParams,
   updateSearchParams,
   isValidInputs as isValidInputsUtils,
+  isSubset,
 } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -138,6 +139,8 @@ const TopicalClient = ({
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
   );
+  const [numberOfQuestion, setNumberOfQuetion] = useState(0);
+  const [isStrictModeEnabled, setIsStrictModeEnabled] = useState(false);
   const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
     useState(true);
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
@@ -359,27 +362,32 @@ const TopicalClient = ({
 
     try {
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+
+      const parsedState: FiltersCache = JSON.parse(savedState ?? "");
+
+      if (parsedState) {
+        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
+        setIsPersistantCacheEnabled(
+          parsedState.isPersistantCacheEnabled ?? true
+        );
+        setNumberOfColumns(
+          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
+        );
+        setIsStrictModeEnabled(parsedState.isStrictModeEnabled ?? false);
+        setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
+        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+        setNumberOfQuestionsPerPage(
+          parsedState.numberOfQuestionsPerPage ??
+            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+        );
+        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
+        setShowFinishedQuestionTint(
+          parsedState.showFinishedQuestionTint ?? true
+        );
+      }
+
       try {
         if (savedState && !parsedQueryFromSearchParams) {
-          const parsedState: FiltersCache = JSON.parse(savedState);
-          setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
-          setIsPersistantCacheEnabled(
-            parsedState.isPersistantCacheEnabled ?? true
-          );
-          setNumberOfColumns(
-            parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-          );
-          setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
-          setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-          setNumberOfQuestionsPerPage(
-            parsedState.numberOfQuestionsPerPage ??
-              DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-          );
-          setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
-          setShowFinishedQuestionTint(
-            parsedState.showFinishedQuestionTint ?? true
-          );
-
           if (
             parsedState.isSessionCacheEnabled &&
             parsedState.lastSessionCurriculum &&
@@ -456,6 +464,7 @@ const TopicalClient = ({
       setIsPersistantCacheEnabled(true);
       setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
       setLayoutStyle(DEFAULT_LAYOUT_STYLE);
+      setIsStrictModeEnabled(false);
       setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
       setShowScrollToTopButton(true);
       setShowFinishedQuestionTint(true);
@@ -576,6 +585,7 @@ const TopicalClient = ({
       showScrollToTopButton,
       numberOfColumns,
       layoutStyle,
+      isStrictModeEnabled,
       numberOfQuestionsPerPage,
       selectedCurriculum,
       selectedSubject,
@@ -588,6 +598,7 @@ const TopicalClient = ({
     selectedCurriculum,
     selectedSubject,
     selectedTopic,
+    isStrictModeEnabled,
     selectedPaperType,
     selectedYear,
     selectedSeason,
@@ -821,7 +832,14 @@ const TopicalClient = ({
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
-      const sortedData = topicalData.data.toSorted(
+
+      const filteredStrictModeData = isStrictModeEnabled
+        ? topicalData.data.filter((item) => {
+            return isSubset(item.topics, currentQuery.topic);
+          })
+        : topicalData.data;
+
+      const sortedData = filteredStrictModeData.toSorted(
         (a: SelectedQuestion, b: SelectedQuestion) => {
           const aPaperTypeScore =
             (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
@@ -876,6 +894,7 @@ const TopicalClient = ({
           );
         }
       );
+      setNumberOfQuetion(sortedData.length);
 
       sortedData.forEach((item: SelectedQuestion) => {
         if (currentChunks.length === chunkSize) {
@@ -900,6 +919,8 @@ const TopicalClient = ({
     layoutStyle,
     numberOfQuestionsPerPage,
     sortParameters,
+    isStrictModeEnabled,
+    currentQuery.topic,
   ]);
 
   useEffect(() => {
@@ -1063,6 +1084,22 @@ const TopicalClient = ({
                   setSelectedSeason={setSelectedSeason}
                   isOverwriting={isOverwriting}
                 />
+
+                <div className="w-full flex items-center justify-around rounded-md border border-muted-foreground/20 bg-muted p-2">
+                  <div className="w-[70%] flex items-start justify-center flex-col">
+                    <p className="text-sm font-semibold">Strict mode</p>
+                    <p className="text-xs text-muted-foreground">
+                      Questions containing unrelated topics will be excluded .
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isStrictModeEnabled}
+                    title="Toggle"
+                    className="hover:cursor-pointer"
+                    onCheckedChange={setIsStrictModeEnabled}
+                  />
+                </div>
+
                 <SidebarSeparator />
 
                 <div className="flex w-full flex-col items-center justify-start gap-4">
@@ -1746,8 +1783,8 @@ const TopicalClient = ({
 
               {topicalData?.data && topicalData?.data.length > 0 && (
                 <p className="text-sm text-left mb-1">
-                  {topicalData?.data.length} question
-                  {topicalData?.data.length > 1 ? "s" : ""} found
+                  {numberOfQuestion} question
+                  {numberOfQuestion > 1 ? "s" : ""} found
                 </p>
               )}
               {topicalData?.isRateLimited && (

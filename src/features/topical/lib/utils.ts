@@ -27,7 +27,7 @@ export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
 };
 
-function isSubset(array1: string[], array2: string[]): boolean {
+export function isSubset(array1: string[], array2: string[]): boolean {
   // 1. Check if array1 is potentially larger.
   if (array1.length > array2.length) {
     return false;
@@ -386,6 +386,7 @@ export const syncFilterCacheToLocalStorage = ({
   isSessionCacheEnabled,
   isPersistantCacheEnabled,
   showFinishedQuestionTint,
+  isStrictModeEnabled,
   scrollUpWhenPageChange,
   showScrollToTopButton,
   numberOfColumns,
@@ -400,6 +401,7 @@ export const syncFilterCacheToLocalStorage = ({
   selectedSeason,
 }: {
   isSessionCacheEnabled?: boolean;
+  isStrictModeEnabled?: boolean;
   isPersistantCacheEnabled?: boolean;
   layoutStyle?: LayoutStyle;
   showFinishedQuestionTint?: boolean;
@@ -448,6 +450,8 @@ export const syncFilterCacheToLocalStorage = ({
       numberOfQuestionsPerPage:
         numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
       imageTheme: imageTheme ?? stateToSave.imageTheme,
+      isStrictModeEnabled:
+        isStrictModeEnabled ?? stateToSave.isStrictModeEnabled,
     };
 
     if (selectedCurriculum && selectedSubject) {
