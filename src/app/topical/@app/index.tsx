@@ -912,7 +912,6 @@ const TopicalClient = ({
         top: 0,
         behavior: "instant",
       });
-      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
     }
   }, [
     topicalData,
@@ -923,6 +922,12 @@ const TopicalClient = ({
     isStrictModeEnabled,
     currentQuery.topic,
   ]);
+
+  useEffect(() => {
+    if (topicalData) {
+      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
+    }
+  }, [topicalData, isStrictModeEnabled]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
