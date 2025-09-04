@@ -912,6 +912,7 @@ const TopicalClient = ({
         top: 0,
         behavior: "instant",
       });
+      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
     }
   }, [
     topicalData,
@@ -922,12 +923,6 @@ const TopicalClient = ({
     isStrictModeEnabled,
     currentQuery.topic,
   ]);
-
-  useEffect(() => {
-    if (topicalData) {
-      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
-    }
-  }, [topicalData]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -1024,7 +1019,7 @@ const TopicalClient = ({
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
-      topicalData?.data?.length === 0 ||
+      numberOfQuestion === 0 ||
       isTopicalDataError ||
       !fullPartitionedData ||
       fullPartitionedData.length === 0 ||
@@ -1033,7 +1028,7 @@ const TopicalClient = ({
     );
   }, [
     isSearchEnabled,
-    topicalData?.data?.length,
+    numberOfQuestion,
     isTopicalDataError,
     fullPartitionedData,
     isTopicalDataFetching,
@@ -1826,13 +1821,14 @@ const TopicalClient = ({
                     </Button>
                   </div>
                 )}
-              {topicalData?.data.length == 0 &&
+              {numberOfQuestion == 0 &&
                 isTopicalDataFetched &&
                 !isTopicalDataError &&
                 !isTopicalDataFetching && (
                   <div className="flex items-center justify-center w-full h-full">
                     <p className="text-md text-center mb-2 text-red-600">
-                      No questions found. Try changing the filters.
+                      No questions found. Try changing the filters. Certain
+                      topics may be paired with specific papers.
                     </p>
                   </div>
                 )}
