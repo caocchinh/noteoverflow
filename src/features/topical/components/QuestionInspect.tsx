@@ -790,6 +790,11 @@ const QuestionInspect = ({
   useEffect(() => {
     if (isOpen.isOpen) {
       setCurrentView("question");
+      updateSearchParams({
+        query: JSON.stringify(currentQuery),
+        isInspectOpen: true,
+        questionId: isOpen.questionId ?? "",
+      });
     } else {
       setIsInputFocused(false);
       if (currentQuery?.curriculumId && currentQuery?.subjectId) {
