@@ -787,20 +787,23 @@ const QuestionInspect = ({
   ]);
   const [isCoolDown, setIsCoolDown] = useState(false);
 
+  useEffect(() => {
+    if (isOpen.isOpen) {
+      setCurrentView("question");
+    } else {
+      setIsInputFocused(false);
+      updateSearchParams({
+        query: JSON.stringify(currentQuery),
+        questionId: currentQuestionId ?? "",
+        isInspectOpen: false,
+      });
+    }
+  }, [currentQuery, currentQuestionId, isOpen.isOpen]);
+
   return (
     <Dialog
       open={isOpen.isOpen}
       onOpenChange={(open) => {
-        if (open) {
-          setCurrentView("question");
-        } else {
-          setIsInputFocused(false);
-          updateSearchParams({
-            query: JSON.stringify(currentQuery),
-            questionId: currentQuestionId ?? "",
-            isInspectOpen: false,
-          });
-        }
         setIsOpen({
           isOpen: open,
           questionId:
