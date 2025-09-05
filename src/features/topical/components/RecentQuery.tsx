@@ -511,7 +511,7 @@ const RecentQueryItem = ({
               }
               setAccordionValue("dom dom yes yes");
               setCurrentQuery(parsedQuery);
-              updateSearchParams({ query: JSON.stringify(parsedQuery) });
+              updateSearchParams({ query: JSON.stringify(parsedQuery) , questionId: "",isInspectOpen:false});
               isOverwriting.current = true;
               setSelectedCurriculum(
                 parsedQuery.curriculumId as ValidCurriculum
