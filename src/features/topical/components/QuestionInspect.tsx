@@ -349,16 +349,6 @@ const QuestionInspect = ({
     "question"
   );
 
-  useEffect(() => {
-    if (currentQuery && currentQuestionId) {
-      updateSearchParams({
-        query: JSON.stringify(currentQuery),
-        isInspectOpen: true,
-        questionId: currentQuestionId,
-      });
-    }
-  }, [currentQuestionId, currentQuery]);
-
   const currentQuestionIndex = useMemo(() => {
     return (
       partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
@@ -805,7 +795,17 @@ const QuestionInspect = ({
         });
       }
     }
-  }, [currentQuery, currentQuestionId, isOpen]);
+  }, [currentQuery, isOpen]);
+
+  useEffect(() => {
+    if (currentQuery && currentQuestionId) {
+      updateSearchParams({
+        query: JSON.stringify(currentQuery),
+        isInspectOpen: true,
+        questionId: currentQuestionId,
+      });
+    }
+  }, [currentQuestionId, currentQuery]);
 
   return (
     <Dialog

@@ -947,7 +947,6 @@ const TopicalClient = ({
               (item) => item.id === existingQuestionid
             ) !== -1
           ) {
-            console.log("Opening inspect for question ID from URL:");
             setIsQuestionInspectOpen({
               isOpen: searchParams.isInspectOpen === "true",
               questionId: existingQuestionid,
