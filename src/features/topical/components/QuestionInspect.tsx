@@ -795,12 +795,12 @@ const QuestionInspect = ({
       if (currentQuery?.curriculumId && currentQuery?.subjectId) {
         updateSearchParams({
           query: JSON.stringify(currentQuery),
-          questionId: currentQuestionId ?? "",
+          questionId: isOpen.questionId ?? "",
           isInspectOpen: false,
         });
       }
     }
-  }, [currentQuery, currentQuestionId, isOpen.isOpen]);
+  }, [currentQuery, currentQuestionId, isOpen]);
 
   return (
     <Dialog
