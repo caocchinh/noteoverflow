@@ -365,7 +365,9 @@ const TopicalClient = ({
     try {
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
 
-      const parsedState: FiltersCache = JSON.parse(savedState ?? "");
+      const parsedState: FiltersCache = savedState
+        ? JSON.parse(savedState)
+        : false;
 
       if (parsedState) {
         setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
