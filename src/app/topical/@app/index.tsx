@@ -564,7 +564,7 @@ const TopicalClient = ({
         isInspectOpen: false,
       });
     }
-  }, [currentQuery, searchParams, isStrictModeEnabled]);
+  }, [currentQuery, isStrictModeEnabled]);
 
   useEffect(() => {
     if (!mountedRef.current || isOverwriting.current) {
@@ -947,15 +947,14 @@ const TopicalClient = ({
               (item) => item.id === existingQuestionid
             ) !== -1
           ) {
+            console.log("Opening inspect for question ID from URL:");
             setIsQuestionInspectOpen({
               isOpen: searchParams.isInspectOpen === "true",
               questionId: existingQuestionid,
             });
           }
         }
-
-        setOpenInspectOnMount(true);
-      } catch {
+      } finally {
         setOpenInspectOnMount(true);
       }
     }

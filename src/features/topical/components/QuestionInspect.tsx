@@ -792,11 +792,13 @@ const QuestionInspect = ({
       setCurrentView("question");
     } else {
       setIsInputFocused(false);
-      updateSearchParams({
-        query: JSON.stringify(currentQuery),
-        questionId: currentQuestionId ?? "",
-        isInspectOpen: false,
-      });
+      if (currentQuery?.curriculumId && currentQuery?.subjectId) {
+        updateSearchParams({
+          query: JSON.stringify(currentQuery),
+          questionId: currentQuestionId ?? "",
+          isInspectOpen: false,
+        });
+      }
     }
   }, [currentQuery, currentQuestionId, isOpen.isOpen]);
 
