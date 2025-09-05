@@ -110,11 +110,13 @@ const TopicalClient = ({
     useState<ValidCurriculum>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
+
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
       TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
     ]?.subject;
   }, [selectedCurriculum]);
+  const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const availableTopics = useMemo(() => {
     return availableSubjects?.find((item) => item.code === selectedSubject)
       ?.topic;
@@ -556,9 +558,11 @@ const TopicalClient = ({
     if (currentQuery.curriculumId && currentQuery.subjectId) {
       updateSearchParams({
         query: JSON.stringify(currentQuery),
+        questionId: "",
+        isInspectOpen: false,
       });
     }
-  }, [currentQuery, searchParams]);
+  }, [currentQuery, searchParams, isStrictModeEnabled]);
 
   useEffect(() => {
     if (!mountedRef.current || isOverwriting.current) {
@@ -907,6 +911,7 @@ const TopicalClient = ({
 
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
+
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -928,6 +933,36 @@ const TopicalClient = ({
       setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
     }
   }, [topicalData, isStrictModeEnabled]);
+
+  useEffect(() => {
+    if (!openInspectOnMount && topicalData) {
+      try {
+        const existingQuestionid = searchParams.questionId;
+
+        if (existingQuestionid && typeof existingQuestionid === "string") {
+          if (
+            topicalData?.data.findIndex(
+              (item) => item.id === existingQuestionid
+            ) !== -1
+          ) {
+            setIsQuestionInspectOpen({
+              isOpen: searchParams.isInspectOpen === "true",
+              questionId: existingQuestionid,
+            });
+          }
+        }
+
+        setOpenInspectOnMount(true);
+      } catch {
+        setOpenInspectOnMount(true);
+      }
+    }
+  }, [
+    openInspectOnMount,
+    searchParams.isInspectOpen,
+    searchParams.questionId,
+    topicalData,
+  ]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -1919,6 +1954,7 @@ const TopicalClient = ({
         partitionedTopicalData={fullPartitionedData}
         bookmarks={bookmarks ?? []}
         imageTheme={imageTheme}
+        currentQuery={currentQuery}
         isValidSession={!!userSession?.data?.session}
         isBookmarksFetching={isBookmarksFetching}
         isUserSessionPending={isUserSessionPending}

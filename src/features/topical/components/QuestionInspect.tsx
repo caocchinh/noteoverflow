@@ -25,8 +25,10 @@ import {
   fuzzySearch,
   isOverScrolling,
   parsePastPaperUrl,
+  updateSearchParams,
 } from "../lib/utils";
 import { Button } from "@/components/ui/button";
+
 import {
   ChevronDown,
   ChevronLeft,
@@ -52,6 +54,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
 import {
+  CurrentQuery,
   QuestionHoverCardProps,
   SelectedBookmark,
   SelectedFinishedQuestion,
@@ -287,6 +290,7 @@ const QuestionHoverCard = ({
 
 const QuestionInspect = ({
   isOpen,
+  currentQuery,
   setIsOpen,
   partitionedTopicalData,
   bookmarks,
@@ -316,6 +320,7 @@ const QuestionInspect = ({
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
   imageTheme: "dark" | "light";
+  currentQuery?: CurrentQuery;
   isUserSessionPending: boolean;
   sortBy?: "ascending" | "descending";
   setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
@@ -343,6 +348,17 @@ const QuestionInspect = ({
   const [currentView, setCurrentView] = useState<"question" | "answer">(
     "question"
   );
+
+  useEffect(() => {
+    if (currentQuery && currentQuestionId) {
+      updateSearchParams({
+        query: JSON.stringify(currentQuery),
+        isInspectOpen: true,
+        questionId: currentQuestionId,
+      });
+    }
+  }, [currentQuestionId, currentQuery]);
+
   const currentQuestionIndex = useMemo(() => {
     return (
       partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
@@ -779,6 +795,11 @@ const QuestionInspect = ({
           setCurrentView("question");
         } else {
           setIsInputFocused(false);
+          updateSearchParams({
+            query: JSON.stringify(currentQuery),
+            questionId: currentQuestionId ?? "",
+            isInspectOpen: false,
+          });
         }
         setIsOpen({
           isOpen: open,

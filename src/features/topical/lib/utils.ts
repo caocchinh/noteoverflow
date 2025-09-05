@@ -364,15 +364,25 @@ export const computeWeightedScoreByArrayIndex = ({
   }
 };
 
-export const updateSearchParams = ({ query }: { query: string }) => {
+export const updateSearchParams = ({
+  query,
+  questionId = "",
+  isInspectOpen = false,
+}: {
+  query: string;
+  questionId: string;
+  isInspectOpen: boolean;
+}) => {
   try {
     if (typeof window === "undefined") {
       return;
     }
     const params = new URLSearchParams();
     params.set("queryKey", query);
+    params.set("questionId", questionId);
+    params.set("isInspectOpen", isInspectOpen.toString());
 
-    window.history.pushState(
+    window.history.replaceState(
       {},
       "",
       `${window.location.pathname}?${params.toString()}`
