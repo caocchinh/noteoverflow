@@ -34,6 +34,7 @@ import type { ValidCurriculum } from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
+import { usePathname } from "next/navigation";
 import {
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
@@ -110,7 +111,7 @@ const TopicalClient = ({
     useState<ValidCurriculum>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [sidebarKey, setSidebarKey] = useState(0);
-
+  const pathname = usePathname();
   const availableSubjects = useMemo(() => {
     return TOPICAL_DATA[
       TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
@@ -1091,6 +1092,24 @@ const TopicalClient = ({
       setIsSidebarOpen(false);
     }
   }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsSidebarOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !mountedRef.current) {
+      return;
+    }
+    if (pathname === "/topical") {
+      if (currentQuery.curriculumId && currentQuery.subjectId) {
+        updateSearchParams({
+          query: JSON.stringify(currentQuery),
+          questionId: isQuestionInspectOpen.questionId
+            ? isQuestionInspectOpen.questionId
+            : "",
+          isInspectOpen: false,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return (
     <>
