@@ -20,11 +20,15 @@ export default function CacheAccordion({
   setIsSessionCacheEnabled,
   isPersistantCacheEnabled,
   setIsPersistantCacheEnabled,
+  isQuestionCacheEnabled,
+  setIsQuestionCacheEnabled,
 }: {
   isSessionCacheEnabled: boolean;
   setIsSessionCacheEnabled: Dispatch<SetStateAction<boolean>>;
   isPersistantCacheEnabled: boolean;
   setIsPersistantCacheEnabled: Dispatch<SetStateAction<boolean>>;
+  isQuestionCacheEnabled: boolean;
+  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -83,6 +87,24 @@ export default function CacheAccordion({
                   checked={isPersistantCacheEnabled}
                   id="persistant-cache"
                   onCheckedChange={setIsPersistantCacheEnabled}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="question-cache">
+            <AccordionTrigger>Question cache</AccordionTrigger>
+            <AccordionContent className="flex flex-col gap-4 text-balance">
+              <p>
+                Caches opened questions during inspection. On refresh, cached
+                questions will automatically reopen in inspect mode if it was
+                previously active. Is enabled by default.
+              </p>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="question-cache">Enable question cache</Label>
+                <Switch
+                  checked={isQuestionCacheEnabled}
+                  id="question-cache"
+                  onCheckedChange={setIsQuestionCacheEnabled}
                 />
               </div>
             </AccordionContent>

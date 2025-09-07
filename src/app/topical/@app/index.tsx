@@ -143,6 +143,7 @@ const TopicalClient = ({
   );
   const [numberOfQuestion, setNumberOfQuetion] = useState(0);
   const [isStrictModeEnabled, setIsStrictModeEnabled] = useState(false);
+  const [isQuestionCacheEnabled, setIsQuestionCacheEnabled] = useState(true);
   const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
     useState(true);
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
@@ -317,6 +318,9 @@ const TopicalClient = ({
   }, [selectedSeason]);
 
   useEffect(() => {
+    if (mountedRef.current) {
+      return;
+    }
     let parsedQueryFromSearchParams;
     if (searchParams.queryKey) {
       try {
@@ -374,6 +378,7 @@ const TopicalClient = ({
         setIsPersistantCacheEnabled(
           parsedState.isPersistantCacheEnabled ?? true
         );
+        setIsQuestionCacheEnabled(parsedState.isQuestionCacheEnabled ?? true);
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
@@ -451,6 +456,7 @@ const TopicalClient = ({
           setSelectedSeason(parsedQueryFromSearchParams.season);
           syncFilterCacheToLocalStorage({
             selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
+            isQuestionCacheEnabled: parsedState.isQuestionCacheEnabled,
             selectedSubject: parsedQueryFromSearchParams.subjectId,
             selectedTopic: parsedQueryFromSearchParams.topic,
             selectedPaperType: parsedQueryFromSearchParams.paperType,
@@ -469,6 +475,7 @@ const TopicalClient = ({
       setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
       setLayoutStyle(DEFAULT_LAYOUT_STYLE);
       setIsStrictModeEnabled(false);
+      setIsQuestionCacheEnabled(true);
       setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
       setShowScrollToTopButton(true);
       setShowFinishedQuestionTint(true);
@@ -588,6 +595,7 @@ const TopicalClient = ({
       isPersistantCacheEnabled,
       showFinishedQuestionTint,
       scrollUpWhenPageChange,
+      isQuestionCacheEnabled,
       showScrollToTopButton,
       numberOfColumns,
       layoutStyle,
@@ -617,6 +625,7 @@ const TopicalClient = ({
     numberOfQuestionsPerPage,
     scrollUpWhenPageChange,
     numberOfColumns,
+    isQuestionCacheEnabled,
   ]);
 
   const isValidInputs = ({
@@ -937,6 +946,13 @@ const TopicalClient = ({
   }, [topicalData, isStrictModeEnabled]);
 
   useEffect(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+    if (!isQuestionCacheEnabled) {
+      setOpenInspectOnMount(true);
+      return;
+    }
     if (!openInspectOnMount && topicalData) {
       try {
         const existingQuestionid = searchParams.questionId;
@@ -957,12 +973,7 @@ const TopicalClient = ({
         setOpenInspectOnMount(true);
       }
     }
-  }, [
-    openInspectOnMount,
-    searchParams.isInspectOpen,
-    searchParams.questionId,
-    topicalData,
-  ]);
+  }, [isQuestionCacheEnabled, openInspectOnMount, searchParams, topicalData]);
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -1421,6 +1432,8 @@ const TopicalClient = ({
                   isPersistantCacheEnabled={isPersistantCacheEnabled}
                   isSessionCacheEnabled={isSessionCacheEnabled}
                   setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
+                  isQuestionCacheEnabled={isQuestionCacheEnabled}
+                  setIsQuestionCacheEnabled={setIsQuestionCacheEnabled}
                   setIsSessionCacheEnabled={setIsSessionCacheEnabled}
                 />
                 <LayoutSetting

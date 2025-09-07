@@ -409,6 +409,7 @@ export const syncFilterCacheToLocalStorage = ({
   selectedPaperType,
   selectedYear,
   selectedSeason,
+  isQuestionCacheEnabled,
 }: {
   isSessionCacheEnabled?: boolean;
   isStrictModeEnabled?: boolean;
@@ -421,6 +422,7 @@ export const syncFilterCacheToLocalStorage = ({
   numberOfColumns?: number;
   numberOfQuestionsPerPage?: number;
   selectedCurriculum: string;
+  isQuestionCacheEnabled: boolean;
   selectedSubject: string;
   selectedTopic: string[];
   selectedPaperType: string[];
@@ -451,6 +453,8 @@ export const syncFilterCacheToLocalStorage = ({
         isPersistantCacheEnabled ?? stateToSave.isPersistantCacheEnabled,
       showFinishedQuestionTint:
         showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
+      isQuestionCacheEnabled:
+        isQuestionCacheEnabled ?? stateToSave.isQuestionCacheEnabled,
       scrollUpWhenPageChange:
         scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
       showScrollToTopButton:
