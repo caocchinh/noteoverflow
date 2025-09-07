@@ -50,6 +50,7 @@ export const DEFAULT_CACHE: FiltersCache = {
   finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,
   scrollUpWhenPageChange: true,
   showScrollToTopButton: true,
+  isQuestionCacheEnabled: true,
   lastSessionCurriculum: "",
   lastSessionSubject: "",
   filters: {},
