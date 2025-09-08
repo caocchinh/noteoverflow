@@ -17,7 +17,7 @@ export const InspectImages = ({
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
   return (
-    <div className="flex flex-col flex-wrap w-full gap-2 relative items-center">
+    <div className="flex flex-col flex-wrap w-full relative items-center">
       {imageSource[0]?.includes("http") && (
         <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0" />
       )}
