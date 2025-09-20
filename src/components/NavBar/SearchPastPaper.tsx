@@ -120,7 +120,7 @@ const SearchPastPaper = () => {
       case "M":
         setSelectedSeason("Summer");
         break;
-      case "J":
+      case "F":
         setSelectedSeason("Spring");
         break;
       case "O":
