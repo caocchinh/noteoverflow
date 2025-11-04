@@ -822,7 +822,7 @@ const QuestionInspect = ({
       }}
     >
       <DialogContent
-        className="w-[90vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+        className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
         showCloseButton={false}
         onKeyDown={(e) => {
           if (e.key === "e" && !isInputFocused) {

@@ -106,6 +106,8 @@ export const TOPICAL_DATA: TopicalData[] = [
     subject: [
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Physics (9702)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/664565-2025-2027-syllabus.pdf",
         code: "Physics (9702)",
         topic: [
           "PHYSICAL QUANTITIES & UNITS",
@@ -146,6 +148,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Chemistry (9701)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf",
         code: "Chemistry (9701)",
         topic: [
           "ATOMS, MOLECULES & STOICHIOMETRY",
@@ -181,6 +185,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Biology (9700)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf",
         code: "Biology (9700)",
         topic: [
           "CELL STRUCTURE",
@@ -213,6 +219,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 1 (9709)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Pure Mathematics 1 (9709)",
         topic: [
           "COORDINATES GEOMETRY",
@@ -237,6 +245,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9618)"],
         code: "Computer Science (9618)",
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/636089-2024-2025-syllabus.pdf",
         topic: [
           "INFORMATION REPRESENTATION",
           "COMMUNICATION",
@@ -266,6 +276,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
         code: "Mechanics (9709)",
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         topic: [
           "FORCES & EQUILIBRIUM",
           "KINEMATICS OF MOTION IN A STRAIGHT LINE",
@@ -282,6 +294,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Further Mathematics (9231)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597381-2023-2025-syllabus.pdf",
         code: "Further Mathematics (9231)",
         topic: [
           "ROOTS OF POLYNOMIAL EQUATIONS",
@@ -321,6 +335,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Economics (9708)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/595463-2023-2025-syllabus.pdf",
         code: "Economics (9708)",
         topic: [
           "BASIC ECONOMIC IDEAS AND RESOURCE ALLOCATION",
@@ -339,6 +355,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Psychology (9990)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/634461-2024-2026-syllabus.pdf",
         code: "Psychology (9990)",
         topic: [
           "APPROACHES, ISSUES AND DEBATES",
@@ -358,6 +376,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Sociology (9699)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/636099-2024-2026-syllabus.pdf",
         code: "Sociology (9699)",
         topic: [
           "THE FAMILY",
@@ -381,6 +401,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
             "Mathematics Probability & Statistics 1 (9709)"
           ],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Probability & Statistics 1 (9709)",
         topic: [
           "REPRESENTATION OF DATA",
@@ -400,6 +422,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
             "Mathematics Probability & Statistics 2 (9709)"
           ],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Probability & Statistics 2 (9709)",
         topic: [
           "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
@@ -418,6 +442,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
             "Mathematics Pure Math 2,3 (9709)"
           ],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Pure Math 2,3 (9709)",
         topic: [
           "ALGEBRA",

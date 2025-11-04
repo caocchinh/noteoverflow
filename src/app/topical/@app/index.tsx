@@ -5,6 +5,8 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  BookMarked,
+  CalendarOff,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -839,6 +841,9 @@ const TopicalClient = ({
   const [sortParameters, setSortParameters] = useState<SortParameters | null>(
     null
   );
+  const subjectSyllabus = TOPICAL_DATA.find(
+    (item) => item.curriculum === selectedCurriculum
+  )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
 
   useEffect(() => {
     if (topicalData?.data) {
@@ -1181,6 +1186,7 @@ const TopicalClient = ({
                               duration: 0.15,
                               ease: "easeInOut",
                             }}
+                            className="flex flex-col gap-2"
                           >
                             <NextImage
                               alt="cover"
@@ -1193,6 +1199,23 @@ const TopicalClient = ({
                               }
                               width={100}
                             />
+                            {subjectSyllabus ? (
+                              <a
+                                className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row"
+                                href={subjectSyllabus}
+                                target="_blank"
+                                title="Open syllabus"
+                                rel="noreferrer"
+                              >
+                                Syllabus
+                                <BookMarked size={15} />
+                              </a>
+                            ) : (
+                              <div className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row">
+                                Outdated
+                                <CalendarOff size={15} />
+                              </div>
+                            )}
                           </motion.div>
                         ) : (
                           <motion.div

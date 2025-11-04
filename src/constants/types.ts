@@ -51,6 +51,7 @@ export interface TopicalData {
   coverImage: string;
   subject: {
     coverImage: string;
+    syllabusLink?: string;
     code: string;
     topic: string[];
     year: number[];
