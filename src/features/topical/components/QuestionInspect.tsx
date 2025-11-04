@@ -1632,10 +1632,19 @@ const BothViews = ({
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
-  const [isHidingAnswer, setIsHidingAnswer] = useState(false);
+  const [isHidingAnswer, setIsHidingAnswer] = useState(true);
   const [isHidingQuestion, setIsHidingQuestion] = useState(false);
+  const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    setIsHidingAnswer(true);
+    setIsHidingQuestion(false);
+    setKey((prev) => prev + 1);
+  }, [currentQuestionData]);
+
   return (
     <ResizablePanelGroup
+      key={key}
       direction={isMobile ? "vertical" : "horizontal"}
       className={cn(
         "rounded-lg border w-full",
@@ -1644,7 +1653,7 @@ const BothViews = ({
     >
       <ResizablePanel defaultSize={50} minSize={15}>
         <div
-          className="ml-3 m-2 mb-4 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
+          className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
           title="Toggle visibility"
           onClick={() => {
             setIsHidingQuestion(!isHidingQuestion);
@@ -1676,7 +1685,7 @@ const BothViews = ({
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} minSize={15}>
         <div
-          className="ml-3 w-max m-2 mb-4 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
+          className="ml-3 w-max m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
           title="Toggle visibility"
           onClick={() => {
             setIsHidingAnswer(!isHidingAnswer);
@@ -1695,15 +1704,10 @@ const BothViews = ({
           viewportRef={answerScrollAreaRef}
         >
           <InspectImages
-            imageSource={currentQuestionData?.questionImages ?? []}
+            imageSource={currentQuestionData?.answers ?? []}
             currentQuestionId={currentQuestionData?.id}
             imageTheme={imageTheme}
           />
-          {/* <InspectImages
-                        imageSource={currentQuestionData?.answers ?? []}
-                        currentQuestionId={currentQuestionData?.id}
-                        imageTheme={imageTheme}
-                      /> */}
         </ScrollArea>
       </ResizablePanel>
     </ResizablePanelGroup>
