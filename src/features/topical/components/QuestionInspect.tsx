@@ -10,6 +10,7 @@ import {
 import {
   Dispatch,
   Fragment,
+  RefObject,
   SetStateAction,
   useCallback,
   useEffect,
@@ -36,6 +37,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ChevronUp,
+  Eye,
+  EyeClosed,
   FastForward,
   Loader2,
   PanelsTopLeft,
@@ -87,6 +90,11 @@ import Loader from "./Loader/Loader";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 const QuestionHoverCard = ({
   question,
@@ -345,9 +353,9 @@ const QuestionInspect = ({
   >(undefined);
   const [searchInput, setSearchInput] = useState("");
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
-  const [currentView, setCurrentView] = useState<"question" | "answer">(
-    "question"
-  );
+  const [currentView, setCurrentView] = useState<
+    "question" | "answer" | "both"
+  >("question");
 
   const currentQuestionIndex = useMemo(() => {
     return (
@@ -1301,6 +1309,16 @@ const QuestionInspect = ({
                     >
                       Answer
                     </Button>
+                    <Button
+                      onClick={() => setCurrentView("both")}
+                      className={cn(
+                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                        currentView === "both" &&
+                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      )}
+                    >
+                      Both
+                    </Button>
                   </div>
 
                   <div className="flex items-center justify-center gap-2">
@@ -1323,6 +1341,41 @@ const QuestionInspect = ({
                       <ChevronUp />
                     </Button>
                   </div>
+                  {currentQuestionData && (
+                    <QuestionInspectFinishedCheckbox
+                      finishedQuestions={userFinishedQuestions}
+                      question={currentQuestionData}
+                      isFinishedQuestionDisabled={isUserSessionPending}
+                      isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                      isFinishedQuestionError={isFinishedQuestionsError}
+                      isValidSession={isValidSession}
+                    />
+                  )}
+                  {currentQuestionData && (
+                    <BookmarkButton
+                      triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
+                      badgeClassName="h-[35px] min-h-[35px] !static"
+                      question={currentQuestionData}
+                      isBookmarkDisabled={isUserSessionPending}
+                      listId={listId}
+                      bookmarks={bookmarks}
+                      popOverAlign="start"
+                      isValidSession={isValidSession}
+                      isBookmarksFetching={isBookmarksFetching}
+                      isBookmarkError={isBookmarkError}
+                      isInView={true}
+                    />
+                  )}
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setIsInspectSidebarOpen(!isInspectSidebarOpen)
+                    }
+                  >
+                    {isInspectSidebarOpen ? "Hide" : "Show"}
+                    <PanelsTopLeft />
+                  </Button>
                   <Tooltip>
                     <TooltipTrigger className="cursor-pointer" asChild>
                       <Button
@@ -1369,41 +1422,7 @@ const QuestionInspect = ({
                       </PastPaperLink>
                     </TooltipContent>
                   </Tooltip>
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer"
-                    onClick={() =>
-                      setIsInspectSidebarOpen(!isInspectSidebarOpen)
-                    }
-                  >
-                    {isInspectSidebarOpen ? "Hide" : "Show"}
-                    <PanelsTopLeft />
-                  </Button>
-                  {currentQuestionData && (
-                    <BookmarkButton
-                      triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
-                      badgeClassName="h-[35px] min-h-[35px] !static"
-                      question={currentQuestionData}
-                      isBookmarkDisabled={isUserSessionPending}
-                      listId={listId}
-                      bookmarks={bookmarks}
-                      popOverAlign="start"
-                      isValidSession={isValidSession}
-                      isBookmarksFetching={isBookmarksFetching}
-                      isBookmarkError={isBookmarkError}
-                      isInView={true}
-                    />
-                  )}
-                  {currentQuestionData && (
-                    <QuestionInspectFinishedCheckbox
-                      finishedQuestions={userFinishedQuestions}
-                      question={currentQuestionData}
-                      isFinishedQuestionDisabled={isUserSessionPending}
-                      isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                      isFinishedQuestionError={isFinishedQuestionsError}
-                      isValidSession={isValidSession}
-                    />
-                  )}
+
                   {sortBy && setSortBy && (
                     <SortBy sortBy={sortBy} setSortBy={setSortBy} />
                   )}
@@ -1475,6 +1494,26 @@ const QuestionInspect = ({
                     imageTheme={imageTheme}
                   />
                 </ScrollArea>
+              </div>
+              <div
+                className={cn(
+                  currentView === "both" ? "block w-full" : "hidden"
+                )}
+              >
+                <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                  <QuestionInformation
+                    question={currentQuestionData}
+                    showCurriculumn={false}
+                    showSubject={false}
+                  />
+                </div>
+                <BothViews
+                  currentQuestionData={currentQuestionData}
+                  imageTheme={imageTheme}
+                  isMobile={isMobile}
+                  questionScrollAreaRef={questionScrollAreaRef}
+                  answerScrollAreaRef={answerScrollAreaRef}
+                />
               </div>
             </div>
             <Button
@@ -1577,5 +1616,96 @@ const FinishedTracker = ({
         </span>
       )}
     </div>
+  );
+};
+
+const BothViews = ({
+  isMobile,
+  currentQuestionData,
+  imageTheme,
+  questionScrollAreaRef,
+  answerScrollAreaRef,
+}: {
+  isMobile: boolean;
+  currentQuestionData: SelectedQuestion | undefined;
+  imageTheme: "dark" | "light";
+  questionScrollAreaRef: RefObject<HTMLDivElement | null>;
+  answerScrollAreaRef: RefObject<HTMLDivElement | null>;
+}) => {
+  const [isHidingAnswer, setIsHidingAnswer] = useState(false);
+  const [isHidingQuestion, setIsHidingQuestion] = useState(false);
+  return (
+    <ResizablePanelGroup
+      direction={isMobile ? "vertical" : "horizontal"}
+      className={cn(
+        "rounded-lg border w-full",
+        isMobile ? "!h-[65dvh]" : "!h-[74dvh]"
+      )}
+    >
+      <ResizablePanel defaultSize={50} minSize={15}>
+        <div
+          className="ml-3 m-2 mb-4 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
+          title="Toggle visibility"
+          onClick={() => {
+            setIsHidingQuestion(!isHidingQuestion);
+          }}
+        >
+          <p className="text-sm">Question</p>
+          {!isHidingQuestion ? (
+            <Eye strokeWidth={2} />
+          ) : (
+            <EyeClosed strokeWidth={2} />
+          )}
+        </div>
+        <ScrollArea
+          className={cn(
+            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 p-3 pt-0",
+            isMobile && "!h-full",
+            isHidingQuestion && "blur-sm"
+          )}
+          type="always"
+          viewportRef={questionScrollAreaRef}
+        >
+          <InspectImages
+            imageSource={currentQuestionData?.questionImages ?? []}
+            currentQuestionId={currentQuestionData?.id}
+            imageTheme={imageTheme}
+          />
+        </ScrollArea>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={50} minSize={15}>
+        <div
+          className="ml-3 w-max m-2 mb-4 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
+          title="Toggle visibility"
+          onClick={() => {
+            setIsHidingAnswer(!isHidingAnswer);
+          }}
+        >
+          <p className="text-sm">Answer</p>
+          {!isHidingAnswer ? <Eye strokeWidth={2} /> : <EyeClosed />}
+        </div>
+        <ScrollArea
+          className={cn(
+            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 p-3 pt-0",
+            isMobile && "!h-full",
+            isHidingAnswer && "blur-sm"
+          )}
+          type="always"
+          viewportRef={answerScrollAreaRef}
+        >
+          <InspectImages
+            imageSource={currentQuestionData?.questionImages ?? []}
+            currentQuestionId={currentQuestionData?.id}
+            imageTheme={imageTheme}
+          />
+          {/* <InspectImages
+                        imageSource={currentQuestionData?.answers ?? []}
+                        currentQuestionId={currentQuestionData?.id}
+                        imageTheme={imageTheme}
+                      /> */}
+        </ScrollArea>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
