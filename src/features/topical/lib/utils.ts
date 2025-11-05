@@ -237,7 +237,7 @@ export const parsePastPaperUrl = ({
   questionId: string;
   year: string;
   season: ValidSeason;
-  type: "qp" | "ms";
+  type: "qp" | "ms" | "er" | "gt";
 }): string => {
   try {
     const splitedQuestionId = questionId.split(";");
@@ -245,13 +245,18 @@ export const parsePastPaperUrl = ({
     const paper = splitedQuestionId[2].split("_")[1];
     const curriculum = splitedQuestionId[0] as ValidCurriculum;
     const shortSeason = getShortSeason({ season, verbose: false });
-    const newPaperCode = `${subjectCode}_${shortSeason}${year.slice(
-      2
-    )}_${type}_${paper}`;
+    let newPaperCode = `${subjectCode}-${shortSeason}${year
+      .toString()
+      .slice(2)}-${type}`;
+    if (type === "ms" || type === "qp") {
+      newPaperCode = `${newPaperCode}-${paper}`;
+    }
     if (newPaperCode === "9608-w15-qp-12") {
       return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
     }
-    return `${BESTEXAMHELP_DOMAIN}/${BESTEXAMHELP_CURRICULUM_CODE_PREFIX[curriculum]}/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.pdf`;
+    return `${BESTEXAMHELP_DOMAIN}/${
+      BESTEXAMHELP_CURRICULUM_CODE_PREFIX[curriculum as ValidCurriculum]
+    }/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
   } catch {
     return "";
   }

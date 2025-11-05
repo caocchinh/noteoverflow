@@ -25,7 +25,6 @@ import {
   extractQuestionNumber,
   fuzzySearch,
   isOverScrolling,
-  parsePastPaperUrl,
   updateSearchParams,
 } from "../lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,20 +41,13 @@ import {
   FastForward,
   Loader2,
   PanelsTopLeft,
-  PencilLine,
-  ScrollText,
   Search,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { ValidSeason } from "@/constants/types";
+import { PastPaperDropdown } from "./BestExamHelpUltility";
 import {
   CurrentQuery,
   QuestionHoverCardProps,
@@ -1376,52 +1368,7 @@ const QuestionInspect = ({
                     {isInspectSidebarOpen ? "Hide" : "Show"}
                     <PanelsTopLeft />
                   </Button>
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-pointer" asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-9 h-9 cursor-pointer !p-0",
-                          currentQuestionData?.year === 2009 &&
-                            "opacity-50 cursor-default"
-                        )}
-                      >
-                        <PastPaperLink question={currentQuestionData} type="qp">
-                          <ScrollText />
-                        </PastPaperLink>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="z-[99999999]" side="bottom">
-                      <PastPaperLink question={currentQuestionData} type="qp">
-                        {currentQuestionData?.year === 2009
-                          ? "Only supported year 2010 and above"
-                          : "View entire paper"}
-                      </PastPaperLink>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-pointer -ml-1" asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-9 h-9 cursor-pointer !p-0",
-                          currentQuestionData?.year === 2009 &&
-                            "opacity-50 cursor-default"
-                        )}
-                      >
-                        <PastPaperLink question={currentQuestionData} type="ms">
-                          <PencilLine />
-                        </PastPaperLink>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="z-[99999999]" side="bottom">
-                      <PastPaperLink question={currentQuestionData} type="ms">
-                        {currentQuestionData?.year === 2009
-                          ? "Only supported year 2010 and above"
-                          : "View entire mark scheme"}
-                      </PastPaperLink>
-                    </TooltipContent>
-                  </Tooltip>
+                  <PastPaperDropdown question={currentQuestionData} />
 
                   {sortBy && setSortBy && (
                     <SortBy sortBy={sortBy} setSortBy={setSortBy} />
@@ -1535,42 +1482,6 @@ const QuestionInspect = ({
 
 export default QuestionInspect;
 
-const PastPaperLink = ({
-  question,
-  children,
-  type,
-}: {
-  question: SelectedQuestion | undefined;
-  children: React.ReactNode;
-  type: "qp" | "ms";
-}) => {
-  if (!question) {
-    return null;
-  }
-  return (
-    <a
-      target="_blank"
-      className={cn(
-        "w-full h-full flex items-center justify-center",
-        question.year === 2009 && "pointer-events-none"
-      )}
-      href={
-        question.year === 2009
-          ? ""
-          : parsePastPaperUrl({
-              questionId: question.id,
-              year: question.year.toString(),
-              season: question.season as ValidSeason,
-              type,
-            })
-      }
-      rel="noopener noreferrer"
-    >
-      {children}
-    </a>
-  );
-};
-
 const FinishedTracker = ({
   allQuestions,
   isValidSession,
@@ -1635,6 +1546,8 @@ const BothViews = ({
   const [isHidingAnswer, setIsHidingAnswer] = useState(true);
   const [isHidingQuestion, setIsHidingQuestion] = useState(false);
   const [key, setKey] = useState(0);
+  const isAnswerMultipleChoice =
+    !currentQuestionData?.answers?.[0]?.includes("http");
 
   useEffect(() => {
     setIsHidingAnswer(true);
@@ -1651,7 +1564,10 @@ const BothViews = ({
         isMobile ? "!h-[65dvh]" : "!h-[74dvh]"
       )}
     >
-      <ResizablePanel defaultSize={50} minSize={15}>
+      <ResizablePanel
+        defaultSize={isAnswerMultipleChoice ? 77 : 50}
+        minSize={15}
+      >
         <div
           className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
           title="Toggle visibility"
@@ -1683,7 +1599,10 @@ const BothViews = ({
         </ScrollArea>
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={50} minSize={15}>
+      <ResizablePanel
+        defaultSize={isAnswerMultipleChoice ? 23 : 50}
+        minSize={15}
+      >
         <div
           className="ml-3 w-max m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
           title="Toggle visibility"

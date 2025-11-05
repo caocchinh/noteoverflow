@@ -261,7 +261,7 @@ const SearchPastPaper = () => {
     setQuickCodeError(null);
   };
 
-  const parseLink = ({ type }: { type: "qp" | "ms" }) => {
+  const parseLink = ({ type }: { type: "qp" | "ms" | "er" | "gt" }) => {
     const shortSeason = getShortSeason({
       season: selectedSeason as ValidSeason,
       verbose: false,
@@ -271,9 +271,12 @@ const SearchPastPaper = () => {
     const year = parseInt(selectedYear);
     const subjectCode = selectedSubject.split("(")[1]?.slice(0, 4);
 
-    const newPaperCode = `${subjectCode}-${shortSeason}${year
+    let newPaperCode = `${subjectCode}-${shortSeason}${year
       .toString()
-      .slice(2)}-${type}-${paperType}${variant}`;
+      .slice(2)}-${type}`;
+    if (type === "ms" || type === "qp") {
+      newPaperCode = `${newPaperCode}-${paperType}${variant}`;
+    }
     if (newPaperCode === "9608-w15-qp-12") {
       return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
     }
@@ -741,7 +744,7 @@ const SearchPastPaper = () => {
 
               <div className="relative pt-0 w-full">
                 <Button
-                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg -mt-4 transition-all duration-200 hover:scale-[1.01]"
                   variant="destructive"
                   onClick={clearEverything}
                 >
@@ -779,7 +782,7 @@ const SearchPastPaper = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="w-full h-[83dvh]" type="always">
-            <div className="relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
+            <div className="relative rounded-xl border border-border bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-1">
@@ -863,25 +866,49 @@ const SearchPastPaper = () => {
                 </div>
               </div>
             </div>
-            <Button className="w-full mt-3 cursor-pointer" asChild>
-              <a
-                href={parseLink({ type: "ms" })}
-                target="_blank"
-                rel="noopener noreferrer"
-                ref={markingSchemeButtonRef}
-              >
-                Open marking scheme <ExternalLink />
-              </a>
-            </Button>
-            <Button className="w-full mt-3 cursor-pointer" asChild>
-              <a
-                href={parseLink({ type: "qp" })}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open question paper <ExternalLink />
-              </a>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center sm:mt-2 mt-3">
+              {" "}
+              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+                <a
+                  href={parseLink({ type: "ms" })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ref={markingSchemeButtonRef}
+                >
+                  Open marking scheme <ExternalLink />
+                </a>
+              </Button>
+              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+                <a
+                  href={parseLink({ type: "qp" })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open question paper <ExternalLink />
+                </a>
+              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center mt-3 sm:mt-2">
+              {" "}
+              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+                <a
+                  href={parseLink({ type: "er" })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open examiner report <ExternalLink />
+                </a>
+              </Button>
+              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+                <a
+                  href={parseLink({ type: "gt" })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open grade threshold <ExternalLink />
+                </a>
+              </Button>
+            </div>
             <Button
               className="w-full mt-3 cursor-pointer"
               onClick={() => setIsInfoDialogOpen(false)}
