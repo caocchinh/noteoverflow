@@ -67,7 +67,6 @@ import {
   validateSubject,
   isOverScrolling,
   syncFilterCacheToLocalStorage,
-  computeDefaultSortParams,
   updateSearchParams,
   isValidInputs as isValidInputsUtils,
   isSubset,
@@ -358,14 +357,9 @@ const TopicalClient = ({
         setIsValidSearchParams(true);
         setCurrentQuery(parsedQueryFromSearchParams);
         setIsSearchEnabled(true);
-        setSortParameters(
-          computeDefaultSortParams({
-            paperType: parsedQueryFromSearchParams.paperType,
-            topic: parsedQueryFromSearchParams.topic,
-            year: parsedQueryFromSearchParams.year,
-            season: parsedQueryFromSearchParams.season,
-          })
-        );
+        setSortParameters({
+          sortBy: "year-desc",
+        });
       }
     }
 
@@ -838,9 +832,9 @@ const TopicalClient = ({
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortParameters, setSortParameters] = useState<SortParameters | null>(
-    null
-  );
+  const [sortParameters, setSortParameters] = useState<SortParameters | null>({
+    sortBy: "year-desc",
+  });
   const subjectSyllabus = TOPICAL_DATA.find(
     (item) => item.curriculum === selectedCurriculum
   )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
@@ -862,57 +856,12 @@ const TopicalClient = ({
 
       const sortedData = filteredStrictModeData.toSorted(
         (a: SelectedQuestion, b: SelectedQuestion) => {
-          const aPaperTypeScore =
-            (sortParameters?.paperType.data?.[a.paperType] ?? 0) *
-            (sortParameters?.paperType.weight ?? 0);
-          const bPaperTypeScore =
-            (sortParameters?.paperType.data?.[b.paperType] ?? 0) *
-            (sortParameters?.paperType.weight ?? 0);
-          const aTopicScore =
-            a.topics.reduce((acc, curr) => {
-              if (sortParameters?.topic && curr) {
-                return (
-                  acc +
-                  sortParameters.topic.data?.[curr] *
-                    (sortParameters.topic.weight ?? 0)
-                );
-              }
-              return acc;
-            }, 0) / a.topics.length;
-          const bTopicScore =
-            b.topics.reduce((acc, curr) => {
-              if (sortParameters?.topic && curr) {
-                return (
-                  acc +
-                  sortParameters.topic.data?.[curr] *
-                    (sortParameters.topic.weight ?? 0)
-                );
-              }
-              return acc;
-            }, 0) / b.topics.length;
-
-          const aYearScore =
-            (sortParameters?.year.data?.[a.year] ?? 0) *
-            (sortParameters?.year.weight ?? 0);
-          const bYearScore =
-            (sortParameters?.year.data?.[b.year] ?? 0) *
-            (sortParameters?.year.weight ?? 0);
-          const aSeasonScore =
-            (sortParameters?.season.data?.[a.season] ?? 0) *
-            (sortParameters?.season.weight ?? 0);
-          const bSeasonScore =
-            (sortParameters?.season.data?.[b.season] ?? 0) *
-            (sortParameters?.season.weight ?? 0);
-          return (
-            bPaperTypeScore -
-            aPaperTypeScore +
-            (!Number.isNaN(bTopicScore) ? bTopicScore : 0) -
-            (!Number.isNaN(aTopicScore) ? aTopicScore : 0) +
-            bYearScore -
-            aYearScore +
-            bSeasonScore -
-            aSeasonScore
-          );
+          if (sortParameters?.sortBy === "year-asc") {
+            return a.year - b.year;
+          } else {
+            // Default to year-desc
+            return b.year - a.year;
+          }
         }
       );
       setNumberOfQuetion(sortedData.length);
@@ -1446,14 +1395,9 @@ const TopicalClient = ({
                               ...query,
                             });
                             // Update URL parameters without page reload
-                            setSortParameters(
-                              computeDefaultSortParams({
-                                paperType: query.paperType,
-                                topic: query.topic,
-                                year: query.year,
-                                season: query.season,
-                              })
-                            );
+                            setSortParameters({
+                              sortBy: "year-desc",
+                            });
                           } else if (isSameQuery && isMobileDevice) {
                             setIsSidebarOpen(false);
                           }

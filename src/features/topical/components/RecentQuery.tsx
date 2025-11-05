@@ -58,7 +58,6 @@ import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
-  computeDefaultSortParams,
 } from "../lib/utils";
 import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
@@ -511,7 +510,11 @@ const RecentQueryItem = ({
               }
               setAccordionValue("dom dom yes yes");
               setCurrentQuery(parsedQuery);
-              updateSearchParams({ query: JSON.stringify(parsedQuery) , questionId: "",isInspectOpen:false});
+              updateSearchParams({
+                query: JSON.stringify(parsedQuery),
+                questionId: "",
+                isInspectOpen: false,
+              });
               isOverwriting.current = true;
               setSelectedCurriculum(
                 parsedQuery.curriculumId as ValidCurriculum
@@ -522,14 +525,9 @@ const RecentQueryItem = ({
               setSelectedYear(parsedQuery.year);
               setIsSearchEnabled(true);
               setSelectedPaperType(parsedQuery.paperType);
-              setSortParameters(
-                computeDefaultSortParams({
-                  paperType: parsedQuery.paperType,
-                  topic: parsedQuery.topic,
-                  year: parsedQuery.year,
-                  season: parsedQuery.season,
-                })
-              );
+              setSortParameters({
+                sortBy: "year-desc",
+              });
 
               setTimeout(() => {
                 isOverwriting.current = false;

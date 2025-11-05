@@ -4,6 +4,10 @@ type SearchParams = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+// Force dynamic rendering to prevent caching issues with parallel routes in production
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function TopicalPage({ searchParams }: SearchParams) {
   return (
     <TopicalClient

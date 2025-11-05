@@ -8,10 +8,6 @@ import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
-  PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-  SEASON_SORT_DEFAULT_WEIGHT,
-  TOPIC_SORT_DEFAULT_WEIGHT,
-  YEAR_SORT_DEFAULT_WEIGHT,
 } from "../constants/constants";
 import type {
   FilterData,
@@ -61,20 +57,6 @@ export function hasOverlap(arr1: string[], arr2: string[]): boolean {
   const set1 = new Set(arr1);
   return arr2.some((item) => set1.has(item));
 }
-
-export const areArraysIdentical = <T>(array1: T[], array2: T[]): boolean => {
-  if (array1.length !== array2.length) {
-    return false;
-  }
-
-  for (let i = 0; i < array1.length; i++) {
-    if (array1[i] !== array2[i]) {
-      return false;
-    }
-  }
-
-  return true;
-};
 
 export const validateSubject = (
   curriculum: string,
@@ -349,26 +331,6 @@ export const isOverScrolling = ({
   }
 };
 
-// Lowest index has the highest weight
-export const computeWeightedScoreByArrayIndex = ({
-  data,
-}: {
-  data: string[];
-}): Record<string, number> => {
-  try {
-    const scoreObject: Record<string, number> = {};
-    let weight = data.length;
-    for (const item of data) {
-      const score = weight;
-      scoreObject[item] = score;
-      weight--;
-    }
-    return scoreObject;
-  } catch {
-    return {};
-  }
-};
-
 export const updateSearchParams = ({
   query,
   questionId = "",
@@ -497,45 +459,6 @@ export const syncFilterCacheToLocalStorage = ({
   } catch (error) {
     console.error("Failed to save settings to localStorage:", error);
   }
-};
-
-export const computeDefaultSortParams = ({
-  paperType,
-  topic,
-  year,
-  season,
-}: {
-  paperType: string[];
-  topic: string[];
-  year: string[];
-  season: string[];
-}) => {
-  return {
-    paperType: {
-      data: computeWeightedScoreByArrayIndex({
-        data: paperType,
-      }),
-      weight: PAPER_TYPE_SORT_DEFAULT_WEIGHT,
-    },
-    topic: {
-      data: computeWeightedScoreByArrayIndex({
-        data: topic,
-      }),
-      weight: TOPIC_SORT_DEFAULT_WEIGHT,
-    },
-    year: {
-      data: computeWeightedScoreByArrayIndex({
-        data: year,
-      }),
-      weight: YEAR_SORT_DEFAULT_WEIGHT,
-    },
-    season: {
-      data: computeWeightedScoreByArrayIndex({
-        data: season,
-      }),
-      weight: SEASON_SORT_DEFAULT_WEIGHT,
-    },
-  };
 };
 
 export const isValidInputs = ({

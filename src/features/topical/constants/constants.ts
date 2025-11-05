@@ -29,10 +29,6 @@ export const DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE = 50;
 export const MAX_NUMBER_OF_COLUMNS = 5;
 export const MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE = 100;
 
-export const YEAR_SORT_DEFAULT_WEIGHT = 1;
-export const PAPER_TYPE_SORT_DEFAULT_WEIGHT = 0;
-export const SEASON_SORT_DEFAULT_WEIGHT = 0;
-export const TOPIC_SORT_DEFAULT_WEIGHT = 0;
 export const MAX_NUMBER_OF_RECENT_QUERIES = 30;
 export const DEFAULT_SORT_BY: "ascending" | "descending" = "descending";
 export const DEFAULT_IMAGE_THEME = "light";

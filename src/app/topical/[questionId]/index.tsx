@@ -15,6 +15,7 @@ import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/Q
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { InspectImages } from "@/features/topical/components/InspectImages";
+import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
 
 export const QuestionView = ({
   data,
@@ -138,6 +139,7 @@ export const QuestionView = ({
           isFinishedQuestionDisabled={isUserSessionPending}
           className="!h-max"
         />
+        <BestExamHelpUltility question={data} />
         <ShareFilter
           isDisabled={false}
           url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(data.id)}`}

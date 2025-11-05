@@ -126,22 +126,7 @@ export interface ExtendedIntersectionObserverInit
 }
 
 export interface SortParameters {
-  topic: {
-    data: Record<string, number>;
-    weight: number;
-  };
-  paperType: {
-    data: Record<string, number>;
-    weight: number;
-  };
-  year: {
-    data: Record<string, number>;
-    weight: number;
-  };
-  season: {
-    data: Record<string, number>;
-    weight: number;
-  };
+  sortBy: "year-asc" | "year-desc";
 }
 
 export type CurrentQuery = {

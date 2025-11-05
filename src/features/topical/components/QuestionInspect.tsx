@@ -47,7 +47,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { PastPaperDropdown } from "./BestExamHelpUltility";
+import { BestExamHelpUltility } from "./BestExamHelpUltility";
 import {
   CurrentQuery,
   QuestionHoverCardProps,
@@ -1368,7 +1368,7 @@ const QuestionInspect = ({
                     {isInspectSidebarOpen ? "Hide" : "Show"}
                     <PanelsTopLeft />
                   </Button>
-                  <PastPaperDropdown question={currentQuestionData} />
+                  <BestExamHelpUltility question={currentQuestionData} />
 
                   {sortBy && setSortBy && (
                     <SortBy sortBy={sortBy} setSortBy={setSortBy} />

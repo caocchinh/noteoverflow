@@ -61,7 +61,7 @@ const PastPaperLink = ({
   );
 };
 
-export const PastPaperDropdown = ({
+export const BestExamHelpUltility = ({
   question,
 }: {
   question: SelectedQuestion | undefined;
