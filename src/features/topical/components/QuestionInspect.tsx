@@ -254,11 +254,12 @@ const QuestionHoverCard = ({
       </HoverCardTrigger>
       <HoverCardContent
         className={cn(
-          "z-[100007] w-max p-0 overflow-hidden border-none max-w-md min-h-[100px] !bg-white md:flex hidden   items-center justify-center rounded-sm",
+          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[272px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
           currentQuestionId === question?.id && "!hidden"
         )}
-        side="right"
-        sideOffset={25}
+        side={isPopoverOpen ? "right" : "left"}
+        sideOffset={isPopoverOpen ? -310 : 25}
+        avoidCollisions={isPopoverOpen ? false : true}
       >
         {!isImageLoaded && !isImageError && (
           <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">

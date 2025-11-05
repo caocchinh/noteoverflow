@@ -54,11 +54,7 @@ const DockWrapper = () => {
 
         {
           icon: (
-            <Link
-              href={TOPICAL_QUESTION_BOOKMARK_ROUTE}
-              ref={dummyLinkRef3}
-              prefetch={false}
-            >
+            <Link href={TOPICAL_QUESTION_BOOKMARK_ROUTE} ref={dummyLinkRef3}>
               <Bookmark
                 className={cn(
                   "text-white dark:text-black",
@@ -80,7 +76,6 @@ const DockWrapper = () => {
             <Link
               href={TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE}
               ref={dummyLinkRef4}
-              prefetch={false}
             >
               <BookOpenCheck
                 className={cn(
