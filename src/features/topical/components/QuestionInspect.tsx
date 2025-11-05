@@ -1462,7 +1462,7 @@ const QuestionInspect = ({
                   currentView === "both" ? "block w-full" : "hidden"
                 )}
               >
-                <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
                   <QuestionInformation
                     question={currentQuestionData}
                     showCurriculumn={false}
@@ -1479,7 +1479,8 @@ const QuestionInspect = ({
               </div>
             </div>
             <Button
-              className="w-full h-7 flex items-center justify-center cursor-pointer lg:hidden "
+              className="w-full h-7 flex items-center justify-center cursor-pointer"
+              variant="outline"
               onClick={() => {
                 if (currentQuestionId) {
                   setIsOpen({ isOpen: false, questionId: currentQuestionId });
@@ -1576,7 +1577,7 @@ const BothViews = ({
       direction={isMobile ? "vertical" : "horizontal"}
       className={cn(
         "rounded-lg border w-full",
-        isMobile ? "!h-[65dvh]" : "!h-[74dvh]"
+        isMobile ? "!h-[65dvh]" : "!h-[70dvh]"
       )}
     >
       <ResizablePanel
@@ -1599,7 +1600,7 @@ const BothViews = ({
         </div>
         <ScrollArea
           className={cn(
-            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
+            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
             isMobile && "!h-full",
             isHidingQuestion && "blur-sm"
           )}
@@ -1630,7 +1631,7 @@ const BothViews = ({
         </div>
         <ScrollArea
           className={cn(
-            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pl-3 pb-5 pt-0",
+            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pl-3 pb-5 pt-0",
             isMobile && "!h-full",
             isHidingAnswer && "blur-sm"
           )}
