@@ -206,64 +206,62 @@ const QuestionPreview = memo(
             <Loader2 className="animate-spin" />
           </Badge>
         )}
-        {!isMutatingThisQuestion &&
-          !isPopoverOpen &&
-          ((!isMobileDevice && isHovering) || isMobileDevice) && (
-            <Button
-              className={cn(
-                "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
-                "rounded-[3px] z-[30]",
-                (() => {
-                  for (const bookmark of bookmarks) {
-                    if (
-                      bookmark.userBookmarks.some(
-                        (b) => b.question.id === question.id
-                      )
-                    ) {
-                      return true;
-                    }
+        {!isMutatingThisQuestion && isHovering && (
+          <Button
+            className={cn(
+              "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
+              "rounded-[3px] z-[30]",
+              (() => {
+                for (const bookmark of bookmarks) {
+                  if (
+                    bookmark.userBookmarks.some(
+                      (b) => b.question.id === question.id
+                    )
+                  ) {
+                    return true;
                   }
-                  return false;
-                })() && "!bg-logo-main !text-white",
-                (isUserSessionPending || isBookmarksFetching) && "opacity-50"
-              )}
-              tabIndex={-1}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isUserSessionPending || isBookmarksFetching) {
-                  return;
                 }
-                if (isBookmarkError) {
-                  toast.error("Bookmark error. Please refresh the page.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                if (!isValidSession) {
-                  toast.error("Please sign in to bookmark questions.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                setShouldOpen(true);
-                setIsPopoverOpen(true);
-              }}
-            >
-              {isBookmarksFetching ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Bookmark size={10} />
-              )}
-            </Button>
-          )}
+                return false;
+              })() && "!bg-logo-main !text-white",
+              (isUserSessionPending || isBookmarksFetching) && "opacity-50"
+            )}
+            tabIndex={-1}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isUserSessionPending || isBookmarksFetching) {
+                return;
+              }
+              if (isBookmarkError) {
+                toast.error("Bookmark error. Please refresh the page.", {
+                  duration: 2000,
+                  position:
+                    isMobileDevice && isPopoverOpen
+                      ? "top-center"
+                      : "bottom-right",
+                });
+                return;
+              }
+              if (!isValidSession) {
+                toast.error("Please sign in to bookmark questions.", {
+                  duration: 2000,
+                  position:
+                    isMobileDevice && isPopoverOpen
+                      ? "top-center"
+                      : "bottom-right",
+                });
+                return;
+              }
+              setShouldOpen(true);
+              setIsPopoverOpen(true);
+            }}
+          >
+            {isBookmarksFetching ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Bookmark size={10} />
+            )}
+          </Button>
+        )}
 
         <img
           className={cn(

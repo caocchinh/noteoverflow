@@ -254,12 +254,11 @@ const QuestionHoverCard = ({
       </HoverCardTrigger>
       <HoverCardContent
         className={cn(
-          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[272px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
+          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
           currentQuestionId === question?.id && "!hidden"
         )}
-        side={isPopoverOpen ? "right" : "left"}
-        sideOffset={isPopoverOpen ? -310 : 25}
-        avoidCollisions={isPopoverOpen ? false : true}
+        side="left"
+        sideOffset={25}
       >
         {!isImageLoaded && !isImageError && (
           <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
@@ -469,6 +468,7 @@ const QuestionInspect = ({
       ) {
         return;
       }
+
       const itemIndex =
         partitionedTopicalData[tab].findIndex(
           (question) => question.id === questionId
@@ -477,7 +477,9 @@ const QuestionInspect = ({
         return;
       }
 
-      displayVirtualizer.scrollToIndex(itemIndex);
+      setTimeout(() => {
+        displayVirtualizer.scrollToIndex(itemIndex);
+      }, 0);
     },
     [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
   );
@@ -833,6 +835,15 @@ const QuestionInspect = ({
             } else {
               setCurrentView("question");
             }
+          }
+          if (e.key === "r" && !isInputFocused) {
+            e.preventDefault();
+            setCurrentView("both");
+            setIsInspectSidebarOpen(false);
+          }
+          if (e.key === "t" && !isInputFocused) {
+            e.preventDefault();
+            setIsInspectSidebarOpen(!isInspectSidebarOpen);
           }
           if (isCoolDown) return;
 
@@ -1303,7 +1314,10 @@ const QuestionInspect = ({
                       Answer
                     </Button>
                     <Button
-                      onClick={() => setCurrentView("both")}
+                      onClick={() => {
+                        setCurrentView("both");
+                        setIsInspectSidebarOpen(false);
+                      }}
                       className={cn(
                         "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                         currentView === "both" &&
@@ -1585,7 +1599,7 @@ const BothViews = ({
         </div>
         <ScrollArea
           className={cn(
-            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 p-3 pt-0",
+            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
             isMobile && "!h-full",
             isHidingQuestion && "blur-sm"
           )}
@@ -1616,7 +1630,7 @@ const BothViews = ({
         </div>
         <ScrollArea
           className={cn(
-            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 p-3 pt-0",
+            "h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pl-3 pb-5 pt-0",
             isMobile && "!h-full",
             isHidingAnswer && "blur-sm"
           )}

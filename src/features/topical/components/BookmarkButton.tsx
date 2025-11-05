@@ -770,7 +770,7 @@ const BookmarkButtonConsumer = memo(
               </div>
             </PopoverTrigger>
             <PopoverContent
-              className="flex flex-col z-[100006] w-[300px] !px-0 dark:bg-accent"
+              className="flex flex-col z-[100006] w-[270px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
               side="left"
