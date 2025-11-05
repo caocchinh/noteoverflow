@@ -1,15 +1,10 @@
-import { Metadata } from "next";
 import TopicalClient from "./index";
-
-export const metadata: Metadata = {
-  title: "Topical questions",
-  description:
-    "Practice curated topical questions across AS & A-level curriculums on NoteOverflow. Filter by subject, topic and year, bookmark tricky questions, and monitor your progress.",
-};
 
 type SearchParams = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
+//❌ Parallel routes (like @app/page.tsx) should NOT export metadata
 
 export default async function TopicalPage({ searchParams }: SearchParams) {
   return (
