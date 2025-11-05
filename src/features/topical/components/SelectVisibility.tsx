@@ -24,7 +24,7 @@ export const SelectVisibility = ({
       onValueChange={(value) => setVisibility(value as "public" | "private")}
       value={visibility}
     >
-      <SelectTrigger className="w-full py-6">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a visibility" />
       </SelectTrigger>
       <SelectContent className="z-[999999] dark:bg-accent w-[var(--radix-select-trigger-width)]">
