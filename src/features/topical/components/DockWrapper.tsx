@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 import {
   TOPICAL_QUESTION_APP_ROUTE,
@@ -20,6 +20,7 @@ import Dock from "./Dock";
 
 const DockWrapper = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const dummyLinkRef1 = useRef<HTMLAnchorElement>(null);
   // const dummyLinkRef2 = useRef<HTMLAnchorElement>(null);
   const dummyLinkRef3 = useRef<HTMLAnchorElement>(null);
@@ -30,7 +31,11 @@ const DockWrapper = () => {
       items={[
         {
           icon: (
-            <Link href={TOPICAL_QUESTION_APP_ROUTE} ref={dummyLinkRef1}>
+            <Link
+              href={TOPICAL_QUESTION_APP_ROUTE}
+              ref={dummyLinkRef1}
+              prefetch={false}
+            >
               <LayoutDashboard
                 className={cn(
                   "text-white dark:text-black",
@@ -43,7 +48,6 @@ const DockWrapper = () => {
           label: "App",
           onClick: () => {
             dummyLinkRef1.current?.click();
-            return;
           },
           backgroundColor:
             pathname === TOPICAL_QUESTION_APP_ROUTE ? "!bg-logo-main" : "",
@@ -51,7 +55,11 @@ const DockWrapper = () => {
 
         {
           icon: (
-            <Link href={TOPICAL_QUESTION_BOOKMARK_ROUTE} ref={dummyLinkRef3}>
+            <Link
+              href={TOPICAL_QUESTION_BOOKMARK_ROUTE}
+              ref={dummyLinkRef3}
+              prefetch={false}
+            >
               <Bookmark
                 className={cn(
                   "text-white dark:text-black",
@@ -64,7 +72,6 @@ const DockWrapper = () => {
           label: "Bookmark",
           onClick: () => {
             dummyLinkRef3.current?.click();
-            return;
           },
           backgroundColor:
             pathname === TOPICAL_QUESTION_BOOKMARK_ROUTE ? "!bg-logo-main" : "",
@@ -74,6 +81,7 @@ const DockWrapper = () => {
             <Link
               href={TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE}
               ref={dummyLinkRef4}
+              prefetch={false}
             >
               <BookOpenCheck
                 className={cn(
@@ -88,7 +96,6 @@ const DockWrapper = () => {
           label: "Finished questions",
           onClick: () => {
             dummyLinkRef4.current?.click();
-            return;
           },
           backgroundColor:
             pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE

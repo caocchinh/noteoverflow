@@ -78,24 +78,24 @@ export default function LayoutSetting({
             </SelectTrigger>
             <SelectContent className="z-[9999999]">
               <SelectItem value="pagination">
-                <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
+                <div className="flex items-center justify-start cursor-pointer flex-row gap-3 w-full">
                   <FileStack className="w-4 h-4" />
                   <div className="flex flex-col justify-center items-start">
                     <p className="text-sm">Pagination</p>
-                    <p className="text-xs text-muted-foreground text-left whitespace-normal">
+                    <p className="text-xs text-muted-foreground text-left wrap-anywhere">
                       Better performance on large results.
                     </p>
                   </div>
                 </div>
               </SelectItem>
               <SelectItem value="infinite">
-                <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
+                <div className="flex items-center justify-start cursor-pointer flex-row gap-3 w-full">
                   <Mouse className="w-4 h-4" />
                   <div className="flex flex-col justify-center items-start">
                     <p className="text-sm wrap-anywhere">
                       Infinite/Doom scroll
                     </p>
-                    <p className="text-xs text-muted-foreground text-left whitespace-normal">
+                    <p className="text-xs text-muted-foreground text-left wrap-anywhere">
                       More dopamine.
                     </p>
                   </div>

@@ -1,5 +1,5 @@
-import AppWrapper from '@/features/topical/components/AppWrapper';
-import TopicalLayoutProvider from '../../features/topical/components/TopicalLayoutProvider';
+import AppWrapper from "@/features/topical/components/AppWrapper";
+import TopicalLayoutProvider from "../../features/topical/components/TopicalLayoutProvider";
 
 export default function TopicalLayout({
   children,
