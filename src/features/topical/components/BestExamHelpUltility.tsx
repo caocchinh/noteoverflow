@@ -41,7 +41,7 @@ const PastPaperLink = ({
     <a
       target="_blank"
       className={cn(
-        "w-full h-full flex items-center",
+        "w-full h-full flex items-center hover:bg-input/90 rounded-md p-1",
         question.year === UNSUPPORTED_YEAR && "pointer-events-none"
       )}
       href={

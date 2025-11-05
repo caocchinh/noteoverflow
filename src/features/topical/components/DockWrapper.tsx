@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import {
   TOPICAL_QUESTION_APP_ROUTE,
@@ -20,7 +20,6 @@ import Dock from "./Dock";
 
 const DockWrapper = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const dummyLinkRef1 = useRef<HTMLAnchorElement>(null);
   // const dummyLinkRef2 = useRef<HTMLAnchorElement>(null);
   const dummyLinkRef3 = useRef<HTMLAnchorElement>(null);

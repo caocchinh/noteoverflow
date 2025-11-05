@@ -6,8 +6,13 @@ import { SelectedPublickBookmark } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import { BookmarkView } from ".";
+import { Metadata } from "next";
 
 type Params = Promise<{ bookmarkId: string }>;
+export const metadata: Metadata = {
+  title: "Bookmarks",
+  description: "Bookmark tricky questions and track your progress.",
+};
 
 const BookmarkViewPage = async (props: { params: Params }) => {
   try {
