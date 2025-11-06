@@ -295,11 +295,9 @@ export const ImageAnnotator = ({
             });
           }, 10000);
 
-          const loadImage = (useCORS: boolean = true) => {
-            const img = new window.Image();
-            if (useCORS) {
-              img.crossOrigin = "anonymous";
-            }
+          const loadImage = () => {
+            const img = new Image();
+
             img.src = src;
 
             img.onload = () => {
@@ -311,33 +309,27 @@ export const ImageAnnotator = ({
                 y: 0,
                 width: img.width,
                 height: img.height,
-                error: useCORS
-                  ? null
-                  : "CORS error: Drawing annotations are disabled. Server doesn't allow cross-origin requests.",
+                error: null,
                 loading: false,
               });
             };
 
             img.onerror = () => {
-              if (useCORS) {
-                loadImage(false);
-              } else {
-                clearTimeout(timeoutId);
-                resolve({
-                  src,
-                  image: null,
-                  x: 0,
-                  y: 0,
-                  width: 0,
-                  height: 0,
-                  error: "Failed to load image from server.",
-                  loading: false,
-                });
-              }
+              clearTimeout(timeoutId);
+              resolve({
+                src,
+                image: null,
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                error: "Failed to load image from server.",
+                loading: false,
+              });
             };
           };
 
-          loadImage(true);
+          loadImage();
         });
       });
 
@@ -369,11 +361,6 @@ export const ImageAnnotator = ({
     setSelectedTextboxId(null);
     setEditingTextboxId(null);
   }, [currentQuestionId]);
-
-  // Debug lines state changes
-  useEffect(() => {
-    console.log("Lines state changed:", lines);
-  }, [lines]);
 
   // Update transformer when selected textbox changes
   useEffect(() => {
@@ -514,7 +501,6 @@ export const ImageAnnotator = ({
     if (!isEditMode) return;
 
     const stagePos = e.target.getStage()?.getPointerPosition();
-    console.log("Pointer position:", stagePos);
     if (!stagePos) return;
 
     // Convert stage coordinates to canvas coordinates
@@ -586,7 +572,7 @@ export const ImageAnnotator = ({
         strokeWidth: lineWidth,
       };
       const newLines = [...lines, newLine];
-      console.log("Adding new line:", newLine, "Total lines:", newLines.length);
+
       setLines(newLines);
     }
   };
@@ -594,17 +580,10 @@ export const ImageAnnotator = ({
   const handleMouseMove = (
     e: Konva.KonvaEventObject<MouseEvent | TouchEvent>
   ) => {
-    console.log("Mouse move event fired", {
-      isDrawing: isDrawing.current,
-      isEditMode,
-      hasErrors: images.some((img) => img.error),
-      isDragging,
-    });
     if (!isEditMode) return;
 
     const stage = e.target.getStage();
     const stagePoint = stage?.getPointerPosition();
-    console.log("Move pointer position:", stagePoint);
     if (!stagePoint) return;
 
     // Convert stage coordinates to canvas coordinates
@@ -689,7 +668,6 @@ export const ImageAnnotator = ({
   };
 
   const handleMouseUp = () => {
-    console.log("Mouse up event fired");
     isDrawing.current = false;
     setIsDragging(false);
     // Save current state to history after drawing
@@ -1184,12 +1162,6 @@ export const ImageAnnotator = ({
         >
           <Stage
             ref={(stage) => {
-              console.log(
-                "Stage ref set:",
-                stage,
-                "Dimensions:",
-                canvasDimensions
-              );
               stageRef.current = stage;
             }}
             width={canvasDimensions.width}
@@ -1238,7 +1210,6 @@ export const ImageAnnotator = ({
               {lines
                 .filter((line) => line.tool !== "eraser") // Don't render eraser lines
                 .map((line, i) => {
-                  console.log(`Rendering Line ${i}:`, line);
                   return (
                     <Line
                       key={i}
