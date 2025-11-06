@@ -140,8 +140,6 @@ export interface QuestionHoverCardProps {
   currentQuestionId?: string;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  questionScrollAreaRef: React.RefObject<HTMLDivElement | null>;
-  answerScrollAreaRef: React.RefObject<HTMLDivElement | null>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
   userFinishedQuestions?: SelectedFinishedQuestion[];
   bookmarks: SelectedBookmark[];
@@ -151,4 +149,48 @@ export interface QuestionHoverCardProps {
   isBookmarksFetching: boolean;
   isMobileDevice: boolean;
   isBookmarkError: boolean;
+}
+
+export interface BrowseMoreQuestionsProps {
+  displayedData: SelectedQuestion[];
+  bookmarks: SelectedBookmark[];
+  imageTheme: "dark" | "light";
+  isUserSessionPending: boolean;
+  userFinishedQuestions: SelectedFinishedQuestion[];
+  showFinishedQuestionTint: boolean;
+  isUserSessionError: boolean;
+  isBookmarkError: boolean;
+  isValidSession: boolean;
+  isBookmarksFetching: boolean;
+  navigateToQuestion: (questionId: string) => void;
+}
+
+export interface QuestionInspectProps {
+  isOpen: {
+    isOpen: boolean;
+    questionId: string;
+  };
+
+  setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
+  partitionedTopicalData: SelectedQuestion[][] | undefined;
+  bookmarks: SelectedBookmark[];
+  imageTheme: "dark" | "light";
+  currentQuery?: CurrentQuery;
+  isUserSessionPending: boolean;
+  sortBy?: "ascending" | "descending";
+  setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
+  sortParameters?: SortParameters | null;
+  setSortParameters?: Dispatch<SetStateAction<SortParameters | null>>;
+  isValidSession: boolean;
+  isInspectSidebarOpen: boolean;
+  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  isBookmarksFetching: boolean;
+  isBookmarkError: boolean;
+  isFinishedQuestionsFetching: boolean;
+  isFinishedQuestionsError: boolean;
+  userFinishedQuestions: SelectedFinishedQuestion[];
+  listId?: string;
+  BETTER_AUTH_URL: string;
+  showFinishedQuestionTint: boolean;
+  isUserSessionError: boolean;
 }

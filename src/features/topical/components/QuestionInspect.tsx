@@ -8,10 +8,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Dispatch,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Fragment,
   RefObject,
-  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -49,12 +52,11 @@ import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { BestExamHelpUltility } from "./BestExamHelpUltility";
 import {
-  CurrentQuery,
+  BrowseMoreQuestionsProps,
   QuestionHoverCardProps,
-  SelectedBookmark,
   SelectedFinishedQuestion,
   SelectedQuestion,
-  SortParameters,
+  QuestionInspectProps,
 } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import {
@@ -87,206 +89,12 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-
-const QuestionHoverCard = ({
-  question,
-  currentTab,
-  currentQuestionId,
-  setCurrentQuestionId,
-  questionScrollAreaRef,
-  answerScrollAreaRef,
-  setCurrentTabThatContainsQuestion,
-  userFinishedQuestions,
-  bookmarks,
-  isUserSessionPending,
-  isMobileDevice,
-  isValidSession,
-  listId,
-  isBookmarksFetching,
-  isBookmarkError,
-  isInspectSidebarOpen,
-}: QuestionHoverCardProps) => {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isImageError, setIsImageError] = useState(false);
-  const [hoverCardOpen, setHoverCardOpen] = useState(false);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const touchStartTimeRef = useRef<number | null>(null);
-  const isMutatingThisQuestion =
-    useIsMutating({
-      mutationKey: ["all_user_bookmarks", question.id],
-    }) > 0;
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-      touchStartTimeRef.current = null;
-    };
-  }, []);
-  const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
-
-  return (
-    <HoverCard
-      open={
-        ((hoverCardOpen && !isPopoverOpen) ||
-          (isPopoverOpen && !hoverCardBreakPoint)) &&
-        isInspectSidebarOpen
-      }
-    >
-      <HoverCardTrigger asChild>
-        <div
-          className={cn(
-            "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
-            currentQuestionId === question?.id && "!bg-logo-main text-white",
-            userFinishedQuestions?.some(
-              (item) => item.question.id === question?.id
-            ) &&
-              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-          )}
-          onTouchStart={() => {
-            touchStartTimeRef.current = Date.now();
-          }}
-          onMouseEnter={() => {
-            if (touchStartTimeRef.current) {
-              return;
-            }
-            if (isPopoverOpen) {
-              return;
-            }
-            hoverTimeoutRef.current = setTimeout(() => {
-              setHoverCardOpen(true);
-            }, 375);
-          }}
-          onMouseLeave={() => {
-            if (touchStartTimeRef.current) {
-              return;
-            }
-            if (!isPopoverOpen) {
-              setHoverCardOpen(false);
-            }
-            if (hoverTimeoutRef.current) {
-              clearTimeout(hoverTimeoutRef.current);
-              hoverTimeoutRef.current = null;
-            }
-          }}
-          onClick={() => {
-            setCurrentQuestionId(question?.id);
-            questionScrollAreaRef.current?.scrollTo({
-              top: 0,
-              behavior: "instant",
-            });
-            answerScrollAreaRef.current?.scrollTo({
-              top: 0,
-              behavior: "instant",
-            });
-
-            setCurrentTabThatContainsQuestion(currentTab);
-          }}
-        >
-          <p>
-            {extractPaperCode({
-              questionId: question?.id,
-            })}{" "}
-            Q
-            {extractQuestionNumber({
-              questionId: question?.id,
-            })}
-          </p>
-          <BookmarkButton
-            triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
-            popOverTriggerClassName={cn(
-              "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]"
-            )}
-            badgeClassName="hidden"
-            question={question}
-            isBookmarkDisabled={isUserSessionPending}
-            bookmarks={bookmarks}
-            setIsHovering={setHoverCardOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
-            isPopoverOpen={isPopoverOpen}
-            isValidSession={isValidSession}
-            listId={listId}
-            isBookmarksFetching={isBookmarksFetching}
-            isBookmarkError={isBookmarkError}
-            isInView={true}
-          />
-          {isMutatingThisQuestion && (
-            <Badge
-              className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (isUserSessionPending) {
-                  return;
-                }
-                if (isBookmarkError) {
-                  toast.error("Bookmark error. Please refresh the page.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                if (!isValidSession) {
-                  toast.error("Please sign in to bookmark questions.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                setIsPopoverOpen(true);
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              Saving
-              <Loader2 className="animate-spin" />
-            </Badge>
-          )}
-        </div>
-      </HoverCardTrigger>
-      <HoverCardContent
-        className={cn(
-          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
-          currentQuestionId === question?.id && "!hidden"
-        )}
-        side="left"
-        sideOffset={25}
-      >
-        {!isImageLoaded && !isImageError && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-            <Loader />
-          </div>
-        )}
-        {isImageError && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-            <p className="text-red-500 text-sm">Image failed to load</p>
-          </div>
-        )}
-        <img
-          onLoad={() => {
-            setIsImageLoaded(true);
-          }}
-          loading="lazy"
-          onError={() => {
-            setIsImageError(true);
-          }}
-          src={question?.questionImages[0]}
-          alt="Question image"
-          width={400}
-          className="max-h-[70dvh] overflow-hidden object-cover object-top"
-        />
-      </HoverCardContent>
-    </HoverCard>
-  );
-};
+import QuestionPreview from "./QuestionPreview";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import {
+  COLUMN_BREAKPOINTS,
+  MANSONRY_GUTTER_BREAKPOINTS,
+} from "../constants/constants";
 
 const QuestionInspect = ({
   isOpen,
@@ -310,33 +118,9 @@ const QuestionInspect = ({
   isInspectSidebarOpen,
   setIsInspectSidebarOpen,
   userFinishedQuestions,
-}: {
-  isOpen: {
-    isOpen: boolean;
-    questionId: string;
-  };
-
-  setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
-  partitionedTopicalData: SelectedQuestion[][] | undefined;
-  bookmarks: SelectedBookmark[];
-  imageTheme: "dark" | "light";
-  currentQuery?: CurrentQuery;
-  isUserSessionPending: boolean;
-  sortBy?: "ascending" | "descending";
-  setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
-  sortParameters?: SortParameters | null;
-  setSortParameters?: Dispatch<SetStateAction<SortParameters | null>>;
-  isValidSession: boolean;
-  isInspectSidebarOpen: boolean;
-  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  isBookmarksFetching: boolean;
-  isBookmarkError: boolean;
-  isFinishedQuestionsFetching: boolean;
-  isFinishedQuestionsError: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion[];
-  listId?: string;
-  BETTER_AUTH_URL: string;
-}) => {
+  showFinishedQuestionTint,
+  isUserSessionError,
+}: QuestionInspectProps) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
     useState(0);
@@ -378,6 +162,16 @@ const QuestionInspect = ({
   const allQuestions = useMemo(() => {
     return partitionedTopicalData?.flat() ?? [];
   }, [partitionedTopicalData]);
+
+  // Random selection of 20 questions that are not finished (or less if there aren't that many)
+  const displayedData = useMemo(() => {
+    if (!allQuestions || allQuestions.length === 0) {
+      return [];
+    }
+
+    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(20, allQuestions.length));
+  }, [allQuestions]);
 
   const searchResults = useMemo(() => {
     return searchInput.length > 0
@@ -431,7 +225,7 @@ const QuestionInspect = ({
     partitionedTopicalData,
   ]);
 
-  useEffect(() => {
+  const resetScrollPositions = useCallback(() => {
     questionScrollAreaRef.current?.scrollTo({
       top: 0,
       behavior: "instant",
@@ -440,8 +234,21 @@ const QuestionInspect = ({
       top: 0,
       behavior: "instant",
     });
+    bothViewsQuestionScrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+    bothViewsAnswerScrollAreaRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  }, []);
+
+  useEffect(() => {
     setCurrentView("question");
-  }, [currentQuestionId]);
+    // Scroll to top after view change
+    resetScrollPositions();
+  }, [currentQuestionId, resetScrollPositions]);
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
@@ -482,6 +289,36 @@ const QuestionInspect = ({
       }, 0);
     },
     [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
+  );
+
+  const navigateToQuestion = useCallback(
+    (questionId: string) => {
+      resetScrollPositions();
+      const tab = questionId
+        ? partitionedTopicalData?.findIndex((partition) =>
+            partition.some((question) => question.id === questionId)
+          ) ?? 0
+        : 0;
+
+      setCurrentTabThatContainsQuestion(tab);
+      setCurrentTab(tab);
+      setCurrentQuestionId(
+        !questionId ? partitionedTopicalData?.[tab]?.[0]?.id : questionId
+      );
+
+      if (partitionedTopicalData?.[tab] && isVirtualizationReady) {
+        scrollToQuestion({ questionId, tab });
+      }
+    },
+    [
+      partitionedTopicalData,
+      isVirtualizationReady,
+      scrollToQuestion,
+      setCurrentTabThatContainsQuestion,
+      setCurrentTab,
+      setCurrentQuestionId,
+      resetScrollPositions,
+    ]
   );
 
   const ultilityRef = useRef<HTMLDivElement | null>(null);
@@ -526,36 +363,15 @@ const QuestionInspect = ({
       return;
     }
     overflowScrollHandler();
-
-    const tab = isOpen.questionId
-      ? partitionedTopicalData?.findIndex((partition) =>
-          partition.some((question) => question.id === isOpen.questionId)
-        ) ?? 0
-      : 0;
-
-    setCurrentTabThatContainsQuestion(tab);
-    setCurrentTab(tab);
-    setCurrentQuestionId(
-      !isOpen.questionId
-        ? partitionedTopicalData?.[tab]?.[0]?.id
-        : isOpen.questionId
-    );
-
-    if (partitionedTopicalData?.[tab] && isVirtualizationReady) {
-      scrollToQuestion({ questionId: isOpen.questionId, tab });
-    }
-  }, [
-    isOpen,
-    isVirtualizationReady,
-    overflowScrollHandler,
-    partitionedTopicalData,
-    scrollToQuestion,
-  ]);
+    navigateToQuestion(isOpen.questionId);
+  }, [isOpen, overflowScrollHandler, navigateToQuestion]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
+  const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
+  const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleNextQuestion = useCallback(() => {
     if (
@@ -810,6 +626,9 @@ const QuestionInspect = ({
     }
   }, [currentQuestionId, currentQuery]);
 
+  // Construct userSession from isValidSession for compatibility
+  const userSession = { data: { session: isValidSession ? {} : null } };
+
   return (
     <Dialog
       open={isOpen.isOpen}
@@ -1034,8 +853,6 @@ const QuestionInspect = ({
                             currentTab={currentTab}
                             currentQuestionId={currentQuestionId}
                             setCurrentQuestionId={setCurrentQuestionId}
-                            questionScrollAreaRef={questionScrollAreaRef}
-                            answerScrollAreaRef={answerScrollAreaRef}
                             setCurrentTabThatContainsQuestion={
                               setCurrentTabThatContainsQuestion
                             }
@@ -1083,8 +900,6 @@ const QuestionInspect = ({
                             ) ?? 0
                           }
                           currentQuestionId={currentQuestionId}
-                          questionScrollAreaRef={questionScrollAreaRef}
-                          answerScrollAreaRef={answerScrollAreaRef}
                           setCurrentTabThatContainsQuestion={
                             setCurrentTabThatContainsQuestion
                           }
@@ -1431,6 +1246,20 @@ const QuestionInspect = ({
                     currentQuestionId={currentQuestionData?.id}
                     imageTheme={imageTheme}
                   />
+                  <div className="my-6"></div>
+                  <BrowseMoreQuestions
+                    displayedData={displayedData}
+                    bookmarks={bookmarks ?? []}
+                    navigateToQuestion={navigateToQuestion}
+                    imageTheme={imageTheme}
+                    isUserSessionPending={isUserSessionPending}
+                    userFinishedQuestions={userFinishedQuestions ?? []}
+                    showFinishedQuestionTint={showFinishedQuestionTint}
+                    isUserSessionError={isUserSessionError}
+                    isBookmarkError={isBookmarkError}
+                    isValidSession={!!userSession?.data?.session}
+                    isBookmarksFetching={isBookmarksFetching}
+                  />
                 </ScrollArea>
               </div>
               <div
@@ -1473,8 +1302,8 @@ const QuestionInspect = ({
                   currentQuestionData={currentQuestionData}
                   imageTheme={imageTheme}
                   isMobile={isMobile}
-                  questionScrollAreaRef={questionScrollAreaRef}
-                  answerScrollAreaRef={answerScrollAreaRef}
+                  questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
+                  answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
                 />
               </div>
             </div>
@@ -1646,5 +1475,263 @@ const BothViews = ({
         </ScrollArea>
       </ResizablePanel>
     </ResizablePanelGroup>
+  );
+};
+
+const QuestionHoverCard = ({
+  question,
+  currentTab,
+  currentQuestionId,
+  setCurrentQuestionId,
+  setCurrentTabThatContainsQuestion,
+  userFinishedQuestions,
+  bookmarks,
+  isUserSessionPending,
+  isMobileDevice,
+  isValidSession,
+  listId,
+  isBookmarksFetching,
+  isBookmarkError,
+  isInspectSidebarOpen,
+}: QuestionHoverCardProps) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isImageError, setIsImageError] = useState(false);
+  const [hoverCardOpen, setHoverCardOpen] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const touchStartTimeRef = useRef<number | null>(null);
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["all_user_bookmarks", question.id],
+    }) > 0;
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      touchStartTimeRef.current = null;
+    };
+  }, []);
+  const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
+
+  return (
+    <HoverCard
+      open={
+        ((hoverCardOpen && !isPopoverOpen) ||
+          (isPopoverOpen && !hoverCardBreakPoint)) &&
+        isInspectSidebarOpen
+      }
+    >
+      <HoverCardTrigger asChild>
+        <div
+          className={cn(
+            "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
+            currentQuestionId === question?.id && "!bg-logo-main text-white",
+            userFinishedQuestions?.some(
+              (item) => item.question.id === question?.id
+            ) &&
+              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+          )}
+          onTouchStart={() => {
+            touchStartTimeRef.current = Date.now();
+          }}
+          onMouseEnter={() => {
+            if (touchStartTimeRef.current) {
+              return;
+            }
+            if (isPopoverOpen) {
+              return;
+            }
+            hoverTimeoutRef.current = setTimeout(() => {
+              setHoverCardOpen(true);
+            }, 375);
+          }}
+          onMouseLeave={() => {
+            if (touchStartTimeRef.current) {
+              return;
+            }
+            if (!isPopoverOpen) {
+              setHoverCardOpen(false);
+            }
+            if (hoverTimeoutRef.current) {
+              clearTimeout(hoverTimeoutRef.current);
+              hoverTimeoutRef.current = null;
+            }
+          }}
+          onClick={() => {
+            setCurrentQuestionId(question?.id);
+            setCurrentTabThatContainsQuestion(currentTab);
+          }}
+        >
+          <p>
+            {extractPaperCode({
+              questionId: question?.id,
+            })}{" "}
+            Q
+            {extractQuestionNumber({
+              questionId: question?.id,
+            })}
+          </p>
+          <BookmarkButton
+            triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
+            popOverTriggerClassName={cn(
+              "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]"
+            )}
+            badgeClassName="hidden"
+            question={question}
+            isBookmarkDisabled={isUserSessionPending}
+            bookmarks={bookmarks}
+            setIsHovering={setHoverCardOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            isPopoverOpen={isPopoverOpen}
+            isValidSession={isValidSession}
+            listId={listId}
+            isBookmarksFetching={isBookmarksFetching}
+            isBookmarkError={isBookmarkError}
+            isInView={true}
+          />
+          {isMutatingThisQuestion && (
+            <Badge
+              className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (isUserSessionPending) {
+                  return;
+                }
+                if (isBookmarkError) {
+                  toast.error("Bookmark error. Please refresh the page.", {
+                    duration: 2000,
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
+                  });
+                  return;
+                }
+                if (!isValidSession) {
+                  toast.error("Please sign in to bookmark questions.", {
+                    duration: 2000,
+                    position:
+                      isMobileDevice && isPopoverOpen
+                        ? "top-center"
+                        : "bottom-right",
+                  });
+                  return;
+                }
+                setIsPopoverOpen(true);
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              Saving
+              <Loader2 className="animate-spin" />
+            </Badge>
+          )}
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        className={cn(
+          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
+          currentQuestionId === question?.id && "!hidden"
+        )}
+        side="left"
+        sideOffset={25}
+      >
+        {!isImageLoaded && !isImageError && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <Loader />
+          </div>
+        )}
+        {isImageError && (
+          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <p className="text-red-500 text-sm">Image failed to load</p>
+          </div>
+        )}
+        <img
+          onLoad={() => {
+            setIsImageLoaded(true);
+          }}
+          loading="lazy"
+          onError={() => {
+            setIsImageError(true);
+          }}
+          src={question?.questionImages[0]}
+          alt="Question image"
+          width={400}
+          className="max-h-[70dvh] overflow-hidden object-cover object-top"
+        />
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
+
+const BrowseMoreQuestions = ({
+  displayedData,
+  bookmarks,
+  imageTheme,
+  isUserSessionPending,
+  userFinishedQuestions,
+  showFinishedQuestionTint,
+  isUserSessionError,
+  isBookmarkError,
+  isValidSession,
+  isBookmarksFetching,
+  navigateToQuestion,
+}: BrowseMoreQuestionsProps) => {
+  const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
+
+  return (
+    <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full mb-4 cursor-pointer rounded-none !bg-accent border-logo-main/30 sticky top-0 z-10"
+        >
+          <span className="flex items-center gap-2">
+            Browse more questions
+            {isBrowseMoreOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="relative z-0">
+        <ResponsiveMasonry
+          columnsCountBreakPoints={
+            COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
+          }
+          // @ts-expect-error - gutterBreakPoints is not typed by the library
+          gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+        >
+          <Masonry>
+            {displayedData.map((question) =>
+              question?.questionImages.map((imageSrc: string) => (
+                <QuestionPreview
+                  bookmarks={bookmarks ?? []}
+                  question={question}
+                  imageTheme={imageTheme}
+                  isUserSessionPending={isUserSessionPending}
+                  userFinishedQuestions={userFinishedQuestions ?? []}
+                  showFinishedQuestionTint={showFinishedQuestionTint}
+                  isBookmarkError={isUserSessionError || isBookmarkError}
+                  isValidSession={isValidSession}
+                  key={`${question.id}-${imageSrc}`}
+                  isBookmarksFetching={isBookmarksFetching}
+                  imageSrc={imageSrc}
+                  onQuestionClick={() => {
+                    navigateToQuestion(question?.id);
+                  }}
+                />
+              ))
+            )}
+          </Masonry>
+        </ResponsiveMasonry>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };

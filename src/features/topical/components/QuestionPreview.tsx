@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { Dispatch, memo, SetStateAction, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
@@ -19,7 +19,6 @@ import { toast } from "sonner";
 const QuestionPreview = memo(
   ({
     bookmarks,
-    setIsQuestionInspectOpen,
     isBookmarksFetching,
     isUserSessionPending,
     imageSrc,
@@ -30,15 +29,11 @@ const QuestionPreview = memo(
     showFinishedQuestionTint,
     question,
     userFinishedQuestions,
+    onQuestionClick,
   }: {
     bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
-    setIsQuestionInspectOpen: Dispatch<
-      SetStateAction<{
-        isOpen: boolean;
-        questionId: string;
-      }>
-    >;
+
     isBookmarksFetching: boolean;
     imageSrc: string;
     isUserSessionPending: boolean;
@@ -48,6 +43,7 @@ const QuestionPreview = memo(
     showFinishedQuestionTint: boolean;
     imageTheme: "dark" | "light";
     listId?: string;
+    onQuestionClick: () => void;
   }) => {
     const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
@@ -82,9 +78,9 @@ const QuestionPreview = memo(
           "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]",
           imageTheme === "dark" && "!bg-black dark:!border-white"
         )}
-        onClick={() =>
-          setIsQuestionInspectOpen({ isOpen: true, questionId: question.id })
-        }
+        onClick={() => {
+          onQuestionClick();
+        }}
         onMouseEnter={() => setIsHovering(true)}
         onFocus={() => setIsHovering(true)}
         onBlur={() => setIsHovering(false)}

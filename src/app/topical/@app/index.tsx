@@ -1848,7 +1848,12 @@ const TopicalClient = ({
                           bookmarks={bookmarks ?? []}
                           question={question}
                           imageTheme={imageTheme}
-                          setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+                          onQuestionClick={() => {
+                            setIsQuestionInspectOpen({
+                              isOpen: true,
+                              questionId: question.id,
+                            });
+                          }}
                           isUserSessionPending={isUserSessionPending}
                           userFinishedQuestions={userFinishedQuestions ?? []}
                           showFinishedQuestionTint={showFinishedQuestionTint}
@@ -1906,6 +1911,8 @@ const TopicalClient = ({
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
+        showFinishedQuestionTint={showFinishedQuestionTint}
+        isUserSessionError={isUserSessionError}
       />
     </>
   );
