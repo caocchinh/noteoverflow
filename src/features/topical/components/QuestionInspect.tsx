@@ -75,7 +75,7 @@ import Sort from "./Sort";
 import { SortBy } from "./SortBy";
 import { ShareFilter } from "./ShareFilter";
 import { QuestionInformation } from "./QuestionInformation";
-import { InspectImages } from "./InspectImages";
+import { AnnotatableInspectImages } from "./AnnotatableInspectImages";
 import {
   HoverCard,
   HoverCardContent,
@@ -1241,7 +1241,7 @@ const QuestionInspect = ({
                       showSubject={false}
                     />
                   </div>
-                  <InspectImages
+                  <AnnotatableInspectImages
                     imageSource={currentQuestionData?.questionImages ?? []}
                     currentQuestionId={currentQuestionData?.id}
                     imageTheme={imageTheme}
@@ -1258,6 +1258,7 @@ const QuestionInspect = ({
                     userFinishedQuestions={userFinishedQuestions ?? []}
                     showFinishedQuestionTint={showFinishedQuestionTint}
                     isUserSessionError={isUserSessionError}
+                    questionScrollAreaRef={questionScrollAreaRef}
                     isBookmarkError={isBookmarkError}
                     isValidSession={!!userSession?.data?.session}
                     isBookmarksFetching={isBookmarksFetching}
@@ -1281,7 +1282,7 @@ const QuestionInspect = ({
                       showSubject={false}
                     />
                   </div>
-                  <InspectImages
+                  <AnnotatableInspectImages
                     imageSource={currentQuestionData?.answers ?? []}
                     currentQuestionId={currentQuestionData?.id}
                     imageTheme={imageTheme}
@@ -1438,7 +1439,7 @@ const BothViews = ({
           type="always"
           viewportRef={questionScrollAreaRef}
         >
-          <InspectImages
+          <AnnotatableInspectImages
             imageSource={currentQuestionData?.questionImages ?? []}
             currentQuestionId={currentQuestionData?.id}
             imageTheme={imageTheme}
@@ -1469,7 +1470,7 @@ const BothViews = ({
           type="always"
           viewportRef={answerScrollAreaRef}
         >
-          <InspectImages
+          <AnnotatableInspectImages
             imageSource={currentQuestionData?.answers ?? []}
             currentQuestionId={currentQuestionData?.id}
             imageTheme={imageTheme}
@@ -1691,6 +1692,7 @@ const BrowseMoreQuestions = ({
   navigateToQuestion,
   isBrowseMoreOpen,
   setIsBrowseMoreOpen,
+  questionScrollAreaRef,
 }: BrowseMoreQuestionsProps) => {
   return (
     <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
@@ -1698,6 +1700,26 @@ const BrowseMoreQuestions = ({
         <Button
           variant="outline"
           type="button"
+          onClick={(e) => {
+            if (!isBrowseMoreOpen) {
+              setTimeout(() => {
+                const buttonRect = e.currentTarget.getBoundingClientRect();
+                const scrollAreaRect =
+                  questionScrollAreaRef.current?.getBoundingClientRect();
+
+                if (scrollAreaRect && questionScrollAreaRef.current) {
+                  const currentScrollTop =
+                    questionScrollAreaRef.current.scrollTop;
+                  const targetScrollTop =
+                    currentScrollTop + (buttonRect.top - scrollAreaRect.top);
+                  questionScrollAreaRef.current.scrollTo({
+                    top: targetScrollTop,
+                    behavior: "smooth",
+                  });
+                }
+              }, 100);
+            }
+          }}
           className="w-full mb-4 cursor-pointer rounded-none !bg-accent border-logo-main/30 sticky top-0 z-10"
         >
           <span className="flex items-center gap-2">

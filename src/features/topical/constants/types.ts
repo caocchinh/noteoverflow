@@ -161,6 +161,7 @@ export interface BrowseMoreQuestionsProps {
   showFinishedQuestionTint: boolean;
   isUserSessionError: boolean;
   isBookmarkError: boolean;
+  questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   isValidSession: boolean;
   isBookmarksFetching: boolean;
   navigateToQuestion: (questionId: string) => void;
