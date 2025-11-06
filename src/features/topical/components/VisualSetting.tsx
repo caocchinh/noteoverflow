@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectItem,
 } from "@/components/ui/select";
+import { ImageTheme } from "../constants/types";
 
 export default function VisualSetting({
   showFinishedQuestionTint,
@@ -29,8 +30,8 @@ export default function VisualSetting({
   setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
   scrollUpWhenPageChange: boolean;
   setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
-  imageTheme: "dark" | "light";
-  setImageTheme: Dispatch<SetStateAction<"dark" | "light">>;
+  imageTheme: ImageTheme;
+  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
@@ -86,7 +87,7 @@ export default function VisualSetting({
           <Select
             value={imageTheme}
             onValueChange={(value) => {
-              setImageTheme(value as "dark" | "light");
+              setImageTheme(value as ImageTheme);
             }}
           >
             <SelectTrigger>

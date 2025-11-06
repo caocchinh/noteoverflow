@@ -30,6 +30,7 @@ import {
   SelectedBookmark,
   InvalidInputs,
   SelectedPublickBookmark,
+  ImageTheme,
 } from "@/features/topical/constants/types";
 import {
   ChevronLeft,
@@ -250,9 +251,7 @@ export const BookmarkView = ({
   const [selectedPaperType, setSelectedPaperType] = useState<string[] | null>(
     null
   );
-  const [imageTheme, setImageTheme] = useState<"dark" | "light">(
-    DEFAULT_IMAGE_THEME
-  );
+  const [imageTheme, setImageTheme] = useState<ImageTheme>(DEFAULT_IMAGE_THEME);
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
@@ -970,7 +969,12 @@ export const BookmarkView = ({
                     <QuestionPreview
                       bookmarks={bookmarks ?? []}
                       question={question}
-                      setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+                      onQuestionClick={() => {
+                        setIsQuestionInspectOpen({
+                          isOpen: true,
+                          questionId: question.id,
+                        });
+                      }}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={false}
@@ -1220,6 +1224,8 @@ export const BookmarkView = ({
         listId={
           ownerInfo.ownerId === userSession?.data?.user?.id ? listId : undefined
         }
+        showFinishedQuestionTint={showFinishedQuestionTint}
+        isUserSessionError={isUserSessionError}
       />
     </>
   );

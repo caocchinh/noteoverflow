@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { extractQuestionNumber } from "../lib/utils";
+import { ImageTheme } from "../constants/types";
 
 export const InspectImages = ({
   imageSource,
@@ -11,7 +12,7 @@ export const InspectImages = ({
 }: {
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
-  imageTheme: "dark" | "light";
+  imageTheme: ImageTheme;
 }) => {
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;

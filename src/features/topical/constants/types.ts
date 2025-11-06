@@ -35,6 +35,7 @@ export interface FilterData {
 }
 
 export type LayoutStyle = "pagination" | "infinite";
+export type ImageTheme = "dark" | "light";
 
 export type FiltersCache = {
   numberOfColumns: number;
@@ -43,7 +44,7 @@ export type FiltersCache = {
   layoutStyle: LayoutStyle;
   isQuestionCacheEnabled: boolean;
   isStrictModeEnabled: boolean;
-  imageTheme: "dark" | "light";
+  imageTheme: ImageTheme;
   recentlySearchSortedBy: "ascending" | "descending";
   finishedQuestionsSearchSortedBy: "ascending" | "descending";
   numberOfQuestionsPerPage: number;
@@ -141,7 +142,6 @@ export interface QuestionHoverCardProps {
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
-  userFinishedQuestions?: SelectedFinishedQuestion[];
   bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
   isValidSession: boolean;
@@ -149,12 +149,13 @@ export interface QuestionHoverCardProps {
   isBookmarksFetching: boolean;
   isMobileDevice: boolean;
   isBookmarkError: boolean;
+  resetScrollPositions: () => void;
 }
 
 export interface BrowseMoreQuestionsProps {
   displayedData: SelectedQuestion[];
   bookmarks: SelectedBookmark[];
-  imageTheme: "dark" | "light";
+  imageTheme: ImageTheme;
   isUserSessionPending: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
   showFinishedQuestionTint: boolean;
@@ -163,6 +164,8 @@ export interface BrowseMoreQuestionsProps {
   isValidSession: boolean;
   isBookmarksFetching: boolean;
   navigateToQuestion: (questionId: string) => void;
+  isBrowseMoreOpen: boolean;
+  setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface QuestionInspectProps {
@@ -174,7 +177,7 @@ export interface QuestionInspectProps {
   setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
-  imageTheme: "dark" | "light";
+  imageTheme: ImageTheme;
   currentQuery?: CurrentQuery;
   isUserSessionPending: boolean;
   sortBy?: "ascending" | "descending";

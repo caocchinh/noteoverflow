@@ -9,6 +9,7 @@ import {
   SelectedBookmark,
   SelectedFinishedQuestion,
   SelectedQuestion,
+  ImageTheme,
 } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ const QuestionPreview = memo(
     isValidSession: boolean;
     userFinishedQuestions: SelectedFinishedQuestion[];
     showFinishedQuestionTint: boolean;
-    imageTheme: "dark" | "light";
+    imageTheme: ImageTheme;
     listId?: string;
     onQuestionClick: () => void;
   }) => {

@@ -57,6 +57,7 @@ import type {
   SelectedFinishedQuestion,
   SortParameters,
   CurrentQuery,
+  ImageTheme,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -207,9 +208,7 @@ const TopicalClient = ({
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const isOverwriting = useRef(false);
   const [isValidSearchParams, setIsValidSearchParams] = useState(true);
-  const [imageTheme, setImageTheme] = useState<"dark" | "light">(
-    DEFAULT_IMAGE_THEME
-  );
+  const [imageTheme, setImageTheme] = useState<ImageTheme>(DEFAULT_IMAGE_THEME);
   const url = useMemo(() => {
     if (typeof window === "undefined") {
       return "";

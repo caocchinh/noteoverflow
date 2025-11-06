@@ -14,6 +14,7 @@ import type {
   FiltersCache,
   InvalidInputs,
   LayoutStyle,
+  ImageTheme,
 } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -383,7 +384,7 @@ export const syncFilterCacheToLocalStorage = ({
   isPersistantCacheEnabled?: boolean;
   layoutStyle?: LayoutStyle;
   showFinishedQuestionTint?: boolean;
-  imageTheme?: "dark" | "light";
+  imageTheme?: ImageTheme;
   scrollUpWhenPageChange?: boolean;
   showScrollToTopButton?: boolean;
   numberOfColumns?: number;

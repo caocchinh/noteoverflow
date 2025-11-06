@@ -57,6 +57,7 @@ import {
   SelectedFinishedQuestion,
   SelectedQuestion,
   QuestionInspectProps,
+  ImageTheme,
 } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import {
@@ -132,6 +133,7 @@ const QuestionInspect = ({
   const [currentView, setCurrentView] = useState<
     "question" | "answer" | "both"
   >("question");
+  const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
 
   const currentQuestionIndex = useMemo(() => {
     return (
@@ -246,9 +248,7 @@ const QuestionInspect = ({
 
   useEffect(() => {
     setCurrentView("question");
-    // Scroll to top after view change
-    resetScrollPositions();
-  }, [currentQuestionId, resetScrollPositions]);
+  }, [currentQuestionId]);
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
@@ -845,6 +845,7 @@ const QuestionInspect = ({
                       ] && (
                         <Fragment key={virtualItem.index}>
                           <QuestionHoverCard
+                            resetScrollPositions={resetScrollPositions}
                             question={
                               partitionedTopicalData[currentTab][
                                 virtualItem.index
@@ -856,7 +857,6 @@ const QuestionInspect = ({
                             setCurrentTabThatContainsQuestion={
                               setCurrentTabThatContainsQuestion
                             }
-                            userFinishedQuestions={userFinishedQuestions}
                             bookmarks={bookmarks}
                             isUserSessionPending={isUserSessionPending}
                             isValidSession={isValidSession}
@@ -889,6 +889,7 @@ const QuestionInspect = ({
                     >
                       <Fragment key={virtualItem.index}>
                         <QuestionHoverCard
+                          resetScrollPositions={resetScrollPositions}
                           question={searchResults[virtualItem.index]}
                           currentTab={
                             partitionedTopicalData?.findIndex((tab) =>
@@ -903,7 +904,6 @@ const QuestionInspect = ({
                           setCurrentTabThatContainsQuestion={
                             setCurrentTabThatContainsQuestion
                           }
-                          userFinishedQuestions={userFinishedQuestions}
                           bookmarks={bookmarks}
                           isUserSessionPending={isUserSessionPending}
                           isValidSession={isValidSession}
@@ -1252,6 +1252,8 @@ const QuestionInspect = ({
                     bookmarks={bookmarks ?? []}
                     navigateToQuestion={navigateToQuestion}
                     imageTheme={imageTheme}
+                    isBrowseMoreOpen={isBrowseMoreOpen}
+                    setIsBrowseMoreOpen={setIsBrowseMoreOpen}
                     isUserSessionPending={isUserSessionPending}
                     userFinishedQuestions={userFinishedQuestions ?? []}
                     showFinishedQuestionTint={showFinishedQuestionTint}
@@ -1384,7 +1386,7 @@ const BothViews = ({
 }: {
   isMobile: boolean;
   currentQuestionData: SelectedQuestion | undefined;
-  imageTheme: "dark" | "light";
+  imageTheme: ImageTheme;
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
@@ -1484,7 +1486,6 @@ const QuestionHoverCard = ({
   currentQuestionId,
   setCurrentQuestionId,
   setCurrentTabThatContainsQuestion,
-  userFinishedQuestions,
   bookmarks,
   isUserSessionPending,
   isMobileDevice,
@@ -1493,6 +1494,7 @@ const QuestionHoverCard = ({
   isBookmarksFetching,
   isBookmarkError,
   isInspectSidebarOpen,
+  resetScrollPositions,
 }: QuestionHoverCardProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isImageError, setIsImageError] = useState(false);
@@ -1504,6 +1506,11 @@ const QuestionHoverCard = ({
     useIsMutating({
       mutationKey: ["all_user_bookmarks", question.id],
     }) > 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isMutatingFinishedQuestion =
+    useIsMutating({
+      mutationKey: ["user_finished_questions"],
+    }) > 0;
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
@@ -1513,7 +1520,9 @@ const QuestionHoverCard = ({
     };
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
-
+  const queryClient = useQueryClient();
+  const userFinishedQuestions: SelectedFinishedQuestion[] | undefined =
+    queryClient.getQueryData(["user_finished_questions"]);
   return (
     <HoverCard
       open={
@@ -1561,6 +1570,7 @@ const QuestionHoverCard = ({
           onClick={() => {
             setCurrentQuestionId(question?.id);
             setCurrentTabThatContainsQuestion(currentTab);
+            resetScrollPositions();
           }}
         >
           <p>
@@ -1679,9 +1689,9 @@ const BrowseMoreQuestions = ({
   isValidSession,
   isBookmarksFetching,
   navigateToQuestion,
+  isBrowseMoreOpen,
+  setIsBrowseMoreOpen,
 }: BrowseMoreQuestionsProps) => {
-  const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
-
   return (
     <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
       <CollapsibleTrigger asChild>
