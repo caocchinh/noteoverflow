@@ -4,7 +4,7 @@ type SearchParams = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-//❌ Parallel routes (like @app/page.tsx) should NOT export metadata
+//Parallel routes (like @app/page.tsx) should NOT export metadata
 
 export default async function TopicalPage({ searchParams }: SearchParams) {
   return (
