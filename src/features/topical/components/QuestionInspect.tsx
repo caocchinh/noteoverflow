@@ -1157,7 +1157,7 @@ const QuestionInspect = ({
                         className={cn(
                           "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
                           isCalculatorOpen &&
-                            "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+                            "border-logo-main bg-logo-main text-white hover:bg-logo-main/80"
                         )}
                       >
                         Calculator
@@ -1279,7 +1279,6 @@ const QuestionInspect = ({
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={showFinishedQuestionTint}
                       isUserSessionError={isUserSessionError}
-                      questionScrollAreaRef={questionScrollAreaRef}
                       isBookmarkError={isBookmarkError}
                       isValidSession={!!userSession?.data?.session}
                       isBookmarksFetching={isBookmarksFetching}
@@ -1714,33 +1713,24 @@ const BrowseMoreQuestions = ({
   navigateToQuestion,
   isBrowseMoreOpen,
   setIsBrowseMoreOpen,
-  questionScrollAreaRef,
 }: BrowseMoreQuestionsProps) => {
+  const expandedContentRef = useRef<HTMLDivElement>(null);
+
   return (
     <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
       <CollapsibleTrigger asChild>
         <Button
           variant="outline"
           type="button"
-          onClick={(e) => {
-            if (!isBrowseMoreOpen) {
-              setTimeout(() => {
-                const buttonRect = e.currentTarget.getBoundingClientRect();
-                const scrollAreaRect =
-                  questionScrollAreaRef.current?.getBoundingClientRect();
-
-                if (scrollAreaRect && questionScrollAreaRef.current) {
-                  const currentScrollTop =
-                    questionScrollAreaRef.current.scrollTop;
-                  const targetScrollTop =
-                    currentScrollTop + (buttonRect.top - scrollAreaRect.top);
-                  questionScrollAreaRef.current.scrollTo({
-                    top: targetScrollTop,
-                    behavior: "smooth",
-                  });
-                }
-              }, 100);
-            }
+          onClick={() => {
+            setTimeout(() => {
+              if (!isBrowseMoreOpen) {
+                expandedContentRef.current?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }
+            }, 50);
           }}
           className="w-full mb-4 cursor-pointer rounded-none !bg-accent border-logo-main/30 sticky top-0 z-10"
         >
@@ -1754,7 +1744,10 @@ const BrowseMoreQuestions = ({
           </span>
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="relative z-0">
+      <CollapsibleContent
+        ref={expandedContentRef}
+        className="relative z-0 pt-10"
+      >
         <ResponsiveMasonry
           columnsCountBreakPoints={
             COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
