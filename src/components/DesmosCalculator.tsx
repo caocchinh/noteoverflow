@@ -5,6 +5,8 @@ import { Rnd } from "react-rnd";
 // @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
 import Desmos from "desmos";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { Maximize, Shrink, X } from "lucide-react";
 
 interface DesmosCalculatorProps {
   isOpen: boolean;
@@ -14,6 +16,9 @@ interface DesmosCalculatorProps {
 interface CalculatorProps {
   calculatorRef: React.RefObject<HTMLDivElement | null>;
 }
+
+const aspectRatio = 850 / 500;
+const scaleFactor = 0.75;
 
 const Calculator = memo(({ calculatorRef }: CalculatorProps) => {
   console.log("calculatorRef", calculatorRef);
@@ -75,24 +80,27 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
         >
           <div className="flex flex-col h-full">
             {/* Header with close button */}
-            <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Desmos Calculator
               </span>
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={toggleFullscreen}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   title="Exit Fullscreen"
                 >
-                  ▫️
-                </button>
-                <button
+                  <Shrink />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={onClose}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                  title="Close Calculator"
                 >
-                  ✕
-                </button>
+                  <X />
+                </Button>
               </div>
             </div>
             {/* Calculator portal target */}
@@ -104,37 +112,54 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
         <div className={cn(isFullscreen ? "hidden" : "block")}>
           <Rnd
             default={{
-              x: window.innerWidth - 850,
-              y: 100,
-              width: 850,
-              height: 500,
+              x: 0,
+              y: 0,
+              width: Math.min(
+                window.innerWidth * scaleFactor,
+                window.innerHeight * scaleFactor * aspectRatio
+              ),
+              height: Math.min(
+                window.innerHeight * scaleFactor,
+                (window.innerWidth * scaleFactor) / aspectRatio
+              ),
             }}
-            minWidth={400}
-            minHeight={300}
+            minWidth={Math.min(
+              window.innerWidth * (scaleFactor - 0.2),
+              window.innerHeight * (scaleFactor - 0.2) * aspectRatio,
+              300
+            )}
+            minHeight={Math.min(
+              window.innerHeight * (scaleFactor - 0.2),
+              (window.innerWidth * (scaleFactor - 0.2)) / aspectRatio,
+              200
+            )}
             bounds="window"
-            className="z-[999999] border border-gray-300 rounded-lg shadow-2xl bg-white dark:bg-gray-800"
+            className="z-[999999] border border-gray-300 rounded-t-lg shadow-2xl bg-white dark:bg-gray-800"
             dragHandleClassName="calculator-drag-handle"
           >
             <div className="flex flex-col h-full">
               {/* Header with close button */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg calculator-drag-handle cursor-move">
+              <div className="flex items-center justify-between py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg calculator-drag-handle cursor-move">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Desmos Calculator
                 </span>
                 <div className="flex items-center gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={toggleFullscreen}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                     title="Enter Fullscreen"
                   >
-                    ▢
-                  </button>
-                  <button
+                    <Maximize />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={onClose}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    title="Close Calculator"
                   >
-                    ✕
-                  </button>
+                    <X />
+                  </Button>
                 </div>
               </div>
               <div ref={draggableContainerRef} className="flex-1" />
