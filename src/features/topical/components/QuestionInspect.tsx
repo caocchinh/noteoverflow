@@ -48,6 +48,8 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+// @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
+import Desmos from "desmos";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { BestExamHelpUltility } from "./BestExamHelpUltility";
@@ -131,7 +133,7 @@ const QuestionInspect = ({
   const [searchInput, setSearchInput] = useState("");
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
   const [currentView, setCurrentView] = useState<
-    "question" | "answer" | "both"
+    "question" | "answer" | "both" | "calculator"
   >("question");
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
 
@@ -372,6 +374,7 @@ const QuestionInspect = ({
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
+  const calculatorRef = useRef<HTMLDivElement>(null);
 
   const handleNextQuestion = useCallback(() => {
     if (
@@ -617,6 +620,15 @@ const QuestionInspect = ({
   }, [currentQuery, isOpen]);
 
   useEffect(() => {
+    if (currentView === "calculator" && calculatorRef.current) {
+      Desmos.GraphingCalculator(calculatorRef.current);
+      return () => {
+        // Cleanup if needed
+      };
+    }
+  }, [currentView]);
+
+  useEffect(() => {
     if (currentQuery && currentQuestionId) {
       updateSearchParams({
         query: JSON.stringify(currentQuery),
@@ -630,144 +642,131 @@ const QuestionInspect = ({
   const userSession = { data: { session: isValidSession ? {} : null } };
 
   return (
-    <Dialog
-      open={isOpen.isOpen}
-      onOpenChange={(open) => {
-        setIsOpen({
-          isOpen: open,
-          questionId:
-            currentQuestionId ??
-            isOpen.questionId ??
-            partitionedTopicalData?.[0]?.[0]?.id ??
-            "",
-        });
-      }}
-    >
-      <DialogContent
-        className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
-        showCloseButton={false}
-        onKeyDown={(e) => {
-          if (e.key === "e" && !isInputFocused) {
-            e.preventDefault();
-            if (currentView === "question") {
-              setCurrentView("answer");
-            } else {
-              setCurrentView("question");
-            }
-          }
-          if (e.key === "r" && !isInputFocused) {
-            e.preventDefault();
-            setCurrentView("both");
-            setIsInspectSidebarOpen(false);
-          }
-          if (e.key === "t" && !isInputFocused) {
-            e.preventDefault();
-            setIsInspectSidebarOpen(!isInspectSidebarOpen);
-          }
-          if (isCoolDown) return;
-
-          if (
-            (e.key === "ArrowUp" ||
-              ((e.key === "w" || e.key === "a" || e.key === "ArrowLeft") &&
-                !isInputFocused)) &&
-            !isHandlePreviousQuestionDisabled
-          ) {
-            e.preventDefault();
-            handlePreviousQuestion();
-            setIsCoolDown(true);
-            setTimeout(() => {
-              setIsCoolDown(false);
-            }, 25);
-          } else if (
-            (e.key === "ArrowDown" ||
-              ((e.key === "s" || e.key === "d" || e.key === "ArrowRight") &&
-                !isInputFocused)) &&
-            !isHandleNextQuestionDisabled
-          ) {
-            e.preventDefault();
-            handleNextQuestion();
-
-            setIsCoolDown(true);
-            setTimeout(() => {
-              setIsCoolDown(false);
-            }, 25);
-          }
-        }}
-        onKeyUp={() => {
-          setIsCoolDown(false);
+    <>
+      <Dialog
+        open={isOpen.isOpen}
+        onOpenChange={(open) => {
+          setIsOpen({
+            isOpen: open,
+            questionId:
+              currentQuestionId ??
+              isOpen.questionId ??
+              partitionedTopicalData?.[0]?.[0]?.id ??
+              "",
+          });
         }}
       >
-        <DialogHeader className="sr-only">
-          <DialogTitle>Question and answer inspector</DialogTitle>
-          <DialogDescription>
-            View the question and answer for individual questions
-          </DialogDescription>
-        </DialogHeader>
-        <SidebarProvider
-          onOpenChange={setIsInspectSidebarOpen}
-          openMobile={isInspectSidebarOpen}
-          onOpenChangeMobile={setIsInspectSidebarOpen}
-          open={isInspectSidebarOpen}
-          className="!min-h-[inherit]"
-          style={
-            {
-              "--sidebar-width": "299.6px",
-              height: "inherit",
-              minHeight: "inherit !important",
-            } as React.CSSProperties
-          }
-        >
-          <Sidebar
-            className="top-0 !h-full"
-            onTransitionEnd={(e) => {
-              if (e.propertyName == "left") {
-                overflowScrollHandler();
+        <DialogContent
+          className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+          showCloseButton={false}
+          onKeyDown={(e) => {
+            if (e.key === "e" && !isInputFocused) {
+              e.preventDefault();
+              if (currentView === "question") {
+                setCurrentView("answer");
+              } else {
+                setCurrentView("question");
               }
-            }}
+            }
+            if (e.key === "r" && !isInputFocused) {
+              e.preventDefault();
+              setCurrentView("both");
+              setIsInspectSidebarOpen(false);
+            }
+            if (e.key === "t" && !isInputFocused) {
+              e.preventDefault();
+              setIsInspectSidebarOpen(!isInspectSidebarOpen);
+            }
+            if (isCoolDown) return;
+
+            if (
+              (e.key === "ArrowUp" ||
+                ((e.key === "w" || e.key === "a" || e.key === "ArrowLeft") &&
+                  !isInputFocused)) &&
+              !isHandlePreviousQuestionDisabled
+            ) {
+              e.preventDefault();
+              handlePreviousQuestion();
+              setIsCoolDown(true);
+              setTimeout(() => {
+                setIsCoolDown(false);
+              }, 25);
+            } else if (
+              (e.key === "ArrowDown" ||
+                ((e.key === "s" || e.key === "d" || e.key === "ArrowRight") &&
+                  !isInputFocused)) &&
+              !isHandleNextQuestionDisabled
+            ) {
+              e.preventDefault();
+              handleNextQuestion();
+
+              setIsCoolDown(true);
+              setTimeout(() => {
+                setIsCoolDown(false);
+              }, 25);
+            }
+          }}
+          onKeyUp={() => {
+            setIsCoolDown(false);
+          }}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Question and answer inspector</DialogTitle>
+            <DialogDescription>
+              View the question and answer for individual questions
+            </DialogDescription>
+          </DialogHeader>
+          <SidebarProvider
+            onOpenChange={setIsInspectSidebarOpen}
+            openMobile={isInspectSidebarOpen}
+            onOpenChangeMobile={setIsInspectSidebarOpen}
+            open={isInspectSidebarOpen}
+            className="!min-h-[inherit]"
+            style={
+              {
+                "--sidebar-width": "299.6px",
+                height: "inherit",
+                minHeight: "inherit !important",
+              } as React.CSSProperties
+            }
           >
-            <SidebarHeader className="sr-only">Search questions</SidebarHeader>
-            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
-              <FinishedTracker
-                allQuestions={allQuestions}
-                isFinishedQuestionsFetching={isFinishedQuestionsFetching}
-                isValidSession={isValidSession}
-                isUserSessionPending={isUserSessionPending}
-              />
-              <div className="flex items-center justify-start w-full gap-2 px-1 mt-5">
-                <div className="flex items-center gap-2 border-b border-border">
-                  <Search />
-                  <Input
-                    onFocus={() => setIsInputFocused(true)}
-                    onBlur={() => setIsInputFocused(false)}
-                    className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
-                    placeholder="Search questions"
-                    value={searchInput}
-                    tabIndex={-1}
-                    onChange={(e) => {
-                      if (searchInput == "") {
-                        listScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                        });
-                      }
-                      setSearchInput(e.target.value);
-                      if (e.target.value.length === 0 && currentQuestionId) {
-                        setCurrentTab(currentTabThatContainsQuestion);
-                        setTimeout(() => {
-                          scrollToQuestion({
-                            questionId: currentQuestionId,
-                            tab: currentTabThatContainsQuestion,
+            <Sidebar
+              className="top-0 !h-full"
+              onTransitionEnd={(e) => {
+                if (e.propertyName == "left") {
+                  overflowScrollHandler();
+                }
+              }}
+            >
+              <SidebarHeader className="sr-only">
+                Search questions
+              </SidebarHeader>
+              <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
+                <FinishedTracker
+                  allQuestions={allQuestions}
+                  isFinishedQuestionsFetching={isFinishedQuestionsFetching}
+                  isValidSession={isValidSession}
+                  isUserSessionPending={isUserSessionPending}
+                />
+                <div className="flex items-center justify-start w-full gap-2 px-1 mt-5">
+                  <div className="flex items-center gap-2 border-b border-border">
+                    <Search />
+                    <Input
+                      onFocus={() => setIsInputFocused(true)}
+                      onBlur={() => setIsInputFocused(false)}
+                      className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
+                      placeholder="Search questions"
+                      value={searchInput}
+                      tabIndex={-1}
+                      onChange={(e) => {
+                        if (searchInput == "") {
+                          listScrollAreaRef.current?.scrollTo({
+                            top: 0,
                           });
-                        }, 0);
-                      }
-                    }}
-                  />
-                  {searchInput.length > 0 && (
-                    <X
-                      className="text-red-600 hover:text-red-600/80 cursor-pointer"
-                      onClick={() => {
-                        setSearchInput("");
-                        setCurrentTab(currentTabThatContainsQuestion);
-                        if (currentQuestionId) {
+                        }
+                        setSearchInput(e.target.value);
+                        if (e.target.value.length === 0 && currentQuestionId) {
+                          setCurrentTab(currentTabThatContainsQuestion);
                           setTimeout(() => {
                             scrollToQuestion({
                               questionId: currentQuestionId,
@@ -777,83 +776,146 @@ const QuestionInspect = ({
                         }
                       }}
                     />
-                  )}
-                </div>
-                <Button
-                  variant="default"
-                  className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
-                  title="Go to current question"
-                  onClick={() => {
-                    if (searchInput === "") {
-                      setCurrentTab(currentTabThatContainsQuestion);
-                      if (currentQuestionId) {
+                    {searchInput.length > 0 && (
+                      <X
+                        className="text-red-600 hover:text-red-600/80 cursor-pointer"
+                        onClick={() => {
+                          setSearchInput("");
+                          setCurrentTab(currentTabThatContainsQuestion);
+                          if (currentQuestionId) {
+                            setTimeout(() => {
+                              scrollToQuestion({
+                                questionId: currentQuestionId,
+                                tab: currentTabThatContainsQuestion,
+                              });
+                            }, 0);
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
+                  <Button
+                    variant="default"
+                    className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
+                    title="Go to current question"
+                    onClick={() => {
+                      if (searchInput === "") {
+                        setCurrentTab(currentTabThatContainsQuestion);
+                        if (currentQuestionId) {
+                          setTimeout(() => {
+                            scrollToQuestion({
+                              questionId: currentQuestionId,
+                              tab: currentTabThatContainsQuestion,
+                            });
+                          }, 0);
+                        }
+                      } else {
+                        const currentQuestionIndexInSearchResult =
+                          searchResults.findIndex(
+                            (question) => question.id === currentQuestionId
+                          );
+                        if (currentQuestionIndexInSearchResult === -1) {
+                          return;
+                        }
                         setTimeout(() => {
-                          scrollToQuestion({
-                            questionId: currentQuestionId,
-                            tab: currentTabThatContainsQuestion,
-                          });
+                          searchVirtualizer.scrollToIndex(
+                            currentQuestionIndexInSearchResult
+                          );
                         }, 0);
                       }
-                    } else {
-                      const currentQuestionIndexInSearchResult =
-                        searchResults.findIndex(
-                          (question) => question.id === currentQuestionId
-                        );
-                      if (currentQuestionIndexInSearchResult === -1) {
-                        return;
-                      }
-                      setTimeout(() => {
-                        searchVirtualizer.scrollToIndex(
-                          currentQuestionIndexInSearchResult
-                        );
-                      }, 0);
-                    }
-                  }}
-                >
-                  <FastForward />
-                  Current
-                </Button>
-              </div>
-              <ScrollArea
-                className={cn(
-                  "w-full",
-                  searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
-                )}
-                type="always"
-                viewportRef={listScrollAreaRef}
-              >
-                <div
+                    }}
+                  >
+                    <FastForward />
+                    Current
+                  </Button>
+                </div>
+                <ScrollArea
                   className={cn(
-                    "relative w-full",
-                    searchInput.length > 0 && "!hidden"
+                    "w-full",
+                    searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
                   )}
-                  style={{
-                    height: displayVirtualizer.getTotalSize(),
-                  }}
+                  type="always"
+                  viewportRef={listScrollAreaRef}
                 >
-                  {virtualDisplayItems.map((virtualItem) => (
-                    <div
-                      className="absolute top-0 left-0 w-full pr-3"
-                      style={{
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      key={virtualItem.key}
-                      data-index={virtualItem.index}
-                    >
-                      {partitionedTopicalData?.[currentTab][
-                        virtualItem.index
-                      ] && (
+                  <div
+                    className={cn(
+                      "relative w-full",
+                      searchInput.length > 0 && "!hidden"
+                    )}
+                    style={{
+                      height: displayVirtualizer.getTotalSize(),
+                    }}
+                  >
+                    {virtualDisplayItems.map((virtualItem) => (
+                      <div
+                        className="absolute top-0 left-0 w-full pr-3"
+                        style={{
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                        key={virtualItem.key}
+                        data-index={virtualItem.index}
+                      >
+                        {partitionedTopicalData?.[currentTab][
+                          virtualItem.index
+                        ] && (
+                          <Fragment key={virtualItem.index}>
+                            <QuestionHoverCard
+                              resetScrollPositions={resetScrollPositions}
+                              question={
+                                partitionedTopicalData[currentTab][
+                                  virtualItem.index
+                                ]
+                              }
+                              currentTab={currentTab}
+                              currentQuestionId={currentQuestionId}
+                              setCurrentQuestionId={setCurrentQuestionId}
+                              setCurrentTabThatContainsQuestion={
+                                setCurrentTabThatContainsQuestion
+                              }
+                              bookmarks={bookmarks}
+                              isUserSessionPending={isUserSessionPending}
+                              isValidSession={isValidSession}
+                              listId={listId}
+                              isBookmarksFetching={isBookmarksFetching}
+                              isBookmarkError={isBookmarkError}
+                              isInspectSidebarOpen={isInspectSidebarOpen}
+                              isMobileDevice={isMobile}
+                            />
+                            <SelectSeparator />
+                          </Fragment>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    className="relative w-full"
+                    style={{
+                      height: searchVirtualizer.getTotalSize(),
+                    }}
+                  >
+                    {virtualSearchItems.map((virtualItem) => (
+                      <div
+                        className="absolute top-0 left-0 w-full pr-3"
+                        style={{
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                        key={virtualItem.key}
+                        data-index={virtualItem.index}
+                      >
                         <Fragment key={virtualItem.index}>
                           <QuestionHoverCard
                             resetScrollPositions={resetScrollPositions}
-                            question={
-                              partitionedTopicalData[currentTab][
-                                virtualItem.index
-                              ]
+                            question={searchResults[virtualItem.index]}
+                            currentTab={
+                              partitionedTopicalData?.findIndex((tab) =>
+                                tab.some(
+                                  (question) =>
+                                    question.id ===
+                                    searchResults[virtualItem.index]?.id
+                                )
+                              ) ?? 0
                             }
-                            currentTab={currentTab}
                             currentQuestionId={currentQuestionId}
-                            setCurrentQuestionId={setCurrentQuestionId}
                             setCurrentTabThatContainsQuestion={
                               setCurrentTabThatContainsQuestion
                             }
@@ -863,468 +925,454 @@ const QuestionInspect = ({
                             listId={listId}
                             isBookmarksFetching={isBookmarksFetching}
                             isBookmarkError={isBookmarkError}
+                            setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
                             isMobileDevice={isMobile}
                           />
                           <SelectSeparator />
                         </Fragment>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div
-                  className="relative w-full"
-                  style={{
-                    height: searchVirtualizer.getTotalSize(),
-                  }}
-                >
-                  {virtualSearchItems.map((virtualItem) => (
-                    <div
-                      className="absolute top-0 left-0 w-full pr-3"
-                      style={{
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      key={virtualItem.key}
-                      data-index={virtualItem.index}
-                    >
-                      <Fragment key={virtualItem.index}>
-                        <QuestionHoverCard
-                          resetScrollPositions={resetScrollPositions}
-                          question={searchResults[virtualItem.index]}
-                          currentTab={
-                            partitionedTopicalData?.findIndex((tab) =>
-                              tab.some(
-                                (question) =>
-                                  question.id ===
-                                  searchResults[virtualItem.index]?.id
-                              )
-                            ) ?? 0
-                          }
-                          currentQuestionId={currentQuestionId}
-                          setCurrentTabThatContainsQuestion={
-                            setCurrentTabThatContainsQuestion
-                          }
-                          bookmarks={bookmarks}
-                          isUserSessionPending={isUserSessionPending}
-                          isValidSession={isValidSession}
-                          listId={listId}
-                          isBookmarksFetching={isBookmarksFetching}
-                          isBookmarkError={isBookmarkError}
-                          setCurrentQuestionId={setCurrentQuestionId}
-                          isInspectSidebarOpen={isInspectSidebarOpen}
-                          isMobileDevice={isMobile}
-                        />
-                        <SelectSeparator />
-                      </Fragment>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
 
-              <div
-                className={cn(
-                  "flex justify-between items-center w-full",
-                  searchInput.length > 0 && "hidden"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <Button
-                    title="Jump to first tab"
-                    disabled={currentTab === 0}
-                    onClick={() => {
-                      setCurrentTab(0);
-                      if (
-                        currentTabThatContainsQuestion == 0 &&
-                        currentQuestionId
-                      ) {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: 0,
-                        });
-                      } else {
-                        listScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                      }
-                    }}
-                    variant="outline"
-                    className="w-9 h-9 cursor-pointer rounded-[2px]"
-                  >
-                    <ChevronsLeft />
-                  </Button>
-                  <Button
-                    title="Jump to previous tab"
-                    disabled={currentTab === 0}
-                    onClick={() => {
-                      if (
-                        currentTab > 0 &&
-                        currentTab < (partitionedTopicalData?.length ?? 0)
-                      ) {
-                        setCurrentTab(currentTab - 1);
-                      }
-                      if (
-                        currentTabThatContainsQuestion == currentTab - 1 &&
-                        currentQuestionId
-                      ) {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: currentTab - 1,
-                        });
-                      } else {
-                        listScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                      }
-                    }}
-                    variant="outline"
-                    className="w-9 h-9 cursor-pointer rounded-[2px]"
-                  >
-                    <ChevronLeft />
-                  </Button>
-                </div>
-                <JumpToTabButton
-                  tab={currentTab}
-                  onTabChangeCallback={({ tab }) => {
-                    setCurrentTab(tab);
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }}
-                  totalTabs={partitionedTopicalData?.length ?? 0}
-                />
-                <div className="flex items-center gap-2">
-                  <Button
-                    title="Jump to next tab"
-                    disabled={
-                      currentTab === (partitionedTopicalData?.length ?? 1) - 1
-                    }
-                    onClick={() => {
-                      if (
-                        currentTab <
-                        (partitionedTopicalData?.length ?? 0) - 1
-                      ) {
-                        setCurrentTab(currentTab + 1);
-                      }
-                      if (
-                        currentTabThatContainsQuestion == currentTab + 1 &&
-                        currentQuestionId
-                      ) {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: currentTab + 1,
-                        });
-                      } else {
-                        listScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                      }
-                    }}
-                    variant="outline"
-                    className="w-9 h-9 cursor-pointer rounded-[2px]"
-                  >
-                    <ChevronRight />
-                  </Button>
-                  <Button
-                    title="Jump to last tab"
-                    disabled={
-                      currentTab === (partitionedTopicalData?.length ?? 1) - 1
-                    }
-                    onClick={() => {
-                      setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
-                      if (
-                        currentTabThatContainsQuestion ==
-                          (partitionedTopicalData?.length ?? 1) - 1 &&
-                        currentQuestionId
-                      ) {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: (partitionedTopicalData?.length ?? 1) - 1,
-                        });
-                      } else {
-                        listScrollAreaRef.current?.scrollTo({
-                          top: 0,
-                          behavior: "instant",
-                        });
-                      }
-                    }}
-                    variant="outline"
-                    className="w-9 h-9 cursor-pointer rounded-[2px]"
-                  >
-                    <ChevronsRight />
-                  </Button>
-                </div>
-              </div>
-            </SidebarContent>
-            <SidebarRail />
-          </Sidebar>
-          <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
-            <div
-              className="w-full h-[inherit] flex flex-col gap-2 items-center justify-start relative"
-              ref={sideBarInsetRef}
-            >
-              {isUltilityOverflowingRight && (
-                <Button
-                  className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-[200]"
-                  title="Move right"
-                  onClick={() => {
-                    if (ultilityHorizontalScrollBarRef.current) {
-                      ultilityHorizontalScrollBarRef.current.scrollBy({
-                        left: 200,
-                        behavior: "smooth",
-                      });
-                    }
-                  }}
-                >
-                  <ChevronRight size={5} />
-                </Button>
-              )}
-              {isUltilityOverflowingLeft && (
-                <Button
-                  className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
-                  title="Move left"
-                  onClick={() => {
-                    if (ultilityHorizontalScrollBarRef.current) {
-                      ultilityHorizontalScrollBarRef.current.scrollBy({
-                        left: -200,
-                        behavior: "smooth",
-                      });
-                    }
-                  }}
-                >
-                  <ChevronLeft size={5} />
-                </Button>
-              )}
-              <ScrollArea
-                className="w-full whitespace-nowrap"
-                viewPortOnScroll={overflowScrollHandler}
-                viewportRef={ultilityHorizontalScrollBarRef}
-              >
                 <div
-                  className="flex pt-1 items-stretch w-max justify-center gap-4 mb-2 relative"
-                  ref={ultilityRef}
+                  className={cn(
+                    "flex justify-between items-center w-full",
+                    searchInput.length > 0 && "hidden"
+                  )}
                 >
-                  <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
+                  <div className="flex items-center gap-2">
                     <Button
-                      onClick={() => setCurrentView("question")}
-                      className={cn(
-                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                        currentView === "question" &&
-                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                      )}
-                    >
-                      Question
-                    </Button>
-                    <Button
-                      onClick={() => setCurrentView("answer")}
-                      className={cn(
-                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                        currentView === "answer" &&
-                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                      )}
-                    >
-                      Answer
-                    </Button>
-                    <Button
+                      title="Jump to first tab"
+                      disabled={currentTab === 0}
                       onClick={() => {
-                        setCurrentView("both");
-                        setIsInspectSidebarOpen(false);
+                        setCurrentTab(0);
+                        if (
+                          currentTabThatContainsQuestion == 0 &&
+                          currentQuestionId
+                        ) {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: 0,
+                          });
+                        } else {
+                          listScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
                       }}
-                      className={cn(
-                        "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                        currentView === "both" &&
-                          "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
-                      )}
-                    >
-                      Both
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
                       variant="outline"
-                      className="w-9 rounded-sm cursor-pointer"
-                      onClick={handleNextQuestion}
-                      title="Next question"
-                      disabled={isHandleNextQuestionDisabled}
+                      className="w-9 h-9 cursor-pointer rounded-[2px]"
                     >
-                      <ChevronDown />
+                      <ChevronsLeft />
                     </Button>
                     <Button
+                      title="Jump to previous tab"
+                      disabled={currentTab === 0}
+                      onClick={() => {
+                        if (
+                          currentTab > 0 &&
+                          currentTab < (partitionedTopicalData?.length ?? 0)
+                        ) {
+                          setCurrentTab(currentTab - 1);
+                        }
+                        if (
+                          currentTabThatContainsQuestion == currentTab - 1 &&
+                          currentQuestionId
+                        ) {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: currentTab - 1,
+                          });
+                        } else {
+                          listScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
                       variant="outline"
-                      className="w-9 rounded-sm cursor-pointer"
-                      onClick={handlePreviousQuestion}
-                      title="Previous question"
-                      disabled={isHandlePreviousQuestionDisabled}
+                      className="w-9 h-9 cursor-pointer rounded-[2px]"
                     >
-                      <ChevronUp />
+                      <ChevronLeft />
                     </Button>
                   </div>
-                  {currentQuestionData && (
-                    <QuestionInspectFinishedCheckbox
-                      finishedQuestions={userFinishedQuestions}
-                      question={currentQuestionData}
-                      isFinishedQuestionDisabled={isUserSessionPending}
-                      isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                      isFinishedQuestionError={isFinishedQuestionsError}
-                      isValidSession={isValidSession}
-                    />
-                  )}
-                  {currentQuestionData && (
-                    <BookmarkButton
-                      triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
-                      badgeClassName="h-[35px] min-h-[35px] !static"
-                      question={currentQuestionData}
-                      isBookmarkDisabled={isUserSessionPending}
-                      listId={listId}
-                      bookmarks={bookmarks}
-                      popOverAlign="start"
-                      isValidSession={isValidSession}
-                      isBookmarksFetching={isBookmarksFetching}
-                      isBookmarkError={isBookmarkError}
-                      isInView={true}
-                    />
-                  )}
+                  <JumpToTabButton
+                    tab={currentTab}
+                    onTabChangeCallback={({ tab }) => {
+                      setCurrentTab(tab);
+                      listScrollAreaRef.current?.scrollTo({
+                        top: 0,
+                        behavior: "instant",
+                      });
+                    }}
+                    totalTabs={partitionedTopicalData?.length ?? 0}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      title="Jump to next tab"
+                      disabled={
+                        currentTab === (partitionedTopicalData?.length ?? 1) - 1
+                      }
+                      onClick={() => {
+                        if (
+                          currentTab <
+                          (partitionedTopicalData?.length ?? 0) - 1
+                        ) {
+                          setCurrentTab(currentTab + 1);
+                        }
+                        if (
+                          currentTabThatContainsQuestion == currentTab + 1 &&
+                          currentQuestionId
+                        ) {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: currentTab + 1,
+                          });
+                        } else {
+                          listScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      className="w-9 h-9 cursor-pointer rounded-[2px]"
+                    >
+                      <ChevronRight />
+                    </Button>
+                    <Button
+                      title="Jump to last tab"
+                      disabled={
+                        currentTab === (partitionedTopicalData?.length ?? 1) - 1
+                      }
+                      onClick={() => {
+                        setCurrentTab(
+                          (partitionedTopicalData?.length ?? 1) - 1
+                        );
+                        if (
+                          currentTabThatContainsQuestion ==
+                            (partitionedTopicalData?.length ?? 1) - 1 &&
+                          currentQuestionId
+                        ) {
+                          scrollToQuestion({
+                            questionId: currentQuestionId,
+                            tab: (partitionedTopicalData?.length ?? 1) - 1,
+                          });
+                        } else {
+                          listScrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      className="w-9 h-9 cursor-pointer rounded-[2px]"
+                    >
+                      <ChevronsRight />
+                    </Button>
+                  </div>
+                </div>
+              </SidebarContent>
+              <SidebarRail />
+            </Sidebar>
+            <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
+              <div
+                className="w-full h-[inherit] flex flex-col gap-2 items-center justify-start relative"
+                ref={sideBarInsetRef}
+              >
+                {isUltilityOverflowingRight && (
                   <Button
-                    variant="outline"
-                    className="cursor-pointer"
-                    onClick={() =>
-                      setIsInspectSidebarOpen(!isInspectSidebarOpen)
-                    }
+                    className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-[200]"
+                    title="Move right"
+                    onClick={() => {
+                      if (ultilityHorizontalScrollBarRef.current) {
+                        ultilityHorizontalScrollBarRef.current.scrollBy({
+                          left: 200,
+                          behavior: "smooth",
+                        });
+                      }
+                    }}
                   >
-                    {isInspectSidebarOpen ? "Hide" : "Show"}
-                    <PanelsTopLeft />
+                    <ChevronRight size={5} />
                   </Button>
-                  <BestExamHelpUltility question={currentQuestionData} />
+                )}
+                {isUltilityOverflowingLeft && (
+                  <Button
+                    className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+                    title="Move left"
+                    onClick={() => {
+                      if (ultilityHorizontalScrollBarRef.current) {
+                        ultilityHorizontalScrollBarRef.current.scrollBy({
+                          left: -200,
+                          behavior: "smooth",
+                        });
+                      }
+                    }}
+                  >
+                    <ChevronLeft size={5} />
+                  </Button>
+                )}
+                <ScrollArea
+                  className="w-full whitespace-nowrap"
+                  viewPortOnScroll={overflowScrollHandler}
+                  viewportRef={ultilityHorizontalScrollBarRef}
+                >
+                  <div
+                    className="flex pt-1 items-stretch w-max justify-center gap-4 mb-2 relative"
+                    ref={ultilityRef}
+                  >
+                    <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
+                      <Button
+                        onClick={() => setCurrentView("question")}
+                        className={cn(
+                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                          currentView === "question" &&
+                            "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                        )}
+                      >
+                        Question
+                      </Button>
+                      <Button
+                        onClick={() => setCurrentView("answer")}
+                        className={cn(
+                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                          currentView === "answer" &&
+                            "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                        )}
+                      >
+                        Answer
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setCurrentView("both");
+                          setIsInspectSidebarOpen(false);
+                        }}
+                        className={cn(
+                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                          currentView === "both" &&
+                            "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                        )}
+                      >
+                        Both
+                      </Button>
+                      <Button
+                        onClick={() => setCurrentView("calculator")}
+                        className={cn(
+                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                          currentView === "calculator" &&
+                            "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                        )}
+                      >
+                        Desmos
+                      </Button>
+                    </div>
 
-                  {sortBy && setSortBy && (
-                    <SortBy sortBy={sortBy} setSortBy={setSortBy} />
-                  )}
-                  {sortParameters && setSortParameters && (
-                    <Sort
-                      sortParameters={sortParameters}
-                      setSortParameters={setSortParameters}
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="w-9 rounded-sm cursor-pointer"
+                        onClick={handleNextQuestion}
+                        title="Next question"
+                        disabled={isHandleNextQuestionDisabled}
+                      >
+                        <ChevronDown />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-9 rounded-sm cursor-pointer"
+                        onClick={handlePreviousQuestion}
+                        title="Previous question"
+                        disabled={isHandlePreviousQuestionDisabled}
+                      >
+                        <ChevronUp />
+                      </Button>
+                    </div>
+                    {currentQuestionData && (
+                      <QuestionInspectFinishedCheckbox
+                        finishedQuestions={userFinishedQuestions}
+                        question={currentQuestionData}
+                        isFinishedQuestionDisabled={isUserSessionPending}
+                        isFinishedQuestionFetching={isFinishedQuestionsFetching}
+                        isFinishedQuestionError={isFinishedQuestionsError}
+                        isValidSession={isValidSession}
+                      />
+                    )}
+                    {currentQuestionData && (
+                      <BookmarkButton
+                        triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
+                        badgeClassName="h-[35px] min-h-[35px] !static"
+                        question={currentQuestionData}
+                        isBookmarkDisabled={isUserSessionPending}
+                        listId={listId}
+                        bookmarks={bookmarks}
+                        popOverAlign="start"
+                        isValidSession={isValidSession}
+                        isBookmarksFetching={isBookmarksFetching}
+                        isBookmarkError={isBookmarkError}
+                        isInView={true}
+                      />
+                    )}
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() =>
+                        setIsInspectSidebarOpen(!isInspectSidebarOpen)
+                      }
+                    >
+                      {isInspectSidebarOpen ? "Hide" : "Show"}
+                      <PanelsTopLeft />
+                    </Button>
+                    <BestExamHelpUltility question={currentQuestionData} />
+
+                    {sortBy && setSortBy && (
+                      <SortBy sortBy={sortBy} setSortBy={setSortBy} />
+                    )}
+                    {sortParameters && setSortParameters && (
+                      <Sort
+                        sortParameters={sortParameters}
+                        setSortParameters={setSortParameters}
+                        isDisabled={false}
+                      />
+                    )}
+                    <ShareFilter
+                      type="question"
                       isDisabled={false}
+                      url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(
+                        currentQuestionData?.id ?? ""
+                      )}`}
                     />
-                  )}
-                  <ShareFilter
-                    type="question"
-                    isDisabled={false}
-                    url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(
-                      currentQuestionData?.id ?? ""
-                    )}`}
+                  </div>
+                  <ScrollBar
+                    orientation="horizontal"
+                    className="[&_.bg-border]:bg-transparent"
                   />
-                </div>
-                <ScrollBar
-                  orientation="horizontal"
-                  className="[&_.bg-border]:bg-transparent"
-                />
-              </ScrollArea>
+                </ScrollArea>
 
-              <div
-                className={cn(
-                  currentView === "question" ? "block w-full" : "hidden"
-                )}
-              >
-                <ScrollArea
-                  className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
-                  type="always"
-                  viewportRef={questionScrollAreaRef}
+                <div
+                  className={cn(
+                    currentView === "question" ? "block w-full" : "hidden"
+                  )}
                 >
-                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                  <ScrollArea
+                    className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                    type="always"
+                    viewportRef={questionScrollAreaRef}
+                  >
+                    <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                      <QuestionInformation
+                        question={currentQuestionData}
+                        showCurriculumn={false}
+                        showSubject={false}
+                      />
+                    </div>
+                    <AnnotatableInspectImages
+                      imageSource={currentQuestionData?.questionImages ?? []}
+                      currentQuestionId={currentQuestionData?.id}
+                      imageTheme={imageTheme}
+                    />
+                    <div className="my-6"></div>
+                    <BrowseMoreQuestions
+                      displayedData={displayedData}
+                      bookmarks={bookmarks ?? []}
+                      navigateToQuestion={navigateToQuestion}
+                      imageTheme={imageTheme}
+                      isBrowseMoreOpen={isBrowseMoreOpen}
+                      setIsBrowseMoreOpen={setIsBrowseMoreOpen}
+                      isUserSessionPending={isUserSessionPending}
+                      userFinishedQuestions={userFinishedQuestions ?? []}
+                      showFinishedQuestionTint={showFinishedQuestionTint}
+                      isUserSessionError={isUserSessionError}
+                      questionScrollAreaRef={questionScrollAreaRef}
+                      isBookmarkError={isBookmarkError}
+                      isValidSession={!!userSession?.data?.session}
+                      isBookmarksFetching={isBookmarksFetching}
+                    />
+                  </ScrollArea>
+                </div>
+                <div
+                  className={cn(
+                    currentView === "answer" ? "block w-full" : "hidden"
+                  )}
+                >
+                  <ScrollArea
+                    className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                    type="always"
+                    viewportRef={answerScrollAreaRef}
+                  >
+                    <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                      <QuestionInformation
+                        question={currentQuestionData}
+                        showCurriculumn={false}
+                        showSubject={false}
+                      />
+                    </div>
+                    <AnnotatableInspectImages
+                      imageSource={currentQuestionData?.answers ?? []}
+                      currentQuestionId={currentQuestionData?.id}
+                      imageTheme={imageTheme}
+                    />
+                  </ScrollArea>
+                </div>
+                <div
+                  className={cn(
+                    currentView === "both" ? "block w-full" : "hidden"
+                  )}
+                >
+                  <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
                     <QuestionInformation
                       question={currentQuestionData}
                       showCurriculumn={false}
                       showSubject={false}
                     />
                   </div>
-                  <AnnotatableInspectImages
-                    imageSource={currentQuestionData?.questionImages ?? []}
-                    currentQuestionId={currentQuestionData?.id}
+                  <BothViews
+                    currentQuestionData={currentQuestionData}
                     imageTheme={imageTheme}
-                  />
-                  <div className="my-6"></div>
-                  <BrowseMoreQuestions
-                    displayedData={displayedData}
-                    bookmarks={bookmarks ?? []}
-                    navigateToQuestion={navigateToQuestion}
-                    imageTheme={imageTheme}
-                    isBrowseMoreOpen={isBrowseMoreOpen}
-                    setIsBrowseMoreOpen={setIsBrowseMoreOpen}
-                    isUserSessionPending={isUserSessionPending}
-                    userFinishedQuestions={userFinishedQuestions ?? []}
-                    showFinishedQuestionTint={showFinishedQuestionTint}
-                    isUserSessionError={isUserSessionError}
-                    questionScrollAreaRef={questionScrollAreaRef}
-                    isBookmarkError={isBookmarkError}
-                    isValidSession={!!userSession?.data?.session}
-                    isBookmarksFetching={isBookmarksFetching}
-                  />
-                </ScrollArea>
-              </div>
-              <div
-                className={cn(
-                  currentView === "answer" ? "block w-full" : "hidden"
-                )}
-              >
-                <ScrollArea
-                  className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
-                  type="always"
-                  viewportRef={answerScrollAreaRef}
-                >
-                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <QuestionInformation
-                      question={currentQuestionData}
-                      showCurriculumn={false}
-                      showSubject={false}
-                    />
-                  </div>
-                  <AnnotatableInspectImages
-                    imageSource={currentQuestionData?.answers ?? []}
-                    currentQuestionId={currentQuestionData?.id}
-                    imageTheme={imageTheme}
-                  />
-                </ScrollArea>
-              </div>
-              <div
-                className={cn(
-                  currentView === "both" ? "block w-full" : "hidden"
-                )}
-              >
-                <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
-                  <QuestionInformation
-                    question={currentQuestionData}
-                    showCurriculumn={false}
-                    showSubject={false}
+                    isMobile={isMobile}
+                    questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
+                    answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
                   />
                 </div>
-                <BothViews
-                  currentQuestionData={currentQuestionData}
-                  imageTheme={imageTheme}
-                  isMobile={isMobile}
-                  questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
-                  answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
-                />
+                <div
+                  className={cn(
+                    currentView === "calculator" ? "block w-full" : "hidden"
+                  )}
+                >
+                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+                    <QuestionInformation
+                      question={currentQuestionData}
+                      showCurriculumn={false}
+                      showSubject={false}
+                    />
+                  </div>
+                  <div className="h-[76dvh] w-full p-4">
+                    <div
+                      ref={calculatorRef}
+                      className="w-full h-full border-0 rounded-lg"
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <Button
-              className="w-full h-7 flex items-center justify-center cursor-pointer"
-              variant="outline"
-              onClick={() => {
-                if (currentQuestionId) {
-                  setIsOpen({ isOpen: false, questionId: currentQuestionId });
-                }
-              }}
-            >
-              Close
-            </Button>
-          </SidebarInset>
-        </SidebarProvider>
-      </DialogContent>
-    </Dialog>
+              <Button
+                className="w-full h-7 flex items-center justify-center cursor-pointer"
+                variant="outline"
+                onClick={() => {
+                  if (currentQuestionId) {
+                    setIsOpen({ isOpen: false, questionId: currentQuestionId });
+                  }
+                }}
+              >
+                Close
+              </Button>
+            </SidebarInset>
+          </SidebarProvider>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

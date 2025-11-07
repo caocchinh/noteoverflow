@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Stage,
   Layer,
@@ -23,8 +23,9 @@ import {
   Type,
   ZoomIn,
   ZoomOut,
-  Maximize,
   MousePointer,
+  ArrowRight,
+  Minus as LineIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Konva from "konva";
@@ -93,7 +94,7 @@ export const ImageAnnotator = ({
     }))
   );
   const [tool, setTool] = useState<
-    "pen" | "eraser" | "highlight" | "textbox" | "select"
+    "pen" | "eraser" | "highlight" | "textbox" | "select" | "line" | "arrow"
   >("pen");
   const [lines, setLines] = useState<Line[]>([]);
   const [textboxes, setTextboxes] = useState<Textbox[]>([]);
@@ -112,11 +113,11 @@ export const ImageAnnotator = ({
     width: 0,
     height: 0,
   });
+  const [previewLine, setPreviewLine] = useState<Line | null>(null);
 
   // Zoom and pan state
   const [scale, setScale] = useState(1);
   const [stagePosition, setStagePosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [stagePositionAtDragStart, setStagePositionAtDragStart] = useState({
     x: 0,
@@ -128,10 +129,12 @@ export const ImageAnnotator = ({
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const isDrawing = useRef(false);
+  const isDragging = useRef(false);
   const stageRef = useRef<Konva.Stage>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const textEditInputRef = useRef<HTMLInputElement>(null);
+  const currentLineRef = useRef<Line | null>(null);
 
   // Calculate dimensions to fit container and stack images vertically
   const calculateDimensions = useCallback(
@@ -214,36 +217,17 @@ export const ImageAnnotator = ({
 
   // Zoom functions
   const handleZoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev * 1.2, 5)); // Max zoom 5x
+    setScale((prev) => Math.min(prev * 1.2, 10)); // Max zoom 10x
   }, []);
 
   const handleZoomOut = useCallback(() => {
-    setScale((prev) => Math.max(prev / 1.2, 0.1)); // Min zoom 0.1x
+    setScale((prev) => Math.max(prev / 1.2, 1)); // Min zoom 1x (no zoom out beyond original size)
   }, []);
 
   const handleZoomReset = useCallback(() => {
     setScale(1);
     setStagePosition({ x: 0, y: 0 });
   }, []);
-
-  const handleZoomToFit = useCallback(() => {
-    if (
-      !containerRef.current ||
-      canvasDimensions.width === 0 ||
-      canvasDimensions.height === 0
-    )
-      return;
-
-    const containerWidth = containerRef.current.offsetWidth - 32;
-    const containerHeight = window.innerHeight * 0.8;
-
-    const scaleX = containerWidth / canvasDimensions.width;
-    const scaleY = containerHeight / canvasDimensions.height;
-    const newScale = Math.min(scaleX, scaleY, 1); // Don't zoom in beyond 100%
-
-    setScale(newScale);
-    setStagePosition({ x: 0, y: 0 });
-  }, [canvasDimensions]);
 
   // Wheel zoom handler
   const handleWheel = useCallback(
@@ -253,25 +237,35 @@ export const ImageAnnotator = ({
       const stage = stageRef.current;
       if (!stage) return;
 
-      const pointer = stage.getPointerPosition();
-      if (!pointer) return;
+      if (e.evt.ctrlKey) {
+        // Zoom when ctrl key is pressed (deliberate zoom gesture)
+        const pointer = stage.getPointerPosition();
+        if (!pointer) return;
 
-      const zoomFactor = e.evt.deltaY > 0 ? 0.9 : 1.1;
-      const newScale = Math.min(Math.max(scale * zoomFactor, 0.1), 5);
+        const zoomFactor = e.evt.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.min(Math.max(scale * zoomFactor, 1), 10);
 
-      // Calculate new position to zoom towards cursor
-      const mousePointTo = {
-        x: (pointer.x - stagePosition.x) / scale,
-        y: (pointer.y - stagePosition.y) / scale,
-      };
+        // Calculate new position to zoom towards cursor
+        const mousePointTo = {
+          x: (pointer.x - stagePosition.x) / scale,
+          y: (pointer.y - stagePosition.y) / scale,
+        };
 
-      const newPos = {
-        x: pointer.x - mousePointTo.x * newScale,
-        y: pointer.y - mousePointTo.y * newScale,
-      };
+        const newPos = {
+          x: pointer.x - mousePointTo.x * newScale,
+          y: pointer.y - mousePointTo.y * newScale,
+        };
 
-      setScale(newScale);
-      setStagePosition(newPos);
+        setScale(newScale);
+        setStagePosition(newPos);
+      } else {
+        const newPos = {
+          x: stagePosition.x - e.evt.deltaX,
+          y: stagePosition.y - e.evt.deltaY,
+        };
+
+        setStagePosition(newPos);
+      }
     },
     [scale, stagePosition]
   );
@@ -293,11 +287,10 @@ export const ImageAnnotator = ({
                 "Image loading timed out. Please check your internet connection.",
               loading: false,
             });
-          }, 10000);
+          }, 30000);
 
           const loadImage = () => {
             const img = new Image();
-
             img.src = src;
 
             img.onload = () => {
@@ -534,6 +527,34 @@ export const ImageAnnotator = ({
       return;
     }
 
+    // Handle line/arrow creation - start drawing
+    if (tool === "line" || tool === "arrow") {
+      const getLineProperties = () => {
+        switch (tool) {
+          case "line":
+            return { color: penColor, strokeWidth: penSize };
+          case "arrow":
+            return { color: highlightColor, strokeWidth: highlightSize };
+          default:
+            return { color: penColor, strokeWidth: penSize };
+        }
+      };
+
+      const { color: lineColor, strokeWidth: lineWidth } = getLineProperties();
+
+      const newLine = {
+        tool,
+        points: [pos.x, pos.y, pos.x, pos.y], // Start and end points (same initially)
+        color: lineColor,
+        strokeWidth: lineWidth,
+      };
+
+      currentLineRef.current = newLine;
+      setPreviewLine(newLine);
+      isDrawing.current = true;
+      return;
+    }
+
     // Handle clicking outside textboxes to deselect and finish editing
     if (selectedTextboxId) {
       setSelectedTextboxId(null);
@@ -543,7 +564,7 @@ export const ImageAnnotator = ({
     // Start dragging if space key is held or if not drawing
     const isSpacePressed = e.evt instanceof MouseEvent && e.evt.ctrlKey;
     if (isSpacePressed || tool === "select") {
-      setIsDragging(true);
+      isDragging.current = true;
       setDragStartPosition(stagePos);
       setStagePositionAtDragStart(stagePosition);
       return;
@@ -593,7 +614,7 @@ export const ImageAnnotator = ({
     };
 
     // Handle dragging
-    if (isDragging) {
+    if (isDragging.current) {
       const dx = stagePoint.x - dragStartPosition.x;
       const dy = stagePoint.y - dragStartPosition.y;
       setStagePosition({
@@ -604,6 +625,22 @@ export const ImageAnnotator = ({
     }
 
     if (!isDrawing.current) return;
+
+    // Handle line/arrow drawing - update end point
+    if ((tool === "line" || tool === "arrow") && currentLineRef.current) {
+      const updatedLine = {
+        ...currentLineRef.current,
+        points: [
+          currentLineRef.current.points[0],
+          currentLineRef.current.points[1],
+          point.x,
+          point.y,
+        ],
+      };
+      currentLineRef.current = updatedLine;
+      setPreviewLine(updatedLine);
+      return;
+    }
 
     if (tool === "eraser") {
       // Eraser logic: remove lines that intersect with the eraser
@@ -669,12 +706,31 @@ export const ImageAnnotator = ({
 
   const handleMouseUp = () => {
     isDrawing.current = false;
-    setIsDragging(false);
-    // Save current state to history after drawing
-    setLines((currentLines) => {
-      saveToHistory(currentLines);
-      return currentLines;
-    });
+    isDragging.current = false;
+
+    // Finalize line/arrow if one was being drawn
+    if (currentLineRef.current) {
+      // Only save if the line has some length (not just a point)
+      const [x1, y1, x2, y2] = currentLineRef.current.points;
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      if (length > 1) {
+        // Minimum length threshold - add to lines array
+        const lineToAdd = currentLineRef.current;
+        setLines((currentLines) => {
+          const finalLines = [...currentLines, lineToAdd];
+          saveToHistory(finalLines);
+          return finalLines;
+        });
+      }
+      currentLineRef.current = null;
+      setPreviewLine(null);
+    } else {
+      // Save current state to history after drawing (for pen/highlight)
+      setLines((currentLines) => {
+        saveToHistory(currentLines);
+        return currentLines;
+      });
+    }
   };
 
   const handleClear = () => {
@@ -690,15 +746,27 @@ export const ImageAnnotator = ({
   const handleExport = () => {
     if (!stageRef.current) return;
 
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
-    const link = document.createElement("a");
-    link.download = `annotated-${currentQuestionId || "question"}-combined.png`;
-    link.href = uri;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+      const link = document.createElement("a");
+      link.download = `annotated-${
+        currentQuestionId || "question"
+      }-combined.png`;
+      link.href = uri;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-    toast.success("Combined image exported successfully!", { duration: 2000 });
+      toast.success("Combined image exported successfully!", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error(
+        "Export failed due to image loading restrictions. Try saving annotations instead.",
+        { duration: 3000 }
+      );
+    }
   };
 
   const handleSaveAnnotation = () => {
@@ -887,6 +955,30 @@ export const ImageAnnotator = ({
               >
                 <Type className="h-4 w-4" />
               </Button>
+              <Button
+                type="button"
+                variant={tool === "line" ? "default" : "ghost"}
+                className={cn(
+                  "h-8 w-8 cursor-pointer",
+                  tool === "line" && "bg-primary"
+                )}
+                onClick={() => setTool("line")}
+                title="Straight Line"
+              >
+                <LineIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant={tool === "arrow" ? "default" : "ghost"}
+                className={cn(
+                  "h-8 w-8 cursor-pointer",
+                  tool === "arrow" && "bg-primary"
+                )}
+                onClick={() => setTool("arrow")}
+                title="Arrow"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Zoom Controls */}
@@ -918,19 +1010,14 @@ export const ImageAnnotator = ({
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-8 w-8 cursor-pointer"
-                onClick={handleZoomToFit}
-                title="Zoom to Fit"
-              >
-                <Maximize className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Color Selection */}
-            {(tool === "pen" || tool === "highlight" || tool === "textbox") && (
+            {(tool === "pen" ||
+              tool === "highlight" ||
+              tool === "textbox" ||
+              tool === "line" ||
+              tool === "arrow") && (
               <div className="flex gap-1 p-1 bg-background rounded-md border border-border">
                 {COLORS.map((c) => (
                   <button
@@ -941,8 +1028,10 @@ export const ImageAnnotator = ({
                       (() => {
                         switch (tool) {
                           case "pen":
+                          case "line":
                             return penColor === c.value;
                           case "highlight":
+                          case "arrow":
                             return highlightColor === c.value;
                           case "textbox":
                             return textboxColor === c.value;
@@ -957,9 +1046,11 @@ export const ImageAnnotator = ({
                     onClick={() => {
                       switch (tool) {
                         case "pen":
+                        case "line":
                           setPenColor(c.value);
                           break;
                         case "highlight":
+                        case "arrow":
                           setHighlightColor(c.value);
                           break;
                         case "textbox":
@@ -981,10 +1072,10 @@ export const ImageAnnotator = ({
                   variant="ghost"
                   className="h-8 w-8 cursor-pointer"
                   onClick={() => {
-                    if (tool === "pen") {
+                    if (tool === "pen" || tool === "line") {
                       setPenSize((prev) => Math.max(1, prev - 1));
-                    } else if (tool === "highlight") {
-                      setHighlightSize((prev) => Math.max(5, prev - 5));
+                    } else if (tool === "highlight" || tool === "arrow") {
+                      setHighlightSize((prev) => Math.max(1, prev - 5));
                     } else if (tool === "textbox") {
                       setTextboxFontSize((prev) => Math.max(8, prev - 2));
                     }
@@ -1015,19 +1106,30 @@ export const ImageAnnotator = ({
                         className="rounded-full bg-primary"
                         style={{
                           width: `${Math.min(
-                            (tool === "pen" ? penSize : highlightSize) *
-                              (tool === "highlight" ? 1 : 2),
+                            (tool === "pen" || tool === "line"
+                              ? penSize
+                              : highlightSize) *
+                              (tool === "highlight" || tool === "arrow"
+                                ? 1
+                                : 2),
                             20
                           )}px`,
                           height: `${Math.min(
-                            (tool === "pen" ? penSize : highlightSize) *
-                              (tool === "highlight" ? 1 : 2),
+                            (tool === "pen" || tool === "line"
+                              ? penSize
+                              : highlightSize) *
+                              (tool === "highlight" || tool === "arrow"
+                                ? 1
+                                : 2),
                             20
                           )}px`,
                         }}
                       />
                       <span className="text-xs text-muted-foreground">
-                        {tool === "pen" ? penSize : highlightSize}px
+                        {tool === "pen" || tool === "line"
+                          ? penSize
+                          : highlightSize}
+                        px
                       </span>
                     </>
                   )}
@@ -1037,9 +1139,9 @@ export const ImageAnnotator = ({
                   variant="ghost"
                   className="h-8 w-8 cursor-pointer"
                   onClick={() => {
-                    if (tool === "pen") {
+                    if (tool === "pen" || tool === "line") {
                       setPenSize((prev) => Math.min(20, prev + 1));
-                    } else if (tool === "highlight") {
+                    } else if (tool === "highlight" || tool === "arrow") {
                       setHighlightSize((prev) => Math.min(50, prev + 5));
                     } else if (tool === "textbox") {
                       setTextboxFontSize((prev) => Math.min(48, prev + 2));
@@ -1179,7 +1281,7 @@ export const ImageAnnotator = ({
             onTouchEnd={handleMouseUp}
             style={{
               cursor: isEditMode
-                ? isDragging
+                ? isDragging.current
                   ? "grabbing"
                   : tool === "select"
                   ? "grab"
@@ -1208,21 +1310,166 @@ export const ImageAnnotator = ({
             {/* Annotations Layer (top) */}
             <Layer>
               {lines
-                .filter((line) => line.tool !== "eraser") // Don't render eraser lines
+                .filter((line) => line && line.tool !== "eraser") // Don't render eraser lines
                 .map((line, i) => {
-                  return (
-                    <Line
-                      key={i}
-                      points={line.points}
-                      stroke={line.color}
-                      strokeWidth={line.strokeWidth}
-                      tension={0}
-                      lineCap="round"
-                      lineJoin="round"
-                      opacity={line.tool === "highlight" ? 0.5 : 1}
-                    />
-                  );
+                  if (
+                    line.tool === "arrow" &&
+                    line.points &&
+                    line.points.length >= 4
+                  ) {
+                    // Render arrow: line + arrowhead
+                    const [x1, y1, x2, y2] = line.points;
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const angle = Math.atan2(dy, dx);
+                    const arrowLength = Math.max(1, line.strokeWidth * 2);
+                    const arrowAngle = Math.PI / 6; // 30 degrees
+
+                    // Calculate arrowhead points
+                    const arrowX1 =
+                      x2 - arrowLength * Math.cos(angle - arrowAngle);
+                    const arrowY1 =
+                      y2 - arrowLength * Math.sin(angle - arrowAngle);
+                    const arrowX2 =
+                      x2 - arrowLength * Math.cos(angle + arrowAngle);
+                    const arrowY2 =
+                      y2 - arrowLength * Math.sin(angle + arrowAngle);
+
+                    return (
+                      <React.Fragment key={i}>
+                        {/* Main line */}
+                        <Line
+                          points={[x1, y1, x2, y2]}
+                          stroke={line.color}
+                          strokeWidth={line.strokeWidth}
+                          lineCap="round"
+                          opacity={1}
+                        />
+                        {/* Arrowhead */}
+                        <Line
+                          points={[x2, y2, arrowX1, arrowY1]}
+                          stroke={line.color}
+                          strokeWidth={line.strokeWidth}
+                          lineCap="round"
+                          opacity={1}
+                        />
+                        <Line
+                          points={[x2, y2, arrowX2, arrowY2]}
+                          stroke={line.color}
+                          strokeWidth={line.strokeWidth}
+                          lineCap="round"
+                          opacity={1}
+                        />
+                      </React.Fragment>
+                    );
+                  } else if (
+                    line.tool === "line" &&
+                    line.points &&
+                    line.points.length >= 4
+                  ) {
+                    // Render straight line
+                    const [x1, y1, x2, y2] = line.points;
+                    return (
+                      <Line
+                        key={i}
+                        points={[x1, y1, x2, y2]}
+                        stroke={line.color}
+                        strokeWidth={line.strokeWidth}
+                        lineCap="round"
+                        opacity={1}
+                      />
+                    );
+                  } else {
+                    // Render freehand lines (pen, highlight)
+                    return (
+                      <Line
+                        key={i}
+                        points={line.points}
+                        stroke={line.color}
+                        strokeWidth={line.strokeWidth}
+                        tension={0}
+                        lineCap="round"
+                        lineJoin="round"
+                        opacity={line.tool === "highlight" ? 0.5 : 1}
+                      />
+                    );
+                  }
                 })}
+
+              {/* Preview line/arrow while drawing */}
+              {(() => {
+                const currentLine = previewLine;
+                if (
+                  currentLine &&
+                  currentLine.points &&
+                  currentLine.points.length >= 4
+                ) {
+                  if (currentLine.tool === "arrow") {
+                    // Render arrow preview: line + arrowhead
+                    const [x1, y1, x2, y2] = currentLine.points;
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    const angle = Math.atan2(dy, dx);
+                    const arrowLength = Math.max(
+                      1,
+                      currentLine.strokeWidth * 2
+                    );
+                    const arrowAngle = Math.PI / 6; // 30 degrees
+
+                    // Calculate arrowhead points
+                    const arrowX1 =
+                      x2 - arrowLength * Math.cos(angle - arrowAngle);
+                    const arrowY1 =
+                      y2 - arrowLength * Math.sin(angle - arrowAngle);
+                    const arrowX2 =
+                      x2 - arrowLength * Math.cos(angle + arrowAngle);
+                    const arrowY2 =
+                      y2 - arrowLength * Math.sin(angle + arrowAngle);
+
+                    return (
+                      <React.Fragment key="preview-arrow">
+                        {/* Main line */}
+                        <Line
+                          points={[x1, y1, x2, y2]}
+                          stroke={currentLine.color}
+                          strokeWidth={currentLine.strokeWidth}
+                          lineCap="round"
+                          opacity={0.7}
+                        />
+                        {/* Arrowhead */}
+                        <Line
+                          points={[x2, y2, arrowX1, arrowY1]}
+                          stroke={currentLine.color}
+                          strokeWidth={currentLine.strokeWidth}
+                          lineCap="round"
+                          opacity={0.7}
+                        />
+                        <Line
+                          points={[x2, y2, arrowX2, arrowY2]}
+                          stroke={currentLine.color}
+                          strokeWidth={currentLine.strokeWidth}
+                          lineCap="round"
+                          opacity={0.7}
+                        />
+                      </React.Fragment>
+                    );
+                  } else if (currentLine.tool === "line") {
+                    // Render straight line preview
+                    const [x1, y1, x2, y2] = currentLine.points;
+                    return (
+                      <Line
+                        key="preview-line"
+                        points={[x1, y1, x2, y2]}
+                        stroke={currentLine.color}
+                        strokeWidth={currentLine.strokeWidth}
+                        lineCap="round"
+                        opacity={0.7}
+                      />
+                    );
+                  }
+                }
+                return null;
+              })()}
 
               {/* Textboxes */}
               {textboxes.map((textbox) => (

@@ -105,22 +105,10 @@ export const AnnotatableInspectImages = ({
           </>
         )}
 
-        {/* Text items (if any) */}
         {textItems.map((item, index) => (
           <p key={`text-${index}`}>{item}</p>
         ))}
       </div>
-
-      {/* Export Tip (only in edit mode with multiple images) */}
-      {isEditMode && imageUrls.length > 1 && (
-        <div className="mt-6 p-4 bg-accent/50 rounded-lg border border-border">
-          <p className="text-sm text-muted-foreground mb-2">
-            💡 Tip: Use the &ldquo;Export Combined&rdquo; button to export all
-            images with annotations as a single image, or save your annotations
-            to load them later.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

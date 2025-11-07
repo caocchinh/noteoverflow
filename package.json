@@ -42,6 +42,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "desmos": "^1.5.4",
     "drizzle-orm": "^0.44.2",
     "framer-motion": "12.16.0",
     "gsap": "^3.13.0",
