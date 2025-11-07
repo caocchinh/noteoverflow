@@ -48,8 +48,6 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-// @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
-import Desmos from "desmos";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { BestExamHelpUltility } from "./BestExamHelpUltility";
@@ -123,6 +121,8 @@ const QuestionInspect = ({
   userFinishedQuestions,
   showFinishedQuestionTint,
   isUserSessionError,
+  isCalculatorOpen,
+  setIsCalculatorOpen,
 }: QuestionInspectProps) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -133,7 +133,7 @@ const QuestionInspect = ({
   const [searchInput, setSearchInput] = useState("");
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
   const [currentView, setCurrentView] = useState<
-    "question" | "answer" | "both" | "calculator"
+    "question" | "answer" | "both"
   >("question");
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
 
@@ -374,7 +374,6 @@ const QuestionInspect = ({
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
-  const calculatorRef = useRef<HTMLDivElement>(null);
 
   const handleNextQuestion = useCallback(() => {
     if (
@@ -620,15 +619,6 @@ const QuestionInspect = ({
   }, [currentQuery, isOpen]);
 
   useEffect(() => {
-    if (currentView === "calculator" && calculatorRef.current) {
-      Desmos.GraphingCalculator(calculatorRef.current);
-      return () => {
-        // Cleanup if needed
-      };
-    }
-  }, [currentView]);
-
-  useEffect(() => {
     if (currentQuery && currentQuestionId) {
       updateSearchParams({
         query: JSON.stringify(currentQuery),
@@ -655,6 +645,7 @@ const QuestionInspect = ({
               "",
           });
         }}
+        modal={false}
       >
         <DialogContent
           className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
@@ -708,6 +699,9 @@ const QuestionInspect = ({
           }}
           onKeyUp={() => {
             setIsCoolDown(false);
+          }}
+          onInteractOutside={(e) => {
+            e.preventDefault();
           }}
         >
           <DialogHeader className="sr-only">
@@ -1159,14 +1153,14 @@ const QuestionInspect = ({
                         Both
                       </Button>
                       <Button
-                        onClick={() => setCurrentView("calculator")}
+                        onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
                         className={cn(
-                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
-                          currentView === "calculator" &&
-                            "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                          "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
+                          isCalculatorOpen &&
+                            "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
                         )}
                       >
-                        Desmos
+                        Calculator
                       </Button>
                     </div>
 
@@ -1335,26 +1329,6 @@ const QuestionInspect = ({
                     questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
                     answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
                   />
-                </div>
-                <div
-                  className={cn(
-                    currentView === "calculator" ? "block w-full" : "hidden"
-                  )}
-                >
-                  <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-                    <QuestionInformation
-                      question={currentQuestionData}
-                      showCurriculumn={false}
-                      showSubject={false}
-                    />
-                  </div>
-                  <div className="h-[76dvh] w-full p-4">
-                    <div
-                      ref={calculatorRef}
-                      className="w-full h-full border-0 rounded-lg"
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </div>
                 </div>
               </div>
               <Button

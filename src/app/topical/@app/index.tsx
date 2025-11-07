@@ -73,6 +73,9 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Rnd } from "react-rnd";
+// @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
+import Desmos from "desmos";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { authClient } from "@/lib/auth/auth-client";
@@ -1025,6 +1028,8 @@ const TopicalClient = ({
     isOpen: false,
     questionId: "",
   });
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const calculatorRef = useRef<HTMLDivElement>(null);
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -1049,6 +1054,13 @@ const TopicalClient = ({
       setIsSidebarOpen(false);
     }
   }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsSidebarOpen]);
+
+  // Initialize Desmos calculator
+  useEffect(() => {
+    if (calculatorRef.current && typeof Desmos !== "undefined") {
+      Desmos.GraphingCalculator(calculatorRef.current as HTMLElement);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -1912,7 +1924,47 @@ const TopicalClient = ({
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
+        isCalculatorOpen={isCalculatorOpen}
+        setIsCalculatorOpen={setIsCalculatorOpen}
       />
+
+      <div className={cn(isCalculatorOpen ? "block" : "hidden")}>
+        <Rnd
+          default={{
+            x: window.innerWidth / 3,
+            y: 100,
+            width: 850,
+            height: 500,
+          }}
+          minWidth={400}
+          minHeight={300}
+          maxWidth={1200}
+          maxHeight={800}
+          bounds="window"
+          className="z-[999999] border border-gray-300 rounded-lg shadow-2xl bg-white dark:bg-gray-800"
+          dragHandleClassName="calculator-drag-handle"
+        >
+          <div className="flex flex-col h-full">
+            {/* Header with close button */}
+            <div className="calculator-drag-handle flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg cursor-move">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Desmos Calculator
+              </span>
+              <button
+                onClick={() => setIsCalculatorOpen(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Calculator content */}
+            <div
+              ref={calculatorRef}
+              className="w-full h-full flex-1 border-0 rounded-b-lg"
+            />
+          </div>
+        </Rnd>
+      </div>
     </>
   );
 };
