@@ -797,13 +797,10 @@ const FinishedQuestionsClient = ({
           </ScrollArea>
         </div>
 
-        {metadata &&
-          !selectedCurriculumn &&
-          Object.keys(metadata).length > 0 && (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <h1 className="font-semibold text-2xl">
-                Choose your curriculumn
-              </h1>
+        {metadata && !selectedCurriculumn && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
+            {Object.keys(metadata || {}).length > 0 ? (
               <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
                 {Object.keys(metadata || {}).map((curriculum) => (
                   <div
@@ -830,24 +827,22 @@ const FinishedQuestionsClient = ({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-        {Object.keys(metadata || {}).length === 0 &&
-          !isSavedActivitiesFetching &&
-          !isUserSessionPending &&
-          userSession?.data?.session && (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground">
-                Start searching for questions and add them to your finished
-                questions!
-              </p>
-              <Button className="!bg-logo-main !text-white" asChild>
-                <Link href="/topical" className="w-[250px]">
-                  Search for questions <ScanText />
-                </Link>
-              </Button>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground">
+                  No curriculums found. Search for questions and add them to
+                  your finished questions!
+                </p>
+                <Button className="!bg-logo-main !text-white" asChild>
+                  <Link href="/topical" className="w-[250px]">
+                    Search for questions <ScanText />
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {(isSavedActivitiesFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
@@ -873,113 +868,143 @@ const FinishedQuestionsClient = ({
         {metadata && selectedCurriculumn && !selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {metadata?.[selectedCurriculumn]?.subjects?.map((subject) => (
-                  <div
-                    key={subject}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
-                    onClick={() => {
-                      setSelecteSubject(subject);
-                    }}
-                  >
-                    <Image
-                      width={150}
-                      height={200}
-                      loading="lazy"
-                      title={subject}
-                      className="!h-[200px] w-40 object-cover rounded-[1px] "
-                      alt="Curriculum cover image"
-                      src={
-                        SUBJECT_COVER_IMAGE[
-                          selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                        ][subject]
-                      }
-                    />
-                    <p className="text-sm text-muted-foreground text-center px-1">
-                      {subject}
-                    </p>
-                  </div>
-                ))}
+            {Object.keys(metadata).length > 0 ? (
+              <ScrollArea
+                className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+                type="always"
+              >
+                <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+                  {metadata?.[selectedCurriculumn]?.subjects?.map((subject) => (
+                    <div
+                      key={subject}
+                      className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
+                      onClick={() => {
+                        setSelecteSubject(subject);
+                      }}
+                    >
+                      <Image
+                        width={150}
+                        height={200}
+                        loading="lazy"
+                        title={subject}
+                        className="!h-[200px] w-40 object-cover rounded-[1px] "
+                        alt="Curriculum cover image"
+                        src={
+                          SUBJECT_COVER_IMAGE[
+                            selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                          ][subject]
+                        }
+                      />
+                      <p className="text-sm text-muted-foreground text-center px-1">
+                        {subject}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground">
+                  No subjects found. Search for questions and add them to your
+                  finished questions!
+                </p>
+                <Button className="!bg-logo-main !text-white" asChild>
+                  <Link href="/topical" className="w-[250px]">
+                    Search for questions <ScanText />
+                  </Link>
+                </Button>
               </div>
-            </ScrollArea>
+            )}
           </div>
         )}
 
-        {displayedData.length > 0 && (
-          <ScrollArea
-            viewportRef={scrollAreaRef}
-            className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
-            type="always"
-            viewPortOnScrollEnd={() => {
-              if (scrollAreaRef.current?.scrollTop === 0) {
-                setIsScrollingAndShouldShowScrollButton(false);
-              } else {
-                setIsScrollingAndShouldShowScrollButton(true);
-              }
-            }}
-          >
-            <p> {topicalData.length} items</p>
-            <ResponsiveMasonry
-              columnsCountBreakPoints={
-                COLUMN_BREAKPOINTS[
-                  numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
-                ]
-              }
-              // @ts-expect-error - gutterBreakPoints is not typed by the library
-              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-            >
-              <Masonry>
-                {displayedData.map((question) =>
-                  question?.questionImages.map((imageSrc: string) => (
-                    <QuestionPreview
-                      bookmarks={bookmarks ?? []}
-                      question={question}
-                      onQuestionClick={() => {
-                        setIsQuestionInspectOpen({
-                          isOpen: true,
-                          questionId: question.id,
-                        });
-                      }}
-                      isUserSessionPending={isUserSessionPending}
-                      userFinishedQuestions={userFinishedQuestions ?? []}
-                      showFinishedQuestionTint={false}
-                      isSavedActivitiesError={
-                        isUserSessionError || isSavedActivitiesError
-                      }
-                      isValidSession={!!userSession?.data?.session}
-                      key={`${question.id}-${imageSrc}`}
-                      isSavedActivitiesFetching={isSavedActivitiesFetching}
-                      imageSrc={imageSrc}
-                      imageTheme={imageTheme}
-                    />
-                  ))
-                )}
-              </Masonry>
-            </ResponsiveMasonry>
-
-            {layoutStyle === "infinite" && (
-              <InfiniteScroll
-                next={() => {
-                  if (fullPartitionedData) {
-                    setCurrentChunkIndex(currentChunkIndex + 1);
-                    setDisplayedData([
-                      ...displayedData,
-                      ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
-                    ]);
+        {metadata && selectedCurriculumn && selectedSubject && (
+          <>
+            {displayedData.length > 0 ? (
+              <ScrollArea
+                viewportRef={scrollAreaRef}
+                className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+                type="always"
+                viewPortOnScrollEnd={() => {
+                  if (scrollAreaRef.current?.scrollTop === 0) {
+                    setIsScrollingAndShouldShowScrollButton(false);
+                  } else {
+                    setIsScrollingAndShouldShowScrollButton(true);
                   }
                 }}
-                hasMore={
-                  !!fullPartitionedData &&
-                  currentChunkIndex < fullPartitionedData.length - 1
-                }
-                isLoading={!fullPartitionedData}
-              />
+              >
+                <p> {topicalData.length} items</p>
+                <ResponsiveMasonry
+                  columnsCountBreakPoints={
+                    COLUMN_BREAKPOINTS[
+                      numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+                    ]
+                  }
+                  // @ts-expect-error - gutterBreakPoints is not typed by the library
+                  gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+                >
+                  <Masonry>
+                    {displayedData.map((question) =>
+                      question?.questionImages.map((imageSrc: string) => (
+                        <QuestionPreview
+                          bookmarks={bookmarks ?? []}
+                          question={question}
+                          onQuestionClick={() => {
+                            setIsQuestionInspectOpen({
+                              isOpen: true,
+                              questionId: question.id,
+                            });
+                          }}
+                          isUserSessionPending={isUserSessionPending}
+                          userFinishedQuestions={userFinishedQuestions ?? []}
+                          showFinishedQuestionTint={false}
+                          isSavedActivitiesError={
+                            isUserSessionError || isSavedActivitiesError
+                          }
+                          isValidSession={!!userSession?.data?.session}
+                          key={`${question.id}-${imageSrc}`}
+                          isSavedActivitiesFetching={isSavedActivitiesFetching}
+                          imageSrc={imageSrc}
+                          imageTheme={imageTheme}
+                        />
+                      ))
+                    )}
+                  </Masonry>
+                </ResponsiveMasonry>
+
+                {layoutStyle === "infinite" && (
+                  <InfiniteScroll
+                    next={() => {
+                      if (fullPartitionedData) {
+                        setCurrentChunkIndex(currentChunkIndex + 1);
+                        setDisplayedData([
+                          ...displayedData,
+                          ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+                        ]);
+                      }
+                    }}
+                    hasMore={
+                      !!fullPartitionedData &&
+                      currentChunkIndex < fullPartitionedData.length - 1
+                    }
+                    isLoading={!fullPartitionedData}
+                  />
+                )}
+              </ScrollArea>
+            ) : (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground">
+                  No questions found. Search for questions and add them to your
+                  finished questions!
+                </p>
+                <Button className="!bg-logo-main !text-white" asChild>
+                  <Link href="/topical" className="w-[250px]">
+                    Search for questions <ScanText />
+                  </Link>
+                </Button>
+              </div>
             )}
-          </ScrollArea>
+          </>
         )}
       </div>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>

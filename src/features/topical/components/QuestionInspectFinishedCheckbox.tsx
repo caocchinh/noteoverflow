@@ -17,6 +17,7 @@ import {
   SelectedFinishedQuestion,
   SelectedQuestion,
 } from "../constants/types";
+import { computeFinishedQuestionsMetadata } from "../lib/utils";
 
 export const QuestionInspectFinishedCheckbox = ({
   finishedQuestions,
@@ -84,6 +85,7 @@ export const QuestionInspectFinishedCheckbox = ({
         isCurrentlyFinished,
       }: { currentQuestionId: string; isCurrentlyFinished: boolean }
     ) => {
+      // Optimistically update the cache
       queryClient.setQueryData<SavedActivitiesResponse>(
         ["user_saved_activities"],
         (prev) => {
@@ -110,9 +112,18 @@ export const QuestionInspectFinishedCheckbox = ({
               updatedAt: new Date(),
             });
           }
+
+          // Update metadata optimistically
+          const updatedFinishedQuestionsMetadata =
+            computeFinishedQuestionsMetadata(next);
+
           return {
             ...prev,
             finishedQuestions: next,
+            metadata: {
+              ...prev.metadata,
+              finishedQuestions: updatedFinishedQuestionsMetadata,
+            },
           };
         }
       );

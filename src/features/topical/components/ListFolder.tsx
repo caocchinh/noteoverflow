@@ -8,7 +8,7 @@ import {
   Trash2,
   Type as TypeIcon,
 } from "lucide-react";
-import { truncateListName } from "../lib/utils";
+import { computeBookmarksMetadata, truncateListName } from "../lib/utils";
 import {
   Popover,
   PopoverTrigger,
@@ -46,7 +46,6 @@ import {
   useState,
 } from "react";
 import { Input } from "@/components/ui/input";
-import { ValidCurriculum } from "@/constants/types";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
 import { QR } from "./QR";
@@ -124,11 +123,17 @@ export const ListFolder = ({
           if (!prev) {
             return prev;
           }
+          const next = prev.bookmarks.filter(
+            (bookmark) => !(bookmark.id === realListId)
+          );
+          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
-            bookmarks: prev.bookmarks.filter(
-              (bookmark) => !(bookmark.id === realListId)
-            ),
+            bookmarks: next,
+            metadata: {
+              ...prev.metadata,
+              bookmarks: updatedBookmarksMetadata,
+            },
           };
         }
       );
@@ -173,14 +178,20 @@ export const ListFolder = ({
           }
           setNewListName("");
           setIsRenameAlertDialogOpen(false);
+          const next = prev.bookmarks.map((bookmark) => {
+            if (bookmark.id === realListId) {
+              return { ...bookmark, listName: realNewName };
+            }
+            return bookmark;
+          });
+          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
-            bookmarks: prev.bookmarks.map((bookmark) => {
-              if (bookmark.id === realListId) {
-                return { ...bookmark, listName: realNewName };
-              }
-              return bookmark;
-            }),
+            bookmarks: next,
+            metadata: {
+              ...prev.metadata,
+              bookmarks: updatedBookmarksMetadata,
+            },
           };
         }
       );
@@ -228,14 +239,20 @@ export const ListFolder = ({
           }
           setNewListName("");
           setIsRenameAlertDialogOpen(false);
+          const next = prev.bookmarks.map((bookmark) => {
+            if (bookmark.id === realListId) {
+              return { ...bookmark, visibility: realNewVisibility };
+            }
+            return bookmark;
+          });
+          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
-            bookmarks: prev.bookmarks.map((bookmark) => {
-              if (bookmark.id === realListId) {
-                return { ...bookmark, visibility: realNewVisibility };
-              }
-              return bookmark;
-            }),
+            bookmarks: next,
+            metadata: {
+              ...prev.metadata,
+              bookmarks: updatedBookmarksMetadata,
+            },
           };
         }
       );

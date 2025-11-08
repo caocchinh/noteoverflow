@@ -15,6 +15,10 @@ import type {
   InvalidInputs,
   LayoutStyle,
   ImageTheme,
+  FinishedQuestionsMetadata,
+  BookmarksMetadata,
+  SelectedFinishedQuestion,
+  SelectedBookmark,
 } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -577,3 +581,87 @@ export const truncateListName = ({ listName }: { listName: string }) => {
   }
   return listName;
 };
+
+export function computeFinishedQuestionsMetadata(
+  finishedQuestions: SelectedFinishedQuestion[]
+): FinishedQuestionsMetadata {
+  const metadata: FinishedQuestionsMetadata = {};
+
+  finishedQuestions.forEach((question) => {
+    const extractedCurriculum = extractCurriculumCode({
+      questionId: question.question.id,
+    });
+
+    if (extractedCurriculum) {
+      const extractedSubjectCodeValue = extractSubjectCode({
+        questionId: question.question.id,
+      });
+
+      if (!metadata[extractedCurriculum]) {
+        metadata[extractedCurriculum] = { subjects: [] };
+      }
+
+      if (
+        !metadata[extractedCurriculum].subjects.includes(
+          extractedSubjectCodeValue
+        )
+      ) {
+        metadata[extractedCurriculum].subjects.push(extractedSubjectCodeValue);
+      }
+    }
+  });
+
+  return metadata;
+}
+
+export function computeBookmarksMetadata(
+  bookmarks: SelectedBookmark[]
+): BookmarksMetadata {
+  const metadata: BookmarksMetadata = {
+    public: {},
+    private: {},
+  };
+
+  bookmarks.forEach((bookmark) => {
+    const visibility = bookmark.visibility as "public" | "private";
+
+    if (!metadata[visibility]) {
+      metadata[visibility] = {};
+    }
+
+    if (!metadata[visibility][bookmark.id]) {
+      metadata[visibility][bookmark.id] = {
+        listName: bookmark.listName,
+        curricula: {},
+      };
+    }
+
+    bookmark.userBookmarks.forEach((userBookmark) => {
+      const extractedCurriculum = extractCurriculumCode({
+        questionId: userBookmark.question.id,
+      });
+
+      if (extractedCurriculum) {
+        const extractedSubjectCodeValue = extractSubjectCode({
+          questionId: userBookmark.question.id,
+        });
+
+        if (!metadata[visibility][bookmark.id].curricula[extractedCurriculum]) {
+          metadata[visibility][bookmark.id].curricula[extractedCurriculum] = {
+            subjects: [],
+          };
+        }
+
+        const curriculumSubjects =
+          metadata[visibility][bookmark.id].curricula[extractedCurriculum]!
+            .subjects;
+
+        if (!curriculumSubjects.includes(extractedSubjectCodeValue)) {
+          curriculumSubjects.push(extractedSubjectCodeValue);
+        }
+      }
+    });
+  });
+
+  return metadata;
+}

@@ -109,6 +109,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       questionId: "",
     });
 
+  const isValidSession = !!userSession?.data?.session;
+
   const {
     data: userSavedActivities,
     isFetching: isUserSavedActivitiesFetching,
@@ -981,41 +983,55 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         {curriculumnMetadata && selectedCurriculumn && !selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your subject</h1>
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {curriculumnMetadata?.[selectedCurriculumn]?.subjects?.map(
-                  (subject) => (
-                    <div
-                      key={subject}
-                      className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
-                      onClick={() => {
-                        setSelecteSubject(subject);
-                      }}
-                    >
-                      <Image
-                        width={150}
-                        height={200}
-                        loading="lazy"
-                        title={subject}
-                        className=" object-cover rounded-[1px] "
-                        alt="Curriculum cover image"
-                        src={
-                          SUBJECT_COVER_IMAGE[
-                            selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                          ][subject]
-                        }
-                      />
-                      <p className="text-sm text-muted-foreground text-center px-1">
-                        {subject}
-                      </p>
-                    </div>
-                  )
-                )}
+            {Object.keys(curriculumnMetadata).length > 0 ? (
+              <ScrollArea
+                className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+                type="always"
+              >
+                <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+                  {curriculumnMetadata?.[selectedCurriculumn]?.subjects?.map(
+                    (subject) => (
+                      <div
+                        key={subject}
+                        className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
+                        onClick={() => {
+                          setSelecteSubject(subject);
+                        }}
+                      >
+                        <Image
+                          width={150}
+                          height={200}
+                          loading="lazy"
+                          title={subject}
+                          className=" object-cover rounded-[1px] "
+                          alt="Curriculum cover image"
+                          src={
+                            SUBJECT_COVER_IMAGE[
+                              selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                            ][subject]
+                          }
+                        />
+                        <p className="text-sm text-muted-foreground text-center px-1">
+                          {subject}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground">
+                  No subjects found. Search for questions and add them to a this
+                  list!
+                </p>
+                <Button className="!bg-logo-main !text-white" asChild>
+                  <Link href="/topical" className="w-[250px]">
+                    Search for questions <ScanText />
+                  </Link>
+                </Button>
               </div>
-            </ScrollArea>
+            )}
           </div>
         )}
         {!isQuestionViewDisabled && (
@@ -1051,7 +1067,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={showFinishedQuestionTint}
                       isSavedActivitiesError={isSavedActivitiesError}
-                      isValidSession={!!userSession?.data?.session}
+                      isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
                       isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
@@ -1095,6 +1111,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               No questions found. Search for questions and add them to this
               list!
             </p>
+            <Button className="!bg-logo-main !text-white" asChild>
+              <Link href="/topical" className="w-[250px]">
+                Search for questions <ScanText />
+              </Link>
+            </Button>
           </div>
         )}
       </div>
@@ -1295,7 +1316,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         imageTheme={imageTheme}
         bookmarks={bookmarks ?? []}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={!!userSession?.data?.session}
+        isValidSession={isValidSession}
         isSavedActivitiesFetching={isSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
         listId={chosenList?.id}

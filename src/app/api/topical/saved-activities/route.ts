@@ -5,14 +5,12 @@ import { finishedQuestions, userBookmarkList } from "@/drizzle/schema";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
-  BookmarksMetadata,
-  FinishedQuestionsMetadata,
   SavedActivitiesMetadata,
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
-  extractCurriculumCode,
-  extractSubjectCode,
+  computeBookmarksMetadata,
+  computeFinishedQuestionsMetadata,
 } from "@/features/topical/lib/utils";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -109,90 +107,6 @@ async function fetchBookmarks(userId: string) {
   return data;
 }
 
-function computeFinishedQuestionsMetadata(
-  finishedQuestions: SelectedFinishedQuestion[]
-): FinishedQuestionsMetadata {
-  const metadata: FinishedQuestionsMetadata = {};
-
-  finishedQuestions.forEach((question) => {
-    const extractedCurriculum = extractCurriculumCode({
-      questionId: question.question.id,
-    });
-
-    if (extractedCurriculum) {
-      const extractedSubjectCodeValue = extractSubjectCode({
-        questionId: question.question.id,
-      });
-
-      if (!metadata[extractedCurriculum]) {
-        metadata[extractedCurriculum] = { subjects: [] };
-      }
-
-      if (
-        !metadata[extractedCurriculum].subjects.includes(
-          extractedSubjectCodeValue
-        )
-      ) {
-        metadata[extractedCurriculum].subjects.push(extractedSubjectCodeValue);
-      }
-    }
-  });
-
-  return metadata;
-}
-
-function computeBookmarksMetadata(
-  bookmarks: SelectedBookmark[]
-): BookmarksMetadata {
-  const metadata: BookmarksMetadata = {
-    public: {},
-    private: {},
-  };
-
-  bookmarks.forEach((bookmark) => {
-    const visibility = bookmark.visibility as "public" | "private";
-
-    if (!metadata[visibility]) {
-      metadata[visibility] = {};
-    }
-
-    if (!metadata[visibility][bookmark.id]) {
-      metadata[visibility][bookmark.id] = {
-        listName: bookmark.listName,
-        curricula: {},
-      };
-    }
-
-    bookmark.userBookmarks.forEach((userBookmark) => {
-      const extractedCurriculum = extractCurriculumCode({
-        questionId: userBookmark.question.id,
-      });
-
-      if (extractedCurriculum) {
-        const extractedSubjectCodeValue = extractSubjectCode({
-          questionId: userBookmark.question.id,
-        });
-
-        if (!metadata[visibility][bookmark.id].curricula[extractedCurriculum]) {
-          metadata[visibility][bookmark.id].curricula[extractedCurriculum] = {
-            subjects: [],
-          };
-        }
-
-        const curriculumSubjects =
-          metadata[visibility][bookmark.id].curricula[extractedCurriculum]!
-            .subjects;
-
-        if (!curriculumSubjects.includes(extractedSubjectCodeValue)) {
-          curriculumSubjects.push(extractedSubjectCodeValue);
-        }
-      }
-    });
-  });
-
-  return metadata;
-}
-
 function computeSavedActivitiesMetadata(
   finishedQuestions: SelectedFinishedQuestion[],
   bookmarks: SelectedBookmark[]
@@ -229,9 +143,7 @@ export async function GET() {
       metadata,
     };
 
-    return NextResponse.json(responseData, {
-      status: 200,
-    });
+    return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return NextResponse.json({ error: UNAUTHORIZED }, { status: 401 });
