@@ -36,7 +36,7 @@ import {
   renameBookmarkListAction,
 } from "../server/actions";
 import { toast } from "sonner";
-import { SavedActivitiesResponse } from "../constants/types";
+import { SavedActivitiesResponse, BookmarksMetadata } from "../constants/types";
 import {
   Dispatch,
   SetStateAction,
@@ -63,16 +63,7 @@ export const ListFolder = ({
   listId: string;
   BETTER_AUTH_URL: string;
   visibility: "public" | "private";
-  metadata: Record<
-    "public" | "private",
-    Record<
-      string,
-      {
-        listName: string;
-        data: Partial<Record<ValidCurriculum, string[]>>;
-      }
-    >
-  >;
+  metadata: BookmarksMetadata;
   setChosenList: Dispatch<
     SetStateAction<{
       id: string;

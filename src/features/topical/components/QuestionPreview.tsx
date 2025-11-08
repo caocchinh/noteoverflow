@@ -34,7 +34,6 @@ const QuestionPreview = memo(
   }: {
     bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
-
     isSavedActivitiesFetching: boolean;
     imageSrc: string;
     isUserSessionPending: boolean;
@@ -52,14 +51,6 @@ const QuestionPreview = memo(
     const [isHovering, setIsHovering] = useState(false);
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
-    const isMutatingFinishedQuestions =
-      useIsMutating({
-        mutationKey: [
-          "user_saved_activities",
-          question.id,
-          "finished_questions",
-        ],
-      }) > 0;
 
     const doesThisQuestionFinished = useMemo(() => {
       if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
@@ -68,8 +59,7 @@ const QuestionPreview = memo(
       return userFinishedQuestions.some(
         (item) => item.question.id === question.id
       );
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userFinishedQuestions, question.id, isMutatingFinishedQuestions]);
+    }, [userFinishedQuestions, question.id]);
 
     const isMutatingThisQuestion =
       useIsMutating({
@@ -161,9 +151,7 @@ const QuestionPreview = memo(
           setIsHovering={setIsHovering}
           isValidSession={isValidSession}
           isBookmarkDisabled={isUserSessionPending}
-          isSavedActivitiesFetching={
-            isSavedActivitiesFetching || isUserSessionPending
-          }
+          isSavedActivitiesFetching={isSavedActivitiesFetching}
           isInView={shouldOpen}
           listId={listId}
         />

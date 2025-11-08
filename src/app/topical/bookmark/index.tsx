@@ -19,11 +19,11 @@ import {
   SelectedQuestion,
   LayoutStyle,
   FiltersCache,
-  SelectedBookmark,
   InvalidInputs,
   ImageTheme,
   SortParameters,
   QuestionInspectOpenState,
+  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
@@ -110,46 +110,16 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     });
 
   const {
-    data: userFinishedQuestions,
-    isFetching: isUserFinishedQuestionsFetching,
-    isError: isUserFinishedQuestionsError,
+    data: userSavedActivities,
+    isFetching: isUserSavedActivitiesFetching,
+    isError: isUserSavedActivitiesError,
   } = useQuery({
-    queryKey: ["user_finished_questions"],
+    queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/finished");
-      const data: {
-        data: SelectedFinishedQuestion[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-      return data.data;
-    },
-    enabled:
-      !!userSession?.data?.session &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_finished_questions"]),
-  });
-
-  const {
-    data: bookmarks,
-    isFetching: isBookmarksFetching,
-    isError: isBookmarksError,
-  } = useQuery({
-    queryKey: ["all_user_bookmarks"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/bookmark", {
+      const response = await fetch("/api/topical/saved-activities", {
         method: "GET",
       });
-      const data: {
-        data: SelectedBookmark[];
-        error?: string;
-      } = await response.json();
+      const data: SavedActivitiesResponse = await response.json();
       if (!response.ok) {
         const errorMessage =
           typeof data === "object" && data && "error" in data
@@ -158,17 +128,26 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         throw new Error(errorMessage);
       }
 
-      return data.data;
+      return data;
     },
     enabled:
       !!userSession?.data?.session &&
       !isUserSessionError &&
-      !queryClient.getQueryData(["all_user_bookmarks"]),
+      !queryClient.getQueryData(["user_saved_activities"]),
   });
-  const isSavedActivitiesFetching =
-    isBookmarksFetching || isUserFinishedQuestionsFetching;
-  const isSavedActivitiesError =
-    isBookmarksError || isUserFinishedQuestionsError;
+
+  const userFinishedQuestions = useMemo(() => {
+    return userSavedActivities?.finishedQuestions;
+  }, [userSavedActivities]);
+  const bookmarks = useMemo(() => {
+    return userSavedActivities?.bookmarks;
+  }, [userSavedActivities]);
+  const metadata = useMemo(() => {
+    return userSavedActivities?.metadata.bookmarks;
+  }, [userSavedActivities]);
+
+  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
+  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -177,71 +156,15 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     listName: string;
   } | null>(null);
 
-  const metadata = useMemo(() => {
-    const tempMetadata: Record<
-      "public" | "private",
-      Record<
-        string,
-        {
-          listName: string;
-          data: Partial<Record<ValidCurriculum, string[]>>;
-        }
-      >
-    > = {
-      public: {},
-      private: {},
-    };
-    bookmarks?.forEach((bookmark) => {
-      if (!tempMetadata[bookmark.visibility as "public" | "private"]) {
-        tempMetadata[bookmark.visibility as "public" | "private"] = {};
-      }
-      if (
-        !tempMetadata[bookmark.visibility as "public" | "private"][bookmark.id]
-      ) {
-        tempMetadata[bookmark.visibility as "public" | "private"][bookmark.id] =
-          { listName: bookmark.listName, data: {} };
-      }
-      bookmark.userBookmarks.forEach((userBookmark) => {
-        const extractedCurriculumn = extractCurriculumCode({
-          questionId: userBookmark.question.id,
-        });
-        const extractedSubjectCode = extractSubjectCode({
-          questionId: userBookmark.question.id,
-        });
-        if (extractedCurriculumn) {
-          if (
-            !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn]
-          ) {
-            tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn] = [];
-          }
-          if (
-            !tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn]?.includes(extractedSubjectCode)
-          ) {
-            tempMetadata[bookmark.visibility as "public" | "private"][
-              bookmark.id
-            ].data[extractedCurriculumn]?.push(extractedSubjectCode);
-          }
-        }
-      });
-    });
-
-    return tempMetadata;
-  }, [bookmarks]);
-
   const curriculumnMetadata = useMemo(() => {
     if (
       !chosenList ||
+      !metadata ||
       !metadata[chosenList.visibility] ||
       !metadata[chosenList.visibility][chosenList.id]
     )
       return null;
-    return metadata[chosenList.visibility][chosenList.id].data;
+    return metadata[chosenList.visibility][chosenList.id].curricula;
   }, [chosenList, metadata]);
 
   const questionUnderThatBookmarkList = useMemo(() => {
@@ -939,25 +862,26 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <h1 className="font-semibold text-2xl">Choose your list</h1>
             <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
-              {metadata.private && Object.keys(metadata.private).length > 0 && (
-                <div className="flex flex-col gap-2 w-full items-start justify-center">
-                  <h2 className="font text-lg text-logo-main">Private</h2>
-                  <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                    {Object.keys(metadata.private).map((listId) => (
-                      <ListFolder
-                        BETTER_AUTH_URL={BETTER_AUTH_URL}
-                        listId={listId}
-                        listName={metadata.private[listId].listName}
-                        visibility="private"
-                        key={listId}
-                        metadata={metadata}
-                        setChosenList={setChosenList}
-                      />
-                    ))}
+              {metadata?.private &&
+                Object.keys(metadata.private).length > 0 && (
+                  <div className="flex flex-col gap-2 w-full items-start justify-center">
+                    <h2 className="font text-lg text-logo-main">Private</h2>
+                    <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
+                      {Object.keys(metadata.private).map((listId) => (
+                        <ListFolder
+                          BETTER_AUTH_URL={BETTER_AUTH_URL}
+                          listId={listId}
+                          listName={metadata.private[listId].listName}
+                          visibility="private"
+                          key={listId}
+                          metadata={metadata}
+                          setChosenList={setChosenList}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-              {metadata.public && Object.keys(metadata.public).length > 0 && (
+                )}
+              {metadata?.public && Object.keys(metadata.public).length > 0 && (
                 <div className="flex flex-col gap-2 w-full items-start justify-center">
                   <h2 className="font text-lg text-logo-main">Public</h2>
                   <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
@@ -975,9 +899,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   </div>
                 </div>
               )}
-              {Object.keys(metadata.private).length === 0 &&
-                Object.keys(metadata.public).length === 0 &&
-                !isBookmarksFetching &&
+              {Object.keys(metadata?.private || {}).length === 0 &&
+                Object.keys(metadata?.public || {}).length === 0 &&
+                !isUserSavedActivitiesFetching &&
                 !isUserSessionPending &&
                 userSession?.data?.session && (
                   <p className="text-sm text-muted-foreground">
@@ -988,16 +912,16 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             </div>
           </div>
         )}
-        {Object.keys(metadata.private).length === 0 &&
-          Object.keys(metadata.public).length === 0 &&
-          !isBookmarksFetching &&
+        {Object.keys(metadata?.private || {}).length === 0 &&
+          Object.keys(metadata?.public || {}).length === 0 &&
+          !isUserSavedActivitiesFetching &&
           !isUserSessionPending &&
           !userSession?.data?.session && (
             <p className="text-sm  text-red-500">
               You are not signed in. Please sign to create a list!
             </p>
           )}
-        {(isBookmarksFetching || isUserSessionPending) && (
+        {(isUserSavedActivitiesFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>
@@ -1062,32 +986,34 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               type="always"
             >
               <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {curriculumnMetadata[selectedCurriculumn]?.map((subject) => (
-                  <div
-                    key={subject}
-                    className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
-                    onClick={() => {
-                      setSelecteSubject(subject);
-                    }}
-                  >
-                    <Image
-                      width={150}
-                      height={200}
-                      loading="lazy"
-                      title={subject}
-                      className=" object-cover rounded-[1px] "
-                      alt="Curriculum cover image"
-                      src={
-                        SUBJECT_COVER_IMAGE[
-                          selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                        ][subject]
-                      }
-                    />
-                    <p className="text-sm text-muted-foreground text-center px-1">
-                      {subject}
-                    </p>
-                  </div>
-                ))}
+                {curriculumnMetadata?.[selectedCurriculumn]?.subjects?.map(
+                  (subject) => (
+                    <div
+                      key={subject}
+                      className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
+                      onClick={() => {
+                        setSelecteSubject(subject);
+                      }}
+                    >
+                      <Image
+                        width={150}
+                        height={200}
+                        loading="lazy"
+                        title={subject}
+                        className=" object-cover rounded-[1px] "
+                        alt="Curriculum cover image"
+                        src={
+                          SUBJECT_COVER_IMAGE[
+                            selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                          ][subject]
+                        }
+                      />
+                      <p className="text-sm text-muted-foreground text-center px-1">
+                        {subject}
+                      </p>
+                    </div>
+                  )
+                )}
               </div>
             </ScrollArea>
           </div>
@@ -1124,9 +1050,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={showFinishedQuestionTint}
-                      isSavedActivitiesError={
-                        isUserSessionError || isSavedActivitiesError
-                      }
+                      isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={!!userSession?.data?.session}
                       key={`${question.id}-${imageSrc}`}
                       isSavedActivitiesFetching={isSavedActivitiesFetching}
@@ -1375,7 +1299,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isSavedActivitiesFetching={isSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
         listId={chosenList?.id}
-        isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
+        isSavedActivitiesError={isSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         userFinishedQuestions={userFinishedQuestions ?? []}

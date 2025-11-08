@@ -19,11 +19,11 @@ import {
   SelectedQuestion,
   LayoutStyle,
   FiltersCache,
-  SelectedBookmark,
   InvalidInputs,
   ImageTheme,
   SortParameters,
   QuestionInspectOpenState,
+  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
@@ -108,46 +108,16 @@ const FinishedQuestionsClient = ({
     });
 
   const {
-    data: userFinishedQuestions,
-    isFetching: isUserFinishedQuestionsFetching,
-    isError: isUserFinishedQuestionsError,
+    data: userSavedActivities,
+    isFetching: isUserSavedActivitiesFetching,
+    isError: isUserSavedActivitiesError,
   } = useQuery({
-    queryKey: ["user_finished_questions"],
+    queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/finished");
-      const data: {
-        data: SelectedFinishedQuestion[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-      return data.data;
-    },
-    enabled:
-      !!userSession?.data?.session &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_finished_questions"]),
-  });
-
-  const {
-    data: bookmarks,
-    isFetching: isBookmarksFetching,
-    isError: isBookmarksError,
-  } = useQuery({
-    queryKey: ["all_user_bookmarks"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/bookmark", {
+      const response = await fetch("/api/topical/saved-activities", {
         method: "GET",
       });
-      const data: {
-        data: SelectedBookmark[];
-        error?: string;
-      } = await response.json();
+      const data: SavedActivitiesResponse = await response.json();
       if (!response.ok) {
         const errorMessage =
           typeof data === "object" && data && "error" in data
@@ -156,43 +126,28 @@ const FinishedQuestionsClient = ({
         throw new Error(errorMessage);
       }
 
-      return data.data;
+      return data;
     },
     enabled:
       !!userSession?.data?.session &&
       !isUserSessionError &&
-      !queryClient.getQueryData(["all_user_bookmarks"]),
+      !queryClient.getQueryData(["user_saved_activities"]),
   });
-  const isSavedActivitiesFetching =
-    isBookmarksFetching || isUserFinishedQuestionsFetching;
-  const isSavedActivitiesError =
-    isBookmarksError || isUserFinishedQuestionsError;
+
+  const userFinishedQuestions = useMemo(() => {
+    return userSavedActivities?.finishedQuestions;
+  }, [userSavedActivities]);
+  const bookmarks = useMemo(() => {
+    return userSavedActivities?.bookmarks;
+  }, [userSavedActivities]);
+  const metadata = useMemo(() => {
+    return userSavedActivities?.metadata.finishedQuestions;
+  }, [userSavedActivities]);
+
+  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
+  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const metadata = useMemo(() => {
-    const tempMetadata: Partial<Record<ValidCurriculum, string[]>> = {};
-    userFinishedQuestions?.forEach((question) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: question.question.id,
-      });
-      if (extractedCurriculumn) {
-        const extractedSubjectCode = extractSubjectCode({
-          questionId: question.question.id,
-        });
-        if (!tempMetadata[extractedCurriculumn]) {
-          tempMetadata[extractedCurriculumn] = [];
-        }
-        if (
-          !tempMetadata[extractedCurriculumn].includes(extractedSubjectCode)
-        ) {
-          tempMetadata[extractedCurriculumn].push(extractedSubjectCode);
-        }
-      }
-    });
-
-    return tempMetadata;
-  }, [userFinishedQuestions]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
@@ -850,7 +805,7 @@ const FinishedQuestionsClient = ({
                 Choose your curriculumn
               </h1>
               <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-                {Object.keys(metadata).map((curriculum) => (
+                {Object.keys(metadata || {}).map((curriculum) => (
                   <div
                     key={curriculum}
                     className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -877,8 +832,8 @@ const FinishedQuestionsClient = ({
               </div>
             </div>
           )}
-        {Object.keys(metadata).length === 0 &&
-          !isUserFinishedQuestionsFetching &&
+        {Object.keys(metadata || {}).length === 0 &&
+          !isSavedActivitiesFetching &&
           !isUserSessionPending &&
           userSession?.data?.session && (
             <div className="flex flex-col gap-4 items-center justify-center w-full">
@@ -893,7 +848,7 @@ const FinishedQuestionsClient = ({
               </Button>
             </div>
           )}
-        {(isUserFinishedQuestionsFetching || isUserSessionPending) && (
+        {(isSavedActivitiesFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>
@@ -923,7 +878,7 @@ const FinishedQuestionsClient = ({
               type="always"
             >
               <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {metadata[selectedCurriculumn]?.map((subject) => (
+                {metadata?.[selectedCurriculumn]?.subjects?.map((subject) => (
                   <div
                     key={subject}
                     className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
@@ -1226,7 +1181,7 @@ const FinishedQuestionsClient = ({
         isValidSession={!!userSession?.data?.session}
         isSavedActivitiesFetching={isSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
-        isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
+        isSavedActivitiesError={isSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         userFinishedQuestions={userFinishedQuestions ?? []}
