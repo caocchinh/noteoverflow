@@ -915,6 +915,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 sortParameters={sortParameters}
                 setSortParameters={setSortParameters}
                 isDisabled={isQuestionViewDisabled}
+                disabledMessage="To sort questions, select a subject first."
               />
               {chosenList && chosenList.visibility === "public" && (
                 <ShareFilter

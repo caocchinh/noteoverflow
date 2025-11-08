@@ -1,4 +1,4 @@
-import { memo, Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ArrowDownWideNarrow, Info, Check } from "lucide-react";
 import { SortParameters } from "../constants/types";
 import { cn } from "@/lib/utils";
@@ -16,84 +16,89 @@ import {
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SORT_OPTIONS } from "../constants/constants";
 
-const Sort = memo(
-  ({
-    sortParameters,
-    setSortParameters,
-    isDisabled,
-  }: {
-    sortParameters: SortParameters;
-    setSortParameters: Dispatch<SetStateAction<SortParameters>>;
-    isDisabled: boolean;
-  }) => {
-    const currentSort = sortParameters?.sortBy || DEFAULT_SORT_OPTIONS;
+const Sort = ({
+  sortParameters,
+  setSortParameters,
+  isDisabled,
+  disabledMessage,
+  showSortTextTrigger = true,
+}: {
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  isDisabled: boolean;
+  disabledMessage: string;
+  showSortTextTrigger?: boolean;
+}) => {
+  const currentSort = sortParameters?.sortBy || DEFAULT_SORT_OPTIONS;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            tabIndex={-1}
-            className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
-          >
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  disabled={isDisabled}
-                  className="cursor-pointer"
-                >
-                  <ArrowDownWideNarrow className="mr-2 w-4 h-4" />
-                  Sort
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[180px] z-[999999]">
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (sortParameters?.sortBy === "ascending") {
-                      setSortParameters({ sortBy: "descending" });
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 w-4 h-4",
-                      currentSort === "descending" ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  Newest first
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (sortParameters?.sortBy === "descending") {
-                      setSortParameters({ sortBy: "ascending" });
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 w-4 h-4",
-                      currentSort === "ascending" ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  Oldest first
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className={cn(!isDisabled && "hidden")}>
-          <div className="flex items-center gap-2 justify-center">
-            <Info className="w-4 h-4" />
-            To sort questions, run a search first.
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-);
-
-Sort.displayName = "Sort";
+  return (
+    <Tooltip
+      open={
+        isTooltipOpen && !isDropdownOpen && (isDisabled || !showSortTextTrigger)
+      }
+      onOpenChange={setIsTooltipOpen}
+    >
+      <TooltipTrigger asChild>
+        <div tabIndex={-1} className={cn(isDisabled && "opacity-50")}>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={isDisabled}
+                className="cursor-pointer !px-[10px]"
+              >
+                <ArrowDownWideNarrow className="w-4 h-4" />
+                {showSortTextTrigger && "Sort"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[180px] z-[999999]">
+              <DropdownMenuItem
+                onClick={() => {
+                  if (sortParameters?.sortBy === "ascending") {
+                    setSortParameters({ sortBy: "descending" });
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                <Check
+                  className={cn(
+                    "mr-2 w-4 h-4",
+                    currentSort === "descending" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                Newest first
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  if (sortParameters?.sortBy === "descending") {
+                    setSortParameters({ sortBy: "ascending" });
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                <Check
+                  className={cn(
+                    "mr-2 w-4 h-4",
+                    currentSort === "ascending" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                Oldest first
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="z-[1000000]">
+        <div className="flex items-center gap-2 justify-center">
+          {showSortTextTrigger && <Info className="w-4 h-4" />}
+          {showSortTextTrigger && disabledMessage}
+          {!showSortTextTrigger && "Sort by"}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 export default Sort;

@@ -823,6 +823,7 @@ export const BookmarkView = ({
                 sortParameters={sortParameters}
                 setSortParameters={setSortParameters}
                 isDisabled={isQuestionViewDisabled}
+                disabledMessage="To sort questions, select a subject first."
               />
               <ShareFilter
                 isDisabled={false}

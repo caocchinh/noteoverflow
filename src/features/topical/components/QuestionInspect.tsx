@@ -1213,6 +1213,8 @@ const QuestionInspect = ({
                         sortParameters={sortParameters}
                         setSortParameters={setSortParameters}
                         isDisabled={false}
+                        disabledMessage=""
+                        showSortTextTrigger={false}
                       />
                     )}
                     <ShareFilter

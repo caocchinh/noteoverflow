@@ -247,6 +247,7 @@ export const RecentQuery = ({
                 sortParameters={recentQueriesSortParams}
                 setSortParameters={setRecentQueriesSortParams}
                 isDisabled={false}
+                disabledMessage=""
               />
             </PopoverContent>
           </Popover>

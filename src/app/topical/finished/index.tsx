@@ -828,6 +828,7 @@ const FinishedQuestionsClient = ({
                 sortParameters={sortParameters}
                 setSortParameters={setSortParameters}
                 isDisabled={isQuestionViewDisabled}
+                disabledMessage="To sort questions, select a subject first."
               />
             </div>
 

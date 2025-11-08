@@ -1607,6 +1607,7 @@ const TopicalClient = ({
                   sortParameters={sortParameters}
                   setSortParameters={setSortParameters}
                   isDisabled={isQuestionViewDisabled}
+                  disabledMessage="To sort questions, run a search first."
                 />
                 <Tooltip>
                   <TooltipTrigger asChild>
