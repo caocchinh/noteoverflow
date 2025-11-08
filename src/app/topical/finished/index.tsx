@@ -163,6 +163,11 @@ const FinishedQuestionsClient = ({
       !isUserSessionError &&
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
+  const isSavedActivitiesFetching =
+    isBookmarksFetching || isUserFinishedQuestionsFetching;
+  const isSavedActivitiesError =
+    isBookmarksError || isUserFinishedQuestionsError;
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
@@ -987,10 +992,12 @@ const FinishedQuestionsClient = ({
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={false}
-                      isBookmarkError={isUserSessionError || isBookmarksError}
+                      isSavedActivitiesError={
+                        isUserSessionError || isSavedActivitiesError
+                      }
                       isValidSession={!!userSession?.data?.session}
                       key={`${question.id}-${imageSrc}`}
-                      isBookmarksFetching={isBookmarksFetching}
+                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
                       imageTheme={imageTheme}
                     />
@@ -1217,13 +1224,11 @@ const FinishedQuestionsClient = ({
         bookmarks={bookmarks ?? []}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         isValidSession={!!userSession?.data?.session}
-        isBookmarksFetching={isBookmarksFetching}
+        isSavedActivitiesFetching={isSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
-        isBookmarkError={isUserSessionError || isBookmarksError}
-        isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
+        isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}

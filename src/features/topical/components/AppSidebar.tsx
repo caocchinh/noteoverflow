@@ -601,7 +601,7 @@ const AppSidebar = ({
             <div className="w-[70%] flex items-start justify-center flex-col">
               <p className="text-sm font-semibold">Strict mode</p>
               <p className="text-xs text-muted-foreground">
-                Questions containing unrelated topics will be excluded .
+                Questions containing unrelated topics will be excluded.
               </p>
             </div>
             <Switch

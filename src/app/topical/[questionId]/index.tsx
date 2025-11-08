@@ -95,6 +95,9 @@ export const QuestionView = ({
       !isUserSessionError &&
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
+  const isSavedActivitiesFetching = isBookmarksFetching || isUserFinishedQuestionsFetching;
+  const isSavedActivitiesError = isBookmarksError || isUserFinishedQuestionsError;
+
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
       <div className="flex items-center justify-start w-full gap-4 flex-wrap mb-3 ">
@@ -122,8 +125,8 @@ export const QuestionView = ({
         </div>
         <BookmarkButton
           bookmarks={bookmarks ?? []}
-          isBookmarksFetching={isBookmarksFetching}
-          isBookmarkError={isBookmarksError}
+          isSavedActivitiesFetching={isSavedActivitiesFetching}
+          isSavedActivitiesError={isSavedActivitiesError}
           isBookmarkDisabled={isUserSessionPending}
           isValidSession={!!userSession?.data?.session}
           isInView={true}

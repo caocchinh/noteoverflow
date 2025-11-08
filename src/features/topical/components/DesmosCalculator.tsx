@@ -125,7 +125,6 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
   // Recalculate Rnd dimensions when window resizes
   useEffect(() => {
     const handleResize = () => {
-      console.log("handleResize");
       calculateRndDimensions();
     };
 

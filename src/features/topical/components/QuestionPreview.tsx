@@ -20,10 +20,10 @@ import { toast } from "sonner";
 const QuestionPreview = memo(
   ({
     bookmarks,
-    isBookmarksFetching,
+    isSavedActivitiesFetching,
     isUserSessionPending,
     imageSrc,
-    isBookmarkError,
+    isSavedActivitiesError,
     imageTheme,
     listId,
     isValidSession,
@@ -35,10 +35,10 @@ const QuestionPreview = memo(
     bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
 
-    isBookmarksFetching: boolean;
+    isSavedActivitiesFetching: boolean;
     imageSrc: string;
     isUserSessionPending: boolean;
-    isBookmarkError: boolean;
+    isSavedActivitiesError: boolean;
     isValidSession: boolean;
     userFinishedQuestions: SelectedFinishedQuestion[];
     showFinishedQuestionTint: boolean;
@@ -150,7 +150,7 @@ const QuestionPreview = memo(
           )}
           badgeClassName="hidden"
           bookmarks={bookmarks}
-          isBookmarkError={isBookmarkError}
+          isSavedActivitiesError={isSavedActivitiesError}
           question={question}
           setIsPopoverOpen={setIsPopoverOpen}
           isPopoverOpen={isPopoverOpen}
@@ -158,7 +158,9 @@ const QuestionPreview = memo(
           setIsHovering={setIsHovering}
           isValidSession={isValidSession}
           isBookmarkDisabled={isUserSessionPending}
-          isBookmarksFetching={isBookmarksFetching || isUserSessionPending}
+          isSavedActivitiesFetching={
+            isSavedActivitiesFetching || isUserSessionPending
+          }
           isInView={shouldOpen}
           listId={listId}
         />
@@ -171,7 +173,7 @@ const QuestionPreview = memo(
               if (isUserSessionPending) {
                 return;
               }
-              if (isBookmarkError) {
+              if (isSavedActivitiesError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -220,15 +222,16 @@ const QuestionPreview = memo(
                 }
                 return false;
               })() && "!bg-logo-main !text-white",
-              (isUserSessionPending || isBookmarksFetching) && "opacity-50"
+              (isUserSessionPending || isSavedActivitiesFetching) &&
+                "opacity-50"
             )}
             tabIndex={-1}
             onClick={(e) => {
               e.stopPropagation();
-              if (isUserSessionPending || isBookmarksFetching) {
+              if (isUserSessionPending || isSavedActivitiesFetching) {
                 return;
               }
-              if (isBookmarkError) {
+              if (isSavedActivitiesError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -252,7 +255,7 @@ const QuestionPreview = memo(
               setIsPopoverOpen(true);
             }}
           >
-            {isBookmarksFetching ? (
+            {isSavedActivitiesFetching ? (
               <Loader2 className="animate-spin" />
             ) : (
               <Bookmark size={10} />

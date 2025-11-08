@@ -742,9 +742,9 @@ const SearchPastPaper = () => {
                 </Button>
               </div>
 
-              <div className="relative pt-0 w-full">
+              <div className="relative mt-[-10px] pt-0 w-full">
                 <Button
-                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg -mt-4 transition-all duration-200 hover:scale-[1.01]"
+                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
                   variant="destructive"
                   onClick={clearEverything}
                 >

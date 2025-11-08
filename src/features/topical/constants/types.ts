@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, RefObject } from "react";
+import type { ValidCurriculum } from "@/constants/types";
 
 export interface MultiSelectorProps {
   values: string[];
@@ -92,6 +93,42 @@ export interface SelectedPublickBookmark {
   question: SelectedQuestion;
 }
 
+// Generic metadata structure for consistent API responses
+export interface CurriculumMetadata {
+  subjects: string[];
+}
+
+// Unified bookmark metadata structure
+export interface BookmarkMetadataItem {
+  listName: string;
+  curricula: Partial<Record<ValidCurriculum, CurriculumMetadata>>;
+}
+
+type BookmarkId = string;
+
+// Organized by visibility for bookmarks
+export type BookmarksMetadata = Record<
+  "public" | "private",
+  Record<BookmarkId, BookmarkMetadataItem>
+>;
+
+// Simple curriculum mapping for finished questions
+export type FinishedQuestionsMetadata = Partial<
+  Record<ValidCurriculum, CurriculumMetadata>
+>;
+
+// Main metadata interface - consistent and extensible
+export interface SavedActivitiesMetadata {
+  finishedQuestions: FinishedQuestionsMetadata;
+  bookmarks: BookmarksMetadata;
+}
+
+export interface SavedActivitiesResponse {
+  finishedQuestions: SelectedFinishedQuestion[];
+  bookmarks: SelectedBookmark[];
+  metadata: SavedActivitiesMetadata;
+}
+
 export interface MultiSelectContextProps {
   value: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,9 +185,9 @@ export interface QuestionHoverCardProps {
   isUserSessionPending: boolean;
   isValidSession: boolean;
   listId?: string;
-  isBookmarksFetching: boolean;
+  isSavedActivitiesFetching: boolean;
   isMobileDevice: boolean;
-  isBookmarkError: boolean;
+  isSavedActivitiesError: boolean;
   resetScrollPositions: () => void;
 }
 
@@ -162,9 +199,9 @@ export interface BrowseMoreQuestionsProps {
   userFinishedQuestions: SelectedFinishedQuestion[];
   showFinishedQuestionTint: boolean;
   isUserSessionError: boolean;
-  isBookmarkError: boolean;
+  isSavedActivitiesError: boolean;
   isValidSession: boolean;
-  isBookmarksFetching: boolean;
+  isSavedActivitiesFetching: boolean;
   navigateToQuestion: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
@@ -183,10 +220,8 @@ export interface QuestionInspectProps {
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  isBookmarksFetching: boolean;
-  isBookmarkError: boolean;
-  isFinishedQuestionsFetching: boolean;
-  isFinishedQuestionsError: boolean;
+  isSavedActivitiesFetching: boolean;
+  isSavedActivitiesError: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
   listId?: string;
   BETTER_AUTH_URL: string;

@@ -106,14 +106,12 @@ const QuestionInspect = ({
   imageTheme,
   isUserSessionPending,
   isValidSession,
-  isBookmarksFetching,
-  isBookmarkError,
+  isSavedActivitiesFetching,
+  isSavedActivitiesError,
   listId,
-  isFinishedQuestionsFetching,
   BETTER_AUTH_URL,
   sortParameters,
   setSortParameters,
-  isFinishedQuestionsError,
   isInspectSidebarOpen,
   setIsInspectSidebarOpen,
   userFinishedQuestions,
@@ -615,9 +613,6 @@ const QuestionInspect = ({
     }
   }, [currentQuestionId, currentQuery]);
 
-  // Construct userSession from isValidSession for compatibility
-  const userSession = { data: { session: isValidSession ? {} : null } };
-
   return (
     <>
       <Dialog
@@ -725,7 +720,7 @@ const QuestionInspect = ({
               <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
                 <FinishedTracker
                   allQuestions={allQuestions}
-                  isFinishedQuestionsFetching={isFinishedQuestionsFetching}
+                  isSavedActivitiesFetching={isSavedActivitiesFetching}
                   isValidSession={isValidSession}
                   isUserSessionPending={isUserSessionPending}
                 />
@@ -857,8 +852,10 @@ const QuestionInspect = ({
                               isUserSessionPending={isUserSessionPending}
                               isValidSession={isValidSession}
                               listId={listId}
-                              isBookmarksFetching={isBookmarksFetching}
-                              isBookmarkError={isBookmarkError}
+                              isSavedActivitiesFetching={
+                                isSavedActivitiesFetching
+                              }
+                              isSavedActivitiesError={isSavedActivitiesError}
                               isInspectSidebarOpen={isInspectSidebarOpen}
                               isMobileDevice={isMobile}
                             />
@@ -904,8 +901,10 @@ const QuestionInspect = ({
                             isUserSessionPending={isUserSessionPending}
                             isValidSession={isValidSession}
                             listId={listId}
-                            isBookmarksFetching={isBookmarksFetching}
-                            isBookmarkError={isBookmarkError}
+                            isSavedActivitiesFetching={
+                              isSavedActivitiesFetching
+                            }
+                            isSavedActivitiesError={isSavedActivitiesError}
                             setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
                             isMobileDevice={isMobile}
@@ -1176,8 +1175,8 @@ const QuestionInspect = ({
                         finishedQuestions={userFinishedQuestions}
                         question={currentQuestionData}
                         isFinishedQuestionDisabled={isUserSessionPending}
-                        isFinishedQuestionFetching={isFinishedQuestionsFetching}
-                        isFinishedQuestionError={isFinishedQuestionsError}
+                        isFinishedQuestionFetching={isSavedActivitiesFetching}
+                        isFinishedQuestionError={isSavedActivitiesError}
                         isValidSession={isValidSession}
                       />
                     )}
@@ -1191,8 +1190,8 @@ const QuestionInspect = ({
                         bookmarks={bookmarks}
                         popOverAlign="start"
                         isValidSession={isValidSession}
-                        isBookmarksFetching={isBookmarksFetching}
-                        isBookmarkError={isBookmarkError}
+                        isSavedActivitiesFetching={isSavedActivitiesFetching}
+                        isSavedActivitiesError={isSavedActivitiesError}
                         isInView={true}
                       />
                     )}
@@ -1265,9 +1264,9 @@ const QuestionInspect = ({
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={showFinishedQuestionTint}
                       isUserSessionError={isUserSessionError}
-                      isBookmarkError={isBookmarkError}
-                      isValidSession={!!userSession?.data?.session}
-                      isBookmarksFetching={isBookmarksFetching}
+                      isSavedActivitiesError={isSavedActivitiesError}
+                      isValidSession={isValidSession}
+                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                     />
                   </ScrollArea>
                 </div>
@@ -1340,12 +1339,12 @@ export default QuestionInspect;
 const FinishedTracker = ({
   allQuestions,
   isValidSession,
-  isFinishedQuestionsFetching,
+  isSavedActivitiesFetching,
   isUserSessionPending,
 }: {
   allQuestions: SelectedQuestion[];
   isValidSession: boolean;
-  isFinishedQuestionsFetching: boolean;
+  isSavedActivitiesFetching: boolean;
   isUserSessionPending: boolean;
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1358,7 +1357,7 @@ const FinishedTracker = ({
     queryClient.getQueryData(["user_finished_questions"]);
   return (
     <div className="absolute w-full h-7 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm">
-      {!isFinishedQuestionsFetching &&
+      {!isSavedActivitiesFetching &&
         !isUserSessionPending &&
         isValidSession && (
           <>
@@ -1371,7 +1370,7 @@ const FinishedTracker = ({
             out of {allQuestions.length}
           </>
         )}
-      {(isUserSessionPending || isFinishedQuestionsFetching) && (
+      {(isUserSessionPending || isSavedActivitiesFetching) && (
         <span className="text-xs flex items-center justify-center gap-2">
           Fetching data <Loader2 className="animate-spin " size={12} />
         </span>
@@ -1499,8 +1498,8 @@ const QuestionHoverCard = ({
   isMobileDevice,
   isValidSession,
   listId,
-  isBookmarksFetching,
-  isBookmarkError,
+  isSavedActivitiesFetching,
+  isSavedActivitiesError,
   isInspectSidebarOpen,
   resetScrollPositions,
 }: QuestionHoverCardProps) => {
@@ -1604,8 +1603,8 @@ const QuestionHoverCard = ({
             isPopoverOpen={isPopoverOpen}
             isValidSession={isValidSession}
             listId={listId}
-            isBookmarksFetching={isBookmarksFetching}
-            isBookmarkError={isBookmarkError}
+            isSavedActivitiesFetching={isSavedActivitiesFetching}
+            isSavedActivitiesError={isSavedActivitiesError}
             isInView={true}
           />
           {isMutatingThisQuestion && (
@@ -1617,7 +1616,7 @@ const QuestionHoverCard = ({
                 if (isUserSessionPending) {
                   return;
                 }
-                if (isBookmarkError) {
+                if (isSavedActivitiesError) {
                   toast.error("Bookmark error. Please refresh the page.", {
                     duration: 2000,
                     position:
@@ -1693,9 +1692,9 @@ const BrowseMoreQuestions = ({
   userFinishedQuestions,
   showFinishedQuestionTint,
   isUserSessionError,
-  isBookmarkError,
+  isSavedActivitiesError,
   isValidSession,
-  isBookmarksFetching,
+  isSavedActivitiesFetching,
   navigateToQuestion,
   isBrowseMoreOpen,
   setIsBrowseMoreOpen,
@@ -1751,10 +1750,12 @@ const BrowseMoreQuestions = ({
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions ?? []}
                   showFinishedQuestionTint={showFinishedQuestionTint}
-                  isBookmarkError={isUserSessionError || isBookmarkError}
+                  isSavedActivitiesError={
+                    isUserSessionError || isSavedActivitiesError
+                  }
                   isValidSession={isValidSession}
                   key={`${question.id}-${imageSrc}`}
-                  isBookmarksFetching={isBookmarksFetching}
+                  isSavedActivitiesFetching={isSavedActivitiesFetching}
                   imageSrc={imageSrc}
                   onQuestionClick={() => {
                     navigateToQuestion(question?.id);

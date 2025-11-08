@@ -165,6 +165,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       !isUserSessionError &&
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
+  const isSavedActivitiesFetching =
+    isBookmarksFetching || isUserFinishedQuestionsFetching;
+  const isSavedActivitiesError =
+    isBookmarksError || isUserFinishedQuestionsError;
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
     id: string;
@@ -1119,10 +1124,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
                       showFinishedQuestionTint={showFinishedQuestionTint}
-                      isBookmarkError={isUserSessionError || isBookmarksError}
+                      isSavedActivitiesError={
+                        isUserSessionError || isSavedActivitiesError
+                      }
                       isValidSession={!!userSession?.data?.session}
                       key={`${question.id}-${imageSrc}`}
-                      isBookmarksFetching={isBookmarksFetching}
+                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
                       listId={chosenList?.id}
                       imageTheme={imageTheme}
@@ -1365,14 +1372,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         bookmarks={bookmarks ?? []}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         isValidSession={!!userSession?.data?.session}
-        isBookmarksFetching={isBookmarksFetching}
+        isSavedActivitiesFetching={isSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
         listId={chosenList?.id}
-        isBookmarkError={isUserSessionError || isBookmarksError}
-        isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
+        isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}

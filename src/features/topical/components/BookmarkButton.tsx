@@ -35,7 +35,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SelectedBookmark, SelectedQuestion } from "../constants/types";
+import {
+  SavedActivitiesResponse,
+  SelectedBookmark,
+  SelectedQuestion,
+} from "../constants/types";
 import {
   Command,
   CommandEmpty,
@@ -100,11 +104,11 @@ export const BookmarkButton = memo(
     bookmarks,
     question,
     isBookmarkDisabled,
-    isBookmarksFetching,
+    isSavedActivitiesFetching,
     isPopoverOpen: openProp,
     setIsPopoverOpen: setOpenProp,
     setIsHovering,
-    isBookmarkError,
+    isSavedActivitiesError,
     setShouldOpen,
     popOverAlign = "end",
     listId,
@@ -121,9 +125,9 @@ export const BookmarkButton = memo(
     setIsPopoverOpen?: (open: boolean) => void;
     setIsHovering?: (value: boolean) => void;
     popOverAlign?: "start" | "end";
-    isBookmarksFetching: boolean;
+    isSavedActivitiesFetching: boolean;
     setShouldOpen?: (value: boolean) => void;
-    isBookmarkError: boolean;
+    isSavedActivitiesError: boolean;
     listId?: string;
     badgeClassName?: string;
     popOverTriggerClassName?: string;
@@ -162,9 +166,9 @@ export const BookmarkButton = memo(
     // Only create the store once when component mounts
     if (bookmarkStore.current === null && isInView) {
       bookmarkStore.current = createBookmarkStore({
-        isBookmarksFetching,
+        isSavedActivitiesFetching,
         isBookmarkDisabled,
-        isBookmarkError,
+        isSavedActivitiesError,
         isValidSession,
         question,
         chosenBookmarkList: (() => {
@@ -197,9 +201,9 @@ export const BookmarkButton = memo(
       if (bookmarkStore.current) {
         bookmarkStore.current.setState((state) => ({
           ...state,
-          isBookmarksFetching,
+          isSavedActivitiesFetching,
           isBookmarkDisabled,
-          isBookmarkError,
+          isSavedActivitiesError,
           isValidSession,
           question,
           chosenBookmarkList: (() => {
@@ -226,9 +230,9 @@ export const BookmarkButton = memo(
         }));
       }
     }, [
-      isBookmarksFetching,
+      isSavedActivitiesFetching,
       isBookmarkDisabled,
-      isBookmarkError,
+      isSavedActivitiesError,
       isValidSession,
       question,
       bookmarks,
@@ -279,17 +283,17 @@ const BookmarkButtonConsumer = memo(
     const isBookmarkDisabled = useBookmarkContext(
       (state) => state.isBookmarkDisabled
     );
-    const isBookmarksFetching = useBookmarkContext(
-      (state) => state.isBookmarksFetching
+    const isSavedActivitiesFetching = useBookmarkContext(
+      (state) => state.isSavedActivitiesFetching
     );
-    const isBookmarkError = useBookmarkContext(
-      (state) => state.isBookmarkError
+    const isSavedActivitiesError = useBookmarkContext(
+      (state) => state.isSavedActivitiesError
     );
     const visibility = useBookmarkContext((state) => state.visibility);
     // const isInView = useBookmarkContext((state) => state.isInView);
     const isValidSession = useBookmarkContext((state) => state.isValidSession);
     const mutationKey = [
-      "all_user_bookmarks",
+      "user_saved_activities",
       question.id,
       bookmarkListName,
       visibility,
@@ -436,16 +440,16 @@ const BookmarkButtonConsumer = memo(
           }, 0);
         }, 0);
 
-        queryClient.setQueryData<SelectedBookmark[]>(
-          ["all_user_bookmarks"],
-          (prev: SelectedBookmark[] | undefined) => {
+        queryClient.setQueryData<SavedActivitiesResponse>(
+          ["user_saved_activities"],
+          (prev: SavedActivitiesResponse | undefined) => {
             if (!prev) {
               return prev;
             }
 
             // Modify data in-place to avoid re-renders caused by new references
             if (isCreateNew) {
-              const isListAlreadyExist = prev.some(
+              const isListAlreadyExist = prev.bookmarks.some(
                 (bookmark) => bookmark.id === realListId
               );
 
@@ -461,7 +465,7 @@ const BookmarkButtonConsumer = memo(
               if (isListAlreadyExist) {
                 // Add bookmark to existing list
                 addChosenBookmarkList(realListId);
-                const existingList = prev.find(
+                const existingList = prev.bookmarks.find(
                   (bookmark) => bookmark.id === realListId
                 );
                 if (existingList) {
@@ -481,7 +485,7 @@ const BookmarkButtonConsumer = memo(
               } else {
                 // Create new list and add bookmark
                 addChosenBookmarkList(realListId);
-                prev.push({
+                prev.bookmarks.push({
                   id: realListId,
                   createdAt: new Date(),
                   updatedAt: new Date(),
@@ -512,7 +516,7 @@ const BookmarkButtonConsumer = memo(
             } else if (!isCreateNew && !isRealBookmarked) {
               // Add bookmark to existing list
               addChosenBookmarkList(realListId);
-              const existingList = prev.find(
+              const existingList = prev.bookmarks.find(
                 (bookmark) => bookmark.id === realListId
               );
               if (existingList) {
@@ -533,7 +537,7 @@ const BookmarkButtonConsumer = memo(
               // Remove bookmark from list
               removeChosenBookmarkList(realListId);
               setIsRemoveFromListDialogOpen(false);
-              const existingList = prev.find(
+              const existingList = prev.bookmarks.find(
                 (bookmark) => bookmark.id === realListId
               );
               if (existingList) {
@@ -627,10 +631,10 @@ const BookmarkButtonConsumer = memo(
 
     const openUI = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (isBookmarkDisabled || isBookmarksFetching) {
+      if (isBookmarkDisabled || isSavedActivitiesFetching) {
         return;
       }
-      if (isBookmarkError) {
+      if (isSavedActivitiesError) {
         toast.error("Bookmark error. Please refresh the page.", {
           duration: 2000,
           position: isMobileDevice ? "top-center" : "bottom-right",
@@ -815,8 +819,8 @@ const BookmarkTrigger = memo(() => {
   const triggerButtonClassName = useBookmarkContext(
     (state) => state.triggerButtonClassName
   );
-  const isBookmarksFetching = useBookmarkContext(
-    (state) => state.isBookmarksFetching
+  const isSavedActivitiesFetching = useBookmarkContext(
+    (state) => state.isSavedActivitiesFetching
   );
 
   const isBookmarkDisabled = useBookmarkContext(
@@ -858,12 +862,12 @@ const BookmarkTrigger = memo(() => {
         triggerButtonClassName,
         "rounded-[3px]",
         isBookmarked && "!bg-logo-main !text-white",
-        (isBookmarkDisabled || isBookmarksFetching) && "opacity-50"
+        (isBookmarkDisabled || isSavedActivitiesFetching) && "opacity-50"
       )}
       tabIndex={-1}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
     >
-      {isBookmarksFetching ? (
+      {isSavedActivitiesFetching ? (
         <Loader2 className="animate-spin" />
       ) : (
         <Bookmark size={10} />

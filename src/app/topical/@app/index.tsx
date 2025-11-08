@@ -27,12 +27,11 @@ import {
 import type {
   FilterData,
   LayoutStyle,
-  SelectedBookmark,
-  SelectedFinishedQuestion,
   SortParameters,
   CurrentQuery,
   ImageTheme,
   QuestionInspectOpenState,
+  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams, isSubset } from "@/features/topical/lib/utils";
@@ -435,19 +434,16 @@ const TopicalClient = ({
   const isValidSession = !!userSession?.data?.session;
 
   const {
-    data: bookmarks,
-    isFetching: isBookmarksFetching,
-    isError: isBookmarksError,
+    data: userSavedActivities,
+    isFetching: isUserSavedActivitiesFetching,
+    isError: isUserSavedActivitiesError,
   } = useQuery({
-    queryKey: ["all_user_bookmarks"],
+    queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/bookmark", {
+      const response = await fetch("/api/topical/saved-activities", {
         method: "GET",
       });
-      const data: {
-        data: SelectedBookmark[];
-        error?: string;
-      } = await response.json();
+      const data: SavedActivitiesResponse = await response.json();
       if (!response.ok) {
         const errorMessage =
           typeof data === "object" && data && "error" in data
@@ -456,42 +452,21 @@ const TopicalClient = ({
         throw new Error(errorMessage);
       }
 
-      return data.data;
+      return data;
     },
     enabled:
       isSearchEnabled &&
       isValidSession &&
       !isUserSessionError &&
-      !queryClient.getQueryData(["all_user_bookmarks"]),
+      !queryClient.getQueryData(["user_saved_activities"]),
   });
 
-  const {
-    data: userFinishedQuestions,
-    isFetching: isUserFinishedQuestionsFetching,
-    isError: isUserFinishedQuestionsError,
-  } = useQuery({
-    queryKey: ["user_finished_questions"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/finished");
-      const data: {
-        data: SelectedFinishedQuestion[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-      return data.data;
-    },
-    enabled:
-      isSearchEnabled &&
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_finished_questions"]),
-  });
+  const userFinishedQuestions = useMemo(() => {
+    return userSavedActivities?.finishedQuestions;
+  }, [userSavedActivities]);
+  const bookmarks = useMemo(() => {
+    return userSavedActivities?.bookmarks;
+  }, [userSavedActivities]);
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
@@ -821,12 +796,12 @@ const TopicalClient = ({
                             isUserSessionPending={isUserSessionPending}
                             userFinishedQuestions={userFinishedQuestions ?? []}
                             showFinishedQuestionTint={showFinishedQuestionTint}
-                            isBookmarkError={
-                              isUserSessionError || isBookmarksError
-                            }
+                            isSavedActivitiesError={isUserSavedActivitiesError}
                             isValidSession={isValidSession}
                             key={`${question.id}-${imageSrc}`}
-                            isBookmarksFetching={isBookmarksFetching}
+                            isSavedActivitiesFetching={
+                              isUserSavedActivitiesFetching
+                            }
                             imageSrc={imageSrc}
                           />
                         ))
@@ -865,16 +840,14 @@ const TopicalClient = ({
         imageTheme={imageTheme}
         currentQuery={currentQuery}
         isValidSession={isValidSession}
-        isBookmarksFetching={isBookmarksFetching}
+        isSavedActivitiesFetching={isUserSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}
-        isBookmarkError={isUserSessionError || isBookmarksError}
-        isFinishedQuestionsFetching={isUserFinishedQuestionsFetching}
+        isSavedActivitiesError={isUserSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        isFinishedQuestionsError={isUserFinishedQuestionsError}
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
