@@ -16,22 +16,11 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { BookMarked, CalendarOff, ScanText, Send } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  RefObject,
-} from "react";
-import {
-  CurrentQuery,
   FiltersCache,
-  ImageTheme,
   InvalidInputs,
-  LayoutStyle,
-  SortParameters,
+  AppSidebarProps,
 } from "../constants/types";
 import {
   DEFAULT_CACHE,
@@ -91,39 +80,7 @@ const AppSidebar = ({
   isUserSessionPending,
   isValidSession,
   isAddRecentQueryPending,
-}: {
-  currentQuery: CurrentQuery;
-  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
-  isTopicalDataFetching: boolean;
-  isQuestionViewDisabled: boolean;
-  filterUrl: string;
-  mountedRef: RefObject<boolean>;
-  searchParams: { [key: string]: string | string[] | undefined };
-  setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
-  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
-  setNumberOfColumns: Dispatch<SetStateAction<number>>;
-  setIsStrictModeEnabled: Dispatch<SetStateAction<boolean>>;
-  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
-  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
-  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
-  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
-  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
-  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
-  imageTheme: ImageTheme;
-  showFinishedQuestionTint: boolean;
-  showScrollToTopButton: boolean;
-  scrollUpWhenPageChange: boolean;
-  isQuestionCacheEnabled: boolean;
-  numberOfColumns: number;
-  layoutStyle: LayoutStyle;
-  numberOfQuestionsPerPage: number;
-  isStrictModeEnabled: boolean;
-  isUserSessionPending: boolean;
-  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
-  isValidSession: boolean;
-  isAddRecentQueryPending: boolean;
-}) => {
+}: AppSidebarProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const { setIsAppSidebarOpen } = useTopicalApp();
   const { overflowScrollHandler } = useUtilityOverflow();

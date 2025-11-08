@@ -32,6 +32,7 @@ import {
   SelectedPublickBookmark,
   ImageTheme,
   SortParameters,
+  QuestionInspectOpenState,
 } from "@/features/topical/constants/types";
 import {
   ChevronLeft,
@@ -112,10 +113,11 @@ export const BookmarkView = ({
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
   });
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] = useState({
-    isOpen: false,
-    questionId: "",
-  });
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
+    useState<QuestionInspectOpenState>({
+      isOpen: false,
+      questionId: "",
+    });
 
   const {
     data: userFinishedQuestions,

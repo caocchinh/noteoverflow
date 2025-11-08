@@ -171,12 +171,8 @@ export interface BrowseMoreQuestionsProps {
 }
 
 export interface QuestionInspectProps {
-  isOpen: {
-    isOpen: boolean;
-    questionId: string;
-  };
-
-  setIsOpen: Dispatch<SetStateAction<{ isOpen: boolean; questionId: string }>>;
+  isOpen: QuestionInspectOpenState;
+  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
   imageTheme: ImageTheme;
@@ -203,9 +199,7 @@ export interface AppUltilityBarProps {
   layoutStyle: LayoutStyle;
   ultilityRef: RefObject<HTMLDivElement | null>;
   isQuestionViewDisabled: boolean;
-  setIsQuestionInspectOpen: Dispatch<
-    SetStateAction<{ isOpen: boolean; questionId: string }>
-  >;
+  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
@@ -217,3 +211,42 @@ export interface AppUltilityBarProps {
   filterUrl: string;
   setShowFinishedQuestion: Dispatch<SetStateAction<boolean>>;
 }
+
+export interface AppSidebarProps {
+  currentQuery: CurrentQuery;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  isTopicalDataFetching: boolean;
+  isQuestionViewDisabled: boolean;
+  filterUrl: string;
+  mountedRef: RefObject<boolean>;
+  searchParams: { [key: string]: string | string[] | undefined };
+  setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
+  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
+  setNumberOfColumns: Dispatch<SetStateAction<number>>;
+  setIsStrictModeEnabled: Dispatch<SetStateAction<boolean>>;
+  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
+  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
+  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
+  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
+  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
+  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
+  imageTheme: ImageTheme;
+  showFinishedQuestionTint: boolean;
+  showScrollToTopButton: boolean;
+  scrollUpWhenPageChange: boolean;
+  isQuestionCacheEnabled: boolean;
+  numberOfColumns: number;
+  layoutStyle: LayoutStyle;
+  numberOfQuestionsPerPage: number;
+  isStrictModeEnabled: boolean;
+  isUserSessionPending: boolean;
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
+  isValidSession: boolean;
+  isAddRecentQueryPending: boolean;
+}
+
+export type QuestionInspectOpenState = {
+  isOpen: boolean;
+  questionId: string;
+};

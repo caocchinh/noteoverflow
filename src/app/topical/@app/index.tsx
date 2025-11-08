@@ -32,6 +32,7 @@ import type {
   SortParameters,
   CurrentQuery,
   ImageTheme,
+  QuestionInspectOpenState,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams, isSubset } from "@/features/topical/lib/utils";
@@ -355,7 +356,7 @@ const TopicalClient = ({
       setDisplayedData(chunkedData[0]);
 
       setCurrentChunkIndex(0);
-      scrollAreaRef.current?.scrollTo({
+      mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
       });
@@ -407,7 +408,7 @@ const TopicalClient = ({
   }, [isQuestionCacheEnabled, openInspectOnMount, searchParams, topicalData]);
 
   useEffect(() => {
-    scrollAreaRef.current?.scrollTo({
+    mainContentScrollAreaRef.current?.scrollTo({
       top: 0,
       behavior: "instant",
     });
@@ -492,11 +493,12 @@ const TopicalClient = ({
       !queryClient.getQueryData(["user_finished_questions"]),
   });
 
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] = useState({
-    isOpen: false,
-    questionId: "",
-  });
+  const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
+    useState<QuestionInspectOpenState>({
+      isOpen: false,
+      questionId: "",
+    });
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -595,7 +597,7 @@ const TopicalClient = ({
                 isScrollingAndShouldShowScrollButton={
                   isScrollingAndShouldShowScrollButton
                 }
-                scrollAreaRef={scrollAreaRef}
+                scrollAreaRef={mainContentScrollAreaRef}
               />
 
               <AppUltilityBar
@@ -604,7 +606,7 @@ const TopicalClient = ({
                 ultilityRef={ultilityRef}
                 isQuestionViewDisabled={isQuestionViewDisabled}
                 setIsQuestionInspectOpen={setIsQuestionInspectOpen}
-                scrollAreaRef={scrollAreaRef}
+                scrollAreaRef={mainContentScrollAreaRef}
                 currentChunkIndex={currentChunkIndex}
                 setCurrentChunkIndex={setCurrentChunkIndex}
                 setDisplayedData={setDisplayedData}
@@ -617,11 +619,11 @@ const TopicalClient = ({
               />
 
               <ScrollArea
-                viewportRef={scrollAreaRef}
+                viewportRef={mainContentScrollAreaRef}
                 className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
                 type="always"
                 viewPortOnScrollEnd={() => {
-                  if (scrollAreaRef.current?.scrollTop === 0) {
+                  if (mainContentScrollAreaRef.current?.scrollTop === 0) {
                     setIsScrollingAndShouldShowScrollButton(false);
                   } else {
                     setIsScrollingAndShouldShowScrollButton(true);
