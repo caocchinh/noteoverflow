@@ -45,7 +45,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Info,
   Loader2,
   Monitor,
   ScanText,
@@ -671,7 +670,6 @@ const FinishedQuestionsClient = ({
                     "flex justify-center items-center gap-2"
                   )}
                 >
-                  <Info className="w-4 h-4" />
                   To filter questions, select a subject first
                 </TooltipContent>
               </Tooltip>
@@ -701,7 +699,6 @@ const FinishedQuestionsClient = ({
                     "flex justify-center items-center gap-2"
                   )}
                 >
-                  <Info className="w-4 h-4" />
                   To inspect questions, select a subject first
                 </TooltipContent>
               </Tooltip>

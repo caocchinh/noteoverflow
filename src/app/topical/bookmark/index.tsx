@@ -51,7 +51,6 @@ import {
   Loader2,
   Monitor,
   ScanText,
-  Info,
 } from "lucide-react";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -757,7 +756,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     "flex justify-center items-center gap-2"
                   )}
                 >
-                  <Info className="w-4 h-4" />
                   To filter questions, select a subject first
                 </TooltipContent>
               </Tooltip>
@@ -787,7 +785,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     "flex justify-center items-center gap-2"
                   )}
                 >
-                  <Info className="w-4 h-4" />
                   To inspect questions, select a subject first
                 </TooltipContent>
               </Tooltip>

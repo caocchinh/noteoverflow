@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Info, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useState } from "react";
 import { QR } from "./QR";
 
@@ -27,7 +27,7 @@ export const ShareFilter = ({
           <Button
             className={cn(
               "rounded-sm w-9 cursor-pointer !bg-logo-main !text-white",
-              isDisabled && "opacity-50"
+              isDisabled && "opacity-50 !cursor-default"
             )}
             onClick={() => {
               if (isDisabled) {
@@ -46,10 +46,7 @@ export const ShareFilter = ({
           arrowClassName="!bg-logo-main !fill-logo-main"
         >
           {isDisabled ? (
-            <>
-              <Info className="w-4 h-4" />
-              To share {type}, run a search first.
-            </>
+            <>To share {type}, run a search first.</>
           ) : (
             <>Share {type}</>
           )}

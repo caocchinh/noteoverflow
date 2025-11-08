@@ -197,3 +197,23 @@ export interface QuestionInspectProps {
   showFinishedQuestionTint: boolean;
   isUserSessionError: boolean;
 }
+
+export interface AppUltilityBarProps {
+  fullPartitionedData: SelectedQuestion[][] | undefined;
+  layoutStyle: LayoutStyle;
+  ultilityRef: RefObject<HTMLDivElement | null>;
+  isQuestionViewDisabled: boolean;
+  setIsQuestionInspectOpen: Dispatch<
+    SetStateAction<{ isOpen: boolean; questionId: string }>
+  >;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+  currentChunkIndex: number;
+  setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
+  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
+  scrollUpWhenPageChange: boolean;
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  showFinishedQuestion: boolean;
+  filterUrl: string;
+  setShowFinishedQuestion: Dispatch<SetStateAction<boolean>>;
+}

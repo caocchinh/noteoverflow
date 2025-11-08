@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { ArrowDownWideNarrow, Info, Check } from "lucide-react";
+import { ArrowDownWideNarrow, Check } from "lucide-react";
 import { SortParameters } from "../constants/types";
 import { cn } from "@/lib/utils";
 import {
@@ -93,7 +93,6 @@ const Sort = ({
       </TooltipTrigger>
       <TooltipContent side="bottom" className="z-[1000000]">
         <div className="flex items-center gap-2 justify-center">
-          {showSortTextTrigger && <Info className="w-4 h-4" />}
           {showSortTextTrigger && disabledMessage}
           {!showSortTextTrigger && "Sort by"}
         </div>

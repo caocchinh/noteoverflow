@@ -1,0 +1,998 @@
+import { AnimatePresence, motion } from "framer-motion";
+import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
+import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
+import ButtonUltility from "@/features/topical/components/ButtonUltility";
+import CacheSetting from "@/features/topical/components/CacheSetting";
+import LayoutSetting from "@/features/topical/components/LayoutSetting";
+import VisualSetting from "@/features/topical/components/VisualSetting";
+import { RecentQuery } from "@/features/topical/components/RecentQuery";
+import { TOPICAL_DATA } from "@/constants/constants";
+import { default as NextImage } from "next/image";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarRail,
+  SidebarSeparator,
+} from "@/components/ui/sidebar";
+import { BookMarked, CalendarOff, ScanText, Send } from "lucide-react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  RefObject,
+} from "react";
+import {
+  CurrentQuery,
+  FiltersCache,
+  ImageTheme,
+  InvalidInputs,
+  LayoutStyle,
+  SortParameters,
+} from "../constants/types";
+import {
+  DEFAULT_CACHE,
+  DEFAULT_LAYOUT_STYLE,
+  DEFAULT_NUMBER_OF_COLUMNS,
+  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
+  DEFAULT_SORT_OPTIONS,
+  FILTERS_CACHE_KEY,
+  INVALID_INPUTS_DEFAULT,
+} from "../constants/constants";
+import type { ValidCurriculum } from "@/constants/types";
+import {
+  validateCurriculum,
+  validateFilterData,
+  validateSubject,
+  syncFilterCacheToLocalStorage,
+  isValidInputs as isValidInputsUtils,
+} from "@/features/topical/lib/utils";
+import { useTopicalApp } from "./TopicalLayoutProvider";
+import { Button } from "@/components/ui/button";
+import { QR } from "./QR";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import { useUtilityOverflow } from "../hooks/useUtilityOverflow";
+
+const AppSidebar = ({
+  currentQuery,
+  setCurrentQuery,
+  setIsSearchEnabled,
+  setSortParameters,
+  isTopicalDataFetching,
+  isQuestionViewDisabled,
+  filterUrl,
+  mountedRef,
+  searchParams,
+  setIsValidSearchParams,
+  setIsQuestionCacheEnabled,
+  setNumberOfColumns,
+  setIsStrictModeEnabled,
+  setScrollUpWhenPageChange,
+  setLayoutStyle,
+  setNumberOfQuestionsPerPage,
+  setShowScrollToTopButton,
+  setShowFinishedQuestionTint,
+  setImageTheme,
+  imageTheme,
+  showFinishedQuestionTint,
+  showScrollToTopButton,
+  scrollUpWhenPageChange,
+  isQuestionCacheEnabled,
+  numberOfColumns,
+  layoutStyle,
+  numberOfQuestionsPerPage,
+  isStrictModeEnabled,
+  isUserSessionPending,
+  isValidSession,
+  isAddRecentQueryPending,
+}: {
+  currentQuery: CurrentQuery;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  isTopicalDataFetching: boolean;
+  isQuestionViewDisabled: boolean;
+  filterUrl: string;
+  mountedRef: RefObject<boolean>;
+  searchParams: { [key: string]: string | string[] | undefined };
+  setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
+  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
+  setNumberOfColumns: Dispatch<SetStateAction<number>>;
+  setIsStrictModeEnabled: Dispatch<SetStateAction<boolean>>;
+  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
+  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
+  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
+  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
+  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
+  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
+  imageTheme: ImageTheme;
+  showFinishedQuestionTint: boolean;
+  showScrollToTopButton: boolean;
+  scrollUpWhenPageChange: boolean;
+  isQuestionCacheEnabled: boolean;
+  numberOfColumns: number;
+  layoutStyle: LayoutStyle;
+  numberOfQuestionsPerPage: number;
+  isStrictModeEnabled: boolean;
+  isUserSessionPending: boolean;
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
+  isValidSession: boolean;
+  isAddRecentQueryPending: boolean;
+}) => {
+  const [isMounted, setIsMounted] = useState(false);
+  const { setIsAppSidebarOpen } = useTopicalApp();
+  const { overflowScrollHandler } = useUtilityOverflow();
+  const [selectedCurriculum, setSelectedCurriculum] =
+    useState<ValidCurriculum>("CIE A-LEVEL");
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string[]>([]);
+  const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
+  const [isSessionCacheEnabled, setIsSessionCacheEnabled] = useState(true);
+  const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
+    useState(true);
+  const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
+    ...INVALID_INPUTS_DEFAULT,
+  });
+  const [sidebarKey, setSidebarKey] = useState(0);
+  const isMobileDevice = useIsMobile();
+
+  const curriculumRef = useRef<HTMLDivElement | null>(null);
+  const subjectRef = useRef<HTMLDivElement | null>(null);
+  const topicRef = useRef<HTMLDivElement | null>(null);
+  const yearRef = useRef<HTMLDivElement | null>(null);
+  const paperTypeRef = useRef<HTMLDivElement | null>(null);
+  const seasonRef = useRef<HTMLDivElement | null>(null);
+  const isOverwriting = useRef(false);
+
+  const availableSubjects = useMemo(() => {
+    return TOPICAL_DATA[
+      TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
+    ]?.subject;
+  }, [selectedCurriculum]);
+
+  const subjectSyllabus = TOPICAL_DATA.find(
+    (item) => item.curriculum === selectedCurriculum
+  )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
+
+  const availableTopics = useMemo(() => {
+    return availableSubjects?.find((item) => item.code === selectedSubject)
+      ?.topic;
+  }, [availableSubjects, selectedSubject]);
+
+  const availableYears = useMemo(() => {
+    return availableSubjects?.find((item) => item.code === selectedSubject)
+      ?.year;
+  }, [availableSubjects, selectedSubject]);
+
+  const availablePaperTypes = useMemo(() => {
+    return availableSubjects?.find((item) => item.code === selectedSubject)
+      ?.paperType;
+  }, [availableSubjects, selectedSubject]);
+
+  const availableSeasons = useMemo(() => {
+    return availableSubjects?.find((item) => item.code === selectedSubject)
+      ?.season;
+  }, [availableSubjects, selectedSubject]);
+
+  const revert = () => {
+    if (!currentQuery.curriculumId || !currentQuery.subjectId) {
+      return;
+    }
+    isOverwriting.current = true;
+    setSelectedCurriculum(currentQuery.curriculumId as ValidCurriculum);
+    setSelectedSubject(currentQuery.subjectId);
+    setSelectedTopic(currentQuery.topic);
+    setSelectedYear(currentQuery.year);
+    setSelectedPaperType(currentQuery.paperType);
+    setSelectedSeason(currentQuery.season);
+    setTimeout(() => {
+      isOverwriting.current = false;
+    }, 0);
+  };
+
+  const resetEverything = () => {
+    isOverwriting.current = true;
+    try {
+      const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
+      const stateToSave: FiltersCache = existingStateJSON
+        ? JSON.parse(existingStateJSON)
+        : { ...DEFAULT_CACHE };
+
+      stateToSave.lastSessionCurriculum = "";
+      stateToSave.lastSessionCurriculum = "";
+      if (selectedCurriculum && selectedSubject) {
+        stateToSave.filters = {
+          ...stateToSave.filters,
+          [selectedCurriculum]: {
+            ...stateToSave.filters?.[selectedCurriculum],
+            [selectedSubject]: {
+              topic: [],
+              paperType: [],
+              year: [],
+              season: [],
+            },
+          },
+        };
+      }
+
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+    }
+
+    setSelectedCurriculum("CIE A-LEVEL");
+    setSelectedSubject("");
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+    if (!isMobileDevice) {
+      setSidebarKey((prev) => prev + 1);
+    }
+    setTimeout(() => {
+      isOverwriting.current = false;
+    }, 0);
+  };
+
+  const isValidInputs = ({
+    scrollOnError = true,
+  }: {
+    scrollOnError?: boolean;
+  }) => {
+    return isValidInputsUtils({
+      scrollOnError,
+      curriculumRef: curriculumRef,
+      subjectRef: subjectRef,
+      topicRef: topicRef,
+      yearRef: yearRef,
+      paperTypeRef: paperTypeRef,
+      seasonRef: seasonRef,
+      selectedCurriculum: selectedCurriculum,
+      selectedSubject: selectedSubject,
+      selectedTopic: selectedTopic,
+      selectedYear: selectedYear,
+      selectedPaperType: selectedPaperType,
+      selectedSeason: selectedSeason,
+      setInvalidInputs: setInvalidInputs,
+    });
+  };
+
+  useEffect(() => {
+    if (selectedCurriculum) {
+      setInvalidInputs((prev) => ({ ...prev, curriculum: false }));
+    }
+  }, [selectedCurriculum]);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      setInvalidInputs((prev) => ({ ...prev, subject: false }));
+    }
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    if (selectedTopic.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, topic: false }));
+    }
+  }, [selectedTopic]);
+
+  useEffect(() => {
+    if (selectedPaperType.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
+    }
+  }, [selectedPaperType]);
+
+  useEffect(() => {
+    if (selectedYear.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, year: false }));
+    }
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (selectedSeason.length > 0) {
+      setInvalidInputs((prev) => ({ ...prev, season: false }));
+    }
+  }, [selectedSeason]);
+
+  useEffect(() => {
+    if (mountedRef.current) {
+      return;
+    }
+    let parsedQueryFromSearchParams;
+    if (searchParams.queryKey) {
+      try {
+        parsedQueryFromSearchParams = JSON.parse(
+          searchParams.queryKey as string
+        );
+      } catch {
+        parsedQueryFromSearchParams = undefined;
+        setIsValidSearchParams(false);
+      }
+      if (
+        !parsedQueryFromSearchParams ||
+        !validateCurriculum(parsedQueryFromSearchParams.curriculumId) ||
+        !validateSubject(
+          parsedQueryFromSearchParams.curriculumId,
+          parsedQueryFromSearchParams.subjectId
+        ) ||
+        !validateFilterData({
+          data: {
+            topic: parsedQueryFromSearchParams.topic,
+            paperType: parsedQueryFromSearchParams.paperType,
+            year: parsedQueryFromSearchParams.year,
+            season: parsedQueryFromSearchParams.season,
+          },
+          curriculumn: parsedQueryFromSearchParams.curriculumId,
+          subject: parsedQueryFromSearchParams.subjectId,
+        })
+      ) {
+        parsedQueryFromSearchParams = undefined;
+        setIsValidSearchParams(false);
+      } else {
+        setIsValidSearchParams(true);
+        setCurrentQuery(parsedQueryFromSearchParams);
+        setIsSearchEnabled(true);
+        setSortParameters({
+          sortBy: DEFAULT_SORT_OPTIONS,
+        });
+      }
+    }
+
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+
+      const parsedState: FiltersCache = savedState
+        ? JSON.parse(savedState)
+        : false;
+
+      if (parsedState) {
+        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
+        setIsPersistantCacheEnabled(
+          parsedState.isPersistantCacheEnabled ?? true
+        );
+        setIsQuestionCacheEnabled(parsedState.isQuestionCacheEnabled ?? true);
+        setNumberOfColumns(
+          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
+        );
+        setIsStrictModeEnabled(parsedState.isStrictModeEnabled ?? false);
+        setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
+        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
+        setNumberOfQuestionsPerPage(
+          parsedState.numberOfQuestionsPerPage ??
+            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+        );
+        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
+        setShowFinishedQuestionTint(
+          parsedState.showFinishedQuestionTint ?? true
+        );
+      }
+
+      try {
+        if (savedState && !parsedQueryFromSearchParams) {
+          if (
+            parsedState.isSessionCacheEnabled &&
+            parsedState.lastSessionCurriculum &&
+            validateCurriculum(parsedState.lastSessionCurriculum)
+          ) {
+            setSelectedCurriculum(
+              parsedState.lastSessionCurriculum as ValidCurriculum
+            );
+            const isSubjectValid = validateSubject(
+              parsedState.lastSessionCurriculum,
+              parsedState.lastSessionSubject
+            );
+            if (parsedState.lastSessionSubject && isSubjectValid) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                curriculumn: parsedState.lastSessionCurriculum,
+                data: parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ],
+                subject: parsedState.lastSessionSubject,
+              })
+            ) {
+              setSelectedSubject(parsedState.lastSessionSubject);
+              setSelectedTopic(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].topic
+              );
+              setSelectedPaperType(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].paperType
+              );
+              setSelectedYear(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].year
+              );
+              setSelectedSeason(
+                parsedState.filters[parsedState.lastSessionCurriculum][
+                  parsedState.lastSessionSubject
+                ].season
+              );
+            }
+          }
+        } else if (parsedQueryFromSearchParams) {
+          setSelectedCurriculum(
+            parsedQueryFromSearchParams.curriculumId as ValidCurriculum
+          );
+          setSelectedSubject(parsedQueryFromSearchParams.subjectId);
+          setSelectedPaperType(parsedQueryFromSearchParams.paperType);
+          setSelectedTopic(parsedQueryFromSearchParams.topic);
+          setSelectedYear(parsedQueryFromSearchParams.year);
+          setSelectedSeason(parsedQueryFromSearchParams.season);
+          syncFilterCacheToLocalStorage({
+            selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
+            isQuestionCacheEnabled: parsedState.isQuestionCacheEnabled,
+            selectedSubject: parsedQueryFromSearchParams.subjectId,
+            selectedTopic: parsedQueryFromSearchParams.topic,
+            selectedPaperType: parsedQueryFromSearchParams.paperType,
+            selectedYear: parsedQueryFromSearchParams.year,
+            selectedSeason: parsedQueryFromSearchParams.season,
+          });
+        }
+      } catch {
+        localStorage.removeItem(FILTERS_CACHE_KEY);
+      }
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+      // Set default values
+      setIsSessionCacheEnabled(true);
+      setIsPersistantCacheEnabled(true);
+      setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
+      setLayoutStyle(DEFAULT_LAYOUT_STYLE);
+      setIsStrictModeEnabled(false);
+      setIsQuestionCacheEnabled(true);
+      setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
+      setShowScrollToTopButton(true);
+      setShowFinishedQuestionTint(true);
+    }
+
+    setTimeout(() => {
+      mountedRef.current = true;
+      setIsMounted(true);
+    }, 0);
+  }, [
+    mountedRef,
+    searchParams,
+    setCurrentQuery,
+    setIsQuestionCacheEnabled,
+    setIsSearchEnabled,
+    setIsStrictModeEnabled,
+    setIsValidSearchParams,
+    setLayoutStyle,
+    setNumberOfColumns,
+    setNumberOfQuestionsPerPage,
+    setScrollUpWhenPageChange,
+    setShowFinishedQuestionTint,
+    setShowScrollToTopButton,
+    setSortParameters,
+  ]);
+
+  useEffect(() => {
+    if (!mountedRef.current || isOverwriting.current) {
+      return;
+    }
+    try {
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (savedState) {
+        try {
+          const parsedState: FiltersCache = JSON.parse(savedState);
+          if (parsedState.isPersistantCacheEnabled) {
+            const isSubjectValid = validateSubject(
+              selectedCurriculum,
+              selectedSubject
+            );
+            if (selectedSubject && isSubjectValid) {
+              setSelectedSubject(selectedSubject);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                data: parsedState.filters[selectedCurriculum][selectedSubject],
+                curriculumn: selectedCurriculum,
+                subject: selectedSubject,
+              })
+            ) {
+              setSelectedTopic(
+                parsedState.filters[selectedCurriculum][selectedSubject].topic
+              );
+              setSelectedPaperType(
+                parsedState.filters[selectedCurriculum][selectedSubject]
+                  .paperType
+              );
+              setSelectedYear(
+                parsedState.filters[selectedCurriculum][selectedSubject].year
+              );
+              setSelectedSeason(
+                parsedState.filters[selectedCurriculum][selectedSubject].season
+              );
+            } else {
+              setSelectedTopic([]);
+              setSelectedYear([]);
+              setSelectedPaperType([]);
+              setSelectedSeason([]);
+            }
+          } else {
+            setSelectedTopic([]);
+            setSelectedYear([]);
+            setSelectedPaperType([]);
+            setSelectedSeason([]);
+          }
+        } catch {
+          setSelectedTopic([]);
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+        }
+      } else {
+        setSelectedTopic([]);
+        setSelectedYear([]);
+        setSelectedPaperType([]);
+        setSelectedSeason([]);
+      }
+    } catch (error) {
+      console.error("Failed to access localStorage:", error);
+      setSelectedTopic([]);
+      setSelectedYear([]);
+      setSelectedPaperType([]);
+      setSelectedSeason([]);
+    }
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    if (!mountedRef.current || isOverwriting.current) {
+      return;
+    }
+    setSelectedSubject("");
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+  }, [selectedCurriculum, isOverwriting, mountedRef]);
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      return;
+    }
+    syncFilterCacheToLocalStorage({
+      isSessionCacheEnabled,
+      imageTheme,
+      isPersistantCacheEnabled,
+      showFinishedQuestionTint,
+      scrollUpWhenPageChange,
+      isQuestionCacheEnabled,
+      showScrollToTopButton,
+      numberOfColumns,
+      layoutStyle,
+      isStrictModeEnabled,
+      numberOfQuestionsPerPage,
+      selectedCurriculum,
+      selectedSubject,
+      selectedTopic,
+      selectedPaperType,
+      selectedYear,
+      selectedSeason,
+    });
+  }, [
+    selectedCurriculum,
+    selectedSubject,
+    selectedTopic,
+    isStrictModeEnabled,
+    selectedPaperType,
+    selectedYear,
+    selectedSeason,
+    isSessionCacheEnabled,
+    imageTheme,
+    isPersistantCacheEnabled,
+    showFinishedQuestionTint,
+    showScrollToTopButton,
+    layoutStyle,
+    numberOfQuestionsPerPage,
+    scrollUpWhenPageChange,
+    numberOfColumns,
+    isQuestionCacheEnabled,
+    mountedRef,
+  ]);
+
+  return (
+    <Sidebar
+      key={sidebarKey}
+      variant="floating"
+      onTransitionEnd={(e) => {
+        if (e.propertyName == "left") {
+          overflowScrollHandler();
+        }
+      }}
+    >
+      <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
+      <ScrollArea className="h-full" type="always">
+        <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
+          <RecentQuery
+            isAddRecentQueryPending={isAddRecentQueryPending}
+            setSortParameters={setSortParameters}
+            setIsSidebarOpen={setIsAppSidebarOpen}
+            setIsSearchEnabled={setIsSearchEnabled}
+            setCurrentQuery={setCurrentQuery}
+            isUserSessionPending={isUserSessionPending}
+            isValidSession={isValidSession}
+            currentQuery={currentQuery}
+            setSelectedCurriculum={setSelectedCurriculum}
+            setSelectedSubject={setSelectedSubject}
+            setSelectedTopic={setSelectedTopic}
+            setSelectedYear={setSelectedYear}
+            setSelectedPaperType={setSelectedPaperType}
+            setSelectedSeason={setSelectedSeason}
+            isOverwriting={isOverwriting}
+          />
+
+          <div className="w-full flex items-center justify-around rounded-md border border-muted-foreground/20 bg-muted p-2">
+            <div className="w-[70%] flex items-start justify-center flex-col">
+              <p className="text-sm font-semibold">Strict mode</p>
+              <p className="text-xs text-muted-foreground">
+                Questions containing unrelated topics will be excluded .
+              </p>
+            </div>
+            <Switch
+              checked={isStrictModeEnabled}
+              title="Toggle"
+              className="hover:cursor-pointer"
+              onCheckedChange={setIsStrictModeEnabled}
+            />
+          </div>
+
+          <SidebarSeparator />
+
+          <div className="flex w-full flex-col items-center justify-start gap-4">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <AnimatePresence mode="wait">
+                  {selectedSubject && selectedCurriculum ? (
+                    <motion.div
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      key={selectedSubject}
+                      transition={{
+                        duration: 0.15,
+                        ease: "easeInOut",
+                      }}
+                      className="flex flex-col gap-2"
+                    >
+                      <NextImage
+                        alt="cover"
+                        className="self-center rounded-[2px]"
+                        height={126}
+                        src={
+                          availableSubjects.find(
+                            (item) => item.code === selectedSubject
+                          )?.coverImage ?? ""
+                        }
+                        width={100}
+                      />
+                      {subjectSyllabus ? (
+                        <a
+                          className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row"
+                          href={subjectSyllabus}
+                          target="_blank"
+                          title="Open syllabus"
+                          rel="noreferrer"
+                        >
+                          Syllabus
+                          <BookMarked size={15} />
+                        </a>
+                      ) : (
+                        <div className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row">
+                          Outdated
+                          <CalendarOff size={15} />
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      key={selectedSubject}
+                      transition={{
+                        duration: 0.15,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      <NextImage
+                        alt="default subject"
+                        className="self-center"
+                        height={100}
+                        src="/assets/pointing.webp"
+                        width={100}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="flex flex-col items-start justify-start gap-6">
+                  <div
+                    className="flex flex-col items-start justify-start gap-1"
+                    ref={curriculumRef}
+                  >
+                    <h3
+                      className={cn(
+                        "w-max font-medium text-sm",
+                        invalidInputs.curriculum && "text-destructive"
+                      )}
+                    >
+                      Curriculum
+                    </h3>
+                    <EnhancedSelect
+                      data={TOPICAL_DATA.map((item) => ({
+                        code: item.curriculum,
+                        coverImage: item.coverImage,
+                      }))}
+                      label="Curriculum"
+                      prerequisite=""
+                      selectedValue={selectedCurriculum}
+                      setSelectedValue={(value) => {
+                        setSelectedCurriculum(value as ValidCurriculum);
+                      }}
+                    />
+                    {invalidInputs.curriculum && (
+                      <p className="text-destructive text-sm">
+                        Curriculum is required
+                      </p>
+                    )}
+                  </div>
+
+                  <div
+                    className="flex flex-col items-start justify-start gap-1"
+                    ref={subjectRef}
+                  >
+                    <h3
+                      className={cn(
+                        "w-max font-medium text-sm",
+                        invalidInputs.subject && "text-destructive"
+                      )}
+                    >
+                      Subject
+                    </h3>
+                    <EnhancedSelect
+                      data={availableSubjects}
+                      label="Subject"
+                      prerequisite={selectedCurriculum ? "" : "Curriculum"}
+                      selectedValue={selectedSubject}
+                      setSelectedValue={setSelectedSubject}
+                    />
+                    {invalidInputs.subject && (
+                      <p className="text-destructive text-sm">
+                        Subject is required
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={topicRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.topic && "text-destructive"
+                  )}
+                >
+                  Topic
+                </h3>
+                <EnhancedMultiSelect
+                  data={availableTopics}
+                  label="Topic"
+                  onValuesChange={(values) =>
+                    setSelectedTopic(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedTopic}
+                />
+                {invalidInputs.topic && (
+                  <p className="text-destructive text-sm">Topic is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={paperTypeRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.paperType && "text-destructive"
+                  )}
+                >
+                  Paper
+                </h3>
+                <EnhancedMultiSelect
+                  data={availablePaperTypes?.map((item) => item.toString())}
+                  label="Paper"
+                  onValuesChange={(values) =>
+                    setSelectedPaperType(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedPaperType}
+                />
+                {invalidInputs.paperType && (
+                  <p className="text-destructive text-sm">Paper is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={yearRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.year && "text-destructive"
+                  )}
+                >
+                  Year
+                </h3>
+                <EnhancedMultiSelect
+                  data={availableYears?.map((item) => item.toString())}
+                  label="Year"
+                  onValuesChange={(values) =>
+                    setSelectedYear(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedYear}
+                />
+                {invalidInputs.year && (
+                  <p className="text-destructive text-sm">Year is required</p>
+                )}
+              </div>
+              <div
+                className="flex flex-col items-start justify-start gap-1"
+                ref={seasonRef}
+              >
+                <h3
+                  className={cn(
+                    "w-max font-medium text-sm",
+                    invalidInputs.season && "text-destructive"
+                  )}
+                >
+                  Season
+                </h3>
+                <EnhancedMultiSelect
+                  data={availableSeasons}
+                  label="Season"
+                  onValuesChange={(values) =>
+                    setSelectedSeason(values as string[])
+                  }
+                  prerequisite="Subject"
+                  values={selectedSeason}
+                />
+                {invalidInputs.season && (
+                  <p className="text-destructive text-sm">Season is required</p>
+                )}
+              </div>
+            </div>
+            <div className="flex w-full flex-col items-center justify-center gap-3">
+              <ButtonUltility
+                isMounted={isMounted}
+                revert={revert}
+                resetEverything={resetEverything}
+                setIsSidebarOpen={setIsAppSidebarOpen}
+              >
+                <Button
+                  className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+                  disabled={!isMounted || isTopicalDataFetching}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const query = {
+                      curriculumId: selectedCurriculum,
+                      subjectId: selectedSubject,
+                      topic: selectedTopic.toSorted(),
+                      paperType: selectedPaperType.toSorted(),
+                      year: selectedYear.toSorted(
+                        (a, b) => Number(b) - Number(a)
+                      ),
+                      season: selectedSeason.toSorted(),
+                    };
+                    const isSameQuery =
+                      JSON.stringify(currentQuery) == JSON.stringify(query);
+                    if (
+                      isValidInputs({ scrollOnError: true }) &&
+                      !isSameQuery
+                    ) {
+                      setIsSearchEnabled(true);
+                      setCurrentQuery({
+                        ...query,
+                      });
+                      // Update URL parameters without page reload
+                      setSortParameters({
+                        sortBy: DEFAULT_SORT_OPTIONS,
+                      });
+                    } else if (isSameQuery && isMobileDevice) {
+                      setIsAppSidebarOpen(false);
+                    }
+                  }}
+                >
+                  {isTopicalDataFetching ? "Searching" : "Search"}
+                  <ScanText />
+                </Button>
+                <ShareFilterButton
+                  isQuestionViewDisabled={isQuestionViewDisabled}
+                  filterUrl={filterUrl}
+                />
+              </ButtonUltility>
+            </div>
+          </div>
+          <SidebarSeparator />
+          <CacheSetting
+            isPersistantCacheEnabled={isPersistantCacheEnabled}
+            isSessionCacheEnabled={isSessionCacheEnabled}
+            setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
+            isQuestionCacheEnabled={isQuestionCacheEnabled}
+            setIsQuestionCacheEnabled={setIsQuestionCacheEnabled}
+            setIsSessionCacheEnabled={setIsSessionCacheEnabled}
+          />
+          <LayoutSetting
+            layoutStyle={layoutStyle}
+            numberOfColumns={numberOfColumns}
+            setLayoutStyle={setLayoutStyle}
+            setNumberOfColumns={setNumberOfColumns}
+            numberOfQuestionsPerPage={numberOfQuestionsPerPage}
+            setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
+          />
+          <VisualSetting
+            showFinishedQuestionTint={showFinishedQuestionTint}
+            setShowFinishedQuestionTint={setShowFinishedQuestionTint}
+            showScrollToTopButton={showScrollToTopButton}
+            setShowScrollToTopButton={setShowScrollToTopButton}
+            scrollUpWhenPageChange={scrollUpWhenPageChange}
+            setScrollUpWhenPageChange={setScrollUpWhenPageChange}
+            imageTheme={imageTheme}
+            setImageTheme={setImageTheme}
+          />
+        </SidebarContent>
+      </ScrollArea>
+      <SidebarRail />
+    </Sidebar>
+  );
+};
+
+export default AppSidebar;
+
+const ShareFilterButton = ({
+  isQuestionViewDisabled,
+  filterUrl,
+}: {
+  isQuestionViewDisabled: boolean;
+  filterUrl: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button
+        className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+        disabled={isQuestionViewDisabled}
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Share filter
+        <Send />
+      </Button>
+      <QR url={filterUrl} isOpen={isOpen} setIsOpen={setIsOpen} />
+    </>
+  );
+};
