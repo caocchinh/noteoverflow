@@ -48,6 +48,7 @@ const Sort = ({
                 variant="outline"
                 disabled={isDisabled}
                 className="cursor-pointer !px-[10px]"
+                onTouchStart={(e) => e.preventDefault()}
               >
                 <ArrowDownWideNarrow className="w-4 h-4" />
                 {showSortTextTrigger && "Sort"}

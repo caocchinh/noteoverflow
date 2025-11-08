@@ -14,7 +14,6 @@ import {
   INVALID_INPUTS_DEFAULT,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
-
 import {
   SelectedFinishedQuestion,
   SelectedQuestion,
@@ -317,7 +316,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -1379,8 +1377,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
-        isCalculatorOpen={isCalculatorOpen}
-        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );

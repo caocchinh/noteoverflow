@@ -259,7 +259,6 @@ const FinishedQuestionsClient = ({
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -1229,8 +1228,6 @@ const FinishedQuestionsClient = ({
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
-        isCalculatorOpen={isCalculatorOpen}
-        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );

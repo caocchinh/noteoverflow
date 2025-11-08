@@ -196,6 +196,4 @@ export interface QuestionInspectProps {
   BETTER_AUTH_URL: string;
   showFinishedQuestionTint: boolean;
   isUserSessionError: boolean;
-  isCalculatorOpen: boolean;
-  setIsCalculatorOpen: Dispatch<SetStateAction<boolean>>;
 }

@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { default as NextImage } from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -34,7 +33,7 @@ import {
 import type { ValidCurriculum } from "@/constants/types";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
-import { useSidebar } from "@/features/topical/components/TopicalLayoutProvider";
+import { useTopicalApp } from "@/features/topical/components/TopicalLayoutProvider";
 import { usePathname } from "next/navigation";
 import {
   FILTERS_CACHE_KEY,
@@ -174,7 +173,7 @@ const TopicalClient = ({
   const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
     useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
+  const { isAppSidebarOpen, setIsAppSidebarOpen } = useTopicalApp();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
@@ -944,9 +943,9 @@ const TopicalClient = ({
 
   useEffect(() => {
     if (isMobileDevice) {
-      setIsSidebarOpen(false);
+      setIsAppSidebarOpen(false);
     }
-  }, [currentQuery, isMobileDevice, setIsSidebarOpen]);
+  }, [currentQuery, isMobileDevice, setIsAppSidebarOpen]);
 
   useEffect(() => {
     overflowScrollHandler();
@@ -1027,7 +1026,6 @@ const TopicalClient = ({
     isOpen: false,
     questionId: "",
   });
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -1049,9 +1047,9 @@ const TopicalClient = ({
 
   useEffect(() => {
     if (isQuestionInspectOpen.isOpen && isMobileDevice) {
-      setIsSidebarOpen(false);
+      setIsAppSidebarOpen(false);
     }
-  }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsSidebarOpen]);
+  }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsAppSidebarOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -1074,15 +1072,11 @@ const TopicalClient = ({
   return (
     <>
       <div className="pt-12 h-screen !overflow-hidden">
-        <DesmosCalculator
-          isOpen={isCalculatorOpen}
-          onClose={() => setIsCalculatorOpen(false)}
-        />
         <SidebarProvider
-          onOpenChange={setIsSidebarOpen}
-          onOpenChangeMobile={setIsSidebarOpen}
-          open={isSidebarOpen}
-          openMobile={isSidebarOpen}
+          onOpenChange={setIsAppSidebarOpen}
+          onOpenChangeMobile={setIsAppSidebarOpen}
+          open={isAppSidebarOpen}
+          openMobile={isAppSidebarOpen}
         >
           <Sidebar
             key={sidebarKey}
@@ -1099,7 +1093,7 @@ const TopicalClient = ({
                 <RecentQuery
                   isAddRecentQueryPending={isAddRecentQueryPending}
                   setSortParameters={setSortParameters}
-                  setIsSidebarOpen={setIsSidebarOpen}
+                  setIsSidebarOpen={setIsAppSidebarOpen}
                   setIsSearchEnabled={setIsSearchEnabled}
                   setCurrentQuery={setCurrentQuery}
                   isUserSessionPending={isUserSessionPending}
@@ -1376,7 +1370,7 @@ const TopicalClient = ({
                       isMounted={isMounted}
                       revert={revert}
                       resetEverything={resetEverything}
-                      setIsSidebarOpen={setIsSidebarOpen}
+                      setIsSidebarOpen={setIsAppSidebarOpen}
                     >
                       <Button
                         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
@@ -1409,7 +1403,7 @@ const TopicalClient = ({
                               sortBy: DEFAULT_SORT_OPTIONS,
                             });
                           } else if (isSameQuery && isMobileDevice) {
-                            setIsSidebarOpen(false);
+                            setIsAppSidebarOpen(false);
                           }
                         }}
                       >
@@ -1510,7 +1504,7 @@ const TopicalClient = ({
                 <Button
                   className="!bg-background flex cursor-pointer items-center gap-2 border"
                   onClick={() => {
-                    setIsSidebarOpen(!isSidebarOpen);
+                    setIsAppSidebarOpen(!isAppSidebarOpen);
                   }}
                   variant="outline"
                 >
@@ -1920,22 +1914,12 @@ const TopicalClient = ({
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
-        isCalculatorOpen={isCalculatorOpen}
-        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );
 };
 
 export default TopicalClient;
-
-// Dynamically imported calculator component to avoid SSR issues
-const DesmosCalculator = dynamic(
-  () => import("@/components/DesmosCalculator"),
-  {
-    ssr: false,
-  }
-);
 
 const ShareFilterButton = ({
   isQuestionViewDisabled,

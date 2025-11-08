@@ -1,6 +1,12 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import {
   Sidebar,
   SidebarInset,
@@ -9,16 +15,26 @@ import {
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import DockWrapper from "@/features/topical/components/DockWrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
+import dynamic from "next/dynamic";
 
-const SidebarContext = createContext<{
-  isSidebarOpen: boolean;
-  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
+const DesmosCalculator = dynamic(
+  () => import("@/features/topical/components/DesmosCalculator"),
+  {
+    ssr: false,
+  }
+);
+
+const TopicalContext = createContext<{
+  isAppSidebarOpen: boolean;
+  setIsAppSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  isCalculatorOpen: boolean;
+  setIsCalculatorOpen: Dispatch<SetStateAction<boolean>>;
 } | null>(null);
 
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
+export const useTopicalApp = () => {
+  const context = useContext(TopicalContext);
   if (!context) {
-    throw new Error("useSidebar must be used within SidebarProvider");
+    throw new Error("useTopicalApp must be used within TopicalLayoutProvider");
   }
   return context;
 };
@@ -28,16 +44,28 @@ export default function TopicalLayoutProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAppSidebarOpen, setIsAppSidebarOpen] = useState(true);
   const isMobileDevice = useIsMobile();
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const pathname = usePathname();
   return (
-    <SidebarContext.Provider value={{ isSidebarOpen, setIsSidebarOpen }}>
+    <TopicalContext.Provider
+      value={{
+        isAppSidebarOpen,
+        setIsAppSidebarOpen,
+        isCalculatorOpen,
+        setIsCalculatorOpen,
+      }}
+    >
+      <DesmosCalculator
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+      />
       <div>
         <div className="absolute left-0 w-full">
           <SidebarProvider
-            onOpenChange={setIsSidebarOpen}
-            open={isSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
+            onOpenChange={setIsAppSidebarOpen}
+            open={isAppSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
           >
             {!isMobileDevice && (
               <Sidebar className="!bg-background !border-none !z-[-1]" />
@@ -54,6 +82,6 @@ export default function TopicalLayoutProvider({
 
         {children}
       </div>
-    </SidebarContext.Provider>
+    </TopicalContext.Provider>
   );
 }

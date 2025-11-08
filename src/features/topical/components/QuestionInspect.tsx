@@ -95,6 +95,7 @@ import {
   COLUMN_BREAKPOINTS,
   MANSONRY_GUTTER_BREAKPOINTS,
 } from "../constants/constants";
+import { useTopicalApp } from "./TopicalLayoutProvider";
 
 const QuestionInspect = ({
   isOpen,
@@ -118,8 +119,6 @@ const QuestionInspect = ({
   userFinishedQuestions,
   showFinishedQuestionTint,
   isUserSessionError,
-  isCalculatorOpen,
-  setIsCalculatorOpen,
 }: QuestionInspectProps) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -134,6 +133,7 @@ const QuestionInspect = ({
   >("question");
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
 
+  const { isCalculatorOpen, setIsCalculatorOpen } = useTopicalApp();
   const currentQuestionIndex = useMemo(() => {
     return (
       partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
