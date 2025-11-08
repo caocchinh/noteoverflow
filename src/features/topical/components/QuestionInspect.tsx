@@ -153,10 +153,6 @@ const QuestionInspect = ({
     currentTabThatContainsQuestion,
     currentQuestionIndex,
   ]);
-  useEffect(() => {
-    setSearchInput("");
-    setCurrentView("question");
-  }, [partitionedTopicalData]);
 
   const allQuestions = useMemo(() => {
     return partitionedTopicalData?.flat() ?? [];
@@ -318,6 +314,8 @@ const QuestionInspect = ({
     ]
   );
 
+  console.log("currentQuestionId", currentQuestionId);
+
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
@@ -352,6 +350,30 @@ const QuestionInspect = ({
     overflowScrollHandler();
     navigateToQuestion(isOpen.questionId);
   }, [isOpen, overflowScrollHandler, navigateToQuestion]);
+
+  useEffect(() => {
+    setSearchInput("");
+    setCurrentView("question");
+    if (
+      allQuestions &&
+      allQuestions.length > 0 &&
+      currentQuestionId &&
+      !allQuestions.some(
+        (question) =>
+          question.id === currentQuestionId && question.id !== currentQuestionId
+      )
+    ) {
+      setCurrentQuestionId(allQuestions[0].id);
+      navigateToQuestion(allQuestions[0].id);
+    }
+    if (allQuestions && allQuestions.length === 0) {
+      setIsOpen({
+        isOpen: false,
+        questionId: "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allQuestions]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
