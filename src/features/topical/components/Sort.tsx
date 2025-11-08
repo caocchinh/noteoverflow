@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { DEFAULT_SORT_OPTIONS } from "../constants/constants";
 
 const Sort = memo(
   ({
@@ -21,17 +22,11 @@ const Sort = memo(
     setSortParameters,
     isDisabled,
   }: {
-    sortParameters: SortParameters | null;
-    setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
+    sortParameters: SortParameters;
+    setSortParameters: Dispatch<SetStateAction<SortParameters>>;
     isDisabled: boolean;
   }) => {
-    const handleSortChange = (value: string) => {
-      setSortParameters({
-        sortBy: value as "year-asc" | "year-desc",
-      });
-    };
-
-    const currentSort = sortParameters?.sortBy || "year-desc";
+    const currentSort = sortParameters?.sortBy || DEFAULT_SORT_OPTIONS;
 
     return (
       <Tooltip>
@@ -54,8 +49,8 @@ const Sort = memo(
               <DropdownMenuContent className="w-[180px] z-[999999]">
                 <DropdownMenuItem
                   onClick={() => {
-                    if (sortParameters?.sortBy === "year-asc") {
-                      handleSortChange("year-desc");
+                    if (sortParameters?.sortBy === "ascending") {
+                      setSortParameters({ sortBy: "descending" });
                     }
                   }}
                   className="cursor-pointer"
@@ -63,15 +58,15 @@ const Sort = memo(
                   <Check
                     className={cn(
                       "mr-2 w-4 h-4",
-                      currentSort === "year-desc" ? "opacity-100" : "opacity-0"
+                      currentSort === "descending" ? "opacity-100" : "opacity-0"
                     )}
                   />
                   Newest first
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    if (sortParameters?.sortBy === "year-desc") {
-                      handleSortChange("year-asc");
+                    if (sortParameters?.sortBy === "descending") {
+                      setSortParameters({ sortBy: "ascending" });
                     }
                   }}
                   className="cursor-pointer"
@@ -79,7 +74,7 @@ const Sort = memo(
                   <Check
                     className={cn(
                       "mr-2 w-4 h-4",
-                      currentSort === "year-asc" ? "opacity-100" : "opacity-0"
+                      currentSort === "ascending" ? "opacity-100" : "opacity-0"
                     )}
                   />
                   Oldest first

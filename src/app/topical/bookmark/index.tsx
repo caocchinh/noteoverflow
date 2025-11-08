@@ -9,10 +9,10 @@ import {
   FILTERS_CACHE_KEY,
   COLUMN_BREAKPOINTS,
   DEFAULT_CACHE,
-  DEFAULT_SORT_BY,
   DEFAULT_IMAGE_THEME,
   MANSONRY_GUTTER_BREAKPOINTS,
   INVALID_INPUTS_DEFAULT,
+  DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 
 import {
@@ -23,6 +23,7 @@ import {
   SelectedBookmark,
   InvalidInputs,
   ImageTheme,
+  SortParameters,
 } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
@@ -77,7 +78,7 @@ import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { SortBy } from "@/features/topical/components/SortBy";
+import Sort from "@/features/topical/components/Sort";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
@@ -316,6 +317,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -333,9 +335,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortBy, setSortBy] = useState<"descending" | "ascending">(
-    "descending"
-  );
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
   const [layoutStyle, setLayoutStyle] =
     useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
   const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
@@ -365,9 +367,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
-        setSortBy(
-          parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_BY
-        );
+        setSortParameters({
+          sortBy:
+            parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_OPTIONS,
+        });
         setImageTheme(parsedState.imageTheme ?? DEFAULT_IMAGE_THEME);
         setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
         setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
@@ -510,7 +513,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
           const aIndex = new Date(a.updatedAt).getTime();
           const bIndex = new Date(b.updatedAt).getTime();
-          return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
+          return sortParameters.sortBy === "descending"
+            ? bIndex - aIndex
+            : aIndex - bIndex;
         }
       );
       sortedData.forEach((item: SelectedFinishedQuestion) => {
@@ -535,7 +540,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     numberOfColumns,
     layoutStyle,
     numberOfQuestionsPerPage,
-    sortBy,
+    sortParameters.sortBy,
   ]);
 
   const isValidInputs = ({
@@ -582,8 +587,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         showScrollToTopButton:
           showScrollToTopButton ?? stateToSave.showScrollToTopButton,
         imageTheme: imageTheme ?? stateToSave.imageTheme,
-        finishedQuestionsSearchSortedBy:
-          sortBy ?? stateToSave.finishedQuestionsSearchSortedBy,
+        finishedQuestionsSearchSortedBy: sortParameters.sortBy,
         numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
         layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
         numberOfQuestionsPerPage:
@@ -601,7 +605,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     scrollUpWhenPageChange,
     showFinishedQuestionTint,
     showScrollToTopButton,
-    sortBy,
+    sortParameters.sortBy,
     imageTheme,
     isMounted,
   ]);
@@ -907,10 +911,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
-              <SortBy
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                disabled={isQuestionViewDisabled}
+              <Sort
+                sortParameters={sortParameters}
+                setSortParameters={setSortParameters}
+                isDisabled={isQuestionViewDisabled}
               />
               {chosenList && chosenList.visibility === "public" && (
                 <ShareFilter
@@ -1354,8 +1358,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         </SheetContent>
       </Sheet>
       <QuestionInspect
-        sortBy={sortBy}
-        setSortBy={setSortBy}
+        sortParameters={sortParameters}
+        setSortParameters={setSortParameters}
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
@@ -1374,6 +1378,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
+        isCalculatorOpen={isCalculatorOpen}
+        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );

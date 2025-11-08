@@ -126,8 +126,10 @@ export interface ExtendedIntersectionObserverInit
   scrollMargin?: string;
 }
 
+export type SortByOptions = "ascending" | "descending";
+
 export interface SortParameters {
-  sortBy: "year-asc" | "year-desc";
+  sortBy: SortByOptions;
 }
 
 export type CurrentQuery = {
@@ -180,10 +182,8 @@ export interface QuestionInspectProps {
   imageTheme: ImageTheme;
   currentQuery?: CurrentQuery;
   isUserSessionPending: boolean;
-  sortBy?: "ascending" | "descending";
-  setSortBy?: Dispatch<SetStateAction<"ascending" | "descending">>;
-  sortParameters?: SortParameters | null;
-  setSortParameters?: Dispatch<SetStateAction<SortParameters | null>>;
+  sortParameters?: SortParameters;
+  setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;

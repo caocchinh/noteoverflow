@@ -17,7 +17,7 @@ import {
   MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_NUMBER_OF_COLUMNS,
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  DEFAULT_SORT_BY,
+  DEFAULT_SORT_OPTIONS,
   FILTERS_CACHE_KEY,
   INFINITE_SCROLL_CHUNK_SIZE,
   INVALID_INPUTS_DEFAULT,
@@ -31,6 +31,7 @@ import {
   InvalidInputs,
   SelectedPublickBookmark,
   ImageTheme,
+  SortParameters,
 } from "@/features/topical/constants/types";
 import {
   ChevronLeft,
@@ -67,7 +68,7 @@ import {
 import { authClient } from "@/lib/auth/auth-client";
 import { cn } from "@/lib/utils";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
-import { SortBy } from "@/features/topical/components/SortBy";
+import Sort from "@/features/topical/components/Sort";
 import { ValidCurriculum } from "@/constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
@@ -269,6 +270,7 @@ export const BookmarkView = ({
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -286,9 +288,9 @@ export const BookmarkView = ({
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortBy, setSortBy] = useState<"descending" | "ascending">(
-    "descending"
-  );
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
   const [layoutStyle, setLayoutStyle] =
     useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
   const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
@@ -319,9 +321,10 @@ export const BookmarkView = ({
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
-        setSortBy(
-          parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_BY
-        );
+        setSortParameters({
+          sortBy:
+            parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_OPTIONS,
+        });
         setImageTheme(parsedState.imageTheme ?? DEFAULT_IMAGE_THEME);
         setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
         setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
@@ -454,7 +457,9 @@ export const BookmarkView = ({
         (a: SelectedPublickBookmark, b: SelectedPublickBookmark) => {
           const aIndex = new Date(a.updatedAt).getTime();
           const bIndex = new Date(b.updatedAt).getTime();
-          return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
+          return sortParameters.sortBy === "descending"
+            ? bIndex - aIndex
+            : aIndex - bIndex;
         }
       );
       sortedData.forEach((item: SelectedPublickBookmark) => {
@@ -479,7 +484,7 @@ export const BookmarkView = ({
     numberOfColumns,
     layoutStyle,
     numberOfQuestionsPerPage,
-    sortBy,
+    sortParameters?.sortBy,
   ]);
 
   const isValidInputs = ({
@@ -527,7 +532,7 @@ export const BookmarkView = ({
           showScrollToTopButton ?? stateToSave.showScrollToTopButton,
         imageTheme: imageTheme ?? stateToSave.imageTheme,
         finishedQuestionsSearchSortedBy:
-          sortBy ?? stateToSave.finishedQuestionsSearchSortedBy,
+          sortParameters?.sortBy ?? DEFAULT_SORT_OPTIONS,
         numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
         layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
         numberOfQuestionsPerPage:
@@ -545,7 +550,7 @@ export const BookmarkView = ({
     scrollUpWhenPageChange,
     showFinishedQuestionTint,
     showScrollToTopButton,
-    sortBy,
+    sortParameters?.sortBy,
     imageTheme,
     isMounted,
   ]);
@@ -814,10 +819,10 @@ export const BookmarkView = ({
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
-              <SortBy
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                disabled={isQuestionViewDisabled}
+              <Sort
+                sortParameters={sortParameters}
+                setSortParameters={setSortParameters}
+                isDisabled={isQuestionViewDisabled}
               />
               <ShareFilter
                 isDisabled={false}
@@ -1204,8 +1209,8 @@ export const BookmarkView = ({
         </SheetContent>
       </Sheet>
       <QuestionInspect
-        sortBy={sortBy}
-        setSortBy={setSortBy}
+        sortParameters={sortParameters}
+        setSortParameters={setSortParameters}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
@@ -1226,6 +1231,8 @@ export const BookmarkView = ({
         }
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
+        isCalculatorOpen={isCalculatorOpen}
+        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );

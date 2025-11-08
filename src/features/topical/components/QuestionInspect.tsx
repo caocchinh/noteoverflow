@@ -72,7 +72,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { BookmarkButton } from "./BookmarkButton";
 import { JumpToTabButton } from "./JumpToTabButton";
 import Sort from "./Sort";
-import { SortBy } from "./SortBy";
 import { ShareFilter } from "./ShareFilter";
 import { QuestionInformation } from "./QuestionInformation";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages";
@@ -110,9 +109,7 @@ const QuestionInspect = ({
   isBookmarkError,
   listId,
   isFinishedQuestionsFetching,
-  sortBy,
   BETTER_AUTH_URL,
-  setSortBy,
   sortParameters,
   setSortParameters,
   isFinishedQuestionsError,
@@ -348,16 +345,6 @@ const QuestionInspect = ({
       window.removeEventListener("resize", overflowScrollHandler);
     };
   }, [overflowScrollHandler]);
-
-  useEffect(() => {
-    setIsOpen((prev) => {
-      return {
-        ...prev,
-        questionId: currentQuestionId ?? prev.questionId,
-      };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, sortParameters, setIsOpen]);
 
   // Hydrate inspector on open
   useEffect(() => {
@@ -1221,9 +1208,6 @@ const QuestionInspect = ({
                     </Button>
                     <BestExamHelpUltility question={currentQuestionData} />
 
-                    {sortBy && setSortBy && (
-                      <SortBy sortBy={sortBy} setSortBy={setSortBy} />
-                    )}
                     {sortParameters && setSortParameters && (
                       <Sort
                         sortParameters={sortParameters}

@@ -16,7 +16,7 @@ import {
 import {
   FILTERS_CACHE_KEY,
   MAX_NUMBER_OF_RECENT_QUERIES,
-  DEFAULT_SORT_BY,
+  DEFAULT_SORT_OPTIONS,
   DEFAULT_CACHE,
 } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ import {
 } from "../lib/utils";
 import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
-import { SortBy } from "./SortBy";
+import Sort from "./Sort";
 
 export const RecentQuery = ({
   isUserSessionPending,
@@ -89,7 +89,7 @@ export const RecentQuery = ({
   setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
   setSelectedSubject: Dispatch<SetStateAction<string>>;
   setSelectedTopic: Dispatch<SetStateAction<string[]>>;
-  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   setSelectedYear: Dispatch<SetStateAction<string[]>>;
   setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
   setSelectedSeason: Dispatch<SetStateAction<string[]>>;
@@ -130,9 +130,10 @@ export const RecentQuery = ({
   const [accordionValue, setAccordionValue] =
     useState<string>("skibidi toilet");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<"ascending" | "descending">(
-    DEFAULT_SORT_BY
-  );
+  const [recentQueriesSortParams, setRecentQueriesSortParams] =
+    useState<SortParameters>({
+      sortBy: DEFAULT_SORT_OPTIONS,
+    });
   const isMounted = useRef(false);
 
   useEffect(() => {
@@ -140,7 +141,9 @@ export const RecentQuery = ({
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
       if (savedState) {
         const parsedState: FiltersCache = JSON.parse(savedState);
-        setSortBy(parsedState.recentlySearchSortedBy ?? DEFAULT_SORT_BY);
+        setRecentQueriesSortParams({
+          sortBy: parsedState.recentlySearchSortedBy ?? DEFAULT_SORT_OPTIONS,
+        });
       }
     } catch {}
     setTimeout(() => {
@@ -165,14 +168,14 @@ export const RecentQuery = ({
       }
       stateToSave = {
         ...stateToSave,
-        recentlySearchSortedBy: sortBy,
+        recentlySearchSortedBy: recentQueriesSortParams.sortBy,
       };
 
       localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
     } catch (error) {
       console.error("Failed to save settings to localStorage", error);
     }
-  }, [sortBy]);
+  }, [recentQueriesSortParams?.sortBy]);
   const queryClient = useQueryClient();
   const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<string | null>(
     null
@@ -240,7 +243,11 @@ export const RecentQuery = ({
             </PopoverTrigger>
             <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
               <p className="text-sm mb-1">Sort by date</p>
-              <SortBy sortBy={sortBy} setSortBy={setSortBy} />
+              <Sort
+                sortParameters={recentQueriesSortParams}
+                setSortParameters={setRecentQueriesSortParams}
+                isDisabled={false}
+              />
             </PopoverContent>
           </Popover>
         </DialogHeader>
@@ -296,7 +303,7 @@ export const RecentQuery = ({
                     ? b.lastSearch
                     : new Date(b.lastSearch).getTime();
 
-                if (sortBy === "descending") {
+                if (recentQueriesSortParams.sortBy === "descending") {
                   return dateB - dateA; // Newest first
                 }
                 return dateA - dateB; // Oldest first
@@ -384,7 +391,7 @@ const RecentQueryItem = ({
   setQueryThatIsDeleting: Dispatch<SetStateAction<string | null>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   deleteRecentQueryMutation: (queryKey: string) => void;
-  setSortParameters: Dispatch<SetStateAction<SortParameters | null>>;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   isUserSessionPending: boolean;
   isValidSession: boolean;
 }) => {
@@ -526,7 +533,7 @@ const RecentQueryItem = ({
               setIsSearchEnabled(true);
               setSelectedPaperType(parsedQuery.paperType);
               setSortParameters({
-                sortBy: "year-desc",
+                sortBy: "descending",
               });
 
               setTimeout(() => {

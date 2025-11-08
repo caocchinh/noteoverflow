@@ -48,6 +48,7 @@ import {
   DEFAULT_CACHE,
   DEFAULT_IMAGE_THEME,
   MANSONRY_GUTTER_BREAKPOINTS,
+  DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
@@ -362,7 +363,7 @@ const TopicalClient = ({
         setCurrentQuery(parsedQueryFromSearchParams);
         setIsSearchEnabled(true);
         setSortParameters({
-          sortBy: "year-desc",
+          sortBy: DEFAULT_SORT_OPTIONS,
         });
       }
     }
@@ -836,8 +837,8 @@ const TopicalClient = ({
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortParameters, setSortParameters] = useState<SortParameters | null>({
-    sortBy: "year-desc",
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
   });
   const subjectSyllabus = TOPICAL_DATA.find(
     (item) => item.curriculum === selectedCurriculum
@@ -860,7 +861,7 @@ const TopicalClient = ({
 
       const sortedData = filteredStrictModeData.toSorted(
         (a: SelectedQuestion, b: SelectedQuestion) => {
-          if (sortParameters?.sortBy === "year-asc") {
+          if (sortParameters.sortBy === "ascending") {
             return a.year - b.year;
           } else {
             // Default to year-desc
@@ -893,7 +894,7 @@ const TopicalClient = ({
     numberOfColumns,
     layoutStyle,
     numberOfQuestionsPerPage,
-    sortParameters,
+    sortParameters.sortBy,
     isStrictModeEnabled,
     currentQuery.topic,
   ]);
@@ -1405,7 +1406,7 @@ const TopicalClient = ({
                             });
                             // Update URL parameters without page reload
                             setSortParameters({
-                              sortBy: "year-desc",
+                              sortBy: DEFAULT_SORT_OPTIONS,
                             });
                           } else if (isSameQuery && isMobileDevice) {
                             setIsSidebarOpen(false);

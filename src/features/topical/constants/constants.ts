@@ -1,4 +1,9 @@
-import type { FiltersCache, InvalidInputs, LayoutStyle } from "./types";
+import type {
+  FiltersCache,
+  InvalidInputs,
+  LayoutStyle,
+  SortByOptions,
+} from "./types";
 
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
 
@@ -30,12 +35,12 @@ export const MAX_NUMBER_OF_COLUMNS = 5;
 export const MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE = 100;
 
 export const MAX_NUMBER_OF_RECENT_QUERIES = 30;
-export const DEFAULT_SORT_BY: "ascending" | "descending" = "descending";
+export const DEFAULT_SORT_OPTIONS: SortByOptions = "descending";
 export const DEFAULT_IMAGE_THEME = "light";
 
 export const DEFAULT_CACHE: FiltersCache = {
   imageTheme: DEFAULT_IMAGE_THEME,
-  recentlySearchSortedBy: DEFAULT_SORT_BY,
+  recentlySearchSortedBy: DEFAULT_SORT_OPTIONS,
   numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
   layoutStyle: DEFAULT_LAYOUT_STYLE,
   numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -43,7 +48,7 @@ export const DEFAULT_CACHE: FiltersCache = {
   isStrictModeEnabled: false,
   isPersistantCacheEnabled: true,
   showFinishedQuestionTint: true,
-  finishedQuestionsSearchSortedBy: DEFAULT_SORT_BY,
+  finishedQuestionsSearchSortedBy: DEFAULT_SORT_OPTIONS,
   scrollUpWhenPageChange: true,
   showScrollToTopButton: true,
   isQuestionCacheEnabled: true,

@@ -9,10 +9,10 @@ import {
   FILTERS_CACHE_KEY,
   COLUMN_BREAKPOINTS,
   DEFAULT_CACHE,
-  DEFAULT_SORT_BY,
   DEFAULT_IMAGE_THEME,
   INVALID_INPUTS_DEFAULT,
   MANSONRY_GUTTER_BREAKPOINTS,
+  DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
@@ -22,6 +22,7 @@ import {
   SelectedBookmark,
   InvalidInputs,
   ImageTheme,
+  SortParameters,
 } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
@@ -73,7 +74,7 @@ import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { SortBy } from "@/features/topical/components/SortBy";
+import Sort from "@/features/topical/components/Sort";
 import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
@@ -258,6 +259,7 @@ const FinishedQuestionsClient = ({
   }, [isMobileDevice]);
   const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -275,9 +277,9 @@ const FinishedQuestionsClient = ({
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
-  const [sortBy, setSortBy] = useState<"descending" | "ascending">(
-    "descending"
-  );
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
   const [layoutStyle, setLayoutStyle] =
     useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
   const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
@@ -308,9 +310,10 @@ const FinishedQuestionsClient = ({
         setNumberOfColumns(
           parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
         );
-        setSortBy(
-          parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_BY
-        );
+        setSortParameters({
+          sortBy:
+            parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_OPTIONS,
+        });
         setImageTheme(parsedState.imageTheme ?? DEFAULT_IMAGE_THEME);
         setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
         setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
@@ -452,7 +455,9 @@ const FinishedQuestionsClient = ({
         (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
           const aIndex = new Date(a.updatedAt).getTime();
           const bIndex = new Date(b.updatedAt).getTime();
-          return sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
+          return sortParameters.sortBy === "descending"
+            ? bIndex - aIndex
+            : aIndex - bIndex;
         }
       );
       sortedData.forEach((item: SelectedFinishedQuestion) => {
@@ -477,7 +482,7 @@ const FinishedQuestionsClient = ({
     numberOfColumns,
     layoutStyle,
     numberOfQuestionsPerPage,
-    sortBy,
+    sortParameters.sortBy,
   ]);
 
   const isValidInputs = ({
@@ -524,8 +529,7 @@ const FinishedQuestionsClient = ({
         showScrollToTopButton:
           showScrollToTopButton ?? stateToSave.showScrollToTopButton,
         imageTheme: imageTheme ?? stateToSave.imageTheme,
-        finishedQuestionsSearchSortedBy:
-          sortBy ?? stateToSave.finishedQuestionsSearchSortedBy,
+        finishedQuestionsSearchSortedBy: sortParameters.sortBy,
         numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
         layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
         numberOfQuestionsPerPage:
@@ -543,7 +547,7 @@ const FinishedQuestionsClient = ({
     scrollUpWhenPageChange,
     showFinishedQuestionTint,
     showScrollToTopButton,
-    sortBy,
+    sortParameters.sortBy,
     imageTheme,
     isMounted,
   ]);
@@ -820,10 +824,10 @@ const FinishedQuestionsClient = ({
                 </>
               )}
               <Separator orientation="vertical" className="!h-[30px]" />
-              <SortBy
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                disabled={isQuestionViewDisabled}
+              <Sort
+                sortParameters={sortParameters}
+                setSortParameters={setSortParameters}
+                isDisabled={isQuestionViewDisabled}
               />
             </div>
 
@@ -1205,8 +1209,8 @@ const FinishedQuestionsClient = ({
         </SheetContent>
       </Sheet>
       <QuestionInspect
-        sortBy={sortBy}
-        setSortBy={setSortBy}
+        sortParameters={sortParameters}
+        setSortParameters={setSortParameters}
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
@@ -1224,6 +1228,8 @@ const FinishedQuestionsClient = ({
         userFinishedQuestions={userFinishedQuestions ?? []}
         showFinishedQuestionTint={showFinishedQuestionTint}
         isUserSessionError={isUserSessionError}
+        isCalculatorOpen={isCalculatorOpen}
+        setIsCalculatorOpen={setIsCalculatorOpen}
       />
     </>
   );
