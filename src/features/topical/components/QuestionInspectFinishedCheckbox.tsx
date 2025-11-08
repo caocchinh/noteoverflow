@@ -12,60 +12,64 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { SelectedFinishedQuestion, SelectedQuestion } from "../constants/types";
+import {
+  SavedActivitiesResponse,
+  SelectedFinishedQuestion,
+  SelectedQuestion,
+} from "../constants/types";
 
 export const QuestionInspectFinishedCheckbox = ({
   finishedQuestions,
   question,
-  isFinishedQuestionDisabled,
-  isFinishedQuestionFetching,
-  isFinishedQuestionError,
+  isUserSessionPending,
+  isSavedActivitiesFetching,
+  isSavedActivitiesError,
   className,
   isValidSession,
 }: {
   finishedQuestions: SelectedFinishedQuestion[] | null;
   question: SelectedQuestion;
-  isFinishedQuestionDisabled: boolean;
-  isFinishedQuestionFetching: boolean;
-  isFinishedQuestionError: boolean;
+  isUserSessionPending: boolean;
+  isSavedActivitiesFetching: boolean;
+  isSavedActivitiesError: boolean;
   className?: string;
   isValidSession: boolean;
 }) => {
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["user_finished_questions", question.id],
+      mutationKey: ["user_saved_activities", question.id, "finished_questions"],
     }) > 0;
 
-  const isFinished = finishedQuestions?.some(
-    (item) => item.question.id === question.id
-  );
+  const isFinished =
+    finishedQuestions?.some((item) => item.question.id === question.id) ??
+    false;
 
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationKey: ["user_finished_questions", question.id],
+    mutationKey: ["user_saved_activities", question.id, "finished_questions"],
     mutationFn: async ({
-      realQuestionId,
-      isRealFinished,
+      currentQuestionId,
+      isCurrentlyFinished,
     }: {
-      realQuestionId: string;
-      isRealFinished: boolean;
+      currentQuestionId: string;
+      isCurrentlyFinished: boolean;
     }) => {
-      if (!realQuestionId) {
+      if (!currentQuestionId) {
         throw new Error(
           "No question id provided for finished question mutation"
         );
       }
-      if (isRealFinished) {
+      if (isCurrentlyFinished) {
         const result = await removeFinishedQuestionAction({
-          questionId: realQuestionId,
+          questionId: currentQuestionId,
         });
         if (result.error) {
           throw new Error(result.error);
         }
       } else {
         const result = await addFinishedQuestionAction({
-          questionId: realQuestionId,
+          questionId: currentQuestionId,
         });
         if (result.error) {
           throw new Error(result.error);
@@ -76,24 +80,27 @@ export const QuestionInspectFinishedCheckbox = ({
     onSuccess: async (
       _data,
       {
-        realQuestionId,
-        isRealFinished,
-      }: { realQuestionId: string; isRealFinished: boolean }
+        currentQuestionId,
+        isCurrentlyFinished,
+      }: { currentQuestionId: string; isCurrentlyFinished: boolean }
     ) => {
-      queryClient.setQueryData<SelectedFinishedQuestion[]>(
-        ["user_finished_questions"],
+      queryClient.setQueryData<SavedActivitiesResponse>(
+        ["user_saved_activities"],
         (prev) => {
-          const next = prev ?? [];
-          if (isRealFinished) {
+          if (!prev) {
+            return prev;
+          }
+          const next = [...prev.finishedQuestions];
+          if (isCurrentlyFinished) {
             next.splice(
-              next.findIndex((item) => item.question.id === realQuestionId),
+              next.findIndex((item) => item.question.id === currentQuestionId),
               1
             );
           } else {
             next.push({
               question: {
                 year: question.year,
-                id: realQuestionId,
+                id: currentQuestionId,
                 paperType: question.paperType,
                 season: question.season,
                 questionImages: question.questionImages,
@@ -103,12 +110,15 @@ export const QuestionInspectFinishedCheckbox = ({
               updatedAt: new Date(),
             });
           }
-          return next;
+          return {
+            ...prev,
+            finishedQuestions: next,
+          };
         }
       );
 
       toast.success(
-        isRealFinished
+        isCurrentlyFinished
           ? "Question removed from finished questions list."
           : "Question added to finished questions list.",
         {
@@ -135,8 +145,8 @@ export const QuestionInspectFinishedCheckbox = ({
       className={cn(
         "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
         (isMutatingThisQuestion ||
-          isFinishedQuestionDisabled ||
-          isFinishedQuestionFetching) &&
+          isUserSessionPending ||
+          isSavedActivitiesFetching) &&
           "pointer-events-none",
         isFinished ? "border-green-600" : "border-muted-foreground",
         className
@@ -148,8 +158,8 @@ export const QuestionInspectFinishedCheckbox = ({
         }
         if (
           isMutatingThisQuestion ||
-          isFinishedQuestionDisabled ||
-          isFinishedQuestionFetching
+          isUserSessionPending ||
+          isSavedActivitiesFetching
         ) {
           return;
         }
@@ -157,25 +167,25 @@ export const QuestionInspectFinishedCheckbox = ({
           toast.error("Please sign in to save finished questions.");
           return;
         }
-        if (isFinishedQuestionError) {
+        if (isSavedActivitiesError) {
           toast.error(
             "Failed to update finished questions list. Please refresh the page."
           );
           return;
         }
         mutate({
-          realQuestionId: question.id,
-          isRealFinished: isFinished ?? false,
+          currentQuestionId: question.id,
+          isCurrentlyFinished: isFinished,
         });
       }}
     >
-      {isFinishedQuestionFetching ? (
+      {isSavedActivitiesFetching ? (
         <Loader2 className="animate-spin w-4 h-4" />
       ) : (
         <Switch
           className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
           id="completed-switch"
-          checked={isFinished ?? false}
+          checked={isFinished}
         />
       )}
       <Label
@@ -187,7 +197,7 @@ export const QuestionInspectFinishedCheckbox = ({
       >
         {isMutatingThisQuestion ? (
           <>Saving...</>
-        ) : isFinishedQuestionFetching ? (
+        ) : isSavedActivitiesFetching ? (
           <>Loading</>
         ) : (
           <>Complete{isFinished && "d"}</>

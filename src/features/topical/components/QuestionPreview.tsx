@@ -46,7 +46,6 @@ const QuestionPreview = memo(
     listId?: string;
     onQuestionClick: () => void;
   }) => {
-    const mutationKey = ["all_user_bookmarks", question.id];
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -55,7 +54,11 @@ const QuestionPreview = memo(
     const isMobileDevice = useIsMobile();
     const isMutatingFinishedQuestions =
       useIsMutating({
-        mutationKey: ["user_finished_questions", question.id],
+        mutationKey: [
+          "user_saved_activities",
+          question.id,
+          "finished_questions",
+        ],
       }) > 0;
 
     const doesThisQuestionFinished = useMemo(() => {
@@ -70,7 +73,7 @@ const QuestionPreview = memo(
 
     const isMutatingThisQuestion =
       useIsMutating({
-        mutationKey: mutationKey,
+        mutationKey: ["user_saved_activities", question.id, "bookmarks"],
       }) > 0;
 
     return (

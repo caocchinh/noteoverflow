@@ -187,6 +187,7 @@ export interface QuestionHoverCardProps {
   listId?: string;
   isSavedActivitiesFetching: boolean;
   isMobileDevice: boolean;
+  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
   isSavedActivitiesError: boolean;
   resetScrollPositions: () => void;
 }

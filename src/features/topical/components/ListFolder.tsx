@@ -36,7 +36,7 @@ import {
   renameBookmarkListAction,
 } from "../server/actions";
 import { toast } from "sonner";
-import { SelectedBookmark } from "../constants/types";
+import { SavedActivitiesResponse } from "../constants/types";
 import {
   Dispatch,
   SetStateAction,
@@ -127,13 +127,18 @@ export const ListFolder = ({
     ) => {
       toast.success("List deleted successfully");
       setIsDeleteAlertDialogOpen(false);
-      queryClient.setQueryData<SelectedBookmark[]>(
-        ["all_user_bookmarks"],
-        (prev: SelectedBookmark[] | undefined) => {
+      queryClient.setQueryData<SavedActivitiesResponse>(
+        ["user_saved_activities"],
+        (prev: SavedActivitiesResponse | undefined) => {
           if (!prev) {
             return prev;
           }
-          return prev.filter((bookmark) => !(bookmark.id === realListId));
+          return {
+            ...prev,
+            bookmarks: prev.bookmarks.filter(
+              (bookmark) => !(bookmark.id === realListId)
+            ),
+          };
         }
       );
     },
@@ -169,20 +174,23 @@ export const ListFolder = ({
     ) => {
       toast.success("List renamed successfully");
       setIsRenameAlertDialogOpen(false);
-      queryClient.setQueryData<SelectedBookmark[]>(
-        ["all_user_bookmarks"],
-        (prev: SelectedBookmark[] | undefined) => {
+      queryClient.setQueryData<SavedActivitiesResponse>(
+        ["user_saved_activities"],
+        (prev: SavedActivitiesResponse | undefined) => {
           if (!prev) {
             return prev;
           }
           setNewListName("");
           setIsRenameAlertDialogOpen(false);
-          return prev.map((bookmark) => {
-            if (bookmark.id === realListId) {
-              return { ...bookmark, listName: realNewName };
-            }
-            return bookmark;
-          });
+          return {
+            ...prev,
+            bookmarks: prev.bookmarks.map((bookmark) => {
+              if (bookmark.id === realListId) {
+                return { ...bookmark, listName: realNewName };
+              }
+              return bookmark;
+            }),
+          };
         }
       );
     },
@@ -221,20 +229,23 @@ export const ListFolder = ({
     ) => {
       toast.success("List visibility changed successfully");
       setIsRenameAlertDialogOpen(false);
-      queryClient.setQueryData<SelectedBookmark[]>(
-        ["all_user_bookmarks"],
-        (prev: SelectedBookmark[] | undefined) => {
+      queryClient.setQueryData<SavedActivitiesResponse>(
+        ["user_saved_activities"],
+        (prev: SavedActivitiesResponse | undefined) => {
           if (!prev) {
             return prev;
           }
           setNewListName("");
           setIsRenameAlertDialogOpen(false);
-          return prev.map((bookmark) => {
-            if (bookmark.id === realListId) {
-              return { ...bookmark, visibility: realNewVisibility };
-            }
-            return bookmark;
-          });
+          return {
+            ...prev,
+            bookmarks: prev.bookmarks.map((bookmark) => {
+              if (bookmark.id === realListId) {
+                return { ...bookmark, visibility: realNewVisibility };
+              }
+              return bookmark;
+            }),
+          };
         }
       );
     },

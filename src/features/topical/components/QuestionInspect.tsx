@@ -83,7 +83,7 @@ import {
 import Loader from "./Loader/Loader";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -723,6 +723,7 @@ const QuestionInspect = ({
                   isSavedActivitiesFetching={isSavedActivitiesFetching}
                   isValidSession={isValidSession}
                   isUserSessionPending={isUserSessionPending}
+                  userFinishedQuestions={userFinishedQuestions}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-5">
                   <div className="flex items-center gap-2 border-b border-border">
@@ -858,6 +859,7 @@ const QuestionInspect = ({
                               isSavedActivitiesError={isSavedActivitiesError}
                               isInspectSidebarOpen={isInspectSidebarOpen}
                               isMobileDevice={isMobile}
+                              userFinishedQuestions={userFinishedQuestions}
                             />
                             <SelectSeparator />
                           </Fragment>
@@ -908,6 +910,7 @@ const QuestionInspect = ({
                             setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
                             isMobileDevice={isMobile}
+                            userFinishedQuestions={userFinishedQuestions}
                           />
                           <SelectSeparator />
                         </Fragment>
@@ -1174,9 +1177,9 @@ const QuestionInspect = ({
                       <QuestionInspectFinishedCheckbox
                         finishedQuestions={userFinishedQuestions}
                         question={currentQuestionData}
-                        isFinishedQuestionDisabled={isUserSessionPending}
-                        isFinishedQuestionFetching={isSavedActivitiesFetching}
-                        isFinishedQuestionError={isSavedActivitiesError}
+                        isUserSessionPending={isUserSessionPending}
+                        isSavedActivitiesFetching={isSavedActivitiesFetching}
+                        isSavedActivitiesError={isSavedActivitiesError}
                         isValidSession={isValidSession}
                       />
                     )}
@@ -1341,20 +1344,14 @@ const FinishedTracker = ({
   isValidSession,
   isSavedActivitiesFetching,
   isUserSessionPending,
+  userFinishedQuestions,
 }: {
   allQuestions: SelectedQuestion[];
   isValidSession: boolean;
   isSavedActivitiesFetching: boolean;
   isUserSessionPending: boolean;
+  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isMutatingFinishedQuestion =
-    useIsMutating({
-      mutationKey: ["user_finished_questions"],
-    }) > 0;
-  const queryClient = useQueryClient();
-  const userFinishedQuestions: SelectedFinishedQuestion[] | undefined =
-    queryClient.getQueryData(["user_finished_questions"]);
   return (
     <div className="absolute w-full h-7 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm">
       {!isSavedActivitiesFetching &&
@@ -1502,6 +1499,7 @@ const QuestionHoverCard = ({
   isSavedActivitiesError,
   isInspectSidebarOpen,
   resetScrollPositions,
+  userFinishedQuestions,
 }: QuestionHoverCardProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isImageError, setIsImageError] = useState(false);
@@ -1509,15 +1507,11 @@ const QuestionHoverCard = ({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const touchStartTimeRef = useRef<number | null>(null);
-  const isMutatingThisQuestion =
+  const isMutatingBookmarkOfThisQuestion =
     useIsMutating({
-      mutationKey: ["all_user_bookmarks", question.id],
+      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isMutatingFinishedQuestion =
-    useIsMutating({
-      mutationKey: ["user_finished_questions"],
-    }) > 0;
+
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
@@ -1527,9 +1521,7 @@ const QuestionHoverCard = ({
     };
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
-  const queryClient = useQueryClient();
-  const userFinishedQuestions: SelectedFinishedQuestion[] | undefined =
-    queryClient.getQueryData(["user_finished_questions"]);
+
   return (
     <HoverCard
       open={
@@ -1607,7 +1599,7 @@ const QuestionHoverCard = ({
             isSavedActivitiesError={isSavedActivitiesError}
             isInView={true}
           />
-          {isMutatingThisQuestion && (
+          {isMutatingBookmarkOfThisQuestion && (
             <Badge
               className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
               onClick={(e) => {

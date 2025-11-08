@@ -87,7 +87,6 @@ import createBookmarkStore, {
 } from "../store/useBookmark";
 import { createContext, useContext } from "react";
 import { useStore } from "zustand";
-
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
 
@@ -295,6 +294,7 @@ const BookmarkButtonConsumer = memo(
     const mutationKey = [
       "user_saved_activities",
       question.id,
+      "bookmarks",
       bookmarkListName,
       visibility,
     ];
@@ -830,14 +830,15 @@ const BookmarkTrigger = memo(() => {
 
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["all_user_bookmarks", question.id],
+      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
 
   const queryClient = useQueryClient();
 
-  const bookmarks = queryClient.getQueryData<SelectedBookmark[]>([
-    "all_user_bookmarks",
-  ]);
+  const userSavedActivities = queryClient.getQueryData<SavedActivitiesResponse>(
+    ["user_saved_activities"]
+  );
+  const bookmarks = userSavedActivities?.bookmarks;
   const isBookmarked = bookmarks?.some((bookmark) =>
     bookmark.userBookmarks.some((b) => b.question.id === question.id)
   );
@@ -1149,7 +1150,13 @@ const BookmarkItem = memo(
     );
     const isMutating =
       useIsMutating({
-        mutationKey: ["all_user_bookmarks", question.id, listName, visibility],
+        mutationKey: [
+          "user_saved_activities",
+          question.id,
+          "bookmarks",
+          listName,
+          visibility,
+        ],
       }) > 0;
 
     return (
@@ -1245,7 +1252,7 @@ const ActionDialogs = memo(() => {
   );
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["all_user_bookmarks", question.id],
+      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
   const mutate = useBookmarkContext((state) => state.mutate);
 
