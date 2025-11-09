@@ -63,7 +63,6 @@ const AppSidebar = ({
   isAddRecentQueryPending,
 }: AppSidebarProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const { setIsAppSidebarOpen } = useTopicalApp();
   const { overflowScrollHandler } = useUtilityOverflow();
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<ValidCurriculum>("CIE A-LEVEL");
@@ -77,7 +76,8 @@ const AppSidebar = ({
   });
   const [sidebarKey, setSidebarKey] = useState(0);
   const isMobileDevice = useIsMobile();
-  const { uiPreferences, setUiPreference } = useTopicalApp();
+  const { uiPreferences, setUiPreference, setIsAppSidebarOpen } =
+    useTopicalApp();
   const curriculumRef = useRef<HTMLDivElement | null>(null);
   const subjectRef = useRef<HTMLDivElement | null>(null);
   const topicRef = useRef<HTMLDivElement | null>(null);

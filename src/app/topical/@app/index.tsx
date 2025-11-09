@@ -595,86 +595,90 @@ const TopicalClient = ({
                 type="always"
                 viewPortOnScrollEnd={handleScrollEnd}
               >
-                {!isTopicalDataFetching && !isTopicalDataFetched && (
-                  <div className="flex flex-col items-center justify-center w-full h-full mb-3 gap-2">
-                    <h1 className="w-full text-center font-bold text-2xl -mb-1">
-                      Topical questions
-                    </h1>
+                {!isTopicalDataFetching &&
+                  !isTopicalDataFetched &&
+                  isValidSearchParams && (
+                    <div className="flex flex-col items-center justify-center w-full h-full mb-3 gap-2">
+                      <h1 className="w-full text-center font-bold text-2xl -mb-1">
+                        Topical questions
+                      </h1>
 
-                    <div className="flex mb-1 flex-row items-center justify-center w-full gap-2 px-4 rounded-lg ">
-                      <ArrowLeft
-                        className="hidden md:block text-green-600 dark:text-green-700"
-                        size={20}
-                      />
-                      <ArrowUp
-                        className="md:hidden block text-green-600 dark:text-green-700"
-                        size={20}
-                      />
-                      <span className="text-green-700 dark:text-green-700 text-lg text-center font-medium">
-                        Use the sidebar/filter on the{" "}
-                        <span className="hidden md:inline">left</span>
-                        <span className="md:hidden inline">top</span> to search
-                        for questions
-                      </span>
-                    </div>
-
-                    <div className="flex flex-row flex-wrap w-full  gap-4 items-stretch justify-center">
-                      <div className="w-full md:w-[377px] flex items-center justify-center flex-col gap-2  !max-w-full h-[inherit]  p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm ">
-                        <h3 className="text-lg font-semibold text-center mb-3 text-orange-700 dark:text-orange-400">
-                          Inspect Mode Keyboard Navigation
-                        </h3>
-                        <ul className=" flex items-center justify-center flex-col">
-                          <li className="flex items-center flex-col gap-2 text-orange-600 dark:text-orange-400">
-                            <div className="flex flex-row items-center gap-2">
-                              <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                                ↑↓←→
-                              </kbd>
-                              <span>or</span>
-                              <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                                WASD
-                              </kbd>
-                            </div>
-                            <span>
-                              to navigate between questions during inspect
-                            </span>
-                          </li>
-                          <li className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                            <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                              E
-                            </kbd>
-                            <span>to toggle between questions and answers</span>
-                          </li>
-                        </ul>
+                      <div className="flex mb-1 flex-row items-center justify-center w-full gap-2 px-4 rounded-lg ">
+                        <ArrowLeft
+                          className="hidden md:block text-green-600 dark:text-green-700"
+                          size={20}
+                        />
+                        <ArrowUp
+                          className="md:hidden block text-green-600 dark:text-green-700"
+                          size={20}
+                        />
+                        <span className="text-green-700 dark:text-green-700 text-lg text-center font-medium">
+                          Use the sidebar/filter on the{" "}
+                          <span className="hidden md:inline">left</span>
+                          <span className="md:hidden inline">top</span> to
+                          search for questions
+                        </span>
                       </div>
 
-                      <div className="w-full md:w-[377px] !max-w-full h-[inherit] p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg shadow-sm ">
-                        <h3 className="text-lg font-semibold text-center mb-2 text-gray-700 dark:text-gray-300">
-                          Customize Your Experience
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-center">
-                          Scroll down to the bottom of the sidebar to adjust
-                          content layout, cache behaviour, and visual settings
-                          to your preference.
-                        </p>
-                      </div>
+                      <div className="flex flex-row flex-wrap w-full  gap-4 items-stretch justify-center">
+                        <div className="w-full md:w-[377px] flex items-center justify-center flex-col gap-2  !max-w-full h-[inherit]  p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm ">
+                          <h3 className="text-lg font-semibold text-center mb-3 text-orange-700 dark:text-orange-400">
+                            Inspect Mode Keyboard Navigation
+                          </h3>
+                          <ul className=" flex items-center justify-center flex-col">
+                            <li className="flex items-center flex-col gap-2 text-orange-600 dark:text-orange-400">
+                              <div className="flex flex-row items-center gap-2">
+                                <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
+                                  ↑↓←→
+                                </kbd>
+                                <span>or</span>
+                                <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
+                                  WASD
+                                </kbd>
+                              </div>
+                              <span>
+                                to navigate between questions during inspect
+                              </span>
+                            </li>
+                            <li className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+                              <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
+                                E
+                              </kbd>
+                              <span>
+                                to toggle between questions and answers
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
 
-                      <div className="w-full md:w-[377px]  !max-w-full h-[inherit] p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
-                        <h3 className="text-lg font-semibold text-center mb-2 text-blue-700 dark:text-blue-400">
-                          Track Your Progress
-                        </h3>
-                        <div className="flex flex-col gap-2 items-center justify-center">
-                          <p className="text-blue-600 dark:text-blue-400 text-center">
-                            Bookmark questions to create your personal list,
-                            share with friends, and mark completed questions to
-                            track your revision progress. Use the mini sidebar
-                            below to access it.
+                        <div className="w-full md:w-[377px] !max-w-full h-[inherit] p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg shadow-sm ">
+                          <h3 className="text-lg font-semibold text-center mb-2 text-gray-700 dark:text-gray-300">
+                            Customize Your Experience
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-center">
+                            Scroll down to the bottom of the sidebar to adjust
+                            content layout, cache behaviour, and visual settings
+                            to your preference.
                           </p>
-                          <ArrowDown className="text-blue-700" />
+                        </div>
+
+                        <div className="w-full md:w-[377px]  !max-w-full h-[inherit] p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
+                          <h3 className="text-lg font-semibold text-center mb-2 text-blue-700 dark:text-blue-400">
+                            Track Your Progress
+                          </h3>
+                          <div className="flex flex-col gap-2 items-center justify-center">
+                            <p className="text-blue-600 dark:text-blue-400 text-center">
+                              Bookmark questions to create your personal list,
+                              share with friends, and mark completed questions
+                              to track your revision progress. Use the mini
+                              sidebar below to access it.
+                            </p>
+                            <ArrowDown className="text-blue-700" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 {!isTopicalDataFetching &&
                   !isTopicalDataFetched &&
                   !isValidSearchParams && (

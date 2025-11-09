@@ -13,12 +13,7 @@ import {
   AccordionContent,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  FILTERS_CACHE_KEY,
-  MAX_NUMBER_OF_RECENT_QUERIES,
-  DEFAULT_SORT_OPTIONS,
-  DEFAULT_CACHE,
-} from "@/features/topical/constants/constants";
+import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
 import {
@@ -27,20 +22,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  CurrentQuery,
-  FilterData,
-  FiltersCache,
-  SortParameters,
-} from "../constants/types";
-import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { CurrentQuery, FilterData, SortParameters } from "../constants/types";
+import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -62,6 +45,7 @@ import {
 import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
 import Sort from "./Sort";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const RecentQuery = ({
   isUserSessionPending,
@@ -96,6 +80,7 @@ export const RecentQuery = ({
   isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }) => {
+  const { uiPreferences, setUiPreference } = useTopicalApp();
   const {
     data: recentQuery,
     isError: isRecentQueryError,
@@ -130,52 +115,7 @@ export const RecentQuery = ({
   const [accordionValue, setAccordionValue] =
     useState<string>("skibidi toilet");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [recentQueriesSortParams, setRecentQueriesSortParams] =
-    useState<SortParameters>({
-      sortBy: DEFAULT_SORT_OPTIONS,
-    });
-  const isMounted = useRef(false);
 
-  useEffect(() => {
-    try {
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      if (savedState) {
-        const parsedState: FiltersCache = JSON.parse(savedState);
-        setRecentQueriesSortParams({
-          sortBy: parsedState.recentlySearchSortedBy ?? DEFAULT_SORT_OPTIONS,
-        });
-      }
-    } catch {}
-    setTimeout(() => {
-      isMounted.current = true;
-    }, 0);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      return;
-    }
-    try {
-      let stateToSave: FiltersCache;
-      try {
-        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-        stateToSave = existingStateJSON
-          ? JSON.parse(existingStateJSON)
-          : { ...DEFAULT_CACHE };
-      } catch {
-        // If reading fails, start with empty state
-        stateToSave = { ...DEFAULT_CACHE };
-      }
-      stateToSave = {
-        ...stateToSave,
-        recentlySearchSortedBy: recentQueriesSortParams.sortBy,
-      };
-
-      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.error("Failed to save settings to localStorage", error);
-    }
-  }, [recentQueriesSortParams?.sortBy]);
   const queryClient = useQueryClient();
   const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<string | null>(
     null
@@ -244,8 +184,16 @@ export const RecentQuery = ({
             <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
               <p className="text-sm mb-1">Sort by date</p>
               <Sort
-                sortParameters={recentQueriesSortParams}
-                setSortParameters={setRecentQueriesSortParams}
+                sortParameters={{
+                  sortBy: uiPreferences.recentlySearchSortedBy,
+                }}
+                setSortParameters={(value) => {
+                  const newValue =
+                    typeof value === "function"
+                      ? value({ sortBy: uiPreferences.recentlySearchSortedBy })
+                      : value;
+                  setUiPreference("recentlySearchSortedBy", newValue.sortBy);
+                }}
                 isDisabled={false}
                 disabledMessage=""
                 descendingSortText="Most recently"
@@ -263,7 +211,7 @@ export const RecentQuery = ({
         >
           <ScrollArea type="always" className="h-[65vh] pr-5">
             {isRecentQueryFetching && (
-              <div className="flex justify-center items-center h-full">
+              <div className="flex justify-center items-center h-full gap-2">
                 Fetching <Loader2 className="animate-spin" />
               </div>
             )}
@@ -306,7 +254,7 @@ export const RecentQuery = ({
                     ? b.lastSearch
                     : new Date(b.lastSearch).getTime();
 
-                if (recentQueriesSortParams.sortBy === "descending") {
+                if (uiPreferences.recentlySearchSortedBy === "descending") {
                   return dateB - dateA; // Newest first
                 }
                 return dateA - dateB; // Oldest first

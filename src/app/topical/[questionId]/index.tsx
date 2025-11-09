@@ -13,8 +13,8 @@ import { BookmarkButton } from "@/features/topical/components/BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspectFinishedCheckbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
-import { InspectImages } from "@/features/topical/components/InspectImages";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
+import { AnnotatableInspectImages } from "@/features/topical/components/AnnotatableInspectImages";
 
 export const QuestionView = ({
   data,
@@ -141,10 +141,9 @@ export const QuestionView = ({
               showSubject={true}
             />
           </div>
-          <InspectImages
+          <AnnotatableInspectImages
             imageSource={data?.questionImages ?? []}
             currentQuestionId={data?.id}
-            imageTheme={"light"}
           />
         </ScrollArea>
       </div>
@@ -160,10 +159,9 @@ export const QuestionView = ({
               showSubject={true}
             />
           </div>
-          <InspectImages
+          <AnnotatableInspectImages
             imageSource={data?.answers ?? []}
             currentQuestionId={data?.id}
-            imageTheme={"light"}
           />
         </ScrollArea>
       </div>

@@ -298,7 +298,6 @@ export interface SecondaryAppSidebarProps {
   setCurrentFilter: Dispatch<SetStateAction<SubjectMetadata | null>>;
   isSidebarOpen: boolean;
   setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  isMounted: boolean;
   selectedCurriculumn: ValidCurriculum | null;
   selectedSubject: string | null;
 }

@@ -2,23 +2,14 @@
 
 import { ValidCurriculum } from "@/constants/types";
 import {
-  DEFAULT_NUMBER_OF_COLUMNS,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  DEFAULT_LAYOUT_STYLE,
   INFINITE_SCROLL_CHUNK_SIZE,
-  FILTERS_CACHE_KEY,
   COLUMN_BREAKPOINTS,
-  DEFAULT_CACHE,
-  DEFAULT_IMAGE_THEME,
   MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import {
   SelectedFinishedQuestion,
   SelectedQuestion,
-  LayoutStyle,
-  FiltersCache,
-  ImageTheme,
   SortParameters,
   QuestionInspectOpenState,
   SavedActivitiesResponse,
@@ -56,6 +47,7 @@ import {
 } from "@/constants/constants";
 import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
@@ -151,7 +143,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     );
   }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
 
-  const [imageTheme, setImageTheme] = useState<ImageTheme>(DEFAULT_IMAGE_THEME);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
@@ -169,52 +160,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
-  const [layoutStyle, setLayoutStyle] =
-    useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
-  const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
-    DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-  );
-  const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
-  const [numberOfColumns, setNumberOfColumns] = useState(
-    DEFAULT_NUMBER_OF_COLUMNS
-  );
-  const [showScrollToTopButton, setShowScrollToTopButton] = useState(true);
-  const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
-    useState(true);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-    try {
-      if (savedState) {
-        const parsedState: FiltersCache = JSON.parse(savedState);
-        setNumberOfColumns(
-          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
-        );
-        setSortParameters({
-          sortBy:
-            parsedState.finishedQuestionsSearchSortedBy ?? DEFAULT_SORT_OPTIONS,
-        });
-        setImageTheme(parsedState.imageTheme ?? DEFAULT_IMAGE_THEME);
-        setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
-        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-        setNumberOfQuestionsPerPage(
-          parsedState.numberOfQuestionsPerPage ??
-            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-        );
-        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
-        setShowFinishedQuestionTint(
-          parsedState.showFinishedQuestionTint ?? true
-        );
-      }
-    } catch {
-      localStorage.removeItem(FILTERS_CACHE_KEY);
-    }
-    setTimeout(() => {
-      setIsMounted(true);
-    }, 0);
-  }, []);
 
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const { uiPreferences } = useTopicalApp();
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -232,8 +181,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   useEffect(() => {
     if (topicalData) {
       const chunkSize =
-        layoutStyle === "pagination"
-          ? numberOfQuestionsPerPage
+        uiPreferences.layoutStyle === "pagination"
+          ? uiPreferences.numberOfQuestionsPerPage
           : INFINITE_SCROLL_CHUNK_SIZE;
       const sortedData: SelectedFinishedQuestion[] = topicalData.toSorted(
         (a: SelectedFinishedQuestion, b: SelectedFinishedQuestion) => {
@@ -260,58 +209,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     }
   }, [
     topicalData,
-    numberOfColumns,
-    layoutStyle,
-    numberOfQuestionsPerPage,
+    uiPreferences.numberOfColumns,
+    uiPreferences.layoutStyle,
+    uiPreferences.numberOfQuestionsPerPage,
     sortParameters.sortBy,
-  ]);
-
-  useEffect(() => {
-    if (!isMounted || typeof window === "undefined") {
-      return;
-    }
-    try {
-      let stateToSave: FiltersCache;
-
-      try {
-        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-        stateToSave = existingStateJSON
-          ? JSON.parse(existingStateJSON)
-          : { ...DEFAULT_CACHE };
-      } catch {
-        stateToSave = { ...DEFAULT_CACHE };
-      }
-
-      stateToSave = {
-        ...stateToSave,
-        showFinishedQuestionTint:
-          showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
-        scrollUpWhenPageChange:
-          scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
-        showScrollToTopButton:
-          showScrollToTopButton ?? stateToSave.showScrollToTopButton,
-        imageTheme: imageTheme ?? stateToSave.imageTheme,
-        finishedQuestionsSearchSortedBy: sortParameters.sortBy,
-        numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
-        layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
-        numberOfQuestionsPerPage:
-          numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
-      };
-
-      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.error("Failed to save settings to localStorage:", error);
-    }
-  }, [
-    layoutStyle,
-    numberOfColumns,
-    numberOfQuestionsPerPage,
-    scrollUpWhenPageChange,
-    showFinishedQuestionTint,
-    showScrollToTopButton,
-    sortParameters.sortBy,
-    imageTheme,
-    isMounted,
   ]);
 
   const isQuestionViewDisabled = useMemo(() => {
@@ -404,11 +305,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             isQuestionViewDisabled={isQuestionViewDisabled}
             sideBarInsetRef={sideBarInsetRef}
             fullPartitionedData={fullPartitionedData}
-            layoutStyle={layoutStyle}
             currentChunkIndex={currentChunkIndex}
             setCurrentChunkIndex={setCurrentChunkIndex}
             setDisplayedData={setDisplayedData}
-            scrollUpWhenPageChange={scrollUpWhenPageChange}
             scrollAreaRef={scrollAreaRef}
             sortParameters={sortParameters}
             setSortParameters={setSortParameters}
@@ -492,7 +391,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         )}
 
         <ScrollToTopButton
-          showScrollToTopButton={showScrollToTopButton}
           isScrollingAndShouldShowScrollButton={
             isScrollingAndShouldShowScrollButton && displayedData.length > 0
           }
@@ -609,7 +507,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             <ResponsiveMasonry
               columnsCountBreakPoints={
                 COLUMN_BREAKPOINTS[
-                  numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+                  uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                 ]
               }
               // @ts-expect-error - gutterBreakPoints is not typed by the library
@@ -623,14 +521,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       question={question}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      showFinishedQuestionTint={showFinishedQuestionTint}
                       isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
                       isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
                       listId={chosenList?.id}
-                      imageTheme={imageTheme}
                       onQuestionClick={() => {
                         setIsQuestionInspectOpen({
                           isOpen: true,
@@ -643,7 +539,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               </Masonry>
             </ResponsiveMasonry>
 
-            {layoutStyle === "infinite" && (
+            {uiPreferences.layoutStyle === "infinite" && (
               <InfiniteScroll
                 next={() => {
                   if (fullPartitionedData) {
@@ -679,22 +575,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         setCurrentFilter={setCurrentFilter}
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
-        isMounted={isMounted}
-        layoutStyle={layoutStyle}
-        numberOfColumns={numberOfColumns}
-        setNumberOfColumns={setNumberOfColumns}
-        numberOfQuestionsPerPage={numberOfQuestionsPerPage}
-        setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
-        showFinishedQuestionTint={showFinishedQuestionTint}
-        setShowFinishedQuestionTint={setShowFinishedQuestionTint}
-        showScrollToTopButton={showScrollToTopButton}
-        setShowScrollToTopButton={setShowScrollToTopButton}
-        scrollUpWhenPageChange={scrollUpWhenPageChange}
-        setScrollUpWhenPageChange={setScrollUpWhenPageChange}
-        imageTheme={imageTheme}
-        setImageTheme={setImageTheme}
         selectedCurriculumn={selectedCurriculumn}
-        setLayoutStyle={setLayoutStyle}
         selectedSubject={selectedSubject}
       />
 
@@ -706,7 +587,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             isOpen={isQuestionInspectOpen}
             setIsOpen={setIsQuestionInspectOpen}
             partitionedTopicalData={fullPartitionedData}
-            imageTheme={imageTheme}
             bookmarks={bookmarks ?? []}
             BETTER_AUTH_URL={BETTER_AUTH_URL}
             isValidSession={isValidSession}
@@ -717,8 +597,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
             userFinishedQuestions={userFinishedQuestions ?? []}
-            showFinishedQuestionTint={showFinishedQuestionTint}
-            isUserSessionError={isUserSessionError}
           />
         )}
     </>

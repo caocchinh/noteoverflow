@@ -24,21 +24,6 @@ const SecondaryAppSidebar = ({
   setCurrentFilter,
   isSidebarOpen,
   setIsSidebarOpen,
-  isMounted,
-  layoutStyle,
-  setLayoutStyle,
-  numberOfColumns,
-  setNumberOfColumns,
-  numberOfQuestionsPerPage,
-  setNumberOfQuestionsPerPage,
-  showFinishedQuestionTint,
-  setShowFinishedQuestionTint,
-  showScrollToTopButton,
-  setShowScrollToTopButton,
-  scrollUpWhenPageChange,
-  setScrollUpWhenPageChange,
-  imageTheme,
-  setImageTheme,
   selectedCurriculumn,
   selectedSubject,
 }: SecondaryAppSidebarProps) => {
@@ -316,7 +301,7 @@ const SecondaryAppSidebar = ({
           </div>
           <div className="flex w-full flex-col items-center justify-center gap-4 px-4 mt-2">
             <ButtonUltility
-              isMounted={isMounted}
+              isMounted={true}
               setIsSidebarOpen={setIsSidebarOpen}
               revert={() => {
                 setSelectedTopic(currentFilter?.topic ?? []);
@@ -334,7 +319,6 @@ const SecondaryAppSidebar = ({
             >
               <Button
                 className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-                disabled={!isMounted}
                 onClick={() => {
                   const filter = {
                     curriculumId: selectedCurriculumn,
@@ -358,30 +342,14 @@ const SecondaryAppSidebar = ({
                   }
                 }}
               >
-                Search
+                Filter
                 <ScanText />
               </Button>
             </ButtonUltility>
             <Separator />
 
-            <LayoutSetting
-              layoutStyle={layoutStyle}
-              numberOfColumns={numberOfColumns}
-              setLayoutStyle={setLayoutStyle}
-              setNumberOfColumns={setNumberOfColumns}
-              numberOfQuestionsPerPage={numberOfQuestionsPerPage}
-              setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
-            />
-            <VisualSetting
-              showFinishedQuestionTint={showFinishedQuestionTint}
-              setShowFinishedQuestionTint={setShowFinishedQuestionTint}
-              showScrollToTopButton={showScrollToTopButton}
-              setShowScrollToTopButton={setShowScrollToTopButton}
-              scrollUpWhenPageChange={scrollUpWhenPageChange}
-              setScrollUpWhenPageChange={setScrollUpWhenPageChange}
-              imageTheme={imageTheme}
-              setImageTheme={setImageTheme}
-            />
+            <LayoutSetting />
+            <VisualSetting />
           </div>
         </ScrollArea>
       </SheetContent>
