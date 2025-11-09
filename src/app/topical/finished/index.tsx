@@ -845,7 +845,7 @@ const FinishedQuestionsClient = ({
 
         {metadata && selectedCurriculumn && selectedSubject && (
           <>
-            {displayedData.length > 0 ? (
+            {displayedData?.length > 0 ? (
               <ScrollArea
                 viewportRef={scrollAreaRef}
                 className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"

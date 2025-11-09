@@ -46,13 +46,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  extractCurriculumCode,
-  extractSubjectCode,
   isValidInputs as isValidInputsUtils,
   isOverScrolling,
   computeSubjectMetadata,
   filterQuestionsByCriteria,
   chunkQuestionsData,
+  computeCurriculumSubjectMapping,
 } from "@/features/topical/lib/utils";
 import {
   Breadcrumb,
@@ -114,6 +113,7 @@ export const BookmarkView = ({
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
   });
+  const isValidSession = !!userSession?.data?.session;
   const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
     useState<QuestionInspectOpenState>({
       isOpen: false,
@@ -142,7 +142,7 @@ export const BookmarkView = ({
       return data;
     },
     enabled:
-      !!userSession?.data?.session &&
+      isValidSession &&
       !isUserSessionError &&
       !queryClient.getQueryData(["user_saved_activities"]),
   });
@@ -159,27 +159,7 @@ export const BookmarkView = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
-    const tempMetadata: Partial<Record<ValidCurriculum, string[]>> = {};
-    data?.forEach((question) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: question.question.id,
-      });
-      if (extractedCurriculumn) {
-        const extractedSubjectCode = extractSubjectCode({
-          questionId: question.question.id,
-        });
-        if (!tempMetadata[extractedCurriculumn]) {
-          tempMetadata[extractedCurriculumn] = [];
-        }
-        if (
-          !tempMetadata[extractedCurriculumn].includes(extractedSubjectCode)
-        ) {
-          tempMetadata[extractedCurriculumn].push(extractedSubjectCode);
-        }
-      }
-    });
-
-    return tempMetadata;
+    return data ? computeCurriculumSubjectMapping(data) : {};
   }, [data]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
@@ -854,7 +834,7 @@ export const BookmarkView = ({
           </div>
         )}
 
-        {displayedData.length > 0 && (
+        {displayedData?.length > 0 && (
           <ScrollArea
             viewportRef={scrollAreaRef}
             className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
@@ -878,7 +858,7 @@ export const BookmarkView = ({
               gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
             >
               <Masonry>
-                {displayedData.map((question) =>
+                {displayedData?.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview
                       bookmarks={bookmarks ?? []}
@@ -895,7 +875,7 @@ export const BookmarkView = ({
                       isSavedActivitiesError={
                         isUserSessionError || isSavedActivitiesError
                       }
-                      isValidSession={!!userSession?.data?.session}
+                      isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
                       isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
@@ -1129,7 +1109,7 @@ export const BookmarkView = ({
           partitionedTopicalData={fullPartitionedData}
           imageTheme={imageTheme}
           bookmarks={bookmarks ?? []}
-          isValidSession={!!userSession?.data?.session}
+          isValidSession={isValidSession}
           isSavedActivitiesFetching={isSavedActivitiesFetching}
           isUserSessionPending={isUserSessionPending}
           isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}

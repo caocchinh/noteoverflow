@@ -583,12 +583,11 @@ export const truncateListName = ({ listName }: { listName: string }) => {
   return listName;
 };
 
-export function computeFinishedQuestionsMetadata(
-  finishedQuestions: SelectedFinishedQuestion[]
-): FinishedQuestionsMetadata {
-  const metadata: FinishedQuestionsMetadata = {};
-
-  finishedQuestions.forEach((question) => {
+export function computeCurriculumSubjectMapping<
+  T extends { question: SelectedQuestion }
+>(questions: T[]): Partial<Record<ValidCurriculum, string[]>> {
+  const metadata: Partial<Record<ValidCurriculum, string[]>> = {};
+  questions.forEach((question) => {
     const extractedCurriculum = extractCurriculumCode({
       questionId: question.question.id,
     });
@@ -599,17 +598,28 @@ export function computeFinishedQuestionsMetadata(
       });
 
       if (!metadata[extractedCurriculum]) {
-        metadata[extractedCurriculum] = { subjects: [] };
+        metadata[extractedCurriculum] = [];
       }
 
-      if (
-        !metadata[extractedCurriculum].subjects.includes(
-          extractedSubjectCodeValue
-        )
-      ) {
-        metadata[extractedCurriculum].subjects.push(extractedSubjectCodeValue);
+      if (!metadata[extractedCurriculum].includes(extractedSubjectCodeValue)) {
+        metadata[extractedCurriculum].push(extractedSubjectCodeValue);
       }
     }
+  });
+
+  return metadata;
+}
+
+export function computeFinishedQuestionsMetadata(
+  finishedQuestions: SelectedFinishedQuestion[]
+): FinishedQuestionsMetadata {
+  const curriculumSubjectMapping =
+    computeCurriculumSubjectMapping(finishedQuestions);
+
+  // Transform the flat mapping into the required nested structure
+  const metadata: FinishedQuestionsMetadata = {};
+  Object.entries(curriculumSubjectMapping).forEach(([curriculum, subjects]) => {
+    metadata[curriculum as ValidCurriculum] = { subjects };
   });
 
   return metadata;
@@ -700,31 +710,18 @@ export function computeBookmarksMetadata(
       };
     }
 
-    bookmark.userBookmarks.forEach((userBookmark) => {
-      const extractedCurriculum = extractCurriculumCode({
-        questionId: userBookmark.question.id,
-      });
+    const curriculumSubjectMapping = computeCurriculumSubjectMapping(
+      bookmark.userBookmarks
+    );
 
-      if (extractedCurriculum) {
-        const extractedSubjectCodeValue = extractSubjectCode({
-          questionId: userBookmark.question.id,
-        });
-
-        if (!metadata[visibility][bookmark.id].curricula[extractedCurriculum]) {
-          metadata[visibility][bookmark.id].curricula[extractedCurriculum] = {
-            subjects: [],
-          };
-        }
-
-        const curriculumSubjects =
-          metadata[visibility][bookmark.id].curricula[extractedCurriculum]!
-            .subjects;
-
-        if (!curriculumSubjects.includes(extractedSubjectCodeValue)) {
-          curriculumSubjects.push(extractedSubjectCodeValue);
-        }
+    // Transform the flat mapping into the required nested structure
+    Object.entries(curriculumSubjectMapping).forEach(
+      ([curriculum, subjects]) => {
+        metadata[visibility][bookmark.id].curricula[
+          curriculum as ValidCurriculum
+        ] = { subjects };
       }
-    });
+    );
   });
 
   return metadata;

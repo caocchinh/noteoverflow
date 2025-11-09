@@ -1020,7 +1020,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             )}
           </ScrollArea>
         )}
-        {displayedData.length === 0 && selectedSubject && (
+        {displayedData?.length === 0 && selectedSubject && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <p className="text-sm text-muted-foreground">
               No questions found. Search for questions and add them to this

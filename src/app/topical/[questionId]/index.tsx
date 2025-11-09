@@ -39,6 +39,8 @@ export const QuestionView = ({
     enabled: !queryClient.getQueryData(["user"]),
   });
 
+  const isValidSession = !!userSession?.data?.session;
+
   const {
     data: userFinishedQuestions,
     isFetching: isUserFinishedQuestionsFetching,
@@ -61,7 +63,7 @@ export const QuestionView = ({
       return data.data;
     },
     enabled:
-      !!userSession?.data?.session &&
+      isValidSession &&
       !isUserSessionError &&
       !queryClient.getQueryData(["user_finished_questions"]),
   });
@@ -91,12 +93,14 @@ export const QuestionView = ({
       return data.data;
     },
     enabled:
-      !!userSession?.data?.session &&
+      isValidSession &&
       !isUserSessionError &&
       !queryClient.getQueryData(["all_user_bookmarks"]),
   });
-  const isSavedActivitiesFetching = isBookmarksFetching || isUserFinishedQuestionsFetching;
-  const isSavedActivitiesError = isBookmarksError || isUserFinishedQuestionsError;
+  const isSavedActivitiesFetching =
+    isBookmarksFetching || isUserFinishedQuestionsFetching;
+  const isSavedActivitiesError =
+    isBookmarksError || isUserFinishedQuestionsError;
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
@@ -128,19 +132,19 @@ export const QuestionView = ({
           isSavedActivitiesFetching={isSavedActivitiesFetching}
           isSavedActivitiesError={isSavedActivitiesError}
           isBookmarkDisabled={isUserSessionPending}
-          isValidSession={!!userSession?.data?.session}
+          isValidSession={isValidSession}
           isInView={true}
           badgeClassName="!h-full"
           question={data}
         />
         <QuestionInspectFinishedCheckbox
-          isFinishedQuestionFetching={isUserFinishedQuestionsFetching}
-          isFinishedQuestionError={isUserFinishedQuestionsError}
-          finishedQuestions={userFinishedQuestions ?? []}
-          isValidSession={!!userSession?.data?.session}
+          isValidSession={isValidSession}
           question={data}
-          isFinishedQuestionDisabled={isUserSessionPending}
           className="!h-max"
+          finishedQuestions={userFinishedQuestions ?? []}
+          isUserSessionPending={isUserSessionPending}
+          isSavedActivitiesFetching={isSavedActivitiesFetching}
+          isSavedActivitiesError={isSavedActivitiesError}
         />
         <BestExamHelpUltility question={data} />
         <ShareFilter

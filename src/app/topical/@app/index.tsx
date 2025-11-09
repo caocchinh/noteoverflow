@@ -342,13 +342,10 @@ const TopicalClient = ({
           }
         }
       );
-      setNumberOfQuetion(sortedData.length);
-
       const chunkedData = chunkQuestionsData(sortedData, chunkSize);
-
+      setNumberOfQuetion(sortedData.length);
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
-
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
