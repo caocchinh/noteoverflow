@@ -1,12 +1,11 @@
 "use client";
 import {
-  SelectedBookmark,
-  SelectedFinishedQuestion,
+  SavedActivitiesResponse,
   SelectedQuestion,
 } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
@@ -42,46 +41,16 @@ export const QuestionView = ({
   const isValidSession = !!userSession?.data?.session;
 
   const {
-    data: userFinishedQuestions,
-    isFetching: isUserFinishedQuestionsFetching,
-    isError: isUserFinishedQuestionsError,
+    data: userSavedActivities,
+    isFetching: isUserSavedActivitiesFetching,
+    isError: isUserSavedActivitiesError,
   } = useQuery({
-    queryKey: ["user_finished_questions"],
+    queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/finished");
-      const data: {
-        data: SelectedFinishedQuestion[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-      return data.data;
-    },
-    enabled:
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_finished_questions"]),
-  });
-
-  const {
-    data: bookmarks,
-    isFetching: isBookmarksFetching,
-    isError: isBookmarksError,
-  } = useQuery({
-    queryKey: ["all_user_bookmarks"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/bookmark", {
+      const response = await fetch("/api/topical/saved-activities", {
         method: "GET",
       });
-      const data: {
-        data: SelectedBookmark[];
-        error?: string;
-      } = await response.json();
+      const data: SavedActivitiesResponse = await response.json();
       if (!response.ok) {
         const errorMessage =
           typeof data === "object" && data && "error" in data
@@ -90,17 +59,22 @@ export const QuestionView = ({
         throw new Error(errorMessage);
       }
 
-      return data.data;
+      return data;
     },
     enabled:
       isValidSession &&
       !isUserSessionError &&
-      !queryClient.getQueryData(["all_user_bookmarks"]),
+      !queryClient.getQueryData(["user_saved_activities"]),
   });
-  const isSavedActivitiesFetching =
-    isBookmarksFetching || isUserFinishedQuestionsFetching;
-  const isSavedActivitiesError =
-    isBookmarksError || isUserFinishedQuestionsError;
+
+  const userFinishedQuestions = useMemo(() => {
+    return userSavedActivities?.finishedQuestions;
+  }, [userSavedActivities]);
+  const bookmarks = useMemo(() => {
+    return userSavedActivities?.bookmarks;
+  }, [userSavedActivities]);
+  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
+  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">

@@ -104,6 +104,13 @@ export interface BookmarkMetadataItem {
   curricula: Partial<Record<ValidCurriculum, CurriculumMetadata>>;
 }
 
+export interface SubjectMetadata {
+  topic: string[];
+  year: string[];
+  paperType: string[];
+  season: string[];
+}
+
 type BookmarkId = string;
 
 // Organized by visibility for bookmarks
@@ -292,3 +299,45 @@ export type QuestionInspectOpenState = {
   isOpen: boolean;
   questionId: string;
 };
+
+export interface SecondaryAppSidebarProps {
+  subjectMetadata: SubjectMetadata | null;
+  currentFilter: SubjectMetadata | null;
+  setCurrentFilter: Dispatch<SetStateAction<SubjectMetadata | null>>;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  isMounted: boolean;
+  layoutStyle: LayoutStyle;
+  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
+  numberOfColumns: number;
+  setNumberOfColumns: Dispatch<SetStateAction<number>>;
+  numberOfQuestionsPerPage: number;
+  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
+  showFinishedQuestionTint: boolean;
+  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
+  showScrollToTopButton: boolean;
+  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
+  scrollUpWhenPageChange: boolean;
+  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
+  imageTheme: ImageTheme;
+  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
+  selectedCurriculumn: ValidCurriculum | null;
+  selectedSubject: string | null;
+}
+
+export interface SecondaryAppUltilityBarProps {
+  setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  isQuestionViewDisabled: boolean;
+  sideBarInsetRef: RefObject<HTMLDivElement | null>;
+  fullPartitionedData: SelectedQuestion[][] | undefined;
+  layoutStyle: LayoutStyle;
+  currentChunkIndex: number;
+  setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
+  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
+  scrollUpWhenPageChange: boolean;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  isSidebarOpen: boolean;
+}

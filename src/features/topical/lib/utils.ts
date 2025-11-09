@@ -20,6 +20,7 @@ import type {
   SelectedFinishedQuestion,
   SelectedBookmark,
   SelectedQuestion,
+  SubjectMetadata,
 } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -631,20 +632,10 @@ export function computeSubjectMetadata<
   questions: T[],
   selectedCurriculumn: string | null,
   selectedSubject: string | null
-): {
-  topic: string[];
-  year: string[];
-  paperType: string[];
-  season: string[];
-} | null {
+): SubjectMetadata | null {
   if (!selectedCurriculumn || !selectedSubject) return null;
 
-  const temp: {
-    topic: string[];
-    year: string[];
-    paperType: string[];
-    season: string[];
-  } = {
+  const temp: SubjectMetadata = {
     topic: [],
     year: [],
     paperType: [],

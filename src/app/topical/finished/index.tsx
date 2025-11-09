@@ -10,7 +10,6 @@ import {
   COLUMN_BREAKPOINTS,
   DEFAULT_CACHE,
   DEFAULT_IMAGE_THEME,
-  INVALID_INPUTS_DEFAULT,
   MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
@@ -19,15 +18,13 @@ import {
   SelectedQuestion,
   LayoutStyle,
   FiltersCache,
-  InvalidInputs,
   ImageTheme,
   SortParameters,
   QuestionInspectOpenState,
   SavedActivitiesResponse,
+  SubjectMetadata,
 } from "@/features/topical/constants/types";
 import {
-  isOverScrolling,
-  isValidInputs as isValidInputsUtils,
   computeFinishedQuestionsMetadata,
   computeSubjectMetadata,
   filterQuestionsByCriteria,
@@ -35,57 +32,29 @@ import {
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Loader2,
-  Monitor,
-  ScanText,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionInspect from "@/features/topical/components/QuestionInspect";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { SlidersHorizontal } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import Sort from "@/features/topical/components/Sort";
-import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
-import LayoutSetting from "@/features/topical/components/LayoutSetting";
-import VisualSetting from "@/features/topical/components/VisualSetting";
-import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
+import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
 import Image from "next/image";
 import {
   CURRICULUM_COVER_IMAGE,
   SUBJECT_COVER_IMAGE,
 } from "@/constants/constants";
+import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 
 const FinishedQuestionsClient = ({
   BETTER_AUTH_URL,
@@ -155,7 +124,9 @@ const FinishedQuestionsClient = ({
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
-
+  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
+    null
+  );
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
       userFinishedQuestions || [],
@@ -163,42 +134,13 @@ const FinishedQuestionsClient = ({
       selectedSubject
     );
   }, [selectedCurriculumn, selectedSubject, userFinishedQuestions]);
-  const isMobileDevice = useIsMobile();
-  const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
-  const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
-  const [selectedPaperType, setSelectedPaperType] = useState<string[] | null>(
-    null
-  );
   const [imageTheme, setImageTheme] = useState<ImageTheme>(DEFAULT_IMAGE_THEME);
-  const ultilityRef = useRef<HTMLDivElement | null>(null);
-  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
-  const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
-    useState(false);
-  const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
-    useState(false);
-  const overflowScrollHandler = useCallback(() => {
-    const isOverScrollingResult = isOverScrolling({
-      child: ultilityRef.current,
-      parent: sideBarInsetRef.current,
-      specialLeftCase: !isMobileDevice,
-    });
-    setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
-    setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
-  }, [isMobileDevice]);
-  const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
+
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
-  const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const [currentFilter, setCurrentFilter] = useState<{
-    topic: string[];
-    year: string[];
-    paperType: string[];
-    season: string[];
-  } | null>(null);
-
   const [fullPartitionedData, setFullPartitionedData] = useState<
     SelectedQuestion[][] | undefined
   >(undefined);
@@ -213,13 +155,6 @@ const FinishedQuestionsClient = ({
     DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
   );
   const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
-  const topicRef = useRef<HTMLDivElement | null>(null);
-  const yearRef = useRef<HTMLDivElement | null>(null);
-  const paperTypeRef = useRef<HTMLDivElement | null>(null);
-  const seasonRef = useRef<HTMLDivElement | null>(null);
-  const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
-    ...INVALID_INPUTS_DEFAULT,
-  });
   const [numberOfColumns, setNumberOfColumns] = useState(
     DEFAULT_NUMBER_OF_COLUMNS
   );
@@ -262,62 +197,11 @@ const FinishedQuestionsClient = ({
   }, []);
 
   useEffect(() => {
-    if (subjectMetadata) {
-      setSelectedTopic(subjectMetadata.topic);
-      setSelectedYear(subjectMetadata.year);
-      setSelectedPaperType(subjectMetadata.paperType);
-      setSelectedSeason(subjectMetadata.season);
-      setCurrentFilter({
-        topic: subjectMetadata.topic,
-        year: subjectMetadata.year,
-        paperType: subjectMetadata.paperType,
-        season: subjectMetadata.season,
-      });
-    }
-  }, [subjectMetadata]);
-
-  useEffect(() => {
-    if (selectedTopic && selectedTopic.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, topic: false }));
-    }
-  }, [selectedTopic]);
-
-  useEffect(() => {
-    if (selectedPaperType && selectedPaperType.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
-    }
-  }, [selectedPaperType]);
-
-  useEffect(() => {
-    if (selectedYear && selectedYear.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, year: false }));
-    }
-  }, [selectedYear]);
-
-  useEffect(() => {
-    if (selectedSeason && selectedSeason.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, season: false }));
-    }
-  }, [selectedSeason]);
-
-  useEffect(() => {
-    window.addEventListener("resize", overflowScrollHandler);
-
-    return () => {
-      window.removeEventListener("resize", overflowScrollHandler);
-    };
-  }, [overflowScrollHandler]);
-
-  useEffect(() => {
     scrollAreaRef.current?.scrollTo({
       top: 0,
       behavior: "instant",
     });
   }, [currentFilter]);
-
-  useEffect(() => {
-    overflowScrollHandler();
-  }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
@@ -369,25 +253,6 @@ const FinishedQuestionsClient = ({
     numberOfQuestionsPerPage,
     sortParameters.sortBy,
   ]);
-
-  const isValidInputs = ({
-    scrollOnError = true,
-  }: {
-    scrollOnError?: boolean;
-  }) => {
-    return isValidInputsUtils({
-      scrollOnError,
-      topicRef: topicRef,
-      yearRef: yearRef,
-      paperTypeRef: paperTypeRef,
-      seasonRef: seasonRef,
-      selectedTopic: selectedTopic ?? [],
-      selectedYear: selectedYear ?? [],
-      selectedPaperType: selectedPaperType ?? [],
-      selectedSeason: selectedSeason ?? [],
-      setInvalidInputs: setInvalidInputs,
-    });
-  };
 
   useEffect(() => {
     if (!isMounted || typeof window === "undefined") {
@@ -454,6 +319,8 @@ const FinishedQuestionsClient = ({
     displayedData,
   ]);
 
+  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <>
       <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-start p-4 overflow-hidde h-screen">
@@ -493,233 +360,23 @@ const FinishedQuestionsClient = ({
               )}
             </BreadcrumbList>
           </Breadcrumb>
-          <ScrollArea
-            viewPortOnScroll={overflowScrollHandler}
-            className="max-w-full w-max relative"
-            viewportRef={ultilityHorizontalScrollBarRef}
-          >
-            {isUltilityOverflowingRight && (
-              <Button
-                className="absolute right-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
-                title="Move right"
-                onClick={() => {
-                  if (ultilityHorizontalScrollBarRef.current) {
-                    ultilityHorizontalScrollBarRef.current.scrollBy({
-                      left: 200,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-              >
-                <ChevronRight size={5} />
-              </Button>
-            )}
-            {isUltilityOverflowingLeft && (
-              <Button
-                className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
-                title="Move left"
-                onClick={() => {
-                  if (ultilityHorizontalScrollBarRef.current) {
-                    ultilityHorizontalScrollBarRef.current.scrollBy({
-                      left: -200,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-              >
-                <ChevronLeft size={5} />
-              </Button>
-            )}
-            <div
-              className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
-              ref={ultilityRef}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      className="!bg-background flex cursor-pointer items-center gap-2 border"
-                      onClick={() => {
-                        setIsSidebarOpen(!isSidebarOpen);
-                      }}
-                      disabled={isQuestionViewDisabled}
-                      variant="outline"
-                    >
-                      Filters
-                      <SlidersHorizontal />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className={cn(
-                    !isQuestionViewDisabled && "!hidden",
-                    "flex justify-center items-center gap-2"
-                  )}
-                >
-                  To filter questions, select a subject first
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      className="flex cursor-pointer items-center gap-2 border"
-                      disabled={isQuestionViewDisabled}
-                      onClick={() => {
-                        setIsQuestionInspectOpen((prev) => ({
-                          ...prev,
-                          isOpen: true,
-                        }));
-                      }}
-                      variant="default"
-                    >
-                      Inspect
-                      <Monitor />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className={cn(
-                    !isQuestionViewDisabled && "!hidden",
-                    "flex justify-center items-center gap-2"
-                  )}
-                >
-                  To inspect questions, select a subject first
-                </TooltipContent>
-              </Tooltip>
-              {layoutStyle === "pagination" && !isQuestionViewDisabled && (
-                <>
-                  <Separator orientation="vertical" className="!h-[30px]" />
-                  <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="First page"
-                      disabled={currentChunkIndex === 0}
-                      onClick={() => {
-                        if (currentChunkIndex === 0) return;
-                        setCurrentChunkIndex(0);
-                        setDisplayedData(fullPartitionedData![0]);
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronsLeft />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Previous page"
-                      disabled={currentChunkIndex === 0}
-                      onClick={() => {
-                        if (currentChunkIndex === 0) return;
-                        setCurrentChunkIndex(currentChunkIndex - 1);
-                        setDisplayedData(
-                          fullPartitionedData![currentChunkIndex - 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronLeft />
-                    </Button>
-                    <JumpToTabButton
-                      className="mx-4"
-                      tab={currentChunkIndex}
-                      totalTabs={fullPartitionedData!.length}
-                      prefix="page"
-                      onTabChangeCallback={({ tab }) => {
-                        setCurrentChunkIndex(tab);
-                        setDisplayedData(fullPartitionedData![tab]);
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Next page"
-                      disabled={
-                        currentChunkIndex === fullPartitionedData!.length - 1
-                      }
-                      onClick={() => {
-                        if (
-                          currentChunkIndex ===
-                          fullPartitionedData!.length - 1
-                        )
-                          return;
-                        setCurrentChunkIndex(currentChunkIndex + 1);
-                        setDisplayedData(
-                          fullPartitionedData![currentChunkIndex + 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronRight />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer !p-[8px] rounded-[2px]"
-                      title="Last page"
-                      disabled={
-                        currentChunkIndex === fullPartitionedData!.length - 1
-                      }
-                      onClick={() => {
-                        if (
-                          currentChunkIndex ===
-                          fullPartitionedData!.length - 1
-                        )
-                          return;
-                        setCurrentChunkIndex(fullPartitionedData!.length - 1);
-                        setDisplayedData(
-                          fullPartitionedData![fullPartitionedData!.length - 1]
-                        );
-                        if (scrollUpWhenPageChange) {
-                          scrollAreaRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    >
-                      <ChevronsRight />
-                    </Button>
-                  </div>
-                </>
-              )}
-              <Separator orientation="vertical" className="!h-[30px]" />
-              <Sort
-                sortParameters={sortParameters}
-                setSortParameters={setSortParameters}
-                isDisabled={isQuestionViewDisabled}
-                disabledMessage="To sort questions, select a subject first."
-              />
-            </div>
 
-            <ScrollBar
-              orientation="horizontal"
-              className="[&_.bg-border]:bg-transparent"
-            />
-          </ScrollArea>
+          <SecondaryAppUltilityBar
+            setIsSidebarOpen={setIsSidebarOpen}
+            isQuestionViewDisabled={isQuestionViewDisabled}
+            sideBarInsetRef={sideBarInsetRef}
+            fullPartitionedData={fullPartitionedData}
+            layoutStyle={layoutStyle}
+            currentChunkIndex={currentChunkIndex}
+            setCurrentChunkIndex={setCurrentChunkIndex}
+            setDisplayedData={setDisplayedData}
+            scrollUpWhenPageChange={scrollUpWhenPageChange}
+            scrollAreaRef={scrollAreaRef}
+            sortParameters={sortParameters}
+            setSortParameters={setSortParameters}
+            setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+            isSidebarOpen={isSidebarOpen}
+          />
         </div>
 
         {metadata && !selectedCurriculumn && (
@@ -926,193 +583,30 @@ const FinishedQuestionsClient = ({
           </>
         )}
       </div>
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent
-          className="z-[100006] overflow-hidden  py-2"
-          onOpenAutoFocus={(event) => event.preventDefault()}
-        >
-          <ScrollArea className="h-full" type="always">
-            <SheetHeader className="sr-only">
-              <SheetTitle>Filters</SheetTitle>
-            </SheetHeader>
-            <div className="flex w-full flex-col items-center justify-start gap-4">
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={topicRef}
-              >
-                <h3
-                  className={cn(
-                    "w-max font-medium text-sm",
-                    invalidInputs.topic && "text-destructive"
-                  )}
-                >
-                  Topic
-                </h3>
-                <EnhancedMultiSelect
-                  data={subjectMetadata?.topic}
-                  label="Topic"
-                  onValuesChange={(values) =>
-                    setSelectedTopic(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedTopic ?? []}
-                />
-                {invalidInputs.topic && (
-                  <p className="text-destructive text-sm">Topic is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={paperTypeRef}
-              >
-                <h3
-                  className={cn(
-                    "w-max font-medium text-sm",
-                    invalidInputs.paperType && "text-destructive"
-                  )}
-                >
-                  Paper
-                </h3>
-                <EnhancedMultiSelect
-                  data={subjectMetadata?.paperType}
-                  label="Paper"
-                  onValuesChange={(values) =>
-                    setSelectedPaperType(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedPaperType ?? []}
-                />
-                {invalidInputs.paperType && (
-                  <p className="text-destructive text-sm">Paper is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={yearRef}
-              >
-                <h3
-                  className={cn(
-                    "w-max font-medium text-sm",
-                    invalidInputs.year && "text-destructive"
-                  )}
-                >
-                  Year
-                </h3>
-                <EnhancedMultiSelect
-                  data={subjectMetadata?.year}
-                  label="Year"
-                  onValuesChange={(values) =>
-                    setSelectedYear(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedYear ?? []}
-                />
-                {invalidInputs.year && (
-                  <p className="text-destructive text-sm">Year is required</p>
-                )}
-              </div>
-              <div
-                className="flex flex-col items-start justify-start gap-1"
-                ref={seasonRef}
-              >
-                <h3
-                  className={cn(
-                    "w-max font-medium text-sm",
-                    invalidInputs.season && "text-destructive"
-                  )}
-                >
-                  Season
-                </h3>
-                <EnhancedMultiSelect
-                  data={subjectMetadata?.season}
-                  label="Season"
-                  onValuesChange={(values) =>
-                    setSelectedSeason(values as string[])
-                  }
-                  prerequisite="Subject"
-                  values={selectedSeason ?? []}
-                />
-                {invalidInputs.season && (
-                  <p className="text-destructive text-sm">Season is required</p>
-                )}
-              </div>
-            </div>
-            <div className="flex w-full flex-col items-center justify-center gap-4 px-4 mt-2">
-              <ButtonUltility
-                isMounted={isMounted}
-                setIsSidebarOpen={setIsSidebarOpen}
-                revert={() => {
-                  setSelectedTopic(currentFilter?.topic ?? []);
-                  setSelectedYear(currentFilter?.year ?? []);
-                  setSelectedPaperType(currentFilter?.paperType ?? []);
-                  setSelectedSeason(currentFilter?.season ?? []);
-                }}
-                resetEverything={() => {
-                  setSelectedPaperType([]);
-                  setSelectedTopic([]);
-                  setSelectedYear([]);
-                  setSelectedSeason([]);
-                  setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-                }}
-              >
-                <Button
-                  className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-                  disabled={!isMounted}
-                  onClick={() => {
-                    const filter = {
-                      curriculumId: selectedCurriculumn,
-                      subjectId: selectedSubject,
-                      topic: selectedTopic?.toSorted() ?? [],
-                      paperType: selectedPaperType?.toSorted() ?? [],
-                      year:
-                        selectedYear?.toSorted(
-                          (a, b) => Number(b) - Number(a)
-                        ) ?? [],
-                      season: selectedSeason?.toSorted() ?? [],
-                    };
-                    const isSameQuery =
-                      JSON.stringify(currentFilter) == JSON.stringify(filter);
-                    if (
-                      isValidInputs({ scrollOnError: true }) &&
-                      !isSameQuery
-                    ) {
-                      setCurrentFilter({
-                        ...filter,
-                      });
-                      // Update URL parameters without page reload
-                    } else if (isSameQuery) {
-                      setIsSidebarOpen(false);
-                    }
-                  }}
-                >
-                  Search
-                  <ScanText />
-                </Button>
-              </ButtonUltility>
-              <Separator />
-
-              <LayoutSetting
-                layoutStyle={layoutStyle}
-                numberOfColumns={numberOfColumns}
-                setLayoutStyle={setLayoutStyle}
-                setNumberOfColumns={setNumberOfColumns}
-                numberOfQuestionsPerPage={numberOfQuestionsPerPage}
-                setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
-              />
-              <VisualSetting
-                showFinishedQuestionTint={showFinishedQuestionTint}
-                setShowFinishedQuestionTint={setShowFinishedQuestionTint}
-                showScrollToTopButton={showScrollToTopButton}
-                setShowScrollToTopButton={setShowScrollToTopButton}
-                scrollUpWhenPageChange={scrollUpWhenPageChange}
-                setScrollUpWhenPageChange={setScrollUpWhenPageChange}
-                imageTheme={imageTheme}
-                setImageTheme={setImageTheme}
-              />
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
+      <SecondaryAppSidebar
+        subjectMetadata={subjectMetadata}
+        currentFilter={currentFilter}
+        setCurrentFilter={setCurrentFilter}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        isMounted={isMounted}
+        layoutStyle={layoutStyle}
+        numberOfColumns={numberOfColumns}
+        setLayoutStyle={setLayoutStyle}
+        setNumberOfColumns={setNumberOfColumns}
+        numberOfQuestionsPerPage={numberOfQuestionsPerPage}
+        setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
+        showFinishedQuestionTint={showFinishedQuestionTint}
+        setShowFinishedQuestionTint={setShowFinishedQuestionTint}
+        showScrollToTopButton={showScrollToTopButton}
+        setShowScrollToTopButton={setShowScrollToTopButton}
+        scrollUpWhenPageChange={scrollUpWhenPageChange}
+        setScrollUpWhenPageChange={setScrollUpWhenPageChange}
+        imageTheme={imageTheme}
+        setImageTheme={setImageTheme}
+        selectedCurriculumn={selectedCurriculumn}
+        selectedSubject={selectedSubject}
+      />
       {Array.isArray(userFinishedQuestions) &&
         userFinishedQuestions.length > 0 && (
           <QuestionInspect
