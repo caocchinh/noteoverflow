@@ -54,7 +54,6 @@ import { BestExamHelpUltility } from "./BestExamHelpUltility";
 import {
   BrowseMoreQuestionsProps,
   QuestionHoverCardProps,
-  SelectedFinishedQuestion,
   SelectedQuestion,
   QuestionInspectProps,
   ImageTheme,
@@ -96,6 +95,7 @@ import {
   MANSONRY_GUTTER_BREAKPOINTS,
 } from "../constants/constants";
 import { useTopicalApp } from "./TopicalLayoutProvider";
+import { FinishedTracker } from "./FinishedTracker";
 
 const QuestionInspect = ({
   isOpen,
@@ -651,6 +651,9 @@ const QuestionInspect = ({
         }}
         modal={false}
       >
+        {isOpen.isOpen && (
+          <div className="fixed inset-0 z-[100003] bg-black/50" />
+        )}
         <DialogContent
           className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
           showCloseButton={false}
@@ -705,7 +708,9 @@ const QuestionInspect = ({
             setIsCoolDown(false);
           }}
           onInteractOutside={(e) => {
-            e.preventDefault();
+            if (isOpen.isOpen && isCalculatorOpen) {
+              e.preventDefault();
+            }
           }}
         >
           <DialogHeader className="sr-only">
@@ -746,8 +751,14 @@ const QuestionInspect = ({
                   isValidSession={isValidSession}
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions}
+                  bookmarks={bookmarks}
+                  imageTheme={imageTheme}
+                  navigateToQuestion={navigateToQuestion}
+                  showFinishedQuestionTint={showFinishedQuestionTint}
+                  isUserSessionError={isUserSessionError}
+                  isSavedActivitiesError={isSavedActivitiesError}
                 />
-                <div className="flex items-center justify-start w-full gap-2 px-1 mt-5">
+                <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
                   <div className="flex items-center gap-2 border-b border-border">
                     <Search />
                     <Input
@@ -1168,7 +1179,7 @@ const QuestionInspect = ({
                         className={cn(
                           "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
                           isCalculatorOpen &&
-                            "border-logo-main bg-logo-main text-white hover:bg-logo-main/80"
+                            "!border-logo-main !bg-logo-main !text-white hover:!bg-logo-main/80"
                         )}
                       >
                         Calculator
@@ -1239,6 +1250,8 @@ const QuestionInspect = ({
                         isDisabled={false}
                         disabledMessage=""
                         showSortTextTrigger={false}
+                        descendingSortText="Newest year first"
+                        ascendingSortText="Oldest year first"
                       />
                     )}
                     <ShareFilter
@@ -1360,48 +1373,6 @@ const QuestionInspect = ({
 };
 
 export default QuestionInspect;
-
-const FinishedTracker = ({
-  allQuestions,
-  isValidSession,
-  isSavedActivitiesFetching,
-  isUserSessionPending,
-  userFinishedQuestions,
-}: {
-  allQuestions: SelectedQuestion[];
-  isValidSession: boolean;
-  isSavedActivitiesFetching: boolean;
-  isUserSessionPending: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
-}) => {
-  return (
-    <div className="absolute w-full h-7 bg-green-600 left-0 top-0 flex items-center justify-center text-white text-sm">
-      {!isSavedActivitiesFetching &&
-        !isUserSessionPending &&
-        isValidSession && (
-          <>
-            Finished{" "}
-            {
-              allQuestions.filter((q) =>
-                userFinishedQuestions?.some((fq) => fq.question.id === q.id)
-              ).length
-            }{" "}
-            out of {allQuestions.length}
-          </>
-        )}
-      {(isUserSessionPending || isSavedActivitiesFetching) && (
-        <span className="text-xs flex items-center justify-center gap-2">
-          Fetching data <Loader2 className="animate-spin " size={12} />
-        </span>
-      )}
-      {!isValidSession && !isUserSessionPending && (
-        <span className="text-xs flex items-center justify-center gap-2">
-          Sign in to track progress
-        </span>
-      )}
-    </div>
-  );
-};
 
 const BothViews = ({
   isMobile,

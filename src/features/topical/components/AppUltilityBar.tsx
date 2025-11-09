@@ -210,6 +210,8 @@ const AppUltilityBar = ({
             setSortParameters={setSortParameters}
             isDisabled={isQuestionViewDisabled}
             disabledMessage="To sort questions, run a search first."
+            descendingSortText="Newest year first"
+            ascendingSortText="Oldest year first"
           />
           <Tooltip>
             <TooltipTrigger asChild>

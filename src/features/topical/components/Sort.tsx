@@ -22,12 +22,16 @@ const Sort = ({
   isDisabled,
   disabledMessage,
   showSortTextTrigger = true,
+  descendingSortText = "Newest first",
+  ascendingSortText = "Oldest first",
 }: {
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   isDisabled: boolean;
   disabledMessage: string;
   showSortTextTrigger?: boolean;
+  descendingSortText?: string;
+  ascendingSortText?: string;
 }) => {
   const currentSort = sortParameters?.sortBy || DEFAULT_SORT_OPTIONS;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -69,7 +73,7 @@ const Sort = ({
                     currentSort === "descending" ? "opacity-100" : "opacity-0"
                   )}
                 />
-                Newest first
+                {descendingSortText}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
@@ -85,7 +89,7 @@ const Sort = ({
                     currentSort === "ascending" ? "opacity-100" : "opacity-0"
                   )}
                 />
-                Oldest first
+                {ascendingSortText}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

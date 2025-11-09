@@ -721,7 +721,7 @@ const BookmarkButtonConsumer = memo(
               </div>
             </DrawerTrigger>
             <DrawerContent
-              className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
+              className="z-[100009] h-[95vh] max-h-[95vh] dark:bg-accent"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -803,7 +803,7 @@ const BookmarkButtonConsumer = memo(
               </div>
             </PopoverTrigger>
             <PopoverContent
-              className="flex flex-col z-[100006] w-[270px] !px-0 dark:bg-accent"
+              className="flex flex-col z-[100009] w-[270px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
               side="left"
@@ -1384,8 +1384,8 @@ const ActionDialogs = memo(() => {
           </div>
         </AlertDialogTrigger>
         <AlertDialogContent
-          className="z-[100008] dark:bg-accent"
-          overlayClassName="z-[100007] "
+          className="z-[100009] dark:bg-accent"
+          overlayClassName="z-[100008] "
         >
           <AlertDialogHeader>
             <AlertDialogTitle>New list</AlertDialogTitle>
@@ -1516,8 +1516,8 @@ const ActionDialogs = memo(() => {
             </div>
           </AlertDialogTrigger>
           <AlertDialogContent
-            className="z-[100008] dark:bg-accent"
-            overlayClassName="z-[100007] "
+            className="z-[100009] dark:bg-accent"
+            overlayClassName="z-[100008] "
           >
             <AlertDialogHeader>
               <AlertDialogTitle>Remove from this list</AlertDialogTitle>

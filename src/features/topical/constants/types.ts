@@ -282,6 +282,20 @@ export interface AppSidebarProps {
   isAddRecentQueryPending: boolean;
 }
 
+export interface FinishedTrackerProps {
+  allQuestions: SelectedQuestion[];
+  isValidSession: boolean;
+  isSavedActivitiesFetching: boolean;
+  isUserSessionPending: boolean;
+  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
+  bookmarks: SelectedBookmark[];
+  imageTheme: ImageTheme;
+  navigateToQuestion: (questionId: string) => void;
+  showFinishedQuestionTint: boolean;
+  isUserSessionError: boolean;
+  isSavedActivitiesError: boolean;
+}
+
 export type QuestionInspectOpenState = {
   isOpen: boolean;
   questionId: string;
