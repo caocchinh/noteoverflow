@@ -23,16 +23,15 @@ import {
   INVALID_INPUTS_DEFAULT,
 } from "@/features/topical/constants/constants";
 import {
-  SelectedFinishedQuestion,
   SelectedQuestion,
   LayoutStyle,
   FiltersCache,
-  SelectedBookmark,
   InvalidInputs,
   SelectedPublickBookmark,
   ImageTheme,
   SortParameters,
   QuestionInspectOpenState,
+  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
   ChevronLeft,
@@ -120,46 +119,16 @@ export const BookmarkView = ({
     });
 
   const {
-    data: userFinishedQuestions,
-    isFetching: isUserFinishedQuestionsFetching,
-    isError: isUserFinishedQuestionsError,
+    data: userSavedActivities,
+    isFetching: isUserSavedActivitiesFetching,
+    isError: isUserSavedActivitiesError,
   } = useQuery({
-    queryKey: ["user_finished_questions"],
+    queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/finished");
-      const data: {
-        data: SelectedFinishedQuestion[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-      return data.data;
-    },
-    enabled:
-      !!userSession?.data?.session &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_finished_questions"]),
-  });
-
-  const {
-    data: bookmarks,
-    isFetching: isBookmarksFetching,
-    isError: isBookmarksError,
-  } = useQuery({
-    queryKey: ["all_user_bookmarks"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/bookmark", {
+      const response = await fetch("/api/topical/saved-activities", {
         method: "GET",
       });
-      const data: {
-        data: SelectedBookmark[];
-        error?: string;
-      } = await response.json();
+      const data: SavedActivitiesResponse = await response.json();
       if (!response.ok) {
         const errorMessage =
           typeof data === "object" && data && "error" in data
@@ -168,17 +137,22 @@ export const BookmarkView = ({
         throw new Error(errorMessage);
       }
 
-      return data.data;
+      return data;
     },
     enabled:
       !!userSession?.data?.session &&
       !isUserSessionError &&
-      !queryClient.getQueryData(["all_user_bookmarks"]),
+      !queryClient.getQueryData(["user_saved_activities"]),
   });
-  const isSavedActivitiesFetching =
-    isBookmarksFetching || isUserFinishedQuestionsFetching;
-  const isSavedActivitiesError =
-    isBookmarksError || isUserFinishedQuestionsError;
+
+  const userFinishedQuestions = useMemo(() => {
+    return userSavedActivities?.finishedQuestions;
+  }, [userSavedActivities]);
+  const bookmarks = useMemo(() => {
+    return userSavedActivities?.bookmarks;
+  }, [userSavedActivities]);
+  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
+  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
