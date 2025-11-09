@@ -38,22 +38,42 @@ export interface FilterData {
 export type LayoutStyle = "pagination" | "infinite";
 export type ImageTheme = "dark" | "light";
 
-export type FiltersCache = {
+export interface UiPreferences {
   numberOfColumns: number;
-  isSessionCacheEnabled: boolean;
-  lastSessionCurriculum: string;
   layoutStyle: LayoutStyle;
-  isQuestionCacheEnabled: boolean;
-  isStrictModeEnabled: boolean;
-  imageTheme: ImageTheme;
-  recentlySearchSortedBy: "ascending" | "descending";
-  finishedQuestionsSearchSortedBy: "ascending" | "descending";
   numberOfQuestionsPerPage: number;
-  scrollUpWhenPageChange: boolean;
+  imageTheme: ImageTheme;
+  isStrictModeEnabled: boolean;
+  isQuestionCacheEnabled: boolean;
   showFinishedQuestionTint: boolean;
   showScrollToTopButton: boolean;
-  lastSessionSubject: string;
+  scrollUpWhenPageChange: boolean;
+  finishedQuestionsSearchSortedBy: SortByOptions;
+  recentlySearchSortedBy: SortByOptions;
+  isSessionCacheEnabled: boolean;
   isPersistantCacheEnabled: boolean;
+}
+
+export type UiPreferencesCache = Pick<
+  UiPreferences,
+  | "numberOfColumns"
+  | "layoutStyle"
+  | "numberOfQuestionsPerPage"
+  | "imageTheme"
+  | "isStrictModeEnabled"
+  | "isQuestionCacheEnabled"
+  | "showFinishedQuestionTint"
+  | "showScrollToTopButton"
+  | "scrollUpWhenPageChange"
+  | "finishedQuestionsSearchSortedBy"
+  | "recentlySearchSortedBy"
+  | "isSessionCacheEnabled"
+  | "isPersistantCacheEnabled"
+>;
+
+export type FiltersCache = {
+  lastSessionCurriculum: string;
+  lastSessionSubject: string;
   filters: {
     [curriculum: string]: {
       [subject: string]: FilterData;
@@ -195,11 +215,8 @@ export interface QuestionHoverCardProps {
 export interface BrowseMoreQuestionsProps {
   displayedData: SelectedQuestion[];
   bookmarks: SelectedBookmark[];
-  imageTheme: ImageTheme;
   isUserSessionPending: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
-  showFinishedQuestionTint: boolean;
-  isUserSessionError: boolean;
   isSavedActivitiesError: boolean;
   isValidSession: boolean;
   isSavedActivitiesFetching: boolean;
@@ -213,7 +230,6 @@ export interface QuestionInspectProps {
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   bookmarks: SelectedBookmark[];
-  imageTheme: ImageTheme;
   currentQuery?: CurrentQuery;
   isUserSessionPending: boolean;
   sortParameters?: SortParameters;
@@ -226,13 +242,10 @@ export interface QuestionInspectProps {
   userFinishedQuestions: SelectedFinishedQuestion[];
   listId?: string;
   BETTER_AUTH_URL: string;
-  showFinishedQuestionTint: boolean;
-  isUserSessionError: boolean;
 }
 
 export interface AppUltilityBarProps {
   fullPartitionedData: SelectedQuestion[][] | undefined;
-  layoutStyle: LayoutStyle;
   ultilityRef: RefObject<HTMLDivElement | null>;
   isQuestionViewDisabled: boolean;
   setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
@@ -240,7 +253,6 @@ export interface AppUltilityBarProps {
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
   setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
-  scrollUpWhenPageChange: boolean;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   showFinishedQuestion: boolean;
@@ -258,24 +270,6 @@ export interface AppSidebarProps {
   mountedRef: RefObject<boolean>;
   searchParams: { [key: string]: string | string[] | undefined };
   setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
-  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
-  setNumberOfColumns: Dispatch<SetStateAction<number>>;
-  setIsStrictModeEnabled: Dispatch<SetStateAction<boolean>>;
-  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
-  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
-  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
-  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
-  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
-  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
-  imageTheme: ImageTheme;
-  showFinishedQuestionTint: boolean;
-  showScrollToTopButton: boolean;
-  scrollUpWhenPageChange: boolean;
-  isQuestionCacheEnabled: boolean;
-  numberOfColumns: number;
-  layoutStyle: LayoutStyle;
-  numberOfQuestionsPerPage: number;
-  isStrictModeEnabled: boolean;
   isUserSessionPending: boolean;
   setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
   isValidSession: boolean;
@@ -289,9 +283,7 @@ export interface FinishedTrackerProps {
   isUserSessionPending: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
   bookmarks: SelectedBookmark[];
-  imageTheme: ImageTheme;
   navigateToQuestion: (questionId: string) => void;
-  showFinishedQuestionTint: boolean;
   isSavedActivitiesError: boolean;
 }
 
@@ -307,20 +299,6 @@ export interface SecondaryAppSidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
   isMounted: boolean;
-  layoutStyle: LayoutStyle;
-  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
-  numberOfColumns: number;
-  setNumberOfColumns: Dispatch<SetStateAction<number>>;
-  numberOfQuestionsPerPage: number;
-  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
-  showFinishedQuestionTint: boolean;
-  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
-  showScrollToTopButton: boolean;
-  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
-  scrollUpWhenPageChange: boolean;
-  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
-  imageTheme: ImageTheme;
-  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
   selectedCurriculumn: ValidCurriculum | null;
   selectedSubject: string | null;
 }
@@ -330,11 +308,9 @@ export interface SecondaryAppUltilityBarProps {
   isQuestionViewDisabled: boolean;
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
   fullPartitionedData: SelectedQuestion[][] | undefined;
-  layoutStyle: LayoutStyle;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
   setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
-  scrollUpWhenPageChange: boolean;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;

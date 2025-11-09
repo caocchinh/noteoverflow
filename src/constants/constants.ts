@@ -561,3 +561,12 @@ export const TOPICAL_DATA: TopicalData[] = [
 
 export const PAST_PAPER_NAVIGATOR_CACHE_KEY =
   "noteoverflow-past-paper-navigator-cache";
+
+export const INITIAL_QUERY = {
+  curriculumId: "",
+  subjectId: "",
+  topic: [],
+  paperType: [],
+  year: [],
+  season: [],
+};

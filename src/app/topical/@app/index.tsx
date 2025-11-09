@@ -1,4 +1,5 @@
 "use client";
+import React, { useCallback, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDown,
@@ -8,28 +9,22 @@ import {
   OctagonAlert,
   RefreshCcw,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useTopicalApp } from "@/features/topical/components/TopicalLayoutProvider";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { usePathname } from "next/navigation";
 import {
-  DEFAULT_NUMBER_OF_COLUMNS,
   COLUMN_BREAKPOINTS,
   INFINITE_SCROLL_CHUNK_SIZE,
   CACHE_EXPIRE_TIME,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  DEFAULT_LAYOUT_STYLE,
-  DEFAULT_IMAGE_THEME,
   MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import type {
   FilterData,
-  LayoutStyle,
   SortParameters,
   CurrentQuery,
-  ImageTheme,
   QuestionInspectOpenState,
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
@@ -49,7 +44,7 @@ import { getCache, setCache } from "@/drizzle/db";
 import QuestionInspect from "@/features/topical/components/QuestionInspect";
 import { addRecentQuery } from "@/features/topical/server/actions";
 import { toast } from "sonner";
-import { BAD_REQUEST } from "@/constants/constants";
+import { BAD_REQUEST, INITIAL_QUERY } from "@/constants/constants";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
 import { UtilityOverflowProvider } from "@/features/topical/hooks/useUtilityOverflow";
@@ -65,40 +60,23 @@ const TopicalClient = ({
   const pathname = usePathname();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const isMobileDevice = useIsMobile();
-  const [numberOfColumns, setNumberOfColumns] = useState(
-    DEFAULT_NUMBER_OF_COLUMNS
-  );
+  // UI preferences hook
+  const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
+
   const [numberOfQuestion, setNumberOfQuetion] = useState(0);
-  const [isStrictModeEnabled, setIsStrictModeEnabled] = useState(false);
-  const [isQuestionCacheEnabled, setIsQuestionCacheEnabled] = useState(true);
-  const [showFinishedQuestionTint, setShowFinishedQuestionTint] =
-    useState(true);
-  const [layoutStyle, setLayoutStyle] =
-    useState<LayoutStyle>(DEFAULT_LAYOUT_STYLE);
-  const [numberOfQuestionsPerPage, setNumberOfQuestionsPerPage] = useState(
-    DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-  );
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
   const mountedRef = useRef(false);
-  const { isAppSidebarOpen, setIsAppSidebarOpen } = useTopicalApp();
+  const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
+    useTopicalApp();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
-  const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
   const [currentQuery, setCurrentQuery] = useState<CurrentQuery>({
-    curriculumId: "",
-    subjectId: "",
-    topic: [],
-    paperType: [],
-    year: [],
-    season: [],
+    ...INITIAL_QUERY,
   });
-  const [showScrollToTopButton, setShowScrollToTopButton] = useState(true);
-  const [scrollUpWhenPageChange, setScrollUpWhenPageChange] = useState(true);
   const [isValidSearchParams, setIsValidSearchParams] = useState(true);
-  const [imageTheme, setImageTheme] = useState<ImageTheme>(DEFAULT_IMAGE_THEME);
 
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const ultilityRef = useRef<HTMLDivElement | null>(null);
@@ -123,7 +101,7 @@ const TopicalClient = ({
         isInspectOpen: false,
       });
     }
-  }, [currentQuery, isStrictModeEnabled]);
+  }, [currentQuery, uiPreferences.isStrictModeEnabled]);
 
   const search = async () => {
     const params = new URLSearchParams();
@@ -319,60 +297,102 @@ const TopicalClient = ({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
 
-  useEffect(() => {
-    if (topicalData?.data) {
-      const chunkSize =
-        layoutStyle === "pagination"
-          ? numberOfQuestionsPerPage
-          : INFINITE_SCROLL_CHUNK_SIZE;
+  // Memoized data processing to prevent expensive recalculations
+  const processedData = useMemo(() => {
+    if (!topicalData?.data) return null;
 
-      const filteredStrictModeData = isStrictModeEnabled
-        ? topicalData.data.filter((item) => {
-            return isSubset(item.topics, currentQuery.topic);
-          })
-        : topicalData.data;
+    const chunkSize =
+      uiPreferences.layoutStyle === "pagination"
+        ? uiPreferences.numberOfQuestionsPerPage
+        : INFINITE_SCROLL_CHUNK_SIZE;
 
-      const sortedData = filteredStrictModeData.toSorted(
-        (a: SelectedQuestion, b: SelectedQuestion) => {
-          if (sortParameters.sortBy === "ascending") {
-            return a.year - b.year;
-          } else {
-            // Default to year-desc
-            return b.year - a.year;
-          }
+    const filteredStrictModeData = uiPreferences.isStrictModeEnabled
+      ? topicalData.data.filter((item) => {
+          return isSubset(item.topics, currentQuery.topic);
+        })
+      : topicalData.data;
+
+    const sortedData = filteredStrictModeData.toSorted(
+      (a: SelectedQuestion, b: SelectedQuestion) => {
+        if (sortParameters.sortBy === "ascending") {
+          return a.year - b.year;
+        } else {
+          // Default to year-desc
+          return b.year - a.year;
         }
-      );
-      const chunkedData = chunkQuestionsData(sortedData, chunkSize);
-      setNumberOfQuetion(sortedData.length);
-      setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0]);
+      }
+    );
+
+    const chunkedData = chunkQuestionsData(sortedData, chunkSize);
+
+    return {
+      sortedData,
+      chunkedData,
+      totalCount: sortedData.length,
+    };
+  }, [
+    topicalData?.data,
+    uiPreferences.layoutStyle,
+    uiPreferences.numberOfQuestionsPerPage,
+    uiPreferences.isStrictModeEnabled,
+    currentQuery.topic,
+    sortParameters.sortBy,
+  ]);
+
+  // Memoized callbacks to prevent child re-renders
+  const handleQuestionClick = useCallback((questionId: string) => {
+    setIsQuestionInspectOpen({
+      isOpen: true,
+      questionId,
+    });
+  }, []);
+
+  const handleScrollEnd = useCallback(() => {
+    if (mainContentScrollAreaRef.current?.scrollTop === 0) {
+      setIsScrollingAndShouldShowScrollButton(false);
+    } else {
+      setIsScrollingAndShouldShowScrollButton(true);
+    }
+  }, []);
+
+  const handleRefetch = useCallback(() => {
+    refetchTopicalData();
+  }, [refetchTopicalData]);
+
+  const handleInfiniteScrollNext = useCallback(() => {
+    if (fullPartitionedData) {
+      setCurrentChunkIndex(currentChunkIndex + 1);
+      setDisplayedData([
+        ...displayedData,
+        ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+      ]);
+    }
+  }, [fullPartitionedData, currentChunkIndex, displayedData]);
+
+  useEffect(() => {
+    if (processedData) {
+      setNumberOfQuetion(processedData.totalCount);
+      setFullPartitionedData(processedData.chunkedData);
+      setDisplayedData(processedData.chunkedData[0]);
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
       });
     }
-  }, [
-    topicalData,
-    numberOfColumns,
-    layoutStyle,
-    numberOfQuestionsPerPage,
-    sortParameters.sortBy,
-    isStrictModeEnabled,
-    currentQuery.topic,
-  ]);
+  }, [processedData]);
 
   useEffect(() => {
     if (topicalData) {
       setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
     }
-  }, [topicalData, isStrictModeEnabled]);
+  }, [topicalData, uiPreferences.isStrictModeEnabled]);
 
   useEffect(() => {
     if (!mountedRef.current) {
       return;
     }
-    if (!isQuestionCacheEnabled) {
+    if (!uiPreferences.isQuestionCacheEnabled) {
       setOpenInspectOnMount(true);
       return;
     }
@@ -396,7 +416,12 @@ const TopicalClient = ({
         setOpenInspectOnMount(true);
       }
     }
-  }, [isQuestionCacheEnabled, openInspectOnMount, searchParams, topicalData]);
+  }, [
+    uiPreferences.isQuestionCacheEnabled,
+    openInspectOnMount,
+    searchParams,
+    topicalData,
+  ]);
 
   useEffect(() => {
     mainContentScrollAreaRef.current?.scrollTo({
@@ -533,34 +558,15 @@ const TopicalClient = ({
               mountedRef={mountedRef}
               searchParams={searchParams}
               setIsValidSearchParams={setIsValidSearchParams}
-              setIsQuestionCacheEnabled={setIsQuestionCacheEnabled}
-              setNumberOfColumns={setNumberOfColumns}
-              setIsStrictModeEnabled={setIsStrictModeEnabled}
-              setLayoutStyle={setLayoutStyle}
-              setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
-              setShowScrollToTopButton={setShowScrollToTopButton}
-              setShowFinishedQuestionTint={setShowFinishedQuestionTint}
-              setImageTheme={setImageTheme}
-              imageTheme={imageTheme}
-              showFinishedQuestionTint={showFinishedQuestionTint}
-              showScrollToTopButton={showScrollToTopButton}
-              scrollUpWhenPageChange={scrollUpWhenPageChange}
-              isQuestionCacheEnabled={isQuestionCacheEnabled}
-              numberOfColumns={numberOfColumns}
-              layoutStyle={layoutStyle}
-              numberOfQuestionsPerPage={numberOfQuestionsPerPage}
-              isStrictModeEnabled={isStrictModeEnabled}
               isUserSessionPending={isUserSessionPending}
               isValidSession={isValidSession}
               isAddRecentQueryPending={isAddRecentQueryPending}
-              setScrollUpWhenPageChange={setScrollUpWhenPageChange}
             />
             <SidebarInset
               className="!relative flex flex-col items-center justify-start !px-0 gap-4 p-4 pl-2 md:items-start w-full overflow-hidden"
               ref={sideBarInsetRef}
             >
               <ScrollToTopButton
-                showScrollToTopButton={showScrollToTopButton}
                 isScrollingAndShouldShowScrollButton={
                   isScrollingAndShouldShowScrollButton
                 }
@@ -569,7 +575,6 @@ const TopicalClient = ({
 
               <AppUltilityBar
                 fullPartitionedData={fullPartitionedData}
-                layoutStyle={layoutStyle}
                 ultilityRef={ultilityRef}
                 isQuestionViewDisabled={isQuestionViewDisabled}
                 setIsQuestionInspectOpen={setIsQuestionInspectOpen}
@@ -577,7 +582,6 @@ const TopicalClient = ({
                 currentChunkIndex={currentChunkIndex}
                 setCurrentChunkIndex={setCurrentChunkIndex}
                 setDisplayedData={setDisplayedData}
-                scrollUpWhenPageChange={scrollUpWhenPageChange}
                 sortParameters={sortParameters}
                 setSortParameters={setSortParameters}
                 showFinishedQuestion={showFinishedQuestion}
@@ -589,13 +593,7 @@ const TopicalClient = ({
                 viewportRef={mainContentScrollAreaRef}
                 className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
                 type="always"
-                viewPortOnScrollEnd={() => {
-                  if (mainContentScrollAreaRef.current?.scrollTop === 0) {
-                    setIsScrollingAndShouldShowScrollButton(false);
-                  } else {
-                    setIsScrollingAndShouldShowScrollButton(true);
-                  }
-                }}
+                viewPortOnScrollEnd={handleScrollEnd}
               >
                 {!isTopicalDataFetching && !isTopicalDataFetched && (
                   <div className="flex flex-col items-center justify-center w-full h-full mb-3 gap-2">
@@ -721,9 +719,7 @@ const TopicalClient = ({
                       </div>
                       <Button
                         variant="outline"
-                        onClick={() => {
-                          refetchTopicalData();
-                        }}
+                        onClick={handleRefetch}
                         className="flex items-center justify-center gap-1 cursor-pointer"
                       >
                         Refetch
@@ -748,7 +744,7 @@ const TopicalClient = ({
                 <ResponsiveMasonry
                   columnsCountBreakPoints={
                     COLUMN_BREAKPOINTS[
-                      numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+                      uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
                     ]
                   }
                   // @ts-expect-error - gutterBreakPoints is not typed by the library
@@ -778,16 +774,11 @@ const TopicalClient = ({
                           <QuestionPreview
                             bookmarks={bookmarks ?? []}
                             question={question}
-                            imageTheme={imageTheme}
-                            onQuestionClick={() => {
-                              setIsQuestionInspectOpen({
-                                isOpen: true,
-                                questionId: question.id,
-                              });
-                            }}
+                            onQuestionClick={() =>
+                              handleQuestionClick(question.id)
+                            }
                             isUserSessionPending={isUserSessionPending}
                             userFinishedQuestions={userFinishedQuestions ?? []}
-                            showFinishedQuestionTint={showFinishedQuestionTint}
                             isSavedActivitiesError={isUserSavedActivitiesError}
                             isValidSession={isValidSession}
                             key={`${question.id}-${imageSrc}`}
@@ -801,17 +792,9 @@ const TopicalClient = ({
                   </Masonry>
                 </ResponsiveMasonry>
 
-                {layoutStyle === "infinite" && (
+                {uiPreferences.layoutStyle === "infinite" && (
                   <InfiniteScroll
-                    next={() => {
-                      if (fullPartitionedData) {
-                        setCurrentChunkIndex(currentChunkIndex + 1);
-                        setDisplayedData([
-                          ...displayedData,
-                          ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
-                        ]);
-                      }
-                    }}
+                    next={handleInfiniteScrollNext}
                     hasMore={
                       !!fullPartitionedData &&
                       currentChunkIndex < fullPartitionedData.length - 1
@@ -829,7 +812,6 @@ const TopicalClient = ({
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
         bookmarks={bookmarks ?? []}
-        imageTheme={imageTheme}
         currentQuery={currentQuery}
         isValidSession={isValidSession}
         isSavedActivitiesFetching={isUserSavedActivitiesFetching}
@@ -841,8 +823,6 @@ const TopicalClient = ({
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         userFinishedQuestions={userFinishedQuestions ?? []}
-        showFinishedQuestionTint={showFinishedQuestionTint}
-        isUserSessionError={isUserSessionError}
       />
     </>
   );

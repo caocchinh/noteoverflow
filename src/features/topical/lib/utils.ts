@@ -13,8 +13,6 @@ import type {
   FilterData,
   FiltersCache,
   InvalidInputs,
-  LayoutStyle,
-  ImageTheme,
   FinishedQuestionsMetadata,
   BookmarksMetadata,
   SelectedFinishedQuestion,
@@ -367,36 +365,14 @@ export const updateSearchParams = ({
 };
 
 export const syncFilterCacheToLocalStorage = ({
-  isSessionCacheEnabled,
-  isPersistantCacheEnabled,
-  showFinishedQuestionTint,
-  isStrictModeEnabled,
-  scrollUpWhenPageChange,
-  showScrollToTopButton,
-  numberOfColumns,
-  layoutStyle,
-  numberOfQuestionsPerPage,
   selectedCurriculum,
   selectedSubject,
   selectedTopic,
-  imageTheme,
   selectedPaperType,
   selectedYear,
   selectedSeason,
-  isQuestionCacheEnabled,
 }: {
-  isSessionCacheEnabled?: boolean;
-  isStrictModeEnabled?: boolean;
-  isPersistantCacheEnabled?: boolean;
-  layoutStyle?: LayoutStyle;
-  showFinishedQuestionTint?: boolean;
-  imageTheme?: ImageTheme;
-  scrollUpWhenPageChange?: boolean;
-  showScrollToTopButton?: boolean;
-  numberOfColumns?: number;
-  numberOfQuestionsPerPage?: number;
   selectedCurriculum: string;
-  isQuestionCacheEnabled: boolean;
   selectedSubject: string;
   selectedTopic: string[];
   selectedPaperType: string[];
@@ -421,25 +397,6 @@ export const syncFilterCacheToLocalStorage = ({
 
     stateToSave = {
       ...stateToSave,
-      isSessionCacheEnabled:
-        isSessionCacheEnabled ?? stateToSave.isSessionCacheEnabled,
-      isPersistantCacheEnabled:
-        isPersistantCacheEnabled ?? stateToSave.isPersistantCacheEnabled,
-      showFinishedQuestionTint:
-        showFinishedQuestionTint ?? stateToSave.showFinishedQuestionTint,
-      isQuestionCacheEnabled:
-        isQuestionCacheEnabled ?? stateToSave.isQuestionCacheEnabled,
-      scrollUpWhenPageChange:
-        scrollUpWhenPageChange ?? stateToSave.scrollUpWhenPageChange,
-      showScrollToTopButton:
-        showScrollToTopButton ?? stateToSave.showScrollToTopButton,
-      numberOfColumns: numberOfColumns ?? stateToSave.numberOfColumns,
-      layoutStyle: layoutStyle ?? stateToSave.layoutStyle,
-      numberOfQuestionsPerPage:
-        numberOfQuestionsPerPage ?? stateToSave.numberOfQuestionsPerPage,
-      imageTheme: imageTheme ?? stateToSave.imageTheme,
-      isStrictModeEnabled:
-        isStrictModeEnabled ?? stateToSave.isStrictModeEnabled,
     };
 
     if (selectedCurriculum && selectedSubject) {

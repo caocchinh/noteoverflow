@@ -56,7 +56,6 @@ import {
   QuestionHoverCardProps,
   SelectedQuestion,
   QuestionInspectProps,
-  ImageTheme,
 } from "../constants/types";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import {
@@ -94,7 +93,7 @@ import {
   COLUMN_BREAKPOINTS,
   MANSONRY_GUTTER_BREAKPOINTS,
 } from "../constants/constants";
-import { useTopicalApp } from "./TopicalLayoutProvider";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { FinishedTracker } from "./FinishedTracker";
 
 const QuestionInspect = ({
@@ -103,7 +102,6 @@ const QuestionInspect = ({
   setIsOpen,
   partitionedTopicalData,
   bookmarks,
-  imageTheme,
   isUserSessionPending,
   isValidSession,
   isSavedActivitiesFetching,
@@ -115,8 +113,6 @@ const QuestionInspect = ({
   isInspectSidebarOpen,
   setIsInspectSidebarOpen,
   userFinishedQuestions,
-  showFinishedQuestionTint,
-  isUserSessionError,
 }: QuestionInspectProps) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -130,7 +126,6 @@ const QuestionInspect = ({
     "question" | "answer" | "both"
   >("question");
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
-
   const { isCalculatorOpen, setIsCalculatorOpen } = useTopicalApp();
   const currentQuestionIndex = useMemo(() => {
     return (
@@ -749,9 +744,7 @@ const QuestionInspect = ({
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions}
                   bookmarks={bookmarks}
-                  imageTheme={imageTheme}
                   navigateToQuestion={navigateToQuestion}
-                  showFinishedQuestionTint={showFinishedQuestionTint}
                   isSavedActivitiesError={isSavedActivitiesError}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
@@ -1284,20 +1277,16 @@ const QuestionInspect = ({
                     <AnnotatableInspectImages
                       imageSource={currentQuestionData?.questionImages ?? []}
                       currentQuestionId={currentQuestionData?.id}
-                      imageTheme={imageTheme}
                     />
                     <div className="my-6"></div>
                     <BrowseMoreQuestions
                       displayedData={displayedData}
                       bookmarks={bookmarks ?? []}
                       navigateToQuestion={navigateToQuestion}
-                      imageTheme={imageTheme}
                       isBrowseMoreOpen={isBrowseMoreOpen}
                       setIsBrowseMoreOpen={setIsBrowseMoreOpen}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      showFinishedQuestionTint={showFinishedQuestionTint}
-                      isUserSessionError={isUserSessionError}
                       isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={isValidSession}
                       isSavedActivitiesFetching={isSavedActivitiesFetching}
@@ -1324,7 +1313,6 @@ const QuestionInspect = ({
                     <AnnotatableInspectImages
                       imageSource={currentQuestionData?.answers ?? []}
                       currentQuestionId={currentQuestionData?.id}
-                      imageTheme={imageTheme}
                     />
                   </ScrollArea>
                 </div>
@@ -1342,7 +1330,6 @@ const QuestionInspect = ({
                   </div>
                   <BothViews
                     currentQuestionData={currentQuestionData}
-                    imageTheme={imageTheme}
                     isMobile={isMobile}
                     questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
                     answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
@@ -1373,13 +1360,11 @@ export default QuestionInspect;
 const BothViews = ({
   isMobile,
   currentQuestionData,
-  imageTheme,
   questionScrollAreaRef,
   answerScrollAreaRef,
 }: {
   isMobile: boolean;
   currentQuestionData: SelectedQuestion | undefined;
-  imageTheme: ImageTheme;
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
@@ -1434,7 +1419,6 @@ const BothViews = ({
           <AnnotatableInspectImages
             imageSource={currentQuestionData?.questionImages ?? []}
             currentQuestionId={currentQuestionData?.id}
-            imageTheme={imageTheme}
           />
         </ScrollArea>
       </ResizablePanel>
@@ -1465,7 +1449,6 @@ const BothViews = ({
           <AnnotatableInspectImages
             imageSource={currentQuestionData?.answers ?? []}
             currentQuestionId={currentQuestionData?.id}
-            imageTheme={imageTheme}
           />
         </ScrollArea>
       </ResizablePanel>
@@ -1668,11 +1651,8 @@ const QuestionHoverCard = ({
 const BrowseMoreQuestions = ({
   displayedData,
   bookmarks,
-  imageTheme,
   isUserSessionPending,
   userFinishedQuestions,
-  showFinishedQuestionTint,
-  isUserSessionError,
   isSavedActivitiesError,
   isValidSession,
   isSavedActivitiesFetching,
@@ -1681,7 +1661,6 @@ const BrowseMoreQuestions = ({
   setIsBrowseMoreOpen,
 }: BrowseMoreQuestionsProps) => {
   const expandedContentRef = useRef<HTMLDivElement>(null);
-
   return (
     <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
       <CollapsibleTrigger asChild>
@@ -1727,13 +1706,9 @@ const BrowseMoreQuestions = ({
                 <QuestionPreview
                   bookmarks={bookmarks ?? []}
                   question={question}
-                  imageTheme={imageTheme}
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions ?? []}
-                  showFinishedQuestionTint={showFinishedQuestionTint}
-                  isSavedActivitiesError={
-                    isUserSessionError || isSavedActivitiesError
-                  }
+                  isSavedActivitiesError={isSavedActivitiesError}
                   isValidSession={isValidSession}
                   key={`${question.id}-${imageSrc}`}
                   isSavedActivitiesFetching={isSavedActivitiesFetching}

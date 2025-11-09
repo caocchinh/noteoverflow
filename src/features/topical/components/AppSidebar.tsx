@@ -21,15 +21,14 @@ import {
   FiltersCache,
   InvalidInputs,
   AppSidebarProps,
+  UiPreferencesCache,
 } from "../constants/types";
 import {
   DEFAULT_CACHE,
-  DEFAULT_LAYOUT_STYLE,
-  DEFAULT_NUMBER_OF_COLUMNS,
-  DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_SORT_OPTIONS,
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
+  UI_PREFERENCES_CACHE_KEY,
 } from "../constants/constants";
 import type { ValidCurriculum } from "@/constants/types";
 import {
@@ -39,7 +38,7 @@ import {
   syncFilterCacheToLocalStorage,
   isValidInputs as isValidInputsUtils,
 } from "@/features/topical/lib/utils";
-import { useTopicalApp } from "./TopicalLayoutProvider";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { Button } from "@/components/ui/button";
 import { QR } from "./QR";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -59,24 +58,6 @@ const AppSidebar = ({
   mountedRef,
   searchParams,
   setIsValidSearchParams,
-  setIsQuestionCacheEnabled,
-  setNumberOfColumns,
-  setIsStrictModeEnabled,
-  setScrollUpWhenPageChange,
-  setLayoutStyle,
-  setNumberOfQuestionsPerPage,
-  setShowScrollToTopButton,
-  setShowFinishedQuestionTint,
-  setImageTheme,
-  imageTheme,
-  showFinishedQuestionTint,
-  showScrollToTopButton,
-  scrollUpWhenPageChange,
-  isQuestionCacheEnabled,
-  numberOfColumns,
-  layoutStyle,
-  numberOfQuestionsPerPage,
-  isStrictModeEnabled,
   isUserSessionPending,
   isValidSession,
   isAddRecentQueryPending,
@@ -91,15 +72,12 @@ const AppSidebar = ({
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
-  const [isSessionCacheEnabled, setIsSessionCacheEnabled] = useState(true);
-  const [isPersistantCacheEnabled, setIsPersistantCacheEnabled] =
-    useState(true);
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
   const [sidebarKey, setSidebarKey] = useState(0);
   const isMobileDevice = useIsMobile();
-
+  const { uiPreferences, setUiPreference } = useTopicalApp();
   const curriculumRef = useRef<HTMLDivElement | null>(null);
   const subjectRef = useRef<HTMLDivElement | null>(null);
   const topicRef = useRef<HTMLDivElement | null>(null);
@@ -301,119 +279,80 @@ const AppSidebar = ({
       }
     }
 
-    try {
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-
-      const parsedState: FiltersCache = savedState
-        ? JSON.parse(savedState)
-        : false;
-
-      if (parsedState) {
-        setIsSessionCacheEnabled(parsedState.isSessionCacheEnabled ?? true);
-        setIsPersistantCacheEnabled(
-          parsedState.isPersistantCacheEnabled ?? true
+    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+    const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
+    const parsedState: FiltersCache = savedState
+      ? JSON.parse(savedState)
+      : false;
+    const parsedUiPreferences: UiPreferencesCache = savedUiPreferences
+      ? JSON.parse(savedUiPreferences)
+      : false;
+    if (savedState && savedUiPreferences && !parsedQueryFromSearchParams) {
+      if (
+        parsedUiPreferences.isSessionCacheEnabled &&
+        parsedState.lastSessionCurriculum &&
+        validateCurriculum(parsedState.lastSessionCurriculum)
+      ) {
+        setSelectedCurriculum(
+          parsedState.lastSessionCurriculum as ValidCurriculum
         );
-        setIsQuestionCacheEnabled(parsedState.isQuestionCacheEnabled ?? true);
-        setNumberOfColumns(
-          parsedState.numberOfColumns ?? DEFAULT_NUMBER_OF_COLUMNS
+        const isSubjectValid = validateSubject(
+          parsedState.lastSessionCurriculum,
+          parsedState.lastSessionSubject
         );
-        setIsStrictModeEnabled(parsedState.isStrictModeEnabled ?? false);
-        setScrollUpWhenPageChange(parsedState.scrollUpWhenPageChange ?? true);
-        setLayoutStyle(parsedState.layoutStyle ?? DEFAULT_LAYOUT_STYLE);
-        setNumberOfQuestionsPerPage(
-          parsedState.numberOfQuestionsPerPage ??
-            DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
-        );
-        setShowScrollToTopButton(parsedState.showScrollToTopButton ?? true);
-        setShowFinishedQuestionTint(
-          parsedState.showFinishedQuestionTint ?? true
-        );
-      }
-
-      try {
-        if (savedState && !parsedQueryFromSearchParams) {
-          if (
-            parsedState.isSessionCacheEnabled &&
-            parsedState.lastSessionCurriculum &&
-            validateCurriculum(parsedState.lastSessionCurriculum)
-          ) {
-            setSelectedCurriculum(
-              parsedState.lastSessionCurriculum as ValidCurriculum
-            );
-            const isSubjectValid = validateSubject(
-              parsedState.lastSessionCurriculum,
-              parsedState.lastSessionSubject
-            );
-            if (parsedState.lastSessionSubject && isSubjectValid) {
-              setSelectedSubject(parsedState.lastSessionSubject);
-            }
-            if (
-              isSubjectValid &&
-              validateFilterData({
-                curriculumn: parsedState.lastSessionCurriculum,
-                data: parsedState.filters[parsedState.lastSessionCurriculum][
-                  parsedState.lastSessionSubject
-                ],
-                subject: parsedState.lastSessionSubject,
-              })
-            ) {
-              setSelectedSubject(parsedState.lastSessionSubject);
-              setSelectedTopic(
-                parsedState.filters[parsedState.lastSessionCurriculum][
-                  parsedState.lastSessionSubject
-                ].topic
-              );
-              setSelectedPaperType(
-                parsedState.filters[parsedState.lastSessionCurriculum][
-                  parsedState.lastSessionSubject
-                ].paperType
-              );
-              setSelectedYear(
-                parsedState.filters[parsedState.lastSessionCurriculum][
-                  parsedState.lastSessionSubject
-                ].year
-              );
-              setSelectedSeason(
-                parsedState.filters[parsedState.lastSessionCurriculum][
-                  parsedState.lastSessionSubject
-                ].season
-              );
-            }
-          }
-        } else if (parsedQueryFromSearchParams) {
-          setSelectedCurriculum(
-            parsedQueryFromSearchParams.curriculumId as ValidCurriculum
-          );
-          setSelectedSubject(parsedQueryFromSearchParams.subjectId);
-          setSelectedPaperType(parsedQueryFromSearchParams.paperType);
-          setSelectedTopic(parsedQueryFromSearchParams.topic);
-          setSelectedYear(parsedQueryFromSearchParams.year);
-          setSelectedSeason(parsedQueryFromSearchParams.season);
-          syncFilterCacheToLocalStorage({
-            selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
-            isQuestionCacheEnabled: parsedState.isQuestionCacheEnabled,
-            selectedSubject: parsedQueryFromSearchParams.subjectId,
-            selectedTopic: parsedQueryFromSearchParams.topic,
-            selectedPaperType: parsedQueryFromSearchParams.paperType,
-            selectedYear: parsedQueryFromSearchParams.year,
-            selectedSeason: parsedQueryFromSearchParams.season,
-          });
+        if (parsedState.lastSessionSubject && isSubjectValid) {
+          setSelectedSubject(parsedState.lastSessionSubject);
         }
-      } catch {
-        localStorage.removeItem(FILTERS_CACHE_KEY);
+        if (
+          isSubjectValid &&
+          validateFilterData({
+            curriculumn: parsedState.lastSessionCurriculum,
+            data: parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ],
+            subject: parsedState.lastSessionSubject,
+          })
+        ) {
+          setSelectedSubject(parsedState.lastSessionSubject);
+          setSelectedTopic(
+            parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ].topic
+          );
+          setSelectedPaperType(
+            parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ].paperType
+          );
+          setSelectedYear(
+            parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ].year
+          );
+          setSelectedSeason(
+            parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ].season
+          );
+        }
       }
-    } catch (error) {
-      console.error("Failed to access localStorage:", error);
-      // Set default values
-      setIsSessionCacheEnabled(true);
-      setIsPersistantCacheEnabled(true);
-      setNumberOfColumns(DEFAULT_NUMBER_OF_COLUMNS);
-      setLayoutStyle(DEFAULT_LAYOUT_STYLE);
-      setIsStrictModeEnabled(false);
-      setIsQuestionCacheEnabled(true);
-      setNumberOfQuestionsPerPage(DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
-      setShowScrollToTopButton(true);
-      setShowFinishedQuestionTint(true);
+    } else if (parsedQueryFromSearchParams) {
+      setSelectedCurriculum(
+        parsedQueryFromSearchParams.curriculumId as ValidCurriculum
+      );
+      setSelectedSubject(parsedQueryFromSearchParams.subjectId);
+      setSelectedPaperType(parsedQueryFromSearchParams.paperType);
+      setSelectedTopic(parsedQueryFromSearchParams.topic);
+      setSelectedYear(parsedQueryFromSearchParams.year);
+      setSelectedSeason(parsedQueryFromSearchParams.season);
+      syncFilterCacheToLocalStorage({
+        selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
+        selectedSubject: parsedQueryFromSearchParams.subjectId,
+        selectedTopic: parsedQueryFromSearchParams.topic,
+        selectedPaperType: parsedQueryFromSearchParams.paperType,
+        selectedYear: parsedQueryFromSearchParams.year,
+        selectedSeason: parsedQueryFromSearchParams.season,
+      });
     }
 
     setTimeout(() => {
@@ -424,16 +363,8 @@ const AppSidebar = ({
     mountedRef,
     searchParams,
     setCurrentQuery,
-    setIsQuestionCacheEnabled,
     setIsSearchEnabled,
-    setIsStrictModeEnabled,
     setIsValidSearchParams,
-    setLayoutStyle,
-    setNumberOfColumns,
-    setNumberOfQuestionsPerPage,
-    setScrollUpWhenPageChange,
-    setShowFinishedQuestionTint,
-    setShowScrollToTopButton,
     setSortParameters,
   ]);
 
@@ -441,71 +372,67 @@ const AppSidebar = ({
     if (!mountedRef.current || isOverwriting.current) {
       return;
     }
-    try {
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      if (savedState) {
-        try {
-          const parsedState: FiltersCache = JSON.parse(savedState);
-          if (parsedState.isPersistantCacheEnabled) {
-            const isSubjectValid = validateSubject(
-              selectedCurriculum,
-              selectedSubject
+    const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+    const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
+
+    if (savedState && savedUiPreferences) {
+      try {
+        const parsedState: FiltersCache = JSON.parse(savedState);
+        const parsedUiPreferences: UiPreferencesCache =
+          JSON.parse(savedUiPreferences);
+        if (parsedUiPreferences.isPersistantCacheEnabled) {
+          const isSubjectValid = validateSubject(
+            selectedCurriculum,
+            selectedSubject
+          );
+          if (selectedSubject && isSubjectValid) {
+            setSelectedSubject(selectedSubject);
+          }
+          if (
+            isSubjectValid &&
+            validateFilterData({
+              data: parsedState.filters[selectedCurriculum][selectedSubject],
+              curriculumn: selectedCurriculum,
+              subject: selectedSubject,
+            })
+          ) {
+            setSelectedTopic(
+              parsedState.filters[selectedCurriculum][selectedSubject].topic
             );
-            if (selectedSubject && isSubjectValid) {
-              setSelectedSubject(selectedSubject);
-            }
-            if (
-              isSubjectValid &&
-              validateFilterData({
-                data: parsedState.filters[selectedCurriculum][selectedSubject],
-                curriculumn: selectedCurriculum,
-                subject: selectedSubject,
-              })
-            ) {
-              setSelectedTopic(
-                parsedState.filters[selectedCurriculum][selectedSubject].topic
-              );
-              setSelectedPaperType(
-                parsedState.filters[selectedCurriculum][selectedSubject]
-                  .paperType
-              );
-              setSelectedYear(
-                parsedState.filters[selectedCurriculum][selectedSubject].year
-              );
-              setSelectedSeason(
-                parsedState.filters[selectedCurriculum][selectedSubject].season
-              );
-            } else {
-              setSelectedTopic([]);
-              setSelectedYear([]);
-              setSelectedPaperType([]);
-              setSelectedSeason([]);
-            }
+            setSelectedPaperType(
+              parsedState.filters[selectedCurriculum][selectedSubject].paperType
+            );
+            setSelectedYear(
+              parsedState.filters[selectedCurriculum][selectedSubject].year
+            );
+            setSelectedSeason(
+              parsedState.filters[selectedCurriculum][selectedSubject].season
+            );
           } else {
             setSelectedTopic([]);
             setSelectedYear([]);
             setSelectedPaperType([]);
             setSelectedSeason([]);
           }
-        } catch {
+        } else {
           setSelectedTopic([]);
           setSelectedYear([]);
           setSelectedPaperType([]);
           setSelectedSeason([]);
         }
-      } else {
+      } catch {
         setSelectedTopic([]);
         setSelectedYear([]);
         setSelectedPaperType([]);
         setSelectedSeason([]);
       }
-    } catch (error) {
-      console.error("Failed to access localStorage:", error);
+    } else {
       setSelectedTopic([]);
       setSelectedYear([]);
       setSelectedPaperType([]);
       setSelectedSeason([]);
     }
+
     setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSubject]);
@@ -527,17 +454,6 @@ const AppSidebar = ({
       return;
     }
     syncFilterCacheToLocalStorage({
-      isSessionCacheEnabled,
-      imageTheme,
-      isPersistantCacheEnabled,
-      showFinishedQuestionTint,
-      scrollUpWhenPageChange,
-      isQuestionCacheEnabled,
-      showScrollToTopButton,
-      numberOfColumns,
-      layoutStyle,
-      isStrictModeEnabled,
-      numberOfQuestionsPerPage,
       selectedCurriculum,
       selectedSubject,
       selectedTopic,
@@ -549,20 +465,9 @@ const AppSidebar = ({
     selectedCurriculum,
     selectedSubject,
     selectedTopic,
-    isStrictModeEnabled,
     selectedPaperType,
     selectedYear,
     selectedSeason,
-    isSessionCacheEnabled,
-    imageTheme,
-    isPersistantCacheEnabled,
-    showFinishedQuestionTint,
-    showScrollToTopButton,
-    layoutStyle,
-    numberOfQuestionsPerPage,
-    scrollUpWhenPageChange,
-    numberOfColumns,
-    isQuestionCacheEnabled,
     mountedRef,
   ]);
 
@@ -605,10 +510,12 @@ const AppSidebar = ({
               </p>
             </div>
             <Switch
-              checked={isStrictModeEnabled}
+              checked={uiPreferences.isStrictModeEnabled}
               title="Toggle"
               className="hover:cursor-pointer"
-              onCheckedChange={setIsStrictModeEnabled}
+              onCheckedChange={() => {
+                setUiPreference("isStrictModeEnabled", (prev) => !prev);
+              }}
             />
           </div>
 
@@ -894,32 +801,9 @@ const AppSidebar = ({
             </div>
           </div>
           <SidebarSeparator />
-          <CacheSetting
-            isPersistantCacheEnabled={isPersistantCacheEnabled}
-            isSessionCacheEnabled={isSessionCacheEnabled}
-            setIsPersistantCacheEnabled={setIsPersistantCacheEnabled}
-            isQuestionCacheEnabled={isQuestionCacheEnabled}
-            setIsQuestionCacheEnabled={setIsQuestionCacheEnabled}
-            setIsSessionCacheEnabled={setIsSessionCacheEnabled}
-          />
-          <LayoutSetting
-            layoutStyle={layoutStyle}
-            numberOfColumns={numberOfColumns}
-            setLayoutStyle={setLayoutStyle}
-            setNumberOfColumns={setNumberOfColumns}
-            numberOfQuestionsPerPage={numberOfQuestionsPerPage}
-            setNumberOfQuestionsPerPage={setNumberOfQuestionsPerPage}
-          />
-          <VisualSetting
-            showFinishedQuestionTint={showFinishedQuestionTint}
-            setShowFinishedQuestionTint={setShowFinishedQuestionTint}
-            showScrollToTopButton={showScrollToTopButton}
-            setShowScrollToTopButton={setShowScrollToTopButton}
-            scrollUpWhenPageChange={scrollUpWhenPageChange}
-            setScrollUpWhenPageChange={setScrollUpWhenPageChange}
-            imageTheme={imageTheme}
-            setImageTheme={setImageTheme}
-          />
+          <CacheSetting />
+          <LayoutSetting />
+          <VisualSetting />
         </SidebarContent>
       </ScrollArea>
       <SidebarRail />

@@ -4,21 +4,19 @@ import { Fragment, useState } from "react";
 import { Loader2, Edit3, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { extractQuestionNumber } from "../lib/utils";
-import { ImageTheme } from "../constants/types";
 import { Button } from "@/components/ui/button";
 import { ImageAnnotator } from "./ImageAnnotator";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const AnnotatableInspectImages = ({
   imageSource,
   currentQuestionId,
-  imageTheme,
 }: {
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
-  imageTheme: ImageTheme;
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
-
+  const { uiPreferences } = useTopicalApp();
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
   }
@@ -91,7 +89,7 @@ export const AnnotatableInspectImages = ({
                   <img
                     className={cn(
                       "w-full h-full object-contain relative z-10 !max-w-[750px]",
-                      imageTheme === "dark" && "!invert"
+                      uiPreferences.imageTheme === "dark" && "!invert"
                     )}
                     src={item}
                     alt="Question image"

@@ -6,7 +6,7 @@ import { Blocks, FileStack, Mouse, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
 import { LayoutStyle } from "../constants/types";
-import { SetStateAction, Dispatch, useState } from "react";
+import { useState } from "react";
 import {
   MAX_NUMBER_OF_COLUMNS,
   MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -19,24 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
-export default function LayoutSetting({
-  setNumberOfColumns,
-  numberOfColumns,
-  layoutStyle,
-  setLayoutStyle,
-  numberOfQuestionsPerPage,
-  setNumberOfQuestionsPerPage,
-}: {
-  setNumberOfColumns: Dispatch<SetStateAction<number>>;
-  layoutStyle: LayoutStyle;
-  numberOfColumns: number;
-  setLayoutStyle: Dispatch<SetStateAction<LayoutStyle>>;
-  numberOfQuestionsPerPage: number;
-  setNumberOfQuestionsPerPage: Dispatch<SetStateAction<number>>;
-}) {
+export default function LayoutSetting() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+  const { uiPreferences, setUiPreference } = useTopicalApp();
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
@@ -59,19 +46,23 @@ export default function LayoutSetting({
           </h4>
           <ElasticSlider
             minValue={1}
-            startingValue={numberOfColumns}
+            startingValue={uiPreferences.numberOfColumns}
             maxValue={MAX_NUMBER_OF_COLUMNS}
             isStepped
             stepSize={1}
-            setValue={setNumberOfColumns}
+            setValue={(value) => {
+              setUiPreference("numberOfColumns", value);
+            }}
           />
         </div>
         <Separator orientation="horizontal" />
         <div className="flex flex-col items-center justify-center gap-3 w-full">
           <h4 className="text-sm font-medium text-center">Layout style</h4>
           <Select
-            value={layoutStyle}
-            onValueChange={(value) => setLayoutStyle(value as LayoutStyle)}
+            value={uiPreferences.layoutStyle}
+            onValueChange={(value) =>
+              setUiPreference("layoutStyle", value as LayoutStyle)
+            }
           >
             <SelectTrigger className="w-[90%] !h-max">
               <SelectValue placeholder="Select a layout style" />
@@ -114,11 +105,13 @@ export default function LayoutSetting({
             </p>
             <ElasticSlider
               minValue={1}
-              startingValue={numberOfQuestionsPerPage}
+              startingValue={uiPreferences.numberOfQuestionsPerPage}
               maxValue={MAXIMUM_NUMBER_OF_QUESTIONS_PER_PAGE}
               isStepped
               stepSize={1}
-              setValue={setNumberOfQuestionsPerPage}
+              setValue={(value) => {
+                setUiPreference("numberOfQuestionsPerPage", value);
+              }}
             />
           </div>
         </div>

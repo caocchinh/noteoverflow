@@ -26,11 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
 import Sort from "@/features/topical/components/Sort";
 import { Switch } from "@/components/ui/switch";
-import { useTopicalApp } from "./TopicalLayoutProvider";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 const AppUltilityBar = ({
   fullPartitionedData,
-  layoutStyle,
   ultilityRef,
   isQuestionViewDisabled,
   setIsQuestionInspectOpen,
@@ -38,14 +37,14 @@ const AppUltilityBar = ({
   currentChunkIndex,
   setCurrentChunkIndex,
   setDisplayedData,
-  scrollUpWhenPageChange,
   sortParameters,
   setSortParameters,
   showFinishedQuestion,
   setShowFinishedQuestion,
   filterUrl,
 }: AppUltilityBarProps) => {
-  const { isAppSidebarOpen, setIsAppSidebarOpen } = useTopicalApp();
+  const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
+    useTopicalApp();
   const {
     isUltilityOverflowingLeft,
     isUltilityOverflowingRight,
@@ -65,7 +64,7 @@ const AppUltilityBar = ({
 
   useEffect(() => {
     overflowScrollHandler();
-  }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
+  }, [overflowScrollHandler, fullPartitionedData, uiPreferences.layoutStyle]);
 
   return (
     <>
@@ -149,61 +148,70 @@ const AppUltilityBar = ({
               To inspect questions, run a search first.
             </TooltipContent>
           </Tooltip>
-          {layoutStyle === "pagination" && !isQuestionViewDisabled && (
-            <>
-              <Separator orientation="vertical" className="!h-[30px]" />
-              <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
-                <FirstPageButton
-                  currentChunkIndex={currentChunkIndex}
-                  setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
-                  scrollUpWhenPageChange={scrollUpWhenPageChange}
-                  scrollAreaRef={scrollAreaRef}
-                />
-                <PreviousPageButton
-                  currentChunkIndex={currentChunkIndex}
-                  setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
-                  scrollUpWhenPageChange={scrollUpWhenPageChange}
-                  scrollAreaRef={scrollAreaRef}
-                />
-                <JumpToTabButton
-                  className="mx-4"
-                  tab={currentChunkIndex}
-                  totalTabs={fullPartitionedData!.length}
-                  prefix="page"
-                  onTabChangeCallback={({ tab }) => {
-                    setCurrentChunkIndex(tab);
-                    setDisplayedData(fullPartitionedData![tab]);
-                    if (scrollUpWhenPageChange) {
-                      scrollAreaRef.current?.scrollTo({
-                        top: 0,
-                        behavior: "instant",
-                      });
+          {uiPreferences.layoutStyle === "pagination" &&
+            !isQuestionViewDisabled && (
+              <>
+                <Separator orientation="vertical" className="!h-[30px]" />
+                <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
+                  <FirstPageButton
+                    currentChunkIndex={currentChunkIndex}
+                    setCurrentChunkIndex={setCurrentChunkIndex}
+                    fullPartitionedData={fullPartitionedData}
+                    setDisplayedData={setDisplayedData}
+                    scrollUpWhenPageChange={
+                      uiPreferences.scrollUpWhenPageChange
                     }
-                  }}
-                />
-                <NextPageButton
-                  currentChunkIndex={currentChunkIndex}
-                  setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
-                  scrollUpWhenPageChange={scrollUpWhenPageChange}
-                  scrollAreaRef={scrollAreaRef}
-                />
-                <LastPageButton
-                  currentChunkIndex={currentChunkIndex}
-                  setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
-                  scrollUpWhenPageChange={scrollUpWhenPageChange}
-                  scrollAreaRef={scrollAreaRef}
-                />
-              </div>
-            </>
-          )}
+                    scrollAreaRef={scrollAreaRef}
+                  />
+                  <PreviousPageButton
+                    currentChunkIndex={currentChunkIndex}
+                    setCurrentChunkIndex={setCurrentChunkIndex}
+                    fullPartitionedData={fullPartitionedData}
+                    setDisplayedData={setDisplayedData}
+                    scrollUpWhenPageChange={
+                      uiPreferences.scrollUpWhenPageChange
+                    }
+                    scrollAreaRef={scrollAreaRef}
+                  />
+                  <JumpToTabButton
+                    className="mx-4"
+                    tab={currentChunkIndex}
+                    totalTabs={fullPartitionedData!.length}
+                    prefix="page"
+                    onTabChangeCallback={({ tab }) => {
+                      setCurrentChunkIndex(tab);
+                      setDisplayedData(fullPartitionedData![tab]);
+                      if (uiPreferences.scrollUpWhenPageChange) {
+                        scrollAreaRef.current?.scrollTo({
+                          top: 0,
+                          behavior: "instant",
+                        });
+                      }
+                    }}
+                  />
+                  <NextPageButton
+                    currentChunkIndex={currentChunkIndex}
+                    setCurrentChunkIndex={setCurrentChunkIndex}
+                    fullPartitionedData={fullPartitionedData}
+                    setDisplayedData={setDisplayedData}
+                    scrollUpWhenPageChange={
+                      uiPreferences.scrollUpWhenPageChange
+                    }
+                    scrollAreaRef={scrollAreaRef}
+                  />
+                  <LastPageButton
+                    currentChunkIndex={currentChunkIndex}
+                    setCurrentChunkIndex={setCurrentChunkIndex}
+                    fullPartitionedData={fullPartitionedData}
+                    setDisplayedData={setDisplayedData}
+                    scrollUpWhenPageChange={
+                      uiPreferences.scrollUpWhenPageChange
+                    }
+                    scrollAreaRef={scrollAreaRef}
+                  />
+                </div>
+              </>
+            )}
           <Separator orientation="vertical" className="!h-[30px]" />
           <Sort
             sortParameters={sortParameters}

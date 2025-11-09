@@ -1,11 +1,13 @@
 import type {
   FiltersCache,
+  UiPreferencesCache,
   InvalidInputs,
   LayoutStyle,
   SortByOptions,
 } from "./types";
 
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
+export const UI_PREFERENCES_CACHE_KEY = "noteoverflow-ui-preferences-cache";
 
 export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   curriculum: false,
@@ -38,20 +40,23 @@ export const MAX_NUMBER_OF_RECENT_QUERIES = 30;
 export const DEFAULT_SORT_OPTIONS: SortByOptions = "descending";
 export const DEFAULT_IMAGE_THEME = "light";
 
-export const DEFAULT_CACHE: FiltersCache = {
-  imageTheme: DEFAULT_IMAGE_THEME,
-  recentlySearchSortedBy: DEFAULT_SORT_OPTIONS,
+export const DEFAULT_UI_PREFERENCES_CACHE: UiPreferencesCache = {
   numberOfColumns: DEFAULT_NUMBER_OF_COLUMNS,
   layoutStyle: DEFAULT_LAYOUT_STYLE,
   numberOfQuestionsPerPage: DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  isSessionCacheEnabled: true,
+  imageTheme: DEFAULT_IMAGE_THEME,
   isStrictModeEnabled: false,
-  isPersistantCacheEnabled: true,
-  showFinishedQuestionTint: true,
-  finishedQuestionsSearchSortedBy: DEFAULT_SORT_OPTIONS,
-  scrollUpWhenPageChange: true,
-  showScrollToTopButton: true,
   isQuestionCacheEnabled: true,
+  showFinishedQuestionTint: true,
+  showScrollToTopButton: true,
+  scrollUpWhenPageChange: true,
+  finishedQuestionsSearchSortedBy: DEFAULT_SORT_OPTIONS,
+  recentlySearchSortedBy: DEFAULT_SORT_OPTIONS,
+  isSessionCacheEnabled: true,
+  isPersistantCacheEnabled: true,
+};
+
+export const DEFAULT_CACHE: FiltersCache = {
   lastSessionCurriculum: "",
   lastSessionSubject: "",
   filters: {},

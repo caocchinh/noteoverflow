@@ -32,7 +32,7 @@ import {
   SortParameters,
 } from "@/features/topical/constants/types";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
-import { useTopicalApp } from "./TopicalLayoutProvider";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import Sort from "./Sort";
 import QuestionPreview from "./QuestionPreview";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -51,9 +51,7 @@ export const FinishedTracker = ({
   isUserSessionPending,
   userFinishedQuestions,
   bookmarks,
-  imageTheme,
   navigateToQuestion,
-  showFinishedQuestionTint,
   isSavedActivitiesError,
 }: FinishedTrackerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -226,13 +224,9 @@ export const FinishedTracker = ({
                             <QuestionPreview
                               bookmarks={bookmarks ?? []}
                               question={question}
-                              imageTheme={imageTheme}
                               isUserSessionPending={isUserSessionPending}
                               userFinishedQuestions={
                                 userFinishedQuestions ?? []
-                              }
-                              showFinishedQuestionTint={
-                                showFinishedQuestionTint
                               }
                               isSavedActivitiesError={isSavedActivitiesError}
                               isValidSession={isValidSession}

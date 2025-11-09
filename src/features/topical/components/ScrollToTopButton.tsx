@@ -7,18 +7,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpFromLine } from "lucide-react";
 import { RefObject } from "react";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const ScrollToTopButton = ({
-  showScrollToTopButton,
   isScrollingAndShouldShowScrollButton,
   scrollAreaRef,
 }: {
-  showScrollToTopButton: boolean;
   isScrollingAndShouldShowScrollButton: boolean;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
+  const { uiPreferences } = useTopicalApp();
   return (
-    showScrollToTopButton && (
+    uiPreferences.showScrollToTopButton && (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

@@ -9,13 +9,13 @@ import {
   SelectedBookmark,
   SelectedFinishedQuestion,
   SelectedQuestion,
-  ImageTheme,
 } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 const QuestionPreview = memo(
   ({
@@ -24,10 +24,8 @@ const QuestionPreview = memo(
     isUserSessionPending,
     imageSrc,
     isSavedActivitiesError,
-    imageTheme,
     listId,
     isValidSession,
-    showFinishedQuestionTint,
     question,
     userFinishedQuestions,
     onQuestionClick,
@@ -40,11 +38,10 @@ const QuestionPreview = memo(
     isSavedActivitiesError: boolean;
     isValidSession: boolean;
     userFinishedQuestions: SelectedFinishedQuestion[];
-    showFinishedQuestionTint: boolean;
-    imageTheme: ImageTheme;
     listId?: string;
     onQuestionClick: () => void;
   }) => {
+    const { uiPreferences } = useTopicalApp();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -70,7 +67,7 @@ const QuestionPreview = memo(
       <div
         className={cn(
           "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]",
-          imageTheme === "dark" && "!bg-black dark:!border-white"
+          uiPreferences.imageTheme === "dark" && "!bg-black dark:!border-white"
         )}
         onClick={() => {
           onQuestionClick();
@@ -87,7 +84,7 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-[12]",
-            doesThisQuestionFinished && showFinishedQuestionTint
+            doesThisQuestionFinished && uiPreferences.showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
           )}
@@ -96,7 +93,7 @@ const QuestionPreview = memo(
         <div
           className={cn(
             "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%] z-[10]",
-            imageTheme === "dark" && "!bg-white"
+            uiPreferences.imageTheme === "dark" && "!bg-white"
           )}
         ></div>
         {loading && (
@@ -257,7 +254,7 @@ const QuestionPreview = memo(
         <img
           className={cn(
             "w-full h-full object-contain",
-            imageTheme === "dark" && "!invert"
+            uiPreferences.imageTheme === "dark" && "!invert"
           )}
           src={imageSrc}
           alt="Question preview"

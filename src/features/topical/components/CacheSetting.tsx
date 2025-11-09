@@ -13,24 +13,12 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Settings, X } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
-export default function CacheAccordion({
-  isSessionCacheEnabled,
-  setIsSessionCacheEnabled,
-  isPersistantCacheEnabled,
-  setIsPersistantCacheEnabled,
-  isQuestionCacheEnabled,
-  setIsQuestionCacheEnabled,
-}: {
-  isSessionCacheEnabled: boolean;
-  setIsSessionCacheEnabled: Dispatch<SetStateAction<boolean>>;
-  isPersistantCacheEnabled: boolean;
-  setIsPersistantCacheEnabled: Dispatch<SetStateAction<boolean>>;
-  isQuestionCacheEnabled: boolean;
-  setIsQuestionCacheEnabled: Dispatch<SetStateAction<boolean>>;
-}) {
+export default function CacheAccordion() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { uiPreferences, setUiPreference } = useTopicalApp();
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
@@ -63,9 +51,11 @@ export default function CacheAccordion({
               <div className="flex items-center gap-2">
                 <Label htmlFor="session-cache">Enable session cache</Label>
                 <Switch
-                  checked={isSessionCacheEnabled}
+                  checked={uiPreferences.isSessionCacheEnabled}
                   id="session-cache"
-                  onCheckedChange={setIsSessionCacheEnabled}
+                  onCheckedChange={() => {
+                    setUiPreference("isSessionCacheEnabled", (prev) => !prev);
+                  }}
                 />
               </div>
             </AccordionContent>
@@ -84,9 +74,14 @@ export default function CacheAccordion({
                   Enable persistant cache
                 </Label>
                 <Switch
-                  checked={isPersistantCacheEnabled}
+                  checked={uiPreferences.isPersistantCacheEnabled}
                   id="persistant-cache"
-                  onCheckedChange={setIsPersistantCacheEnabled}
+                  onCheckedChange={() => {
+                    setUiPreference(
+                      "isPersistantCacheEnabled",
+                      (prev) => !prev
+                    );
+                  }}
                 />
               </div>
             </AccordionContent>
@@ -102,9 +97,11 @@ export default function CacheAccordion({
               <div className="flex items-center gap-2">
                 <Label htmlFor="question-cache">Enable question cache</Label>
                 <Switch
-                  checked={isQuestionCacheEnabled}
+                  checked={uiPreferences.isQuestionCacheEnabled}
                   id="question-cache"
-                  onCheckedChange={setIsQuestionCacheEnabled}
+                  onCheckedChange={() => {
+                    setUiPreference("isQuestionCacheEnabled", (prev) => !prev);
+                  }}
                 />
               </div>
             </AccordionContent>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LandPlot, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -13,27 +13,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { ImageTheme } from "../constants/types";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
-export default function VisualSetting({
-  showFinishedQuestionTint,
-  setShowFinishedQuestionTint,
-  showScrollToTopButton,
-  setShowScrollToTopButton,
-  scrollUpWhenPageChange,
-  setScrollUpWhenPageChange,
-  imageTheme,
-  setImageTheme,
-}: {
-  showFinishedQuestionTint: boolean;
-  setShowFinishedQuestionTint: Dispatch<SetStateAction<boolean>>;
-  showScrollToTopButton: boolean;
-  setShowScrollToTopButton: Dispatch<SetStateAction<boolean>>;
-  scrollUpWhenPageChange: boolean;
-  setScrollUpWhenPageChange: Dispatch<SetStateAction<boolean>>;
-  imageTheme: ImageTheme;
-  setImageTheme: Dispatch<SetStateAction<ImageTheme>>;
-}) {
+export default function VisualSetting({}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { uiPreferences, setUiPreference } = useTopicalApp();
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
@@ -55,8 +39,10 @@ export default function VisualSetting({
             Show green tint on finished questions?
           </h4>
           <Switch
-            checked={showFinishedQuestionTint}
-            onCheckedChange={setShowFinishedQuestionTint}
+            checked={uiPreferences.showFinishedQuestionTint}
+            onCheckedChange={() => {
+              setUiPreference("showFinishedQuestionTint", (prev) => !prev);
+            }}
           />
         </div>
         <hr />
@@ -65,8 +51,10 @@ export default function VisualSetting({
             Show scroll to top button?
           </h4>
           <Switch
-            checked={showScrollToTopButton}
-            onCheckedChange={setShowScrollToTopButton}
+            checked={uiPreferences.showScrollToTopButton}
+            onCheckedChange={() => {
+              setUiPreference("showScrollToTopButton", (prev) => !prev);
+            }}
           />
         </div>
         <hr />
@@ -75,8 +63,10 @@ export default function VisualSetting({
             Scroll up when page changes? (Pagination layout only)
           </h4>
           <Switch
-            checked={scrollUpWhenPageChange}
-            onCheckedChange={setScrollUpWhenPageChange}
+            checked={uiPreferences.scrollUpWhenPageChange}
+            onCheckedChange={() => {
+              setUiPreference("scrollUpWhenPageChange", (prev) => !prev);
+            }}
           />
         </div>
         <hr />
@@ -85,9 +75,9 @@ export default function VisualSetting({
             Question & Answer image theme
           </h4>
           <Select
-            value={imageTheme}
+            value={uiPreferences.imageTheme}
             onValueChange={(value) => {
-              setImageTheme(value as ImageTheme);
+              setUiPreference("imageTheme", value as ImageTheme);
             }}
           >
             <SelectTrigger>
