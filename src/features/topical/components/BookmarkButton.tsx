@@ -794,15 +794,15 @@ const BookmarkButtonConsumer = memo(
               </div>
             </PopoverTrigger>
             <PopoverContent
-              className="flex flex-col z-[100009] w-[270px] !px-0 dark:bg-accent"
+              className="flex flex-col z-[100010] w-[270px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
               side="left"
-              sideOffset={10}
               onInteractOutside={(e) => {
                 if (triggerRef.current?.contains(e.target as Node)) {
                   return;
                 }
+                console.log("interact outside", e.target);
                 setOpen(false);
                 setSearchInput("");
               }}
@@ -1375,8 +1375,8 @@ const ActionDialogs = memo(() => {
           </div>
         </AlertDialogTrigger>
         <AlertDialogContent
-          className="z-[100009] dark:bg-accent"
-          overlayClassName="z-[100008] "
+          className="z-[100011] dark:bg-accent"
+          overlayClassName="z-[100010] "
         >
           <AlertDialogHeader>
             <AlertDialogTitle>New list</AlertDialogTitle>
@@ -1507,8 +1507,8 @@ const ActionDialogs = memo(() => {
             </div>
           </AlertDialogTrigger>
           <AlertDialogContent
-            className="z-[100009] dark:bg-accent"
-            overlayClassName="z-[100008] "
+            className="z-[100011] dark:bg-accent"
+            overlayClassName="z-[100010] "
           >
             <AlertDialogHeader>
               <AlertDialogTitle>Remove from this list</AlertDialogTitle>

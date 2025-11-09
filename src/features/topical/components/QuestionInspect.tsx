@@ -313,9 +313,6 @@ const QuestionInspect = ({
       resetScrollPositions,
     ]
   );
-
-  console.log("currentQuestionId", currentQuestionId);
-
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
@@ -755,7 +752,6 @@ const QuestionInspect = ({
                   imageTheme={imageTheme}
                   navigateToQuestion={navigateToQuestion}
                   showFinishedQuestionTint={showFinishedQuestionTint}
-                  isUserSessionError={isUserSessionError}
                   isSavedActivitiesError={isSavedActivitiesError}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">

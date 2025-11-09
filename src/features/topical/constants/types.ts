@@ -285,7 +285,6 @@ export interface FinishedTrackerProps {
   imageTheme: ImageTheme;
   navigateToQuestion: (questionId: string) => void;
   showFinishedQuestionTint: boolean;
-  isUserSessionError: boolean;
   isSavedActivitiesError: boolean;
 }
 

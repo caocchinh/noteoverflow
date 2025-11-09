@@ -54,7 +54,6 @@ export const FinishedTracker = ({
   imageTheme,
   navigateToQuestion,
   showFinishedQuestionTint,
-  isUserSessionError,
   isSavedActivitiesError,
 }: FinishedTrackerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -109,7 +108,6 @@ export const FinishedTracker = ({
     if (fullPartitionedData.length > 0) {
       setDisplayedData(fullPartitionedData[0]);
       setCurrentChunkIndex(0);
-      console.log("scrolling to top");
       if (scrollAreaRef?.current) {
         scrollAreaRef.current.scrollTo({
           top: 0,
@@ -121,12 +119,14 @@ export const FinishedTracker = ({
 
   return (
     <>
+      {isDialogOpen && <div className="fixed inset-0 z-[100007] bg-black/67" />}
       <Dialog
         open={isDialogOpen}
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           setIsCalculatorOpen(false);
         }}
+        modal={false}
       >
         <Tooltip>
           <TooltipTrigger asChild>
@@ -170,7 +170,6 @@ export const FinishedTracker = ({
         </Tooltip>
         <DialogContent
           className="!max-w-5xl h-[95dvh] z-[100008] dark:bg-accent gap-2"
-          overlayClassName="!z-[100007]"
           showCloseButton={false}
         >
           {(isUserSessionPending || isSavedActivitiesFetching) && (
@@ -208,98 +207,108 @@ export const FinishedTracker = ({
                   />
                 </DialogHeader>
 
-                <ScrollArea
-                  className="max-h-[75vh] pr-4"
-                  viewportRef={scrollAreaRef}
-                  type="always"
-                >
-                  <ResponsiveMasonry
-                    columnsCountBreakPoints={
-                      COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
-                    }
-                    // @ts-expect-error - gutterBreakPoints is not typed by the library
-                    gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+                {finishedQuestions.length > 0 ? (
+                  <ScrollArea
+                    className="max-h-[75vh] pr-4"
+                    viewportRef={scrollAreaRef}
+                    type="always"
                   >
-                    <Masonry>
-                      {displayedData.map((question) =>
-                        question?.questionImages.map((imageSrc: string) => (
-                          <QuestionPreview
-                            bookmarks={bookmarks ?? []}
-                            question={question}
-                            imageTheme={imageTheme}
-                            isUserSessionPending={isUserSessionPending}
-                            userFinishedQuestions={userFinishedQuestions ?? []}
-                            showFinishedQuestionTint={showFinishedQuestionTint}
-                            isSavedActivitiesError={
-                              isUserSessionError || isSavedActivitiesError
-                            }
-                            isValidSession={isValidSession}
-                            key={`${question.id}-${imageSrc}`}
-                            isSavedActivitiesFetching={
-                              isSavedActivitiesFetching
-                            }
-                            imageSrc={imageSrc}
-                            onQuestionClick={() => {
-                              setIsDialogOpen(false);
-                              navigateToQuestion(question?.id);
-                            }}
-                          />
-                        ))
-                      )}
-                    </Masonry>
-                  </ResponsiveMasonry>
-                  {/* Pagination Controls */}
-                  <div className="flex flex-row items-center justify-center gap-2 mt-4 w-full">
-                    <FirstPageButton
-                      currentChunkIndex={currentChunkIndex}
-                      setCurrentChunkIndex={setCurrentChunkIndex}
-                      fullPartitionedData={fullPartitionedData}
-                      setDisplayedData={setDisplayedData}
-                      scrollUpWhenPageChange={true}
-                      scrollAreaRef={scrollAreaRef}
-                    />
-                    <PreviousPageButton
-                      currentChunkIndex={currentChunkIndex}
-                      setCurrentChunkIndex={setCurrentChunkIndex}
-                      fullPartitionedData={fullPartitionedData}
-                      setDisplayedData={setDisplayedData}
-                      scrollUpWhenPageChange={true}
-                      scrollAreaRef={scrollAreaRef}
-                    />
-                    <JumpToTabButton
-                      className="mx-4"
-                      tab={currentChunkIndex}
-                      totalTabs={fullPartitionedData.length}
-                      prefix="page"
-                      onTabChangeCallback={({ tab }) => {
-                        setCurrentChunkIndex(tab);
-                        setDisplayedData(fullPartitionedData[tab]);
-                        if (scrollAreaRef?.current) {
-                          scrollAreaRef.current.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }}
-                    />
-                    <NextPageButton
-                      currentChunkIndex={currentChunkIndex}
-                      setCurrentChunkIndex={setCurrentChunkIndex}
-                      fullPartitionedData={fullPartitionedData}
-                      setDisplayedData={setDisplayedData}
-                      scrollUpWhenPageChange={true}
-                      scrollAreaRef={scrollAreaRef}
-                    />
-                    <LastPageButton
-                      currentChunkIndex={currentChunkIndex}
-                      setCurrentChunkIndex={setCurrentChunkIndex}
-                      fullPartitionedData={fullPartitionedData}
-                      setDisplayedData={setDisplayedData}
-                      scrollUpWhenPageChange={true}
-                      scrollAreaRef={scrollAreaRef}
-                    />
+                    <ResponsiveMasonry
+                      columnsCountBreakPoints={
+                        COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
+                      }
+                      // @ts-expect-error - gutterBreakPoints is not typed by the library
+                      gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+                    >
+                      <Masonry>
+                        {displayedData.map((question) =>
+                          question?.questionImages.map((imageSrc: string) => (
+                            <QuestionPreview
+                              bookmarks={bookmarks ?? []}
+                              question={question}
+                              imageTheme={imageTheme}
+                              isUserSessionPending={isUserSessionPending}
+                              userFinishedQuestions={
+                                userFinishedQuestions ?? []
+                              }
+                              showFinishedQuestionTint={
+                                showFinishedQuestionTint
+                              }
+                              isSavedActivitiesError={isSavedActivitiesError}
+                              isValidSession={isValidSession}
+                              key={`${question.id}-${imageSrc}`}
+                              isSavedActivitiesFetching={
+                                isSavedActivitiesFetching
+                              }
+                              imageSrc={imageSrc}
+                              onQuestionClick={() => {
+                                setIsDialogOpen(false);
+                                navigateToQuestion(question?.id);
+                              }}
+                            />
+                          ))
+                        )}
+                      </Masonry>
+                    </ResponsiveMasonry>
+                    {/* Pagination Controls */}
+                    <div className="flex flex-row items-center justify-center gap-2 mt-6 w-full">
+                      <FirstPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        fullPartitionedData={fullPartitionedData}
+                        setDisplayedData={setDisplayedData}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                      <PreviousPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        fullPartitionedData={fullPartitionedData}
+                        setDisplayedData={setDisplayedData}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                      <JumpToTabButton
+                        className="mx-4"
+                        tab={currentChunkIndex}
+                        totalTabs={fullPartitionedData.length}
+                        prefix="page"
+                        onTabChangeCallback={({ tab }) => {
+                          setCurrentChunkIndex(tab);
+                          setDisplayedData(fullPartitionedData[tab]);
+                          if (scrollAreaRef?.current) {
+                            scrollAreaRef.current.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      />
+                      <NextPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        fullPartitionedData={fullPartitionedData}
+                        setDisplayedData={setDisplayedData}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                      <LastPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        fullPartitionedData={fullPartitionedData}
+                        setDisplayedData={setDisplayedData}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="flex items-center justify-center w-full">
+                    <p className="text-sm text-muted-foreground">
+                      No finished questions yet.
+                    </p>
                   </div>
-                </ScrollArea>
+                )}
               </>
             )}
 

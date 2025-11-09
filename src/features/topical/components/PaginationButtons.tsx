@@ -110,7 +110,10 @@ export const NextPageButton = ({
       variant="outline"
       className="cursor-pointer !p-[8px] rounded-[2px]"
       title="Next page"
-      disabled={currentChunkIndex === fullPartitionedData!.length - 1}
+      disabled={
+        currentChunkIndex === fullPartitionedData!.length - 1 ||
+        fullPartitionedData!.length - 1 < 1
+      }
       onClick={() => {
         if (currentChunkIndex === fullPartitionedData!.length - 1) return;
         setCurrentChunkIndex(currentChunkIndex + 1);
@@ -150,7 +153,10 @@ export const LastPageButton = ({
       variant="outline"
       className="cursor-pointer !p-[8px] rounded-[2px]"
       title="Last page"
-      disabled={currentChunkIndex === fullPartitionedData!.length - 1}
+      disabled={
+        currentChunkIndex === fullPartitionedData!.length - 1 ||
+        fullPartitionedData!.length - 1 < 1
+      }
       onClick={() => {
         if (currentChunkIndex === fullPartitionedData!.length - 1) return;
         setCurrentChunkIndex(fullPartitionedData!.length - 1);

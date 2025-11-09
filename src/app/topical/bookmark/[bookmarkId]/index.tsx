@@ -79,7 +79,7 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
-import Link from "next/link";
+import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import Image from "next/image";
 import {
   CURRICULUM_COVER_IMAGE,
@@ -780,11 +780,7 @@ export const BookmarkView = ({
             <p className="text-sm text-muted-foreground">
               Nothing found in this bookmark list!
             </p>
-            <Button className="!bg-logo-main !text-white" asChild>
-              <Link href="/topical/bookmark" className="w-[250px]">
-                Go back to your bookmark
-              </Link>
-            </Button>
+            <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
           </div>
         )}
 

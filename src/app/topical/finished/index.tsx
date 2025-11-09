@@ -80,7 +80,7 @@ import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSele
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
-import Link from "next/link";
+import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import Image from "next/image";
 import {
   CURRICULUM_COVER_IMAGE,
@@ -758,11 +758,9 @@ const FinishedQuestionsClient = ({
                   No curriculums found. Search for questions and add them to
                   your finished questions!
                 </p>
-                <Button className="!bg-logo-main !text-white" asChild>
-                  <Link href="/topical" className="w-[250px]">
-                    Search for questions <ScanText />
-                  </Link>
-                </Button>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
               </div>
             )}
           </div>
@@ -833,11 +831,9 @@ const FinishedQuestionsClient = ({
                   No subjects found. Search for questions and add them to your
                   finished questions!
                 </p>
-                <Button className="!bg-logo-main !text-white" asChild>
-                  <Link href="/topical" className="w-[250px]">
-                    Search for questions <ScanText />
-                  </Link>
-                </Button>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
               </div>
             )}
           </div>
@@ -922,11 +918,9 @@ const FinishedQuestionsClient = ({
                   No questions found. Search for questions and add them to your
                   finished questions!
                 </p>
-                <Button className="!bg-logo-main !text-white" asChild>
-                  <Link href="/topical" className="w-[250px]">
-                    Search for questions <ScanText />
-                  </Link>
-                </Button>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
               </div>
             )}
           </>

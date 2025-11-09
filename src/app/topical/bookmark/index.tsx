@@ -85,7 +85,7 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { ListFolder } from "@/features/topical/components/ListFolder";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
-import Link from "next/link";
+import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import Image from "next/image";
 import {
   CURRICULUM_COVER_IMAGE,
@@ -821,10 +821,15 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 !isUserSavedActivitiesFetching &&
                 !isUserSessionPending &&
                 userSession?.data?.session && (
-                  <p className="text-sm text-muted-foreground">
-                    No lists found. Search for questions and add them to a new
-                    list!
-                  </p>
+                  <div className="flex flex-col gap-4 items-center justify-center w-full">
+                    <p className="text-sm text-muted-foreground">
+                      No lists found. Search for questions and add them to a new
+                      list!
+                    </p>
+                    <NavigateToTopicalApp>
+                      Search for questions
+                    </NavigateToTopicalApp>
+                  </div>
                 )}
             </div>
           </div>
@@ -861,11 +866,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     No curriculums found. Search for questions and add them to a
                     this list!
                   </p>
-                  <Button className="!bg-logo-main !text-white" asChild>
-                    <Link href="/topical" className="w-[250px]">
-                      Search for questions <ScanText />
-                    </Link>
-                  </Button>
+                  <NavigateToTopicalApp>
+                    Search for questions{" "}
+                  </NavigateToTopicalApp>
                 </div>
               )}
               {Object.keys(curriculumnMetadata).map((curriculum) => (
@@ -940,11 +943,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   No subjects found. Search for questions and add them to a this
                   list!
                 </p>
-                <Button className="!bg-logo-main !text-white" asChild>
-                  <Link href="/topical" className="w-[250px]">
-                    Search for questions <ScanText />
-                  </Link>
-                </Button>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
               </div>
             )}
           </div>
@@ -1026,11 +1027,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               No questions found. Search for questions and add them to this
               list!
             </p>
-            <Button className="!bg-logo-main !text-white" asChild>
-              <Link href="/topical" className="w-[250px]">
-                Search for questions <ScanText />
-              </Link>
-            </Button>
+            <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
           </div>
         )}
       </div>
