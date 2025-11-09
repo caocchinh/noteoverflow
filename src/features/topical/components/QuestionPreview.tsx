@@ -20,11 +20,9 @@ import { useTopicalApp } from "../context/TopicalLayoutProvider";
 const QuestionPreview = memo(
   ({
     bookmarks,
-    isSavedActivitiesFetching,
-    isUserSessionPending,
     imageSrc,
-    isSavedActivitiesError,
     listId,
+    isUserSessionPending,
     isValidSession,
     question,
     userFinishedQuestions,
@@ -32,16 +30,14 @@ const QuestionPreview = memo(
   }: {
     bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
-    isSavedActivitiesFetching: boolean;
     imageSrc: string;
-    isUserSessionPending: boolean;
-    isSavedActivitiesError: boolean;
     isValidSession: boolean;
     userFinishedQuestions: SelectedFinishedQuestion[];
     listId?: string;
+    isUserSessionPending: boolean;
     onQuestionClick: () => void;
   }) => {
-    const { uiPreferences } = useTopicalApp();
+    const { uiPreferences, userSavedActivities } = useTopicalApp();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -130,6 +126,7 @@ const QuestionPreview = memo(
         </div>
 
         <BookmarkButton
+          isBookmarkDisabled={isUserSessionPending}
           triggerButtonClassName={cn(
             "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
@@ -140,15 +137,12 @@ const QuestionPreview = memo(
           )}
           badgeClassName="hidden"
           bookmarks={bookmarks}
-          isSavedActivitiesError={isSavedActivitiesError}
           question={question}
           setIsPopoverOpen={setIsPopoverOpen}
           isPopoverOpen={isPopoverOpen}
           setShouldOpen={setShouldOpen}
           setIsHovering={setIsHovering}
           isValidSession={isValidSession}
-          isBookmarkDisabled={isUserSessionPending}
-          isSavedActivitiesFetching={isSavedActivitiesFetching}
           isInView={shouldOpen}
           listId={listId}
         />
@@ -158,10 +152,10 @@ const QuestionPreview = memo(
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              if (isUserSessionPending) {
+              if (userSavedActivities.isPending) {
                 return;
               }
-              if (isSavedActivitiesError) {
+              if (userSavedActivities.isError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -210,16 +204,17 @@ const QuestionPreview = memo(
                 }
                 return false;
               })() && "!bg-logo-main !text-white",
-              (isUserSessionPending || isSavedActivitiesFetching) &&
+              (userSavedActivities.isPending ||
+                userSavedActivities.isFetching) &&
                 "opacity-50"
             )}
             tabIndex={-1}
             onClick={(e) => {
               e.stopPropagation();
-              if (isUserSessionPending || isSavedActivitiesFetching) {
+              if (isUserSessionPending || userSavedActivities.isFetching) {
                 return;
               }
-              if (isSavedActivitiesError) {
+              if (userSavedActivities.isError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -243,7 +238,7 @@ const QuestionPreview = memo(
               setIsPopoverOpen(true);
             }}
           >
-            {isSavedActivitiesFetching ? (
+            {userSavedActivities.isFetching ? (
               <Loader2 className="animate-spin" />
             ) : (
               <Bookmark size={10} />

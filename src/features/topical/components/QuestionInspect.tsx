@@ -104,8 +104,6 @@ const QuestionInspect = ({
   bookmarks,
   isUserSessionPending,
   isValidSession,
-  isSavedActivitiesFetching,
-  isSavedActivitiesError,
   listId,
   BETTER_AUTH_URL,
   sortParameters,
@@ -739,13 +737,11 @@ const QuestionInspect = ({
               <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
                 <FinishedTracker
                   allQuestions={allQuestions}
-                  isSavedActivitiesFetching={isSavedActivitiesFetching}
                   isValidSession={isValidSession}
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions}
                   bookmarks={bookmarks}
                   navigateToQuestion={navigateToQuestion}
-                  isSavedActivitiesError={isSavedActivitiesError}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
                   <div className="flex items-center gap-2 border-b border-border">
@@ -875,10 +871,6 @@ const QuestionInspect = ({
                               isUserSessionPending={isUserSessionPending}
                               isValidSession={isValidSession}
                               listId={listId}
-                              isSavedActivitiesFetching={
-                                isSavedActivitiesFetching
-                              }
-                              isSavedActivitiesError={isSavedActivitiesError}
                               isInspectSidebarOpen={isInspectSidebarOpen}
                               isMobileDevice={isMobile}
                               userFinishedQuestions={userFinishedQuestions}
@@ -925,10 +917,6 @@ const QuestionInspect = ({
                             isUserSessionPending={isUserSessionPending}
                             isValidSession={isValidSession}
                             listId={listId}
-                            isSavedActivitiesFetching={
-                              isSavedActivitiesFetching
-                            }
-                            isSavedActivitiesError={isSavedActivitiesError}
                             setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
                             isMobileDevice={isMobile}
@@ -1200,8 +1188,6 @@ const QuestionInspect = ({
                         finishedQuestions={userFinishedQuestions}
                         question={currentQuestionData}
                         isUserSessionPending={isUserSessionPending}
-                        isSavedActivitiesFetching={isSavedActivitiesFetching}
-                        isSavedActivitiesError={isSavedActivitiesError}
                         isValidSession={isValidSession}
                       />
                     )}
@@ -1215,8 +1201,6 @@ const QuestionInspect = ({
                         bookmarks={bookmarks}
                         popOverAlign="start"
                         isValidSession={isValidSession}
-                        isSavedActivitiesFetching={isSavedActivitiesFetching}
-                        isSavedActivitiesError={isSavedActivitiesError}
                         isInView={true}
                       />
                     )}
@@ -1287,9 +1271,7 @@ const QuestionInspect = ({
                       setIsBrowseMoreOpen={setIsBrowseMoreOpen}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={isValidSession}
-                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                     />
                   </ScrollArea>
                 </div>
@@ -1467,8 +1449,6 @@ const QuestionHoverCard = ({
   isMobileDevice,
   isValidSession,
   listId,
-  isSavedActivitiesFetching,
-  isSavedActivitiesError,
   isInspectSidebarOpen,
   resetScrollPositions,
   userFinishedQuestions,
@@ -1493,6 +1473,7 @@ const QuestionHoverCard = ({
     };
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
+  const { userSavedActivities } = useTopicalApp();
 
   return (
     <HoverCard
@@ -1567,8 +1548,6 @@ const QuestionHoverCard = ({
             isPopoverOpen={isPopoverOpen}
             isValidSession={isValidSession}
             listId={listId}
-            isSavedActivitiesFetching={isSavedActivitiesFetching}
-            isSavedActivitiesError={isSavedActivitiesError}
             isInView={true}
           />
           {isMutatingBookmarkOfThisQuestion && (
@@ -1580,7 +1559,7 @@ const QuestionHoverCard = ({
                 if (isUserSessionPending) {
                   return;
                 }
-                if (isSavedActivitiesError) {
+                if (userSavedActivities.isError) {
                   toast.error("Bookmark error. Please refresh the page.", {
                     duration: 2000,
                     position:
@@ -1653,9 +1632,7 @@ const BrowseMoreQuestions = ({
   bookmarks,
   isUserSessionPending,
   userFinishedQuestions,
-  isSavedActivitiesError,
   isValidSession,
-  isSavedActivitiesFetching,
   navigateToQuestion,
   isBrowseMoreOpen,
   setIsBrowseMoreOpen,
@@ -1708,10 +1685,8 @@ const BrowseMoreQuestions = ({
                   question={question}
                   isUserSessionPending={isUserSessionPending}
                   userFinishedQuestions={userFinishedQuestions ?? []}
-                  isSavedActivitiesError={isSavedActivitiesError}
                   isValidSession={isValidSession}
                   key={`${question.id}-${imageSrc}`}
-                  isSavedActivitiesFetching={isSavedActivitiesFetching}
                   imageSrc={imageSrc}
                   onQuestionClick={() => {
                     navigateToQuestion(question?.id);

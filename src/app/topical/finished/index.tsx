@@ -12,7 +12,6 @@ import {
   SelectedQuestion,
   SortParameters,
   QuestionInspectOpenState,
-  SavedActivitiesResponse,
   SubjectMetadata,
 } from "@/features/topical/constants/types";
 import {
@@ -53,11 +52,7 @@ const FinishedQuestionsClient = ({
   BETTER_AUTH_URL: string;
 }) => {
   const queryClient = useQueryClient();
-  const {
-    data: userSession,
-    isError: isUserSessionError,
-    isPending: isUserSessionPending,
-  } = useQuery({
+  const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
@@ -70,46 +65,17 @@ const FinishedQuestionsClient = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const {
-    data: userSavedActivities,
-    isFetching: isUserSavedActivitiesFetching,
-    isError: isUserSavedActivitiesError,
-  } = useQuery({
-    queryKey: ["user_saved_activities"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data;
-    },
-    enabled:
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_saved_activities"]),
-  });
-
+  const { userSavedActivities, uiPreferences } = useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.finishedQuestions;
+    return userSavedActivities.data?.finishedQuestions;
   }, [userSavedActivities]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.bookmarks;
+    return userSavedActivities.data?.bookmarks;
   }, [userSavedActivities]);
   const metadata = useMemo(() => {
     if (!userFinishedQuestions) return null;
     return computeFinishedQuestionsMetadata(userFinishedQuestions);
   }, [userFinishedQuestions]);
-
-  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
-  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCurriculumn, setSelectedCurriculum] =
@@ -139,7 +105,6 @@ const FinishedQuestionsClient = ({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { uiPreferences } = useTopicalApp();
 
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({
@@ -318,7 +283,7 @@ const FinishedQuestionsClient = ({
           </div>
         )}
 
-        {(isSavedActivitiesFetching || isUserSessionPending) && (
+        {(userSavedActivities.isFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>
@@ -429,10 +394,8 @@ const FinishedQuestionsClient = ({
                           }}
                           isUserSessionPending={isUserSessionPending}
                           userFinishedQuestions={userFinishedQuestions ?? []}
-                          isSavedActivitiesError={isSavedActivitiesError}
                           isValidSession={isValidSession}
                           key={`${question.id}-${imageSrc}`}
-                          isSavedActivitiesFetching={isSavedActivitiesFetching}
                           imageSrc={imageSrc}
                         />
                       ))
@@ -493,9 +456,7 @@ const FinishedQuestionsClient = ({
             bookmarks={bookmarks ?? []}
             BETTER_AUTH_URL={BETTER_AUTH_URL}
             isValidSession={isValidSession}
-            isSavedActivitiesFetching={isSavedActivitiesFetching}
             isUserSessionPending={isUserSessionPending}
-            isSavedActivitiesError={isSavedActivitiesError}
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
             userFinishedQuestions={userFinishedQuestions ?? []}

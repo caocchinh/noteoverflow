@@ -12,7 +12,6 @@ import {
   SelectedQuestion,
   SortParameters,
   QuestionInspectOpenState,
-  SavedActivitiesResponse,
   SubjectMetadata,
 } from "@/features/topical/constants/types";
 import {
@@ -51,11 +50,7 @@ import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider"
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
-  const {
-    data: userSession,
-    isError: isUserSessionError,
-    isPending: isUserSessionPending,
-  } = useQuery({
+  const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
@@ -68,46 +63,18 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const isValidSession = !!userSession?.data?.session;
 
-  const {
-    data: userSavedActivities,
-    isFetching: isUserSavedActivitiesFetching,
-    isError: isUserSavedActivitiesError,
-  } = useQuery({
-    queryKey: ["user_saved_activities"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data;
-    },
-    enabled:
-      !!userSession?.data?.session &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_saved_activities"]),
-  });
+  const { userSavedActivities, uiPreferences } = useTopicalApp();
 
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.finishedQuestions;
+    return userSavedActivities.data?.finishedQuestions;
   }, [userSavedActivities]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.bookmarks;
+    return userSavedActivities.data?.bookmarks;
   }, [userSavedActivities]);
   const metadata = useMemo(() => {
     if (!bookmarks) return null;
     return computeBookmarksMetadata(bookmarks);
   }, [bookmarks]);
-
-  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
-  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -163,7 +130,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const { uiPreferences } = useTopicalApp();
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -359,7 +325,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               )}
               {Object.keys(metadata?.private || {}).length === 0 &&
                 Object.keys(metadata?.public || {}).length === 0 &&
-                !isUserSavedActivitiesFetching &&
+                !userSavedActivities.isFetching &&
                 !isUserSessionPending &&
                 userSession?.data?.session && (
                   <div className="flex flex-col gap-4 items-center justify-center w-full">
@@ -377,14 +343,14 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         )}
         {Object.keys(metadata?.private || {}).length === 0 &&
           Object.keys(metadata?.public || {}).length === 0 &&
-          !isUserSavedActivitiesFetching &&
+          !userSavedActivities.isFetching &&
           !isUserSessionPending &&
           !userSession?.data?.session && (
             <p className="text-sm  text-red-500">
               You are not signed in. Please sign to create a list!
             </p>
           )}
-        {(isUserSavedActivitiesFetching || isUserSessionPending) && (
+        {(userSavedActivities.isFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>
@@ -521,10 +487,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                       question={question}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
-                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
                       listId={chosenList?.id}
                       onQuestionClick={() => {
@@ -590,10 +554,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             bookmarks={bookmarks ?? []}
             BETTER_AUTH_URL={BETTER_AUTH_URL}
             isValidSession={isValidSession}
-            isSavedActivitiesFetching={isSavedActivitiesFetching}
             isUserSessionPending={isUserSessionPending}
             listId={chosenList?.id}
-            isSavedActivitiesError={isSavedActivitiesError}
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
             userFinishedQuestions={userFinishedQuestions ?? []}

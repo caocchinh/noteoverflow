@@ -47,12 +47,10 @@ import { Button } from "@/components/ui/button";
 export const FinishedTracker = ({
   allQuestions,
   isValidSession,
-  isSavedActivitiesFetching,
   isUserSessionPending,
   userFinishedQuestions,
   bookmarks,
   navigateToQuestion,
-  isSavedActivitiesError,
 }: FinishedTrackerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
@@ -99,7 +97,7 @@ export const FinishedTracker = ({
     );
   }, [finishedQuestions]);
 
-  const { setIsCalculatorOpen } = useTopicalApp();
+  const { setIsCalculatorOpen, userSavedActivities } = useTopicalApp();
 
   // Update displayed data when fullPartitionedData changes
   useEffect(() => {
@@ -130,7 +128,7 @@ export const FinishedTracker = ({
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
               <div className="absolute w-full left-0 top-0 p-2 bg-green-600 cursor-pointer backdrop-blur-sm border-b">
-                {!isSavedActivitiesFetching &&
+                {!userSavedActivities.isFetching &&
                   !isUserSessionPending &&
                   isValidSession && (
                     <div className="flex items-center gap-3">
@@ -148,7 +146,7 @@ export const FinishedTracker = ({
                       </span>
                     </div>
                   )}
-                {(isUserSessionPending || isSavedActivitiesFetching) && (
+                {(isUserSessionPending || userSavedActivities.isFetching) && (
                   <div className="flex items-center justify-center gap-2 text-sm text-white">
                     <Loader2 className="animate-spin" size={14} />
                     Fetching progress data...
@@ -170,7 +168,7 @@ export const FinishedTracker = ({
           className="!max-w-5xl h-[95dvh] z-[100008] dark:bg-accent gap-2"
           showCloseButton={false}
         >
-          {(isUserSessionPending || isSavedActivitiesFetching) && (
+          {(isUserSessionPending || userSavedActivities.isFetching) && (
             <div className="flex items-center justify-center gap-2 text-xl text-gray-500">
               <Loader2 className="animate-spin" size={14} />
               Fetching progress data...
@@ -182,7 +180,7 @@ export const FinishedTracker = ({
             </div>
           )}
 
-          {!isSavedActivitiesFetching &&
+          {!userSavedActivities.isFetching &&
             !isUserSessionPending &&
             isValidSession && (
               <>
@@ -228,12 +226,8 @@ export const FinishedTracker = ({
                               userFinishedQuestions={
                                 userFinishedQuestions ?? []
                               }
-                              isSavedActivitiesError={isSavedActivitiesError}
                               isValidSession={isValidSession}
                               key={`${question.id}-${imageSrc}`}
-                              isSavedActivitiesFetching={
-                                isSavedActivitiesFetching
-                              }
                               imageSrc={imageSrc}
                               onQuestionClick={() => {
                                 setIsDialogOpen(false);

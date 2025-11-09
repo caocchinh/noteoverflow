@@ -1,8 +1,5 @@
 "use client";
-import {
-  SavedActivitiesResponse,
-  SelectedQuestion,
-} from "@/features/topical/constants/types";
+import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
@@ -15,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
 import { AnnotatableInspectImages } from "@/features/topical/components/AnnotatableInspectImages";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 
 export const QuestionView = ({
   data,
@@ -28,11 +26,7 @@ export const QuestionView = ({
   );
   const queryClient = useQueryClient();
 
-  const {
-    data: userSession,
-    isError: isUserSessionError,
-    isPending: isUserSessionPending,
-  } = useQuery({
+  const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
@@ -40,41 +34,13 @@ export const QuestionView = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const {
-    data: userSavedActivities,
-    isFetching: isUserSavedActivitiesFetching,
-    isError: isUserSavedActivitiesError,
-  } = useQuery({
-    queryKey: ["user_saved_activities"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data;
-    },
-    enabled:
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_saved_activities"]),
-  });
-
+  const { userSavedActivities } = useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.finishedQuestions;
+    return userSavedActivities.data?.finishedQuestions;
   }, [userSavedActivities]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.bookmarks;
+    return userSavedActivities.data?.bookmarks;
   }, [userSavedActivities]);
-  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
-  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
@@ -103,8 +69,6 @@ export const QuestionView = ({
         </div>
         <BookmarkButton
           bookmarks={bookmarks ?? []}
-          isSavedActivitiesFetching={isSavedActivitiesFetching}
-          isSavedActivitiesError={isSavedActivitiesError}
           isBookmarkDisabled={isUserSessionPending}
           isValidSession={isValidSession}
           isInView={true}
@@ -117,8 +81,6 @@ export const QuestionView = ({
           className="!h-max"
           finishedQuestions={userFinishedQuestions ?? []}
           isUserSessionPending={isUserSessionPending}
-          isSavedActivitiesFetching={isSavedActivitiesFetching}
-          isSavedActivitiesError={isSavedActivitiesError}
         />
         <BestExamHelpUltility question={data} />
         <ShareFilter

@@ -26,7 +26,6 @@ import type {
   SortParameters,
   CurrentQuery,
   QuestionInspectOpenState,
-  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -69,8 +68,12 @@ const TopicalClient = ({
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
   const mountedRef = useRef(false);
-  const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
-    useTopicalApp();
+  const {
+    isAppSidebarOpen,
+    setIsAppSidebarOpen,
+    uiPreferences,
+    userSavedActivities,
+  } = useTopicalApp();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<CurrentQuery>({
@@ -438,11 +441,7 @@ const TopicalClient = ({
 
   const queryClient = useQueryClient();
 
-  const {
-    data: userSession,
-    isError: isUserSessionError,
-    isPending: isUserSessionPending,
-  } = useQuery({
+  const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
@@ -450,39 +449,11 @@ const TopicalClient = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const {
-    data: userSavedActivities,
-    isFetching: isUserSavedActivitiesFetching,
-    isError: isUserSavedActivitiesError,
-  } = useQuery({
-    queryKey: ["user_saved_activities"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data;
-    },
-    enabled:
-      isSearchEnabled &&
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_saved_activities"]),
-  });
-
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.finishedQuestions;
+    return userSavedActivities?.data?.finishedQuestions;
   }, [userSavedActivities]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.bookmarks;
+    return userSavedActivities?.data?.bookmarks;
   }, [userSavedActivities]);
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -783,12 +754,8 @@ const TopicalClient = ({
                             }
                             isUserSessionPending={isUserSessionPending}
                             userFinishedQuestions={userFinishedQuestions ?? []}
-                            isSavedActivitiesError={isUserSavedActivitiesError}
                             isValidSession={isValidSession}
                             key={`${question.id}-${imageSrc}`}
-                            isSavedActivitiesFetching={
-                              isUserSavedActivitiesFetching
-                            }
                             imageSrc={imageSrc}
                           />
                         ))
@@ -818,12 +785,10 @@ const TopicalClient = ({
         bookmarks={bookmarks ?? []}
         currentQuery={currentQuery}
         isValidSession={isValidSession}
-        isSavedActivitiesFetching={isUserSavedActivitiesFetching}
         isUserSessionPending={isUserSessionPending}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}
-        isSavedActivitiesError={isUserSavedActivitiesError}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         userFinishedQuestions={userFinishedQuestions ?? []}

@@ -205,10 +205,8 @@ export interface QuestionHoverCardProps {
   isUserSessionPending: boolean;
   isValidSession: boolean;
   listId?: string;
-  isSavedActivitiesFetching: boolean;
   isMobileDevice: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
-  isSavedActivitiesError: boolean;
   resetScrollPositions: () => void;
 }
 
@@ -217,9 +215,7 @@ export interface BrowseMoreQuestionsProps {
   bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
-  isSavedActivitiesError: boolean;
   isValidSession: boolean;
-  isSavedActivitiesFetching: boolean;
   navigateToQuestion: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
@@ -237,8 +233,6 @@ export interface QuestionInspectProps {
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  isSavedActivitiesFetching: boolean;
-  isSavedActivitiesError: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[];
   listId?: string;
   BETTER_AUTH_URL: string;
@@ -279,12 +273,10 @@ export interface AppSidebarProps {
 export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
   isValidSession: boolean;
-  isSavedActivitiesFetching: boolean;
   isUserSessionPending: boolean;
   userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
   bookmarks: SelectedBookmark[];
   navigateToQuestion: (questionId: string) => void;
-  isSavedActivitiesError: boolean;
 }
 
 export type QuestionInspectOpenState = {

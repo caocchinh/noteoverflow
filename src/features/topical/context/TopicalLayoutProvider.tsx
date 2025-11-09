@@ -25,7 +25,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import type {
   UiPreferences,
   UiPreferencesCache,
+  SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 
 type UiPreferencesKey = keyof UiPreferences;
@@ -108,6 +110,7 @@ const TopicalContext = createContext<{
     key: K,
     value: SetStateAction<UiPreferences[K]>
   ) => void;
+  userSavedActivities: UseQueryResult<SavedActivitiesResponse, Error>;
 } | null>(null);
 
 export const useTopicalApp = () => {
@@ -187,6 +190,26 @@ export default function TopicalLayoutProvider({
     []
   );
 
+  // User saved activities query
+  const userSavedActivitiesQuery = useQuery({
+    queryKey: ["user_saved_activities"],
+    queryFn: async () => {
+      const response = await fetch("/api/topical/saved-activities", {
+        method: "GET",
+      });
+      const data: SavedActivitiesResponse = await response.json();
+      if (!response.ok) {
+        const errorMessage =
+          typeof data === "object" && data && "error" in data
+            ? String(data.error)
+            : "An error occurred";
+        throw new Error(errorMessage);
+      }
+
+      return data;
+    },
+  });
+
   return (
     <TopicalContext.Provider
       value={{
@@ -196,6 +219,7 @@ export default function TopicalLayoutProvider({
         setIsCalculatorOpen,
         uiPreferences,
         setUiPreference,
+        userSavedActivities: userSavedActivitiesQuery,
       }}
     >
       <DesmosCalculator

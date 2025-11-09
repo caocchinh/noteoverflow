@@ -12,9 +12,7 @@ type MutateFunction = (params: {
 }) => Promise<unknown> | void;
 
 export type BookmarkState = {
-  isSavedActivitiesFetching: boolean;
   isBookmarkDisabled: boolean;
-  isSavedActivitiesError: boolean;
   isValidSession: boolean;
   isBlockingInput: boolean;
   isInputError: boolean;
@@ -54,9 +52,7 @@ export type BookmarkState = {
 };
 
 export type BookmarkProps = {
-  isSavedActivitiesFetching: boolean;
   isBookmarkDisabled: boolean;
-  isSavedActivitiesError: boolean;
   listId?: string;
   isValidSession: boolean;
   question: SelectedQuestion;
@@ -74,9 +70,7 @@ export type BookmarkStore = ReturnType<typeof createBookmarkStore>;
 
 const createBookmarkStore = (props: BookmarkProps) => {
   return create<BookmarkState>()((set) => ({
-    isSavedActivitiesFetching: props.isSavedActivitiesFetching,
     isBookmarkDisabled: props.isBookmarkDisabled,
-    isSavedActivitiesError: props.isSavedActivitiesError,
     listId: props.listId ?? "",
     isValidSession: props.isValidSession,
     isBlockingInput: false,

@@ -12,7 +12,6 @@ import {
   SelectedPublickBookmark,
   SortParameters,
   QuestionInspectOpenState,
-  SavedActivitiesResponse,
   SubjectMetadata,
 } from "@/features/topical/constants/types";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -64,11 +63,7 @@ export const BookmarkView = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const {
-    data: userSession,
-    isError: isUserSessionError,
-    isPending: isUserSessionPending,
-  } = useQuery({
+  const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
     enabled: !queryClient.getQueryData(["user"]),
@@ -79,42 +74,13 @@ export const BookmarkView = ({
       isOpen: false,
       questionId: "",
     });
-
-  const {
-    data: userSavedActivities,
-    isFetching: isUserSavedActivitiesFetching,
-    isError: isUserSavedActivitiesError,
-  } = useQuery({
-    queryKey: ["user_saved_activities"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data;
-    },
-    enabled:
-      isValidSession &&
-      !isUserSessionError &&
-      !queryClient.getQueryData(["user_saved_activities"]),
-  });
-
+  const { userSavedActivities } = useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.finishedQuestions;
+    return userSavedActivities.data?.finishedQuestions;
   }, [userSavedActivities]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.bookmarks;
+    return userSavedActivities.data?.bookmarks;
   }, [userSavedActivities]);
-  const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
-  const isSavedActivitiesError = isUserSavedActivitiesError;
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -410,10 +376,8 @@ export const BookmarkView = ({
                       }}
                       isUserSessionPending={isUserSessionPending}
                       userFinishedQuestions={userFinishedQuestions ?? []}
-                      isSavedActivitiesError={isSavedActivitiesError}
                       isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
-                      isSavedActivitiesFetching={isSavedActivitiesFetching}
                       imageSrc={imageSrc}
                       listId={
                         ownerInfo.ownerId === userSession?.data?.user?.id
@@ -466,9 +430,7 @@ export const BookmarkView = ({
           partitionedTopicalData={fullPartitionedData}
           bookmarks={bookmarks ?? []}
           isValidSession={isValidSession}
-          isSavedActivitiesFetching={isSavedActivitiesFetching}
           isUserSessionPending={isUserSessionPending}
-          isSavedActivitiesError={isSavedActivitiesError}
           isInspectSidebarOpen={isInspectSidebarOpen}
           setIsInspectSidebarOpen={setIsInspectSidebarOpen}
           userFinishedQuestions={userFinishedQuestions ?? []}

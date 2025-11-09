@@ -17,21 +17,18 @@ import {
   SelectedFinishedQuestion,
   SelectedQuestion,
 } from "../constants/types";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const QuestionInspectFinishedCheckbox = ({
   finishedQuestions,
   question,
   isUserSessionPending,
-  isSavedActivitiesFetching,
-  isSavedActivitiesError,
   className,
   isValidSession,
 }: {
   finishedQuestions: SelectedFinishedQuestion[] | null;
   question: SelectedQuestion;
   isUserSessionPending: boolean;
-  isSavedActivitiesFetching: boolean;
-  isSavedActivitiesError: boolean;
   className?: string;
   isValidSession: boolean;
 }) => {
@@ -45,7 +42,7 @@ export const QuestionInspectFinishedCheckbox = ({
     false;
 
   const queryClient = useQueryClient();
-
+  const { userSavedActivities } = useTopicalApp();
   const { mutate } = useMutation({
     mutationKey: ["user_saved_activities", question.id, "finished_questions"],
     mutationFn: async ({
@@ -148,7 +145,7 @@ export const QuestionInspectFinishedCheckbox = ({
         "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
         (isMutatingThisQuestion ||
           isUserSessionPending ||
-          isSavedActivitiesFetching) &&
+          userSavedActivities.isFetching) &&
           "pointer-events-none",
         isFinished ? "border-green-600" : "border-muted-foreground",
         className
@@ -161,7 +158,7 @@ export const QuestionInspectFinishedCheckbox = ({
         if (
           isMutatingThisQuestion ||
           isUserSessionPending ||
-          isSavedActivitiesFetching
+          userSavedActivities.isFetching
         ) {
           return;
         }
@@ -169,7 +166,7 @@ export const QuestionInspectFinishedCheckbox = ({
           toast.error("Please sign in to save finished questions.");
           return;
         }
-        if (isSavedActivitiesError) {
+        if (userSavedActivities.isError) {
           toast.error(
             "Failed to update finished questions list. Please refresh the page."
           );
@@ -181,7 +178,7 @@ export const QuestionInspectFinishedCheckbox = ({
         });
       }}
     >
-      {isSavedActivitiesFetching ? (
+      {userSavedActivities.isFetching ? (
         <Loader2 className="animate-spin w-4 h-4" />
       ) : (
         <Switch
@@ -199,7 +196,7 @@ export const QuestionInspectFinishedCheckbox = ({
       >
         {isMutatingThisQuestion ? (
           <>Saving...</>
-        ) : isSavedActivitiesFetching ? (
+        ) : userSavedActivities.isFetching ? (
           <>Loading</>
         ) : (
           <>Complete{isFinished && "d"}</>

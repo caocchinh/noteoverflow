@@ -89,6 +89,7 @@ import { createContext, useContext } from "react";
 import { useStore } from "zustand";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 const BookmarkContext = createContext<BookmarkStore | null>(null);
 
@@ -103,11 +104,9 @@ export const BookmarkButton = memo(
     bookmarks,
     question,
     isBookmarkDisabled,
-    isSavedActivitiesFetching,
     isPopoverOpen: openProp,
     setIsPopoverOpen: setOpenProp,
     setIsHovering,
-    isSavedActivitiesError,
     setShouldOpen,
     popOverAlign = "end",
     listId,
@@ -124,9 +123,7 @@ export const BookmarkButton = memo(
     setIsPopoverOpen?: (open: boolean) => void;
     setIsHovering?: (value: boolean) => void;
     popOverAlign?: "start" | "end";
-    isSavedActivitiesFetching: boolean;
     setShouldOpen?: (value: boolean) => void;
-    isSavedActivitiesError: boolean;
     listId?: string;
     badgeClassName?: string;
     popOverTriggerClassName?: string;
@@ -165,9 +162,7 @@ export const BookmarkButton = memo(
     // Only create the store once when component mounts
     if (bookmarkStore.current === null && isInView) {
       bookmarkStore.current = createBookmarkStore({
-        isSavedActivitiesFetching,
         isBookmarkDisabled,
-        isSavedActivitiesError,
         isValidSession,
         question,
         chosenBookmarkList: (() => {
@@ -200,9 +195,7 @@ export const BookmarkButton = memo(
       if (bookmarkStore.current) {
         bookmarkStore.current.setState((state) => ({
           ...state,
-          isSavedActivitiesFetching,
           isBookmarkDisabled,
-          isSavedActivitiesError,
           isValidSession,
           question,
           chosenBookmarkList: (() => {
@@ -229,9 +222,7 @@ export const BookmarkButton = memo(
         }));
       }
     }, [
-      isSavedActivitiesFetching,
       isBookmarkDisabled,
-      isSavedActivitiesError,
       isValidSession,
       question,
       bookmarks,
@@ -281,12 +272,6 @@ const BookmarkButtonConsumer = memo(
     const popOverAlign = useBookmarkContext((state) => state.popOverAlign);
     const isBookmarkDisabled = useBookmarkContext(
       (state) => state.isBookmarkDisabled
-    );
-    const isSavedActivitiesFetching = useBookmarkContext(
-      (state) => state.isSavedActivitiesFetching
-    );
-    const isSavedActivitiesError = useBookmarkContext(
-      (state) => state.isSavedActivitiesError
     );
     const visibility = useBookmarkContext((state) => state.visibility);
     // const isInView = useBookmarkContext((state) => state.isInView);
@@ -648,13 +633,13 @@ const BookmarkButtonConsumer = memo(
       },
       [searchInput, open, setNewBookmarkListNameInput, setSearchInput, setOpen]
     );
-
+    const { userSavedActivities } = useTopicalApp();
     const openUI = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (isBookmarkDisabled || isSavedActivitiesFetching) {
+      if (isBookmarkDisabled || userSavedActivities.isPending) {
         return;
       }
-      if (isSavedActivitiesError) {
+      if (userSavedActivities.isError) {
         toast.error("Bookmark error. Please refresh the page.", {
           duration: 2000,
           position: isMobileDevice ? "top-center" : "bottom-right",
@@ -839,9 +824,6 @@ const BookmarkTrigger = memo(() => {
   const triggerButtonClassName = useBookmarkContext(
     (state) => state.triggerButtonClassName
   );
-  const isSavedActivitiesFetching = useBookmarkContext(
-    (state) => state.isSavedActivitiesFetching
-  );
 
   const isBookmarkDisabled = useBookmarkContext(
     (state) => state.isBookmarkDisabled
@@ -853,12 +835,8 @@ const BookmarkTrigger = memo(() => {
       mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
 
-  const queryClient = useQueryClient();
-
-  const userSavedActivities = queryClient.getQueryData<SavedActivitiesResponse>(
-    ["user_saved_activities"]
-  );
-  const bookmarks = userSavedActivities?.bookmarks;
+  const { userSavedActivities } = useTopicalApp();
+  const bookmarks = userSavedActivities?.data?.bookmarks;
   const isBookmarked = bookmarks?.some((bookmark) =>
     bookmark.userBookmarks.some((b) => b.question.id === question.id)
   );
@@ -883,12 +861,12 @@ const BookmarkTrigger = memo(() => {
         triggerButtonClassName,
         "rounded-[3px]",
         isBookmarked && "!bg-logo-main !text-white",
-        (isBookmarkDisabled || isSavedActivitiesFetching) && "opacity-50"
+        (isBookmarkDisabled || userSavedActivities.isFetching) && "opacity-50"
       )}
       tabIndex={-1}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
     >
-      {isSavedActivitiesFetching ? (
+      {userSavedActivities.isFetching ? (
         <Loader2 className="animate-spin" />
       ) : (
         <Bookmark size={10} />
