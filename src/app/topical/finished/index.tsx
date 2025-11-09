@@ -149,7 +149,7 @@ const FinishedQuestionsClient = ({
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0]);
+      setDisplayedData(chunkedData[0] ?? 0);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -300,7 +300,7 @@ const FinishedQuestionsClient = ({
 
         <ScrollToTopButton
           isScrollingAndShouldShowScrollButton={
-            isScrollingAndShouldShowScrollButton && displayedData.length > 0
+            isScrollingAndShouldShowScrollButton && displayedData?.length > 0
           }
           scrollAreaRef={scrollAreaRef}
         />
@@ -381,7 +381,7 @@ const FinishedQuestionsClient = ({
                   gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
                 >
                   <Masonry>
-                    {displayedData.map((question) =>
+                    {displayedData?.map((question) =>
                       question?.questionImages.map((imageSrc: string) => (
                         <QuestionPreview
                           bookmarks={bookmarks ?? []}

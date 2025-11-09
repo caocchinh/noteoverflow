@@ -376,7 +376,7 @@ const TopicalClient = ({
     if (processedData) {
       setNumberOfQuetion(processedData.totalCount);
       setFullPartitionedData(processedData.chunkedData);
-      setDisplayedData(processedData.chunkedData[0]);
+      setDisplayedData(processedData.chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
@@ -727,7 +727,7 @@ const TopicalClient = ({
                 >
                   <Masonry>
                     {displayedData
-                      .filter((question: SelectedQuestion) => {
+                      ?.filter((question: SelectedQuestion) => {
                         if (
                           !userFinishedQuestions ||
                           !userSession?.data?.session
@@ -744,21 +744,24 @@ const TopicalClient = ({
                         }
                         return true;
                       })
-                      .map((question) =>
-                        question?.questionImages.map((imageSrc: string) => (
-                          <QuestionPreview
-                            bookmarks={bookmarks ?? []}
-                            question={question}
-                            onQuestionClick={() =>
-                              handleQuestionClick(question.id)
-                            }
-                            isUserSessionPending={isUserSessionPending}
-                            userFinishedQuestions={userFinishedQuestions ?? []}
-                            isValidSession={isValidSession}
-                            key={`${question.id}-${imageSrc}`}
-                            imageSrc={imageSrc}
-                          />
-                        ))
+                      ?.map(
+                        (question) =>
+                          question?.questionImages.map((imageSrc: string) => (
+                            <QuestionPreview
+                              bookmarks={bookmarks ?? []}
+                              question={question}
+                              onQuestionClick={() =>
+                                handleQuestionClick(question.id)
+                              }
+                              isUserSessionPending={isUserSessionPending}
+                              userFinishedQuestions={
+                                userFinishedQuestions ?? []
+                              }
+                              isValidSession={isValidSession}
+                              key={`${question.id}-${imageSrc}`}
+                              imageSrc={imageSrc}
+                            />
+                          )) ?? []
                       )}
                   </Masonry>
                 </ResponsiveMasonry>

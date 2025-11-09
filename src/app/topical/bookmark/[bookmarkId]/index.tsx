@@ -44,16 +44,19 @@ import {
 } from "@/constants/constants";
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { Loader2 } from "lucide-react";
 
 export const BookmarkView = ({
-  data,
   BETTER_AUTH_URL,
   listId,
+  bookmarkId,
+  isOwnerOfTheList,
   ownerInfo,
 }: {
-  data: SelectedPublickBookmark[];
   BETTER_AUTH_URL: string;
   listId: string;
+  bookmarkId: string;
+  isOwnerOfTheList: boolean;
   ownerInfo: {
     ownerName: string;
     ownerId: string;
@@ -74,7 +77,7 @@ export const BookmarkView = ({
       isOpen: false,
       questionId: "",
     });
-  const { userSavedActivities } = useTopicalApp();
+  const { userSavedActivities, uiPreferences } = useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
     return userSavedActivities.data?.finishedQuestions;
   }, [userSavedActivities]);
@@ -82,22 +85,50 @@ export const BookmarkView = ({
     return userSavedActivities.data?.bookmarks;
   }, [userSavedActivities]);
 
+  // Fetch bookmark data only if user is not the owner
+  const { data: fetchedBookmarkData, isLoading: isFetchedBookmarkLoading } =
+    useQuery({
+      queryKey: ["bookmark", bookmarkId],
+      queryFn: async () => {
+        const response = await fetch(`/api/topical/bookmark/${bookmarkId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookmark");
+        }
+        return response.json();
+      },
+      enabled: !isOwnerOfTheList && !!bookmarkId,
+    });
+
+  // Get bookmark data based on ownership
+  const bookmarkData = useMemo((): SelectedPublickBookmark[] => {
+    if (isOwnerOfTheList) {
+      // User is owner, find the specific bookmark from their saved activities
+      return (
+        bookmarks?.find((bookmark) => bookmark.id === bookmarkId)
+          ?.userBookmarks ?? []
+      );
+    } else {
+      // User is not owner, use fetched data
+      return Array.isArray(fetchedBookmarkData) ? fetchedBookmarkData : [];
+    }
+  }, [isOwnerOfTheList, bookmarks, bookmarkId, fetchedBookmarkData]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
-    return data ? computeCurriculumSubjectMapping(data) : {};
-  }, [data]);
+    return bookmarkData ? computeCurriculumSubjectMapping(bookmarkData) : {};
+  }, [bookmarkData]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
 
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
-      data || [],
+      bookmarkData || [],
       selectedCurriculumn,
       selectedSubject
     );
-  }, [data, selectedCurriculumn, selectedSubject]);
+  }, [bookmarkData, selectedCurriculumn, selectedSubject]);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
@@ -117,16 +148,14 @@ export const BookmarkView = ({
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const { uiPreferences } = useTopicalApp();
-
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
-      data,
+      bookmarkData,
       currentFilter,
       selectedCurriculumn,
       selectedSubject
     );
-  }, [currentFilter, data, selectedCurriculumn, selectedSubject]);
+  }, [currentFilter, bookmarkData, selectedCurriculumn, selectedSubject]);
 
   useEffect(() => {
     if (topicalData) {
@@ -150,7 +179,7 @@ export const BookmarkView = ({
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0]);
+      setDisplayedData(chunkedData[0] ?? 0);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -249,166 +278,174 @@ export const BookmarkView = ({
             {ownerInfo.ownerName}&apos;s list - {ownerInfo.listName}
           </p>
         </div>
-        {metadata &&
-          !selectedCurriculumn &&
-          Object.keys(metadata).length > 0 && (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <h1 className="font-semibold text-2xl">
-                Choose your curriculumn
-              </h1>
-              <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
-                {Object.keys(metadata).map((curriculum) => (
-                  <div
-                    key={curriculum}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer"
-                    onClick={() => {
-                      setSelectedCurriculum(curriculum as ValidCurriculum);
-                    }}
-                    title={curriculum}
-                  >
-                    <Image
-                      width={182}
-                      height={80}
-                      loading="lazy"
-                      className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
-                      alt="Curriculum cover image"
-                      src={
-                        CURRICULUM_COVER_IMAGE[
-                          curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                        ]
-                      }
-                    />
-                    <p>{curriculum}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        {Object.keys(metadata).length === 0 && (
+        {userSavedActivities.isFetching ||
+        isUserSessionPending ||
+        isFetchedBookmarkLoading ? (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-muted-foreground">
-              Nothing found in this bookmark list!
-            </p>
-            <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
+            <Loader2 className="animate-spin" />
           </div>
-        )}
-
-        <ScrollToTopButton
-          isScrollingAndShouldShowScrollButton={
-            isScrollingAndShouldShowScrollButton && displayedData.length > 0
-          }
-          scrollAreaRef={scrollAreaRef}
-        />
-        {metadata && selectedCurriculumn && !selectedSubject && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your subject</h1>
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {metadata[selectedCurriculumn]?.map((subject) => (
-                  <div
-                    key={subject}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
-                    onClick={() => {
-                      setSelecteSubject(subject);
-                    }}
-                  >
-                    <Image
-                      width={150}
-                      height={200}
-                      loading="lazy"
-                      title={subject}
-                      className="!h-[200px] w-40 object-cover rounded-[1px] "
-                      alt="Curriculum cover image"
-                      src={
-                        SUBJECT_COVER_IMAGE[
-                          selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                        ][subject]
-                      }
-                    />
-                    <p className="text-sm text-muted-foreground text-center px-1">
-                      {subject}
-                    </p>
+        ) : (
+          <>
+            {metadata &&
+              !selectedCurriculumn &&
+              Object.keys(metadata).length > 0 && (
+                <div className="flex flex-col gap-4 items-center justify-center w-full">
+                  <h1 className="font-semibold text-2xl">
+                    Choose your curriculumn
+                  </h1>
+                  <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+                    {Object.keys(metadata).map((curriculum) => (
+                      <div
+                        key={curriculum}
+                        className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                        onClick={() => {
+                          setSelectedCurriculum(curriculum as ValidCurriculum);
+                        }}
+                        title={curriculum}
+                      >
+                        <Image
+                          width={182}
+                          height={80}
+                          loading="lazy"
+                          className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
+                          alt="Curriculum cover image"
+                          src={
+                            CURRICULUM_COVER_IMAGE[
+                              curriculum as keyof typeof CURRICULUM_COVER_IMAGE
+                            ]
+                          }
+                        />
+                        <p>{curriculum}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
+
+            {Object.keys(metadata).length === 0 && (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground">
+                  Nothing found in this bookmark list!
+                </p>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
               </div>
-            </ScrollArea>
-          </div>
-        )}
+            )}
 
-        {displayedData?.length > 0 && (
-          <ScrollArea
-            viewportRef={scrollAreaRef}
-            className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
-            type="always"
-            viewPortOnScrollEnd={() => {
-              if (scrollAreaRef.current?.scrollTop === 0) {
-                setIsScrollingAndShouldShowScrollButton(false);
-              } else {
-                setIsScrollingAndShouldShowScrollButton(true);
+            <ScrollToTopButton
+              isScrollingAndShouldShowScrollButton={
+                isScrollingAndShouldShowScrollButton && displayedData.length > 0
               }
-            }}
-          >
-            <p> {topicalData.length} items</p>
-            <ResponsiveMasonry
-              columnsCountBreakPoints={
-                COLUMN_BREAKPOINTS[
-                  uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
-                ]
-              }
-              // @ts-expect-error - gutterBreakPoints is not typed by the library
-              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-            >
-              <Masonry>
-                {displayedData?.map((question) =>
-                  question?.questionImages.map((imageSrc: string) => (
-                    <QuestionPreview
-                      bookmarks={bookmarks ?? []}
-                      question={question}
-                      onQuestionClick={() => {
-                        setIsQuestionInspectOpen({
-                          isOpen: true,
-                          questionId: question.id,
-                        });
-                      }}
-                      isUserSessionPending={isUserSessionPending}
-                      userFinishedQuestions={userFinishedQuestions ?? []}
-                      isValidSession={isValidSession}
-                      key={`${question.id}-${imageSrc}`}
-                      imageSrc={imageSrc}
-                      listId={
-                        ownerInfo.ownerId === userSession?.data?.user?.id
-                          ? listId
-                          : undefined
-                      }
-                    />
-                  ))
-                )}
-              </Masonry>
-            </ResponsiveMasonry>
+              scrollAreaRef={scrollAreaRef}
+            />
+            {metadata && selectedCurriculumn && !selectedSubject && (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <h1 className="font-semibold text-2xl">Choose your subject</h1>
+                <ScrollArea
+                  className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+                  type="always"
+                >
+                  <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+                    {metadata[selectedCurriculumn]?.map((subject) => (
+                      <div
+                        key={subject}
+                        className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
+                        onClick={() => {
+                          setSelecteSubject(subject);
+                        }}
+                      >
+                        <Image
+                          width={150}
+                          height={200}
+                          loading="lazy"
+                          title={subject}
+                          className="!h-[200px] w-40 object-cover rounded-[1px] "
+                          alt="Curriculum cover image"
+                          src={
+                            SUBJECT_COVER_IMAGE[
+                              selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                            ][subject]
+                          }
+                        />
+                        <p className="text-sm text-muted-foreground text-center px-1">
+                          {subject}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
 
-            {uiPreferences.layoutStyle === "infinite" && (
-              <InfiniteScroll
-                next={() => {
-                  if (fullPartitionedData) {
-                    setCurrentChunkIndex(currentChunkIndex + 1);
-                    setDisplayedData([
-                      ...displayedData,
-                      ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
-                    ]);
+            {displayedData?.length > 0 && (
+              <ScrollArea
+                viewportRef={scrollAreaRef}
+                className=" h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+                type="always"
+                viewPortOnScrollEnd={() => {
+                  if (scrollAreaRef.current?.scrollTop === 0) {
+                    setIsScrollingAndShouldShowScrollButton(false);
+                  } else {
+                    setIsScrollingAndShouldShowScrollButton(true);
                   }
                 }}
-                hasMore={
-                  !!fullPartitionedData &&
-                  currentChunkIndex < fullPartitionedData.length - 1
-                }
-                isLoading={!fullPartitionedData}
-              />
+              >
+                <p> {topicalData.length} items</p>
+                <ResponsiveMasonry
+                  columnsCountBreakPoints={
+                    COLUMN_BREAKPOINTS[
+                      uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+                    ]
+                  }
+                  // @ts-expect-error - gutterBreakPoints is not typed by the library
+                  gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+                >
+                  <Masonry>
+                    {displayedData?.map((question) =>
+                      question?.questionImages.map((imageSrc: string) => (
+                        <QuestionPreview
+                          bookmarks={bookmarks ?? []}
+                          question={question}
+                          onQuestionClick={() => {
+                            setIsQuestionInspectOpen({
+                              isOpen: true,
+                              questionId: question.id,
+                            });
+                          }}
+                          isUserSessionPending={isUserSessionPending}
+                          userFinishedQuestions={userFinishedQuestions ?? []}
+                          isValidSession={isValidSession}
+                          key={`${question.id}-${imageSrc}`}
+                          imageSrc={imageSrc}
+                          listId={isOwnerOfTheList ? listId : undefined}
+                        />
+                      ))
+                    )}
+                  </Masonry>
+                </ResponsiveMasonry>
+
+                {uiPreferences.layoutStyle === "infinite" && (
+                  <InfiniteScroll
+                    next={() => {
+                      if (fullPartitionedData) {
+                        setCurrentChunkIndex(currentChunkIndex + 1);
+                        setDisplayedData([
+                          ...displayedData,
+                          ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+                        ]);
+                      }
+                    }}
+                    hasMore={
+                      !!fullPartitionedData &&
+                      currentChunkIndex < fullPartitionedData.length - 1
+                    }
+                    isLoading={!fullPartitionedData}
+                  />
+                )}
+              </ScrollArea>
             )}
-          </ScrollArea>
+          </>
         )}
       </div>
       <SecondaryAppSidebar
@@ -420,7 +457,7 @@ export const BookmarkView = ({
         selectedCurriculumn={selectedCurriculumn}
         selectedSubject={selectedSubject}
       />
-      {Array.isArray(data) && data.length > 0 && (
+      {Array.isArray(bookmarkData) && bookmarkData.length > 0 && (
         <QuestionInspect
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}

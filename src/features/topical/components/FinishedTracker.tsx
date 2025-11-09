@@ -102,7 +102,7 @@ export const FinishedTracker = ({
   // Update displayed data when fullPartitionedData changes
   useEffect(() => {
     if (fullPartitionedData.length > 0) {
-      setDisplayedData(fullPartitionedData[0]);
+      setDisplayedData(fullPartitionedData[0] ?? 0);
       setCurrentChunkIndex(0);
       if (scrollAreaRef?.current) {
         scrollAreaRef.current.scrollTo({
@@ -217,7 +217,7 @@ export const FinishedTracker = ({
                       gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
                     >
                       <Masonry>
-                        {displayedData.map((question) =>
+                        {displayedData?.map((question) =>
                           question?.questionImages.map((imageSrc: string) => (
                             <QuestionPreview
                               bookmarks={bookmarks ?? []}

@@ -1678,7 +1678,7 @@ const BrowseMoreQuestions = ({
           gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
         >
           <Masonry>
-            {displayedData.map((question) =>
+            {displayedData?.map((question) =>
               question?.questionImages.map((imageSrc: string) => (
                 <QuestionPreview
                   bookmarks={bookmarks ?? []}

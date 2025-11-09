@@ -166,7 +166,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0]);
+      setDisplayedData(chunkedData[0] ?? 0);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -480,7 +480,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
             >
               <Masonry>
-                {displayedData.map((question) =>
+                {displayedData?.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview
                       bookmarks={bookmarks ?? []}

@@ -1,8 +1,7 @@
 import Loader from "@/components/Loader/Loader";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db";
-import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
-import { SelectedPublickBookmark } from "@/features/topical/constants/types";
+import { userBookmarkList } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import { BookmarkView } from ".";
@@ -60,47 +59,13 @@ const BookmarkViewPage = async (props: { params: Params }) => {
       );
     }
 
-    const selectedBookmarkQuestions = await db.query.userBookmarks.findMany({
-      where: eq(userBookmarks.listId, bookmarkId),
-      columns: { updatedAt: true },
-      with: {
-        question: {
-          columns: {
-            id: true,
-            year: true,
-            season: true,
-            paperType: true,
-            paperVariant: true,
-            answers: true,
-            questionImages: true,
-            topics: true,
-          },
-        },
-      },
-    });
-
-    const data: SelectedPublickBookmark[] = selectedBookmarkQuestions.map(
-      (item) => {
-        return {
-          updatedAt: item.updatedAt,
-          questionId: item.question.id,
-
-          question: {
-            ...item.question,
-            questionImages: JSON.parse(item.question.questionImages ?? "[]"),
-            answers: JSON.parse(item.question.answers ?? "[]"),
-            topics: JSON.parse(item.question.topics ?? "[]"),
-          },
-        };
-      }
-    );
-
     return (
       <Suspense fallback={<Loader />}>
         <BookmarkView
-          data={data}
           BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
           listId={bookmarkId}
+          bookmarkId={bookmarkId}
+          isOwnerOfTheList={session?.user.id === bookmarkList.userId}
           ownerInfo={{
             ownerId: bookmarkList.user.id,
             ownerName: bookmarkList.user.name,
