@@ -89,7 +89,6 @@ import { createContext, useContext } from "react";
 import { useStore } from "zustand";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
-import { computeBookmarksMetadata } from "../lib/utils";
 
 const BookmarkContext = createContext<BookmarkStore | null>(null);
 
@@ -565,17 +564,9 @@ const BookmarkButtonConsumer = memo(
               );
             }
 
-            // Update metadata optimistically
-            const updatedBookmarksMetadata =
-              computeBookmarksMetadata(updatedBookmarks);
-
             return {
               ...prev,
               bookmarks: updatedBookmarks,
-              metadata: {
-                ...prev.metadata,
-                bookmarks: updatedBookmarksMetadata,
-              },
             };
           }
         );

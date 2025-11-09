@@ -19,6 +19,7 @@ import type {
   BookmarksMetadata,
   SelectedFinishedQuestion,
   SelectedBookmark,
+  SelectedQuestion,
 } from "../constants/types";
 import type { ValidCurriculum, ValidSeason } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -612,6 +613,69 @@ export function computeFinishedQuestionsMetadata(
   });
 
   return metadata;
+}
+
+export function computeSubjectMetadata<
+  T extends { question: SelectedQuestion }
+>(
+  questions: T[],
+  selectedCurriculumn: string | null,
+  selectedSubject: string | null
+): {
+  topic: string[];
+  year: string[];
+  paperType: string[];
+  season: string[];
+} | null {
+  if (!selectedCurriculumn || !selectedSubject) return null;
+
+  const temp: {
+    topic: string[];
+    year: string[];
+    paperType: string[];
+    season: string[];
+  } = {
+    topic: [],
+    year: [],
+    paperType: [],
+    season: [],
+  };
+
+  questions.forEach((questionItem) => {
+    const extractedCurriculumn = extractCurriculumCode({
+      questionId: questionItem.question.id,
+    });
+    const extractedSubjectCode = extractSubjectCode({
+      questionId: questionItem.question.id,
+    });
+
+    if (
+      extractedCurriculumn === selectedCurriculumn &&
+      extractedSubjectCode === selectedSubject
+    ) {
+      questionItem.question.topics.forEach((topic) => {
+        if (topic && !temp.topic.includes(topic)) {
+          temp.topic.push(topic);
+        }
+      });
+
+      if (!temp.year.includes(questionItem.question.year.toString())) {
+        temp.year.push(questionItem.question.year.toString());
+      }
+
+      if (
+        !temp.paperType.includes(questionItem.question.paperType.toString())
+      ) {
+        temp.paperType.push(questionItem.question.paperType.toString());
+      }
+
+      if (!temp.season.includes(questionItem.question.season)) {
+        temp.season.push(questionItem.question.season);
+      }
+    }
+  });
+
+  return temp;
 }
 
 export function computeBookmarksMetadata(

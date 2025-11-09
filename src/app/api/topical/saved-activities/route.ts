@@ -5,13 +5,8 @@ import { finishedQuestions, userBookmarkList } from "@/drizzle/schema";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
-  SavedActivitiesMetadata,
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
-import {
-  computeBookmarksMetadata,
-  computeFinishedQuestionsMetadata,
-} from "@/features/topical/lib/utils";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -107,16 +102,6 @@ async function fetchBookmarks(userId: string) {
   return data;
 }
 
-function computeSavedActivitiesMetadata(
-  finishedQuestions: SelectedFinishedQuestion[],
-  bookmarks: SelectedBookmark[]
-): SavedActivitiesMetadata {
-  return {
-    finishedQuestions: computeFinishedQuestionsMetadata(finishedQuestions),
-    bookmarks: computeBookmarksMetadata(bookmarks),
-  };
-}
-
 export async function GET() {
   try {
     const session = await verifySession();
@@ -131,16 +116,9 @@ export async function GET() {
       fetchBookmarks(userId),
     ]);
 
-    // Compute metadata for both datasets
-    const metadata = computeSavedActivitiesMetadata(
-      finishedQuestionsData,
-      bookmarksData
-    );
-
     const responseData: SavedActivitiesResponse = {
       finishedQuestions: finishedQuestionsData,
       bookmarks: bookmarksData,
-      metadata,
     };
 
     return NextResponse.json(responseData, { status: 200 });

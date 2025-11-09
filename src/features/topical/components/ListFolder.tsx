@@ -8,7 +8,7 @@ import {
   Trash2,
   Type as TypeIcon,
 } from "lucide-react";
-import { computeBookmarksMetadata, truncateListName } from "../lib/utils";
+import { truncateListName } from "../lib/utils";
 import {
   Popover,
   PopoverTrigger,
@@ -126,14 +126,9 @@ export const ListFolder = ({
           const next = prev.bookmarks.filter(
             (bookmark) => !(bookmark.id === realListId)
           );
-          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
             bookmarks: next,
-            metadata: {
-              ...prev.metadata,
-              bookmarks: updatedBookmarksMetadata,
-            },
           };
         }
       );
@@ -184,14 +179,9 @@ export const ListFolder = ({
             }
             return bookmark;
           });
-          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
             bookmarks: next,
-            metadata: {
-              ...prev.metadata,
-              bookmarks: updatedBookmarksMetadata,
-            },
           };
         }
       );
@@ -245,14 +235,9 @@ export const ListFolder = ({
             }
             return bookmark;
           });
-          const updatedBookmarksMetadata = computeBookmarksMetadata(next);
           return {
             ...prev,
             bookmarks: next,
-            metadata: {
-              ...prev.metadata,
-              bookmarks: updatedBookmarksMetadata,
-            },
           };
         }
       );

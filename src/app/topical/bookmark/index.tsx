@@ -26,12 +26,14 @@ import {
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
+  computeBookmarksMetadata,
   extractCurriculumCode,
   extractSubjectCode,
   hasOverlap,
   isOverScrolling,
   isValidInputs as isValidInputsUtils,
   truncateListName,
+  computeSubjectMetadata,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -145,8 +147,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     return userSavedActivities?.bookmarks;
   }, [userSavedActivities]);
   const metadata = useMemo(() => {
-    return userSavedActivities?.metadata.bookmarks;
-  }, [userSavedActivities]);
+    if (!bookmarks) return null;
+    return computeBookmarksMetadata(bookmarks);
+  }, [bookmarks]);
 
   const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
   const isSavedActivitiesError = isUserSavedActivitiesError;
@@ -180,48 +183,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
 
   const subjectMetadata = useMemo(() => {
-    if (!selectedCurriculumn || !selectedSubject) return null;
-    const temp: {
-      topic: string[];
-      year: string[];
-      paperType: string[];
-      season: string[];
-    } = {
-      topic: [],
-      year: [],
-      paperType: [],
-      season: [],
-    };
-    questionUnderThatBookmarkList?.forEach((question) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: question.question.id,
-      });
-      const extractedSubjectCode = extractSubjectCode({
-        questionId: question.question.id,
-      });
-      if (
-        extractedCurriculumn === selectedCurriculumn &&
-        extractedSubjectCode === selectedSubject
-      ) {
-        question.question.topics.forEach((topic) => {
-          if (topic) {
-            if (!temp.topic.includes(topic)) {
-              temp.topic.push(topic);
-            }
-          }
-        });
-        if (!temp.year.includes(question.question.year.toString())) {
-          temp.year.push(question.question.year.toString());
-        }
-        if (!temp.paperType.includes(question.question.paperType.toString())) {
-          temp.paperType.push(question.question.paperType.toString());
-        }
-        if (!temp.season.includes(question.question.season)) {
-          temp.season.push(question.question.season);
-        }
-      }
-    });
-    return temp;
+    return computeSubjectMetadata(
+      questionUnderThatBookmarkList || [],
+      selectedCurriculumn,
+      selectedSubject
+    );
   }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
   const isMobileDevice = useIsMobile();
   const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
@@ -366,14 +332,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       window.removeEventListener("resize", overflowScrollHandler);
     };
   }, [overflowScrollHandler]);
-
-  useEffect(() => {
-    scrollAreaRef.current?.scrollTo({
-      top: 0,
-      behavior: "instant",
-    });
-    setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
-  }, [currentFilter]);
 
   useEffect(() => {
     overflowScrollHandler();

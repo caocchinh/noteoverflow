@@ -31,6 +31,8 @@ import {
   hasOverlap,
   isOverScrolling,
   isValidInputs as isValidInputsUtils,
+  computeFinishedQuestionsMetadata,
+  computeSubjectMetadata,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -141,8 +143,9 @@ const FinishedQuestionsClient = ({
     return userSavedActivities?.bookmarks;
   }, [userSavedActivities]);
   const metadata = useMemo(() => {
-    return userSavedActivities?.metadata.finishedQuestions;
-  }, [userSavedActivities]);
+    if (!userFinishedQuestions) return null;
+    return computeFinishedQuestionsMetadata(userFinishedQuestions);
+  }, [userFinishedQuestions]);
 
   const isSavedActivitiesFetching = isUserSavedActivitiesFetching;
   const isSavedActivitiesError = isUserSavedActivitiesError;
@@ -153,48 +156,11 @@ const FinishedQuestionsClient = ({
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
 
   const subjectMetadata = useMemo(() => {
-    if (!selectedCurriculumn || !selectedSubject) return null;
-    const temp: {
-      topic: string[];
-      year: string[];
-      paperType: string[];
-      season: string[];
-    } = {
-      topic: [],
-      year: [],
-      paperType: [],
-      season: [],
-    };
-    userFinishedQuestions?.forEach((question) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: question.question.id,
-      });
-      const extractedSubjectCode = extractSubjectCode({
-        questionId: question.question.id,
-      });
-      if (
-        extractedCurriculumn === selectedCurriculumn &&
-        extractedSubjectCode === selectedSubject
-      ) {
-        question.question.topics.forEach((topic) => {
-          if (topic) {
-            if (!temp.topic.includes(topic)) {
-              temp.topic.push(topic);
-            }
-          }
-        });
-        if (!temp.year.includes(question.question.year.toString())) {
-          temp.year.push(question.question.year.toString());
-        }
-        if (!temp.paperType.includes(question.question.paperType.toString())) {
-          temp.paperType.push(question.question.paperType.toString());
-        }
-        if (!temp.season.includes(question.question.season)) {
-          temp.season.push(question.question.season);
-        }
-      }
-    });
-    return temp;
+    return computeSubjectMetadata(
+      userFinishedQuestions || [],
+      selectedCurriculumn,
+      selectedSubject
+    );
   }, [selectedCurriculumn, selectedSubject, userFinishedQuestions]);
   const isMobileDevice = useIsMobile();
   const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);

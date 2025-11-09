@@ -117,16 +117,9 @@ export type FinishedQuestionsMetadata = Partial<
   Record<ValidCurriculum, CurriculumMetadata>
 >;
 
-// Main metadata interface - consistent and extensible
-export interface SavedActivitiesMetadata {
-  finishedQuestions: FinishedQuestionsMetadata;
-  bookmarks: BookmarksMetadata;
-}
-
 export interface SavedActivitiesResponse {
   finishedQuestions: SelectedFinishedQuestion[];
   bookmarks: SelectedBookmark[];
-  metadata: SavedActivitiesMetadata;
 }
 
 export interface MultiSelectContextProps {

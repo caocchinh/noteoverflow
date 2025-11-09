@@ -3,7 +3,7 @@ import BookmarkClient from "./index";
 
 export const metadata: Metadata = {
   title: "Bookmarks",
-  description: "Bookmark tricky questions and track your progress.",
+  description: "Bookmark questions and track your progress.",
 };
 
 export default async function TopicalPage() {
