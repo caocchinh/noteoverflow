@@ -26,13 +26,12 @@ import {
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import {
-  extractCurriculumCode,
-  extractSubjectCode,
-  hasOverlap,
   isOverScrolling,
   isValidInputs as isValidInputsUtils,
   computeFinishedQuestionsMetadata,
   computeSubjectMetadata,
+  filterQuestionsByCriteria,
+  chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -109,6 +108,8 @@ const FinishedQuestionsClient = ({
       questionId: "",
     });
 
+  const isValidSession = !!userSession?.data?.session;
+
   const {
     data: userSavedActivities,
     isFetching: isUserSavedActivitiesFetching,
@@ -131,7 +132,7 @@ const FinishedQuestionsClient = ({
       return data;
     },
     enabled:
-      !!userSession?.data?.session &&
+      isValidSession &&
       !isUserSessionError &&
       !queryClient.getQueryData(["user_saved_activities"]),
   });
@@ -319,49 +320,12 @@ const FinishedQuestionsClient = ({
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const topicalData = useMemo(() => {
-    if (
-      !userFinishedQuestions ||
-      !currentFilter ||
-      !selectedCurriculumn ||
-      !selectedSubject
-    )
-      return [];
-    return userFinishedQuestions.filter((item) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: item.question.id,
-      });
-      if (extractedCurriculumn !== selectedCurriculumn) {
-        return false;
-      }
-      const extractedSubjectCode = extractSubjectCode({
-        questionId: item.question.id,
-      });
-      if (extractedSubjectCode !== selectedSubject) {
-        return false;
-      }
-      if (
-        !currentFilter.paperType.includes(item.question.paperType.toString())
-      ) {
-        return false;
-      }
-      if (!currentFilter.year.includes(item.question.year.toString())) {
-        return false;
-      }
-      if (
-        !hasOverlap(
-          item.question.topics
-            .map((topic) => topic)
-            .filter((topic) => topic !== null),
-          currentFilter.topic
-        )
-      ) {
-        return false;
-      }
-      if (!currentFilter.season.includes(item.question.season)) {
-        return false;
-      }
-      return true;
-    });
+    return filterQuestionsByCriteria(
+      userFinishedQuestions,
+      currentFilter,
+      selectedCurriculumn,
+      selectedSubject
+    );
   }, [
     currentFilter,
     selectedCurriculumn,
@@ -371,8 +335,6 @@ const FinishedQuestionsClient = ({
 
   useEffect(() => {
     if (topicalData) {
-      const chunkedData: SelectedQuestion[][] = [];
-      let currentChunks: SelectedQuestion[] = [];
       const chunkSize =
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
@@ -386,14 +348,11 @@ const FinishedQuestionsClient = ({
             : aIndex - bIndex;
         }
       );
-      sortedData.forEach((item: SelectedFinishedQuestion) => {
-        if (currentChunks.length === chunkSize) {
-          chunkedData.push(currentChunks);
-          currentChunks = [];
-        }
-        currentChunks.push(item.question);
-      });
-      chunkedData.push(currentChunks);
+      const chunkedData = chunkQuestionsData(
+        sortedData,
+        chunkSize,
+        (item) => item.question
+      );
 
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
@@ -927,7 +886,7 @@ const FinishedQuestionsClient = ({
                           isSavedActivitiesError={
                             isUserSessionError || isSavedActivitiesError
                           }
-                          isValidSession={!!userSession?.data?.session}
+                          isValidSession={isValidSession}
                           key={`${question.id}-${imageSrc}`}
                           isSavedActivitiesFetching={isSavedActivitiesFetching}
                           imageSrc={imageSrc}
@@ -1160,25 +1119,28 @@ const FinishedQuestionsClient = ({
           </ScrollArea>
         </SheetContent>
       </Sheet>
-      <QuestionInspect
-        sortParameters={sortParameters}
-        setSortParameters={setSortParameters}
-        isOpen={isQuestionInspectOpen}
-        setIsOpen={setIsQuestionInspectOpen}
-        partitionedTopicalData={fullPartitionedData}
-        imageTheme={imageTheme}
-        bookmarks={bookmarks ?? []}
-        BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={!!userSession?.data?.session}
-        isSavedActivitiesFetching={isSavedActivitiesFetching}
-        isUserSessionPending={isUserSessionPending}
-        isSavedActivitiesError={isSavedActivitiesError}
-        isInspectSidebarOpen={isInspectSidebarOpen}
-        setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        userFinishedQuestions={userFinishedQuestions ?? []}
-        showFinishedQuestionTint={showFinishedQuestionTint}
-        isUserSessionError={isUserSessionError}
-      />
+      {Array.isArray(userFinishedQuestions) &&
+        userFinishedQuestions.length > 0 && (
+          <QuestionInspect
+            sortParameters={sortParameters}
+            setSortParameters={setSortParameters}
+            isOpen={isQuestionInspectOpen}
+            setIsOpen={setIsQuestionInspectOpen}
+            partitionedTopicalData={fullPartitionedData}
+            imageTheme={imageTheme}
+            bookmarks={bookmarks ?? []}
+            BETTER_AUTH_URL={BETTER_AUTH_URL}
+            isValidSession={isValidSession}
+            isSavedActivitiesFetching={isSavedActivitiesFetching}
+            isUserSessionPending={isUserSessionPending}
+            isSavedActivitiesError={isSavedActivitiesError}
+            isInspectSidebarOpen={isInspectSidebarOpen}
+            setIsInspectSidebarOpen={setIsInspectSidebarOpen}
+            userFinishedQuestions={userFinishedQuestions ?? []}
+            showFinishedQuestionTint={showFinishedQuestionTint}
+            isUserSessionError={isUserSessionError}
+          />
+        )}
     </>
   );
 };

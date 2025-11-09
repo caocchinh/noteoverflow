@@ -27,13 +27,12 @@ import {
 } from "@/features/topical/constants/types";
 import {
   computeBookmarksMetadata,
-  extractCurriculumCode,
-  extractSubjectCode,
-  hasOverlap,
   isOverScrolling,
   isValidInputs as isValidInputsUtils,
   truncateListName,
   computeSubjectMetadata,
+  filterQuestionsByCriteria,
+  chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -338,49 +337,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const topicalData = useMemo(() => {
-    if (
-      !questionUnderThatBookmarkList ||
-      !currentFilter ||
-      !selectedCurriculumn ||
-      !selectedSubject
-    )
-      return [];
-    return questionUnderThatBookmarkList.filter((item) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: item.question.id,
-      });
-      if (extractedCurriculumn !== selectedCurriculumn) {
-        return false;
-      }
-      const extractedSubjectCode = extractSubjectCode({
-        questionId: item.question.id,
-      });
-      if (extractedSubjectCode !== selectedSubject) {
-        return false;
-      }
-      if (
-        !currentFilter.paperType.includes(item.question.paperType.toString())
-      ) {
-        return false;
-      }
-      if (!currentFilter.year.includes(item.question.year.toString())) {
-        return false;
-      }
-      if (
-        !hasOverlap(
-          item.question.topics
-            .map((topic) => topic)
-            .filter((topic) => topic !== null),
-          currentFilter.topic
-        )
-      ) {
-        return false;
-      }
-      if (!currentFilter.season.includes(item.question.season)) {
-        return false;
-      }
-      return true;
-    });
+    return filterQuestionsByCriteria(
+      questionUnderThatBookmarkList,
+      currentFilter,
+      selectedCurriculumn,
+      selectedSubject
+    );
   }, [
     currentFilter,
     questionUnderThatBookmarkList,
@@ -390,8 +352,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   useEffect(() => {
     if (topicalData) {
-      const chunkedData: SelectedQuestion[][] = [];
-      let currentChunks: SelectedQuestion[] = [];
       const chunkSize =
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
@@ -405,14 +365,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             : aIndex - bIndex;
         }
       );
-      sortedData.forEach((item: SelectedFinishedQuestion) => {
-        if (currentChunks.length === chunkSize) {
-          chunkedData.push(currentChunks);
-          currentChunks = [];
-        }
-        currentChunks.push(item.question);
-      });
-      chunkedData.push(currentChunks);
+      const chunkedData = chunkQuestionsData(
+        sortedData,
+        chunkSize,
+        (item) => item.question
+      );
 
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
@@ -1265,26 +1222,29 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           </ScrollArea>
         </SheetContent>
       </Sheet>
-      <QuestionInspect
-        sortParameters={sortParameters}
-        setSortParameters={setSortParameters}
-        isOpen={isQuestionInspectOpen}
-        setIsOpen={setIsQuestionInspectOpen}
-        partitionedTopicalData={fullPartitionedData}
-        imageTheme={imageTheme}
-        bookmarks={bookmarks ?? []}
-        BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={isValidSession}
-        isSavedActivitiesFetching={isSavedActivitiesFetching}
-        isUserSessionPending={isUserSessionPending}
-        listId={chosenList?.id}
-        isSavedActivitiesError={isSavedActivitiesError}
-        isInspectSidebarOpen={isInspectSidebarOpen}
-        setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        userFinishedQuestions={userFinishedQuestions ?? []}
-        showFinishedQuestionTint={showFinishedQuestionTint}
-        isUserSessionError={isUserSessionError}
-      />
+      {Array.isArray(questionUnderThatBookmarkList) &&
+        questionUnderThatBookmarkList.length > 0 && (
+          <QuestionInspect
+            sortParameters={sortParameters}
+            setSortParameters={setSortParameters}
+            isOpen={isQuestionInspectOpen}
+            setIsOpen={setIsQuestionInspectOpen}
+            partitionedTopicalData={fullPartitionedData}
+            imageTheme={imageTheme}
+            bookmarks={bookmarks ?? []}
+            BETTER_AUTH_URL={BETTER_AUTH_URL}
+            isValidSession={isValidSession}
+            isSavedActivitiesFetching={isSavedActivitiesFetching}
+            isUserSessionPending={isUserSessionPending}
+            listId={chosenList?.id}
+            isSavedActivitiesError={isSavedActivitiesError}
+            isInspectSidebarOpen={isInspectSidebarOpen}
+            setIsInspectSidebarOpen={setIsInspectSidebarOpen}
+            userFinishedQuestions={userFinishedQuestions ?? []}
+            showFinishedQuestionTint={showFinishedQuestionTint}
+            isUserSessionError={isUserSessionError}
+          />
+        )}
     </>
   );
 };

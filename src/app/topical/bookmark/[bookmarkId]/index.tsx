@@ -48,10 +48,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   extractCurriculumCode,
   extractSubjectCode,
-  hasOverlap,
   isValidInputs as isValidInputsUtils,
   isOverScrolling,
   computeSubjectMetadata,
+  filterQuestionsByCriteria,
+  chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import {
   Breadcrumb,
@@ -349,50 +350,16 @@ export const BookmarkView = ({
   }, [overflowScrollHandler, fullPartitionedData, layoutStyle]);
 
   const topicalData = useMemo(() => {
-    if (!currentFilter || !selectedCurriculumn || !selectedSubject || !data)
-      return [];
-    return data.filter((item) => {
-      const extractedCurriculumn = extractCurriculumCode({
-        questionId: item.question.id,
-      });
-      if (extractedCurriculumn !== selectedCurriculumn) {
-        return false;
-      }
-      const extractedSubjectCode = extractSubjectCode({
-        questionId: item.question.id,
-      });
-      if (extractedSubjectCode !== selectedSubject) {
-        return false;
-      }
-      if (
-        !currentFilter.paperType.includes(item.question.paperType.toString())
-      ) {
-        return false;
-      }
-      if (!currentFilter.year.includes(item.question.year.toString())) {
-        return false;
-      }
-      if (
-        !hasOverlap(
-          item.question.topics
-            .map((topic) => topic)
-            .filter((topic) => topic !== null),
-          currentFilter.topic
-        )
-      ) {
-        return false;
-      }
-      if (!currentFilter.season.includes(item.question.season)) {
-        return false;
-      }
-      return true;
-    });
+    return filterQuestionsByCriteria(
+      data,
+      currentFilter,
+      selectedCurriculumn,
+      selectedSubject
+    );
   }, [currentFilter, data, selectedCurriculumn, selectedSubject]);
 
   useEffect(() => {
     if (topicalData) {
-      const chunkedData: SelectedQuestion[][] = [];
-      let currentChunks: SelectedQuestion[] = [];
       const chunkSize =
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
@@ -406,14 +373,11 @@ export const BookmarkView = ({
             : aIndex - bIndex;
         }
       );
-      sortedData.forEach((item: SelectedPublickBookmark) => {
-        if (currentChunks.length === chunkSize) {
-          chunkedData.push(currentChunks);
-          currentChunks = [];
-        }
-        currentChunks.push(item.question);
-      });
-      chunkedData.push(currentChunks);
+      const chunkedData = chunkQuestionsData(
+        sortedData,
+        chunkSize,
+        (item) => item.question
+      );
 
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);
@@ -1155,28 +1119,32 @@ export const BookmarkView = ({
           </ScrollArea>
         </SheetContent>
       </Sheet>
-      <QuestionInspect
-        sortParameters={sortParameters}
-        setSortParameters={setSortParameters}
-        BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isOpen={isQuestionInspectOpen}
-        setIsOpen={setIsQuestionInspectOpen}
-        partitionedTopicalData={fullPartitionedData}
-        imageTheme={imageTheme}
-        bookmarks={bookmarks ?? []}
-        isValidSession={!!userSession?.data?.session}
-        isSavedActivitiesFetching={isSavedActivitiesFetching}
-        isUserSessionPending={isUserSessionPending}
-        isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
-        isInspectSidebarOpen={isInspectSidebarOpen}
-        setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        userFinishedQuestions={userFinishedQuestions ?? []}
-        listId={
-          ownerInfo.ownerId === userSession?.data?.user?.id ? listId : undefined
-        }
-        showFinishedQuestionTint={showFinishedQuestionTint}
-        isUserSessionError={isUserSessionError}
-      />
+      {Array.isArray(data) && data.length > 0 && (
+        <QuestionInspect
+          sortParameters={sortParameters}
+          setSortParameters={setSortParameters}
+          BETTER_AUTH_URL={BETTER_AUTH_URL}
+          isOpen={isQuestionInspectOpen}
+          setIsOpen={setIsQuestionInspectOpen}
+          partitionedTopicalData={fullPartitionedData}
+          imageTheme={imageTheme}
+          bookmarks={bookmarks ?? []}
+          isValidSession={!!userSession?.data?.session}
+          isSavedActivitiesFetching={isSavedActivitiesFetching}
+          isUserSessionPending={isUserSessionPending}
+          isSavedActivitiesError={isUserSessionError || isSavedActivitiesError}
+          isInspectSidebarOpen={isInspectSidebarOpen}
+          setIsInspectSidebarOpen={setIsInspectSidebarOpen}
+          userFinishedQuestions={userFinishedQuestions ?? []}
+          listId={
+            ownerInfo.ownerId === userSession?.data?.user?.id
+              ? listId
+              : undefined
+          }
+          showFinishedQuestionTint={showFinishedQuestionTint}
+          isUserSessionError={isUserSessionError}
+        />
+      )}
     </>
   );
 };

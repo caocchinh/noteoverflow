@@ -34,7 +34,11 @@ import type {
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
-import { updateSearchParams, isSubset } from "@/features/topical/lib/utils";
+import {
+  updateSearchParams,
+  isSubset,
+  chunkQuestionsData,
+} from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -317,8 +321,6 @@ const TopicalClient = ({
 
   useEffect(() => {
     if (topicalData?.data) {
-      const chunkedData: SelectedQuestion[][] = [];
-      let currentChunks: SelectedQuestion[] = [];
       const chunkSize =
         layoutStyle === "pagination"
           ? numberOfQuestionsPerPage
@@ -342,14 +344,7 @@ const TopicalClient = ({
       );
       setNumberOfQuetion(sortedData.length);
 
-      sortedData.forEach((item: SelectedQuestion) => {
-        if (currentChunks.length === chunkSize) {
-          chunkedData.push(currentChunks);
-          currentChunks = [];
-        }
-        currentChunks.push(item);
-      });
-      chunkedData.push(currentChunks);
+      const chunkedData = chunkQuestionsData(sortedData, chunkSize);
 
       setFullPartitionedData(chunkedData);
       setDisplayedData(chunkedData[0]);

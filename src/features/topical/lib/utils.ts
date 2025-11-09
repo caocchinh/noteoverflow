@@ -729,3 +729,83 @@ export function computeBookmarksMetadata(
 
   return metadata;
 }
+
+export function filterQuestionsByCriteria<
+  T extends { question: SelectedQuestion }
+>(
+  items: T[] | null | undefined,
+  currentFilter:
+    | {
+        topic: string[];
+        year: string[];
+        paperType: string[];
+        season: string[];
+      }
+    | null
+    | undefined,
+  selectedCurriculum: ValidCurriculum | null | undefined,
+  selectedSubject: string | null | undefined
+): T[] {
+  if (!items || !currentFilter || !selectedCurriculum || !selectedSubject) {
+    return [];
+  }
+
+  return items.filter((item) => {
+    const extractedCurriculum = extractCurriculumCode({
+      questionId: item.question.id,
+    });
+    if (extractedCurriculum !== selectedCurriculum) {
+      return false;
+    }
+    const extractedSubjectCode = extractSubjectCode({
+      questionId: item.question.id,
+    });
+    if (extractedSubjectCode !== selectedSubject) {
+      return false;
+    }
+    if (!currentFilter.paperType.includes(item.question.paperType.toString())) {
+      return false;
+    }
+    if (!currentFilter.year.includes(item.question.year.toString())) {
+      return false;
+    }
+    if (
+      !hasOverlap(
+        item.question.topics
+          .map((topic) => topic)
+          .filter((topic) => topic !== null),
+        currentFilter.topic
+      )
+    ) {
+      return false;
+    }
+    if (!currentFilter.season.includes(item.question.season)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function chunkQuestionsData<T>(
+  items: T[],
+  chunkSize: number,
+  selector?: (item: T) => SelectedQuestion
+): SelectedQuestion[][] {
+  const chunkedData: SelectedQuestion[][] = [];
+  let currentChunks: SelectedQuestion[] = [];
+
+  items.forEach((item) => {
+    if (currentChunks.length === chunkSize) {
+      chunkedData.push(currentChunks);
+      currentChunks = [];
+    }
+    const question = selector ? selector(item) : (item as SelectedQuestion);
+    currentChunks.push(question);
+  });
+
+  if (currentChunks.length > 0) {
+    chunkedData.push(currentChunks);
+  }
+
+  return chunkedData;
+}

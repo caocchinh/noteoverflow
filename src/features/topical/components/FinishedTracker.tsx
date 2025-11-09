@@ -31,6 +31,7 @@ import {
   FinishedTrackerProps,
   SortParameters,
 } from "@/features/topical/constants/types";
+import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "./TopicalLayoutProvider";
 import Sort from "./Sort";
 import QuestionPreview from "./QuestionPreview";
@@ -95,20 +96,10 @@ export const FinishedTracker = ({
   }, [allQuestions, userFinishedQuestions, sortParameters.sortBy]);
 
   const fullPartitionedData = useMemo(() => {
-    const chunkedData: SelectedQuestion[][] = [];
-    let currentChunks: SelectedQuestion[] = [];
-    const chunkSize = DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE;
-
-    finishedQuestions.forEach((question) => {
-      if (currentChunks.length === chunkSize) {
-        chunkedData.push(currentChunks);
-        currentChunks = [];
-      }
-      currentChunks.push(question);
-    });
-    chunkedData.push(currentChunks);
-
-    return chunkedData;
+    return chunkQuestionsData(
+      finishedQuestions,
+      DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+    );
   }, [finishedQuestions]);
 
   const { setIsCalculatorOpen } = useTopicalApp();
