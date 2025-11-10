@@ -30,7 +30,6 @@ const SecondaryMainContent = ({
   setIsQuestionInspectOpen,
 }: SecondaryMainContentProps) => {
   const { uiPreferences } = useTopicalApp();
-
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,

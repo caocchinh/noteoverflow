@@ -50,7 +50,6 @@ export const DEFAULT_UI_PREFERENCES_CACHE: UiPreferencesCache = {
   showFinishedQuestionTint: true,
   showScrollToTopButton: true,
   scrollUpWhenPageChange: true,
-  finishedQuestionsSearchSortedBy: DEFAULT_SORT_OPTIONS,
   recentlySearchSortedBy: DEFAULT_SORT_OPTIONS,
   isSessionCacheEnabled: true,
   isPersistantCacheEnabled: true,

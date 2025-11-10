@@ -48,7 +48,6 @@ export interface UiPreferences {
   showFinishedQuestionTint: boolean;
   showScrollToTopButton: boolean;
   scrollUpWhenPageChange: boolean;
-  finishedQuestionsSearchSortedBy: SortByOptions;
   recentlySearchSortedBy: SortByOptions;
   isSessionCacheEnabled: boolean;
   isPersistantCacheEnabled: boolean;
@@ -65,7 +64,6 @@ export type UiPreferencesCache = Pick<
   | "showFinishedQuestionTint"
   | "showScrollToTopButton"
   | "scrollUpWhenPageChange"
-  | "finishedQuestionsSearchSortedBy"
   | "recentlySearchSortedBy"
   | "isSessionCacheEnabled"
   | "isPersistantCacheEnabled"

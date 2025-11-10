@@ -74,9 +74,6 @@ const getInitialUiPreferences = (): UiPreferences => {
       isPersistantCacheEnabled:
         parsedState.isPersistantCacheEnabled ??
         DEFAULT_UI_PREFERENCES_CACHE.isPersistantCacheEnabled,
-      finishedQuestionsSearchSortedBy:
-        parsedState.finishedQuestionsSearchSortedBy ??
-        DEFAULT_UI_PREFERENCES_CACHE.finishedQuestionsSearchSortedBy,
       recentlySearchSortedBy:
         parsedState.recentlySearchSortedBy ??
         DEFAULT_UI_PREFERENCES_CACHE.recentlySearchSortedBy,
@@ -173,8 +170,6 @@ export default function TopicalLayoutProvider({
         scrollUpWhenPageChange: uiPreferences.scrollUpWhenPageChange,
         isSessionCacheEnabled: uiPreferences.isSessionCacheEnabled,
         isPersistantCacheEnabled: uiPreferences.isPersistantCacheEnabled,
-        finishedQuestionsSearchSortedBy:
-          uiPreferences.finishedQuestionsSearchSortedBy,
         recentlySearchSortedBy: uiPreferences.recentlySearchSortedBy,
       };
 
