@@ -2,6 +2,8 @@
 import {
   SelectedPublickBookmark,
   SubjectMetadata,
+  SortParameters,
+  QuestionInspectOpenState,
 } from "@/features/topical/constants/types";
 import { useMemo, useRef, useState } from "react";
 import { useIsMutating, useQuery } from "@tanstack/react-query";
@@ -31,6 +33,7 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
+import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 
 export const BookmarkView = ({
   BETTER_AUTH_URL,
@@ -51,7 +54,11 @@ export const BookmarkView = ({
   };
 }) => {
   const queryClient = useQueryClient();
-
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
+    useState<QuestionInspectOpenState>({
+      isOpen: false,
+      questionId: "",
+    });
   const { data: userSession, isPending: isUserSessionPending } = useQuery({
     queryKey: ["user"],
     queryFn: async () => await authClient.getSession(),
@@ -110,6 +117,9 @@ export const BookmarkView = ({
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
 
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
@@ -143,7 +153,7 @@ export const BookmarkView = ({
   }, [selectedCurriculumn, selectedSubject, currentFilter, topicalData]);
 
   // Before breadcrumb content
-  const beforeBreadcrumbContent = (
+  const preContent = (
     <>
       {(savedActivitiesIsFetching ||
         isUserSessionPending ||
@@ -216,6 +226,9 @@ export const BookmarkView = ({
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
+        sortParameters={sortParameters}
+        setSortParameters={setSortParameters}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
     </div>
   );
@@ -314,9 +327,11 @@ export const BookmarkView = ({
         isValidSession={isValidSession}
         isUserSessionPending={isUserSessionPending}
         listId={isOwnerOfTheList ? listId : undefined}
-        beforeBreadcrumbContent={beforeBreadcrumbContent}
+        preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
+        isQuestionInspectOpen={isQuestionInspectOpen}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}

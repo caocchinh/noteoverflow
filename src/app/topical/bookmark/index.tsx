@@ -1,7 +1,11 @@
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
-import { SubjectMetadata } from "@/features/topical/constants/types";
+import {
+  QuestionInspectOpenState,
+  SortParameters,
+  SubjectMetadata,
+} from "@/features/topical/constants/types";
 import {
   computeBookmarksMetadata,
   truncateListName,
@@ -30,6 +34,7 @@ import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSideb
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
+import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const queryClient = useQueryClient();
@@ -94,7 +99,14 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
     null
   );
-
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
+    useState<QuestionInspectOpenState>({
+      isOpen: false,
+      questionId: "",
+    });
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -127,7 +139,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   ]);
 
   // Before breadcrumb content
-  const beforeBreadcrumbContent = (
+  const preContent = (
     <>
       {(savedActivitiesIsFetching || isUserSessionPending) && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
@@ -213,10 +225,13 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         </BreadcrumbList>
       </Breadcrumb>
       <SecondaryAppUltilityBar
+        sortParameters={sortParameters}
+        setSortParameters={setSortParameters}
         setIsSidebarOpen={setIsSidebarOpen}
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
     </div>
   ) : null;
@@ -396,9 +411,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isValidSession={isValidSession}
         isUserSessionPending={isUserSessionPending}
         listId={chosenList?.id}
-        beforeBreadcrumbContent={beforeBreadcrumbContent}
+        preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
+        isQuestionInspectOpen={isQuestionInspectOpen}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}

@@ -12,35 +12,11 @@ import {
   MANSONRY_GUTTER_BREAKPOINTS,
 } from "@/features/topical/constants/constants";
 import type {
+  SecondaryMainContentProps,
+  SortableTopicalItem,
   SortParameters,
-  QuestionInspectOpenState,
-  SelectedPublickBookmark,
-  SelectedFinishedQuestion,
 } from "@/features/topical/constants/types";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-
-type TopicalData =
-  | SelectedPublickBookmark[]
-  | SelectedFinishedQuestion[]
-  | null;
-
-// Common type for sorting elements that have updatedAt
-type SortableTopicalItem = SelectedPublickBookmark | SelectedFinishedQuestion;
-
-export interface SecondaryMainContentProps {
-  // Data and state
-  topicalData: TopicalData;
-  isQuestionViewDisabled: boolean;
-  BETTER_AUTH_URL: string;
-  isValidSession: boolean;
-  isUserSessionPending: boolean;
-  listId?: string;
-
-  // Custom content sections
-  beforeBreadcrumbContent?: React.ReactNode;
-  breadcrumbContent: React.ReactNode;
-  mainContent: React.ReactNode;
-}
 
 const SecondaryMainContent = ({
   topicalData,
@@ -49,16 +25,14 @@ const SecondaryMainContent = ({
   isValidSession,
   isUserSessionPending,
   listId,
-  beforeBreadcrumbContent,
+  preContent,
   breadcrumbContent,
   mainContent,
+  isQuestionInspectOpen,
+  setIsQuestionInspectOpen,
 }: SecondaryMainContentProps) => {
   const { uiPreferences } = useTopicalApp();
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
-    useState<QuestionInspectOpenState>({
-      isOpen: false,
-      questionId: "",
-    });
+
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -133,10 +107,9 @@ const SecondaryMainContent = ({
   return (
     <>
       <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-start p-4 overflow-hidden h-screen">
-        {beforeBreadcrumbContent}
-
         {breadcrumbContent}
 
+        {preContent}
         {mainContent}
 
         <ScrollToTopButton

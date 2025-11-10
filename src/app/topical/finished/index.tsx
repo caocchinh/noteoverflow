@@ -1,7 +1,11 @@
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
-import { SubjectMetadata } from "@/features/topical/constants/types";
+import {
+  QuestionInspectOpenState,
+  SortParameters,
+  SubjectMetadata,
+} from "@/features/topical/constants/types";
 import {
   computeFinishedQuestionsMetadata,
   computeSubjectMetadata,
@@ -28,6 +32,7 @@ import {
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 
 const FinishedQuestionsClient = ({
   BETTER_AUTH_URL,
@@ -41,7 +46,14 @@ const FinishedQuestionsClient = ({
     enabled: !queryClient.getQueryData(["user"]),
   });
   const isValidSession = !!userSession?.data?.session;
-
+  const [sortParameters, setSortParameters] = useState<SortParameters>({
+    sortBy: DEFAULT_SORT_OPTIONS,
+  });
+  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
+    useState<QuestionInspectOpenState>({
+      isOpen: false,
+      questionId: "",
+    });
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "finished_questions"],
@@ -109,10 +121,10 @@ const FinishedQuestionsClient = ({
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
 
   // Before breadcrumb content
-  const beforeBreadcrumbContent = (
+  const preContent = (
     <>
       {(savedActivitiesIsFetching || isUserSessionPending) && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
+        <div className="flex flex-col gap-4 items-center justify-center w-full ">
           <Loader2 className="animate-spin" />
         </div>
       )}
@@ -171,6 +183,9 @@ const FinishedQuestionsClient = ({
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
+        sortParameters={sortParameters}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+        setSortParameters={setSortParameters}
       />
     </div>
   );
@@ -289,9 +304,11 @@ const FinishedQuestionsClient = ({
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         isValidSession={isValidSession}
         isUserSessionPending={isUserSessionPending}
-        beforeBreadcrumbContent={beforeBreadcrumbContent}
+        preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
+        isQuestionInspectOpen={isQuestionInspectOpen}
+        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}

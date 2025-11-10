@@ -114,32 +114,6 @@ const SecondaryAppUltilityBar = ({
         className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
         ref={ultilityRef}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Button
-                className="!bg-background flex cursor-pointer items-center gap-2 border"
-                onClick={() => {
-                  setIsSidebarOpen(!isSidebarOpen);
-                }}
-                disabled={isQuestionViewDisabled}
-                variant="outline"
-              >
-                Filters
-                <SlidersHorizontal />
-              </Button>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            className={cn(
-              !isQuestionViewDisabled && "!hidden",
-              "flex justify-center items-center gap-2"
-            )}
-          >
-            To filter questions, select a subject first
-          </TooltipContent>
-        </Tooltip>
         {setIsQuestionInspectOpen && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -171,6 +145,33 @@ const SecondaryAppUltilityBar = ({
             </TooltipContent>
           </Tooltip>
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                className="!bg-background flex cursor-pointer items-center gap-2 border"
+                onClick={() => {
+                  setIsSidebarOpen(!isSidebarOpen);
+                }}
+                disabled={isQuestionViewDisabled}
+                variant="outline"
+              >
+                Filters
+                <SlidersHorizontal />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className={cn(
+              !isQuestionViewDisabled && "!hidden",
+              "flex justify-center items-center gap-2"
+            )}
+          >
+            To filter questions, select a subject first
+          </TooltipContent>
+        </Tooltip>
+
         {uiPreferences.layoutStyle === "pagination" &&
           !isQuestionViewDisabled &&
           fullPartitionedData &&

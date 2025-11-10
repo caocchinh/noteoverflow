@@ -294,9 +294,9 @@ export interface SecondaryAppUltilityBarProps {
   setCurrentChunkIndex?: Dispatch<SetStateAction<number>>;
   setDisplayedData?: Dispatch<SetStateAction<SelectedQuestion[]>>;
   scrollAreaRef?: RefObject<HTMLDivElement | null>;
-  sortParameters?: SortParameters;
-  setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
-  setIsQuestionInspectOpen?: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isSidebarOpen: boolean;
 }
 
@@ -316,4 +316,31 @@ export interface AppMainContentProps {
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
   ultilityRef: RefObject<HTMLDivElement | null>;
   filterUrl: string;
+}
+
+export type TopicalData =
+  | SelectedPublickBookmark[]
+  | SelectedFinishedQuestion[]
+  | null;
+
+// Common type for sorting elements that have updatedAt
+export type SortableTopicalItem =
+  | SelectedPublickBookmark
+  | SelectedFinishedQuestion;
+
+export interface SecondaryMainContentProps {
+  // Data and state
+  topicalData: TopicalData;
+  isQuestionViewDisabled: boolean;
+  BETTER_AUTH_URL: string;
+  isValidSession: boolean;
+  isUserSessionPending: boolean;
+  listId?: string;
+
+  // Custom content sections
+  preContent?: React.ReactNode;
+  breadcrumbContent: React.ReactNode;
+  mainContent: React.ReactNode;
+  isQuestionInspectOpen: QuestionInspectOpenState;
+  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
 }
