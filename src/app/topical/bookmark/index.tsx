@@ -12,8 +12,7 @@ import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
 } from "@/features/topical/lib/utils";
-import { authClient } from "@/lib/auth/auth-client";
-import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -35,16 +34,10 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
+import { useAuth } from "@/context/AuthContext";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
-  const queryClient = useQueryClient();
-  const { data: userSession, isPending: isUserSessionPending } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => await authClient.getSession(),
-    enabled: !queryClient.getQueryData(["user"]),
-  });
-
-  const isValidSession = !!userSession?.data?.session;
+  const { isSessionPending, isAuthenticated } = useAuth();
 
   const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
     useTopicalApp();
@@ -141,7 +134,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   // Before breadcrumb content
   const preContent = (
     <>
-      {(savedActivitiesIsFetching || isUserSessionPending) && (
+      {(savedActivitiesIsFetching || isSessionPending) && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <Loader2 className="animate-spin" />
         </div>
@@ -150,8 +143,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       {Object.keys(metadata?.private || {}).length === 0 &&
         Object.keys(metadata?.public || {}).length === 0 &&
         !savedActivitiesIsFetching &&
-        !isUserSessionPending &&
-        !userSession?.data?.session && (
+        !isAuthenticated &&
+        !isSessionPending && (
           <p className="text-sm  text-red-500">
             You are not signed in. Please sign to create a list!
           </p>
@@ -239,7 +232,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   // Main content
   const mainContent = (
     <>
-      {metadata && !chosenList && userSession?.data?.session && (
+      {metadata && !chosenList && isAuthenticated && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <h1 className="font-semibold text-2xl">Choose your list</h1>
           <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
@@ -282,8 +275,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             {Object.keys(metadata?.private || {}).length === 0 &&
               Object.keys(metadata?.public || {}).length === 0 &&
               !savedActivitiesIsFetching &&
-              !isUserSessionPending &&
-              userSession?.data?.session && (
+              isAuthenticated &&
+              !isSessionPending && (
                 <div className="flex flex-col gap-4 items-center justify-center w-full">
                   <p className="text-sm text-muted-foreground">
                     No lists found. Search for questions and add them to a new
@@ -408,8 +401,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         topicalData={topicalData}
         isQuestionViewDisabled={isQuestionViewDisabled}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={isValidSession}
-        isUserSessionPending={isUserSessionPending}
         listId={chosenList?.id}
         preContent={preContent}
         breadcrumbContent={breadcrumbContent}

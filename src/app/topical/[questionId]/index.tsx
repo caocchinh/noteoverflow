@@ -4,15 +4,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth/auth-client";
 import { BookmarkButton } from "@/features/topical/components/BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspectFinishedCheckbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
 import { AnnotatableInspectImages } from "@/features/topical/components/AnnotatableInspectImages";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { useAuth } from "@/context/AuthContext";
 
 export const QuestionView = ({
   data,
@@ -24,17 +22,7 @@ export const QuestionView = ({
   const [currentView, setCurrentView] = useState<"question" | "answer">(
     "question"
   );
-  const queryClient = useQueryClient();
-
-  const { data: userSession, isPending: isUserSessionPending } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => await authClient.getSession(),
-    enabled: !queryClient.getQueryData(["user"]),
-  });
-
-  const isValidSession = !!userSession?.data?.session;
-
-  const { bookmarksData: bookmarks } = useTopicalApp();
+  const { isSessionPending } = useAuth();
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
@@ -62,19 +50,12 @@ export const QuestionView = ({
           </Button>
         </div>
         <BookmarkButton
-          bookmarks={bookmarks ?? []}
-          isBookmarkDisabled={isUserSessionPending}
-          isValidSession={isValidSession}
+          isBookmarkDisabled={isSessionPending}
           isInView={true}
           badgeClassName="!h-full"
           question={data}
         />
-        <QuestionInspectFinishedCheckbox
-          isValidSession={isValidSession}
-          question={data}
-          className="!h-max"
-          isUserSessionPending={isUserSessionPending}
-        />
+        <QuestionInspectFinishedCheckbox question={data} className="!h-max" />
         <BestExamHelpUltility question={data} />
         <ShareFilter
           isDisabled={false}

@@ -201,8 +201,6 @@ export interface QuestionHoverCardProps {
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
-  isUserSessionPending: boolean;
-  isValidSession: boolean;
   listId?: string;
   isMobileDevice: boolean;
   resetScrollPositions: () => void;
@@ -210,8 +208,6 @@ export interface QuestionHoverCardProps {
 
 export interface BrowseMoreQuestionsProps {
   displayedData: SelectedQuestion[];
-  isUserSessionPending: boolean;
-  isValidSession: boolean;
   navigateToQuestion: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
@@ -222,10 +218,8 @@ export interface QuestionInspectProps {
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   currentQuery?: CurrentQuery;
-  isUserSessionPending: boolean;
   sortParameters?: SortParameters;
   setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
-  isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   listId?: string;
@@ -256,16 +250,12 @@ export interface AppSidebarProps {
   mountedRef: RefObject<boolean>;
   searchParams: { [key: string]: string | string[] | undefined };
   setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
-  isUserSessionPending: boolean;
   setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
-  isValidSession: boolean;
   isAddRecentQueryPending: boolean;
 }
 
 export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
-  isValidSession: boolean;
-  isUserSessionPending: boolean;
   navigateToQuestion: (questionId: string) => void;
 }
 
@@ -301,6 +291,7 @@ export interface SecondaryAppUltilityBarProps {
 }
 
 export interface AppMainContentProps {
+  mountedRef: RefObject<boolean>;
   currentQuery: CurrentQuery;
   topicalData: { data: SelectedQuestion[]; isRateLimited: boolean } | undefined;
   isSearchEnabled: boolean;
@@ -309,8 +300,6 @@ export interface AppMainContentProps {
   isTopicalDataFetched: boolean;
   isValidSearchParams: boolean;
   BETTER_AUTH_URL: string;
-  isValidSession: boolean;
-  isUserSessionPending: boolean;
   refetchTopicalData: () => void;
   searchParams: { [key: string]: string | string[] | undefined };
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
@@ -333,8 +322,6 @@ export interface SecondaryMainContentProps {
   topicalData: TopicalData;
   isQuestionViewDisabled: boolean;
   BETTER_AUTH_URL: string;
-  isValidSession: boolean;
-  isUserSessionPending: boolean;
   listId?: string;
 
   // Custom content sections

@@ -14,19 +14,17 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { SavedActivitiesResponse, SelectedQuestion } from "../constants/types";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { useAuth } from "@/context/AuthContext";
 
 export const QuestionInspectFinishedCheckbox = ({
   question,
-  isUserSessionPending,
   className,
-  isValidSession,
 }: {
   question: SelectedQuestion;
-  isUserSessionPending: boolean;
   className?: string;
-  isValidSession: boolean;
 }) => {
   const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
+  const { isSessionPending, isAuthenticated } = useAuth();
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "finished_questions", question.id],
@@ -138,7 +136,7 @@ export const QuestionInspectFinishedCheckbox = ({
       className={cn(
         "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
         (isMutatingThisQuestion ||
-          isUserSessionPending ||
+          isSessionPending ||
           savedActivitiesIsFetching) &&
           "pointer-events-none",
         isFinished ? "border-green-600" : "border-muted-foreground",
@@ -151,12 +149,12 @@ export const QuestionInspectFinishedCheckbox = ({
         }
         if (
           isMutatingThisQuestion ||
-          isUserSessionPending ||
+          isSessionPending ||
           savedActivitiesIsFetching
         ) {
           return;
         }
-        if (!isValidSession) {
+        if (!isAuthenticated) {
           toast.error("Please sign in to save finished questions.");
           return;
         }

@@ -46,10 +46,9 @@ import { toast } from "sonner";
 import { deleteRecentQuery } from "../server/actions";
 import Sort from "./Sort";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { useAuth } from "@/context/AuthContext";
 
 export const RecentQuery = ({
-  isUserSessionPending,
-  isValidSession,
   currentQuery,
   setIsSearchEnabled,
   setCurrentQuery,
@@ -63,8 +62,6 @@ export const RecentQuery = ({
   setSelectedSeason,
   setIsSidebarOpen,
 }: {
-  isUserSessionPending: boolean;
-  isValidSession: boolean;
   setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
   currentQuery: CurrentQuery;
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
@@ -79,6 +76,7 @@ export const RecentQuery = ({
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }) => {
   const { uiPreferences, setUiPreference } = useTopicalApp();
+  const { isPending, isAuthenticated } = useAuth();
   const {
     data: recentQuery,
     isError: isRecentQueryError,
@@ -107,7 +105,7 @@ export const RecentQuery = ({
 
       return data.data;
     },
-    enabled: !isUserSessionPending && isValidSession,
+    enabled: isAuthenticated,
   });
 
   const [accordionValue, setAccordionValue] =
@@ -213,7 +211,7 @@ export const RecentQuery = ({
                 Fetching <Loader2 className="animate-spin" />
               </div>
             )}
-            {!isValidSession && (
+            {!isAuthenticated && (
               <div className="flex justify-center items-center h-full">
                 <p className="text-red-500">
                   Please sign in to view recently searched queries.
@@ -228,13 +226,11 @@ export const RecentQuery = ({
                 </p>
               </div>
             )}
-            {isAddRecentQueryPending &&
-              !isUserSessionPending &&
-              isValidSession && (
-                <div className="flex justify-center items-center text-sm gap-2">
-                  Updating <Loader2 className="animate-spin" size={13} />
-                </div>
-              )}
+            {isAddRecentQueryPending && !isPending && isAuthenticated && (
+              <div className="flex justify-center items-center text-sm gap-2">
+                Updating <Loader2 className="animate-spin" size={13} />
+              </div>
+            )}
             {recentQuery && recentQuery.length == 0 && (
               <div className="h-full w-full flex items-center justify-center">
                 No item found! Try searching for something.
@@ -268,8 +264,6 @@ export const RecentQuery = ({
                     setSelectedYear={setSelectedYear}
                     setSelectedPaperType={setSelectedPaperType}
                     setAccordionValue={setAccordionValue}
-                    isUserSessionPending={isUserSessionPending}
-                    isValidSession={isValidSession}
                     setSelectedSeason={setSelectedSeason}
                     isOverwriting={isOverwriting}
                     setIsSidebarOpen={setIsSidebarOpen}
@@ -312,8 +306,6 @@ const RecentQueryItem = ({
   setIsDialogOpen,
   item,
   deleteRecentQueryMutation,
-  isUserSessionPending,
-  isValidSession,
   setAccordionValue,
 }: {
   item: {
@@ -338,8 +330,6 @@ const RecentQueryItem = ({
   setQueryThatIsDeleting: Dispatch<SetStateAction<string | null>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   deleteRecentQueryMutation: (queryKey: string) => void;
-  isUserSessionPending: boolean;
-  isValidSession: boolean;
 }) => {
   const isMobileDevice = useIsMobile();
   const parsedQuery = JSON.parse(item.queryKey) as {
@@ -349,6 +339,7 @@ const RecentQueryItem = ({
   const isThisItemDeleting = useIsMutating({
     mutationKey: ["delete_recent_query", item.queryKey],
   });
+  const { isPending, isAuthenticated } = useAuth();
   return (
     <AccordionItem
       value={index.toString()}
@@ -432,7 +423,7 @@ const RecentQueryItem = ({
             isThisItemDeleting && "!bg-red-500"
           )}
           onClick={() => {
-            if (isThisItemDeleting || isUserSessionPending || !isValidSession) {
+            if (isThisItemDeleting || isPending || !isAuthenticated) {
               return;
             }
             const stringifiedNewQuery = JSON.stringify(parsedQuery);

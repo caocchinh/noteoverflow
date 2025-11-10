@@ -30,6 +30,7 @@ import type {
 } from "@/features/topical/constants/types";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import { useAuth } from "@/context/AuthContext";
 
 type UiPreferencesKey = keyof UiPreferences;
 
@@ -140,6 +141,7 @@ export default function TopicalLayoutProvider({
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const isMounted = useRef(false);
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
 
   // UI Preferences state
   const [uiPreferences, setUiPreferences] = useState<UiPreferences>(
@@ -217,6 +219,7 @@ export default function TopicalLayoutProvider({
 
       return data;
     },
+    enabled: isAuthenticated,
   });
 
   // Memoize individual query states to prevent context re-renders

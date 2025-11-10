@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
 import { QueryProvider } from "@/context/QueryProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 
 const inter = Inter({
@@ -118,20 +119,22 @@ export default function RootLayout({
         className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
       >
         <QueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            disableTransitionOnChange
-            enableSystem={false}
-          >
-            <NextTopLoader
-              color={LOGO_MAIN_COLOR}
-              showSpinner={false}
-              zIndex={99_999_999}
-            />
-            <NavBar />
-            {children}
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              disableTransitionOnChange
+              enableSystem={false}
+            >
+              <NextTopLoader
+                color={LOGO_MAIN_COLOR}
+                showSpinner={false}
+                zIndex={99_999_999}
+              />
+              <NavBar />
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
         </QueryProvider>
 
         <Toaster />

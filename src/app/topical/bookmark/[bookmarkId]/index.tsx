@@ -7,7 +7,6 @@ import {
 } from "@/features/topical/constants/types";
 import { useMemo, useRef, useState } from "react";
 import { useIsMutating, useQuery } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
@@ -20,7 +19,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { authClient } from "@/lib/auth/auth-client";
 import { ValidCurriculum } from "@/constants/types";
 import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
@@ -34,6 +32,7 @@ import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider"
 import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
+import { useAuth } from "@/context/AuthContext";
 
 export const BookmarkView = ({
   BETTER_AUTH_URL,
@@ -53,18 +52,12 @@ export const BookmarkView = ({
     ownerAvatar: string;
   };
 }) => {
-  const queryClient = useQueryClient();
   const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
     useState<QuestionInspectOpenState>({
       isOpen: false,
       questionId: "",
     });
-  const { data: userSession, isPending: isUserSessionPending } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => await authClient.getSession(),
-    enabled: !queryClient.getQueryData(["user"]),
-  });
-  const isValidSession = !!userSession?.data?.session;
+  const { isSessionPending } = useAuth();
 
   const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
     useTopicalApp();
@@ -156,14 +149,14 @@ export const BookmarkView = ({
   const preContent = (
     <>
       {(savedActivitiesIsFetching ||
-        isUserSessionPending ||
+        isSessionPending ||
         isFetchedBookmarkLoading) && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <Loader2 className="animate-spin" />
         </div>
       )}
 
-      {!isUserSessionPending &&
+      {!isSessionPending &&
         !isFetchedBookmarkLoading &&
         !savedActivitiesIsFetching && (
           <div className="flex flex-row items-center justify-start w-full gap-1 mb-1">
@@ -324,8 +317,6 @@ export const BookmarkView = ({
         topicalData={topicalData}
         isQuestionViewDisabled={isQuestionViewDisabled}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={isValidSession}
-        isUserSessionPending={isUserSessionPending}
         listId={isOwnerOfTheList ? listId : undefined}
         preContent={preContent}
         breadcrumbContent={breadcrumbContent}

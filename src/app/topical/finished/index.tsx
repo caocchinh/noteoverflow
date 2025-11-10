@@ -11,8 +11,7 @@ import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
 } from "@/features/topical/lib/utils";
-import { authClient } from "@/lib/auth/auth-client";
-import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -33,19 +32,14 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
+import { useAuth } from "@/context/AuthContext";
 
 const FinishedQuestionsClient = ({
   BETTER_AUTH_URL,
 }: {
   BETTER_AUTH_URL: string;
 }) => {
-  const queryClient = useQueryClient();
-  const { data: userSession, isPending: isUserSessionPending } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => await authClient.getSession(),
-    enabled: !queryClient.getQueryData(["user"]),
-  });
-  const isValidSession = !!userSession?.data?.session;
+  const { isSessionPending, isAuthenticated } = useAuth();
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
@@ -123,13 +117,13 @@ const FinishedQuestionsClient = ({
   // Before breadcrumb content
   const preContent = (
     <>
-      {(savedActivitiesIsFetching || isUserSessionPending) && (
+      {(savedActivitiesIsFetching || isSessionPending) && (
         <div className="flex flex-col gap-4 items-center justify-center w-full ">
           <Loader2 className="animate-spin" />
         </div>
       )}
 
-      {!isUserSessionPending && !userSession?.data?.session && (
+      {!isAuthenticated && !isSessionPending && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <p className="text-sm text-red-500">
             You are not signed in. Please sign to view your finished questions!
@@ -302,8 +296,6 @@ const FinishedQuestionsClient = ({
         topicalData={topicalData}
         isQuestionViewDisabled={isQuestionViewDisabled}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
-        isValidSession={isValidSession}
-        isUserSessionPending={isUserSessionPending}
         preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}

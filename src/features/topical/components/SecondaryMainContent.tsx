@@ -22,8 +22,6 @@ const SecondaryMainContent = ({
   topicalData,
   isQuestionViewDisabled,
   BETTER_AUTH_URL,
-  isValidSession,
-  isUserSessionPending,
   listId,
   preContent,
   breadcrumbContent,
@@ -150,8 +148,6 @@ const SecondaryMainContent = ({
                       onQuestionClick={() =>
                         handleQuestionClick(question.question.id)
                       }
-                      isUserSessionPending={isUserSessionPending}
-                      isValidSession={isValidSession}
                       key={`${question.question.id}-${imageSrc}`}
                       imageSrc={imageSrc}
                       listId={listId}
@@ -193,8 +189,6 @@ const SecondaryMainContent = ({
             chunk.map((item) => item.question)
           )}
           BETTER_AUTH_URL={BETTER_AUTH_URL}
-          isValidSession={isValidSession}
-          isUserSessionPending={isUserSessionPending}
           listId={listId}
           isInspectSidebarOpen={isInspectSidebarOpen}
           setIsInspectSidebarOpen={setIsInspectSidebarOpen}

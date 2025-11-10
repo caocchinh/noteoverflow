@@ -90,6 +90,7 @@ import { useStore } from "zustand";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { useAuth } from "@/context/AuthContext";
 
 const BookmarkContext = createContext<BookmarkStore | null>(null);
 
@@ -112,7 +113,6 @@ export const BookmarkButton = memo(
     badgeClassName,
     popOverTriggerClassName,
     triggerButtonClassName,
-    isValidSession,
     isInView,
   }: {
     question: SelectedQuestion;
@@ -126,7 +126,6 @@ export const BookmarkButton = memo(
     badgeClassName?: string;
     popOverTriggerClassName?: string;
     triggerButtonClassName?: string;
-    isValidSession: boolean;
     isInView: boolean;
   }) => {
     const [_open, _setOpen] = useState(false);
@@ -161,7 +160,6 @@ export const BookmarkButton = memo(
     if (bookmarkStore.current === null && isInView) {
       bookmarkStore.current = createBookmarkStore({
         isBookmarkDisabled,
-        isValidSession,
         question,
         chosenBookmarkList: (() => {
           const set = new Set<string>();
@@ -194,7 +192,6 @@ export const BookmarkButton = memo(
         bookmarkStore.current.setState((state) => ({
           ...state,
           isBookmarkDisabled,
-          isValidSession,
           question,
           chosenBookmarkList: (() => {
             const set = new Set<string>();
@@ -221,7 +218,6 @@ export const BookmarkButton = memo(
       }
     }, [
       isBookmarkDisabled,
-      isValidSession,
       question,
       bookmarks,
       popOverAlign,
@@ -272,8 +268,8 @@ const BookmarkButtonConsumer = memo(
       (state) => state.isBookmarkDisabled
     );
     const visibility = useBookmarkContext((state) => state.visibility);
+    const { isAuthenticated } = useAuth();
     // const isInView = useBookmarkContext((state) => state.isInView);
-    const isValidSession = useBookmarkContext((state) => state.isValidSession);
     const mutationKey = [
       "user_saved_activities",
       "bookmarks",
@@ -631,7 +627,7 @@ const BookmarkButtonConsumer = memo(
         });
         return;
       }
-      if (!isValidSession) {
+      if (!isAuthenticated) {
         toast.error("Please sign in to bookmark questions.", {
           duration: 2000,
           position: isMobileDevice && isOpen ? "top-center" : "bottom-right",
@@ -817,7 +813,7 @@ const BookmarkTrigger = memo(() => {
 
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
+      mutationKey: ["user_saved_activities", "bookmarks", question.id],
     }) > 0;
 
   const { savedActivitiesIsFetching, bookmarksData } = useTopicalApp();

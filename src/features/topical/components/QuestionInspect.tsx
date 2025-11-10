@@ -95,14 +95,13 @@ import {
 } from "../constants/constants";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { FinishedTracker } from "./FinishedTracker";
+import { useAuth } from "@/context/AuthContext";
 
 const QuestionInspect = ({
   isOpen,
   currentQuery,
   setIsOpen,
   partitionedTopicalData,
-  isUserSessionPending,
-  isValidSession,
   listId,
   BETTER_AUTH_URL,
   sortParameters,
@@ -117,6 +116,7 @@ const QuestionInspect = ({
     string | undefined
   >(undefined);
   const [searchInput, setSearchInput] = useState("");
+  const { isSessionPending } = useAuth();
   const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
   const [currentView, setCurrentView] = useState<
     "question" | "answer" | "both"
@@ -735,8 +735,6 @@ const QuestionInspect = ({
               <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
                 <FinishedTracker
                   allQuestions={allQuestions}
-                  isValidSession={isValidSession}
-                  isUserSessionPending={isUserSessionPending}
                   navigateToQuestion={navigateToQuestion}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
@@ -863,8 +861,6 @@ const QuestionInspect = ({
                               setCurrentTabThatContainsQuestion={
                                 setCurrentTabThatContainsQuestion
                               }
-                              isUserSessionPending={isUserSessionPending}
-                              isValidSession={isValidSession}
                               listId={listId}
                               isInspectSidebarOpen={isInspectSidebarOpen}
                               isMobileDevice={isMobile}
@@ -907,8 +903,6 @@ const QuestionInspect = ({
                             setCurrentTabThatContainsQuestion={
                               setCurrentTabThatContainsQuestion
                             }
-                            isUserSessionPending={isUserSessionPending}
-                            isValidSession={isValidSession}
                             listId={listId}
                             setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
@@ -1178,8 +1172,6 @@ const QuestionInspect = ({
                     {currentQuestionData && (
                       <QuestionInspectFinishedCheckbox
                         question={currentQuestionData}
-                        isUserSessionPending={isUserSessionPending}
-                        isValidSession={isValidSession}
                       />
                     )}
                     {currentQuestionData && (
@@ -1187,10 +1179,9 @@ const QuestionInspect = ({
                         triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
                         badgeClassName="h-[35px] min-h-[35px] !static"
                         question={currentQuestionData}
-                        isBookmarkDisabled={isUserSessionPending}
+                        isBookmarkDisabled={isSessionPending}
                         listId={listId}
                         popOverAlign="start"
-                        isValidSession={isValidSession}
                         isInView={true}
                       />
                     )}
@@ -1258,8 +1249,6 @@ const QuestionInspect = ({
                       navigateToQuestion={navigateToQuestion}
                       isBrowseMoreOpen={isBrowseMoreOpen}
                       setIsBrowseMoreOpen={setIsBrowseMoreOpen}
-                      isUserSessionPending={isUserSessionPending}
-                      isValidSession={isValidSession}
                     />
                   </ScrollArea>
                 </div>
@@ -1432,9 +1421,7 @@ const QuestionHoverCard = ({
   currentQuestionId,
   setCurrentQuestionId,
   setCurrentTabThatContainsQuestion,
-  isUserSessionPending,
   isMobileDevice,
-  isValidSession,
   listId,
   isInspectSidebarOpen,
   resetScrollPositions,
@@ -1469,6 +1456,7 @@ const QuestionHoverCard = ({
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
   const { savedActivitiesIsError } = useTopicalApp();
+  const { isSessionPending, isAuthenticated } = useAuth();
 
   return (
     <HoverCard
@@ -1534,11 +1522,10 @@ const QuestionHoverCard = ({
             )}
             badgeClassName="hidden"
             question={question}
-            isBookmarkDisabled={isUserSessionPending}
+            isBookmarkDisabled={isSessionPending}
             setIsHovering={setHoverCardOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             isPopoverOpen={isPopoverOpen}
-            isValidSession={isValidSession}
             listId={listId}
             isInView={true}
           />
@@ -1548,7 +1535,7 @@ const QuestionHoverCard = ({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                if (isUserSessionPending) {
+                if (isSessionPending) {
                   return;
                 }
                 if (savedActivitiesIsError) {
@@ -1561,7 +1548,7 @@ const QuestionHoverCard = ({
                   });
                   return;
                 }
-                if (!isValidSession) {
+                if (!isAuthenticated) {
                   toast.error("Please sign in to bookmark questions.", {
                     duration: 2000,
                     position:
@@ -1621,8 +1608,6 @@ const QuestionHoverCard = ({
 
 const BrowseMoreQuestions = ({
   displayedData,
-  isUserSessionPending,
-  isValidSession,
   navigateToQuestion,
   isBrowseMoreOpen,
   setIsBrowseMoreOpen,
@@ -1672,8 +1657,6 @@ const BrowseMoreQuestions = ({
               question?.questionImages.map((imageSrc: string) => (
                 <QuestionPreview
                   question={question}
-                  isUserSessionPending={isUserSessionPending}
-                  isValidSession={isValidSession}
                   key={`${question.id}-${imageSrc}`}
                   imageSrc={imageSrc}
                   onQuestionClick={() => {

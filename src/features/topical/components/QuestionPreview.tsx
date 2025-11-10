@@ -12,21 +12,18 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { useAuth } from "@/context/AuthContext";
 
 const QuestionPreview = memo(
   ({
     imageSrc,
     listId,
-    isUserSessionPending,
-    isValidSession,
     question,
     onQuestionClick,
   }: {
     question: SelectedQuestion;
     imageSrc: string;
-    isValidSession: boolean;
     listId?: string;
-    isUserSessionPending: boolean;
     onQuestionClick: () => void;
   }) => {
     const {
@@ -43,6 +40,7 @@ const QuestionPreview = memo(
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
     const { bookmarksData: bookmarks } = useTopicalApp();
+    const { isSessionPending, isAuthenticated } = useAuth();
 
     const isMutatingThisBookmarkQuestion =
       useIsMutating({
@@ -135,7 +133,7 @@ const QuestionPreview = memo(
         </div>
 
         <BookmarkButton
-          isBookmarkDisabled={isUserSessionPending}
+          isBookmarkDisabled={isSessionPending}
           triggerButtonClassName={cn(
             "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
@@ -150,7 +148,6 @@ const QuestionPreview = memo(
           isPopoverOpen={isPopoverOpen}
           setShouldOpen={setShouldOpen}
           setIsHovering={setIsHovering}
-          isValidSession={isValidSession}
           isInView={shouldOpen}
           listId={listId}
         />
@@ -173,7 +170,7 @@ const QuestionPreview = memo(
                 });
                 return;
               }
-              if (!isValidSession) {
+              if (!isAuthenticated) {
                 toast.error("Please sign in to bookmark questions.", {
                   duration: 2000,
                   position:
@@ -218,7 +215,7 @@ const QuestionPreview = memo(
             tabIndex={-1}
             onClick={(e) => {
               e.stopPropagation();
-              if (isUserSessionPending || savedActivitiesIsFetching) {
+              if (isSessionPending || savedActivitiesIsFetching) {
                 return;
               }
               if (savedActivitiesIsError) {
@@ -231,7 +228,7 @@ const QuestionPreview = memo(
                 });
                 return;
               }
-              if (!isValidSession) {
+              if (!isAuthenticated) {
                 toast.error("Please sign in to bookmark questions.", {
                   duration: 2000,
                   position:

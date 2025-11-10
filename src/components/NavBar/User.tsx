@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ImageIcon,
@@ -43,6 +43,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import { useAuth } from "@/context/AuthContext";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,16 +52,7 @@ const User = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile({ breakpoint: 515 });
-
-  const { data, isPending, isError } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      return await authClient.getSession();
-    },
-    retry: 3,
-    retryDelay: 1000,
-  });
-
+  const { user, isPending, isError, isAuthenticated } = useAuth();
   const signOutMutation = useMutation({
     mutationFn: () => authClient.signOut(),
     onSuccess: () => {
@@ -81,12 +73,12 @@ const User = () => {
   }, [signOutMutation]);
 
   useEffect(() => {
-    if (data && data.data) {
-      if (data.data?.user.banned) {
+    if (isAuthenticated && user) {
+      if (user.banned) {
         handleSignOut();
       }
     }
-  }, [data, handleSignOut]);
+  }, [user, handleSignOut, isAuthenticated]);
 
   if (isError) {
     return (
@@ -125,7 +117,7 @@ const User = () => {
   if (isPending) {
     return <Skeleton className="!bg-navbar-skelenton h-8 w-8 rounded-full" />;
   }
-  if (!data?.data) {
+  if (!isAuthenticated || !user) {
     return (
       <AnimatePresence mode="wait">
         <motion.div
@@ -153,13 +145,11 @@ const User = () => {
   return (
     <>
       <AvatarChange
-        currentAvatar={
-          data.data.user.selectedImage || "/assets/avatar/blue.webp"
-        }
+        currentAvatar={user.selectedImage || "/assets/avatar/blue.webp"}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        userId={data.data.user.id}
-        defaultAvatar={data.data.user.image}
+        userId={user.id}
+        defaultAvatar={user.image}
       />
 
       <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
@@ -169,7 +159,7 @@ const User = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               initial={{ opacity: 0, scale: 0.8 }}
-              key={data.data.user.selectedImage}
+              key={user.selectedImage}
               transition={{
                 duration: 0.3,
                 ease: "easeInOut",
@@ -188,13 +178,11 @@ const User = () => {
                 >
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={
-                      data.data.user.selectedImage || "/assets/avatar/blue.webp"
-                    }
+                    src={user.selectedImage || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(" ")[0]?.charAt(0) +
-                      data.data.user.name.split(" ")[1]?.charAt(0)}
+                    {user.name.split(" ")[0]?.charAt(0) +
+                      user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </GlareHover>
               </Avatar>
@@ -223,18 +211,15 @@ const User = () => {
                 <Avatar>
                   <AvatarImage
                     className="h-[32px] w-[32px]"
-                    src={
-                      data.data?.user.selectedImage ||
-                      "/assets/avatar/blue.webp"
-                    }
+                    src={user.selectedImage || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {data.data.user.name.split(" ")[0]?.charAt(0) +
-                      data.data.user.name.split(" ")[1]?.charAt(0)}
+                    {user.name.split(" ")[0]?.charAt(0) +
+                      user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <p className="w-max max-w-[120px] whitespace-pre-line font-medium text-sm">
-                  {data.data.user.name}
+                  {user.name}
                 </p>
               </DropdownMenuSubTrigger>
             </Button>
@@ -260,8 +245,7 @@ const User = () => {
             </DropdownMenuPortal>
           </DropdownMenuSub>
 
-          {(data.data.user.role === "admin" ||
-            data.data.user.role === "owner") && (
+          {(user.role === "admin" || user.role === "owner") && (
             <>
               <DropdownMenuSeparator className="!mx-0 !my-0" />
               <DropdownMenuItem asChild title="Admin Panel">

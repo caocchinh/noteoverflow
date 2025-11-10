@@ -12,7 +12,6 @@ import type {
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { authClient } from "@/lib/auth/auth-client";
 import { getCache, setCache } from "@/drizzle/db";
 import { addRecentQuery } from "@/features/topical/server/actions";
 import { toast } from "sonner";
@@ -257,14 +256,6 @@ const TopicalClient = ({
 
   const queryClient = useQueryClient();
 
-  const { data: userSession, isPending: isUserSessionPending } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => await authClient.getSession(),
-    enabled: !queryClient.getQueryData(["user"]),
-  });
-
-  const isValidSession = !!userSession?.data?.session;
-
   return (
     <>
       <div className="pt-12 h-screen !overflow-hidden">
@@ -287,8 +278,6 @@ const TopicalClient = ({
               mountedRef={mountedRef}
               searchParams={searchParams}
               setIsValidSearchParams={setIsValidSearchParams}
-              isUserSessionPending={isUserSessionPending}
-              isValidSession={isValidSession}
               isAddRecentQueryPending={isAddRecentQueryPending}
             />
             <AppMainContent
@@ -300,9 +289,8 @@ const TopicalClient = ({
               isTopicalDataFetched={isTopicalDataFetched}
               isValidSearchParams={isValidSearchParams}
               BETTER_AUTH_URL={BETTER_AUTH_URL}
-              isValidSession={isValidSession}
-              isUserSessionPending={isUserSessionPending}
               refetchTopicalData={refetchTopicalData}
+              mountedRef={mountedRef}
               searchParams={searchParams}
               sideBarInsetRef={sideBarInsetRef}
               ultilityRef={ultilityRef}

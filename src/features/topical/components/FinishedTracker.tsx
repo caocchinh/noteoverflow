@@ -44,11 +44,10 @@ import {
 } from "./PaginationButtons";
 import { Button } from "@/components/ui/button";
 import { useIsMutating } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 export const FinishedTracker = ({
   allQuestions,
-  isValidSession,
-  isUserSessionPending,
   navigateToQuestion,
 }: FinishedTrackerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -62,7 +61,7 @@ export const FinishedTracker = ({
     savedActivitiesIsFetching,
     finishedQuestionsData: userFinishedQuestions,
   } = useTopicalApp();
-
+  const { isAuthenticated, isSessionPending } = useAuth();
   const isMutatingThisFinishedQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "finished_questions"],
@@ -147,8 +146,8 @@ export const FinishedTracker = ({
             <DialogTrigger asChild>
               <div className="absolute w-full left-0 top-0 p-2 bg-green-600 cursor-pointer backdrop-blur-sm border-b">
                 {!savedActivitiesIsFetching &&
-                  !isUserSessionPending &&
-                  isValidSession && (
+                  !isSessionPending &&
+                  isAuthenticated && (
                     <div className="flex items-center gap-3">
                       <div className="flex-1">
                         <Progress
@@ -164,13 +163,13 @@ export const FinishedTracker = ({
                       </span>
                     </div>
                   )}
-                {(isUserSessionPending || savedActivitiesIsFetching) && (
+                {(isSessionPending || savedActivitiesIsFetching) && (
                   <div className="flex items-center justify-center gap-2 text-sm text-white">
                     <Loader2 className="animate-spin" size={14} />
                     Fetching progress data...
                   </div>
                 )}
-                {!isValidSession && !isUserSessionPending && (
+                {!isAuthenticated && !isSessionPending && (
                   <div className="flex items-center justify-center text-sm text-white">
                     Sign in to track your progress
                   </div>
@@ -186,21 +185,21 @@ export const FinishedTracker = ({
           className="!max-w-5xl h-[95dvh] z-[100008] dark:bg-accent gap-2"
           showCloseButton={false}
         >
-          {(isUserSessionPending || savedActivitiesIsFetching) && (
+          {(isSessionPending || savedActivitiesIsFetching) && (
             <div className="flex items-center justify-center gap-2 text-xl text-gray-500">
               <Loader2 className="animate-spin" size={14} />
               Fetching progress data...
             </div>
           )}
-          {!isValidSession && !isUserSessionPending && (
+          {!isAuthenticated && !isSessionPending && (
             <div className="flex items-center justify-center text-xl text-red-500">
               Sign in to track your progress
             </div>
           )}
 
           {!savedActivitiesIsFetching &&
-            !isUserSessionPending &&
-            isValidSession && (
+            !isSessionPending &&
+            isAuthenticated && (
               <>
                 <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
                   <div className="flex flex-col items-start justify-start flex-wrap gap-0">
@@ -239,8 +238,6 @@ export const FinishedTracker = ({
                           question?.questionImages.map((imageSrc: string) => (
                             <QuestionPreview
                               question={question}
-                              isUserSessionPending={isUserSessionPending}
-                              isValidSession={isValidSession}
                               key={`${question.id}-${imageSrc}`}
                               imageSrc={imageSrc}
                               onQuestionClick={() => {

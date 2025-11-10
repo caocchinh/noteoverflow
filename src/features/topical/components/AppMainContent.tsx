@@ -40,6 +40,7 @@ import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButt
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
 
 const AppMainContent = ({
+  mountedRef,
   currentQuery,
   topicalData,
   isSearchEnabled,
@@ -48,8 +49,6 @@ const AppMainContent = ({
   isTopicalDataFetched,
   isValidSearchParams,
   BETTER_AUTH_URL,
-  isValidSession,
-  isUserSessionPending,
   refetchTopicalData,
   searchParams,
   sideBarInsetRef,
@@ -66,7 +65,6 @@ const AppMainContent = ({
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const mountedRef = useRef(false);
   const {
     uiPreferences,
     finishedQuestionsData: userFinishedQuestions,
@@ -85,7 +83,7 @@ const AppMainContent = ({
         isInspectOpen: false,
       });
     }
-  }, [currentQuery, uiPreferences.isStrictModeEnabled]);
+  }, [currentQuery, mountedRef, uiPreferences.isStrictModeEnabled]);
 
   const [fullPartitionedData, setFullPartitionedData] = useState<
     SelectedQuestion[][] | undefined
@@ -219,6 +217,7 @@ const AppMainContent = ({
     openInspectOnMount,
     searchParams,
     topicalData,
+    mountedRef,
   ]);
 
   useEffect(() => {
@@ -260,6 +259,7 @@ const AppMainContent = ({
   }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsAppSidebarOpen]);
 
   useEffect(() => {
+    console.log(pathname);
     if (typeof window === "undefined" || !mountedRef.current) {
       return;
     }
@@ -490,8 +490,6 @@ const AppMainContent = ({
                       <QuestionPreview
                         question={question}
                         onQuestionClick={() => handleQuestionClick(question.id)}
-                        isUserSessionPending={isUserSessionPending}
-                        isValidSession={isValidSession}
                         key={`${question.id}-${imageSrc}`}
                         imageSrc={imageSrc}
                       />
@@ -518,8 +516,6 @@ const AppMainContent = ({
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
         currentQuery={currentQuery}
-        isValidSession={isValidSession}
-        isUserSessionPending={isUserSessionPending}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}

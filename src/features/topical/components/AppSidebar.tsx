@@ -54,8 +54,6 @@ const AppSidebar = ({
   mountedRef,
   searchParams,
   setIsValidSearchParams,
-  isUserSessionPending,
-  isValidSession,
   isTopicalDataFetching,
   isAddRecentQueryPending,
 }: AppSidebarProps) => {
@@ -482,8 +480,6 @@ const AppSidebar = ({
             setIsSidebarOpen={setIsAppSidebarOpen}
             setIsSearchEnabled={setIsSearchEnabled}
             setCurrentQuery={setCurrentQuery}
-            isUserSessionPending={isUserSessionPending}
-            isValidSession={isValidSession}
             currentQuery={currentQuery}
             setSelectedCurriculum={setSelectedCurriculum}
             setSelectedSubject={setSelectedSubject}
