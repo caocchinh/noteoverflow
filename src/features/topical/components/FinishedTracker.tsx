@@ -97,7 +97,7 @@ export const FinishedTracker = ({
     );
   }, [finishedQuestions]);
 
-  const { setIsCalculatorOpen, userSavedActivities } = useTopicalApp();
+  const { setIsCalculatorOpen, savedActivitiesIsFetching } = useTopicalApp();
 
   // Update displayed data when fullPartitionedData changes
   useEffect(() => {
@@ -128,7 +128,7 @@ export const FinishedTracker = ({
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
               <div className="absolute w-full left-0 top-0 p-2 bg-green-600 cursor-pointer backdrop-blur-sm border-b">
-                {!userSavedActivities.isFetching &&
+                {!savedActivitiesIsFetching &&
                   !isUserSessionPending &&
                   isValidSession && (
                     <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export const FinishedTracker = ({
                       </span>
                     </div>
                   )}
-                {(isUserSessionPending || userSavedActivities.isFetching) && (
+                {(isUserSessionPending || savedActivitiesIsFetching) && (
                   <div className="flex items-center justify-center gap-2 text-sm text-white">
                     <Loader2 className="animate-spin" size={14} />
                     Fetching progress data...
@@ -168,7 +168,7 @@ export const FinishedTracker = ({
           className="!max-w-5xl h-[95dvh] z-[100008] dark:bg-accent gap-2"
           showCloseButton={false}
         >
-          {(isUserSessionPending || userSavedActivities.isFetching) && (
+          {(isUserSessionPending || savedActivitiesIsFetching) && (
             <div className="flex items-center justify-center gap-2 text-xl text-gray-500">
               <Loader2 className="animate-spin" size={14} />
               Fetching progress data...
@@ -180,7 +180,7 @@ export const FinishedTracker = ({
             </div>
           )}
 
-          {!userSavedActivities.isFetching &&
+          {!savedActivitiesIsFetching &&
             !isUserSessionPending &&
             isValidSession && (
               <>

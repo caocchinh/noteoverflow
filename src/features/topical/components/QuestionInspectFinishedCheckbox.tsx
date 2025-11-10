@@ -42,7 +42,7 @@ export const QuestionInspectFinishedCheckbox = ({
     false;
 
   const queryClient = useQueryClient();
-  const { userSavedActivities } = useTopicalApp();
+  const { savedActivitiesIsFetching, savedActivitiesIsError } = useTopicalApp();
   const { mutate } = useMutation({
     mutationKey: ["user_saved_activities", question.id, "finished_questions"],
     mutationFn: async ({
@@ -145,7 +145,7 @@ export const QuestionInspectFinishedCheckbox = ({
         "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
         (isMutatingThisQuestion ||
           isUserSessionPending ||
-          userSavedActivities.isFetching) &&
+          savedActivitiesIsFetching) &&
           "pointer-events-none",
         isFinished ? "border-green-600" : "border-muted-foreground",
         className
@@ -158,7 +158,7 @@ export const QuestionInspectFinishedCheckbox = ({
         if (
           isMutatingThisQuestion ||
           isUserSessionPending ||
-          userSavedActivities.isFetching
+          savedActivitiesIsFetching
         ) {
           return;
         }
@@ -166,7 +166,7 @@ export const QuestionInspectFinishedCheckbox = ({
           toast.error("Please sign in to save finished questions.");
           return;
         }
-        if (userSavedActivities.isError) {
+        if (savedActivitiesIsError) {
           toast.error(
             "Failed to update finished questions list. Please refresh the page."
           );
@@ -178,7 +178,7 @@ export const QuestionInspectFinishedCheckbox = ({
         });
       }}
     >
-      {userSavedActivities.isFetching ? (
+      {savedActivitiesIsFetching ? (
         <Loader2 className="animate-spin w-4 h-4" />
       ) : (
         <Switch
@@ -196,7 +196,7 @@ export const QuestionInspectFinishedCheckbox = ({
       >
         {isMutatingThisQuestion ? (
           <>Saving...</>
-        ) : userSavedActivities.isFetching ? (
+        ) : savedActivitiesIsFetching ? (
           <>Loading</>
         ) : (
           <>Complete{isFinished && "d"}</>

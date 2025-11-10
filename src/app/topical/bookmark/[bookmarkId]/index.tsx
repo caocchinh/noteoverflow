@@ -77,13 +77,14 @@ export const BookmarkView = ({
       isOpen: false,
       questionId: "",
     });
-  const { userSavedActivities, uiPreferences } = useTopicalApp();
+  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
+    useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities.data?.finishedQuestions;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.finishedQuestions;
+  }, [savedActivitiesData?.finishedQuestions]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities.data?.bookmarks;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.bookmarks;
+  }, [savedActivitiesData?.bookmarks]);
 
   // Fetch bookmark data only if user is not the owner
   const { data: fetchedBookmarkData, isLoading: isFetchedBookmarkLoading } =
@@ -278,7 +279,7 @@ export const BookmarkView = ({
             {ownerInfo.ownerName}&apos;s list - {ownerInfo.listName}
           </p>
         </div>
-        {userSavedActivities.isFetching ||
+        {savedActivitiesIsFetching ||
         isUserSessionPending ||
         isFetchedBookmarkLoading ? (
           <div className="flex flex-col gap-4 items-center justify-center w-full">

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Dialog,
@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { QRCodeCanvas } from "qrcode.react";
 import { Download, Link as LinkIcon } from "lucide-react";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const QR = ({
   isOpen,
@@ -23,7 +24,15 @@ export const QR = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
 
+  useEffect(() => {
+    if (isOpen) {
+      if (isCalculatorOpen) {
+        setIsCalculatorOpen(false);
+      }
+    }
+  }, [isOpen, isCalculatorOpen, setIsCalculatorOpen]);
   return (
     <Dialog
       open={isOpen}

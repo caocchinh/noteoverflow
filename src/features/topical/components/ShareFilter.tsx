@@ -19,7 +19,6 @@ export const ShareFilter = ({
   type?: "filter" | "bookmark" | "question";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   return (
     <>
       <Tooltip>

@@ -63,14 +63,15 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { userSavedActivities, uiPreferences } = useTopicalApp();
+  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
+    useTopicalApp();
 
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities.data?.finishedQuestions;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.finishedQuestions;
+  }, [savedActivitiesData?.finishedQuestions]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities.data?.bookmarks;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.bookmarks;
+  }, [savedActivitiesData?.bookmarks]);
   const metadata = useMemo(() => {
     if (!bookmarks) return null;
     return computeBookmarksMetadata(bookmarks);
@@ -325,7 +326,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               )}
               {Object.keys(metadata?.private || {}).length === 0 &&
                 Object.keys(metadata?.public || {}).length === 0 &&
-                !userSavedActivities.isFetching &&
+                !savedActivitiesIsFetching &&
                 !isUserSessionPending &&
                 userSession?.data?.session && (
                   <div className="flex flex-col gap-4 items-center justify-center w-full">
@@ -343,14 +344,14 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         )}
         {Object.keys(metadata?.private || {}).length === 0 &&
           Object.keys(metadata?.public || {}).length === 0 &&
-          !userSavedActivities.isFetching &&
+          !savedActivitiesIsFetching &&
           !isUserSessionPending &&
           !userSession?.data?.session && (
             <p className="text-sm  text-red-500">
               You are not signed in. Please sign to create a list!
             </p>
           )}
-        {(userSavedActivities.isFetching || isUserSessionPending) && (
+        {(savedActivitiesIsFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>

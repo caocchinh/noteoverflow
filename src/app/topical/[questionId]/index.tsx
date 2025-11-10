@@ -34,13 +34,13 @@ export const QuestionView = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { userSavedActivities } = useTopicalApp();
+  const { savedActivitiesData } = useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities.data?.finishedQuestions;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.finishedQuestions;
+  }, [savedActivitiesData?.finishedQuestions]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities.data?.bookmarks;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.bookmarks;
+  }, [savedActivitiesData?.bookmarks]);
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">

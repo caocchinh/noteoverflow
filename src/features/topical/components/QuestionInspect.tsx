@@ -1473,7 +1473,7 @@ const QuestionHoverCard = ({
     };
   }, []);
   const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
-  const { userSavedActivities } = useTopicalApp();
+  const { savedActivitiesIsError } = useTopicalApp();
 
   return (
     <HoverCard
@@ -1559,7 +1559,7 @@ const QuestionHoverCard = ({
                 if (isUserSessionPending) {
                   return;
                 }
-                if (userSavedActivities.isError) {
+                if (savedActivitiesIsError) {
                   toast.error("Bookmark error. Please refresh the page.", {
                     duration: 2000,
                     position:

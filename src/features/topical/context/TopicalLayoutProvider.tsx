@@ -9,6 +9,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
 } from "react";
 import {
   Sidebar,
@@ -27,7 +28,7 @@ import type {
   UiPreferencesCache,
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 
 type UiPreferencesKey = keyof UiPreferences;
@@ -110,7 +111,12 @@ const TopicalContext = createContext<{
     key: K,
     value: SetStateAction<UiPreferences[K]>
   ) => void;
-  userSavedActivities: UseQueryResult<SavedActivitiesResponse, Error>;
+  // Optimized user saved activities - separated to prevent unnecessary re-renders
+  savedActivitiesData: SavedActivitiesResponse | undefined;
+  savedActivitiesError: Error | null;
+  savedActivitiesIsLoading: boolean;
+  savedActivitiesIsFetching: boolean;
+  savedActivitiesIsError: boolean;
 } | null>(null);
 
 export const useTopicalApp = () => {
@@ -190,7 +196,7 @@ export default function TopicalLayoutProvider({
     []
   );
 
-  // User saved activities query
+  // User saved activities query - optimized to prevent unnecessary re-renders
   const userSavedActivitiesQuery = useQuery({
     queryKey: ["user_saved_activities"],
     queryFn: async () => {
@@ -208,7 +214,35 @@ export default function TopicalLayoutProvider({
 
       return data;
     },
+    // Use select to only trigger re-renders when data actually changes
+    select: (data) => data,
   });
+
+  // Memoize individual query states to prevent context re-renders
+  const savedActivitiesData = useMemo(
+    () => userSavedActivitiesQuery.data,
+    [userSavedActivitiesQuery.data]
+  );
+
+  const savedActivitiesError = useMemo(
+    () => userSavedActivitiesQuery.error,
+    [userSavedActivitiesQuery.error]
+  );
+
+  const savedActivitiesIsLoading = useMemo(
+    () => userSavedActivitiesQuery.isLoading,
+    [userSavedActivitiesQuery.isLoading]
+  );
+
+  const savedActivitiesIsFetching = useMemo(
+    () => userSavedActivitiesQuery.isFetching,
+    [userSavedActivitiesQuery.isFetching]
+  );
+
+  const savedActivitiesIsError = useMemo(
+    () => userSavedActivitiesQuery.isError,
+    [userSavedActivitiesQuery.isError]
+  );
 
   return (
     <TopicalContext.Provider
@@ -219,7 +253,11 @@ export default function TopicalLayoutProvider({
         setIsCalculatorOpen,
         uiPreferences,
         setUiPreference,
-        userSavedActivities: userSavedActivitiesQuery,
+        savedActivitiesData,
+        savedActivitiesError,
+        savedActivitiesIsLoading,
+        savedActivitiesIsFetching,
+        savedActivitiesIsError,
       }}
     >
       <DesmosCalculator

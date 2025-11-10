@@ -633,13 +633,14 @@ const BookmarkButtonConsumer = memo(
       },
       [searchInput, open, setNewBookmarkListNameInput, setSearchInput, setOpen]
     );
-    const { userSavedActivities } = useTopicalApp();
+    const { savedActivitiesIsLoading, savedActivitiesIsError } =
+      useTopicalApp();
     const openUI = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (isBookmarkDisabled || userSavedActivities.isPending) {
+      if (isBookmarkDisabled || savedActivitiesIsLoading) {
         return;
       }
-      if (userSavedActivities.isError) {
+      if (savedActivitiesIsError) {
         toast.error("Bookmark error. Please refresh the page.", {
           duration: 2000,
           position: isMobileDevice ? "top-center" : "bottom-right",
@@ -835,9 +836,8 @@ const BookmarkTrigger = memo(() => {
       mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
 
-  const { userSavedActivities } = useTopicalApp();
-  const bookmarks = userSavedActivities?.data?.bookmarks;
-  const isBookmarked = bookmarks?.some((bookmark) =>
+  const { savedActivitiesIsFetching, savedActivitiesData } = useTopicalApp();
+  const isBookmarked = savedActivitiesData?.bookmarks?.some((bookmark) =>
     bookmark.userBookmarks.some((b) => b.question.id === question.id)
   );
 
@@ -861,12 +861,12 @@ const BookmarkTrigger = memo(() => {
         triggerButtonClassName,
         "rounded-[3px]",
         isBookmarked && "!bg-logo-main !text-white",
-        (isBookmarkDisabled || userSavedActivities.isFetching) && "opacity-50"
+        (isBookmarkDisabled || savedActivitiesIsFetching) && "opacity-50"
       )}
       tabIndex={-1}
       title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
     >
-      {userSavedActivities.isFetching ? (
+      {savedActivitiesIsFetching ? (
         <Loader2 className="animate-spin" />
       ) : (
         <Bookmark size={10} />

@@ -72,7 +72,7 @@ const TopicalClient = ({
     isAppSidebarOpen,
     setIsAppSidebarOpen,
     uiPreferences,
-    userSavedActivities,
+    savedActivitiesData,
   } = useTopicalApp();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
@@ -450,11 +450,11 @@ const TopicalClient = ({
   const isValidSession = !!userSession?.data?.session;
 
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities?.data?.finishedQuestions;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.finishedQuestions;
+  }, [savedActivitiesData?.finishedQuestions]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities?.data?.bookmarks;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.bookmarks;
+  }, [savedActivitiesData?.bookmarks]);
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
   const [isQuestionInspectOpen, setIsQuestionInspectOpen] =

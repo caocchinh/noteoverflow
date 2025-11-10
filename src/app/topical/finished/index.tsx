@@ -65,13 +65,14 @@ const FinishedQuestionsClient = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { userSavedActivities, uiPreferences } = useTopicalApp();
+  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
+    useTopicalApp();
   const userFinishedQuestions = useMemo(() => {
-    return userSavedActivities.data?.finishedQuestions;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.finishedQuestions;
+  }, [savedActivitiesData?.finishedQuestions]);
   const bookmarks = useMemo(() => {
-    return userSavedActivities.data?.bookmarks;
-  }, [userSavedActivities]);
+    return savedActivitiesData?.bookmarks;
+  }, [savedActivitiesData?.bookmarks]);
   const metadata = useMemo(() => {
     if (!userFinishedQuestions) return null;
     return computeFinishedQuestionsMetadata(userFinishedQuestions);
@@ -283,7 +284,7 @@ const FinishedQuestionsClient = ({
           </div>
         )}
 
-        {(userSavedActivities.isFetching || isUserSessionPending) && (
+        {(savedActivitiesIsFetching || isUserSessionPending) && (
           <div className="flex flex-col gap-4 items-center justify-center w-full">
             <Loader2 className="animate-spin" />
           </div>

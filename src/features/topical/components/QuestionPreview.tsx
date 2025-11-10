@@ -37,7 +37,12 @@ const QuestionPreview = memo(
     isUserSessionPending: boolean;
     onQuestionClick: () => void;
   }) => {
-    const { uiPreferences, userSavedActivities } = useTopicalApp();
+    const {
+      uiPreferences,
+      savedActivitiesIsLoading,
+      savedActivitiesIsFetching,
+      savedActivitiesIsError,
+    } = useTopicalApp();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -152,10 +157,10 @@ const QuestionPreview = memo(
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              if (userSavedActivities.isPending) {
+              if (savedActivitiesIsLoading) {
                 return;
               }
-              if (userSavedActivities.isError) {
+              if (savedActivitiesIsError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -204,17 +209,16 @@ const QuestionPreview = memo(
                 }
                 return false;
               })() && "!bg-logo-main !text-white",
-              (userSavedActivities.isPending ||
-                userSavedActivities.isFetching) &&
+              (savedActivitiesIsLoading || savedActivitiesIsFetching) &&
                 "opacity-50"
             )}
             tabIndex={-1}
             onClick={(e) => {
               e.stopPropagation();
-              if (isUserSessionPending || userSavedActivities.isFetching) {
+              if (isUserSessionPending || savedActivitiesIsFetching) {
                 return;
               }
-              if (userSavedActivities.isError) {
+              if (savedActivitiesIsError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
                   position:
@@ -238,7 +242,7 @@ const QuestionPreview = memo(
               setIsPopoverOpen(true);
             }}
           >
-            {userSavedActivities.isFetching ? (
+            {savedActivitiesIsFetching ? (
               <Loader2 className="animate-spin" />
             ) : (
               <Bookmark size={10} />
