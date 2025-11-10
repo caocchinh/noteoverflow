@@ -1,10 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { Fragment, useState } from "react";
-import { Loader2, Edit3, Eye } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { extractQuestionNumber } from "@/features/topical/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ImageAnnotator } from "@/features/topical/components/ImageAnnotator";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { PhotoProvider, PhotoView } from "react-photo-view";
@@ -17,7 +16,7 @@ export const AnnotatableInspectImages = ({
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
 }) => {
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode] = useState(false);
   const { uiPreferences } = useTopicalApp();
   if (!imageSource || imageSource.length === 0) {
     return <p className="text-center text-red-600">Unable to fetch resource</p>;
@@ -29,7 +28,8 @@ export const AnnotatableInspectImages = ({
 
   return (
     <div className="flex flex-col w-full relative">
-      {/* Edit Mode Toggle */}
+      {/* Edit Mode Toggle - Temporarily commented out */}
+      {/*
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">
@@ -60,6 +60,7 @@ export const AnnotatableInspectImages = ({
           )}
         </Button>
       </div>
+      */}
 
       {/* Loading indicator */}
       {!isEditMode && imageUrls.length > 0 && (
