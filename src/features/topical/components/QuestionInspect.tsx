@@ -101,7 +101,6 @@ const QuestionInspect = ({
   currentQuery,
   setIsOpen,
   partitionedTopicalData,
-  bookmarks,
   isUserSessionPending,
   isValidSession,
   listId,
@@ -110,7 +109,6 @@ const QuestionInspect = ({
   setSortParameters,
   isInspectSidebarOpen,
   setIsInspectSidebarOpen,
-  userFinishedQuestions,
 }: QuestionInspectProps) => {
   const [currentTab, setCurrentTab] = useState(0);
   const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
@@ -739,8 +737,6 @@ const QuestionInspect = ({
                   allQuestions={allQuestions}
                   isValidSession={isValidSession}
                   isUserSessionPending={isUserSessionPending}
-                  userFinishedQuestions={userFinishedQuestions}
-                  bookmarks={bookmarks}
                   navigateToQuestion={navigateToQuestion}
                 />
                 <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
@@ -867,13 +863,11 @@ const QuestionInspect = ({
                               setCurrentTabThatContainsQuestion={
                                 setCurrentTabThatContainsQuestion
                               }
-                              bookmarks={bookmarks}
                               isUserSessionPending={isUserSessionPending}
                               isValidSession={isValidSession}
                               listId={listId}
                               isInspectSidebarOpen={isInspectSidebarOpen}
                               isMobileDevice={isMobile}
-                              userFinishedQuestions={userFinishedQuestions}
                             />
                             <SelectSeparator />
                           </Fragment>
@@ -913,14 +907,12 @@ const QuestionInspect = ({
                             setCurrentTabThatContainsQuestion={
                               setCurrentTabThatContainsQuestion
                             }
-                            bookmarks={bookmarks}
                             isUserSessionPending={isUserSessionPending}
                             isValidSession={isValidSession}
                             listId={listId}
                             setCurrentQuestionId={setCurrentQuestionId}
                             isInspectSidebarOpen={isInspectSidebarOpen}
                             isMobileDevice={isMobile}
-                            userFinishedQuestions={userFinishedQuestions}
                           />
                           <SelectSeparator />
                         </Fragment>
@@ -1185,7 +1177,6 @@ const QuestionInspect = ({
                     </div>
                     {currentQuestionData && (
                       <QuestionInspectFinishedCheckbox
-                        finishedQuestions={userFinishedQuestions}
                         question={currentQuestionData}
                         isUserSessionPending={isUserSessionPending}
                         isValidSession={isValidSession}
@@ -1198,7 +1189,6 @@ const QuestionInspect = ({
                         question={currentQuestionData}
                         isBookmarkDisabled={isUserSessionPending}
                         listId={listId}
-                        bookmarks={bookmarks}
                         popOverAlign="start"
                         isValidSession={isValidSession}
                         isInView={true}
@@ -1265,12 +1255,10 @@ const QuestionInspect = ({
                     <div className="my-6"></div>
                     <BrowseMoreQuestions
                       displayedData={displayedData}
-                      bookmarks={bookmarks ?? []}
                       navigateToQuestion={navigateToQuestion}
                       isBrowseMoreOpen={isBrowseMoreOpen}
                       setIsBrowseMoreOpen={setIsBrowseMoreOpen}
                       isUserSessionPending={isUserSessionPending}
-                      userFinishedQuestions={userFinishedQuestions ?? []}
                       isValidSession={isValidSession}
                     />
                   </ScrollArea>
@@ -1444,14 +1432,12 @@ const QuestionHoverCard = ({
   currentQuestionId,
   setCurrentQuestionId,
   setCurrentTabThatContainsQuestion,
-  bookmarks,
   isUserSessionPending,
   isMobileDevice,
   isValidSession,
   listId,
   isInspectSidebarOpen,
   resetScrollPositions,
-  userFinishedQuestions,
 }: QuestionHoverCardProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isImageError, setIsImageError] = useState(false);
@@ -1459,10 +1445,19 @@ const QuestionHoverCard = ({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const touchStartTimeRef = useRef<number | null>(null);
+  const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
   const isMutatingBookmarkOfThisQuestion =
     useIsMutating({
-      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
+      mutationKey: ["user_saved_activities", "bookmarks", question.id],
     }) > 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isMutatingFinishedQuestionOfThisQuestion =
+    useIsMutating({
+      mutationKey: ["user_saved_activities", "finished_questions", question.id],
+    }) > 0;
+  const isThisQuestionFinished =
+    userFinishedQuestions?.some((item) => item.question.id === question?.id) ??
+    false;
 
   useEffect(() => {
     return () => {
@@ -1488,9 +1483,7 @@ const QuestionHoverCard = ({
           className={cn(
             "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
             currentQuestionId === question?.id && "!bg-logo-main text-white",
-            userFinishedQuestions?.some(
-              (item) => item.question.id === question?.id
-            ) &&
+            isThisQuestionFinished &&
               "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
           )}
           onTouchStart={() => {
@@ -1542,7 +1535,6 @@ const QuestionHoverCard = ({
             badgeClassName="hidden"
             question={question}
             isBookmarkDisabled={isUserSessionPending}
-            bookmarks={bookmarks}
             setIsHovering={setHoverCardOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             isPopoverOpen={isPopoverOpen}
@@ -1629,9 +1621,7 @@ const QuestionHoverCard = ({
 
 const BrowseMoreQuestions = ({
   displayedData,
-  bookmarks,
   isUserSessionPending,
-  userFinishedQuestions,
   isValidSession,
   navigateToQuestion,
   isBrowseMoreOpen,
@@ -1681,10 +1671,8 @@ const BrowseMoreQuestions = ({
             {displayedData?.map((question) =>
               question?.questionImages.map((imageSrc: string) => (
                 <QuestionPreview
-                  bookmarks={bookmarks ?? []}
                   question={question}
                   isUserSessionPending={isUserSessionPending}
-                  userFinishedQuestions={userFinishedQuestions ?? []}
                   isValidSession={isValidSession}
                   key={`${question.id}-${imageSrc}`}
                   imageSrc={imageSrc}

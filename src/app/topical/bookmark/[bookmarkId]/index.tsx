@@ -15,7 +15,7 @@ import {
   SubjectMetadata,
 } from "@/features/topical/constants/types";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useIsMutating, useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   computeSubjectMetadata,
@@ -79,10 +79,14 @@ export const BookmarkView = ({
     });
   const {
     bookmarksData: bookmarks,
-    finishedQuestionsData: userFinishedQuestions,
     savedActivitiesIsFetching,
     uiPreferences,
   } = useTopicalApp();
+
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["user_saved_activities", "bookmarks"],
+    }) > 0;
 
   // Fetch bookmark data only if user is not the owner
   const { data: fetchedBookmarkData, isLoading: isFetchedBookmarkLoading } =
@@ -110,7 +114,14 @@ export const BookmarkView = ({
       // User is not owner, use fetched data
       return Array.isArray(fetchedBookmarkData) ? fetchedBookmarkData : [];
     }
-  }, [isOwnerOfTheList, bookmarks, bookmarkId, fetchedBookmarkData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isOwnerOfTheList,
+    bookmarks,
+    bookmarkId,
+    fetchedBookmarkData,
+    isMutatingThisQuestion,
+  ]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -178,7 +189,7 @@ export const BookmarkView = ({
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0] ?? 0);
+      setDisplayedData(chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -404,7 +415,6 @@ export const BookmarkView = ({
                     {displayedData?.map((question) =>
                       question?.questionImages.map((imageSrc: string) => (
                         <QuestionPreview
-                          bookmarks={bookmarks ?? []}
                           question={question}
                           onQuestionClick={() => {
                             setIsQuestionInspectOpen({
@@ -413,7 +423,6 @@ export const BookmarkView = ({
                             });
                           }}
                           isUserSessionPending={isUserSessionPending}
-                          userFinishedQuestions={userFinishedQuestions ?? []}
                           isValidSession={isValidSession}
                           key={`${question.id}-${imageSrc}`}
                           imageSrc={imageSrc}
@@ -464,12 +473,10 @@ export const BookmarkView = ({
           isOpen={isQuestionInspectOpen}
           setIsOpen={setIsQuestionInspectOpen}
           partitionedTopicalData={fullPartitionedData}
-          bookmarks={bookmarks ?? []}
           isValidSession={isValidSession}
           isUserSessionPending={isUserSessionPending}
           isInspectSidebarOpen={isInspectSidebarOpen}
           setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-          userFinishedQuestions={userFinishedQuestions ?? []}
           listId={
             ownerInfo.ownerId === userSession?.data?.user?.id
               ? listId

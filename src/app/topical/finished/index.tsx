@@ -21,7 +21,7 @@ import {
   chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -65,16 +65,23 @@ const FinishedQuestionsClient = ({
 
   const isValidSession = !!userSession?.data?.session;
 
+  const isMutatingThisQuestion =
+    useIsMutating({
+      mutationKey: ["user_saved_activities", "finished_questions"],
+    }) > 0;
+
   const {
-    bookmarksData: bookmarks,
     finishedQuestionsData: userFinishedQuestions,
     savedActivitiesIsFetching,
     uiPreferences,
   } = useTopicalApp();
   const metadata = useMemo(() => {
-    if (!userFinishedQuestions) return null;
+    if (!userFinishedQuestions) {
+      return null;
+    }
     return computeFinishedQuestionsMetadata(userFinishedQuestions);
-  }, [userFinishedQuestions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userFinishedQuestions, isMutatingThisQuestion]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCurriculumn, setSelectedCurriculum] =
@@ -89,7 +96,13 @@ const FinishedQuestionsClient = ({
       selectedCurriculumn,
       selectedSubject
     );
-  }, [selectedCurriculumn, selectedSubject, userFinishedQuestions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    userFinishedQuestions,
+    selectedCurriculumn,
+    selectedSubject,
+    isMutatingThisQuestion,
+  ]);
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -119,11 +132,13 @@ const FinishedQuestionsClient = ({
       selectedCurriculumn,
       selectedSubject
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    userFinishedQuestions,
+    isMutatingThisQuestion,
     currentFilter,
     selectedCurriculumn,
     selectedSubject,
-    userFinishedQuestions,
   ]);
 
   useEffect(() => {
@@ -148,7 +163,7 @@ const FinishedQuestionsClient = ({
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0] ?? 0);
+      setDisplayedData(chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -383,7 +398,6 @@ const FinishedQuestionsClient = ({
                     {displayedData?.map((question) =>
                       question?.questionImages.map((imageSrc: string) => (
                         <QuestionPreview
-                          bookmarks={bookmarks ?? []}
                           question={question}
                           onQuestionClick={() => {
                             setIsQuestionInspectOpen({
@@ -392,7 +406,6 @@ const FinishedQuestionsClient = ({
                             });
                           }}
                           isUserSessionPending={isUserSessionPending}
-                          userFinishedQuestions={userFinishedQuestions ?? []}
                           isValidSession={isValidSession}
                           key={`${question.id}-${imageSrc}`}
                           imageSrc={imageSrc}
@@ -452,13 +465,11 @@ const FinishedQuestionsClient = ({
             isOpen={isQuestionInspectOpen}
             setIsOpen={setIsQuestionInspectOpen}
             partitionedTopicalData={fullPartitionedData}
-            bookmarks={bookmarks ?? []}
             BETTER_AUTH_URL={BETTER_AUTH_URL}
             isValidSession={isValidSession}
             isUserSessionPending={isUserSessionPending}
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-            userFinishedQuestions={userFinishedQuestions ?? []}
           />
         )}
     </>

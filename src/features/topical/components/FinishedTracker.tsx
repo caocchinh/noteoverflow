@@ -43,13 +43,12 @@ import {
   LastPageButton,
 } from "./PaginationButtons";
 import { Button } from "@/components/ui/button";
+import { useIsMutating } from "@tanstack/react-query";
 
 export const FinishedTracker = ({
   allQuestions,
   isValidSession,
   isUserSessionPending,
-  userFinishedQuestions,
-  bookmarks,
   navigateToQuestion,
 }: FinishedTrackerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,11 +57,26 @@ export const FinishedTracker = ({
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const {
+    setIsCalculatorOpen,
+    savedActivitiesIsFetching,
+    finishedQuestionsData: userFinishedQuestions,
+  } = useTopicalApp();
 
-  const finishedCount = allQuestions.filter((q) =>
-    userFinishedQuestions?.some((fq) => fq.question.id === q.id)
-  ).length;
+  const isMutatingThisFinishedQuestion =
+    useIsMutating({
+      mutationKey: ["user_saved_activities", "finished_questions"],
+    }) > 0;
+
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const finishedCount = useMemo(
+    () =>
+      allQuestions.filter((q) =>
+        userFinishedQuestions?.some((fq) => fq.question.id === q.id)
+      ).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allQuestions, userFinishedQuestions, isMutatingThisFinishedQuestion]
+  );
 
   const progressPercentage =
     allQuestions.length > 0 ? (finishedCount / allQuestions.length) * 100 : 0;
@@ -88,7 +102,13 @@ export const FinishedTracker = ({
         ? bTime - aTime
         : aTime - bTime;
     });
-  }, [allQuestions, userFinishedQuestions, sortParameters.sortBy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    allQuestions,
+    userFinishedQuestions,
+    sortParameters.sortBy,
+    isMutatingThisFinishedQuestion,
+  ]);
 
   const fullPartitionedData = useMemo(() => {
     return chunkQuestionsData(
@@ -96,8 +116,6 @@ export const FinishedTracker = ({
       DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
     );
   }, [finishedQuestions]);
-
-  const { setIsCalculatorOpen, savedActivitiesIsFetching } = useTopicalApp();
 
   // Update displayed data when fullPartitionedData changes
   useEffect(() => {
@@ -220,12 +238,8 @@ export const FinishedTracker = ({
                         {displayedData?.map((question) =>
                           question?.questionImages.map((imageSrc: string) => (
                             <QuestionPreview
-                              bookmarks={bookmarks ?? []}
                               question={question}
                               isUserSessionPending={isUserSessionPending}
-                              userFinishedQuestions={
-                                userFinishedQuestions ?? []
-                              }
                               isValidSession={isValidSession}
                               key={`${question.id}-${imageSrc}`}
                               imageSrc={imageSrc}

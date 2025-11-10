@@ -101,7 +101,6 @@ function useBookmarkContext<T>(selector: (state: BookmarkState) => T): T {
 
 export const BookmarkButton = memo(
   ({
-    bookmarks,
     question,
     isBookmarkDisabled,
     isPopoverOpen: openProp,
@@ -116,7 +115,6 @@ export const BookmarkButton = memo(
     isValidSession,
     isInView,
   }: {
-    bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
     isBookmarkDisabled: boolean;
     isPopoverOpen?: boolean;
@@ -158,7 +156,7 @@ export const BookmarkButton = memo(
     );
 
     const bookmarkStore = useRef<BookmarkStore | null>(null);
-
+    const { bookmarksData: bookmarks } = useTopicalApp();
     // Only create the store once when component mounts
     if (bookmarkStore.current === null && isInView) {
       bookmarkStore.current = createBookmarkStore({
@@ -167,7 +165,7 @@ export const BookmarkButton = memo(
         question,
         chosenBookmarkList: (() => {
           const set = new Set<string>();
-          for (const bookmark of bookmarks) {
+          for (const bookmark of bookmarks ?? []) {
             if (
               bookmark.userBookmarks.some((b) => b.question.id === question.id)
             ) {
@@ -176,7 +174,7 @@ export const BookmarkButton = memo(
           }
           return set;
         })(),
-        bookmarks,
+        bookmarks: bookmarks ?? [],
         popOverAlign,
         badgeClassName,
         popOverTriggerClassName,
@@ -200,7 +198,7 @@ export const BookmarkButton = memo(
           question,
           chosenBookmarkList: (() => {
             const set = new Set<string>();
-            for (const bookmark of bookmarks) {
+            for (const bookmark of bookmarks ?? []) {
               if (
                 bookmark.userBookmarks.some(
                   (b) => b.question.id === question.id
@@ -278,8 +276,8 @@ const BookmarkButtonConsumer = memo(
     const isValidSession = useBookmarkContext((state) => state.isValidSession);
     const mutationKey = [
       "user_saved_activities",
-      question.id,
       "bookmarks",
+      question.id,
       bookmarkListName,
       visibility,
     ];
@@ -432,10 +430,10 @@ const BookmarkButtonConsumer = memo(
               return prev;
             }
 
-            let updatedBookmarks = [...prev.bookmarks];
+            const updatedBookmarks = prev.bookmarks ?? [];
 
             if (isCreateNew) {
-              const isListAlreadyExist = prev.bookmarks.some(
+              const isListAlreadyExist = updatedBookmarks.some(
                 (bookmark) => bookmark.id === realListId
               );
 
@@ -451,56 +449,48 @@ const BookmarkButtonConsumer = memo(
               if (isListAlreadyExist) {
                 // Add bookmark to existing list
                 addChosenBookmarkList(realListId);
-                updatedBookmarks = prev.bookmarks.map((bookmark) =>
-                  bookmark.id === realListId
-                    ? {
-                        ...bookmark,
-                        userBookmarks: [
-                          ...bookmark.userBookmarks,
-                          {
-                            question: {
-                              year: newQuestion.year,
-                              season: newQuestion.season,
-                              paperType: newQuestion.paperType,
-                              questionImages: newQuestion.questionImages,
-                              answers: newQuestion.answers,
-                              topics: newQuestion.topics,
-                              id: newQuestion.id,
-                            },
-                            updatedAt: new Date(),
-                          },
-                        ],
-                      }
-                    : bookmark
+                const existingBookmark = updatedBookmarks.find(
+                  (bookmark) => bookmark.id === realListId
                 );
+                if (existingBookmark) {
+                  existingBookmark.userBookmarks.push({
+                    question: {
+                      year: newQuestion.year,
+                      season: newQuestion.season,
+                      paperType: newQuestion.paperType,
+                      questionImages: newQuestion.questionImages,
+                      answers: newQuestion.answers,
+                      topics: newQuestion.topics,
+                      id: newQuestion.id,
+                    },
+                    updatedAt: new Date(),
+                  });
+                }
               } else {
                 // Create new list and add bookmark
                 addChosenBookmarkList(realListId);
-                updatedBookmarks = [
-                  ...prev.bookmarks,
-                  {
-                    id: realListId,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    listName: newBookmarkListName,
-                    visibility: realVisibility as "public" | "private",
+                updatedBookmarks.push({
+                  id: realListId,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  listName: newBookmarkListName,
+                  visibility: realVisibility as "public" | "private",
 
-                    userBookmarks: [
-                      {
-                        question: {
-                          year: newQuestion.year,
-                          season: newQuestion.season,
-                          paperType: newQuestion.paperType,
-                          questionImages: newQuestion.questionImages,
-                          answers: newQuestion.answers,
-                          topics: newQuestion.topics,
-                          id: newQuestion.id,
-                        },
-                        updatedAt: new Date(),
+                  userBookmarks: [
+                    {
+                      question: {
+                        year: newQuestion.year,
+                        season: newQuestion.season,
+                        paperType: newQuestion.paperType,
+                        questionImages: newQuestion.questionImages,
+                        answers: newQuestion.answers,
+                        topics: newQuestion.topics,
+                        id: newQuestion.id,
                       },
-                    ],
-                  },
-                ];
+                      updatedAt: new Date(),
+                    },
+                  ],
+                });
                 // Use the scrollAreaRef directly from the component
                 scrollAreaRef?.current?.scrollTo({
                   top: 0,
@@ -510,43 +500,37 @@ const BookmarkButtonConsumer = memo(
             } else if (!isCreateNew && !isRealBookmarked) {
               // Add bookmark to existing list
               addChosenBookmarkList(realListId);
-              updatedBookmarks = prev.bookmarks.map((bookmark) =>
-                bookmark.id === realListId
-                  ? {
-                      ...bookmark,
-                      userBookmarks: [
-                        ...bookmark.userBookmarks,
-                        {
-                          question: {
-                            year: newQuestion.year,
-                            season: newQuestion.season,
-                            paperType: newQuestion.paperType,
-                            questionImages: newQuestion.questionImages,
-                            answers: newQuestion.answers,
-                            topics: newQuestion.topics,
-                            id: newQuestion.id,
-                          },
-                          updatedAt: new Date(),
-                        },
-                      ],
-                    }
-                  : bookmark
+              const existingBookmark = updatedBookmarks.find(
+                (bookmark) => bookmark.id === realListId
               );
+              if (existingBookmark) {
+                existingBookmark.userBookmarks.push({
+                  question: {
+                    year: newQuestion.year,
+                    season: newQuestion.season,
+                    paperType: newQuestion.paperType,
+                    questionImages: newQuestion.questionImages,
+                    answers: newQuestion.answers,
+                    topics: newQuestion.topics,
+                    id: newQuestion.id,
+                  },
+                  updatedAt: new Date(),
+                });
+              }
             } else if (!isCreateNew && isRealBookmarked) {
               // Remove bookmark from list
               removeChosenBookmarkList(realListId);
               setIsRemoveFromListDialogOpen(false);
-              updatedBookmarks = prev.bookmarks.map((bookmark) =>
-                bookmark.id === realListId
-                  ? {
-                      ...bookmark,
-                      userBookmarks: bookmark.userBookmarks.filter(
-                        (userBookmark) =>
-                          userBookmark.question.id !== newQuestion.id
-                      ),
-                    }
-                  : bookmark
+              const existingBookmark = updatedBookmarks.find(
+                (bookmark) => bookmark.id === realListId
               );
+              if (existingBookmark) {
+                existingBookmark.userBookmarks =
+                  existingBookmark.userBookmarks.filter(
+                    (userBookmark) =>
+                      userBookmark.question.id !== newQuestion.id
+                  );
+              }
             }
 
             return {
@@ -1150,8 +1134,8 @@ const BookmarkItem = memo(
       useIsMutating({
         mutationKey: [
           "user_saved_activities",
-          question.id,
           "bookmarks",
+          question.id,
           listName,
           visibility,
         ],
@@ -1250,7 +1234,7 @@ const ActionDialogs = memo(() => {
   );
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["user_saved_activities", question.id, "bookmarks"],
+      mutationKey: ["user_saved_activities", "bookmarks", question.id],
     }) > 0;
   const mutate = useBookmarkContext((state) => state.mutate);
 

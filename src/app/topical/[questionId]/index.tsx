@@ -34,10 +34,7 @@ export const QuestionView = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const {
-    bookmarksData: bookmarks,
-    finishedQuestionsData: userFinishedQuestions,
-  } = useTopicalApp();
+  const { bookmarksData: bookmarks } = useTopicalApp();
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">
@@ -76,7 +73,6 @@ export const QuestionView = ({
           isValidSession={isValidSession}
           question={data}
           className="!h-max"
-          finishedQuestions={userFinishedQuestions ?? []}
           isUserSessionPending={isUserSessionPending}
         />
         <BestExamHelpUltility question={data} />

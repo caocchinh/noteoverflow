@@ -61,7 +61,6 @@ const TopicalClient = ({
   const isMobileDevice = useIsMobile();
   // UI preferences hook
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
-
   const [numberOfQuestion, setNumberOfQuetion] = useState(0);
   const [
     isScrollingAndShouldShowScrollButton,
@@ -72,7 +71,6 @@ const TopicalClient = ({
     isAppSidebarOpen,
     setIsAppSidebarOpen,
     uiPreferences,
-    bookmarksData: bookmarks,
     finishedQuestionsData: userFinishedQuestions,
   } = useTopicalApp();
   const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
@@ -301,7 +299,6 @@ const TopicalClient = ({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
 
-  // Memoized data processing to prevent expensive recalculations
   const processedData = useMemo(() => {
     if (!topicalData?.data) return null;
 
@@ -742,15 +739,11 @@ const TopicalClient = ({
                         (question) =>
                           question?.questionImages.map((imageSrc: string) => (
                             <QuestionPreview
-                              bookmarks={bookmarks ?? []}
                               question={question}
                               onQuestionClick={() =>
                                 handleQuestionClick(question.id)
                               }
                               isUserSessionPending={isUserSessionPending}
-                              userFinishedQuestions={
-                                userFinishedQuestions ?? []
-                              }
                               isValidSession={isValidSession}
                               key={`${question.id}-${imageSrc}`}
                               imageSrc={imageSrc}
@@ -779,7 +772,6 @@ const TopicalClient = ({
         isOpen={isQuestionInspectOpen}
         setIsOpen={setIsQuestionInspectOpen}
         partitionedTopicalData={fullPartitionedData}
-        bookmarks={bookmarks ?? []}
         currentQuery={currentQuery}
         isValidSession={isValidSession}
         isUserSessionPending={isUserSessionPending}
@@ -788,7 +780,6 @@ const TopicalClient = ({
         sortParameters={sortParameters}
         isInspectSidebarOpen={isInspectSidebarOpen}
         setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-        userFinishedQuestions={userFinishedQuestions ?? []}
       />
     </>
   );

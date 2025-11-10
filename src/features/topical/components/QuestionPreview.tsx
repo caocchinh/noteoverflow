@@ -4,12 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { memo, useMemo, useState } from "react";
-import {
-  SelectedBookmark,
-  SelectedFinishedQuestion,
-  SelectedQuestion,
-} from "../constants/types";
+import { memo, useState } from "react";
+import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -19,20 +15,16 @@ import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 const QuestionPreview = memo(
   ({
-    bookmarks,
     imageSrc,
     listId,
     isUserSessionPending,
     isValidSession,
     question,
-    userFinishedQuestions,
     onQuestionClick,
   }: {
-    bookmarks: SelectedBookmark[];
     question: SelectedQuestion;
     imageSrc: string;
     isValidSession: boolean;
-    userFinishedQuestions: SelectedFinishedQuestion[];
     listId?: string;
     isUserSessionPending: boolean;
     onQuestionClick: () => void;
@@ -42,6 +34,7 @@ const QuestionPreview = memo(
       savedActivitiesIsLoading,
       savedActivitiesIsFetching,
       savedActivitiesIsError,
+      finishedQuestionsData: userFinishedQuestions,
     } = useTopicalApp();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -49,19 +42,31 @@ const QuestionPreview = memo(
     const [isHovering, setIsHovering] = useState(false);
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
+    const { bookmarksData: bookmarks } = useTopicalApp();
+    const doesThisQuestionFinished =
+      (() => {
+        if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
+          return false;
+        }
+        return userFinishedQuestions.some(
+          (item) => item.question.id === question.id
+        );
+      })() ?? false;
 
-    const doesThisQuestionFinished = useMemo(() => {
-      if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
-        return false;
-      }
-      return userFinishedQuestions.some(
-        (item) => item.question.id === question.id
-      );
-    }, [userFinishedQuestions, question.id]);
-
-    const isMutatingThisQuestion =
+    const isMutatingThisBookmarkQuestion =
       useIsMutating({
-        mutationKey: ["user_saved_activities", question.id, "bookmarks"],
+        mutationKey: ["user_saved_activities", "bookmarks", question.id],
+      }) > 0;
+
+    // This is used to check if the finished question is being mutated, a trick to prevent unnecessary re-renders
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const isMutatingThisFinishedQuestion =
+      useIsMutating({
+        mutationKey: [
+          "user_saved_activities",
+          "finished_questions",
+          question.id,
+        ],
       }) > 0;
 
     return (
@@ -141,7 +146,6 @@ const QuestionPreview = memo(
             isHovering && !isMobileDevice && "md:flex hidden"
           )}
           badgeClassName="hidden"
-          bookmarks={bookmarks}
           question={question}
           setIsPopoverOpen={setIsPopoverOpen}
           isPopoverOpen={isPopoverOpen}
@@ -151,7 +155,7 @@ const QuestionPreview = memo(
           isInView={shouldOpen}
           listId={listId}
         />
-        {isMutatingThisQuestion && (
+        {isMutatingThisBookmarkQuestion && (
           <Badge
             className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
             onClick={(e) => {
@@ -192,13 +196,13 @@ const QuestionPreview = memo(
             <Loader2 className="animate-spin" />
           </Badge>
         )}
-        {!isMutatingThisQuestion && isHovering && (
+        {!isMutatingThisBookmarkQuestion && isHovering && (
           <Button
             className={cn(
               "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
               "rounded-[3px] z-[30]",
               (() => {
-                for (const bookmark of bookmarks) {
+                for (const bookmark of bookmarks ?? []) {
                   if (
                     bookmark.userBookmarks.some(
                       (b) => b.question.id === question.id

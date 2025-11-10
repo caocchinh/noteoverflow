@@ -12,39 +12,34 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import {
-  SavedActivitiesResponse,
-  SelectedFinishedQuestion,
-  SelectedQuestion,
-} from "../constants/types";
+import { SavedActivitiesResponse, SelectedQuestion } from "../constants/types";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const QuestionInspectFinishedCheckbox = ({
-  finishedQuestions,
   question,
   isUserSessionPending,
   className,
   isValidSession,
 }: {
-  finishedQuestions: SelectedFinishedQuestion[] | null;
   question: SelectedQuestion;
   isUserSessionPending: boolean;
   className?: string;
   isValidSession: boolean;
 }) => {
+  const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
   const isMutatingThisQuestion =
     useIsMutating({
-      mutationKey: ["user_saved_activities", question.id, "finished_questions"],
+      mutationKey: ["user_saved_activities", "finished_questions", question.id],
     }) > 0;
 
   const isFinished =
-    finishedQuestions?.some((item) => item.question.id === question.id) ??
+    userFinishedQuestions?.some((item) => item.question.id === question.id) ??
     false;
 
   const queryClient = useQueryClient();
   const { savedActivitiesIsFetching, savedActivitiesIsError } = useTopicalApp();
   const { mutate } = useMutation({
-    mutationKey: ["user_saved_activities", question.id, "finished_questions"],
+    mutationKey: ["user_saved_activities", "finished_questions", question.id],
     mutationFn: async ({
       currentQuestionId,
       isCurrentlyFinished,
@@ -88,7 +83,7 @@ export const QuestionInspectFinishedCheckbox = ({
           if (!prev) {
             return prev;
           }
-          const next = [...prev.finishedQuestions];
+          const next = prev.finishedQuestions ?? [];
           if (isCurrentlyFinished) {
             next.splice(
               next.findIndex((item) => item.question.id === currentQuestionId),
@@ -108,7 +103,6 @@ export const QuestionInspectFinishedCheckbox = ({
               updatedAt: new Date(),
             });
           }
-
           return {
             ...prev,
             finishedQuestions: next,

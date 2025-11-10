@@ -22,7 +22,7 @@ import {
   chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import { authClient } from "@/lib/auth/auth-client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -65,14 +65,20 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const {
     bookmarksData: bookmarks,
-    finishedQuestionsData: userFinishedQuestions,
     savedActivitiesIsFetching,
     uiPreferences,
   } = useTopicalApp();
+
+  const isMutatingBookmarks =
+    useIsMutating({
+      mutationKey: ["user_saved_activities", "bookmarks"],
+    }) > 0;
+
   const metadata = useMemo(() => {
     if (!bookmarks) return null;
     return computeBookmarksMetadata(bookmarks);
-  }, [bookmarks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookmarks, isMutatingBookmarks]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -96,7 +102,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     if (!chosenList) return null;
     return bookmarks?.find((bookmark) => bookmark.id === chosenList.id)
       ?.userBookmarks;
-  }, [chosenList, bookmarks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosenList, bookmarks, isMutatingBookmarks]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
@@ -164,7 +171,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       );
 
       setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0] ?? 0);
+      setDisplayedData(chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
       scrollAreaRef.current?.scrollTo({
         top: 0,
@@ -481,10 +488,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 {displayedData?.map((question) =>
                   question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview
-                      bookmarks={bookmarks ?? []}
                       question={question}
                       isUserSessionPending={isUserSessionPending}
-                      userFinishedQuestions={userFinishedQuestions ?? []}
                       isValidSession={isValidSession}
                       key={`${question.id}-${imageSrc}`}
                       imageSrc={imageSrc}
@@ -527,7 +532,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               No questions found. Search for questions and add them to this
               list!
             </p>
-            <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
+            <NavigateToTopicalApp>Search for questions</NavigateToTopicalApp>
           </div>
         )}
       </div>
@@ -549,14 +554,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             isOpen={isQuestionInspectOpen}
             setIsOpen={setIsQuestionInspectOpen}
             partitionedTopicalData={fullPartitionedData}
-            bookmarks={bookmarks ?? []}
             BETTER_AUTH_URL={BETTER_AUTH_URL}
             isValidSession={isValidSession}
             isUserSessionPending={isUserSessionPending}
             listId={chosenList?.id}
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-            userFinishedQuestions={userFinishedQuestions ?? []}
           />
         )}
     </>

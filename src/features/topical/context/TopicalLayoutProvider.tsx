@@ -217,8 +217,6 @@ export default function TopicalLayoutProvider({
 
       return data;
     },
-    // Use select to only trigger re-renders when data actually changes
-    select: (data) => data,
   });
 
   // Memoize individual query states to prevent context re-renders

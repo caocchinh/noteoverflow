@@ -201,20 +201,16 @@ export interface QuestionHoverCardProps {
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
-  bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
   isValidSession: boolean;
   listId?: string;
   isMobileDevice: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
   resetScrollPositions: () => void;
 }
 
 export interface BrowseMoreQuestionsProps {
   displayedData: SelectedQuestion[];
-  bookmarks: SelectedBookmark[];
   isUserSessionPending: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion[];
   isValidSession: boolean;
   navigateToQuestion: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
@@ -225,7 +221,6 @@ export interface QuestionInspectProps {
   isOpen: QuestionInspectOpenState;
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
-  bookmarks: SelectedBookmark[];
   currentQuery?: CurrentQuery;
   isUserSessionPending: boolean;
   sortParameters?: SortParameters;
@@ -233,7 +228,6 @@ export interface QuestionInspectProps {
   isValidSession: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  userFinishedQuestions: SelectedFinishedQuestion[];
   listId?: string;
   BETTER_AUTH_URL: string;
 }
@@ -274,8 +268,6 @@ export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
   isValidSession: boolean;
   isUserSessionPending: boolean;
-  userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
-  bookmarks: SelectedBookmark[];
   navigateToQuestion: (questionId: string) => void;
 }
 

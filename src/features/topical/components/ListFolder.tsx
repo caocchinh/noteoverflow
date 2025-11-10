@@ -72,7 +72,7 @@ export const ListFolder = ({
   >;
 }) => {
   const queryClient = useQueryClient();
-  const mutationKey = ["delete_bookmark_list", listName, visibility];
+  const mutationKey = ["update_bookmark_list", listName, visibility];
   const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
   const [isRenameAlertDialogOpen, setIsRenameAlertDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState(listName);
