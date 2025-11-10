@@ -251,9 +251,7 @@ export interface AppUltilityBarProps {
 export interface AppSidebarProps {
   currentQuery: CurrentQuery;
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   isTopicalDataFetching: boolean;
-  isQuestionViewDisabled: boolean;
   filterUrl: string;
   mountedRef: RefObject<boolean>;
   searchParams: { [key: string]: string | string[] | undefined };

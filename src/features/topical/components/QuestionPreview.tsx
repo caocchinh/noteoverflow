@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
@@ -43,23 +43,12 @@ const QuestionPreview = memo(
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
     const { bookmarksData: bookmarks } = useTopicalApp();
-    const doesThisQuestionFinished =
-      (() => {
-        if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
-          return false;
-        }
-        return userFinishedQuestions.some(
-          (item) => item.question.id === question.id
-        );
-      })() ?? false;
 
     const isMutatingThisBookmarkQuestion =
       useIsMutating({
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
 
-    // This is used to check if the finished question is being mutated, a trick to prevent unnecessary re-renders
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const isMutatingThisFinishedQuestion =
       useIsMutating({
         mutationKey: [
@@ -68,6 +57,16 @@ const QuestionPreview = memo(
           question.id,
         ],
       }) > 0;
+
+    const doesThisQuestionFinished = useMemo(() => {
+      if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
+        return false;
+      }
+      return userFinishedQuestions.some(
+        (item) => item.question.id === question.id
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userFinishedQuestions, question.id, isMutatingThisFinishedQuestion]);
 
     return (
       <div

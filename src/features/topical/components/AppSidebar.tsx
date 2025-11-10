@@ -25,7 +25,6 @@ import {
 } from "../constants/types";
 import {
   DEFAULT_CACHE,
-  DEFAULT_SORT_OPTIONS,
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
   UI_PREFERENCES_CACHE_KEY,
@@ -51,15 +50,13 @@ const AppSidebar = ({
   currentQuery,
   setCurrentQuery,
   setIsSearchEnabled,
-  setSortParameters,
-  isTopicalDataFetching,
-  isQuestionViewDisabled,
   filterUrl,
   mountedRef,
   searchParams,
   setIsValidSearchParams,
   isUserSessionPending,
   isValidSession,
+  isTopicalDataFetching,
   isAddRecentQueryPending,
 }: AppSidebarProps) => {
   const [isMounted, setIsMounted] = useState(false);
@@ -273,9 +270,6 @@ const AppSidebar = ({
         setIsValidSearchParams(true);
         setCurrentQuery(parsedQueryFromSearchParams);
         setIsSearchEnabled(true);
-        setSortParameters({
-          sortBy: DEFAULT_SORT_OPTIONS,
-        });
       }
     }
 
@@ -365,7 +359,6 @@ const AppSidebar = ({
     setCurrentQuery,
     setIsSearchEnabled,
     setIsValidSearchParams,
-    setSortParameters,
   ]);
 
   useEffect(() => {
@@ -486,7 +479,6 @@ const AppSidebar = ({
         <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
           <RecentQuery
             isAddRecentQueryPending={isAddRecentQueryPending}
-            setSortParameters={setSortParameters}
             setIsSidebarOpen={setIsAppSidebarOpen}
             setIsSearchEnabled={setIsSearchEnabled}
             setCurrentQuery={setCurrentQuery}
@@ -781,10 +773,6 @@ const AppSidebar = ({
                       setCurrentQuery({
                         ...query,
                       });
-                      // Update URL parameters without page reload
-                      setSortParameters({
-                        sortBy: DEFAULT_SORT_OPTIONS,
-                      });
                     } else if (isSameQuery && isMobileDevice) {
                       setIsAppSidebarOpen(false);
                     }
@@ -794,7 +782,7 @@ const AppSidebar = ({
                   <ScanText />
                 </Button>
                 <ShareFilterButton
-                  isQuestionViewDisabled={isQuestionViewDisabled}
+                  isDisabled={isTopicalDataFetching}
                   filterUrl={filterUrl}
                 />
               </ButtonUltility>
@@ -814,10 +802,10 @@ const AppSidebar = ({
 export default AppSidebar;
 
 const ShareFilterButton = ({
-  isQuestionViewDisabled,
+  isDisabled,
   filterUrl,
 }: {
-  isQuestionViewDisabled: boolean;
+  isDisabled: boolean;
   filterUrl: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -825,7 +813,7 @@ const ShareFilterButton = ({
     <>
       <Button
         className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-        disabled={isQuestionViewDisabled}
+        disabled={isDisabled}
         onClick={() => {
           setIsOpen(true);
         }}

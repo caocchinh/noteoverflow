@@ -22,7 +22,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { CurrentQuery, FilterData, SortParameters } from "../constants/types";
+import { CurrentQuery, FilterData } from "../constants/types";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,6 @@ export const RecentQuery = ({
   setIsSearchEnabled,
   setCurrentQuery,
   isAddRecentQueryPending,
-  setSortParameters,
   isOverwriting,
   setSelectedCurriculum,
   setSelectedSubject,
@@ -73,7 +72,6 @@ export const RecentQuery = ({
   setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
   setSelectedSubject: Dispatch<SetStateAction<string>>;
   setSelectedTopic: Dispatch<SetStateAction<string[]>>;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   setSelectedYear: Dispatch<SetStateAction<string[]>>;
   setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
   setSelectedSeason: Dispatch<SetStateAction<string[]>>;
@@ -283,7 +281,6 @@ export const RecentQuery = ({
                     setQueryThatIsDeleting={setQueryThatIsDeleting}
                     deleteRecentQueryMutation={deleteRecentQueryMutation}
                     setIsDialogOpen={setIsDialogOpen}
-                    setSortParameters={setSortParameters}
                   />
                 );
               })}
@@ -315,7 +312,6 @@ const RecentQueryItem = ({
   setIsDialogOpen,
   item,
   deleteRecentQueryMutation,
-  setSortParameters,
   isUserSessionPending,
   isValidSession,
   setAccordionValue,
@@ -342,7 +338,6 @@ const RecentQueryItem = ({
   setQueryThatIsDeleting: Dispatch<SetStateAction<string | null>>;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
   deleteRecentQueryMutation: (queryKey: string) => void;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   isUserSessionPending: boolean;
   isValidSession: boolean;
 }) => {
@@ -483,10 +478,6 @@ const RecentQueryItem = ({
               setSelectedYear(parsedQuery.year);
               setIsSearchEnabled(true);
               setSelectedPaperType(parsedQuery.paperType);
-              setSortParameters({
-                sortBy: "descending",
-              });
-
               setTimeout(() => {
                 isOverwriting.current = false;
               }, 0);
