@@ -752,6 +752,15 @@ const SearchPastPaper = () => {
                   <Trash2 className="w-4 h-4 ml-2" />
                 </Button>
               </div>
+              <div className="relative mt-[-10px] pt-0 w-full">
+                <Button
+                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Close
+                  <XIcon className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
 
               <div className="pt-2 text-center">
                 <p className="text-xs text-muted-foreground">
@@ -772,7 +781,7 @@ const SearchPastPaper = () => {
       </Dialog>
       <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
         <DialogContent
-          className="dark:bg-muted z-[9999999] !max-w-[475px] w-[85%]"
+          className="dark:bg-muted z-[9999999] !max-w-[475px] w-[85%] !px-2"
           overlayClassName="z-[999999]"
         >
           <DialogHeader>
@@ -781,7 +790,7 @@ const SearchPastPaper = () => {
               Check the paper details before visiting the paper
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="w-full h-[83dvh]" type="always">
+          <ScrollArea className="w-full h-[83dvh] px-4" type="always">
             <div className="relative rounded-xl border border-border bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
