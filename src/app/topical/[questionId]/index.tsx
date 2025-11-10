@@ -9,7 +9,7 @@ import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/Q
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
-import { AnnotatableInspectImages } from "@/features/topical/components/AnnotatableInspectImages";
+import { AnnotatableInspectImages } from "@/features/topical/components/AnnotatableInspectImages/AnnotatableInspectImages/AnnotatableInspectImages";
 import { useAuth } from "@/context/AuthContext";
 
 export const QuestionView = ({

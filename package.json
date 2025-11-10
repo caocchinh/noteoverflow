@@ -59,6 +59,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.0.0",
     "react-konva": "^19.2.0",
+    "react-photo-view": "^1.2.7",
     "react-resizable-panels": "^3.0.6",
     "react-responsive-masonry": "^2.7.1",
     "react-rnd": "^10.5.2",

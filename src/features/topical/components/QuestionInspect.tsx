@@ -72,7 +72,6 @@ import { JumpToTabButton } from "./JumpToTabButton";
 import Sort from "./Sort";
 import { ShareFilter } from "./ShareFilter";
 import { QuestionInformation } from "./QuestionInformation";
-import { AnnotatableInspectImages } from "./AnnotatableInspectImages";
 import {
   HoverCard,
   HoverCardContent,
@@ -96,6 +95,7 @@ import {
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { FinishedTracker } from "./FinishedTracker";
 import { useAuth } from "@/context/AuthContext";
+import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 
 const QuestionInspect = ({
   isOpen,
@@ -667,8 +667,7 @@ const QuestionInspect = ({
 
             if (
               (e.key === "ArrowUp" ||
-                ((e.key === "w" || e.key === "a" || e.key === "ArrowLeft") &&
-                  !isInputFocused)) &&
+                ((e.key === "w" || e.key === "a") && !isInputFocused)) &&
               !isHandlePreviousQuestionDisabled
             ) {
               e.preventDefault();
@@ -679,8 +678,7 @@ const QuestionInspect = ({
               }, 25);
             } else if (
               (e.key === "ArrowDown" ||
-                ((e.key === "s" || e.key === "d" || e.key === "ArrowRight") &&
-                  !isInputFocused)) &&
+                ((e.key === "s" || e.key === "d") && !isInputFocused)) &&
               !isHandleNextQuestionDisabled
             ) {
               e.preventDefault();
