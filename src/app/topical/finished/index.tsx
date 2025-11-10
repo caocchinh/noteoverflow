@@ -125,7 +125,7 @@ const FinishedQuestionsClient = ({
 
       {!isAuthenticated && !isSessionPending && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-red-500 text-center">
             You are not signed in. Please sign to view your finished questions!
           </p>
         </div>

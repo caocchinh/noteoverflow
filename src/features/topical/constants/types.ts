@@ -156,12 +156,8 @@ export interface MultiSelectContextProps {
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
   inputRef: RefObject<HTMLInputElement | null>;
-  isClickingScrollArea: boolean;
-  setIsClickingScrollArea: Dispatch<SetStateAction<boolean>>;
   commandListRef: RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
-  isBlockingInput: boolean;
-  setIsBlockingInput: Dispatch<SetStateAction<boolean>>;
   label: VALID_LABEL;
   prerequisite: string;
   isMobileDevice: boolean;

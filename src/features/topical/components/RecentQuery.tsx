@@ -76,7 +76,7 @@ export const RecentQuery = ({
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }) => {
   const { uiPreferences, setUiPreference } = useTopicalApp();
-  const { isPending, isAuthenticated } = useAuth();
+  const { isSessionPending, isAuthenticated } = useAuth();
   const {
     data: recentQuery,
     isError: isRecentQueryError,
@@ -213,24 +213,26 @@ export const RecentQuery = ({
             )}
             {!isAuthenticated && (
               <div className="flex justify-center items-center h-full">
-                <p className="text-red-500">
+                <p className="text-red-500 text-center">
                   Please sign in to view recently searched queries.
                 </p>
               </div>
             )}
             {isRecentQueryError && (
               <div className="flex justify-center items-center h-full">
-                <p className="text-red-500">
+                <p className="text-red-500 text-center">
                   An error occurred while fetching recent queries! Please
                   refresh the page.
                 </p>
               </div>
             )}
-            {isAddRecentQueryPending && !isPending && isAuthenticated && (
-              <div className="flex justify-center items-center text-sm gap-2">
-                Updating <Loader2 className="animate-spin" size={13} />
-              </div>
-            )}
+            {isAddRecentQueryPending &&
+              !isSessionPending &&
+              isAuthenticated && (
+                <div className="flex justify-center items-center text-sm gap-2">
+                  Updating <Loader2 className="animate-spin" size={13} />
+                </div>
+              )}
             {recentQuery && recentQuery.length == 0 && (
               <div className="h-full w-full flex items-center justify-center">
                 No item found! Try searching for something.
@@ -339,7 +341,7 @@ const RecentQueryItem = ({
   const isThisItemDeleting = useIsMutating({
     mutationKey: ["delete_recent_query", item.queryKey],
   });
-  const { isPending, isAuthenticated } = useAuth();
+  const { isSessionPending, isAuthenticated } = useAuth();
   return (
     <AccordionItem
       value={index.toString()}
@@ -423,7 +425,7 @@ const RecentQueryItem = ({
             isThisItemDeleting && "!bg-red-500"
           )}
           onClick={() => {
-            if (isThisItemDeleting || isPending || !isAuthenticated) {
+            if (isThisItemDeleting || isSessionPending || !isAuthenticated) {
               return;
             }
             const stringifiedNewQuery = JSON.stringify(parsedQuery);

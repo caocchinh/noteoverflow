@@ -56,7 +56,6 @@ const EnhancedSelect = ({
   modal?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isBlockingInput, setIsBlockingInput] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isMobileDevice = useIsMobile();
   const [inputValue, setInputValue] = useState<string>("");
@@ -91,15 +90,11 @@ const EnhancedSelect = ({
               "h-max w-[200px] justify-between whitespace-pre-wrap",
               triggerClassName
             )}
-            disabled={!!prerequisite}
-            variant="outline"
             onClick={() => {
               setIsOpen(!isOpen);
-              setIsBlockingInput(true);
-              setTimeout(() => {
-                setIsBlockingInput(false);
-              }, 0);
             }}
+            disabled={!!prerequisite}
+            variant="outline"
           >
             {(() => {
               if (selectedValue) {
@@ -115,6 +110,10 @@ const EnhancedSelect = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent
+          autoFocus={false}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+          }}
           onInteractOutside={(e) => {
             if (triggerRef.current?.contains(e.target as Node)) {
               return;
@@ -135,7 +134,6 @@ const EnhancedSelect = ({
               <CommandInput
                 className="h-9 border-none"
                 placeholder={`Search ${label.toLowerCase()}`}
-                readOnly={isBlockingInput}
                 ref={inputRef}
                 onClick={() => {
                   inputRef.current?.focus();
@@ -168,14 +166,10 @@ const EnhancedSelect = ({
                       <EnhancedSelectItem
                         key={item.code}
                         item={item}
-                        search={inputValue}
                         isOpen={isOpen}
                         setIsOpen={setIsOpen}
                         setInputValue={setInputValue}
                         setSelectedValue={setSelectedValue}
-                        inputRef={inputRef}
-                        setIsBlockingInput={setIsBlockingInput}
-                        inputValue={inputValue}
                         selectedValue={selectedValue}
                       />
                     ))}
@@ -195,20 +189,14 @@ const EnhancedSelectItem = ({
   setIsOpen,
   setInputValue,
   setSelectedValue,
-  inputRef,
-  setIsBlockingInput,
-  inputValue,
+
   selectedValue,
 }: {
   item: { code: string; coverImage: string };
-  search: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   setInputValue: (value: string) => void;
   setSelectedValue: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  setIsBlockingInput: (value: boolean) => void;
-  inputValue: string;
   selectedValue: string;
 }) => {
   return (
@@ -218,24 +206,9 @@ const EnhancedSelectItem = ({
           className={cn("cursor-pointer", !isOpen && "pointer-events-none")}
           key={item.code}
           onSelect={(currentValue) => {
-            setIsBlockingInput(true);
-            setTimeout(() => {
-              setIsBlockingInput(false);
-            }, 0);
             setSelectedValue(currentValue);
             setIsOpen(false);
             setInputValue("");
-          }}
-          onTouchEnd={() => {
-            setTimeout(() => {
-              inputRef.current?.focus();
-              setIsBlockingInput(false);
-            }, 0);
-          }}
-          onTouchStart={() => {
-            if (!inputValue) {
-              setIsBlockingInput(true);
-            }
           }}
           value={item.code}
         >

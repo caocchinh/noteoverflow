@@ -145,7 +145,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         !savedActivitiesIsFetching &&
         !isAuthenticated &&
         !isSessionPending && (
-          <p className="text-sm  text-red-500">
+          <p className="text-sm  text-red-500 text-center">
             You are not signed in. Please sign to create a list!
           </p>
         )}
