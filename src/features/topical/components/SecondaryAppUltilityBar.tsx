@@ -140,37 +140,44 @@ const SecondaryAppUltilityBar = ({
             To filter questions, select a subject first
           </TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Button
-                className="flex cursor-pointer items-center gap-2 border"
-                disabled={isQuestionViewDisabled}
-                onClick={() => {
-                  setIsQuestionInspectOpen((prev) => ({
-                    ...prev,
-                    isOpen: true,
-                  }));
-                }}
-                variant="default"
-              >
-                Inspect
-                <Monitor />
-              </Button>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            className={cn(
-              !isQuestionViewDisabled && "!hidden",
-              "flex justify-center items-center gap-2"
-            )}
-          >
-            To inspect questions, select a subject first
-          </TooltipContent>
-        </Tooltip>
+        {setIsQuestionInspectOpen && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button
+                  className="flex cursor-pointer items-center gap-2 border"
+                  disabled={isQuestionViewDisabled}
+                  onClick={() => {
+                    setIsQuestionInspectOpen((prev) => ({
+                      ...prev,
+                      isOpen: true,
+                    }));
+                  }}
+                  variant="default"
+                >
+                  Inspect
+                  <Monitor />
+                </Button>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              className={cn(
+                !isQuestionViewDisabled && "!hidden",
+                "flex justify-center items-center gap-2"
+              )}
+            >
+              To inspect questions, select a subject first
+            </TooltipContent>
+          </Tooltip>
+        )}
         {uiPreferences.layoutStyle === "pagination" &&
-          !isQuestionViewDisabled && (
+          !isQuestionViewDisabled &&
+          fullPartitionedData &&
+          currentChunkIndex !== undefined &&
+          setCurrentChunkIndex &&
+          setDisplayedData &&
+          scrollAreaRef && (
             <>
               <Separator orientation="vertical" className="!h-[30px]" />
               <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">

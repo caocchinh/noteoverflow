@@ -21,8 +21,8 @@ import {
 } from "@/features/topical/constants/constants";
 import type {
   SortParameters,
-  CurrentQuery,
   QuestionInspectOpenState,
+  AppMainContentProps,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -55,23 +55,7 @@ const AppMainContent = ({
   sideBarInsetRef,
   ultilityRef,
   filterUrl,
-}: {
-  currentQuery: CurrentQuery;
-  topicalData: { data: SelectedQuestion[]; isRateLimited: boolean } | undefined;
-  isSearchEnabled: boolean;
-  isTopicalDataError: boolean;
-  isTopicalDataFetching: boolean;
-  isTopicalDataFetched: boolean;
-  isValidSearchParams: boolean;
-  BETTER_AUTH_URL: string;
-  isValidSession: boolean;
-  isUserSessionPending: boolean;
-  refetchTopicalData: () => void;
-  searchParams: { [key: string]: string | string[] | undefined };
-  sideBarInsetRef: React.RefObject<HTMLDivElement | null>;
-  ultilityRef: React.RefObject<HTMLDivElement | null>;
-  filterUrl: string;
-}) => {
+}: AppMainContentProps) => {
   const pathname = usePathname();
   const isMobileDevice = useIsMobile();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);

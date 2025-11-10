@@ -288,13 +288,32 @@ export interface SecondaryAppUltilityBarProps {
   setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
   isQuestionViewDisabled: boolean;
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
-  fullPartitionedData: SelectedQuestion[][] | undefined;
-  currentChunkIndex: number;
-  setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
-  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
-  scrollAreaRef: RefObject<HTMLDivElement | null>;
-  sortParameters: SortParameters;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
-  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  // Optional props for inspect and pagination functionality
+  fullPartitionedData?: SelectedQuestion[][] | undefined;
+  currentChunkIndex?: number;
+  setCurrentChunkIndex?: Dispatch<SetStateAction<number>>;
+  setDisplayedData?: Dispatch<SetStateAction<SelectedQuestion[]>>;
+  scrollAreaRef?: RefObject<HTMLDivElement | null>;
+  sortParameters?: SortParameters;
+  setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
+  setIsQuestionInspectOpen?: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isSidebarOpen: boolean;
+}
+
+export interface AppMainContentProps {
+  currentQuery: CurrentQuery;
+  topicalData: { data: SelectedQuestion[]; isRateLimited: boolean } | undefined;
+  isSearchEnabled: boolean;
+  isTopicalDataError: boolean;
+  isTopicalDataFetching: boolean;
+  isTopicalDataFetched: boolean;
+  isValidSearchParams: boolean;
+  BETTER_AUTH_URL: string;
+  isValidSession: boolean;
+  isUserSessionPending: boolean;
+  refetchTopicalData: () => void;
+  searchParams: { [key: string]: string | string[] | undefined };
+  sideBarInsetRef: RefObject<HTMLDivElement | null>;
+  ultilityRef: RefObject<HTMLDivElement | null>;
+  filterUrl: string;
 }
