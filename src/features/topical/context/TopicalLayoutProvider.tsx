@@ -112,7 +112,10 @@ const TopicalContext = createContext<{
     value: SetStateAction<UiPreferences[K]>
   ) => void;
   // Optimized user saved activities - separated to prevent unnecessary re-renders
-  savedActivitiesData: SavedActivitiesResponse | undefined;
+  bookmarksData: SavedActivitiesResponse["bookmarks"] | undefined;
+  finishedQuestionsData:
+    | SavedActivitiesResponse["finishedQuestions"]
+    | undefined;
   savedActivitiesError: Error | null;
   savedActivitiesIsLoading: boolean;
   savedActivitiesIsFetching: boolean;
@@ -219,9 +222,14 @@ export default function TopicalLayoutProvider({
   });
 
   // Memoize individual query states to prevent context re-renders
-  const savedActivitiesData = useMemo(
-    () => userSavedActivitiesQuery.data,
-    [userSavedActivitiesQuery.data]
+  const bookmarksData = useMemo(
+    () => userSavedActivitiesQuery.data?.bookmarks,
+    [userSavedActivitiesQuery.data?.bookmarks]
+  );
+
+  const finishedQuestionsData = useMemo(
+    () => userSavedActivitiesQuery.data?.finishedQuestions,
+    [userSavedActivitiesQuery.data?.finishedQuestions]
   );
 
   const savedActivitiesError = useMemo(
@@ -253,7 +261,8 @@ export default function TopicalLayoutProvider({
         setIsCalculatorOpen,
         uiPreferences,
         setUiPreference,
-        savedActivitiesData,
+        bookmarksData,
+        finishedQuestionsData,
         savedActivitiesError,
         savedActivitiesIsLoading,
         savedActivitiesIsFetching,

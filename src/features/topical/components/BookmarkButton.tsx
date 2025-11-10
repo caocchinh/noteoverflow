@@ -836,8 +836,8 @@ const BookmarkTrigger = memo(() => {
       mutationKey: ["user_saved_activities", question.id, "bookmarks"],
     }) > 0;
 
-  const { savedActivitiesIsFetching, savedActivitiesData } = useTopicalApp();
-  const isBookmarked = savedActivitiesData?.bookmarks?.some((bookmark) =>
+  const { savedActivitiesIsFetching, bookmarksData } = useTopicalApp();
+  const isBookmarked = bookmarksData?.some((bookmark) =>
     bookmark.userBookmarks.some((b) => b.question.id === question.id)
   );
 

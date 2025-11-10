@@ -2,7 +2,7 @@
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
@@ -34,13 +34,10 @@ export const QuestionView = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { savedActivitiesData } = useTopicalApp();
-  const userFinishedQuestions = useMemo(() => {
-    return savedActivitiesData?.finishedQuestions;
-  }, [savedActivitiesData?.finishedQuestions]);
-  const bookmarks = useMemo(() => {
-    return savedActivitiesData?.bookmarks;
-  }, [savedActivitiesData?.bookmarks]);
+  const {
+    bookmarksData: bookmarks,
+    finishedQuestionsData: userFinishedQuestions,
+  } = useTopicalApp();
 
   return (
     <div className="flex flex-col h-screen pt-16 px-4 relative">

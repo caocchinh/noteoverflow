@@ -65,14 +65,12 @@ const FinishedQuestionsClient = ({
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
-    useTopicalApp();
-  const userFinishedQuestions = useMemo(() => {
-    return savedActivitiesData?.finishedQuestions;
-  }, [savedActivitiesData?.finishedQuestions]);
-  const bookmarks = useMemo(() => {
-    return savedActivitiesData?.bookmarks;
-  }, [savedActivitiesData?.bookmarks]);
+  const {
+    bookmarksData: bookmarks,
+    finishedQuestionsData: userFinishedQuestions,
+    savedActivitiesIsFetching,
+    uiPreferences,
+  } = useTopicalApp();
   const metadata = useMemo(() => {
     if (!userFinishedQuestions) return null;
     return computeFinishedQuestionsMetadata(userFinishedQuestions);

@@ -63,15 +63,12 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   const isValidSession = !!userSession?.data?.session;
 
-  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
-    useTopicalApp();
-
-  const userFinishedQuestions = useMemo(() => {
-    return savedActivitiesData?.finishedQuestions;
-  }, [savedActivitiesData?.finishedQuestions]);
-  const bookmarks = useMemo(() => {
-    return savedActivitiesData?.bookmarks;
-  }, [savedActivitiesData?.bookmarks]);
+  const {
+    bookmarksData: bookmarks,
+    finishedQuestionsData: userFinishedQuestions,
+    savedActivitiesIsFetching,
+    uiPreferences,
+  } = useTopicalApp();
   const metadata = useMemo(() => {
     if (!bookmarks) return null;
     return computeBookmarksMetadata(bookmarks);

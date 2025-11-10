@@ -77,14 +77,12 @@ export const BookmarkView = ({
       isOpen: false,
       questionId: "",
     });
-  const { savedActivitiesData, savedActivitiesIsFetching, uiPreferences } =
-    useTopicalApp();
-  const userFinishedQuestions = useMemo(() => {
-    return savedActivitiesData?.finishedQuestions;
-  }, [savedActivitiesData?.finishedQuestions]);
-  const bookmarks = useMemo(() => {
-    return savedActivitiesData?.bookmarks;
-  }, [savedActivitiesData?.bookmarks]);
+  const {
+    bookmarksData: bookmarks,
+    finishedQuestionsData: userFinishedQuestions,
+    savedActivitiesIsFetching,
+    uiPreferences,
+  } = useTopicalApp();
 
   // Fetch bookmark data only if user is not the owner
   const { data: fetchedBookmarkData, isLoading: isFetchedBookmarkLoading } =
