@@ -7,7 +7,7 @@ import { extractQuestionNumber } from "@/features/topical/lib/utils";
 import { ImageAnnotator } from "@/features/topical/components/QuestionInspect/ImageAnnotator";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import "@/features/topical/components/AnnotatableInspectImages/react-photo-view.css";
+import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
 
 export const AnnotatableInspectImages = ({
   imageSource,

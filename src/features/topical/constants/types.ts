@@ -258,6 +258,8 @@ export type QuestionInspectOpenState = {
   questionId: string;
 };
 
+export type QuestionInspectViewMode = "question" | "answer" | "both";
+
 export interface SecondaryAppSidebarProps {
   subjectMetadata: SubjectMetadata | null;
   currentFilter: SubjectMetadata | null;
@@ -324,4 +326,75 @@ export interface SecondaryMainContentProps {
   mainContent: React.ReactNode;
   isQuestionInspectOpen: QuestionInspectOpenState;
   setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+}
+
+export interface InspectSidebarProps {
+  allQuestions: SelectedQuestion[];
+  partitionedTopicalData: SelectedQuestion[][] | undefined;
+  isOpen: QuestionInspectOpenState;
+  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  currentTabThatContainsQuestion: number;
+  isInspectSidebarOpen: boolean;
+  currentQuestionId: string | undefined;
+  setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
+  setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
+  isInputFocused: RefObject<boolean>;
+  resetScrollPositions: () => void;
+  listId: string | undefined;
+  currentQuestionIndex: number;
+  overflowScrollHandler?: () => void;
+}
+
+export interface InspectSidebarRef {
+  handleNextQuestion(): void;
+  handlePreviousQuestion(): void;
+  navigateToQuestion(questionId: string): void;
+  isHandleNextQuestionDisabled: boolean;
+  isHandlePreviousQuestionDisabled: boolean;
+}
+
+export interface InspectUltilityBarProps {
+  currentView: QuestionInspectViewMode;
+  setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
+  sideBarInspectRef: RefObject<InspectSidebarRef | null>;
+  currentQuestionData: SelectedQuestion | undefined;
+  listId: string | undefined;
+  sortParameters: SortParameters | undefined;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
+  isCalculatorOpen: boolean;
+  isInspectSidebarOpen: boolean;
+  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  BETTER_AUTH_URL: string;
+  sideBarInsetRef: RefObject<HTMLDivElement | null>;
+}
+
+export interface InspectUltilityBarRef {
+  overflowScrollHandler: () => void;
+}
+
+export interface QuestionInspectMainContentProps {
+  allQuestions: SelectedQuestion[];
+  partitionedTopicalData: SelectedQuestion[][] | undefined;
+  currentTabThatContainsQuestion: number;
+  currentQuestionIndex: number;
+  currentQuestionId: string | undefined;
+  listId: string | undefined;
+  inspectUltilityBarRef: RefObject<InspectUltilityBarRef | null>;
+  sideBarInspectRef: RefObject<InspectSidebarRef | null>;
+  sortParameters: SortParameters | undefined;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
+  isCalculatorOpen: boolean;
+  isInspectSidebarOpen: boolean;
+  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  BETTER_AUTH_URL: string;
+  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  isCoolDown: RefObject<boolean>;
+  isInputFocused: RefObject<boolean>;
+}
+
+export interface QuestionInspectMainContentRef {
+  resetScrollPositions: () => void;
+  setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
+  handleKeyboardNavigation: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
