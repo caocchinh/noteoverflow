@@ -73,9 +73,13 @@ const InspectUltilityBar = forwardRef(
       };
     }, [overflowScrollHandler]);
 
-    useImperativeHandle(ref, () => ({
-      overflowScrollHandler,
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        overflowScrollHandler,
+      }),
+      [overflowScrollHandler]
+    );
 
     return (
       <>

@@ -44,7 +44,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { useUtilityOverflow } from "../hooks/useUtilityOverflow";
 
 const AppSidebar = ({
   currentQuery,
@@ -55,10 +54,10 @@ const AppSidebar = ({
   searchParams,
   setIsValidSearchParams,
   isTopicalDataFetching,
-  isAddRecentQueryPending,
+  appUltilityBarRef,
+  recentQueryRef,
 }: AppSidebarProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const { overflowScrollHandler } = useUtilityOverflow();
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<ValidCurriculum>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
@@ -468,7 +467,7 @@ const AppSidebar = ({
       variant="floating"
       onTransitionEnd={(e) => {
         if (e.propertyName == "left") {
-          overflowScrollHandler();
+          appUltilityBarRef.current?.overflowScrollHandler?.();
         }
       }}
     >
@@ -476,7 +475,7 @@ const AppSidebar = ({
       <ScrollArea className="h-full" type="always">
         <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
           <RecentQuery
-            isAddRecentQueryPending={isAddRecentQueryPending}
+            ref={recentQueryRef}
             setIsSidebarOpen={setIsAppSidebarOpen}
             setIsSearchEnabled={setIsSearchEnabled}
             setCurrentQuery={setCurrentQuery}

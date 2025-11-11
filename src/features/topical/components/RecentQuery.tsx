@@ -22,8 +22,15 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { CurrentQuery, FilterData } from "../constants/types";
-import { Dispatch, RefObject, SetStateAction, useState } from "react";
+import { CurrentQuery, FilterData, RecentQueryProps } from "../constants/types";
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -43,252 +50,333 @@ import {
   validateSubject,
 } from "../lib/utils";
 import { toast } from "sonner";
-import { deleteRecentQuery } from "../server/actions";
+import { deleteRecentQuery, addRecentQuery } from "../server/actions";
+import { BAD_REQUEST } from "@/constants/constants";
 import Sort from "./Sort";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 
-export const RecentQuery = ({
-  currentQuery,
-  setIsSearchEnabled,
-  setCurrentQuery,
-  isAddRecentQueryPending,
-  isOverwriting,
-  setSelectedCurriculum,
-  setSelectedSubject,
-  setSelectedTopic,
-  setSelectedYear,
-  setSelectedPaperType,
-  setSelectedSeason,
-  setIsSidebarOpen,
-}: {
-  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
-  currentQuery: CurrentQuery;
-  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  isAddRecentQueryPending: boolean;
-  setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
-  setSelectedSubject: Dispatch<SetStateAction<string>>;
-  setSelectedTopic: Dispatch<SetStateAction<string[]>>;
-  setSelectedYear: Dispatch<SetStateAction<string[]>>;
-  setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
-  setSelectedSeason: Dispatch<SetStateAction<string[]>>;
-  isOverwriting: RefObject<boolean>;
-  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
-}) => {
-  const { uiPreferences, setUiPreference } = useTopicalApp();
-  const { isSessionPending, isAuthenticated } = useAuth();
-  const {
-    data: recentQuery,
-    isError: isRecentQueryError,
-    isFetching: isRecentQueryFetching,
-  } = useQuery({
-    queryKey: ["user_recent_query"],
-    queryFn: async () => {
-      const response = await fetch("/api/topical/recent-query", {
-        method: "GET",
-      });
-      const data: {
-        data: {
-          queryKey: string;
-          sortParams: string | null;
-          lastSearch: number;
-        }[];
-        error?: string;
-      } = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
-      }
-
-      return data.data;
-    },
-    enabled: isAuthenticated,
-  });
-
-  const [accordionValue, setAccordionValue] =
-    useState<string>("skibidi toilet");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const queryClient = useQueryClient();
-  const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<string | null>(
-    null
-  );
-
-  const key = ["delete_recent_query", queryThatIsDeleting];
-
-  const { mutate: deleteRecentQueryMutation } = useMutation({
-    mutationKey: key,
-    mutationFn: async (queryKey: string) => {
-      const result = await deleteRecentQuery({ queryKey: queryKey });
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      return queryKey;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData<
-        {
-          queryKey: string;
-          sortParams: string | null;
-          lastSearch: number;
-        }[]
-      >(["user_recent_query"], (oldData) => {
-        if (!oldData) {
-          return oldData;
+export const RecentQuery = forwardRef(
+  (
+    {
+      currentQuery,
+      setIsSearchEnabled,
+      setCurrentQuery,
+      isOverwriting,
+      setSelectedCurriculum,
+      setSelectedSubject,
+      setSelectedTopic,
+      setSelectedYear,
+      setSelectedPaperType,
+      setSelectedSeason,
+      setIsSidebarOpen,
+    }: RecentQueryProps,
+    ref
+  ) => {
+    const { uiPreferences, setUiPreference } = useTopicalApp();
+    const { isSessionPending, isAuthenticated } = useAuth();
+    const {
+      data: recentQuery,
+      isError: isRecentQueryError,
+      isFetching: isRecentQueryFetching,
+    } = useQuery({
+      queryKey: ["user_recent_query"],
+      queryFn: async () => {
+        const response = await fetch("/api/topical/recent-query", {
+          method: "GET",
+        });
+        const data: {
+          data: {
+            queryKey: string;
+            sortParams: string | null;
+            lastSearch: number;
+          }[];
+          error?: string;
+        } = await response.json();
+        if (!response.ok) {
+          const errorMessage =
+            typeof data === "object" && data && "error" in data
+              ? String(data.error)
+              : "An error occurred";
+          throw new Error(errorMessage);
         }
-        return oldData.filter((item) => item.queryKey !== data);
+
+        return data.data;
+      },
+      enabled: isAuthenticated,
+    });
+
+    const [accordionValue, setAccordionValue] =
+      useState<string>("skibidi toilet");
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const queryClient = useQueryClient();
+    const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<
+      string | null
+    >(null);
+
+    const key = ["delete_recent_query", queryThatIsDeleting];
+
+    const { mutate: deleteRecentQueryMutation } = useMutation({
+      mutationKey: key,
+      mutationFn: async (queryKey: string) => {
+        const result = await deleteRecentQuery({ queryKey: queryKey });
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        return queryKey;
+      },
+      onSuccess: (data) => {
+        queryClient.setQueryData<
+          {
+            queryKey: string;
+            sortParams: string | null;
+            lastSearch: number;
+          }[]
+        >(["user_recent_query"], (oldData) => {
+          if (!oldData) {
+            return oldData;
+          }
+          return oldData.filter((item) => item.queryKey !== data);
+        });
+      },
+      onError: (error) => {
+        toast.error(
+          "Failed to delete outdated data: " +
+            error.message +
+            ". Please refresh the page."
+        );
+      },
+    });
+
+    const { mutate: mutateRecentQuery, isPending: isAddRecentQueryPending } =
+      useMutation({
+        mutationKey: ["add_recent_query"],
+        mutationFn: async (
+          queryKey: {
+            curriculumId: string;
+            subjectId: string;
+          } & FilterData
+        ) => {
+          const result = await addRecentQuery({ queryKey: queryKey });
+          if (result.error) {
+            throw new Error(result.error);
+          }
+          return {
+            deletedKey: result.data?.deletedKey,
+            lastSearch: result.data?.lastSearch,
+            currentQueryKey: queryKey,
+          };
+        },
+        onSuccess: (data) => {
+          queryClient.setQueryData<
+            {
+              queryKey: string;
+              sortParams: string | null;
+              lastSearch: number;
+            }[]
+          >(["user_recent_query"], (oldData) => {
+            if (!oldData) {
+              return oldData;
+            }
+            if (data && data.currentQueryKey) {
+              let newData = oldData;
+              if (data.deletedKey) {
+                newData = newData.filter(
+                  (item) => item.queryKey !== data.deletedKey
+                );
+              }
+              const isQueryAlreadyExist = newData.find(
+                (item) => item.queryKey === JSON.stringify(data.currentQueryKey)
+              );
+              if (!isQueryAlreadyExist) {
+                newData.unshift({
+                  queryKey: JSON.stringify(data.currentQueryKey),
+                  sortParams: null,
+                  lastSearch: data.lastSearch?.getTime() ?? 0,
+                });
+              } else {
+                newData = newData.map((item) => {
+                  if (item.queryKey === JSON.stringify(data.currentQueryKey)) {
+                    return {
+                      ...item,
+                      lastSearch: data.lastSearch?.getTime() ?? 0,
+                    };
+                  }
+                  return item;
+                });
+              }
+              return newData;
+            }
+            return oldData;
+          });
+        },
+        onError: (error) => {
+          if (error.message === BAD_REQUEST) {
+            toast.error(
+              "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!"
+            );
+            return;
+          }
+          toast.error(
+            "Failed to add recent search to database: " +
+              error.message +
+              ". Please refresh the page."
+          );
+        },
       });
-    },
-    onError: (error) => {
-      toast.error(
-        "Failed to delete outdated data: " +
-          error.message +
-          ". Please refresh the page."
-      );
-    },
-  });
 
-  return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full cursor-pointer rounded-sm" variant="outline">
-          <History /> Recently searched
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        showCloseButton={false}
-        className="dark:bg-accent h-[95dvh] z-[100008]"
-        overlayClassName="z-[100007]"
-      >
-        <DialogHeader className="flex justify-between flex-row text-left gap-2">
-          <div>
-            <DialogTitle>Recently searched</DialogTitle>
-            <DialogDescription className="w-[85%]">
-              Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here.
-              Synced accross devices.
-            </DialogDescription>
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-max">
-                Settings <Wrench />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
-              <p className="text-sm mb-1">Sort by date</p>
-              <Sort
-                sortParameters={{
-                  sortBy: uiPreferences.recentlySearchSortedBy,
-                }}
-                setSortParameters={(value) => {
-                  const newValue =
-                    typeof value === "function"
-                      ? value({ sortBy: uiPreferences.recentlySearchSortedBy })
-                      : value;
-                  setUiPreference("recentlySearchSortedBy", newValue.sortBy);
-                }}
-                isDisabled={false}
-                disabledMessage=""
-                descendingSortText="Most recently"
-                ascendingSortText="Least recently"
-              />
-            </PopoverContent>
-          </Popover>
-        </DialogHeader>
+    useImperativeHandle(ref, () => ({
+      mutateRecentQuery,
+      isAddRecentQueryPending,
+    }));
 
-        <Accordion
-          value={accordionValue}
-          onValueChange={setAccordionValue}
-          type="single"
-          collapsible
+    return (
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button
+            className="w-full cursor-pointer rounded-sm"
+            variant="outline"
+          >
+            <History /> Recently searched
+          </Button>
+        </DialogTrigger>
+        <DialogContent
+          showCloseButton={false}
+          className="dark:bg-accent h-[95dvh] z-[100008]"
+          overlayClassName="z-[100007]"
         >
-          <ScrollArea type="always" className="h-[65vh] pr-5">
-            {isRecentQueryFetching && (
-              <div className="flex justify-center items-center h-full gap-2">
-                Fetching <Loader2 className="animate-spin" />
-              </div>
-            )}
-            {!isAuthenticated && (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-red-500 text-center">
-                  Please sign in to view recently searched queries.
-                </p>
-              </div>
-            )}
-            {isRecentQueryError && (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-red-500 text-center">
-                  An error occurred while fetching recent queries! Please
-                  refresh the page.
-                </p>
-              </div>
-            )}
-            {isAddRecentQueryPending &&
-              !isSessionPending &&
-              isAuthenticated && (
-                <div className="flex justify-center items-center text-sm gap-2">
-                  Updating <Loader2 className="animate-spin" size={13} />
+          <DialogHeader className="flex justify-between flex-row text-left gap-2">
+            <div>
+              <DialogTitle>Recently searched</DialogTitle>
+              <DialogDescription className="w-[85%]">
+                Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show
+                here. Synced accross devices.
+              </DialogDescription>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-max">
+                  Settings <Wrench />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
+                <p className="text-sm mb-1">Sort by date</p>
+                <Sort
+                  sortParameters={{
+                    sortBy: uiPreferences.recentlySearchSortedBy,
+                  }}
+                  setSortParameters={(value) => {
+                    const newValue =
+                      typeof value === "function"
+                        ? value({
+                            sortBy: uiPreferences.recentlySearchSortedBy,
+                          })
+                        : value;
+                    setUiPreference("recentlySearchSortedBy", newValue.sortBy);
+                  }}
+                  isDisabled={false}
+                  disabledMessage=""
+                  descendingSortText="Most recently"
+                  ascendingSortText="Least recently"
+                />
+              </PopoverContent>
+            </Popover>
+          </DialogHeader>
+
+          <Accordion
+            value={accordionValue}
+            onValueChange={setAccordionValue}
+            type="single"
+            collapsible
+          >
+            <ScrollArea type="always" className="h-[65vh] pr-5">
+              {isRecentQueryFetching && (
+                <div className="flex justify-center items-center h-full gap-2">
+                  Fetching <Loader2 className="animate-spin" />
                 </div>
               )}
-            {recentQuery && recentQuery.length == 0 && (
-              <div className="h-full w-full flex items-center justify-center">
-                No item found! Try searching for something.
-              </div>
-            )}
-            {recentQuery
-              ?.toSorted((a, b) => {
-                // Convert string dates to timestamps if they're not already numbers
-                const dateA =
-                  typeof a.lastSearch === "number"
-                    ? a.lastSearch
-                    : new Date(a.lastSearch).getTime();
-                const dateB =
-                  typeof b.lastSearch === "number"
-                    ? b.lastSearch
-                    : new Date(b.lastSearch).getTime();
+              {!isAuthenticated && (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-red-500 text-center">
+                    Please sign in to view recently searched queries.
+                  </p>
+                </div>
+              )}
+              {isRecentQueryError && (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-red-500 text-center">
+                    An error occurred while fetching recent queries! Please
+                    refresh the page.
+                  </p>
+                </div>
+              )}
+              {isAddRecentQueryPending &&
+                !isSessionPending &&
+                isAuthenticated && (
+                  <div className="flex justify-center items-center text-sm gap-2">
+                    Updating <Loader2 className="animate-spin" size={13} />
+                  </div>
+                )}
+              {recentQuery && recentQuery.length == 0 && (
+                <div className="h-full w-full flex items-center justify-center">
+                  No item found! Try searching for something.
+                </div>
+              )}
+              {recentQuery
+                ?.toSorted((a, b) => {
+                  // Convert string dates to timestamps if they're not already numbers
+                  const dateA =
+                    typeof a.lastSearch === "number"
+                      ? a.lastSearch
+                      : new Date(a.lastSearch).getTime();
+                  const dateB =
+                    typeof b.lastSearch === "number"
+                      ? b.lastSearch
+                      : new Date(b.lastSearch).getTime();
 
-                if (uiPreferences.recentlySearchSortedBy === "descending") {
-                  return dateB - dateA; // Newest first
-                }
-                return dateA - dateB; // Oldest first
-              })
-              .map((item, index) => {
-                return (
-                  <RecentQueryItem
-                    key={item.queryKey + index}
-                    setCurrentQuery={setCurrentQuery}
-                    setSelectedCurriculum={setSelectedCurriculum}
-                    setSelectedSubject={setSelectedSubject}
-                    setSelectedTopic={setSelectedTopic}
-                    setSelectedYear={setSelectedYear}
-                    setSelectedPaperType={setSelectedPaperType}
-                    setAccordionValue={setAccordionValue}
-                    setSelectedSeason={setSelectedSeason}
-                    isOverwriting={isOverwriting}
-                    setIsSidebarOpen={setIsSidebarOpen}
-                    currentQuery={currentQuery}
-                    setIsSearchEnabled={setIsSearchEnabled}
-                    accordionValue={accordionValue}
-                    index={index}
-                    item={item}
-                    setQueryThatIsDeleting={setQueryThatIsDeleting}
-                    deleteRecentQueryMutation={deleteRecentQueryMutation}
-                    setIsDialogOpen={setIsDialogOpen}
-                  />
-                );
-              })}
-          </ScrollArea>
-        </Accordion>
-        <DialogClose asChild>
-          <Button className="cursor-pointer">Close</Button>
-        </DialogClose>
-      </DialogContent>
-    </Dialog>
-  );
-};
+                  if (uiPreferences.recentlySearchSortedBy === "descending") {
+                    return dateB - dateA; // Newest first
+                  }
+                  return dateA - dateB; // Oldest first
+                })
+                .map((item, index) => {
+                  return (
+                    <RecentQueryItem
+                      key={item.queryKey + index}
+                      setCurrentQuery={setCurrentQuery}
+                      setSelectedCurriculum={setSelectedCurriculum}
+                      setSelectedSubject={setSelectedSubject}
+                      setSelectedTopic={setSelectedTopic}
+                      setSelectedYear={setSelectedYear}
+                      setSelectedPaperType={setSelectedPaperType}
+                      setAccordionValue={setAccordionValue}
+                      setSelectedSeason={setSelectedSeason}
+                      isOverwriting={isOverwriting}
+                      setIsSidebarOpen={setIsSidebarOpen}
+                      currentQuery={currentQuery}
+                      setIsSearchEnabled={setIsSearchEnabled}
+                      accordionValue={accordionValue}
+                      index={index}
+                      item={item}
+                      setQueryThatIsDeleting={setQueryThatIsDeleting}
+                      deleteRecentQueryMutation={deleteRecentQueryMutation}
+                      setIsDialogOpen={setIsDialogOpen}
+                    />
+                  );
+                })}
+            </ScrollArea>
+          </Accordion>
+          <DialogClose asChild>
+            <Button className="cursor-pointer">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
+
+RecentQuery.displayName = "RecentQuery";
 
 const RecentQueryItem = ({
   currentQuery,

@@ -152,11 +152,15 @@ const QuestionInspectMainContent = forwardRef(
       resetScrollPositions();
     }, [currentQuestionId, resetScrollPositions]);
 
-    useImperativeHandle(ref, () => ({
-      resetScrollPositions,
-      setCurrentView,
-      handleKeyboardNavigation,
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        resetScrollPositions,
+        setCurrentView,
+        handleKeyboardNavigation,
+      }),
+      [resetScrollPositions, setCurrentView, handleKeyboardNavigation]
+    );
 
     return (
       <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">

@@ -1,22 +1,20 @@
 "use client";
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { CACHE_EXPIRE_TIME } from "@/features/topical/constants/constants";
 import type {
-  FilterData,
   CurrentQuery,
+  AppUltilityBarRef,
+  RecentQueryRef,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCache, setCache } from "@/drizzle/db";
-import { addRecentQuery } from "@/features/topical/server/actions";
-import { toast } from "sonner";
-import { BAD_REQUEST, INITIAL_QUERY } from "@/constants/constants";
-import { UtilityOverflowProvider } from "@/features/topical/hooks/useUtilityOverflow";
+import { INITIAL_QUERY } from "@/constants/constants";
 import AppSidebar from "@/features/topical/components/AppSidebar";
 import AppMainContent from "@/features/topical/components/AppMainContent";
 
@@ -40,6 +38,7 @@ const TopicalClient = ({
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const ultilityRef = useRef<HTMLDivElement | null>(null);
 
+  const recentQueryRef = useRef<RecentQueryRef | null>(null);
   const filterUrl = useMemo(() => {
     if (typeof window === "undefined") {
       return "";
@@ -103,83 +102,6 @@ const TopicalClient = ({
     };
   };
 
-  const { mutate: mutateRecentQuery, isPending: isAddRecentQueryPending } =
-    useMutation({
-      mutationKey: ["add_recent_query"],
-      mutationFn: async (
-        queryKey: {
-          curriculumId: string;
-          subjectId: string;
-        } & FilterData
-      ) => {
-        const result = await addRecentQuery({ queryKey: queryKey });
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        return {
-          deletedKey: result.data?.deletedKey,
-          lastSearch: result.data?.lastSearch,
-          realQueryKey: queryKey,
-        };
-      },
-      onSuccess: (data) => {
-        queryClient.setQueryData<
-          {
-            queryKey: string;
-            sortParams: string | null;
-            lastSearch: number;
-          }[]
-        >(["user_recent_query"], (oldData) => {
-          if (!oldData) {
-            return oldData;
-          }
-          if (data && data.realQueryKey) {
-            let newData = oldData;
-            if (data.deletedKey) {
-              newData = newData.filter(
-                (item) => item.queryKey !== data.deletedKey
-              );
-            }
-            const isQueryAlreadyExist = newData.find(
-              (item) => item.queryKey === JSON.stringify(data.realQueryKey)
-            );
-            if (!isQueryAlreadyExist) {
-              newData.unshift({
-                queryKey: JSON.stringify(data.realQueryKey),
-                sortParams: null,
-                lastSearch: data.lastSearch?.getTime() ?? 0,
-              });
-            } else {
-              newData = newData.map((item) => {
-                if (item.queryKey === JSON.stringify(data.realQueryKey)) {
-                  return {
-                    ...item,
-                    lastSearch: data.lastSearch?.getTime() ?? 0,
-                  };
-                }
-                return item;
-              });
-            }
-            return newData;
-          }
-          return oldData;
-        });
-      },
-      onError: (error) => {
-        if (error.message === BAD_REQUEST) {
-          toast.error(
-            "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!"
-          );
-          return;
-        }
-        toast.error(
-          "Failed to add recent search to database: " +
-            error.message +
-            ". Please refresh the page."
-        );
-      },
-    });
-
   const {
     data: topicalData,
     isFetching: isTopicalDataFetching,
@@ -189,7 +111,7 @@ const TopicalClient = ({
   } = useQuery({
     queryKey: ["topical_questions", currentQuery],
     queryFn: async () => {
-      mutateRecentQuery(currentQuery);
+      recentQueryRef.current?.mutateRecentQuery(currentQuery);
 
       try {
         const cachedData = await getCache<string>(JSON.stringify(currentQuery));
@@ -254,50 +176,47 @@ const TopicalClient = ({
     }
   }, [currentQuery, isMobileDevice, setIsAppSidebarOpen]);
 
-  const queryClient = useQueryClient();
+  const appUltilityBarRef = useRef<AppUltilityBarRef | null>(null);
 
   return (
     <>
       <div className="pt-12 h-screen !overflow-hidden">
-        <UtilityOverflowProvider
-          sideBarInsetRef={sideBarInsetRef}
-          ultilityRef={ultilityRef}
+        <SidebarProvider
+          onOpenChange={setIsAppSidebarOpen}
+          onOpenChangeMobile={setIsAppSidebarOpen}
+          open={isAppSidebarOpen}
+          openMobile={isAppSidebarOpen}
         >
-          <SidebarProvider
-            onOpenChange={setIsAppSidebarOpen}
-            onOpenChangeMobile={setIsAppSidebarOpen}
-            open={isAppSidebarOpen}
-            openMobile={isAppSidebarOpen}
-          >
-            <AppSidebar
-              currentQuery={currentQuery}
-              setCurrentQuery={setCurrentQuery}
-              setIsSearchEnabled={setIsSearchEnabled}
-              isTopicalDataFetching={isTopicalDataFetching}
-              filterUrl={filterUrl}
-              mountedRef={mountedRef}
-              searchParams={searchParams}
-              setIsValidSearchParams={setIsValidSearchParams}
-              isAddRecentQueryPending={isAddRecentQueryPending}
-            />
-            <AppMainContent
-              currentQuery={currentQuery}
-              topicalData={topicalData}
-              isSearchEnabled={isSearchEnabled}
-              isTopicalDataError={isTopicalDataError}
-              isTopicalDataFetching={isTopicalDataFetching}
-              isTopicalDataFetched={isTopicalDataFetched}
-              isValidSearchParams={isValidSearchParams}
-              BETTER_AUTH_URL={BETTER_AUTH_URL}
-              refetchTopicalData={refetchTopicalData}
-              mountedRef={mountedRef}
-              searchParams={searchParams}
-              sideBarInsetRef={sideBarInsetRef}
-              ultilityRef={ultilityRef}
-              filterUrl={filterUrl}
-            />
-          </SidebarProvider>
-        </UtilityOverflowProvider>
+          <AppSidebar
+            currentQuery={currentQuery}
+            setCurrentQuery={setCurrentQuery}
+            setIsSearchEnabled={setIsSearchEnabled}
+            isTopicalDataFetching={isTopicalDataFetching}
+            filterUrl={filterUrl}
+            mountedRef={mountedRef}
+            searchParams={searchParams}
+            setIsValidSearchParams={setIsValidSearchParams}
+            recentQueryRef={recentQueryRef}
+            appUltilityBarRef={appUltilityBarRef}
+          />
+          <AppMainContent
+            currentQuery={currentQuery}
+            topicalData={topicalData}
+            isSearchEnabled={isSearchEnabled}
+            appUltilityBarRef={appUltilityBarRef}
+            isTopicalDataError={isTopicalDataError}
+            isTopicalDataFetching={isTopicalDataFetching}
+            isTopicalDataFetched={isTopicalDataFetched}
+            isValidSearchParams={isValidSearchParams}
+            BETTER_AUTH_URL={BETTER_AUTH_URL}
+            refetchTopicalData={refetchTopicalData}
+            mountedRef={mountedRef}
+            searchParams={searchParams}
+            sideBarInsetRef={sideBarInsetRef}
+            ultilityRef={ultilityRef}
+            filterUrl={filterUrl}
+          />
+        </SidebarProvider>
       </div>
     </>
   );

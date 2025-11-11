@@ -283,14 +283,6 @@ const InspectSidebar = forwardRef(
       setCurrentTabThatContainsQuestion,
     ]);
 
-    useImperativeHandle(ref, () => ({
-      handleNextQuestion,
-      handlePreviousQuestion,
-      navigateToQuestion,
-      isHandleNextQuestionDisabled,
-      isHandlePreviousQuestionDisabled,
-    }));
-
     const isHandleNextQuestionDisabled = useMemo(() => {
       if (
         !partitionedTopicalData ||
@@ -419,6 +411,24 @@ const InspectSidebar = forwardRef(
         setCurrentTabThatContainsQuestion,
         setCurrentTab,
         setCurrentQuestionId,
+      ]
+    );
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        handleNextQuestion,
+        handlePreviousQuestion,
+        navigateToQuestion,
+        isHandleNextQuestionDisabled,
+        isHandlePreviousQuestionDisabled,
+      }),
+      [
+        handleNextQuestion,
+        handlePreviousQuestion,
+        navigateToQuestion,
+        isHandleNextQuestionDisabled,
+        isHandlePreviousQuestionDisabled,
       ]
     );
 

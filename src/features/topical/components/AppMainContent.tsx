@@ -45,6 +45,7 @@ const AppMainContent = ({
   topicalData,
   isSearchEnabled,
   isTopicalDataError,
+  appUltilityBarRef,
   isTopicalDataFetching,
   isTopicalDataFetched,
   isValidSearchParams,
@@ -292,6 +293,7 @@ const AppMainContent = ({
         <AppUltilityBar
           fullPartitionedData={fullPartitionedData}
           ultilityRef={ultilityRef}
+          ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
           setIsQuestionInspectOpen={setIsQuestionInspectOpen}
           scrollAreaRef={mainContentScrollAreaRef}
@@ -303,6 +305,7 @@ const AppMainContent = ({
           showFinishedQuestion={showFinishedQuestion}
           setShowFinishedQuestion={setShowFinishedQuestion}
           filterUrl={filterUrl}
+          sideBarInsetRef={sideBarInsetRef}
         />
 
         <ScrollArea

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, RefObject } from "react";
 import type { ValidCurriculum } from "@/constants/types";
+import { UseMutateFunction } from "@tanstack/react-query";
 
 export interface MultiSelectorProps {
   values: string[];
@@ -232,8 +233,13 @@ export interface AppUltilityBarProps {
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   showFinishedQuestion: boolean;
+  sideBarInsetRef: RefObject<HTMLDivElement | null>;
   filterUrl: string;
   setShowFinishedQuestion: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface AppUltilityBarRef {
+  overflowScrollHandler: () => void;
 }
 
 export interface AppSidebarProps {
@@ -245,7 +251,8 @@ export interface AppSidebarProps {
   searchParams: { [key: string]: string | string[] | undefined };
   setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
   setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
-  isAddRecentQueryPending: boolean;
+  appUltilityBarRef: RefObject<AppUltilityBarRef | null>;
+  recentQueryRef: RefObject<RecentQueryRef | null>;
 }
 
 export interface FinishedTrackerProps {
@@ -293,6 +300,7 @@ export interface AppMainContentProps {
   isSearchEnabled: boolean;
   isTopicalDataError: boolean;
   isTopicalDataFetching: boolean;
+  appUltilityBarRef: RefObject<AppUltilityBarRef | null>;
   isTopicalDataFetched: boolean;
   isValidSearchParams: boolean;
   BETTER_AUTH_URL: string;
@@ -397,4 +405,38 @@ export interface QuestionInspectMainContentRef {
   resetScrollPositions: () => void;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   handleKeyboardNavigation: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+}
+
+export interface RecentQueryProps {
+  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
+  currentQuery: CurrentQuery;
+  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
+  setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
+  setSelectedSubject: Dispatch<SetStateAction<string>>;
+  setSelectedTopic: Dispatch<SetStateAction<string[]>>;
+  setSelectedYear: Dispatch<SetStateAction<string[]>>;
+  setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
+  setSelectedSeason: Dispatch<SetStateAction<string[]>>;
+  isOverwriting: RefObject<boolean>;
+  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
+}
+
+export interface RecentQueryRef {
+  mutateRecentQuery: UseMutateFunction<
+    {
+      deletedKey: string | undefined;
+      lastSearch: Date | undefined;
+      currentQueryKey: {
+        curriculumId: string;
+        subjectId: string;
+      } & FilterData;
+    },
+    Error,
+    {
+      curriculumId: string;
+      subjectId: string;
+    } & FilterData,
+    unknown
+  >;
+  isAddRecentQueryPending: boolean;
 }
