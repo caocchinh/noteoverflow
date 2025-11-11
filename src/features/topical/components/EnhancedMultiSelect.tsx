@@ -9,6 +9,7 @@ import {
 import React, {
   createContext,
   type KeyboardEvent,
+  memo,
   useCallback,
   useContext,
   useEffect,
@@ -67,145 +68,189 @@ const useMultiSelect = () => {
   return context;
 };
 
-export default function EnhancedMultiSelect({
-  label,
-  prerequisite,
-  values: value,
-  maxLength = undefined,
-  onValuesChange: onValueChange,
-  data,
-}: MultiSelectorProps) {
-  const [inputValue, setInputValue] = useState("");
-  const [open, setOpen] = useState<boolean>(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const commandListRef = useRef<HTMLDivElement | null>(null);
-  const isMobileDevice = useIsMobile();
-  if (
-    maxLength !== undefined &&
-    typeof maxLength == "number" &&
-    maxLength <= 0
-  ) {
-    throw new Error("maxLength must be greater than 0");
-  }
+const EnhancedMultiSelect = memo(
+  ({
+    label,
+    prerequisite,
+    values: value,
+    maxLength = undefined,
+    onValuesChange: onValueChange,
+    data,
+  }: MultiSelectorProps) => {
+    const [inputValue, setInputValue] = useState("");
+    const [open, setOpen] = useState<boolean>(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const commandListRef = useRef<HTMLDivElement | null>(null);
+    const isMobileDevice = useIsMobile();
+    if (
+      maxLength !== undefined &&
+      typeof maxLength == "number" &&
+      maxLength <= 0
+    ) {
+      throw new Error("maxLength must be greater than 0");
+    }
 
-  const onValueChangeHandler = useCallback(
-    (val: string, option?: "selectAll" | "removeAll") => {
-      if (option === "selectAll" && data) {
-        onValueChange(data);
-      } else if (option === "removeAll") {
-        onValueChange([]);
-      } else if (value.includes(val)) {
-        onValueChange(value.filter((item) => item !== val));
-      } else {
-        onValueChange([...value, val]);
-      }
-    },
-    [value, data, onValueChange]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-
-      if (e.key === "Escape") {
-        if (inputValue) {
-          setInputValue("");
-          return;
+    const onValueChangeHandler = useCallback(
+      (val: string, option?: "selectAll" | "removeAll") => {
+        if (option === "selectAll" && data) {
+          onValueChange(data);
+        } else if (option === "removeAll") {
+          onValueChange([]);
+        } else if (value.includes(val)) {
+          onValueChange(value.filter((item) => item !== val));
+        } else {
+          onValueChange([...value, val]);
         }
-        inputRef.current?.blur();
-        if (open) {
-          setOpen(false);
-        }
-      }
-    },
-    [inputValue, open]
-  );
-  const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
+      },
+      [value, data, onValueChange]
+    );
 
-  return (
-    <MultiSelectContext.Provider
-      value={{
-        value,
-        onValueChange: onValueChangeHandler,
-        open,
-        inputRef,
-        setOpen,
-        inputValue,
-        setInputValue,
-        maxLength,
-        commandListRef,
-        allAvailableOptions: data,
-        label,
-        prerequisite,
-        isMobileDevice,
-      }}
-    >
-      {isMobileDevice ? (
-        <>
-          <MultiSelectorTrigger />
-          {maxLength && value.length > maxLength && (
-            <h3 className="w-max font-medium text-sm text-destructive mt-1">
-              You can only select up to {maxLength}{" "}
-              {label.toLowerCase() +
-                (label.toLowerCase() === "topic" ? "s" : "")}
-            </h3>
-          )}
-          <Drawer onOpenChange={setOpen} open={open} autoFocus={false}>
-            <DrawerContent
-              autoFocus={false}
-              onOpenAutoFocus={(e) => {
-                e.preventDefault();
-              }}
-              className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
-            >
-              <DrawerHeader className="sr-only">
-                <DrawerTitle>Select</DrawerTitle>
-                <DrawerDescription />
-                Select {label}
-              </DrawerHeader>
-              <div className="w-full pt-2 pb-4">
-                <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
-              </div>
-              {maxLength && value.length > maxLength && (
-                <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
-                  You can only select up to {maxLength}{" "}
-                  {label.toLowerCase() +
-                    (label.toLowerCase() === "topic" ? "s" : "")}
-                </h3>
-              )}
-              <div className="flex flex-row gap-3 p-2 ">
-                <Button
-                  className="flex-1/3 cursor-pointer"
-                  onClick={() => {
-                    onValueChange([]);
-                  }}
-                  variant="destructive"
-                >
-                  Remove all
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                {!maxLength && (
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+
+        if (e.key === "Escape") {
+          if (inputValue) {
+            setInputValue("");
+            return;
+          }
+          inputRef.current?.blur();
+          if (open) {
+            setOpen(false);
+          }
+        }
+      },
+      [inputValue, open]
+    );
+    const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
+
+    return (
+      <MultiSelectContext.Provider
+        value={{
+          value,
+          onValueChange: onValueChangeHandler,
+          open,
+          inputRef,
+          setOpen,
+          inputValue,
+          setInputValue,
+          maxLength,
+          commandListRef,
+          allAvailableOptions: data,
+          label,
+          prerequisite,
+          isMobileDevice,
+        }}
+      >
+        {isMobileDevice ? (
+          <>
+            <MultiSelectorTrigger />
+            {maxLength && value.length > maxLength && (
+              <h3 className="w-max font-medium text-sm text-destructive mt-1">
+                You can only select up to {maxLength}{" "}
+                {label.toLowerCase() +
+                  (label.toLowerCase() === "topic" ? "s" : "")}
+              </h3>
+            )}
+            <Drawer onOpenChange={setOpen} open={open} autoFocus={false}>
+              <DrawerContent
+                autoFocus={false}
+                onOpenAutoFocus={(e) => {
+                  e.preventDefault();
+                }}
+                className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
+              >
+                <DrawerHeader className="sr-only">
+                  <DrawerTitle>Select</DrawerTitle>
+                  <DrawerDescription />
+                  Select {label}
+                </DrawerHeader>
+                <div className="w-full pt-2 pb-4">
+                  <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
+                </div>
+                {maxLength && value.length > maxLength && (
+                  <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
+                    You can only select up to {maxLength}{" "}
+                    {label.toLowerCase() +
+                      (label.toLowerCase() === "topic" ? "s" : "")}
+                  </h3>
+                )}
+                <div className="flex flex-row gap-3 p-2 ">
                   <Button
                     className="flex-1/3 cursor-pointer"
                     onClick={() => {
-                      onValueChange(data ?? []);
+                      onValueChange([]);
                     }}
+                    variant="destructive"
                   >
-                    Select all
-                    <Sparkles className="h-4 w-4" />
+                    Remove all
+                    <Trash2 className="h-4 w-4" />
                   </Button>
-                )}
-                <Button
-                  className="flex-1/3 cursor-pointer"
-                  onClick={() => {
-                    setOpen(false);
-                  }}
-                  variant="outline"
+                  {!maxLength && (
+                    <Button
+                      className="flex-1/3 cursor-pointer"
+                      onClick={() => {
+                        onValueChange(data ?? []);
+                      }}
+                    >
+                      Select all
+                      <Sparkles className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    className="flex-1/3 cursor-pointer"
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    variant="outline"
+                  >
+                    Close
+                    <RemoveIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Command
+                  className={cn(
+                    "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
+                  )}
+                  onKeyDown={handleKeyDown}
+                  shouldFilter={false}
+                  loop={false}
                 >
-                  Close
-                  <RemoveIcon className="h-4 w-4" />
-                </Button>
+                  <MultiSelectorList />
+                </Command>
+              </DrawerContent>
+            </Drawer>
+          </>
+        ) : (
+          <Popover modal={false} open={open}>
+            <PopoverTrigger asChild>
+              <div ref={popoverTriggerRef}>
+                <MultiSelectorTrigger />
+                {maxLength && value.length > maxLength && (
+                  <h3 className="w-max font-medium text-sm text-destructive mt-1">
+                    You can only select up to {maxLength}{" "}
+                    {label.toLowerCase() +
+                      (label.toLowerCase() === "topic" ? "s" : "")}
+                  </h3>
+                )}
               </div>
+            </PopoverTrigger>
+            <PopoverContent
+              align="center"
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+              }}
+              autoFocus={false}
+              className="z-[1000000000000] m-0 border-1 p-0 shadow-none dark:bg-accent"
+              side="right"
+              onInteractOutside={(e) => {
+                if (popoverTriggerRef.current?.contains(e.target as Node)) {
+                  return;
+                }
+                setInputValue("");
+                setOpen(false);
+              }}
+            >
               <Command
                 className={cn(
                   "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
@@ -216,55 +261,17 @@ export default function EnhancedMultiSelect({
               >
                 <MultiSelectorList />
               </Command>
-            </DrawerContent>
-          </Drawer>
-        </>
-      ) : (
-        <Popover modal={false} open={open}>
-          <PopoverTrigger asChild>
-            <div ref={popoverTriggerRef}>
-              <MultiSelectorTrigger />
-              {maxLength && value.length > maxLength && (
-                <h3 className="w-max font-medium text-sm text-destructive mt-1">
-                  You can only select up to {maxLength}{" "}
-                  {label.toLowerCase() +
-                    (label.toLowerCase() === "topic" ? "s" : "")}
-                </h3>
-              )}
-            </div>
-          </PopoverTrigger>
-          <PopoverContent
-            align="center"
-            onOpenAutoFocus={(e) => {
-              e.preventDefault();
-            }}
-            autoFocus={false}
-            className="z-[1000000000000] m-0 border-1 p-0 shadow-none dark:bg-accent"
-            side="right"
-            onInteractOutside={(e) => {
-              if (popoverTriggerRef.current?.contains(e.target as Node)) {
-                return;
-              }
-              setInputValue("");
-              setOpen(false);
-            }}
-          >
-            <Command
-              className={cn(
-                "!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
-              )}
-              onKeyDown={handleKeyDown}
-              shouldFilter={false}
-              loop={false}
-            >
-              <MultiSelectorList />
-            </Command>
-          </PopoverContent>
-        </Popover>
-      )}
-    </MultiSelectContext.Provider>
-  );
-}
+            </PopoverContent>
+          </Popover>
+        )}
+      </MultiSelectContext.Provider>
+    );
+  }
+);
+
+EnhancedMultiSelect.displayName = "EnhancedMultiSelect";
+
+export default EnhancedMultiSelect;
 
 const MultiSelectorTrigger = () => {
   const contentRef = useRef<HTMLDivElement>(null);

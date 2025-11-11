@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { SelectedQuestion } from "../constants/types";
 import { ValidSeason } from "@/constants/types";
 import { parsePastPaperUrl } from "../lib/utils";
+import { memo } from "react";
 
 const UNSUPPORTED_YEAR = 2009;
 
@@ -61,90 +62,89 @@ const PastPaperLink = ({
   );
 };
 
-export const BestExamHelpUltility = ({
-  question,
-}: {
-  question: SelectedQuestion | undefined;
-}) => {
-  return (
-    <DropdownMenu>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-9 h-9 cursor-pointer !p-0",
-                question?.year === UNSUPPORTED_YEAR && "opacity-50 "
-              )}
-            >
-              <FileText />
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
-        <TooltipContent className="z-[99999999]" side="bottom">
-          {question?.year === UNSUPPORTED_YEAR
-            ? "Only supported year 2010 and above"
-            : "Resources"}
-        </TooltipContent>
-      </Tooltip>
-      <DropdownMenuContent className="z-[99999999] p-3 bg-accent">
-        <DropdownMenuItem
-          disabled={question?.year === UNSUPPORTED_YEAR}
-          asChild
-        >
-          <PastPaperLink question={question} type="qp">
-            <ScrollText className="mr-2 h-4 w-4" />
-            <span>
-              {question?.year === UNSUPPORTED_YEAR
-                ? "Only supported year 2010 and above"
-                : "View entire paper"}
-            </span>
-          </PastPaperLink>
-        </DropdownMenuItem>
-        <Separator className="my-1" />
-        <DropdownMenuItem
-          disabled={question?.year === UNSUPPORTED_YEAR}
-          asChild
-        >
-          <PastPaperLink question={question} type="ms">
-            <PencilLine className="mr-2 h-4 w-4" />
-            <span>
-              {question?.year === UNSUPPORTED_YEAR
-                ? "Only supported year 2010 and above"
-                : "View entire mark scheme"}
-            </span>
-          </PastPaperLink>
-        </DropdownMenuItem>
-        <Separator className="my-1" />
-        <DropdownMenuItem
-          disabled={question?.year === UNSUPPORTED_YEAR}
-          asChild
-        >
-          <PastPaperLink question={question} type="er">
-            <ClipboardList className="mr-2 h-4 w-4" />
-            <span>
-              {question?.year === UNSUPPORTED_YEAR
-                ? "Only supported year 2010 and above"
-                : "View examiner's report"}
-            </span>
-          </PastPaperLink>
-        </DropdownMenuItem>
-        <Separator className="my-1" />
-        <DropdownMenuItem
-          disabled={question?.year === UNSUPPORTED_YEAR}
-          asChild
-        >
-          <PastPaperLink question={question} type="gt">
-            <Highlighter className="mr-2 h-4 w-4" />
-            <span>
-              {question?.year === UNSUPPORTED_YEAR
-                ? "Only supported year 2010 and above"
-                : "View grade threshold"}
-            </span>
-          </PastPaperLink>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+export const BestExamHelpUltility = memo(
+  ({ question }: { question: SelectedQuestion | undefined }) => {
+    return (
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-9 h-9 cursor-pointer !p-0",
+                  question?.year === UNSUPPORTED_YEAR && "opacity-50 "
+                )}
+              >
+                <FileText />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent className="z-[99999999]" side="bottom">
+            {question?.year === UNSUPPORTED_YEAR
+              ? "Only supported year 2010 and above"
+              : "Resources"}
+          </TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent className="z-[99999999] p-3 bg-accent">
+          <DropdownMenuItem
+            disabled={question?.year === UNSUPPORTED_YEAR}
+            asChild
+          >
+            <PastPaperLink question={question} type="qp">
+              <ScrollText className="mr-2 h-4 w-4" />
+              <span>
+                {question?.year === UNSUPPORTED_YEAR
+                  ? "Only supported year 2010 and above"
+                  : "View entire paper"}
+              </span>
+            </PastPaperLink>
+          </DropdownMenuItem>
+          <Separator className="my-1" />
+          <DropdownMenuItem
+            disabled={question?.year === UNSUPPORTED_YEAR}
+            asChild
+          >
+            <PastPaperLink question={question} type="ms">
+              <PencilLine className="mr-2 h-4 w-4" />
+              <span>
+                {question?.year === UNSUPPORTED_YEAR
+                  ? "Only supported year 2010 and above"
+                  : "View entire mark scheme"}
+              </span>
+            </PastPaperLink>
+          </DropdownMenuItem>
+          <Separator className="my-1" />
+          <DropdownMenuItem
+            disabled={question?.year === UNSUPPORTED_YEAR}
+            asChild
+          >
+            <PastPaperLink question={question} type="er">
+              <ClipboardList className="mr-2 h-4 w-4" />
+              <span>
+                {question?.year === UNSUPPORTED_YEAR
+                  ? "Only supported year 2010 and above"
+                  : "View examiner's report"}
+              </span>
+            </PastPaperLink>
+          </DropdownMenuItem>
+          <Separator className="my-1" />
+          <DropdownMenuItem
+            disabled={question?.year === UNSUPPORTED_YEAR}
+            asChild
+          >
+            <PastPaperLink question={question} type="gt">
+              <Highlighter className="mr-2 h-4 w-4" />
+              <span>
+                {question?.year === UNSUPPORTED_YEAR
+                  ? "Only supported year 2010 and above"
+                  : "View grade threshold"}
+              </span>
+            </PastPaperLink>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+);
+BestExamHelpUltility.displayName = "BestExamHelpUltility";

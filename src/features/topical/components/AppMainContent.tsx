@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -23,6 +23,7 @@ import type {
   SortParameters,
   QuestionInspectOpenState,
   AppMainContentProps,
+  SelectedFinishedQuestion,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -461,55 +462,15 @@ const AppMainContent = ({
           {isTopicalDataFetching && (
             <Loader2 className="animate-spin m-auto mb-2" />
           )}
-          <ResponsiveMasonry
-            columnsCountBreakPoints={
-              COLUMN_BREAKPOINTS[
-                uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
-              ]
-            }
-            // @ts-expect-error - gutterBreakPoints is not typed by the library
-            gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-          >
-            <Masonry>
-              {displayedData
-                ?.filter((question: SelectedQuestion) => {
-                  if (!userFinishedQuestions) {
-                    return true;
-                  }
-                  if (
-                    !showFinishedQuestion &&
-                    userFinishedQuestions.some(
-                      (item) => item.question.id === question.id
-                    )
-                  ) {
-                    return false;
-                  }
-                  return true;
-                })
-                ?.map(
-                  (question) =>
-                    question?.questionImages.map((imageSrc: string) => (
-                      <QuestionPreview
-                        question={question}
-                        onQuestionClick={() => handleQuestionClick(question.id)}
-                        key={`${question.id}-${imageSrc}`}
-                        imageSrc={imageSrc}
-                      />
-                    )) ?? []
-                )}
-            </Masonry>
-          </ResponsiveMasonry>
-
-          {uiPreferences.layoutStyle === "infinite" && (
-            <InfiniteScroll
-              next={handleInfiniteScrollNext}
-              hasMore={
-                !!fullPartitionedData &&
-                currentChunkIndex < fullPartitionedData.length - 1
-              }
-              isLoading={!fullPartitionedData}
-            />
-          )}
+          <MainContent
+            displayedData={displayedData}
+            userFinishedQuestions={userFinishedQuestions}
+            showFinishedQuestion={showFinishedQuestion}
+            handleQuestionClick={handleQuestionClick}
+            handleInfiniteScrollNext={handleInfiniteScrollNext}
+            fullPartitionedData={fullPartitionedData}
+            currentChunkIndex={currentChunkIndex}
+          />
         </ScrollArea>
       </SidebarInset>
 
@@ -529,3 +490,80 @@ const AppMainContent = ({
 };
 
 export default AppMainContent;
+
+export const MainContent = memo(
+  ({
+    displayedData,
+    userFinishedQuestions,
+    showFinishedQuestion,
+    handleQuestionClick,
+    handleInfiniteScrollNext,
+    fullPartitionedData,
+    currentChunkIndex,
+  }: {
+    displayedData: SelectedQuestion[];
+    userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
+    showFinishedQuestion: boolean;
+    handleQuestionClick: (questionId: string) => void;
+    handleInfiniteScrollNext: () => void;
+    fullPartitionedData: SelectedQuestion[][] | undefined;
+    currentChunkIndex: number;
+  }) => {
+    const { uiPreferences } = useTopicalApp();
+    return (
+      <>
+        <ResponsiveMasonry
+          columnsCountBreakPoints={
+            COLUMN_BREAKPOINTS[
+              uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
+            ]
+          }
+          // @ts-expect-error - gutterBreakPoints is not typed by the library
+          gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
+        >
+          <Masonry>
+            {displayedData
+              ?.filter((question: SelectedQuestion) => {
+                if (!userFinishedQuestions) {
+                  return true;
+                }
+                if (
+                  !showFinishedQuestion &&
+                  userFinishedQuestions.some(
+                    (item) => item.question.id === question.id
+                  )
+                ) {
+                  return false;
+                }
+                return true;
+              })
+              ?.map(
+                (question) =>
+                  question?.questionImages.map((imageSrc: string) => (
+                    <QuestionPreview
+                      question={question}
+                      onQuestionClick={() => handleQuestionClick(question.id)}
+                      key={`${question.id}-${imageSrc}`}
+                      imageSrc={imageSrc}
+                    />
+                  )) ?? []
+              )}
+          </Masonry>
+        </ResponsiveMasonry>
+
+        {uiPreferences.layoutStyle === "infinite" && (
+          <InfiniteScroll
+            next={handleInfiniteScrollNext}
+            hasMore={
+              !!fullPartitionedData &&
+              currentChunkIndex < fullPartitionedData.length - 1
+            }
+            isLoading={!fullPartitionedData}
+          />
+        )}
+      </>
+    );
+  }
+);
+
+MainContent.displayName = "MainContent";

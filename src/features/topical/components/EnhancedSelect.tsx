@@ -8,6 +8,7 @@ import {
   useState,
   useCallback,
   KeyboardEvent,
+  memo,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,154 +35,159 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { fuzzySearch } from "../lib/utils";
 
-const EnhancedSelect = ({
-  label,
-  prerequisite,
-  side,
-  data,
-  selectedValue,
-  triggerClassName,
-  setSelectedValue,
-  popoverContentClassName,
-  modal,
-}: {
-  label: string;
-  prerequisite: string;
-  side?: "left" | "right" | "bottom" | "top";
-  data: { code: string; coverImage: string }[];
-  popoverContentClassName?: string;
-  selectedValue: string;
-  triggerClassName?: string;
-  setSelectedValue: Dispatch<SetStateAction<string>>;
-  modal?: boolean;
-}) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const isMobileDevice = useIsMobile();
-  const [inputValue, setInputValue] = useState<string>("");
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+const EnhancedSelect = memo(
+  ({
+    label,
+    prerequisite,
+    side,
+    data,
+    selectedValue,
+    triggerClassName,
+    setSelectedValue,
+    popoverContentClassName,
+    modal,
+  }: {
+    label: string;
+    prerequisite: string;
+    side?: "left" | "right" | "bottom" | "top";
+    data: { code: string; coverImage: string }[];
+    popoverContentClassName?: string;
+    selectedValue: string;
+    triggerClassName?: string;
+    setSelectedValue: Dispatch<SetStateAction<string>>;
+    modal?: boolean;
+  }) => {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const isMobileDevice = useIsMobile();
+    const [inputValue, setInputValue] = useState<string>("");
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
-      e.stopPropagation();
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLDivElement>) => {
+        e.stopPropagation();
 
-      if (e.key === "Escape") {
-        if (inputValue) {
-          setInputValue("");
-          return;
-        }
-        inputRef.current?.blur();
-        if (isOpen) {
-          setIsOpen(false);
-        }
-      }
-    },
-    [inputValue, isOpen]
-  );
-
-  return (
-    <div className="flex flex-col gap-1">
-      <Popover modal={modal || isMobileDevice} open={isOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={triggerRef}
-            aria-expanded={isOpen}
-            className={cn(
-              "h-max w-[200px] justify-between whitespace-pre-wrap",
-              triggerClassName
-            )}
-            onClick={() => {
-              setIsOpen(!isOpen);
-            }}
-            disabled={!!prerequisite}
-            variant="outline"
-          >
-            {(() => {
-              if (selectedValue) {
-                return data?.find((item) => item.code === selectedValue)?.code;
-              }
-              if (prerequisite) {
-                return `Select ${prerequisite.toLowerCase()} first`;
-              }
-              return `Select ${label.toLowerCase()}`;
-            })()}
-
-            <ChevronsUpDown className="opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          autoFocus={false}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-          }}
-          onInteractOutside={(e) => {
-            if (triggerRef.current?.contains(e.target as Node)) {
-              return;
-            }
-            setIsOpen(false);
+        if (e.key === "Escape") {
+          if (inputValue) {
             setInputValue("");
-          }}
-          align="center"
-          className={cn(
-            "z-[1000000000000000] w-[300px] p-0 sm:w-max",
-            popoverContentClassName
-          )}
-          side={side || (isMobileDevice ? "bottom" : "right")}
-          avoidCollisions={isMobileDevice ? false : true}
-        >
-          <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-            <div className="flex items-center gap-1 dark:bg-accent">
-              <CommandInput
-                className="h-9 border-none"
-                placeholder={`Search ${label.toLowerCase()}`}
-                ref={inputRef}
-                onClick={() => {
-                  inputRef.current?.focus();
-                }}
-                value={inputValue}
-                wrapperClassName="w-full p-4 border-b py-6 "
-                onValueChange={(value) => {
-                  setInputValue(value);
-                }}
-              />
-              <XIcon
-                className="!bg-transparent cursor-pointer mr-2 text-destructive"
-                size={20}
-                onClick={() => {
-                  if (inputValue) {
-                    setInputValue("");
-                  } else {
-                    setIsOpen(false);
-                  }
-                }}
-              />
-            </div>
-            <ScrollArea viewPortClassName="max-h-[195px]" type="always">
-              <CommandList className="dark:bg-accent">
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup>
-                  {data
-                    ?.filter((item) => fuzzySearch(inputValue, item.code))
-                    .map((item) => (
-                      <EnhancedSelectItem
-                        key={item.code}
-                        item={item}
-                        isOpen={isOpen}
-                        setIsOpen={setIsOpen}
-                        setInputValue={setInputValue}
-                        setSelectedValue={setSelectedValue}
-                        selectedValue={selectedValue}
-                      />
-                    ))}
-                </CommandGroup>
-              </CommandList>
-            </ScrollArea>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
+            return;
+          }
+          inputRef.current?.blur();
+          if (isOpen) {
+            setIsOpen(false);
+          }
+        }
+      },
+      [inputValue, isOpen]
+    );
+
+    return (
+      <div className="flex flex-col gap-1">
+        <Popover modal={modal || isMobileDevice} open={isOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              ref={triggerRef}
+              aria-expanded={isOpen}
+              className={cn(
+                "h-max w-[200px] justify-between whitespace-pre-wrap",
+                triggerClassName
+              )}
+              onClick={() => {
+                setIsOpen(!isOpen);
+              }}
+              disabled={!!prerequisite}
+              variant="outline"
+            >
+              {(() => {
+                if (selectedValue) {
+                  return data?.find((item) => item.code === selectedValue)
+                    ?.code;
+                }
+                if (prerequisite) {
+                  return `Select ${prerequisite.toLowerCase()} first`;
+                }
+                return `Select ${label.toLowerCase()}`;
+              })()}
+
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            autoFocus={false}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+            onInteractOutside={(e) => {
+              if (triggerRef.current?.contains(e.target as Node)) {
+                return;
+              }
+              setIsOpen(false);
+              setInputValue("");
+            }}
+            align="center"
+            className={cn(
+              "z-[1000000000000000] w-[300px] p-0 sm:w-max",
+              popoverContentClassName
+            )}
+            side={side || (isMobileDevice ? "bottom" : "right")}
+            avoidCollisions={isMobileDevice ? false : true}
+          >
+            <Command shouldFilter={false} onKeyDown={handleKeyDown}>
+              <div className="flex items-center gap-1 dark:bg-accent">
+                <CommandInput
+                  className="h-9 border-none"
+                  placeholder={`Search ${label.toLowerCase()}`}
+                  ref={inputRef}
+                  onClick={() => {
+                    inputRef.current?.focus();
+                  }}
+                  value={inputValue}
+                  wrapperClassName="w-full p-4 border-b py-6 "
+                  onValueChange={(value) => {
+                    setInputValue(value);
+                  }}
+                />
+                <XIcon
+                  className="!bg-transparent cursor-pointer mr-2 text-destructive"
+                  size={20}
+                  onClick={() => {
+                    if (inputValue) {
+                      setInputValue("");
+                    } else {
+                      setIsOpen(false);
+                    }
+                  }}
+                />
+              </div>
+              <ScrollArea viewPortClassName="max-h-[195px]" type="always">
+                <CommandList className="dark:bg-accent">
+                  <CommandEmpty>No results found.</CommandEmpty>
+                  <CommandGroup>
+                    {data
+                      ?.filter((item) => fuzzySearch(inputValue, item.code))
+                      .map((item) => (
+                        <EnhancedSelectItem
+                          key={item.code}
+                          item={item}
+                          isOpen={isOpen}
+                          setIsOpen={setIsOpen}
+                          setInputValue={setInputValue}
+                          setSelectedValue={setSelectedValue}
+                          selectedValue={selectedValue}
+                        />
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </ScrollArea>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
+  }
+);
+
+EnhancedSelect.displayName = "EnhancedSelect";
 
 const EnhancedSelectItem = ({
   item,

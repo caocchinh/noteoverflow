@@ -754,7 +754,7 @@ const SearchPastPaper = () => {
               </div>
               <div className="relative mt-[-10px] pt-0 w-full">
                 <Button
-                  className="w-full cursor-pointer font-semibold  text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+                  className="w-full cursor-pointer font-semibold   border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Close

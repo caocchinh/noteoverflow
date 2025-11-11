@@ -162,6 +162,13 @@ const QuestionInspectMainContent = forwardRef(
       [resetScrollPositions, setCurrentView, handleKeyboardNavigation]
     );
 
+    const navigateToQuestion = useCallback(
+      (questionId: string) => {
+        sideBarInspectRef.current?.navigateToQuestion(questionId);
+      },
+      [sideBarInspectRef]
+    );
+
     return (
       <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
         <div
@@ -208,9 +215,7 @@ const QuestionInspectMainContent = forwardRef(
               <div className="my-6"></div>
               <BrowseMoreQuestions
                 browseMoreData={browseMoreData}
-                navigateToQuestion={(question) =>
-                  sideBarInspectRef.current?.navigateToQuestion(question)
-                }
+                navigateToQuestion={navigateToQuestion}
                 isBrowseMoreOpen={isBrowseMoreOpen}
                 setIsBrowseMoreOpen={setIsBrowseMoreOpen}
               />

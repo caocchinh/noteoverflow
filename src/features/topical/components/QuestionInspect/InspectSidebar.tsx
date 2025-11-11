@@ -6,20 +6,13 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { FinishedTracker } from "./FinishedTracker";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  FastForward,
-  Search,
-  X,
-} from "lucide-react";
+import { FastForward, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
   Fragment,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -27,10 +20,11 @@ import {
   useState,
   forwardRef,
   useImperativeHandle,
+  RefObject,
 } from "react";
 import QuestionHoverCard from "./QuestionHoverCard";
 import { SelectSeparator } from "@/components/ui/select";
-import { JumpToTabButton } from "../JumpToTabButton";
+import TabNavigationButtons from "./TabNavigationButtons";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   extractPaperCode,
@@ -38,7 +32,7 @@ import {
   fuzzySearch,
 } from "../../lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InspectSidebarProps } from "../../constants/types";
+import { InspectSidebarProps, SelectedQuestion } from "../../constants/types";
 
 const InspectSidebar = forwardRef(
   (
@@ -442,7 +436,7 @@ const InspectSidebar = forwardRef(
       }
       navigateToQuestion(isOpen.questionId);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, overflowScrollHandler, isVirtualizationReady]);
+    }, [isOpen, overflowScrollHandler]);
 
     useEffect(() => {
       setSearchInput("");
@@ -462,6 +456,9 @@ const InspectSidebar = forwardRef(
           questionId: "",
         });
         return;
+      }
+      if (currentQuestionId) {
+        navigateToQuestion(currentQuestionId);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allQuestions, navigateToQuestion, setIsOpen]);
@@ -484,89 +481,25 @@ const InspectSidebar = forwardRef(
             navigateToQuestion={navigateToQuestion}
           />
           <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
-            <div className="flex items-center gap-2 border-b border-border">
-              <Search />
-              <Input
-                onFocus={() => {
-                  isInputFocused.current = true;
-                }}
-                onBlur={() => {
-                  isInputFocused.current = false;
-                }}
-                className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
-                placeholder="Search questions"
-                value={searchInput}
-                tabIndex={-1}
-                onChange={(e) => {
-                  if (searchInput == "") {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                    });
-                  }
-                  setSearchInput(e.target.value);
-                  if (e.target.value.length === 0 && currentQuestionId) {
-                    setCurrentTab(currentTabThatContainsQuestion);
-                    setTimeout(() => {
-                      scrollToQuestion({
-                        questionId: currentQuestionId,
-                        tab: currentTabThatContainsQuestion,
-                      });
-                    }, 0);
-                  }
-                }}
-              />
-              {searchInput.length > 0 && (
-                <X
-                  className="text-red-600 hover:text-red-600/80 cursor-pointer"
-                  onClick={() => {
-                    setSearchInput("");
-                    setCurrentTab(currentTabThatContainsQuestion);
-                    if (currentQuestionId) {
-                      setTimeout(() => {
-                        scrollToQuestion({
-                          questionId: currentQuestionId,
-                          tab: currentTabThatContainsQuestion,
-                        });
-                      }, 0);
-                    }
-                  }}
-                />
-              )}
-            </div>
-            <Button
-              variant="default"
-              className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
-              title="Go to current question"
-              onClick={() => {
-                if (searchInput === "") {
-                  setCurrentTab(currentTabThatContainsQuestion);
-                  if (currentQuestionId) {
-                    setTimeout(() => {
-                      scrollToQuestion({
-                        questionId: currentQuestionId,
-                        tab: currentTabThatContainsQuestion,
-                      });
-                    }, 0);
-                  }
-                } else {
-                  const currentQuestionIndexInSearchResult =
-                    searchResults.findIndex(
-                      (question) => question.id === currentQuestionId
-                    );
-                  if (currentQuestionIndexInSearchResult === -1) {
-                    return;
-                  }
-                  setTimeout(() => {
-                    searchVirtualizer.scrollToIndex(
-                      currentQuestionIndexInSearchResult
-                    );
-                  }, 0);
-                }
-              }}
-            >
-              <FastForward />
-              Current
-            </Button>
+            <SearchInputSection
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+              isInputFocused={isInputFocused}
+              currentQuestionId={currentQuestionId}
+              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+              setCurrentTab={setCurrentTab}
+              scrollToQuestion={scrollToQuestion}
+              listScrollAreaRef={listScrollAreaRef}
+            />
+            <GoToCurrentButton
+              searchInput={searchInput}
+              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+              setCurrentTab={setCurrentTab}
+              currentQuestionId={currentQuestionId}
+              scrollToQuestion={scrollToQuestion}
+              searchResults={searchResults}
+              searchVirtualizer={searchVirtualizer}
+            />
           </div>
           <ScrollArea
             className={cn(
@@ -663,137 +596,19 @@ const InspectSidebar = forwardRef(
 
           <div
             className={cn(
-              "flex justify-between items-center w-full",
+              "w-full flex items-center justify-around",
               searchInput.length > 0 && "hidden"
             )}
           >
-            <div className="flex items-center gap-2">
-              <Button
-                title="Jump to first tab"
-                disabled={currentTab === 0}
-                onClick={() => {
-                  setCurrentTab(0);
-                  if (
-                    currentTabThatContainsQuestion == 0 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: 0,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer rounded-[2px]"
-              >
-                <ChevronsLeft />
-              </Button>
-              <Button
-                title="Jump to previous tab"
-                disabled={currentTab === 0}
-                onClick={() => {
-                  if (
-                    currentTab > 0 &&
-                    currentTab < (partitionedTopicalData?.length ?? 0)
-                  ) {
-                    setCurrentTab(currentTab - 1);
-                  }
-                  if (
-                    currentTabThatContainsQuestion == currentTab - 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTab - 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer rounded-[2px]"
-              >
-                <ChevronLeft />
-              </Button>
-            </div>
-            <JumpToTabButton
-              tab={currentTab}
-              onTabChangeCallback={({ tab }) => {
-                setCurrentTab(tab);
-                listScrollAreaRef.current?.scrollTo({
-                  top: 0,
-                  behavior: "instant",
-                });
-              }}
-              totalTabs={partitionedTopicalData?.length ?? 0}
+            <TabNavigationButtons
+              currentTab={currentTab}
+              setCurrentTab={setCurrentTab}
+              partitionedTopicalData={partitionedTopicalData}
+              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+              currentQuestionId={currentQuestionId}
+              scrollToQuestion={scrollToQuestion}
+              listScrollAreaRef={listScrollAreaRef}
             />
-            <div className="flex items-center gap-2">
-              <Button
-                title="Jump to next tab"
-                disabled={
-                  currentTab === (partitionedTopicalData?.length ?? 1) - 1
-                }
-                onClick={() => {
-                  if (currentTab < (partitionedTopicalData?.length ?? 0) - 1) {
-                    setCurrentTab(currentTab + 1);
-                  }
-                  if (
-                    currentTabThatContainsQuestion == currentTab + 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: currentTab + 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer rounded-[2px]"
-              >
-                <ChevronRight />
-              </Button>
-              <Button
-                title="Jump to last tab"
-                disabled={
-                  currentTab === (partitionedTopicalData?.length ?? 1) - 1
-                }
-                onClick={() => {
-                  setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
-                  if (
-                    currentTabThatContainsQuestion ==
-                      (partitionedTopicalData?.length ?? 1) - 1 &&
-                    currentQuestionId
-                  ) {
-                    scrollToQuestion({
-                      questionId: currentQuestionId,
-                      tab: (partitionedTopicalData?.length ?? 1) - 1,
-                    });
-                  } else {
-                    listScrollAreaRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-                variant="outline"
-                className="w-9 h-9 cursor-pointer rounded-[2px]"
-              >
-                <ChevronsRight />
-              </Button>
-            </div>
           </div>
         </SidebarContent>
         <SidebarRail />
@@ -804,3 +619,151 @@ const InspectSidebar = forwardRef(
 InspectSidebar.displayName = "InspectSidebar";
 
 export default InspectSidebar;
+
+const SearchInputSection = memo(
+  ({
+    searchInput,
+    setSearchInput,
+    isInputFocused,
+    currentQuestionId,
+    currentTabThatContainsQuestion,
+    setCurrentTab,
+    scrollToQuestion,
+    listScrollAreaRef,
+  }: {
+    searchInput: string;
+    setSearchInput: (value: string) => void;
+    isInputFocused: RefObject<boolean>;
+    currentQuestionId?: string;
+    currentTabThatContainsQuestion: number;
+    setCurrentTab: (tab: number) => void;
+    scrollToQuestion: ({
+      questionId,
+      tab,
+    }: {
+      questionId: string;
+      tab: number;
+    }) => void;
+    listScrollAreaRef: RefObject<HTMLDivElement | null>;
+  }) => {
+    return (
+      <div className="flex items-center gap-2 border-b border-border">
+        <Search />
+        <Input
+          onFocus={() => {
+            isInputFocused.current = true;
+          }}
+          onBlur={() => {
+            isInputFocused.current = false;
+          }}
+          className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
+          placeholder="Search questions"
+          value={searchInput}
+          tabIndex={-1}
+          onChange={(e) => {
+            if (searchInput == "") {
+              listScrollAreaRef.current?.scrollTo({
+                top: 0,
+              });
+            }
+            setSearchInput(e.target.value);
+            if (e.target.value.length === 0 && currentQuestionId) {
+              setCurrentTab(currentTabThatContainsQuestion);
+              setTimeout(() => {
+                scrollToQuestion({
+                  questionId: currentQuestionId,
+                  tab: currentTabThatContainsQuestion,
+                });
+              }, 0);
+            }
+          }}
+        />
+        {searchInput.length > 0 && (
+          <X
+            className="text-red-600 hover:text-red-600/80 cursor-pointer"
+            onClick={() => {
+              setSearchInput("");
+              setCurrentTab(currentTabThatContainsQuestion);
+              if (currentQuestionId) {
+                setTimeout(() => {
+                  scrollToQuestion({
+                    questionId: currentQuestionId,
+                    tab: currentTabThatContainsQuestion,
+                  });
+                }, 0);
+              }
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+SearchInputSection.displayName = "SearchInputSection";
+
+const GoToCurrentButton = memo(
+  ({
+    searchInput,
+    currentTabThatContainsQuestion,
+    setCurrentTab,
+    currentQuestionId,
+    scrollToQuestion,
+    searchResults,
+    searchVirtualizer,
+  }: {
+    searchInput: string;
+    currentTabThatContainsQuestion: number;
+    setCurrentTab: (tab: number) => void;
+    currentQuestionId?: string;
+    scrollToQuestion: ({
+      questionId,
+      tab,
+    }: {
+      questionId: string;
+      tab: number;
+    }) => void;
+    searchResults: SelectedQuestion[];
+    searchVirtualizer: {
+      scrollToIndex: (index: number) => void;
+    };
+  }) => {
+    return (
+      <Button
+        variant="default"
+        className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
+        title="Go to current question"
+        onClick={() => {
+          if (searchInput === "") {
+            setCurrentTab(currentTabThatContainsQuestion);
+            if (currentQuestionId) {
+              setTimeout(() => {
+                scrollToQuestion({
+                  questionId: currentQuestionId,
+                  tab: currentTabThatContainsQuestion,
+                });
+              }, 0);
+            }
+          } else {
+            const currentQuestionIndexInSearchResult = searchResults.findIndex(
+              (question) => question.id === currentQuestionId
+            );
+            if (currentQuestionIndexInSearchResult === -1) {
+              return;
+            }
+            setTimeout(() => {
+              searchVirtualizer.scrollToIndex(
+                currentQuestionIndexInSearchResult
+              );
+            }, 0);
+          }
+        }}
+      >
+        <FastForward />
+        Current
+      </Button>
+    );
+  }
+);
+
+GoToCurrentButton.displayName = "GoToCurrentButton";
