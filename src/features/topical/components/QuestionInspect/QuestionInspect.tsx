@@ -37,7 +37,6 @@ const QuestionInspect = ({
   const [currentQuestionId, setCurrentQuestionId] = useState<
     string | undefined
   >(undefined);
-
   const { isCalculatorOpen } = useTopicalApp();
   const isMobile = useIsMobile();
   const currentQuestionIndex = useMemo(() => {
@@ -52,7 +51,6 @@ const QuestionInspect = ({
     currentQuestionId,
   ]);
   const isInputFocused = useRef(false);
-
   const allQuestions = useMemo(() => {
     return partitionedTopicalData?.flat() ?? [];
   }, [partitionedTopicalData]);
@@ -179,6 +177,9 @@ const QuestionInspect = ({
               listId={listId}
               currentQuestionIndex={currentQuestionIndex}
               isInputFocused={isInputFocused}
+              navigationButtonsPortalContainer={
+                inspectUltilityBarRef.current?.navigationButtonsContainerRef
+              }
             />
             <QuestionInspectMainContent
               ref={questionInspectMainContentRef}

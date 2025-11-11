@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 const BrowseMoreQuestions = memo(
   ({
     browseMoreData,
-    navigateToQuestion,
+    onQuestionClick,
     isBrowseMoreOpen,
     setIsBrowseMoreOpen,
   }: BrowseMoreQuestionsProps) => {
@@ -69,7 +69,7 @@ const BrowseMoreQuestions = memo(
                     key={`${question.id}-${imageSrc}`}
                     imageSrc={imageSrc}
                     onQuestionClick={() => {
-                      navigateToQuestion(question?.id);
+                      onQuestionClick(question?.id);
                     }}
                   />
                 ))

@@ -6,7 +6,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { FinishedTracker } from "./FinishedTracker";
-import { FastForward, Search, X } from "lucide-react";
+import { ChevronDown, ChevronUp, FastForward, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ import {
   useImperativeHandle,
   RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import QuestionHoverCard from "./QuestionHoverCard";
 import { SelectSeparator } from "@/components/ui/select";
 import TabNavigationButtons from "./TabNavigationButtons";
@@ -32,7 +33,11 @@ import {
   fuzzySearch,
 } from "../../lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InspectSidebarProps, SelectedQuestion } from "../../constants/types";
+import {
+  InspectSidebarProps,
+  InspectSidebarRef,
+  SelectedQuestion,
+} from "../../constants/types";
 
 const InspectSidebar = forwardRef(
   (
@@ -52,6 +57,7 @@ const InspectSidebar = forwardRef(
       listId,
       overflowScrollHandler,
       currentQuestionIndex,
+      navigationButtonsPortalContainer,
     }: InspectSidebarProps,
     ref
   ) => {
@@ -60,6 +66,7 @@ const InspectSidebar = forwardRef(
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
     const listScrollAreaRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
+    const sidebarRef = useRef<InspectSidebarRef | null>(null);
 
     const searchResults = useMemo(() => {
       return searchInput.length > 0
@@ -426,6 +433,24 @@ const InspectSidebar = forwardRef(
       ]
     );
 
+    useImperativeHandle(
+      sidebarRef,
+      () => ({
+        handleNextQuestion,
+        handlePreviousQuestion,
+        navigateToQuestion,
+        isHandleNextQuestionDisabled,
+        isHandlePreviousQuestionDisabled,
+      }),
+      [
+        handleNextQuestion,
+        handlePreviousQuestion,
+        navigateToQuestion,
+        isHandleNextQuestionDisabled,
+        isHandlePreviousQuestionDisabled,
+      ]
+    );
+
     // Hydrate inspector on open
     useEffect(() => {
       if (!isOpen.isOpen) {
@@ -464,155 +489,165 @@ const InspectSidebar = forwardRef(
     }, [allQuestions, navigateToQuestion, setIsOpen]);
 
     return (
-      <Sidebar
-        className="top-0 !h-full"
-        onTransitionEnd={(e) => {
-          if (e.propertyName == "left") {
-            if (overflowScrollHandler) {
-              overflowScrollHandler();
+      <>
+        <Sidebar
+          className="top-0 !h-full"
+          onTransitionEnd={(e) => {
+            if (e.propertyName == "left") {
+              if (overflowScrollHandler) {
+                overflowScrollHandler();
+              }
             }
-          }
-        }}
-      >
-        <SidebarHeader className="sr-only">Search questions</SidebarHeader>
-        <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
-          <FinishedTracker
-            allQuestions={allQuestions}
-            navigateToQuestion={navigateToQuestion}
-          />
-          <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
-            <SearchInputSection
-              searchInput={searchInput}
-              setSearchInput={setSearchInput}
-              isInputFocused={isInputFocused}
-              currentQuestionId={currentQuestionId}
-              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
-              setCurrentTab={setCurrentTab}
-              scrollToQuestion={scrollToQuestion}
-              listScrollAreaRef={listScrollAreaRef}
+          }}
+        >
+          <SidebarHeader className="sr-only">Search questions</SidebarHeader>
+          <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
+            <FinishedTracker
+              allQuestions={allQuestions}
+              navigateToQuestion={navigateToQuestion}
             />
-            <GoToCurrentButton
-              searchInput={searchInput}
-              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
-              setCurrentTab={setCurrentTab}
-              currentQuestionId={currentQuestionId}
-              scrollToQuestion={scrollToQuestion}
-              searchResults={searchResults}
-              searchVirtualizer={searchVirtualizer}
-            />
-          </div>
-          <ScrollArea
-            className={cn(
-              "w-full",
-              searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
-            )}
-            type="always"
-            viewportRef={listScrollAreaRef}
-          >
-            <div
+            <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
+              <SearchInputSection
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                isInputFocused={isInputFocused}
+                currentQuestionId={currentQuestionId}
+                currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+                setCurrentTab={setCurrentTab}
+                scrollToQuestion={scrollToQuestion}
+                listScrollAreaRef={listScrollAreaRef}
+              />
+              <GoToCurrentButton
+                searchInput={searchInput}
+                currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+                setCurrentTab={setCurrentTab}
+                currentQuestionId={currentQuestionId}
+                scrollToQuestion={scrollToQuestion}
+                searchResults={searchResults}
+                searchVirtualizer={searchVirtualizer}
+              />
+            </div>
+            <ScrollArea
               className={cn(
-                "relative w-full",
-                searchInput.length > 0 && "!hidden"
+                "w-full",
+                searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
               )}
-              style={{
-                height: displayVirtualizer.getTotalSize(),
-              }}
+              type="always"
+              viewportRef={listScrollAreaRef}
             >
-              {virtualDisplayItems.map((virtualItem) => (
-                <div
-                  className="absolute top-0 left-0 w-full pr-3"
-                  style={{
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                >
-                  {partitionedTopicalData?.[currentTab][virtualItem.index] && (
+              <div
+                className={cn(
+                  "relative w-full",
+                  searchInput.length > 0 && "!hidden"
+                )}
+                style={{
+                  height: displayVirtualizer.getTotalSize(),
+                }}
+              >
+                {virtualDisplayItems.map((virtualItem) => (
+                  <div
+                    className="absolute top-0 left-0 w-full pr-3"
+                    style={{
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    key={virtualItem.key}
+                    data-index={virtualItem.index}
+                  >
+                    {partitionedTopicalData?.[currentTab][
+                      virtualItem.index
+                    ] && (
+                      <Fragment key={virtualItem.index}>
+                        <QuestionHoverCard
+                          resetScrollPositions={resetScrollPositions}
+                          question={
+                            partitionedTopicalData[currentTab][
+                              virtualItem.index
+                            ]
+                          }
+                          currentTab={currentTab}
+                          currentQuestionId={currentQuestionId}
+                          setCurrentQuestionId={setCurrentQuestionId}
+                          setCurrentTabThatContainsQuestion={
+                            setCurrentTabThatContainsQuestion
+                          }
+                          listId={listId}
+                          isInspectSidebarOpen={isInspectSidebarOpen}
+                          isMobileDevice={isMobile}
+                        />
+                        <SelectSeparator />
+                      </Fragment>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div
+                className="relative w-full"
+                style={{
+                  height: searchVirtualizer.getTotalSize(),
+                }}
+              >
+                {virtualSearchItems.map((virtualItem) => (
+                  <div
+                    className="absolute top-0 left-0 w-full pr-3"
+                    style={{
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    key={virtualItem.key}
+                    data-index={virtualItem.index}
+                  >
                     <Fragment key={virtualItem.index}>
                       <QuestionHoverCard
                         resetScrollPositions={resetScrollPositions}
-                        question={
-                          partitionedTopicalData[currentTab][virtualItem.index]
-                        }
+                        question={searchResults[virtualItem.index]}
                         currentTab={currentTab}
                         currentQuestionId={currentQuestionId}
-                        setCurrentQuestionId={setCurrentQuestionId}
                         setCurrentTabThatContainsQuestion={
                           setCurrentTabThatContainsQuestion
                         }
                         listId={listId}
+                        setCurrentQuestionId={setCurrentQuestionId}
                         isInspectSidebarOpen={isInspectSidebarOpen}
                         isMobileDevice={isMobile}
                       />
                       <SelectSeparator />
                     </Fragment>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div
-              className="relative w-full"
-              style={{
-                height: searchVirtualizer.getTotalSize(),
-              }}
-            >
-              {virtualSearchItems.map((virtualItem) => (
-                <div
-                  className="absolute top-0 left-0 w-full pr-3"
-                  style={{
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                >
-                  <Fragment key={virtualItem.index}>
-                    <QuestionHoverCard
-                      resetScrollPositions={resetScrollPositions}
-                      question={searchResults[virtualItem.index]}
-                      currentTab={
-                        partitionedTopicalData?.findIndex((tab) =>
-                          tab.some(
-                            (question) =>
-                              question.id ===
-                              searchResults[virtualItem.index]?.id
-                          )
-                        ) ?? 0
-                      }
-                      currentQuestionId={currentQuestionId}
-                      setCurrentTabThatContainsQuestion={
-                        setCurrentTabThatContainsQuestion
-                      }
-                      listId={listId}
-                      setCurrentQuestionId={setCurrentQuestionId}
-                      isInspectSidebarOpen={isInspectSidebarOpen}
-                      isMobileDevice={isMobile}
-                    />
-                    <SelectSeparator />
-                  </Fragment>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
 
-          <div
-            className={cn(
-              "w-full flex items-center justify-around",
-              searchInput.length > 0 && "hidden"
-            )}
-          >
-            <TabNavigationButtons
-              currentTab={currentTab}
-              setCurrentTab={setCurrentTab}
-              partitionedTopicalData={partitionedTopicalData}
-              currentTabThatContainsQuestion={currentTabThatContainsQuestion}
-              currentQuestionId={currentQuestionId}
-              scrollToQuestion={scrollToQuestion}
-              listScrollAreaRef={listScrollAreaRef}
-            />
-          </div>
-        </SidebarContent>
-        <SidebarRail />
-      </Sidebar>
+            <div
+              className={cn(
+                "w-full flex items-center justify-around",
+                searchInput.length > 0 && "hidden"
+              )}
+            >
+              <TabNavigationButtons
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                partitionedTopicalData={partitionedTopicalData}
+                currentTabThatContainsQuestion={currentTabThatContainsQuestion}
+                currentQuestionId={currentQuestionId}
+                scrollToQuestion={scrollToQuestion}
+                listScrollAreaRef={listScrollAreaRef}
+              />
+            </div>
+          </SidebarContent>
+          <SidebarRail />
+        </Sidebar>
+        {navigationButtonsPortalContainer &&
+          createPortal(
+            <NavigationButtons
+              handleNextQuestion={handleNextQuestion}
+              handlePreviousQuestion={handlePreviousQuestion}
+              isHandleNextQuestionDisabled={isHandleNextQuestionDisabled}
+              isHandlePreviousQuestionDisabled={
+                isHandlePreviousQuestionDisabled
+              }
+            />,
+            navigationButtonsPortalContainer
+          )}
+      </>
     );
   }
 );
@@ -767,3 +802,42 @@ const GoToCurrentButton = memo(
 );
 
 GoToCurrentButton.displayName = "GoToCurrentButton";
+
+const NavigationButtons = memo(
+  ({
+    handleNextQuestion,
+    handlePreviousQuestion,
+    isHandleNextQuestionDisabled,
+    isHandlePreviousQuestionDisabled,
+  }: {
+    handleNextQuestion: () => void;
+    handlePreviousQuestion: () => void;
+    isHandleNextQuestionDisabled: boolean;
+    isHandlePreviousQuestionDisabled: boolean;
+  }) => {
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant="outline"
+          className="w-9 rounded-sm cursor-pointer"
+          onClick={handleNextQuestion}
+          disabled={isHandleNextQuestionDisabled}
+          title="Next question"
+        >
+          <ChevronDown />
+        </Button>
+        <Button
+          variant="outline"
+          className="w-9 rounded-sm cursor-pointer"
+          onClick={handlePreviousQuestion}
+          disabled={isHandlePreviousQuestionDisabled}
+          title="Previous question"
+        >
+          <ChevronUp />
+        </Button>
+      </div>
+    );
+  }
+);
+
+NavigationButtons.displayName = "NavigationButtons";

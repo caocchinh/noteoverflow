@@ -349,7 +349,7 @@ const AppMainContent = ({
                       <li className="flex items-center flex-col gap-2 text-orange-600 dark:text-orange-400">
                         <div className="flex flex-row items-center gap-2">
                           <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                            ↑↓←→
+                            ↑↓
                           </kbd>
                           <span>or</span>
                           <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">

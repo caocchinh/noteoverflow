@@ -4,13 +4,7 @@ import { BestExamHelpUltility } from "../BestExamHelpUltility";
 import { BookmarkButton } from "../BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "../QuestionInspectFinishedCheckbox";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  PanelsTopLeft,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, PanelsTopLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InspectUltilityBarProps } from "../../constants/types";
 import {
@@ -34,7 +28,6 @@ const InspectUltilityBar = memo(
       {
         currentView,
         setCurrentView,
-        sideBarInspectRef,
         currentQuestionData,
         listId,
         sortParameters,
@@ -57,6 +50,7 @@ const InspectUltilityBar = memo(
       const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
         null
       );
+      const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
       const isMobile = useIsMobile();
 
       const overflowScrollHandler = useCallback(() => {
@@ -83,8 +77,9 @@ const InspectUltilityBar = memo(
         ref,
         () => ({
           overflowScrollHandler,
+          navigationButtonsContainerRef: navigationButtonsContainerRef.current,
         }),
-        [overflowScrollHandler]
+        [overflowScrollHandler, navigationButtonsContainerRef]
       );
 
       return (
@@ -176,28 +171,10 @@ const InspectUltilityBar = memo(
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  className="w-9 rounded-sm cursor-pointer"
-                  onClick={() =>
-                    sideBarInspectRef.current?.handleNextQuestion()
-                  }
-                  title="Next question"
-                >
-                  <ChevronDown />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-9 rounded-sm cursor-pointer"
-                  onClick={() =>
-                    sideBarInspectRef.current?.handlePreviousQuestion()
-                  }
-                  title="Previous question"
-                >
-                  <ChevronUp />
-                </Button>
-              </div>
+              <div
+                ref={navigationButtonsContainerRef}
+                className="flex items-center justify-center gap-2"
+              ></div>
               {currentQuestionData && (
                 <QuestionInspectFinishedCheckbox
                   question={currentQuestionData}

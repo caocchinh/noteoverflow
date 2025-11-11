@@ -203,7 +203,7 @@ export interface QuestionHoverCardProps {
 
 export interface BrowseMoreQuestionsProps {
   browseMoreData: SelectedQuestion[];
-  navigateToQuestion: (questionId: string) => void;
+  onQuestionClick: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
 }
@@ -352,6 +352,7 @@ export interface InspectSidebarProps {
   listId: string | undefined;
   currentQuestionIndex: number;
   overflowScrollHandler?: () => void;
+  navigationButtonsPortalContainer?: HTMLElement | null;
 }
 
 export interface InspectSidebarRef {
@@ -365,7 +366,6 @@ export interface InspectSidebarRef {
 export interface InspectUltilityBarProps {
   currentView: QuestionInspectViewMode;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
-  sideBarInspectRef: RefObject<InspectSidebarRef | null>;
   currentQuestionData: SelectedQuestion | undefined;
   listId: string | undefined;
   sortParameters: SortParameters | undefined;
@@ -379,6 +379,7 @@ export interface InspectUltilityBarProps {
 
 export interface InspectUltilityBarRef {
   overflowScrollHandler: () => void;
+  navigationButtonsContainerRef: HTMLDivElement | null;
 }
 
 export interface QuestionInspectMainContentProps {

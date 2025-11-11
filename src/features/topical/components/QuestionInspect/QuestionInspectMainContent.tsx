@@ -162,11 +162,12 @@ const QuestionInspectMainContent = forwardRef(
       [resetScrollPositions, setCurrentView, handleKeyboardNavigation]
     );
 
-    const navigateToQuestion = useCallback(
+    const onQuestionClick = useCallback(
       (questionId: string) => {
         sideBarInspectRef.current?.navigateToQuestion(questionId);
+        resetScrollPositions();
       },
-      [sideBarInspectRef]
+      [sideBarInspectRef, resetScrollPositions]
     );
 
     return (
@@ -179,7 +180,6 @@ const QuestionInspectMainContent = forwardRef(
             ref={inspectUltilityBarRef}
             currentView={currentView}
             setCurrentView={setCurrentView}
-            sideBarInspectRef={sideBarInspectRef}
             currentQuestionData={currentQuestionData}
             listId={listId}
             sortParameters={sortParameters}
@@ -215,7 +215,7 @@ const QuestionInspectMainContent = forwardRef(
               <div className="my-6"></div>
               <BrowseMoreQuestions
                 browseMoreData={browseMoreData}
-                navigateToQuestion={navigateToQuestion}
+                onQuestionClick={onQuestionClick}
                 isBrowseMoreOpen={isBrowseMoreOpen}
                 setIsBrowseMoreOpen={setIsBrowseMoreOpen}
               />
