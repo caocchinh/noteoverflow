@@ -8,11 +8,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SORT_OPTIONS } from "../constants/constants";
 
@@ -49,56 +48,62 @@ const Sort = memo(
       >
         <TooltipTrigger asChild>
           <div tabIndex={-1} className={cn(isDisabled && "opacity-50")}>
-            <DropdownMenu
+            <Popover
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}
+              modal={true}
             >
-              <DropdownMenuTrigger asChild>
+              <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   disabled={isDisabled}
                   className="cursor-pointer !px-[10px]"
-                  onTouchStart={(e) => e.preventDefault()}
                 >
                   <ArrowDownWideNarrow className="w-4 h-4" />
                   {showSortTextTrigger && "Sort"}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[180px] z-[999999]">
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (sortParameters?.sortBy === "ascending") {
-                      setSortParameters({ sortBy: "descending" });
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 w-4 h-4",
-                      currentSort === "descending" ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {descendingSortText}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (sortParameters?.sortBy === "descending") {
-                      setSortParameters({ sortBy: "ascending" });
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 w-4 h-4",
-                      currentSort === "ascending" ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {ascendingSortText}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverTrigger>
+              <PopoverContent className="w-[180px] z-[999999] !p-1">
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      if (sortParameters?.sortBy === "ascending") {
+                        setSortParameters({ sortBy: "descending" });
+                      }
+                    }}
+                    className="flex items-center cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm px-2 py-1.5 text-sm outline-hidden"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 w-4 h-4",
+                        currentSort === "descending"
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    {descendingSortText}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (sortParameters?.sortBy === "descending") {
+                        setSortParameters({ sortBy: "ascending" });
+                      }
+                    }}
+                    className="flex items-center cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm px-2 py-1.5 text-sm outline-hidden"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 w-4 h-4",
+                        currentSort === "ascending"
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    {ascendingSortText}
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="z-[1000000]">

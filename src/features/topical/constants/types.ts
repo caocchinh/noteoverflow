@@ -202,7 +202,7 @@ export interface QuestionHoverCardProps {
 }
 
 export interface BrowseMoreQuestionsProps {
-  browseMoreData: SelectedQuestion[];
+  partitionedTopicalData: SelectedQuestion[][] | undefined;
   onQuestionClick: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;
@@ -383,7 +383,6 @@ export interface InspectUltilityBarRef {
 }
 
 export interface QuestionInspectMainContentProps {
-  allQuestions: SelectedQuestion[];
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   currentTabThatContainsQuestion: number;
   currentQuestionIndex: number;

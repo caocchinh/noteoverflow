@@ -24,7 +24,6 @@ import BothViews from "./BothViews";
 const QuestionInspectMainContent = forwardRef(
   (
     {
-      allQuestions,
       partitionedTopicalData,
       currentTabThatContainsQuestion,
       currentQuestionIndex,
@@ -52,15 +51,6 @@ const QuestionInspectMainContent = forwardRef(
     const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
     const [currentView, setCurrentView] =
       useState<QuestionInspectViewMode>("question");
-    // Random selection of 20 questions that are not finished (or less if there aren't that many)
-    const browseMoreData = useMemo(() => {
-      if (!allQuestions || allQuestions.length === 0) {
-        return [];
-      }
-
-      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, Math.min(20, allQuestions.length));
-    }, [allQuestions]);
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -214,7 +204,7 @@ const QuestionInspectMainContent = forwardRef(
               />
               <div className="my-6"></div>
               <BrowseMoreQuestions
-                browseMoreData={browseMoreData}
+                partitionedTopicalData={partitionedTopicalData}
                 onQuestionClick={onQuestionClick}
                 isBrowseMoreOpen={isBrowseMoreOpen}
                 setIsBrowseMoreOpen={setIsBrowseMoreOpen}

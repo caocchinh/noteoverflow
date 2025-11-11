@@ -183,7 +183,6 @@ const QuestionInspect = ({
             />
             <QuestionInspectMainContent
               ref={questionInspectMainContentRef}
-              allQuestions={allQuestions}
               partitionedTopicalData={partitionedTopicalData}
               currentTabThatContainsQuestion={currentTabThatContainsQuestion}
               currentQuestionIndex={currentQuestionIndex}

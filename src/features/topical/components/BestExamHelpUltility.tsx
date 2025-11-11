@@ -1,9 +1,8 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -65,10 +64,10 @@ const PastPaperLink = ({
 export const BestExamHelpUltility = memo(
   ({ question }: { question: SelectedQuestion | undefined }) => {
     return (
-      <DropdownMenu>
+      <Popover>
         <Tooltip>
           <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
+            <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
@@ -78,7 +77,7 @@ export const BestExamHelpUltility = memo(
               >
                 <FileText />
               </Button>
-            </DropdownMenuTrigger>
+            </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent className="z-[99999999]" side="bottom">
             {question?.year === UNSUPPORTED_YEAR
@@ -86,11 +85,8 @@ export const BestExamHelpUltility = memo(
               : "Resources"}
           </TooltipContent>
         </Tooltip>
-        <DropdownMenuContent className="z-[99999999] p-3 bg-accent">
-          <DropdownMenuItem
-            disabled={question?.year === UNSUPPORTED_YEAR}
-            asChild
-          >
+        <PopoverContent className="z-[99999999] p-3 bg-accent w-max">
+          <div className="flex flex-col gap-1">
             <PastPaperLink question={question} type="qp">
               <ScrollText className="mr-2 h-4 w-4" />
               <span>
@@ -99,12 +95,7 @@ export const BestExamHelpUltility = memo(
                   : "View entire paper"}
               </span>
             </PastPaperLink>
-          </DropdownMenuItem>
-          <Separator className="my-1" />
-          <DropdownMenuItem
-            disabled={question?.year === UNSUPPORTED_YEAR}
-            asChild
-          >
+            <Separator className="my-1" />
             <PastPaperLink question={question} type="ms">
               <PencilLine className="mr-2 h-4 w-4" />
               <span>
@@ -113,12 +104,7 @@ export const BestExamHelpUltility = memo(
                   : "View entire mark scheme"}
               </span>
             </PastPaperLink>
-          </DropdownMenuItem>
-          <Separator className="my-1" />
-          <DropdownMenuItem
-            disabled={question?.year === UNSUPPORTED_YEAR}
-            asChild
-          >
+            <Separator className="my-1" />
             <PastPaperLink question={question} type="er">
               <ClipboardList className="mr-2 h-4 w-4" />
               <span>
@@ -127,12 +113,7 @@ export const BestExamHelpUltility = memo(
                   : "View examiner's report"}
               </span>
             </PastPaperLink>
-          </DropdownMenuItem>
-          <Separator className="my-1" />
-          <DropdownMenuItem
-            disabled={question?.year === UNSUPPORTED_YEAR}
-            asChild
-          >
+            <Separator className="my-1" />
             <PastPaperLink question={question} type="gt">
               <Highlighter className="mr-2 h-4 w-4" />
               <span>
@@ -141,9 +122,9 @@ export const BestExamHelpUltility = memo(
                   : "View grade threshold"}
               </span>
             </PastPaperLink>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
 );
