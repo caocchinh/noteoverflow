@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import {
   Dialog,
@@ -8,13 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Fragment,
-  RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -29,7 +22,7 @@ import {
   fuzzySearch,
   isOverScrolling,
   updateSearchParams,
-} from "../lib/utils";
+} from "../../lib/utils";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -39,10 +32,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ChevronUp,
-  Eye,
-  EyeClosed,
   FastForward,
-  Loader2,
   PanelsTopLeft,
   Search,
   X,
@@ -50,14 +40,9 @@ import {
 import { cn } from "@/lib/utils";
 import { SelectSeparator } from "@/components/ui/select";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { BestExamHelpUltility } from "./BestExamHelpUltility";
-import {
-  BrowseMoreQuestionsProps,
-  QuestionHoverCardProps,
-  SelectedQuestion,
-  QuestionInspectProps,
-} from "../constants/types";
-import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
+import { BestExamHelpUltility } from "../BestExamHelpUltility";
+import { QuestionInspectProps } from "../../constants/types";
+import { QuestionInspectFinishedCheckbox } from "../QuestionInspectFinishedCheckbox";
 import {
   Sidebar,
   SidebarContent,
@@ -67,35 +52,18 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BookmarkButton } from "./BookmarkButton";
-import { JumpToTabButton } from "./JumpToTabButton";
-import Sort from "./Sort";
-import { ShareFilter } from "./ShareFilter";
-import { QuestionInformation } from "./QuestionInformation";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import Loader from "./Loader/Loader";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { useIsMutating } from "@tanstack/react-query";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import QuestionPreview from "./QuestionPreview";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import {
-  COLUMN_BREAKPOINTS,
-  MANSONRY_GUTTER_BREAKPOINTS,
-} from "../constants/constants";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import { FinishedTracker } from "./FinishedTracker";
+import { BookmarkButton } from "../BookmarkButton";
+import { JumpToTabButton } from "../JumpToTabButton";
+import Sort from "../Sort";
+import { ShareFilter } from "../ShareFilter";
+import { QuestionInformation } from "../QuestionInformation";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
+import { FinishedTracker } from "./FinishedTracker";
+import BrowseMoreQuestions from "./BrowseMoreQuestions";
+import QuestionHoverCard from "./QuestionHoverCard";
+import BothViews from "./BothViews";
 
 const QuestionInspect = ({
   isOpen,
@@ -123,6 +91,7 @@ const QuestionInspect = ({
   >("question");
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
   const { isCalculatorOpen, setIsCalculatorOpen } = useTopicalApp();
+  console.log(currentQuestionId);
   const currentQuestionIndex = useMemo(() => {
     return (
       partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
@@ -150,7 +119,7 @@ const QuestionInspect = ({
   }, [partitionedTopicalData]);
 
   // Random selection of 20 questions that are not finished (or less if there aren't that many)
-  const displayedData = useMemo(() => {
+  const browseMoreData = useMemo(() => {
     if (!allQuestions || allQuestions.length === 0) {
       return [];
     }
@@ -232,7 +201,8 @@ const QuestionInspect = ({
 
   useEffect(() => {
     setCurrentView("question");
-  }, [currentQuestionId]);
+    resetScrollPositions();
+  }, [currentQuestionId, resetScrollPositions]);
 
   const searchVirtualizer = useVirtualizer({
     count: searchResults.length,
@@ -277,7 +247,6 @@ const QuestionInspect = ({
 
   const navigateToQuestion = useCallback(
     (questionId: string) => {
-      resetScrollPositions();
       const tab = questionId
         ? partitionedTopicalData?.findIndex((partition) =>
             partition.some((question) => question.id === questionId)
@@ -294,14 +263,15 @@ const QuestionInspect = ({
         scrollToQuestion({ questionId, tab });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       partitionedTopicalData,
+      allQuestions,
       isVirtualizationReady,
       scrollToQuestion,
       setCurrentTabThatContainsQuestion,
       setCurrentTab,
       setCurrentQuestionId,
-      resetScrollPositions,
     ]
   );
   const ultilityRef = useRef<HTMLDivElement | null>(null);
@@ -337,7 +307,8 @@ const QuestionInspect = ({
     }
     overflowScrollHandler();
     navigateToQuestion(isOpen.questionId);
-  }, [isOpen, overflowScrollHandler, navigateToQuestion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, overflowScrollHandler, isVirtualizationReady]);
 
   useEffect(() => {
     setSearchInput("");
@@ -346,22 +317,20 @@ const QuestionInspect = ({
       allQuestions &&
       allQuestions.length > 0 &&
       currentQuestionId &&
-      !allQuestions.some(
-        (question) =>
-          question.id === currentQuestionId && question.id !== currentQuestionId
-      )
+      !allQuestions.some((question) => question.id === currentQuestionId)
     ) {
-      setCurrentQuestionId(allQuestions[0].id);
       navigateToQuestion(allQuestions[0].id);
+      return;
     }
     if (allQuestions && allQuestions.length === 0) {
       setIsOpen({
         isOpen: false,
         questionId: "",
       });
+      return;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allQuestions]);
+  }, [allQuestions, navigateToQuestion, setIsOpen]);
 
   const virtualDisplayItems = displayVirtualizer.getVirtualItems();
   const listScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -1243,7 +1212,7 @@ const QuestionInspect = ({
                     />
                     <div className="my-6"></div>
                     <BrowseMoreQuestions
-                      displayedData={displayedData}
+                      browseMoreData={browseMoreData}
                       navigateToQuestion={navigateToQuestion}
                       isBrowseMoreOpen={isBrowseMoreOpen}
                       setIsBrowseMoreOpen={setIsBrowseMoreOpen}
@@ -1287,7 +1256,6 @@ const QuestionInspect = ({
                   </div>
                   <BothViews
                     currentQuestionData={currentQuestionData}
-                    isMobile={isMobile}
                     questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
                     answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
                   />
@@ -1313,359 +1281,3 @@ const QuestionInspect = ({
 };
 
 export default QuestionInspect;
-
-const BothViews = ({
-  isMobile,
-  currentQuestionData,
-  questionScrollAreaRef,
-  answerScrollAreaRef,
-}: {
-  isMobile: boolean;
-  currentQuestionData: SelectedQuestion | undefined;
-  questionScrollAreaRef: RefObject<HTMLDivElement | null>;
-  answerScrollAreaRef: RefObject<HTMLDivElement | null>;
-}) => {
-  const [isHidingAnswer, setIsHidingAnswer] = useState(true);
-  const [isHidingQuestion, setIsHidingQuestion] = useState(false);
-  const [key, setKey] = useState(0);
-  const isAnswerMultipleChoice =
-    !currentQuestionData?.answers?.[0]?.includes("http");
-
-  useEffect(() => {
-    setIsHidingAnswer(true);
-    setIsHidingQuestion(false);
-    setKey((prev) => prev + 1);
-  }, [currentQuestionData]);
-
-  return (
-    <ResizablePanelGroup
-      key={key}
-      direction={isMobile ? "vertical" : "horizontal"}
-      className={cn(
-        "rounded-lg border w-full",
-        isMobile ? "!h-[65dvh]" : "!h-[70dvh]"
-      )}
-    >
-      <ResizablePanel
-        defaultSize={isAnswerMultipleChoice ? 77 : 50}
-        minSize={15}
-      >
-        <div
-          className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
-          title="Toggle visibility"
-          onClick={() => {
-            setIsHidingQuestion(!isHidingQuestion);
-          }}
-        >
-          <p className="text-sm">Question</p>
-          {!isHidingQuestion ? (
-            <Eye strokeWidth={2} />
-          ) : (
-            <EyeClosed strokeWidth={2} />
-          )}
-        </div>
-        <ScrollArea
-          className={cn(
-            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
-            isMobile && "!h-full",
-            isHidingQuestion && "blur-sm"
-          )}
-          type="always"
-          viewportRef={questionScrollAreaRef}
-        >
-          <AnnotatableInspectImages
-            imageSource={currentQuestionData?.questionImages ?? []}
-            currentQuestionId={currentQuestionData?.id}
-          />
-        </ScrollArea>
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel
-        defaultSize={isAnswerMultipleChoice ? 23 : 50}
-        minSize={15}
-      >
-        <div
-          className="ml-3 w-max m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
-          title="Toggle visibility"
-          onClick={() => {
-            setIsHidingAnswer(!isHidingAnswer);
-          }}
-        >
-          <p className="text-sm">Answer</p>
-          {!isHidingAnswer ? <Eye strokeWidth={2} /> : <EyeClosed />}
-        </div>
-        <ScrollArea
-          className={cn(
-            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pl-3 pb-5 pt-0",
-            isMobile && "!h-full",
-            isHidingAnswer && "blur-sm"
-          )}
-          type="always"
-          viewportRef={answerScrollAreaRef}
-        >
-          <AnnotatableInspectImages
-            imageSource={currentQuestionData?.answers ?? []}
-            currentQuestionId={currentQuestionData?.id}
-          />
-        </ScrollArea>
-      </ResizablePanel>
-    </ResizablePanelGroup>
-  );
-};
-
-const QuestionHoverCard = ({
-  question,
-  currentTab,
-  currentQuestionId,
-  setCurrentQuestionId,
-  setCurrentTabThatContainsQuestion,
-  isMobileDevice,
-  listId,
-  isInspectSidebarOpen,
-  resetScrollPositions,
-}: QuestionHoverCardProps) => {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isImageError, setIsImageError] = useState(false);
-  const [hoverCardOpen, setHoverCardOpen] = useState(false);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const touchStartTimeRef = useRef<number | null>(null);
-  const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
-  const isMutatingBookmarkOfThisQuestion =
-    useIsMutating({
-      mutationKey: ["user_saved_activities", "bookmarks", question.id],
-    }) > 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isMutatingFinishedQuestionOfThisQuestion =
-    useIsMutating({
-      mutationKey: ["user_saved_activities", "finished_questions", question.id],
-    }) > 0;
-  const isThisQuestionFinished =
-    userFinishedQuestions?.some((item) => item.question.id === question?.id) ??
-    false;
-
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-      touchStartTimeRef.current = null;
-    };
-  }, []);
-  const hoverCardBreakPoint = useIsMobile({ breakpoint: 1185 });
-  const { savedActivitiesIsError } = useTopicalApp();
-  const { isSessionPending, isAuthenticated } = useAuth();
-
-  return (
-    <HoverCard
-      open={
-        ((hoverCardOpen && !isPopoverOpen) ||
-          (isPopoverOpen && !hoverCardBreakPoint)) &&
-        isInspectSidebarOpen
-      }
-    >
-      <HoverCardTrigger asChild>
-        <div
-          className={cn(
-            "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
-            currentQuestionId === question?.id && "!bg-logo-main text-white",
-            isThisQuestionFinished &&
-              "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-          )}
-          onTouchStart={() => {
-            touchStartTimeRef.current = Date.now();
-          }}
-          onMouseEnter={() => {
-            if (touchStartTimeRef.current) {
-              return;
-            }
-            if (isPopoverOpen) {
-              return;
-            }
-            hoverTimeoutRef.current = setTimeout(() => {
-              setHoverCardOpen(true);
-            }, 375);
-          }}
-          onMouseLeave={() => {
-            if (touchStartTimeRef.current) {
-              return;
-            }
-            if (!isPopoverOpen) {
-              setHoverCardOpen(false);
-            }
-            if (hoverTimeoutRef.current) {
-              clearTimeout(hoverTimeoutRef.current);
-              hoverTimeoutRef.current = null;
-            }
-          }}
-          onClick={() => {
-            setCurrentQuestionId(question?.id);
-            setCurrentTabThatContainsQuestion(currentTab);
-            resetScrollPositions();
-          }}
-        >
-          <p>
-            {extractPaperCode({
-              questionId: question?.id,
-            })}{" "}
-            Q
-            {extractQuestionNumber({
-              questionId: question?.id,
-            })}
-          </p>
-          <BookmarkButton
-            triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
-            popOverTriggerClassName={cn(
-              "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]"
-            )}
-            badgeClassName="hidden"
-            question={question}
-            isBookmarkDisabled={isSessionPending}
-            setIsHovering={setHoverCardOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
-            isPopoverOpen={isPopoverOpen}
-            listId={listId}
-            isInView={true}
-          />
-          {isMutatingBookmarkOfThisQuestion && (
-            <Badge
-              className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (isSessionPending) {
-                  return;
-                }
-                if (savedActivitiesIsError) {
-                  toast.error("Bookmark error. Please refresh the page.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                if (!isAuthenticated) {
-                  toast.error("Please sign in to bookmark questions.", {
-                    duration: 2000,
-                    position:
-                      isMobileDevice && isPopoverOpen
-                        ? "top-center"
-                        : "bottom-right",
-                  });
-                  return;
-                }
-                setIsPopoverOpen(true);
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              Saving
-              <Loader2 className="animate-spin" />
-            </Badge>
-          )}
-        </div>
-      </HoverCardTrigger>
-      <HoverCardContent
-        className={cn(
-          "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
-          currentQuestionId === question?.id && "!hidden"
-        )}
-        side="left"
-        sideOffset={25}
-      >
-        {!isImageLoaded && !isImageError && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-            <Loader />
-          </div>
-        )}
-        {isImageError && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-            <p className="text-red-500 text-sm">Image failed to load</p>
-          </div>
-        )}
-        <img
-          onLoad={() => {
-            setIsImageLoaded(true);
-          }}
-          loading="lazy"
-          onError={() => {
-            setIsImageError(true);
-          }}
-          src={question?.questionImages[0]}
-          alt="Question image"
-          width={400}
-          className="max-h-[70dvh] overflow-hidden object-cover object-top"
-        />
-      </HoverCardContent>
-    </HoverCard>
-  );
-};
-
-const BrowseMoreQuestions = ({
-  displayedData,
-  navigateToQuestion,
-  isBrowseMoreOpen,
-  setIsBrowseMoreOpen,
-}: BrowseMoreQuestionsProps) => {
-  const expandedContentRef = useRef<HTMLDivElement>(null);
-  return (
-    <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => {
-            setTimeout(() => {
-              if (!isBrowseMoreOpen) {
-                expandedContentRef.current?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-              }
-            }, 50);
-          }}
-          className="w-full mb-4 cursor-pointer rounded-none !bg-accent border-logo-main/30 sticky top-0 z-10"
-        >
-          <span className="flex items-center gap-2">
-            Browse more questions
-            {isBrowseMoreOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </span>
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent
-        ref={expandedContentRef}
-        className="relative z-0 pt-10"
-      >
-        <ResponsiveMasonry
-          columnsCountBreakPoints={
-            COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
-          }
-          // @ts-expect-error - gutterBreakPoints is not typed by the library
-          gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-        >
-          <Masonry>
-            {displayedData?.map((question) =>
-              question?.questionImages.map((imageSrc: string) => (
-                <QuestionPreview
-                  question={question}
-                  key={`${question.id}-${imageSrc}`}
-                  imageSrc={imageSrc}
-                  onQuestionClick={() => {
-                    navigateToQuestion(question?.id);
-                  }}
-                />
-              ))
-            )}
-          </Masonry>
-        </ResponsiveMasonry>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-};

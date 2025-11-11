@@ -35,7 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
-import QuestionInspect from "@/features/topical/components/QuestionInspect";
+import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
 
@@ -259,7 +259,6 @@ const AppMainContent = ({
   }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsAppSidebarOpen]);
 
   useEffect(() => {
-    console.log(pathname);
     if (typeof window === "undefined" || !mountedRef.current) {
       return;
     }

@@ -201,7 +201,7 @@ export interface QuestionHoverCardProps {
 }
 
 export interface BrowseMoreQuestionsProps {
-  displayedData: SelectedQuestion[];
+  browseMoreData: SelectedQuestion[];
   navigateToQuestion: (questionId: string) => void;
   isBrowseMoreOpen: boolean;
   setIsBrowseMoreOpen: Dispatch<SetStateAction<boolean>>;

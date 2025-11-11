@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
-import QuestionInspect from "@/features/topical/components/QuestionInspect";
+import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import {
   COLUMN_BREAKPOINTS,

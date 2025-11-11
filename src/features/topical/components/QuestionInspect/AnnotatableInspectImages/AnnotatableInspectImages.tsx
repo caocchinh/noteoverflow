@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { extractQuestionNumber } from "@/features/topical/lib/utils";
-import { ImageAnnotator } from "@/features/topical/components/ImageAnnotator";
+import { ImageAnnotator } from "@/features/topical/components/QuestionInspect/ImageAnnotator";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/AnnotatableInspectImages/react-photo-view.css";
@@ -64,7 +64,7 @@ export const AnnotatableInspectImages = ({
 
       {/* Loading indicator */}
       {!isEditMode && imageUrls.length > 0 && (
-        <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-20" />
+        <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
       )}
 
       {/* Image Display */}
@@ -78,31 +78,26 @@ export const AnnotatableInspectImages = ({
           />
         ) : (
           <PhotoProvider>
-            {imageSource.map((item) => (
-              <Fragment
+            {imageUrls.map((item) => (
+              <PhotoView
                 key={`${item}${currentQuestionId}${
                   currentQuestionId &&
                   extractQuestionNumber({
                     questionId: currentQuestionId,
                   })
                 }`}
+                src={item}
               >
-                {item.includes("http") ? (
-                  <PhotoView src={item}>
-                    <img
-                      className={cn(
-                        "w-full h-full object-contain relative z-10 !max-w-[750px] cursor-pointer",
-                        uiPreferences.imageTheme === "dark" && "!invert"
-                      )}
-                      src={item}
-                      alt="Question image"
-                      loading="lazy"
-                    />
-                  </PhotoView>
-                ) : (
-                  <p>{item}</p>
-                )}
-              </Fragment>
+                <img
+                  className={cn(
+                    "w-full h-full object-contain relative z-10 !max-w-[750px] cursor-pointer",
+                    uiPreferences.imageTheme === "dark" && "!invert"
+                  )}
+                  src={item}
+                  alt="Question image"
+                  loading="lazy"
+                />
+              </PhotoView>
             ))}
           </PhotoProvider>
         )}

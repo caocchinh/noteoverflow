@@ -49,15 +49,8 @@ const getCalculatorElement = (
 };
 
 const Calculator = memo(({ calculatorRef }: CalculatorProps) => {
-  const element = getCalculatorElement(calculatorRef);
-  return (
-    <div
-      ref={(el) => {
-        if (el && element && !el.contains(element)) el.appendChild(element);
-      }}
-      className="w-full h-full"
-    />
-  );
+  getCalculatorElement(calculatorRef);
+  return null;
 });
 
 Calculator.displayName = "Calculator";

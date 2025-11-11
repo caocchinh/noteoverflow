@@ -52,7 +52,7 @@ const User = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile({ breakpoint: 515 });
-  const { user, isPending, isError, isAuthenticated } = useAuth();
+  const { user, isSessionPending, isSessionError, isAuthenticated } = useAuth();
   const signOutMutation = useMutation({
     mutationFn: () => authClient.signOut(),
     onSuccess: () => {
@@ -80,7 +80,7 @@ const User = () => {
     }
   }, [user, handleSignOut, isAuthenticated]);
 
-  if (isError) {
+  if (isSessionError) {
     return (
       <DropdownMenu onOpenChange={setIsMenuOpen} open={isMenuOpen}>
         <DropdownMenuTrigger asChild>
@@ -114,7 +114,7 @@ const User = () => {
     );
   }
 
-  if (isPending) {
+  if (isSessionPending) {
     return <Skeleton className="!bg-navbar-skelenton h-8 w-8 rounded-full" />;
   }
   if (!isAuthenticated || !user) {
