@@ -3,13 +3,35 @@ import type { ValidCurriculum } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 
 export interface MultiSelectorProps {
-  values: string[];
+  selectedValues: string[];
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
-  data?: string[];
+  allAvailableOptions: string[];
   maxLength?: number;
   label: VALID_LABEL;
   prerequisite: string;
+}
+
+export type MultiSelectorSharedProps = {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  allAvailableOptions: string[];
+  label: string;
+  maxLength: number | undefined;
+  prerequisite: string;
+  commandListRef: React.RefObject<HTMLDivElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  popoverTriggerRef?: React.RefObject<HTMLDivElement | null>;
+};
+
+export interface MultiSelectorListRef {
+  setInputValue: Dispatch<SetStateAction<string>>;
+  inputValue: string;
 }
 
 export type VALID_LABEL =

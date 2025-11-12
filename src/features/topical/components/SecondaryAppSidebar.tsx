@@ -280,14 +280,14 @@ const SecondaryAppSidebar = ({
                 Topic
               </h3>
               <EnhancedMultiSelect
-                data={subjectMetadata?.topic}
+                allAvailableOptions={subjectMetadata?.topic ?? []}
                 label="Topic"
                 onValuesChange={useCallback(
                   (values) => setSelectedTopic(values as string[]),
                   []
                 )}
                 prerequisite="Subject"
-                values={selectedTopic ?? []}
+                selectedValues={selectedTopic ?? []}
               />
               {invalidInputs.topic && (
                 <p className="text-destructive text-sm">Topic is required</p>
@@ -306,14 +306,14 @@ const SecondaryAppSidebar = ({
                 Paper
               </h3>
               <EnhancedMultiSelect
-                data={subjectMetadata?.paperType}
+                allAvailableOptions={subjectMetadata?.paperType ?? []}
                 label="Paper"
                 onValuesChange={useCallback(
                   (values) => setSelectedPaperType(values as string[]),
                   []
                 )}
                 prerequisite="Subject"
-                values={selectedPaperType ?? []}
+                selectedValues={selectedPaperType ?? []}
               />
               {invalidInputs.paperType && (
                 <p className="text-destructive text-sm">Paper is required</p>
@@ -332,14 +332,14 @@ const SecondaryAppSidebar = ({
                 Year
               </h3>
               <EnhancedMultiSelect
-                data={subjectMetadata?.year}
+                allAvailableOptions={subjectMetadata?.year ?? []}
                 label="Year"
                 onValuesChange={useCallback(
                   (values) => setSelectedYear(values as string[]),
                   []
                 )}
                 prerequisite="Subject"
-                values={selectedYear ?? []}
+                selectedValues={selectedYear ?? []}
               />
               {invalidInputs.year && (
                 <p className="text-destructive text-sm">Year is required</p>
@@ -358,14 +358,14 @@ const SecondaryAppSidebar = ({
                 Season
               </h3>
               <EnhancedMultiSelect
-                data={subjectMetadata?.season}
+                allAvailableOptions={subjectMetadata?.season ?? []}
                 label="Season"
                 onValuesChange={useCallback(
                   (values) => setSelectedSeason(values as string[]),
                   []
                 )}
                 prerequisite="Subject"
-                values={selectedSeason ?? []}
+                selectedValues={selectedSeason ?? []}
               />
               {invalidInputs.season && (
                 <p className="text-destructive text-sm">Season is required</p>

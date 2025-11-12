@@ -652,14 +652,14 @@ const AppSidebar = memo(
                     Topic
                   </h3>
                   <EnhancedMultiSelect
-                    data={availableTopics}
+                    allAvailableOptions={availableTopics ?? []}
                     label="Topic"
                     onValuesChange={useCallback(
                       (values) => setSelectedTopic(values as string[]),
                       []
                     )}
                     prerequisite="Subject"
-                    values={selectedTopic}
+                    selectedValues={selectedTopic}
                   />
                   {invalidInputs.topic && (
                     <p className="text-destructive text-sm">
@@ -680,14 +680,14 @@ const AppSidebar = memo(
                     Paper
                   </h3>
                   <EnhancedMultiSelect
-                    data={paperTypeData}
+                    allAvailableOptions={paperTypeData ?? []}
                     label="Paper"
                     onValuesChange={useCallback(
                       (values) => setSelectedPaperType(values as string[]),
                       []
                     )}
                     prerequisite="Subject"
-                    values={selectedPaperType}
+                    selectedValues={selectedPaperType}
                   />
                   {invalidInputs.paperType && (
                     <p className="text-destructive text-sm">
@@ -708,14 +708,14 @@ const AppSidebar = memo(
                     Year
                   </h3>
                   <EnhancedMultiSelect
-                    data={yearData}
+                    allAvailableOptions={yearData ?? []}
                     label="Year"
                     onValuesChange={useCallback(
                       (values) => setSelectedYear(values as string[]),
                       []
                     )}
                     prerequisite="Subject"
-                    values={selectedYear}
+                    selectedValues={selectedYear}
                   />
                   {invalidInputs.year && (
                     <p className="text-destructive text-sm">Year is required</p>
@@ -734,14 +734,14 @@ const AppSidebar = memo(
                     Season
                   </h3>
                   <EnhancedMultiSelect
-                    data={availableSeasons}
+                    allAvailableOptions={availableSeasons ?? []}
                     label="Season"
                     onValuesChange={useCallback(
                       (values) => setSelectedSeason(values as string[]),
                       []
                     )}
                     prerequisite="Subject"
-                    values={selectedSeason}
+                    selectedValues={selectedSeason}
                   />
                   {invalidInputs.season && (
                     <p className="text-destructive text-sm">
