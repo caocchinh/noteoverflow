@@ -266,39 +266,21 @@ const MobileMultiSelector = memo(
                   (label.toLowerCase() === "topic" ? "s" : "")}
               </h3>
             )}
-            <div className="flex flex-row gap-3 p-2 ">
-              <Button
-                className="flex-1/3 cursor-pointer"
-                onClick={() => {
-                  onValueChange([]);
-                }}
-                variant="destructive"
-              >
-                Remove all
-                <Trash2 className="h-4 w-4" />
-              </Button>
-              {!maxLength && (
-                <Button
-                  className="flex-1/3 cursor-pointer"
-                  onClick={() => {
-                    onValueChange(allAvailableOptions ?? []);
-                  }}
-                >
-                  Select all
-                  <Sparkles className="h-4 w-4" />
-                </Button>
+            <MultiSelectorMobiletUltilityButtons
+              onValueChange={useCallback(
+                (
+                  val: string | string[],
+                  option?: "selectAll" | "removeAll"
+                ) => {
+                  onValueChange(val, option);
+                },
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                []
               )}
-              <Button
-                className="flex-1/3 cursor-pointer"
-                onClick={() => {
-                  setOpen(false);
-                }}
-                variant="outline"
-              >
-                Close
-                <RemoveIcon className="h-4 w-4" />
-              </Button>
-            </div>
+              allAvailableOptions={allAvailableOptions}
+              maxLength={maxLength}
+              setOpen={setOpen}
+            />
             <MultiSelectorContent
               selectedValues={selectedValues}
               onValueChange={onValueChange}
@@ -852,7 +834,7 @@ const MultiSelectorList = forwardRef(
             </CommandEmpty>
           </CommandList>
         </ScrollArea>
-        <MultiSelectorListUltilityButtons
+        <MultiSelectorDesktoptUltilityButtons
           onValueChange={useCallback(
             (val: string | string[], option?: "selectAll" | "removeAll") => {
               onValueChange(val, option);
@@ -868,7 +850,7 @@ const MultiSelectorList = forwardRef(
   }
 );
 
-const MultiSelectorListUltilityButtons = memo(
+const MultiSelectorDesktoptUltilityButtons = memo(
   ({
     onValueChange,
     allAvailableOptions,
@@ -909,7 +891,63 @@ const MultiSelectorListUltilityButtons = memo(
   }
 );
 
-MultiSelectorListUltilityButtons.displayName =
-  "MultiSelectorListUltilityButtons";
+MultiSelectorDesktoptUltilityButtons.displayName =
+  "MultiSelectorDesktoptUltilityButtons";
+
+const MultiSelectorMobiletUltilityButtons = memo(
+  ({
+    onValueChange,
+    allAvailableOptions,
+    maxLength,
+    setOpen,
+  }: {
+    onValueChange: (
+      val: string | string[],
+      option?: "selectAll" | "removeAll"
+    ) => void;
+    allAvailableOptions: string[];
+    maxLength: number | undefined;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+  }) => {
+    return (
+      <div className="flex flex-row gap-3 p-2 ">
+        <Button
+          className="flex-1/3 cursor-pointer"
+          onClick={() => {
+            onValueChange([]);
+          }}
+          variant="destructive"
+        >
+          Remove all
+          <Trash2 className="h-4 w-4" />
+        </Button>
+        {!maxLength && (
+          <Button
+            className="flex-1/3 cursor-pointer"
+            onClick={() => {
+              onValueChange(allAvailableOptions ?? []);
+            }}
+          >
+            Select all
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          className="flex-1/3 cursor-pointer"
+          onClick={() => {
+            setOpen(false);
+          }}
+          variant="outline"
+        >
+          Close
+          <RemoveIcon className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+);
+
+MultiSelectorMobiletUltilityButtons.displayName =
+  "MultiSelectorMobiletUltilityButtons";
 
 MultiSelectorList.displayName = "MultiSelectorList";

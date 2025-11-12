@@ -9,6 +9,8 @@ import {
   useCallback,
   KeyboardEvent,
   memo,
+  forwardRef,
+  useImperativeHandle,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,6 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { fuzzySearch } from "../lib/utils";
+import { EnhancedSelectContentRef } from "../constants/types";
 
 const EnhancedSelect = memo(
   ({
@@ -58,27 +61,10 @@ const EnhancedSelect = memo(
     modal?: boolean;
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
-    const [inputValue, setInputValue] = useState<string>("");
     const triggerRef = useRef<HTMLButtonElement | null>(null);
-
-    const handleKeyDown = useCallback(
-      (e: KeyboardEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-
-        if (e.key === "Escape") {
-          if (inputValue) {
-            setInputValue("");
-            return;
-          }
-          inputRef.current?.blur();
-          if (isOpen) {
-            setIsOpen(false);
-          }
-        }
-      },
-      [inputValue, isOpen]
+    const enhancedSelectContentRef = useRef<EnhancedSelectContentRef | null>(
+      null
     );
 
     return (
@@ -122,7 +108,7 @@ const EnhancedSelect = memo(
                 return;
               }
               setIsOpen(false);
-              setInputValue("");
+              enhancedSelectContentRef.current?.setInputValue("");
             }}
             align="center"
             className={cn(
@@ -132,54 +118,15 @@ const EnhancedSelect = memo(
             side={side || (isMobileDevice ? "bottom" : "right")}
             avoidCollisions={isMobileDevice ? false : true}
           >
-            <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-              <div className="flex items-center gap-1 dark:bg-accent">
-                <CommandInput
-                  className="h-9 border-none"
-                  placeholder={`Search ${label.toLowerCase()}`}
-                  ref={inputRef}
-                  onClick={() => {
-                    inputRef.current?.focus();
-                  }}
-                  value={inputValue}
-                  wrapperClassName="w-full p-4 border-b py-6 "
-                  onValueChange={(value) => {
-                    setInputValue(value);
-                  }}
-                />
-                <XIcon
-                  className="!bg-transparent cursor-pointer mr-2 text-destructive"
-                  size={20}
-                  onClick={() => {
-                    if (inputValue) {
-                      setInputValue("");
-                    } else {
-                      setIsOpen(false);
-                    }
-                  }}
-                />
-              </div>
-              <ScrollArea viewPortClassName="max-h-[195px]" type="always">
-                <CommandList className="dark:bg-accent">
-                  <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup>
-                    {data
-                      ?.filter((item) => fuzzySearch(inputValue, item.code))
-                      .map((item) => (
-                        <EnhancedSelectItem
-                          key={item.code}
-                          item={item}
-                          isOpen={isOpen}
-                          setIsOpen={setIsOpen}
-                          setInputValue={setInputValue}
-                          setSelectedValue={setSelectedValue}
-                          selectedValue={selectedValue}
-                        />
-                      ))}
-                  </CommandGroup>
-                </CommandList>
-              </ScrollArea>
-            </Command>
+            <EnhancedSelectContent
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              label={label}
+              setSelectedValue={setSelectedValue}
+              selectedValue={selectedValue}
+              data={data}
+              ref={enhancedSelectContentRef}
+            />
           </PopoverContent>
         </Popover>
       </div>
@@ -254,3 +201,106 @@ const EnhancedSelectItem = ({
 };
 
 export default EnhancedSelect;
+
+const EnhancedSelectContent = forwardRef(
+  (
+    {
+      isOpen,
+      setIsOpen,
+      label,
+      data,
+      selectedValue,
+      setSelectedValue,
+    }: {
+      label: string;
+      isOpen: boolean;
+      setIsOpen: Dispatch<SetStateAction<boolean>>;
+      data: { code: string; coverImage: string }[];
+      selectedValue: string;
+      setSelectedValue: Dispatch<SetStateAction<string>>;
+    },
+    ref
+  ) => {
+    const [inputValue, setInputValue] = useState<string>("");
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+
+        if (e.key === "Escape") {
+          if (inputValue) {
+            setInputValue("");
+            return;
+          }
+          inputRef.current?.blur();
+          if (isOpen) {
+            setIsOpen(false);
+          }
+        }
+      },
+      [inputValue, isOpen, setIsOpen]
+    );
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        setInputValue,
+      }),
+      [setInputValue]
+    );
+
+    return (
+      <Command shouldFilter={false} onKeyDown={handleKeyDown}>
+        <div className="flex items-center gap-1 dark:bg-accent">
+          <CommandInput
+            className="h-9 border-none"
+            placeholder={`Search ${label.toLowerCase()}`}
+            ref={inputRef}
+            onClick={() => {
+              inputRef.current?.focus();
+            }}
+            value={inputValue}
+            wrapperClassName="w-full p-4 border-b py-6 "
+            onValueChange={(value) => {
+              setInputValue(value);
+            }}
+          />
+          <XIcon
+            className="!bg-transparent cursor-pointer mr-2 text-destructive"
+            size={20}
+            onClick={() => {
+              if (inputValue) {
+                setInputValue("");
+              } else {
+                setIsOpen(false);
+              }
+            }}
+          />
+        </div>
+        <ScrollArea viewPortClassName="max-h-[195px]" type="always">
+          <CommandList className="dark:bg-accent">
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {data
+                ?.filter((item) => fuzzySearch(inputValue, item.code))
+                .map((item) => (
+                  <EnhancedSelectItem
+                    key={item.code}
+                    item={item}
+                    isOpen={isOpen}
+                    setIsOpen={setIsOpen}
+                    setInputValue={setInputValue}
+                    setSelectedValue={setSelectedValue}
+                    selectedValue={selectedValue}
+                  />
+                ))}
+            </CommandGroup>
+          </CommandList>
+        </ScrollArea>
+      </Command>
+    );
+  }
+);
+
+EnhancedSelectContent.displayName = "EnhancedSelectContent";

@@ -226,10 +226,14 @@ export const RecentQuery = forwardRef(
         },
       });
 
-    useImperativeHandle(ref, () => ({
-      mutateRecentQuery,
-      isAddRecentQueryPending,
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        mutateRecentQuery,
+        isAddRecentQueryPending,
+      }),
+      [isAddRecentQueryPending, mutateRecentQuery]
+    );
 
     return (
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

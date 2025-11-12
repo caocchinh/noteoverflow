@@ -2,6 +2,10 @@ import { Dispatch, SetStateAction, RefObject } from "react";
 import type { ValidCurriculum } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 
+export interface EnhancedSelectContentRef {
+  setInputValue: Dispatch<SetStateAction<string>>;
+}
+
 export interface MultiSelectorProps {
   selectedValues: string[];
   onValuesChange: (value: string[]) => void;
