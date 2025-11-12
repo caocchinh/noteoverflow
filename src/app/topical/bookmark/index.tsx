@@ -2,7 +2,7 @@
 
 import { ValidCurriculum } from "@/constants/types";
 import {
-  QuestionInspectOpenState,
+  QuestionInspectRef,
   SortParameters,
   SubjectMetadata,
 } from "@/features/topical/constants/types";
@@ -87,7 +87,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       selectedSubject
     );
   }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
-
+  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
     null
@@ -95,11 +95,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
-    useState<QuestionInspectOpenState>({
-      isOpen: false,
-      questionId: "",
-    });
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -224,7 +219,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+        setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
       />
     </div>
   ) : null;
@@ -402,11 +397,10 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isQuestionViewDisabled={isQuestionViewDisabled}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         listId={chosenList?.id}
+        questionInspectRef={questionInspectRef}
         preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
-        isQuestionInspectOpen={isQuestionInspectOpen}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}

@@ -114,37 +114,37 @@ const SecondaryAppUltilityBar = ({
         className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
         ref={ultilityRef}
       >
-        {setIsQuestionInspectOpen && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Button
-                  className="flex cursor-pointer items-center gap-2 border"
-                  disabled={isQuestionViewDisabled}
-                  onClick={() => {
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                className="flex cursor-pointer items-center gap-2 border"
+                disabled={isQuestionViewDisabled}
+                onClick={() => {
+                  if (setIsQuestionInspectOpen) {
                     setIsQuestionInspectOpen((prev) => ({
                       ...prev,
                       isOpen: true,
                     }));
-                  }}
-                  variant="default"
-                >
-                  Inspect
-                  <Monitor />
-                </Button>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className={cn(
-                !isQuestionViewDisabled && "!hidden",
-                "flex justify-center items-center gap-2"
-              )}
-            >
-              To inspect questions, select a subject first
-            </TooltipContent>
-          </Tooltip>
-        )}
+                  }
+                }}
+                variant="default"
+              >
+                Inspect
+                <Monitor />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom"
+            className={cn(
+              !isQuestionViewDisabled && "!hidden",
+              "flex justify-center items-center gap-2"
+            )}
+          >
+            To inspect questions, select a subject first
+          </TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <div>

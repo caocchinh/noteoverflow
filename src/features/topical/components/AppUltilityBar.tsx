@@ -165,10 +165,12 @@ const AppUltilityBar = memo(
                       className="flex cursor-pointer items-center gap-2 border"
                       disabled={isQuestionViewDisabled}
                       onClick={() => {
-                        setIsQuestionInspectOpen((prev) => ({
-                          ...prev,
-                          isOpen: true,
-                        }));
+                        if (setIsQuestionInspectOpen) {
+                          setIsQuestionInspectOpen((prev) => ({
+                            ...prev,
+                            isOpen: true,
+                          }));
+                        }
                       }}
                       variant="default"
                     >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -22,15 +22,13 @@ const SecondaryMainContent = ({
   topicalData,
   isQuestionViewDisabled,
   BETTER_AUTH_URL,
+  questionInspectRef,
   listId,
   preContent,
   breadcrumbContent,
   mainContent,
-  isQuestionInspectOpen,
-  setIsQuestionInspectOpen,
 }: SecondaryMainContentProps) => {
   const { uiPreferences } = useTopicalApp();
-  const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
@@ -95,11 +93,17 @@ const SecondaryMainContent = ({
   ]);
 
   const handleQuestionClick = (questionId: string) => {
-    setIsQuestionInspectOpen({
+    questionInspectRef.current?.setIsInspectOpen({
       isOpen: true,
       questionId,
     });
   };
+
+  const partitionedTopicalData = useMemo(() => {
+    return fullPartitionedData?.map((chunk) =>
+      chunk.map((item) => item.question)
+    );
+  }, [fullPartitionedData]);
 
   return (
     <>
@@ -180,17 +184,12 @@ const SecondaryMainContent = ({
 
       {Array.isArray(topicalData) && topicalData.length > 0 && (
         <QuestionInspect
+          ref={questionInspectRef}
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}
-          isOpen={isQuestionInspectOpen}
-          setIsOpen={setIsQuestionInspectOpen}
-          partitionedTopicalData={fullPartitionedData?.map((chunk) =>
-            chunk.map((item) => item.question)
-          )}
+          partitionedTopicalData={partitionedTopicalData}
           BETTER_AUTH_URL={BETTER_AUTH_URL}
           listId={listId}
-          isInspectSidebarOpen={isInspectSidebarOpen}
-          setIsInspectSidebarOpen={setIsInspectSidebarOpen}
         />
       )}
     </>

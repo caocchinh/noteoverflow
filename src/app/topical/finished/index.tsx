@@ -2,7 +2,7 @@
 
 import { ValidCurriculum } from "@/constants/types";
 import {
-  QuestionInspectOpenState,
+  QuestionInspectRef,
   SortParameters,
   SubjectMetadata,
 } from "@/features/topical/constants/types";
@@ -43,11 +43,6 @@ const FinishedQuestionsClient = ({
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
-    useState<QuestionInspectOpenState>({
-      isOpen: false,
-      questionId: "",
-    });
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "finished_questions"],
@@ -64,7 +59,7 @@ const FinishedQuestionsClient = ({
     return computeFinishedQuestionsMetadata(userFinishedQuestions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userFinishedQuestions, isMutatingThisQuestion]);
-
+  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
@@ -178,7 +173,7 @@ const FinishedQuestionsClient = ({
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
         sortParameters={sortParameters}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+        setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
         setSortParameters={setSortParameters}
       />
     </div>
@@ -297,10 +292,9 @@ const FinishedQuestionsClient = ({
         isQuestionViewDisabled={isQuestionViewDisabled}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         preContent={preContent}
+        questionInspectRef={questionInspectRef}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
-        isQuestionInspectOpen={isQuestionInspectOpen}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}

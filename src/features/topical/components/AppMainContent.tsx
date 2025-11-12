@@ -21,9 +21,9 @@ import {
 } from "@/features/topical/constants/constants";
 import type {
   SortParameters,
-  QuestionInspectOpenState,
   AppMainContentProps,
   SelectedFinishedQuestion,
+  QuestionInspectRef,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
@@ -31,7 +31,6 @@ import {
   isSubset,
   chunkQuestionsData,
 } from "@/features/topical/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
@@ -58,21 +57,15 @@ const AppMainContent = ({
   filterUrl,
 }: AppMainContentProps) => {
   const pathname = usePathname();
-  const isMobileDevice = useIsMobile();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
-  // UI preferences hook
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
   const [numberOfQuestion, setNumberOfQuetion] = useState(0);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const {
-    uiPreferences,
-    finishedQuestionsData: userFinishedQuestions,
-    setIsAppSidebarOpen,
-  } = useTopicalApp();
-  const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
+  const { uiPreferences, finishedQuestionsData: userFinishedQuestions } =
+    useTopicalApp();
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -95,6 +88,7 @@ const AppMainContent = ({
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
+  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
 
   const processedData = useMemo(() => {
     if (!topicalData?.data) return null;
@@ -139,7 +133,7 @@ const AppMainContent = ({
 
   // Memoized callbacks to prevent child re-renders
   const handleQuestionClick = useCallback((questionId: string) => {
-    setIsQuestionInspectOpen({
+    questionInspectRef.current?.setIsInspectOpen({
       isOpen: true,
       questionId,
     });
@@ -182,7 +176,10 @@ const AppMainContent = ({
 
   useEffect(() => {
     if (topicalData) {
-      setIsQuestionInspectOpen({ isOpen: false, questionId: "" });
+      questionInspectRef.current?.setIsInspectOpen({
+        isOpen: false,
+        questionId: "",
+      });
     }
   }, [topicalData, uiPreferences.isStrictModeEnabled]);
 
@@ -204,7 +201,7 @@ const AppMainContent = ({
               (item) => item.id === existingQuestionid
             ) !== -1
           ) {
-            setIsQuestionInspectOpen({
+            questionInspectRef.current?.setIsInspectOpen({
               isOpen: searchParams.isInspectOpen === "true",
               questionId: existingQuestionid,
             });
@@ -230,11 +227,7 @@ const AppMainContent = ({
   }, [currentQuery]);
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
-    useState<QuestionInspectOpenState>({
-      isOpen: false,
-      questionId: "",
-    });
+
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -255,12 +248,6 @@ const AppMainContent = ({
   ]);
 
   useEffect(() => {
-    if (isQuestionInspectOpen.isOpen && isMobileDevice) {
-      setIsAppSidebarOpen(false);
-    }
-  }, [isMobileDevice, isQuestionInspectOpen.isOpen, setIsAppSidebarOpen]);
-
-  useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
       return;
     }
@@ -268,8 +255,8 @@ const AppMainContent = ({
       if (currentQuery.curriculumId && currentQuery.subjectId) {
         updateSearchParams({
           query: JSON.stringify(currentQuery),
-          questionId: isQuestionInspectOpen.questionId
-            ? isQuestionInspectOpen.questionId
+          questionId: questionInspectRef.current?.isInspectOpen.questionId
+            ? questionInspectRef.current?.isInspectOpen.questionId
             : "",
           isInspectOpen: false,
         });
@@ -296,7 +283,9 @@ const AppMainContent = ({
           ultilityRef={ultilityRef}
           ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
-          setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+          setIsQuestionInspectOpen={
+            questionInspectRef.current?.setIsInspectOpen
+          }
           scrollAreaRef={mainContentScrollAreaRef}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}
@@ -475,15 +464,12 @@ const AppMainContent = ({
       </SidebarInset>
 
       <QuestionInspect
-        isOpen={isQuestionInspectOpen}
-        setIsOpen={setIsQuestionInspectOpen}
+        ref={questionInspectRef}
         partitionedTopicalData={fullPartitionedData}
         currentQuery={currentQuery}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}
-        isInspectSidebarOpen={isInspectSidebarOpen}
-        setIsInspectSidebarOpen={setIsInspectSidebarOpen}
       />
     </>
   );

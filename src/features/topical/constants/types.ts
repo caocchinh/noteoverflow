@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, RefObject } from "react";
+import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
 import type { ValidCurriculum } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 
@@ -283,14 +283,10 @@ export interface BrowseMoreQuestionsProps {
 }
 
 export interface QuestionInspectProps {
-  isOpen: QuestionInspectOpenState;
-  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   currentQuery?: CurrentQuery;
   sortParameters?: SortParameters;
   setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
-  isInspectSidebarOpen: boolean;
-  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   listId?: string;
   BETTER_AUTH_URL: string;
 }
@@ -299,7 +295,7 @@ export interface AppUltilityBarProps {
   fullPartitionedData: SelectedQuestion[][] | undefined;
   ultilityRef: RefObject<HTMLDivElement | null>;
   isQuestionViewDisabled: boolean;
-  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  setIsQuestionInspectOpen?: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
@@ -363,7 +359,7 @@ export interface SecondaryAppUltilityBarProps {
   scrollAreaRef?: RefObject<HTMLDivElement | null>;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
-  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  setIsQuestionInspectOpen?: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isSidebarOpen: boolean;
 }
 
@@ -396,18 +392,14 @@ export type SortableTopicalItem =
   | SelectedFinishedQuestion;
 
 export interface SecondaryMainContentProps {
-  // Data and state
   topicalData: TopicalData;
   isQuestionViewDisabled: boolean;
   BETTER_AUTH_URL: string;
   listId?: string;
-
-  // Custom content sections
-  preContent?: React.ReactNode;
-  breadcrumbContent: React.ReactNode;
-  mainContent: React.ReactNode;
-  isQuestionInspectOpen: QuestionInspectOpenState;
-  setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  questionInspectRef: RefObject<QuestionInspectRef | null>;
+  preContent?: ReactNode;
+  breadcrumbContent: ReactNode;
+  mainContent: ReactNode;
 }
 
 export interface InspectSidebarProps {
@@ -453,6 +445,11 @@ export interface InspectUltilityBarProps {
 
 export interface InspectUltilityBarRef {
   overflowScrollHandler: () => void;
+}
+
+export interface QuestionInspectRef {
+  setIsInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
+  isInspectOpen: QuestionInspectOpenState;
 }
 
 export interface QuestionInspectMainContentProps {

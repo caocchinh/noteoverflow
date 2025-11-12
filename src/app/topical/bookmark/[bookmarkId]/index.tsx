@@ -3,7 +3,7 @@ import {
   SelectedPublickBookmark,
   SubjectMetadata,
   SortParameters,
-  QuestionInspectOpenState,
+  QuestionInspectRef,
 } from "@/features/topical/constants/types";
 import { useMemo, useRef, useState } from "react";
 import { useIsMutating, useQuery } from "@tanstack/react-query";
@@ -52,16 +52,10 @@ export const BookmarkView = ({
     ownerAvatar: string;
   };
 }) => {
-  const [isQuestionInspectOpen, setIsQuestionInspectOpen] =
-    useState<QuestionInspectOpenState>({
-      isOpen: false,
-      questionId: "",
-    });
   const { isSessionPending } = useAuth();
-
   const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
     useTopicalApp();
-
+  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "bookmarks"],
@@ -221,7 +215,7 @@ export const BookmarkView = ({
         isSidebarOpen={isSidebarOpen}
         sortParameters={sortParameters}
         setSortParameters={setSortParameters}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+        setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
       />
     </div>
   );
@@ -321,8 +315,7 @@ export const BookmarkView = ({
         preContent={preContent}
         breadcrumbContent={breadcrumbContent}
         mainContent={mainContent}
-        isQuestionInspectOpen={isQuestionInspectOpen}
-        setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+        questionInspectRef={questionInspectRef}
       />
       <SecondaryAppSidebar
         subjectMetadata={subjectMetadata}
