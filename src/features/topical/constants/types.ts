@@ -12,26 +12,74 @@ export interface MultiSelectorProps {
   prerequisite: string;
 }
 
-export type MultiSelectorSharedProps = {
+export interface MultiSelectorSharedProps {
   selectedValues: string[];
   onValueChange: (
     val: string | string[],
     option?: "selectAll" | "removeAll"
   ) => void;
-  open: boolean;
-  setOpen: (open: boolean) => void;
   allAvailableOptions: string[];
   label: string;
   maxLength: number | undefined;
   prerequisite: string;
-  commandListRef: React.RefObject<HTMLDivElement | null>;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  popoverTriggerRef?: React.RefObject<HTMLDivElement | null>;
-};
+  inputRef: RefObject<HTMLInputElement | null>;
+}
+
+export interface MultiSelectorContentProps {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  allAvailableOptions: string[];
+  label: string;
+  maxLength: number | undefined;
+  prerequisite: string;
+  inputRef: RefObject<HTMLInputElement | null>;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  multiSelectorListRef: RefObject<MultiSelectorListRef | null>;
+}
 
 export interface MultiSelectorListRef {
   setInputValue: Dispatch<SetStateAction<string>>;
   inputValue: string;
+}
+
+export interface MultiSelectorListProps {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
+  label: string;
+  allAvailableOptions: string[];
+  prerequisite: string;
+  setOpen: (open: boolean) => void;
+  maxLength: number | undefined;
+}
+
+export interface MultiSelectorTriggerButtonUltilityProps {
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  mousePreventDefault: (e: React.MouseEvent) => void;
+  setIsClickingUltility: Dispatch<SetStateAction<boolean>>;
+  allAvailableOptions: string[];
+  maxLength: number | undefined;
+}
+
+export interface MultiSelectorSearchInputProps {
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
+  label: string;
+  allAvailableOptions: string[] | undefined;
+  prerequisite: string;
+  setOpen: (open: boolean) => void;
+  commandListScrollArea: RefObject<HTMLDivElement | null>;
 }
 
 export type VALID_LABEL =
@@ -179,7 +227,7 @@ export interface MultiSelectContextProps {
   inputValue: string;
   setInputValue: Dispatch<SetStateAction<string>>;
   inputRef: RefObject<HTMLInputElement | null>;
-  commandListRef: RefObject<HTMLDivElement | null>;
+  commandListScrollArea: RefObject<HTMLDivElement | null>;
   allAvailableOptions?: string[];
   label: VALID_LABEL;
   prerequisite: string;

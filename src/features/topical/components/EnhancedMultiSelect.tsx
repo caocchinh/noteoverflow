@@ -55,9 +55,13 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import type {
+  MultiSelectorContentProps,
+  MultiSelectorListProps,
   MultiSelectorListRef,
   MultiSelectorProps,
+  MultiSelectorSearchInputProps,
   MultiSelectorSharedProps,
+  MultiSelectorTriggerButtonUltilityProps,
 } from "../constants/types";
 
 const EnhancedMultiSelect = memo(
@@ -69,9 +73,7 @@ const EnhancedMultiSelect = memo(
     onValuesChange: onValueChange,
     allAvailableOptions,
   }: MultiSelectorProps) => {
-    const [open, setOpen] = useState<boolean>(false);
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const commandListRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
     if (
       maxLength !== undefined &&
@@ -101,36 +103,27 @@ const EnhancedMultiSelect = memo(
       [selectedValues, allAvailableOptions, onValueChange]
     );
 
-    const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
-
     return (
       <>
         {isMobileDevice ? (
           <MobileMultiSelector
             selectedValues={selectedValues}
             onValueChange={onValueChangeHandler}
-            open={open}
-            setOpen={setOpen}
             allAvailableOptions={allAvailableOptions}
             label={label}
             maxLength={maxLength}
             prerequisite={prerequisite}
-            commandListRef={commandListRef}
             inputRef={inputRef}
           />
         ) : (
           <DesktopMultiSelector
             selectedValues={selectedValues}
             onValueChange={onValueChangeHandler}
-            open={open}
-            setOpen={setOpen}
             allAvailableOptions={allAvailableOptions}
             label={label}
             maxLength={maxLength}
             prerequisite={prerequisite}
-            commandListRef={commandListRef}
             inputRef={inputRef}
-            popoverTriggerRef={popoverTriggerRef}
           />
         )}
       </>
@@ -183,18 +176,15 @@ const MultiSelectorContent = memo(
   ({
     selectedValues,
     onValueChange,
-    open,
-    setOpen,
     allAvailableOptions,
     label,
     maxLength,
     prerequisite,
-    commandListRef,
     inputRef,
+    open,
+    setOpen,
     multiSelectorListRef,
-  }: MultiSelectorSharedProps & {
-    multiSelectorListRef: React.RefObject<MultiSelectorListRef | null>;
-  }) => {
+  }: MultiSelectorContentProps) => {
     const handleKeyDown = useMultiSelectorKeyDown(
       multiSelectorListRef,
       inputRef,
@@ -211,7 +201,6 @@ const MultiSelectorContent = memo(
           ref={multiSelectorListRef}
           selectedValues={selectedValues}
           onValueChange={onValueChange}
-          commandListRef={commandListRef}
           inputRef={inputRef}
           label={label}
           allAvailableOptions={allAvailableOptions}
@@ -230,16 +219,14 @@ const MobileMultiSelector = memo(
   ({
     selectedValues,
     onValueChange,
-    open,
-    setOpen,
     allAvailableOptions,
     label,
     maxLength,
     prerequisite,
-    commandListRef,
     inputRef,
   }: Omit<MultiSelectorSharedProps, "popoverTriggerRef">) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
+    const [open, setOpen] = useState<boolean>(false);
 
     return (
       <>
@@ -321,7 +308,6 @@ const MobileMultiSelector = memo(
               label={label}
               maxLength={maxLength}
               prerequisite={prerequisite}
-              commandListRef={commandListRef}
               inputRef={inputRef}
               multiSelectorListRef={multiSelectorListRef}
             />
@@ -338,18 +324,16 @@ const DesktopMultiSelector = memo(
   ({
     selectedValues,
     onValueChange,
-    open,
-    setOpen,
     allAvailableOptions,
     label,
     maxLength,
     prerequisite,
-    commandListRef,
     inputRef,
-    popoverTriggerRef,
   }: MultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
+    const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
 
+    const [open, setOpen] = useState<boolean>(false);
     return (
       <Popover modal={false} open={open}>
         <PopoverTrigger asChild>
@@ -394,10 +378,8 @@ const DesktopMultiSelector = memo(
             label={label}
             maxLength={maxLength}
             prerequisite={prerequisite}
-            commandListRef={commandListRef}
             inputRef={inputRef}
             multiSelectorListRef={multiSelectorListRef}
-            popoverTriggerRef={popoverTriggerRef}
           />
         </PopoverContent>
       </Popover>
@@ -454,17 +436,20 @@ const MultiSelectorTrigger = memo(
       }
     }, [selectedValues]);
 
-    const temporaryFix = (item: string) => {
-      if (label === "Season") {
-        if (item === "Winter") {
-          return "Winter - O/N";
-        } else if (item === "Summer") {
-          return "Summer - M/J";
-        } else if (item === "Spring") {
-          return "Spring - F/M";
+    const temporaryFix = useCallback(
+      (item: string) => {
+        if (label === "Season") {
+          if (item === "Winter") {
+            return "Winter - O/N";
+          } else if (item === "Summer") {
+            return "Summer - M/J";
+          } else if (item === "Spring") {
+            return "Spring - F/M";
+          }
         }
-      }
-    };
+      },
+      [label]
+    );
 
     return (
       <div
@@ -477,68 +462,19 @@ const MultiSelectorTrigger = memo(
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
-                onClick={() => {
-                  onValueChange([], "removeAll");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && allAvailableOptions) {
-                    onValueChange([], "removeAll");
-                  }
-                }}
-                onMouseDown={(e) => {
-                  mousePreventDefault(e);
-                  setIsClickingUltility(true);
-                }}
-                onMouseUp={() => {
-                  setTimeout(() => {
-                    setIsClickingUltility(false);
-                  }, 0);
-                }}
-                variant="outline"
-              >
-                <Trash2 className="h-4 w-4 " />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
-              Remove all
-            </TooltipContent>
-          </Tooltip>
-          {!maxLength && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
-                  onClick={() => {
-                    onValueChange(allAvailableOptions ?? [], "selectAll");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && allAvailableOptions) {
-                      onValueChange(allAvailableOptions ?? [], "selectAll");
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    mousePreventDefault(e);
-                    setIsClickingUltility(true);
-                  }}
-                  onMouseUp={() => {
-                    setTimeout(() => {
-                      setIsClickingUltility(false);
-                    }, 0);
-                  }}
-                  variant="outline"
-                >
-                  <Sparkles className="h-4 w-4 " />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="z-[100000000000]">
-                Select all
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <MultiSelectorTriggerButtonUltility
+            setIsClickingUltility={setIsClickingUltility}
+            onValueChange={useCallback(
+              (val: string | string[], option?: "selectAll" | "removeAll") => {
+                onValueChange(val, option);
+              },
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              []
+            )}
+            allAvailableOptions={allAvailableOptions}
+            maxLength={maxLength}
+            mousePreventDefault={mousePreventDefault}
+          />
           <Button
             className="h-6 flex-1 cursor-pointer text-xs"
             onClick={() => {
@@ -630,6 +566,86 @@ const MultiSelectorTrigger = memo(
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 
+const MultiSelectorTriggerButtonUltility = memo(
+  ({
+    onValueChange,
+    mousePreventDefault,
+    setIsClickingUltility,
+    allAvailableOptions,
+    maxLength,
+  }: MultiSelectorTriggerButtonUltilityProps) => {
+    return (
+      <>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
+              onClick={() => {
+                onValueChange([], "removeAll");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && allAvailableOptions) {
+                  onValueChange([], "removeAll");
+                }
+              }}
+              onMouseDown={(e) => {
+                mousePreventDefault(e);
+                setIsClickingUltility(true);
+              }}
+              onMouseUp={() => {
+                setTimeout(() => {
+                  setIsClickingUltility(false);
+                }, 0);
+              }}
+              variant="outline"
+            >
+              <Trash2 className="h-4 w-4 " />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="z-[100000000000]">
+            Remove all
+          </TooltipContent>
+        </Tooltip>
+        {!maxLength && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
+                onClick={() => {
+                  onValueChange(allAvailableOptions ?? [], "selectAll");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && allAvailableOptions) {
+                    onValueChange(allAvailableOptions ?? [], "selectAll");
+                  }
+                }}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingUltility(true);
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingUltility(false);
+                  }, 0);
+                }}
+                variant="outline"
+              >
+                <Sparkles className="h-4 w-4 " />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="z-[100000000000]">
+              Select all
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </>
+    );
+  }
+);
+
+MultiSelectorTriggerButtonUltility.displayName =
+  "MultiSelectorTriggerButtonUltility";
+
 const MultiSelectorSearchInput = memo(
   ({
     inputValue,
@@ -639,17 +655,8 @@ const MultiSelectorSearchInput = memo(
     allAvailableOptions,
     prerequisite,
     setOpen,
-    commandListRef,
-  }: {
-    inputValue: string;
-    setInputValue: (value: string) => void;
-    inputRef: React.RefObject<HTMLInputElement | null>;
-    label: string;
-    allAvailableOptions: string[] | undefined;
-    prerequisite: string;
-    setOpen: (open: boolean) => void;
-    commandListRef: React.RefObject<HTMLDivElement | null>;
-  }) => {
+    commandListScrollArea,
+  }: MultiSelectorSearchInputProps) => {
     return (
       <div
         className="flex items-center gap-1 dark:bg-accent"
@@ -664,11 +671,11 @@ const MultiSelectorSearchInput = memo(
             setInputValue(e);
             if (!e) {
               setTimeout(() => {
-                commandListRef.current?.scrollTo({
+                commandListScrollArea.current?.scrollTo({
                   top: 0,
                   behavior: "instant",
                 });
-              }, 100);
+              }, 0);
             }
           }}
           placeholder={
@@ -705,27 +712,13 @@ const MultiSelectorList = forwardRef(
     {
       selectedValues,
       onValueChange,
-      commandListRef,
       inputRef,
       label,
       allAvailableOptions,
       prerequisite,
       setOpen,
       maxLength,
-    }: {
-      selectedValues: string[];
-      onValueChange: (
-        val: string | string[],
-        option?: "selectAll" | "removeAll"
-      ) => void;
-      commandListRef: React.RefObject<HTMLDivElement | null>;
-      inputRef: React.RefObject<HTMLInputElement | null>;
-      label: string;
-      allAvailableOptions: string[];
-      prerequisite: string;
-      setOpen: (open: boolean) => void;
-      maxLength: number | undefined;
-    },
+    }: MultiSelectorListProps,
     ref
   ) => {
     const temporaryFix = (item: string) => {
@@ -749,6 +742,7 @@ const MultiSelectorList = forwardRef(
       }),
       [inputValue]
     );
+    const commandListScrollArea = useRef<HTMLDivElement | null>(null);
 
     return (
       <div className="flex h-full flex-col gap-2">
@@ -760,16 +754,19 @@ const MultiSelectorList = forwardRef(
           allAvailableOptions={allAvailableOptions}
           prerequisite={prerequisite}
           setOpen={setOpen}
-          commandListRef={commandListRef}
+          commandListScrollArea={commandListScrollArea}
         />
 
-        <ScrollArea viewPortClassName="max-h-[50vh]" type="always">
+        <ScrollArea
+          viewPortClassName="max-h-[50vh]"
+          type="always"
+          viewportRef={commandListScrollArea}
+        >
           <CommandList
             className={cn(
               "z-[1000] flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
               label === "Year" || label === "Season"
             )}
-            ref={commandListRef}
           >
             <Collapsible>
               {!inputValue && (
@@ -839,14 +836,6 @@ const MultiSelectorList = forwardRef(
                     key={item}
                     onSelect={() => {
                       onValueChange(item);
-                      setTimeout(() => {
-                        if (inputValue) {
-                          commandListRef.current?.scrollTo({
-                            top: 0,
-                            behavior: "instant",
-                          });
-                        }
-                      }, 100);
                     }}
                   >
                     <Checkbox
@@ -863,32 +852,64 @@ const MultiSelectorList = forwardRef(
             </CommandEmpty>
           </CommandList>
         </ScrollArea>
-        <div className="flex flex-row gap-2 m-2">
-          {!maxLength && (
-            <Button
-              className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
-              onClick={() => {
-                onValueChange(allAvailableOptions ?? [], "selectAll");
-              }}
-            >
-              Select all
-              <Sparkles className="h-4 w-4" />
-            </Button>
+        <MultiSelectorListUltilityButtons
+          onValueChange={useCallback(
+            (val: string | string[], option?: "selectAll" | "removeAll") => {
+              onValueChange(val, option);
+            },
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            []
           )}
-          <Button
-            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
-            onClick={() => {
-              onValueChange(selectedValues, "removeAll");
-            }}
-            variant="destructive"
-          >
-            Remove all
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+          allAvailableOptions={allAvailableOptions}
+          maxLength={maxLength}
+        />
       </div>
     );
   }
 );
+
+const MultiSelectorListUltilityButtons = memo(
+  ({
+    onValueChange,
+    allAvailableOptions,
+    maxLength,
+  }: {
+    onValueChange: (
+      val: string | string[],
+      option?: "selectAll" | "removeAll"
+    ) => void;
+    allAvailableOptions: string[];
+    maxLength: number | undefined;
+  }) => {
+    return (
+      <div className="flex flex-row gap-2 m-2">
+        {!maxLength && (
+          <Button
+            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
+            onClick={() => {
+              onValueChange(allAvailableOptions ?? [], "selectAll");
+            }}
+          >
+            Select all
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center"
+          onClick={() => {
+            onValueChange([], "removeAll");
+          }}
+          variant="destructive"
+        >
+          Remove all
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+);
+
+MultiSelectorListUltilityButtons.displayName =
+  "MultiSelectorListUltilityButtons";
 
 MultiSelectorList.displayName = "MultiSelectorList";
