@@ -444,7 +444,6 @@ export interface InspectUltilityBarProps {
   listId: string | undefined;
   sortParameters: SortParameters | undefined;
   setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
-  isCalculatorOpen: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   BETTER_AUTH_URL: string;
@@ -466,7 +465,6 @@ export interface QuestionInspectMainContentProps {
   sideBarInspectRef: RefObject<InspectSidebarRef | null>;
   sortParameters: SortParameters | undefined;
   setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
-  isCalculatorOpen: boolean;
   isInspectSidebarOpen: boolean;
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   BETTER_AUTH_URL: string;

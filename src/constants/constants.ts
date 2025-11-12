@@ -1321,22 +1321,76 @@ export const TOPICAL_DATA: TopicalData[] = [
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9608)"],
         code: "Computer Science (9608)",
+        // Topic name up to date but the syllabus isn't
         topic: [
-          "INFORMATION REPRESENTATION",
-          "COMMUNICATION AND INTERNET TECHNOLOGIES",
-          "HARDWARE",
-          "PROCESSOR FUNDAMENTALS",
-          "SYSTEM SOFTWARE",
-          "SECURITY, PRIVACY AND DATA INTEGRITY",
-          "ETHICS AND OWNERSHIP",
-          "DATABASE AND DATA MODELING",
-          "ALGORITHM DESIGN AND PROBLEM-SOLVING",
-          "DATA REPRESENTATION",
-          "PROGRAMMING",
-          "MONITORING AND CONTROL SYSTEMS",
+          {
+            topicName: "INFORMATION REPRESENTATION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMMUNICATION AND INTERNET TECHNOLOGIES",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HARDWARE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROCESSOR FUNDAMENTALS",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SYSTEM SOFTWARE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SECURITY, PRIVACY AND DATA INTEGRITY",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ETHICS AND OWNERSHIP",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DATABASE AND DATA MODELING",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ALGORITHM DESIGN AND PROBLEM-SOLVING",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DATA REPRESENTATION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROGRAMMING",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MONITORING AND CONTROL SYSTEMS",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [2021, 2020, 2019, 2018, 2017, 2016, 2015],
-        paperType: [1],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["Outdated"],
+          },
+        ],
         season: ["Summer", "Winter"],
       },
 
@@ -1345,17 +1399,46 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 1 (9709)"],
         code: "Mathematics Mechanics 1 (9709)",
         topic: [
-          "FORCES & EQUILIBRIUM",
-          "KINEMATICS OF MOTION IN A STRAIGHT LINE",
-          "NEWTON'S LAWS OF MOTION",
-          "ENERGY, WORK & POWER",
-          "GENERAL MOTION IN STRAIGHT LINE",
-          "MOMENTUM",
+          {
+            topicName: "FORCES & EQUILIBRIUM",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "KINEMATICS OF MOTION IN A STRAIGHT LINE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NEWTON'S LAWS OF MOTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ENERGY, WORK & POWER",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GENERAL MOTION IN STRAIGHT LINE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MOMENTUM",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [4],
+        paperType: [
+          {
+            paperTypeCurriculumnSubdivision: ["Outdated"],
+            paperType: 4,
+          },
+        ],
         season: ["Summer", "Winter"],
       },
       {
@@ -1363,15 +1446,44 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 2 (9709)"],
         code: "Mathematics Mechanics 2 (9709)",
         topic: [
-          "MOTION OF A PROJECTILE",
-          "MOMENTS OF FORCES",
-          "CENTRE OF MASS",
-          "UNIFORM MOTION IN A CIRCLE",
-          "HOOK'S LAW",
-          "LINEAR MOTION UNDER A VARIABLE FORCE",
+          {
+            topicName: "MOTION OF A PROJECTILE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MOMENTS OF FORCES",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CENTRE OF MASS",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "UNIFORM MOTION IN A CIRCLE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HOOK'S LAW",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "LINEAR MOTION UNDER A VARIABLE FORCE",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012],
-        paperType: [5],
+        paperType: [
+          {
+            paperType: 5,
+            paperTypeCurriculumnSubdivision: ["Outdated"],
+          },
+        ],
         season: ["Summer", "Winter"],
       },
       {
@@ -1379,18 +1491,51 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 1 (9709)"],
         code: "Mathematics Statistics 1 (9709)",
         topic: [
-          "REPRESENTATION OF DATA",
-          "PERMUTATION & COMBINATION",
-          "PROBABILITY",
-          "DISCRETE RANDOM VARIABLES",
-          "THE NORMAL DISTRIBUTION",
-          "THE BINOMIAL DISTRIBUTION",
-          "GEOMETRIC DISTRIBUTION",
+          {
+            topicName: "REPRESENTATION OF DATA",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PERMUTATION & COMBINATION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROBABILITY",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DISCRETE RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE NORMAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE BINOMIAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GEOMETRIC DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [6],
+        paperType: [
+          {
+            paperType: 6,
+            paperTypeCurriculumnSubdivision: ["Outdated"],
+          },
+        ],
         season: ["Summer", "Winter"],
       },
       {
@@ -1398,15 +1543,44 @@ export const TOPICAL_DATA: TopicalData[] = [
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 2 (9709)"],
         code: "Mathematics Statistics 2 (9709)",
         topic: [
-          "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
-          "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",
-          "POISSON DISTRIBUTION",
-          "LINEAR COMBINATION OF RANDOM VARIABLES",
-          "CONTINUOUS RANDOM VARIABLES",
-          "SAMPLING",
+          {
+            topicName: "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "POISSON DISTRIBUTION",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "LINEAR COMBINATION OF RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CONTINUOUS RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SAMPLING",
+            topicCurriculumnSubdivision: ["Outdated"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012],
-        paperType: [7],
+        paperType: [
+          {
+            paperType: 7,
+            paperTypeCurriculumnSubdivision: ["Outdated"],
+          },
+        ],
         season: ["Summer", "Winter"],
       },
     ],

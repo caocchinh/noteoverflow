@@ -158,6 +158,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
   const toggleFullscreen = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      e.stopPropagation();
       setIsFullscreen(!isFullscreen);
     },
     [isFullscreen, setIsFullscreen]
@@ -166,6 +167,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
   const onClose = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      e.stopPropagation();
       setIsCalculatorOpen(false);
     },
     [setIsCalculatorOpen]
@@ -199,6 +201,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                   <Shrink />
                 </Button>
                 <Button
+                  data-calculator-close
                   className="relative z-[999999]"
                   variant="ghost"
                   size="icon"
@@ -241,8 +244,8 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
           >
             <div className="flex flex-col h-full">
               {/* Header with close button */}
-              <div className="flex items-center justify-between py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg calculator-drag-handle cursor-move">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="flex items-center justify-between px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg">
+                <span className="text-sm font-medium py-1  min-h-[50px] flex items-center text-gray-700 dark:text-gray-300  calculator-drag-handle cursor-move flex-1">
                   Desmos Calculator
                 </span>
                 <div className="flex items-center gap-1">
@@ -261,6 +264,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                     size="icon"
                     onClick={onClose}
                     title="Close Calculator"
+                    data-calculator-close
                   >
                     <X />
                   </Button>

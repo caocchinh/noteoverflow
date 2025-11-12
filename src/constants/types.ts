@@ -47,25 +47,26 @@ export type ValidContentType = "questions" | "answers";
 export type ValidCurriculum = "CIE IGCSE" | "CIE A-LEVEL";
 
 export type CIE_A_LEVEL_SUBDIVISION = "AS-Level" | "A-Level";
+type OUTDATED = "Outdated";
 
 interface Topic {
   topicName: string;
-  topicCurriculumnSubdivision?: CIE_A_LEVEL_SUBDIVISION[];
+  topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
   isTopicUpToDate: boolean;
 }
 
 interface PaperType {
   paperType: number;
-  paperTypeCurriculumnSubdivision?: CIE_A_LEVEL_SUBDIVISION[];
+  paperTypeCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
 }
 
 export interface TopicalSubject {
   coverImage: string;
   syllabusLink?: string;
   code: string;
-  topic: Topic[] | string[];
+  topic: Topic[];
   year: number[];
-  paperType: PaperType[] | number[];
+  paperType: PaperType[];
   season: ValidSeason[];
 }
 export interface TopicalData {

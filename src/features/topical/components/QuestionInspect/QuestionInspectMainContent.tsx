@@ -46,7 +46,6 @@ const QuestionInspectMainContent = forwardRef(
       sideBarInspectRef,
       sortParameters,
       setSortParameters,
-      isCalculatorOpen,
       isInspectSidebarOpen,
       setIsInspectSidebarOpen,
       BETTER_AUTH_URL,
@@ -193,7 +192,6 @@ const QuestionInspectMainContent = forwardRef(
             listId={listId}
             sortParameters={sortParameters}
             setSortParameters={setSortParameters}
-            isCalculatorOpen={isCalculatorOpen}
             isInspectSidebarOpen={isInspectSidebarOpen}
             setIsInspectSidebarOpen={setIsInspectSidebarOpen}
             BETTER_AUTH_URL={BETTER_AUTH_URL}

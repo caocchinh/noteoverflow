@@ -49,7 +49,6 @@ const InspectUltilityBar = memo(
         listId,
         sortParameters,
         setSortParameters,
-        isCalculatorOpen,
         isInspectSidebarOpen,
         setIsInspectSidebarOpen,
         BETTER_AUTH_URL,
@@ -59,7 +58,7 @@ const InspectUltilityBar = memo(
     ) => {
       const ultilityRef = useRef<HTMLDivElement | null>(null);
       const { isSessionPending } = useAuth();
-      const { setIsCalculatorOpen } = useTopicalApp();
+      const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
       const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
         useState(false);
       const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =

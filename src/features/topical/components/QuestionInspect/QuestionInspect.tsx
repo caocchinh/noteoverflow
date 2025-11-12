@@ -87,8 +87,15 @@ const QuestionInspect = ({
 
   const handleInteractOutside = useCallback(
     (e: Event) => {
+      const targetElement = e.target as Element;
+      if (targetElement?.closest("[data-calculator-close]")) {
+        e.preventDefault();
+        return;
+      }
+
       if (isOpen.isOpen && isCalculatorOpen) {
         e.preventDefault();
+        return;
       }
     },
     [isOpen.isOpen, isCalculatorOpen]
@@ -204,7 +211,6 @@ const QuestionInspect = ({
               sideBarInspectRef={sideBarInspectRef}
               sortParameters={sortParameters}
               setSortParameters={setSortParameters}
-              isCalculatorOpen={isCalculatorOpen}
               isInspectSidebarOpen={isInspectSidebarOpen}
               setIsInspectSidebarOpen={setIsInspectSidebarOpen}
               BETTER_AUTH_URL={BETTER_AUTH_URL}
