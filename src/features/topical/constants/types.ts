@@ -442,6 +442,7 @@ export interface InspectUltilityBarProps {
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   currentQuestionData: SelectedQuestion | undefined;
   listId: string | undefined;
+  navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   sortParameters: SortParameters | undefined;
   setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
   isInspectSidebarOpen: boolean;
@@ -452,7 +453,6 @@ export interface InspectUltilityBarProps {
 
 export interface InspectUltilityBarRef {
   overflowScrollHandler: () => void;
-  navigationButtonsContainerRef: HTMLDivElement | null;
 }
 
 export interface QuestionInspectMainContentProps {
@@ -461,6 +461,7 @@ export interface QuestionInspectMainContentProps {
   currentQuestionIndex: number;
   currentQuestionId: string | undefined;
   listId: string | undefined;
+  navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   inspectUltilityBarRef: RefObject<InspectUltilityBarRef | null>;
   sideBarInspectRef: RefObject<InspectSidebarRef | null>;
   sortParameters: SortParameters | undefined;

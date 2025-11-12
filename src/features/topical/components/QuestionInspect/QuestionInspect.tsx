@@ -71,6 +71,7 @@ const QuestionInspect = ({
     useRef<QuestionInspectMainContentRef | null>(null);
   const sideBarInspectRef = useRef<InspectSidebarRef | null>(null);
   const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
+  const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
 
   const isCoolDown = useRef(false);
 
@@ -197,7 +198,7 @@ const QuestionInspect = ({
               currentQuestionIndex={currentQuestionIndex}
               isInputFocused={isInputFocused}
               navigationButtonsPortalContainer={
-                inspectUltilityBarRef.current?.navigationButtonsContainerRef
+                navigationButtonsContainerRef.current
               }
             />
             <QuestionInspectMainContent
@@ -212,6 +213,7 @@ const QuestionInspect = ({
               sortParameters={sortParameters}
               setSortParameters={setSortParameters}
               isInspectSidebarOpen={isInspectSidebarOpen}
+              navigationButtonsContainerRef={navigationButtonsContainerRef}
               setIsInspectSidebarOpen={setIsInspectSidebarOpen}
               BETTER_AUTH_URL={BETTER_AUTH_URL}
               setIsOpen={setIsOpen}

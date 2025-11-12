@@ -47,6 +47,7 @@ const InspectUltilityBar = memo(
         setCurrentView,
         currentQuestionData,
         listId,
+        navigationButtonsContainerRef,
         sortParameters,
         setSortParameters,
         isInspectSidebarOpen,
@@ -66,7 +67,6 @@ const InspectUltilityBar = memo(
       const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
         null
       );
-      const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
       const isMobile = useIsMobile();
 
       const overflowScrollHandler = useCallback(() => {
@@ -97,9 +97,8 @@ const InspectUltilityBar = memo(
         ref,
         () => ({
           overflowScrollHandler,
-          navigationButtonsContainerRef: navigationButtonsContainerRef.current,
         }),
-        [overflowScrollHandler, navigationButtonsContainerRef]
+        [overflowScrollHandler]
       );
 
       return (

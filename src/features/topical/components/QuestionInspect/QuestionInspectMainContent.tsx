@@ -49,6 +49,7 @@ const QuestionInspectMainContent = forwardRef(
       isInspectSidebarOpen,
       setIsInspectSidebarOpen,
       BETTER_AUTH_URL,
+      navigationButtonsContainerRef,
       setIsOpen,
       isCoolDown,
       isInputFocused,
@@ -190,6 +191,7 @@ const QuestionInspectMainContent = forwardRef(
             setCurrentView={setCurrentView}
             currentQuestionData={currentQuestionData}
             listId={listId}
+            navigationButtonsContainerRef={navigationButtonsContainerRef}
             sortParameters={sortParameters}
             setSortParameters={setSortParameters}
             isInspectSidebarOpen={isInspectSidebarOpen}
