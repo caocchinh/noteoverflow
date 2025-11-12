@@ -80,6 +80,15 @@ const AppSidebar = memo(
     const seasonRef = useRef<HTMLDivElement | null>(null);
     const isOverwriting = useRef(false);
 
+    const handleTransitionEnd = useCallback(
+      (e: React.TransitionEvent) => {
+        if (e.propertyName === "left") {
+          appUltilityBarRef.current?.overflowScrollHandler?.();
+        }
+      },
+      [appUltilityBarRef]
+    );
+
     const availableSubjects = useMemo(() => {
       return TOPICAL_DATA[
         TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
@@ -190,28 +199,41 @@ const AppSidebar = memo(
       }, 0);
     };
 
-    const isValidInputs = ({
-      scrollOnError = true,
-    }: {
-      scrollOnError?: boolean;
-    }) => {
-      return isValidInputsUtils({
-        scrollOnError,
-        curriculumRef: curriculumRef,
-        subjectRef: subjectRef,
-        topicRef: topicRef,
-        yearRef: yearRef,
-        paperTypeRef: paperTypeRef,
-        seasonRef: seasonRef,
-        selectedCurriculum: selectedCurriculum,
-        selectedSubject: selectedSubject,
-        selectedTopic: selectedTopic,
-        selectedYear: selectedYear,
-        selectedPaperType: selectedPaperType,
-        selectedSeason: selectedSeason,
-        setInvalidInputs: setInvalidInputs,
-      });
-    };
+    const isValidInputs = useCallback(
+      ({ scrollOnError = true }: { scrollOnError?: boolean }) => {
+        return isValidInputsUtils({
+          scrollOnError,
+          curriculumRef: curriculumRef,
+          subjectRef: subjectRef,
+          topicRef: topicRef,
+          yearRef: yearRef,
+          paperTypeRef: paperTypeRef,
+          seasonRef: seasonRef,
+          selectedCurriculum: selectedCurriculum,
+          selectedSubject: selectedSubject,
+          selectedTopic: selectedTopic,
+          selectedYear: selectedYear,
+          selectedPaperType: selectedPaperType,
+          selectedSeason: selectedSeason,
+          setInvalidInputs: setInvalidInputs,
+        });
+      },
+      [
+        curriculumRef,
+        subjectRef,
+        topicRef,
+        yearRef,
+        paperTypeRef,
+        seasonRef,
+        selectedCurriculum,
+        selectedSubject,
+        selectedTopic,
+        selectedYear,
+        selectedPaperType,
+        selectedSeason,
+        setInvalidInputs,
+      ]
+    );
 
     useEffect(() => {
       if (selectedCurriculum) {
@@ -482,15 +504,49 @@ const AppSidebar = memo(
       mountedRef,
     ]);
 
+    const handleSearch = useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        const query = {
+          curriculumId: selectedCurriculum,
+          subjectId: selectedSubject,
+          topic: selectedTopic.toSorted(),
+          paperType: selectedPaperType.toSorted(),
+          year: selectedYear.toSorted((a, b) => Number(b) - Number(a)),
+          season: selectedSeason.toSorted(),
+        };
+        const isSameQuery =
+          JSON.stringify(currentQuery) == JSON.stringify(query);
+        if (isValidInputs({ scrollOnError: true }) && !isSameQuery) {
+          setIsSearchEnabled(true);
+          setCurrentQuery({
+            ...query,
+          });
+        } else if (isSameQuery && isMobileDevice) {
+          setIsAppSidebarOpen(false);
+        }
+      },
+      [
+        selectedCurriculum,
+        selectedSubject,
+        selectedTopic,
+        selectedPaperType,
+        selectedYear,
+        selectedSeason,
+        currentQuery,
+        isValidInputs,
+        setIsSearchEnabled,
+        setCurrentQuery,
+        isMobileDevice,
+        setIsAppSidebarOpen,
+      ]
+    );
+
     return (
       <Sidebar
         key={sidebarKey}
         variant="floating"
-        onTransitionEnd={(e) => {
-          if (e.propertyName == "left") {
-            appUltilityBarRef.current?.overflowScrollHandler?.();
-          }
-        }}
+        onTransitionEnd={handleTransitionEnd}
       >
         <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
         <ScrollArea className="h-full" type="always">
@@ -704,32 +760,7 @@ const AppSidebar = memo(
                   <Button
                     className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
                     disabled={!isMounted || isTopicalDataFetching}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const query = {
-                        curriculumId: selectedCurriculum,
-                        subjectId: selectedSubject,
-                        topic: selectedTopic.toSorted(),
-                        paperType: selectedPaperType.toSorted(),
-                        year: selectedYear.toSorted(
-                          (a, b) => Number(b) - Number(a)
-                        ),
-                        season: selectedSeason.toSorted(),
-                      };
-                      const isSameQuery =
-                        JSON.stringify(currentQuery) == JSON.stringify(query);
-                      if (
-                        isValidInputs({ scrollOnError: true }) &&
-                        !isSameQuery
-                      ) {
-                        setIsSearchEnabled(true);
-                        setCurrentQuery({
-                          ...query,
-                        });
-                      } else if (isSameQuery && isMobileDevice) {
-                        setIsAppSidebarOpen(false);
-                      }
-                    }}
+                    onClick={handleSearch}
                   >
                     {isTopicalDataFetching ? "Searching" : "Search"}
                     <ScanText />

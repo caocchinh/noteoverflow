@@ -64,7 +64,7 @@ const PastPaperLink = ({
 export const BestExamHelpUltility = memo(
   ({ question }: { question: SelectedQuestion | undefined }) => {
     return (
-      <Popover>
+      <Popover modal={true}>
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>

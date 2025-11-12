@@ -10,7 +10,7 @@ import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { isValidInputs as isValidInputsUtils } from "@/features/topical/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { InvalidInputs, SecondaryAppSidebarProps } from "../constants/types";
 import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
 import { cn } from "@/lib/utils";
@@ -48,24 +48,33 @@ const SecondaryAppSidebar = ({
   const selectedPaperTypeRef = useRef<string[] | null>(null);
   const selectedSeasonRef = useRef<string[] | null>(null);
 
-  const isValidInputs = ({
-    scrollOnError = true,
-  }: {
-    scrollOnError?: boolean;
-  }) => {
-    return isValidInputsUtils({
-      scrollOnError,
-      topicRef: topicRef,
-      yearRef: yearRef,
-      paperTypeRef: paperTypeRef,
-      seasonRef: seasonRef,
-      selectedTopic: selectedTopic ?? [],
-      selectedYear: selectedYear ?? [],
-      selectedPaperType: selectedPaperType ?? [],
-      selectedSeason: selectedSeason ?? [],
-      setInvalidInputs: setInvalidInputs,
-    });
-  };
+  const isValidInputs = useCallback(
+    ({ scrollOnError = true }: { scrollOnError?: boolean }) => {
+      return isValidInputsUtils({
+        scrollOnError,
+        topicRef: topicRef,
+        yearRef: yearRef,
+        paperTypeRef: paperTypeRef,
+        seasonRef: seasonRef,
+        selectedTopic: selectedTopic ?? [],
+        selectedYear: selectedYear ?? [],
+        selectedPaperType: selectedPaperType ?? [],
+        selectedSeason: selectedSeason ?? [],
+        setInvalidInputs: setInvalidInputs,
+      });
+    },
+    [
+      topicRef,
+      yearRef,
+      paperTypeRef,
+      seasonRef,
+      selectedTopic,
+      selectedYear,
+      selectedPaperType,
+      selectedSeason,
+      setInvalidInputs,
+    ]
+  );
 
   useEffect(() => {
     if (selectedTopic && selectedTopic.length > 0) {
@@ -107,6 +116,33 @@ const SecondaryAppSidebar = ({
   useEffect(() => {
     selectedSeasonRef.current = selectedSeason;
   }, [selectedSeason]);
+
+  const handleRevert = useCallback(() => {
+    setSelectedTopic(currentFilter?.topic ?? []);
+    setSelectedYear(currentFilter?.year ?? []);
+    setSelectedPaperType(currentFilter?.paperType ?? []);
+    setSelectedSeason(currentFilter?.season ?? []);
+  }, [
+    currentFilter,
+    setSelectedTopic,
+    setSelectedYear,
+    setSelectedPaperType,
+    setSelectedSeason,
+  ]);
+
+  const handleResetEverything = useCallback(() => {
+    setSelectedPaperType([]);
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+  }, [
+    setSelectedPaperType,
+    setSelectedTopic,
+    setSelectedYear,
+    setSelectedSeason,
+    setInvalidInputs,
+  ]);
 
   useEffect(() => {
     if (subjectMetadata && !currentFilter) {
@@ -189,6 +225,37 @@ const SecondaryAppSidebar = ({
     }
   }, [currentFilter, setCurrentFilter, subjectMetadata]);
 
+  const handleFilter = useCallback(() => {
+    const filter = {
+      curriculumId: selectedCurriculumn,
+      subjectId: selectedSubject,
+      topic: selectedTopic?.toSorted() ?? [],
+      paperType: selectedPaperType?.toSorted() ?? [],
+      year: selectedYear?.toSorted((a, b) => Number(b) - Number(a)) ?? [],
+      season: selectedSeason?.toSorted() ?? [],
+    };
+    const isSameQuery = JSON.stringify(currentFilter) == JSON.stringify(filter);
+    if (isValidInputs({ scrollOnError: true }) && !isSameQuery) {
+      setCurrentFilter({
+        ...filter,
+      });
+      // Update URL parameters without page reload
+    } else if (isSameQuery) {
+      setIsSidebarOpen(false);
+    }
+  }, [
+    selectedCurriculumn,
+    selectedSubject,
+    selectedTopic,
+    selectedPaperType,
+    selectedYear,
+    selectedSeason,
+    currentFilter,
+    isValidInputs,
+    setCurrentFilter,
+    setIsSidebarOpen,
+  ]);
+
   return (
     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
       <SheetContent
@@ -215,9 +282,10 @@ const SecondaryAppSidebar = ({
               <EnhancedMultiSelect
                 data={subjectMetadata?.topic}
                 label="Topic"
-                onValuesChange={(values) =>
-                  setSelectedTopic(values as string[])
-                }
+                onValuesChange={useCallback(
+                  (values) => setSelectedTopic(values as string[]),
+                  []
+                )}
                 prerequisite="Subject"
                 values={selectedTopic ?? []}
               />
@@ -240,9 +308,10 @@ const SecondaryAppSidebar = ({
               <EnhancedMultiSelect
                 data={subjectMetadata?.paperType}
                 label="Paper"
-                onValuesChange={(values) =>
-                  setSelectedPaperType(values as string[])
-                }
+                onValuesChange={useCallback(
+                  (values) => setSelectedPaperType(values as string[]),
+                  []
+                )}
                 prerequisite="Subject"
                 values={selectedPaperType ?? []}
               />
@@ -265,7 +334,10 @@ const SecondaryAppSidebar = ({
               <EnhancedMultiSelect
                 data={subjectMetadata?.year}
                 label="Year"
-                onValuesChange={(values) => setSelectedYear(values as string[])}
+                onValuesChange={useCallback(
+                  (values) => setSelectedYear(values as string[]),
+                  []
+                )}
                 prerequisite="Subject"
                 values={selectedYear ?? []}
               />
@@ -288,9 +360,10 @@ const SecondaryAppSidebar = ({
               <EnhancedMultiSelect
                 data={subjectMetadata?.season}
                 label="Season"
-                onValuesChange={(values) =>
-                  setSelectedSeason(values as string[])
-                }
+                onValuesChange={useCallback(
+                  (values) => setSelectedSeason(values as string[]),
+                  []
+                )}
                 prerequisite="Subject"
                 values={selectedSeason ?? []}
               />
@@ -303,44 +376,12 @@ const SecondaryAppSidebar = ({
             <ButtonUltility
               isMounted={true}
               setIsSidebarOpen={setIsSidebarOpen}
-              revert={() => {
-                setSelectedTopic(currentFilter?.topic ?? []);
-                setSelectedYear(currentFilter?.year ?? []);
-                setSelectedPaperType(currentFilter?.paperType ?? []);
-                setSelectedSeason(currentFilter?.season ?? []);
-              }}
-              resetEverything={() => {
-                setSelectedPaperType([]);
-                setSelectedTopic([]);
-                setSelectedYear([]);
-                setSelectedSeason([]);
-                setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-              }}
+              revert={handleRevert}
+              resetEverything={handleResetEverything}
             >
               <Button
                 className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-                onClick={() => {
-                  const filter = {
-                    curriculumId: selectedCurriculumn,
-                    subjectId: selectedSubject,
-                    topic: selectedTopic?.toSorted() ?? [],
-                    paperType: selectedPaperType?.toSorted() ?? [],
-                    year:
-                      selectedYear?.toSorted((a, b) => Number(b) - Number(a)) ??
-                      [],
-                    season: selectedSeason?.toSorted() ?? [],
-                  };
-                  const isSameQuery =
-                    JSON.stringify(currentFilter) == JSON.stringify(filter);
-                  if (isValidInputs({ scrollOnError: true }) && !isSameQuery) {
-                    setCurrentFilter({
-                      ...filter,
-                    });
-                    // Update URL parameters without page reload
-                  } else if (isSameQuery) {
-                    setIsSidebarOpen(false);
-                  }
-                }}
+                onClick={handleFilter}
               >
                 Filter
                 <ScanText />

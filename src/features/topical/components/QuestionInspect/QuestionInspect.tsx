@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { updateSearchParams } from "../../lib/utils";
 import {
   InspectSidebarRef,
@@ -19,6 +19,12 @@ import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import InspectSidebar from "./InspectSidebar";
 import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
+
+const sidebarProviderStyle = {
+  "--sidebar-width": "299.6px",
+  height: "inherit",
+  minHeight: "inherit !important",
+} as React.CSSProperties;
 
 const QuestionInspect = ({
   isOpen,
@@ -67,6 +73,26 @@ const QuestionInspect = ({
   const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
 
   const isCoolDown = useRef(false);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      questionInspectMainContentRef.current?.handleKeyboardNavigation(e);
+    },
+    []
+  );
+
+  const handleKeyUp = useCallback(() => {
+    isCoolDown.current = false;
+  }, []);
+
+  const handleInteractOutside = useCallback(
+    (e: Event) => {
+      if (isOpen.isOpen && isCalculatorOpen) {
+        e.preventDefault();
+      }
+    },
+    [isOpen.isOpen, isCalculatorOpen]
+  );
 
   useEffect(() => {
     if (isOpen.isOpen) {
@@ -120,17 +146,9 @@ const QuestionInspect = ({
         <DialogContent
           className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
           showCloseButton={false}
-          onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
-            questionInspectMainContentRef.current?.handleKeyboardNavigation(e)
-          }
-          onKeyUp={() => {
-            isCoolDown.current = false;
-          }}
-          onInteractOutside={(e) => {
-            if (isOpen.isOpen && isCalculatorOpen) {
-              e.preventDefault();
-            }
-          }}
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
+          onInteractOutside={handleInteractOutside}
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Question and answer inspector</DialogTitle>
@@ -144,13 +162,7 @@ const QuestionInspect = ({
             onOpenChangeMobile={setIsInspectSidebarOpen}
             open={isInspectSidebarOpen}
             className="!min-h-[inherit]"
-            style={
-              {
-                "--sidebar-width": "299.6px",
-                height: "inherit",
-                minHeight: "inherit !important",
-              } as React.CSSProperties
-            }
+            style={sidebarProviderStyle}
           >
             <InspectSidebar
               ref={sideBarInspectRef}

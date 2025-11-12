@@ -72,58 +72,60 @@ const BrowseMoreQuestions = memo(
               )}
             </span>
           </Button>{" "}
-          {partitionedTopicalData && partitionedTopicalData.length > 1 && (
-            <div className="flex flex-row items-center justify-center gap-2 w-max flex-1">
-              <FirstPageButton
-                currentChunkIndex={currentChunkIndex}
-                setCurrentChunkIndex={setCurrentChunkIndex}
-                fullPartitionedData={partitionedTopicalData}
-                setDisplayedData={setDisplayedData}
-                scrollUpWhenPageChange={true}
-                scrollAreaRef={scrollAreaRef}
-              />
-              <PreviousPageButton
-                currentChunkIndex={currentChunkIndex}
-                setCurrentChunkIndex={setCurrentChunkIndex}
-                fullPartitionedData={partitionedTopicalData}
-                setDisplayedData={setDisplayedData}
-                scrollUpWhenPageChange={true}
-                scrollAreaRef={scrollAreaRef}
-              />
-              <JumpToTabButton
-                className="mx-4"
-                tab={currentChunkIndex}
-                totalTabs={partitionedTopicalData.length}
-                prefix="page"
-                onTabChangeCallback={({ tab }) => {
-                  setCurrentChunkIndex(tab);
-                  setDisplayedData(partitionedTopicalData[tab]);
-                  if (scrollAreaRef?.current) {
-                    scrollAreaRef.current.scrollTo({
-                      top: 0,
-                      behavior: "instant",
-                    });
-                  }
-                }}
-              />
-              <NextPageButton
-                currentChunkIndex={currentChunkIndex}
-                setCurrentChunkIndex={setCurrentChunkIndex}
-                fullPartitionedData={partitionedTopicalData}
-                setDisplayedData={setDisplayedData}
-                scrollUpWhenPageChange={true}
-                scrollAreaRef={scrollAreaRef}
-              />
-              <LastPageButton
-                currentChunkIndex={currentChunkIndex}
-                setCurrentChunkIndex={setCurrentChunkIndex}
-                fullPartitionedData={partitionedTopicalData}
-                setDisplayedData={setDisplayedData}
-                scrollUpWhenPageChange={true}
-                scrollAreaRef={scrollAreaRef}
-              />
-            </div>
-          )}
+          {partitionedTopicalData &&
+            isBrowseMoreOpen &&
+            partitionedTopicalData.length > 1 && (
+              <div className="flex flex-row items-center justify-center gap-2 w-max flex-1">
+                <FirstPageButton
+                  currentChunkIndex={currentChunkIndex}
+                  setCurrentChunkIndex={setCurrentChunkIndex}
+                  fullPartitionedData={partitionedTopicalData}
+                  setDisplayedData={setDisplayedData}
+                  scrollUpWhenPageChange={true}
+                  scrollAreaRef={scrollAreaRef}
+                />
+                <PreviousPageButton
+                  currentChunkIndex={currentChunkIndex}
+                  setCurrentChunkIndex={setCurrentChunkIndex}
+                  fullPartitionedData={partitionedTopicalData}
+                  setDisplayedData={setDisplayedData}
+                  scrollUpWhenPageChange={true}
+                  scrollAreaRef={scrollAreaRef}
+                />
+                <JumpToTabButton
+                  className="mx-4"
+                  tab={currentChunkIndex}
+                  totalTabs={partitionedTopicalData.length}
+                  prefix="page"
+                  onTabChangeCallback={({ tab }) => {
+                    setCurrentChunkIndex(tab);
+                    setDisplayedData(partitionedTopicalData[tab]);
+                    if (scrollAreaRef?.current) {
+                      scrollAreaRef.current.scrollTo({
+                        top: 0,
+                        behavior: "instant",
+                      });
+                    }
+                  }}
+                />
+                <NextPageButton
+                  currentChunkIndex={currentChunkIndex}
+                  setCurrentChunkIndex={setCurrentChunkIndex}
+                  fullPartitionedData={partitionedTopicalData}
+                  setDisplayedData={setDisplayedData}
+                  scrollUpWhenPageChange={true}
+                  scrollAreaRef={scrollAreaRef}
+                />
+                <LastPageButton
+                  currentChunkIndex={currentChunkIndex}
+                  setCurrentChunkIndex={setCurrentChunkIndex}
+                  fullPartitionedData={partitionedTopicalData}
+                  setDisplayedData={setDisplayedData}
+                  scrollUpWhenPageChange={true}
+                  scrollAreaRef={scrollAreaRef}
+                />
+              </div>
+            )}
         </div>
         <CollapsibleContent
           ref={expandedContentRef}

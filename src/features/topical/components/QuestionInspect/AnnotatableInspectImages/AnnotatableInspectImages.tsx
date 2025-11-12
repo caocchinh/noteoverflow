@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { extractQuestionNumber } from "@/features/topical/lib/utils";
@@ -9,27 +9,30 @@ import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider"
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
 
-export const AnnotatableInspectImages = ({
-  imageSource,
-  currentQuestionId,
-}: {
-  imageSource: string[] | undefined;
-  currentQuestionId: string | undefined;
-}) => {
-  const [isEditMode] = useState(false);
-  const { uiPreferences } = useTopicalApp();
-  if (!imageSource || imageSource.length === 0) {
-    return <p className="text-center text-red-600">Unable to fetch resource</p>;
-  }
+export const AnnotatableInspectImages = memo(
+  ({
+    imageSource,
+    currentQuestionId,
+  }: {
+    imageSource: string[] | undefined;
+    currentQuestionId: string | undefined;
+  }) => {
+    const [isEditMode] = useState(false);
+    const { uiPreferences } = useTopicalApp();
+    if (!imageSource || imageSource.length === 0) {
+      return (
+        <p className="text-center text-red-600">Unable to fetch resource</p>
+      );
+    }
 
-  // Filter only image URLs
-  const imageUrls = imageSource.filter((item) => item.includes("http"));
-  const textItems = imageSource.filter((item) => !item.includes("http"));
+    // Filter only image URLs
+    const imageUrls = imageSource.filter((item) => item.includes("http"));
+    const textItems = imageSource.filter((item) => !item.includes("http"));
 
-  return (
-    <div className="flex flex-col w-full relative">
-      {/* Edit Mode Toggle - Temporarily commented out */}
-      {/*
+    return (
+      <div className="flex flex-col w-full relative">
+        {/* Edit Mode Toggle - Temporarily commented out */}
+        {/*
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">
@@ -62,50 +65,53 @@ export const AnnotatableInspectImages = ({
       </div>
       */}
 
-      {/* Loading indicator */}
-      {!isEditMode && imageUrls.length > 0 && (
-        <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
-      )}
-
-      {/* Image Display */}
-      <div className="flex flex-col w-full items-center">
-        {isEditMode ? (
-          // Edit Mode: Show combined annotatable images
-          <ImageAnnotator
-            imageUrls={imageUrls}
-            currentQuestionId={currentQuestionId}
-            isEditMode={isEditMode}
-          />
-        ) : (
-          <PhotoProvider>
-            {imageUrls.map((item) => (
-              <PhotoView
-                key={`${item}${currentQuestionId}${
-                  currentQuestionId &&
-                  extractQuestionNumber({
-                    questionId: currentQuestionId,
-                  })
-                }`}
-                src={item}
-              >
-                <img
-                  className={cn(
-                    "w-full h-full object-contain relative z-10 !max-w-[750px] cursor-pointer",
-                    uiPreferences.imageTheme === "dark" && "!invert"
-                  )}
-                  src={item}
-                  alt="Question image"
-                  loading="lazy"
-                />
-              </PhotoView>
-            ))}
-          </PhotoProvider>
+        {/* Loading indicator */}
+        {!isEditMode && imageUrls.length > 0 && (
+          <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
         )}
 
-        {textItems.map((item, index) => (
-          <p key={`text-${index}`}>{item}</p>
-        ))}
+        {/* Image Display */}
+        <div className="flex flex-col w-full items-center">
+          {isEditMode ? (
+            // Edit Mode: Show combined annotatable images
+            <ImageAnnotator
+              imageUrls={imageUrls}
+              currentQuestionId={currentQuestionId}
+              isEditMode={isEditMode}
+            />
+          ) : (
+            <PhotoProvider>
+              {imageUrls.map((item) => (
+                <PhotoView
+                  key={`${item}${currentQuestionId}${
+                    currentQuestionId &&
+                    extractQuestionNumber({
+                      questionId: currentQuestionId,
+                    })
+                  }`}
+                  src={item}
+                >
+                  <img
+                    className={cn(
+                      "w-full h-full object-contain relative z-10 !max-w-[750px] cursor-pointer",
+                      uiPreferences.imageTheme === "dark" && "!invert"
+                    )}
+                    src={item}
+                    alt="Question image"
+                    loading="lazy"
+                  />
+                </PhotoView>
+              ))}
+            </PhotoProvider>
+          )}
+
+          {textItems.map((item, index) => (
+            <p key={`text-${index}`}>{item}</p>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+AnnotatableInspectImages.displayName = "AnnotatableInspectImages";

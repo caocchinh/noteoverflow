@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useState } from "react";
+import { RefObject, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -11,6 +11,61 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface InspectPanelProps {
+  title: string;
+  defaultSize: number;
+  minSize: number;
+  imageSource: string[];
+  currentQuestionId: string | undefined;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+  scrollAreaClassName?: string;
+  initialHidden?: boolean;
+}
+
+const InspectPanel = ({
+  title,
+  defaultSize,
+  minSize,
+  imageSource,
+  currentQuestionId,
+  scrollAreaRef,
+  scrollAreaClassName,
+  initialHidden = false,
+}: InspectPanelProps) => {
+  const [isHiding, setIsHiding] = useState(initialHidden);
+  const isMobile = useIsMobile();
+
+  return (
+    <ResizablePanel defaultSize={defaultSize} minSize={minSize}>
+      <div
+        className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
+        title="Toggle visibility"
+        onClick={() => {
+          setIsHiding(!isHiding);
+        }}
+      >
+        <p className="text-sm">{title}</p>
+        {!isHiding ? <Eye strokeWidth={2} /> : <EyeClosed strokeWidth={2} />}
+      </div>
+      <ScrollArea
+        className={cn(
+          "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
+          isMobile && "!h-full",
+          isHiding && "blur-sm",
+          scrollAreaClassName
+        )}
+        type="always"
+        viewportRef={scrollAreaRef}
+      >
+        <AnnotatableInspectImages
+          imageSource={imageSource}
+          currentQuestionId={currentQuestionId}
+        />
+      </ScrollArea>
+    </ResizablePanel>
+  );
+};
+
 const BothViews = ({
   currentQuestionData,
   questionScrollAreaRef,
@@ -20,91 +75,39 @@ const BothViews = ({
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
 }) => {
-  const [isHidingAnswer, setIsHidingAnswer] = useState(true);
-  const [isHidingQuestion, setIsHidingQuestion] = useState(false);
-  const [key, setKey] = useState(0);
   const isAnswerMultipleChoice =
     !currentQuestionData?.answers?.[0]?.includes("http");
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    setIsHidingAnswer(true);
-    setIsHidingQuestion(false);
-    setKey((prev) => prev + 1);
-  }, [currentQuestionData]);
-
   return (
     <ResizablePanelGroup
-      key={key}
       direction={isMobile ? "vertical" : "horizontal"}
       className={cn(
         "rounded-lg border w-full",
         isMobile ? "!h-[65dvh]" : "!h-[70dvh]"
       )}
     >
-      <ResizablePanel
+      <InspectPanel
+        key={`question-${currentQuestionData?.id}`}
+        title="Question"
         defaultSize={isAnswerMultipleChoice ? 77 : 50}
         minSize={15}
-      >
-        <div
-          className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
-          title="Toggle visibility"
-          onClick={() => {
-            setIsHidingQuestion(!isHidingQuestion);
-          }}
-        >
-          <p className="text-sm">Question</p>
-          {!isHidingQuestion ? (
-            <Eye strokeWidth={2} />
-          ) : (
-            <EyeClosed strokeWidth={2} />
-          )}
-        </div>
-        <ScrollArea
-          className={cn(
-            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
-            isMobile && "!h-full",
-            isHidingQuestion && "blur-sm"
-          )}
-          type="always"
-          viewportRef={questionScrollAreaRef}
-        >
-          <AnnotatableInspectImages
-            imageSource={currentQuestionData?.questionImages ?? []}
-            currentQuestionId={currentQuestionData?.id}
-          />
-        </ScrollArea>
-      </ResizablePanel>
+        imageSource={currentQuestionData?.questionImages ?? []}
+        currentQuestionId={currentQuestionData?.id}
+        scrollAreaRef={questionScrollAreaRef}
+      />
       <ResizableHandle withHandle />
-      <ResizablePanel
+      <InspectPanel
+        key={`answer-${currentQuestionData?.id}`}
+        title="Answer"
         defaultSize={isAnswerMultipleChoice ? 23 : 50}
         minSize={15}
-      >
-        <div
-          className="ml-3 w-max m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer"
-          title="Toggle visibility"
-          onClick={() => {
-            setIsHidingAnswer(!isHidingAnswer);
-          }}
-        >
-          <p className="text-sm">Answer</p>
-          {!isHidingAnswer ? <Eye strokeWidth={2} /> : <EyeClosed />}
-        </div>
-        <ScrollArea
-          className={cn(
-            "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pl-3 pb-5 pt-0",
-            isMobile && "!h-full",
-            isHidingAnswer && "blur-sm"
-          )}
-          type="always"
-          viewportRef={answerScrollAreaRef}
-        >
-          <AnnotatableInspectImages
-            imageSource={currentQuestionData?.answers ?? []}
-            currentQuestionId={currentQuestionData?.id}
-          />
-        </ScrollArea>
-      </ResizablePanel>
+        imageSource={currentQuestionData?.answers ?? []}
+        currentQuestionId={currentQuestionData?.id}
+        scrollAreaRef={answerScrollAreaRef}
+        scrollAreaClassName="pl-3 pr-0"
+        initialHidden={true}
+      />
     </ResizablePanelGroup>
   );
 };

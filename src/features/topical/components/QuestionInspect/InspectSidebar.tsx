@@ -122,6 +122,17 @@ const InspectSidebar = forwardRef(
       [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
     );
 
+    const handleTransitionEnd = useCallback(
+      (e: React.TransitionEvent) => {
+        if (e.propertyName === "left") {
+          if (overflowScrollHandler) {
+            overflowScrollHandler();
+          }
+        }
+      },
+      [overflowScrollHandler]
+    );
+
     const handleNextQuestion = useCallback(() => {
       if (
         partitionedTopicalData &&
@@ -492,13 +503,7 @@ const InspectSidebar = forwardRef(
       <>
         <Sidebar
           className="top-0 !h-full"
-          onTransitionEnd={(e) => {
-            if (e.propertyName == "left") {
-              if (overflowScrollHandler) {
-                overflowScrollHandler();
-              }
-            }
-          }}
+          onTransitionEnd={handleTransitionEnd}
         >
           <SidebarHeader className="sr-only">Search questions</SidebarHeader>
           <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
