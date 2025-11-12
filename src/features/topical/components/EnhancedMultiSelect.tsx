@@ -451,7 +451,7 @@ const MultiSelectorTrigger = memo(
                 onValueChange(val, option);
               },
               // eslint-disable-next-line react-hooks/exhaustive-deps
-              []
+              [allAvailableOptions]
             )}
             allAvailableOptions={allAvailableOptions}
             maxLength={maxLength}
@@ -840,7 +840,7 @@ const MultiSelectorList = forwardRef(
               onValueChange(val, option);
             },
             // eslint-disable-next-line react-hooks/exhaustive-deps
-            []
+            [allAvailableOptions]
           )}
           allAvailableOptions={allAvailableOptions}
           maxLength={maxLength}

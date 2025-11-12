@@ -24,7 +24,7 @@ import BothViews from "./BothViews";
 
 const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
-    className="w-full h-7 flex items-center justify-center cursor-pointer"
+    className="w-full h-7 flex items-center justify-center cursor-pointer mb-1"
     variant="outline"
     onClick={onClick}
   >

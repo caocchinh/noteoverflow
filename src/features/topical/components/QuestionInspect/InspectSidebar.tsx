@@ -623,7 +623,7 @@ const InspectSidebar = forwardRef(
 
             <div
               className={cn(
-                "w-full flex items-center justify-around",
+                "w-full flex items-center justify-around -mt-2",
                 searchInput.length > 0 && "hidden"
               )}
             >
