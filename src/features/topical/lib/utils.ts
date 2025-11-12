@@ -104,7 +104,12 @@ export const validateFilterData = ({
       return false;
     }
 
-    if (!isSubset(data.topic, currentSubjectData.topic)) {
+    if (
+      !isSubset(
+        data.topic,
+        currentSubjectData.topic.map((topic) => topic.topicName)
+      )
+    ) {
       return false;
     }
     if (!data.paperType) {
@@ -113,7 +118,9 @@ export const validateFilterData = ({
     if (
       !isSubset(
         data.paperType,
-        currentSubjectData.paperType.map((paperType) => paperType.toString())
+        currentSubjectData.paperType.map((paperType) =>
+          paperType.paperType.toString()
+        )
       )
     ) {
       return false;

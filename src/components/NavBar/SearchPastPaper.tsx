@@ -70,7 +70,7 @@ const SearchPastPaper = () => {
         coverImage: "/assets/cover/Mathematics (9709).webp",
         topic: [],
         year: [],
-        paperType: [1, 2, 3, 4, 5, 6, 7],
+        paperType: [],
         season: [],
       });
     }

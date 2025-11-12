@@ -493,9 +493,6 @@ const InspectSidebar = forwardRef(
         });
         return;
       }
-      if (currentQuestionId) {
-        navigateToQuestion(currentQuestionId);
-      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allQuestions, navigateToQuestion, setIsOpen]);
 

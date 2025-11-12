@@ -46,18 +46,32 @@ export type ValidSeason = "Summer" | "Winter" | "Spring";
 export type ValidContentType = "questions" | "answers";
 export type ValidCurriculum = "CIE IGCSE" | "CIE A-LEVEL";
 
+export type CIE_A_LEVEL_SUBDIVISION = "AS-Level" | "A-Level";
+
+interface Topic {
+  topicName: string;
+  topicCurriculumnSubdivision?: CIE_A_LEVEL_SUBDIVISION[];
+  isTopicUpToDate: boolean;
+}
+
+interface PaperType {
+  paperType: number;
+  paperTypeCurriculumnSubdivision?: CIE_A_LEVEL_SUBDIVISION[];
+}
+
+export interface TopicalSubject {
+  coverImage: string;
+  syllabusLink?: string;
+  code: string;
+  topic: Topic[] | string[];
+  year: number[];
+  paperType: PaperType[] | number[];
+  season: ValidSeason[];
+}
 export interface TopicalData {
   curriculum: ValidCurriculum;
   coverImage: string;
-  subject: {
-    coverImage: string;
-    syllabusLink?: string;
-    code: string;
-    topic: string[];
-    year: number[];
-    paperType: number[];
-    season: ValidSeason[];
-  }[];
+  subject: TopicalSubject[];
 }
 
 export type PastPaperNavigatorCache = {

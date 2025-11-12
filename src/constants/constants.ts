@@ -110,40 +110,173 @@ export const TOPICAL_DATA: TopicalData[] = [
           "https://www.cambridgeinternational.org/Images/664565-2025-2027-syllabus.pdf",
         code: "Physics (9702)",
         topic: [
-          "PHYSICAL QUANTITIES & UNITS",
-          "MEASUREMENT TECHNIQUES",
-          "KINEMATICS",
-          "DYNAMICS",
-          "FORCES, DENSITY & PRESSURE",
-          "WORK, ENERGY & POWER",
-          "MOTION IN A CIRCLE",
-          "GRAVITATIONAL FIELDS",
-          "DEFORMATION OF SOLIDS",
-          "IDEAL GASES",
-          "TEMPERATURE",
-          "THERMAL PROPERTIES OF MATERIALS",
-          "OSCILLATIONS",
-          "WAVES",
-          "SUPERPOSITION",
-          "COMMUNICATION",
-          "ELECTRIC FIELDS",
-          "CAPACITANCE",
-          "CURRENT OF ELECTRICITY",
-          "D.C. CIRCUITS",
-          "ELECTRONICS",
-          "MAGNETIC FIELDS",
-          "ELECTROMAGNETIC INDUCTION",
-          "ALTERNATING CURRENTS",
-          "QUANTUM PHYSICS",
-          "PARTICLE & NUCLEAR PHYSICS",
-          "MEDICAL IMAGING",
-          "ASTRONOMY & COSMOLOGY",
+          {
+            topicName: "PHYSICAL QUANTITIES & UNITS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MEASUREMENT TECHNIQUES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "KINEMATICS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DYNAMICS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "FORCES, DENSITY & PRESSURE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "WORK, ENERGY & POWER",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MOTION IN A CIRCLE",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GRAVITATIONAL FIELDS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DEFORMATION OF SOLIDS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "IDEAL GASES",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "TEMPERATURE",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THERMAL PROPERTIES OF MATERIALS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "OSCILLATIONS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "WAVES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SUPERPOSITION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMMUNICATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ELECTRIC FIELDS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CAPACITANCE",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CURRENT OF ELECTRICITY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "D.C. CIRCUITS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ELECTRONICS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MAGNETIC FIELDS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ELECTROMAGNETIC INDUCTION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ALTERNATING CURRENTS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "QUANTUM PHYSICS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PARTICLE & NUCLEAR PHYSICS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MEDICAL IMAGING",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ASTRONOMY & COSMOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
           2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4, 5],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 2,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["AS-Level", "A-Level"],
+          },
+          {
+            paperType: 4,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+          {
+            paperType: 5,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
         season: ["Summer", "Winter", "Spring"],
       },
       {
@@ -152,35 +285,149 @@ export const TOPICAL_DATA: TopicalData[] = [
           "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf",
         code: "Chemistry (9701)",
         topic: [
-          "ATOMS, MOLECULES & STOICHIOMETRY",
-          "ATOMIC STRUCTURE",
-          "CHEMICAL BONDING",
-          "STATES OF MATTER",
-          "CHEMICAL ENERGETICS",
-          "ELECTROCHEMISTRY",
-          "EQUILIBRIA",
-          "REACTION KINETICS",
-          "THE PERIODIC TABLE- CHEMICAL PERIODICITY",
-          "GROUP 2",
-          "GROUP 17",
-          "AN INTRODUCTION TO THE CHEMISTRY OF TRANSITION ELEMENTS",
-          "NITROGEN & SULFUR",
-          "AN INTRODUCTION TO ORGANIC CHEMISTRY",
-          "HYDROCARBONS",
-          "HALOGEN DERIVATIVES",
-          "HYDROXY COMPOUNDS",
-          "CARBONYL COMPOUNDS",
-          "CARBOXYLIC ACIDS AND DERIVATIVES",
-          "NITROGEN COMPOUNDS",
-          "POLYMERISATION",
-          "ANALYTICAL TECHNIQUES",
-          "ORGANIC SYNTHESIS",
+          {
+            topicName: "ATOMS, MOLECULES & STOICHIOMETRY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ATOMIC STRUCTURE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CHEMICAL BONDING",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "STATES OF MATTER",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CHEMICAL ENERGETICS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ELECTROCHEMISTRY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "EQUILIBRIA",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "REACTION KINETICS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE PERIODIC TABLE- CHEMICAL PERIODICITY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GROUP 2",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GROUP 17",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName:
+              "AN INTRODUCTION TO THE CHEMISTRY OF TRANSITION ELEMENTS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NITROGEN & SULFUR",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "AN INTRODUCTION TO ORGANIC CHEMISTRY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYDROCARBONS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HALOGEN DERIVATIVES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYDROXY COMPOUNDS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CARBONYL COMPOUNDS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CARBOXYLIC ACIDS AND DERIVATIVES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NITROGEN COMPOUNDS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "POLYMERISATION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ANALYTICAL TECHNIQUES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ORGANIC SYNTHESIS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
           2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4, 5],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 2,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["AS-Level", "A-Level"],
+          },
+          {
+            paperType: 4,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+          {
+            paperType: 5,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
         season: ["Summer", "Winter", "Spring"],
       },
       {
@@ -189,31 +436,128 @@ export const TOPICAL_DATA: TopicalData[] = [
           "https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf",
         code: "Biology (9700)",
         topic: [
-          "CELL STRUCTURE",
-          "BIOLOGICAL MOLECULES",
-          "ENZYMES",
-          "CELL MEMBRANES AND TRANSPORT",
-          "THE MITOTIC CELL CYCLE",
-          "NUCLEIC ACIDS AND PROTEIN SYNTHESIS",
-          "TRANSPORT IN PLANTS",
-          "TRANSPORT IN MAMMALS",
-          "GAS EXCHANGE AND SMOKING",
-          "INFECTIOUS DISEASE",
-          "IMMUNITY",
-          "ENERGY AND RESPIRATION",
-          "PHOTOSYNTHESIS",
-          "HOMEOSTASIS",
-          "CONTROL AND CO-ORDINATION",
-          "INHERITED CHANGE",
-          "SELECTION AND EVOLUTION",
-          "BIODIVERSITY, CLASSIFICATION AND CONSERVATION",
-          "GENETIC TECHNOLOGY",
+          {
+            topicName: "CELL STRUCTURE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "BIOLOGICAL MOLECULES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ENZYMES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CELL MEMBRANES AND TRANSPORT",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE MITOTIC CELL CYCLE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NUCLEIC ACIDS AND PROTEIN SYNTHESIS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "TRANSPORT IN PLANTS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "TRANSPORT IN MAMMALS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GAS EXCHANGE AND SMOKING",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INFECTIOUS DISEASE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "IMMUNITY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ENERGY AND RESPIRATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PHOTOSYNTHESIS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HOMEOSTASIS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CONTROL AND CO-ORDINATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INHERITED CHANGE",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SELECTION AND EVOLUTION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "BIODIVERSITY, CLASSIFICATION AND CONSERVATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GENETIC TECHNOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
           2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1, 2, 3, 4, 5],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 2,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["AS-Level", "A-Level"],
+          },
+          {
+            paperType: 4,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+          {
+            paperType: 5,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
         season: ["Summer", "Winter", "Spring"],
       },
       {
@@ -223,218 +567,67 @@ export const TOPICAL_DATA: TopicalData[] = [
           "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Pure Mathematics 1 (9709)",
         topic: [
-          "COORDINATES GEOMETRY",
-          "FUNCTIONS",
-          "INTERSECTION POINTS",
-          "DIFFERENTIATION",
-          "SEQUENCES & SERIES",
-          "BINOMIAL THEOREM",
-          "TRIGONOMETRY",
-          "VECTORS",
-          "INTEGRATION",
-          "RADIANS",
+          {
+            topicName: "COORDINATES GEOMETRY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "FUNCTIONS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INTERSECTION POINTS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DIFFERENTIATION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SEQUENCES & SERIES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "BINOMIAL THEOREM",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "TRIGONOMETRY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "VECTORS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "INTEGRATION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "RADIANS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
           2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [1],
-        season: ["Summer", "Winter", "Spring"],
-      },
-      {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9618)"],
-        code: "Computer Science (9618)",
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/636089-2024-2025-syllabus.pdf",
-        topic: [
-          "INFORMATION REPRESENTATION",
-          "COMMUNICATION",
-          "HARDWARE",
-          "PROCESSOR FUNDAMENTALS",
-          "SYSTEM SOFTWARE (OS)",
-          "SECURITY, PRIVACY AND DATA INTEGRITY",
-          "ETHICS AND OWNERSHIP",
-          "DATABASES",
-          "ALGORITHM DESIGN AND PROBLEM-SOLVING",
-          "DATA TYPES AND STRUCTURES",
-          "PROGRAMMING",
-          "SOFTWARE DEVELOPMENT",
-          "DATA REPRESENTATION",
-          "COMMUNICATION AND INTERNET TECHNOLOGIES",
-          "HARDWARE AND VIRTUAL MACHINES",
-          "SYSTEM SOFTWARE (PURPOSES OF AN OS)",
-          "SECURITY",
-          "ARTIFICIAL INTELLIGENCE (AI)",
-          "COMPUTATIONAL THINKING AND PROBLEM SOLVING",
-          "FURTHER PROGRAMMING",
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
         ],
-        year: [2025, 2024, 2023, 2022, 2021],
-        paperType: [1, 3],
-        season: ["Summer", "Winter"],
-      },
-      {
-        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
-        code: "Mechanics (9709)",
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
-        topic: [
-          "FORCES & EQUILIBRIUM",
-          "KINEMATICS OF MOTION IN A STRAIGHT LINE",
-          "NEWTON'S LAWS OF MOTION",
-          "ENERGY, WORK & POWER",
-          "GENERAL MOTION IN STRAIGHT LINE",
-          "MOMENTUM",
-        ],
-        year: [2025, 2024, 2023, 2022, 2021, 2020],
-        paperType: [4],
-        season: ["Summer", "Winter", "Spring"],
-      },
-
-      {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Further Mathematics (9231)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597381-2023-2025-syllabus.pdf",
-        code: "Further Mathematics (9231)",
-        topic: [
-          "ROOTS OF POLYNOMIAL EQUATIONS",
-          "RATIONAL FUNCTIONS AND GRAPHS",
-          "SUMMATION OF SERIES",
-          "MATRICES",
-          "POLAR COORDINATES",
-          "VECTORS",
-          "PROOF BY INDUCTION",
-          "HYPERBOLIC FUNCTIONS",
-          "DIFFERENTIATION",
-          "INTEGRATION",
-          "COMPLEX NUMBERS",
-          "DIFFERENTIAL EQUATIONS",
-          "MOMENTUM AND IMPULSE",
-          "CIRCULAR MOTION",
-          "EQUILIBRIUM OF A RIGID BODY UNDER COPLANAR FORCES",
-          "ROTATION OF A RIGID BODY",
-          "SIMPLE HARMONIC MOTION",
-          "FURTHER WORK ON DISTRIBUTIONS",
-          "INFERENCE USING NORMAL AND T-DISTRIBUTIONS",
-          "X2 TEST",
-          "BIVARIATE DATA",
-          "PROJECTILE MOTION",
-          "LINEAR MOTION UNDER VARIABLE FORCE",
-          "NON PARAMETRIC TEST",
-          "CONTINUOUS RANDOM VARIABLE",
-          "PROBABILITY GENERATING FUNCTION",
-          "HOOK'S LAW",
-        ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012,
-        ],
-        paperType: [1, 2, 3, 4],
-        season: ["Summer", "Winter"],
-      },
-      {
-        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Economics (9708)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/595463-2023-2025-syllabus.pdf",
-        code: "Economics (9708)",
-        topic: [
-          "BASIC ECONOMIC IDEAS AND RESOURCE ALLOCATION",
-          "THE PRICE SYSTEM AND THE MICRO ECONOMY",
-          "GOVERNMENT MICROECONOMIC INTERVENTION",
-          "THE MACRO ECONOMY",
-          "GOVERNMENT MACRO INTERVENTION",
-          "INTERNATIONAL ECONOMIC ISSUES",
-        ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012,
-        ],
-        paperType: [1, 3],
-        season: ["Summer", "Winter"],
-      },
-      {
-        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Psychology (9990)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/634461-2024-2026-syllabus.pdf",
-        code: "Psychology (9990)",
-        topic: [
-          "APPROACHES, ISSUES AND DEBATES",
-          "RESEARCH METHODS",
-          "THEORY- PSYCHOLOGY AND ABNORMALITY",
-          "THEORY- PSYCHOLOGY AND CONSUMER BEHAVIOUR",
-          "THEORY- PSYCHOLOGY AND HEALTH",
-          "THEORY- PSYCHOLOGY AND ORGANISATIONS",
-          "CLINICAL PSYCHOLOGY",
-          "CONSUMER PSYCHOLOGY",
-          "HEALTH PSYCHOLOGY",
-          "ORGANISATIONAL PSYCHOLOGY",
-        ],
-        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018],
-        paperType: [1, 2, 3, 4],
-        season: ["Summer", "Winter"],
-      },
-      {
-        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Sociology (9699)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/636099-2024-2026-syllabus.pdf",
-        code: "Sociology (9699)",
-        topic: [
-          "THE FAMILY",
-          "THEORY AND METHODS",
-          "SOCIAL INEQUALITY AND OPPORTUNITY - EDUCATION",
-          "SOCIAL INEQUALITY AND OPPORTUNITY - GLOBAL DEVELOPMENT",
-          "SOCIAL INEQUALITY AND OPPORTUNITY - MEDIA",
-          "SOCIAL INEQUALITY AND OPPORTUNITY - RELIGION",
-          "SOCIALISATION, IDENTITY AND METHODS OF RESEARCH",
-          "EDUCATION",
-          "GLOBALISATION, MEDIA AND RELIGION",
-        ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-        ],
-        paperType: [1, 2, 3, 4],
-        season: ["Summer", "Winter"],
-      },
-      {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Mathematics Probability & Statistics 1 (9709)"
-          ],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
-        code: "Mathematics Probability & Statistics 1 (9709)",
-        topic: [
-          "REPRESENTATION OF DATA",
-          "PERMUTATION & COMBINATION",
-          "PROBABILITY",
-          "DISCRETE RANDOM VARIABLES",
-          "THE NORMAL DISTRIBUTION",
-          "THE BINOMIAL DISTRIBUTION",
-          "GEOMETRIC DISTRIBUTION",
-        ],
-        year: [2025, 2024, 2023, 2022, 2021, 2020],
-        paperType: [5],
-        season: ["Summer", "Winter", "Spring"],
-      },
-      {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Mathematics Probability & Statistics 2 (9709)"
-          ],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
-        code: "Mathematics Probability & Statistics 2 (9709)",
-        topic: [
-          "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
-          "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",
-          "POISSON DISTRIBUTION",
-          "LINEAR COMBINATION OF RANDOM VARIABLES",
-          "CONTINUOUS RANDOM VARIABLES",
-          "SAMPLING",
-        ],
-        year: [2025, 2024, 2023, 2022, 2021, 2020],
-        paperType: [6],
         season: ["Summer", "Winter", "Spring"],
       },
       {
@@ -446,23 +639,684 @@ export const TOPICAL_DATA: TopicalData[] = [
           "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Pure Math 2,3 (9709)",
         topic: [
-          "ALGEBRA",
-          "LOGARITHMIC & EXPONENTIAL FUNCTIONS",
-          "TRIGONOMETRY",
-          "DIFFERENTIATION",
-          "INTEGRATION",
-          "DIFFERENTIAL EQUATION",
-          "NUMERICAL METHODS",
-          "COMPLEX NUMBERS",
-          "VECTORS",
+          {
+            topicName: "ALGEBRA",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "LOGARITHMIC & EXPONENTIAL FUNCTIONS",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "TRIGONOMETRY",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DIFFERENTIATION",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INTEGRATION",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DIFFERENTIAL EQUATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NUMERICAL METHODS",
+            topicCurriculumnSubdivision: ["A-Level", "AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMPLEX NUMBERS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "VECTORS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
         ],
         year: [
           2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
           2014, 2013, 2012, 2011, 2010, 2009,
         ],
-        paperType: [2, 3],
+        paperType: [
+          {
+            paperType: 2,
+            paperTypeCurriculumnSubdivision: ["A-Level", "AS-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
         season: ["Summer", "Winter", "Spring"],
       },
+      {
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
+            "Mathematics Probability & Statistics 1 (9709)"
+          ],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        code: "Mathematics Probability & Statistics 1 (9709)",
+        topic: [
+          {
+            topicName: "REPRESENTATION OF DATA",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PERMUTATION & COMBINATION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROBABILITY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DISCRETE RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE NORMAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE BINOMIAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GEOMETRIC DISTRIBUTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
+        paperType: [
+          {
+            paperType: 5,
+            paperTypeCurriculumnSubdivision: ["A-Level", "AS-Level"],
+          },
+        ],
+        season: ["Summer", "Winter", "Spring"],
+      },
+      {
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
+            "Mathematics Probability & Statistics 2 (9709)"
+          ],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        code: "Mathematics Probability & Statistics 2 (9709)",
+        topic: [
+          {
+            topicName: "POISSON DISTRIBUTION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "LINEAR COMBINATION OF RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CONTINUOUS RANDOM VARIABLES",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SAMPLING",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYPOTHESIS TESTING USING BINOMIAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYPOTHESIS TESTING USING NORMAL DISTRIBUTION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
+        paperType: [
+          {
+            paperType: 6,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
+        season: ["Summer", "Winter", "Spring"],
+      },
+
+      {
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
+        code: "Mechanics (9709)",
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        topic: [
+          {
+            topicName: "FORCES & EQUILIBRIUM",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "KINEMATICS OF MOTION IN A STRAIGHT LINE",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NEWTON'S LAWS OF MOTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ENERGY, WORK & POWER",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GENERAL MOTION IN STRAIGHT LINE",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MOMENTUM",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020],
+        paperType: [
+          {
+            paperType: 4,
+            paperTypeCurriculumnSubdivision: ["A-Level", "AS-Level"],
+          },
+        ],
+        season: ["Summer", "Winter", "Spring"],
+      },
+      {
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Further Mathematics (9231)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/597381-2023-2025-syllabus.pdf",
+        code: "Further Mathematics (9231)",
+        topic: [
+          {
+            topicName: "ROOTS OF POLYNOMIAL EQUATIONS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "RATIONAL FUNCTIONS AND GRAPHS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SUMMATION OF SERIES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MATRICES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "POLAR COORDINATES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "VECTORS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROOF BY INDUCTION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HYPERBOLIC FUNCTIONS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DIFFERENTIATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INTEGRATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMPLEX NUMBERS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DIFFERENTIAL EQUATIONS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "MOMENTUM AND IMPULSE",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CIRCULAR MOTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "EQUILIBRIUM OF A RIGID BODY UNDER COPLANAR FORCES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ROTATION OF A RIGID BODY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SIMPLE HARMONIC MOTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "FURTHER WORK ON DISTRIBUTIONS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INFERENCE USING NORMAL AND T-DISTRIBUTIONS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "X2 TEST",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "BIVARIATE DATA",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROJECTILE MOTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "LINEAR MOTION UNDER VARIABLE FORCE",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "NON PARAMETRIC TEST",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CONTINUOUS RANDOM VARIABLE",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROBABILITY GENERATING FUNCTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HOOK'S LAW",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012,
+        ],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 2,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["A-Level", "A-Level"],
+          },
+          {
+            paperType: 4,
+            paperTypeCurriculumnSubdivision: ["A-Level", "A-Level"],
+          },
+        ],
+        season: ["Summer", "Winter"],
+      },
+      {
+        coverImage:
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9618)"],
+        code: "Computer Science (9618)",
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/636089-2024-2025-syllabus.pdf",
+        topic: [
+          {
+            topicName: "INFORMATION REPRESENTATION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMMUNICATION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HARDWARE",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROCESSOR FUNDAMENTALS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SYSTEM SOFTWARE (OS)",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SECURITY, PRIVACY AND DATA INTEGRITY",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ETHICS AND OWNERSHIP",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DATABASES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ALGORITHM DESIGN AND PROBLEM-SOLVING",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DATA TYPES AND STRUCTURES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "PROGRAMMING",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SOFTWARE DEVELOPMENT",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "DATA REPRESENTATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMMUNICATION AND INTERNET TECHNOLOGIES",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HARDWARE AND VIRTUAL MACHINES",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SYSTEM SOFTWARE (PURPOSES OF AN OS)",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SECURITY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ARTIFICIAL INTELLIGENCE (AI)",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "COMPUTATIONAL THINKING AND PROBLEM SOLVING",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "FURTHER PROGRAMMING",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [2025, 2024, 2023, 2022, 2021],
+        paperType: [
+          { paperType: 1, paperTypeCurriculumnSubdivision: ["AS-Level"] },
+          { paperType: 3, paperTypeCurriculumnSubdivision: ["A-Level"] },
+        ],
+        season: ["Summer", "Winter"],
+      },
+
+      {
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Economics (9708)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/595463-2023-2025-syllabus.pdf",
+        code: "Economics (9708)",
+        topic: [
+          {
+            topicName: "BASIC ECONOMIC IDEAS AND RESOURCE ALLOCATION",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE PRICE SYSTEM AND THE MICRO ECONOMY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GOVERNMENT MICROECONOMIC INTERVENTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THE MACRO ECONOMY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GOVERNMENT MACRO INTERVENTION",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "INTERNATIONAL ECONOMIC ISSUES",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+          2014, 2013, 2012,
+        ],
+        paperType: [
+          {
+            paperType: 1,
+            paperTypeCurriculumnSubdivision: ["AS-Level"],
+          },
+          {
+            paperType: 3,
+            paperTypeCurriculumnSubdivision: ["A-Level"],
+          },
+        ],
+        season: ["Summer", "Winter"],
+      },
+      {
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Psychology (9990)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/634461-2024-2026-syllabus.pdf",
+        code: "Psychology (9990)",
+        topic: [
+          {
+            topicName: "APPROACHES, ISSUES AND DEBATES",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "RESEARCH METHODS",
+            topicCurriculumnSubdivision: ["AS-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THEORY- PSYCHOLOGY AND ABNORMALITY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "THEORY- PSYCHOLOGY AND CONSUMER BEHAVIOUR",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "THEORY- PSYCHOLOGY AND HEALTH",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "THEORY- PSYCHOLOGY AND ORGANISATIONS",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "CLINICAL PSYCHOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "CONSUMER PSYCHOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "HEALTH PSYCHOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "ORGANISATIONAL PSYCHOLOGY",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018],
+        paperType: [
+          { paperType: 1, paperTypeCurriculumnSubdivision: ["AS-Level"] },
+          { paperType: 2, paperTypeCurriculumnSubdivision: ["AS-Level"] },
+          { paperType: 3, paperTypeCurriculumnSubdivision: ["A-Level"] },
+          { paperType: 4, paperTypeCurriculumnSubdivision: ["A-Level"] },
+        ],
+        season: ["Summer", "Winter"],
+      },
+      {
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Sociology (9699)"],
+        syllabusLink:
+          "https://www.cambridgeinternational.org/Images/636099-2024-2026-syllabus.pdf",
+        code: "Sociology (9699)",
+        topic: [
+          {
+            topicName: "THE FAMILY",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "THEORY AND METHODS",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "SOCIAL INEQUALITY AND OPPORTUNITY - EDUCATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "SOCIAL INEQUALITY AND OPPORTUNITY - GLOBAL DEVELOPMENT",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "SOCIAL INEQUALITY AND OPPORTUNITY - MEDIA",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "SOCIAL INEQUALITY AND OPPORTUNITY - RELIGION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: false,
+          },
+          {
+            topicName: "SOCIALISATION, IDENTITY AND METHODS OF RESEARCH",
+            topicCurriculumnSubdivision: ["AS-Level", "A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "EDUCATION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+          {
+            topicName: "GLOBALISATION, MEDIA AND RELIGION",
+            topicCurriculumnSubdivision: ["A-Level"],
+            isTopicUpToDate: true,
+          },
+        ],
+        year: [
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
+        ],
+        paperType: [
+          { paperType: 1, paperTypeCurriculumnSubdivision: ["AS-Level"] },
+          { paperType: 2, paperTypeCurriculumnSubdivision: ["AS-Level"] },
+          { paperType: 3, paperTypeCurriculumnSubdivision: ["A-Level"] },
+          { paperType: 4, paperTypeCurriculumnSubdivision: ["A-Level"] },
+        ],
+        season: ["Summer", "Winter"],
+      },
+
       {
         coverImage:
           SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9608)"],

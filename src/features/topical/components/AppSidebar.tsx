@@ -29,7 +29,7 @@ import {
   INVALID_INPUTS_DEFAULT,
   UI_PREFERENCES_CACHE_KEY,
 } from "../constants/constants";
-import type { ValidCurriculum, ValidSeason } from "@/constants/types";
+import type { TopicalSubject, ValidCurriculum } from "@/constants/types";
 import {
   validateCurriculum,
   validateFilterData,
@@ -100,8 +100,9 @@ const AppSidebar = memo(
     )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
 
     const availableTopics = useMemo(() => {
-      return availableSubjects?.find((item) => item.code === selectedSubject)
-        ?.topic;
+      return availableSubjects
+        ?.find((item) => item.code === selectedSubject)
+        ?.topic.map((topic) => topic.topicName);
     }, [availableSubjects, selectedSubject]);
 
     const availableYears = useMemo(() => {
@@ -110,8 +111,9 @@ const AppSidebar = memo(
     }, [availableSubjects, selectedSubject]);
 
     const availablePaperTypes = useMemo(() => {
-      return availableSubjects?.find((item) => item.code === selectedSubject)
-        ?.paperType;
+      return availableSubjects
+        ?.find((item) => item.code === selectedSubject)
+        ?.paperType.map((paper) => paper.paperType);
     }, [availableSubjects, selectedSubject]);
 
     const availableSeasons = useMemo(() => {
@@ -797,15 +799,7 @@ const CoursebookCover = memo(
   }: {
     selectedSubject: string;
     selectedCurriculum: ValidCurriculum;
-    availableSubjects: {
-      coverImage: string;
-      syllabusLink?: string;
-      code: string;
-      topic: string[];
-      year: number[];
-      paperType: number[];
-      season: ValidSeason[];
-    }[];
+    availableSubjects: TopicalSubject[];
     subjectSyllabus: string | undefined;
   }) => {
     return (
