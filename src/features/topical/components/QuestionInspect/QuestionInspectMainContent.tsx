@@ -4,6 +4,7 @@ import BrowseMoreQuestions from "./BrowseMoreQuestions";
 import InspectUltilityBar from "./InspectUltilityBar";
 import {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -20,6 +21,18 @@ import { cn } from "@/lib/utils";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { QuestionInformation } from "../QuestionInformation";
 import BothViews from "./BothViews";
+
+const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
+  <Button
+    className="w-full h-7 flex items-center justify-center cursor-pointer"
+    variant="outline"
+    onClick={onClick}
+  >
+    Close
+  </Button>
+));
+
+CloseButton.displayName = "CloseButton";
 
 const QuestionInspectMainContent = forwardRef(
   (
@@ -160,6 +173,12 @@ const QuestionInspectMainContent = forwardRef(
       [sideBarInspectRef, resetScrollPositions]
     );
 
+    const handleCloseClick = useCallback(() => {
+      if (currentQuestionId) {
+        setIsOpen({ isOpen: false, questionId: currentQuestionId });
+      }
+    }, [currentQuestionId, setIsOpen]);
+
     return (
       <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
         <div
@@ -249,17 +268,7 @@ const QuestionInspectMainContent = forwardRef(
             />
           </div>
         </div>
-        <Button
-          className="w-full h-7 flex items-center justify-center cursor-pointer"
-          variant="outline"
-          onClick={() => {
-            if (currentQuestionId) {
-              setIsOpen({ isOpen: false, questionId: currentQuestionId });
-            }
-          }}
-        >
-          Close
-        </Button>
+        <CloseButton onClick={handleCloseClick} />
       </SidebarInset>
     );
   }

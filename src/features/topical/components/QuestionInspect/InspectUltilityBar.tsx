@@ -22,6 +22,23 @@ import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../../lib/utils";
 
+const ToggleInspectSidebarButton = memo(
+  ({
+    isInspectSidebarOpen,
+    onToggle,
+  }: {
+    isInspectSidebarOpen: boolean;
+    onToggle: () => void;
+  }) => (
+    <Button variant="outline" className="cursor-pointer" onClick={onToggle}>
+      {isInspectSidebarOpen ? "Hide" : "Show"}
+      <PanelsTopLeft />
+    </Button>
+  )
+);
+
+ToggleInspectSidebarButton.displayName = "ToggleInspectSidebarButton";
+
 const InspectUltilityBar = memo(
   forwardRef(
     (
@@ -64,6 +81,10 @@ const InspectUltilityBar = memo(
           isOverScrollingResult.isOverScrollingRight
         );
       }, [isMobile, sideBarInsetRef]);
+
+      const toggleInspectSidebar = useCallback(() => {
+        setIsInspectSidebarOpen(!isInspectSidebarOpen);
+      }, [isInspectSidebarOpen, setIsInspectSidebarOpen]);
 
       useEffect(() => {
         window.addEventListener("resize", overflowScrollHandler);
@@ -191,14 +212,10 @@ const InspectUltilityBar = memo(
                   isInView={true}
                 />
               )}
-              <Button
-                variant="outline"
-                className="cursor-pointer"
-                onClick={() => setIsInspectSidebarOpen(!isInspectSidebarOpen)}
-              >
-                {isInspectSidebarOpen ? "Hide" : "Show"}
-                <PanelsTopLeft />
-              </Button>
+              <ToggleInspectSidebarButton
+                isInspectSidebarOpen={isInspectSidebarOpen}
+                onToggle={toggleInspectSidebar}
+              />
               <BestExamHelpUltility question={currentQuestionData} />
 
               {sortParameters && setSortParameters && (

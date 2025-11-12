@@ -14,10 +14,10 @@ import Desmos from "desmos";
 import { cn } from "@/lib/utils";
 import { Maximize, Shrink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 interface DesmosCalculatorProps {
   isOpen: boolean;
-  onClose: () => void;
 }
 
 interface CalculatorProps {
@@ -55,7 +55,8 @@ const Calculator = memo(({ calculatorRef }: CalculatorProps) => {
 
 Calculator.displayName = "Calculator";
 
-const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
+const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
+  const { setIsCalculatorOpen } = useTopicalApp();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
   const draggableContainerRef = useRef<HTMLDivElement>(null);
@@ -154,9 +155,21 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
     };
   }, [calculateRndDimensions]);
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
+  const toggleFullscreen = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      setIsFullscreen(!isFullscreen);
+    },
+    [isFullscreen, setIsFullscreen]
+  );
+
+  const onClose = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      setIsCalculatorOpen(false);
+    },
+    [setIsCalculatorOpen]
+  );
 
   return (
     <>
@@ -177,6 +190,7 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
               </span>
               <div className="flex items-center gap-1">
                 <Button
+                  className="relative z-[999999]"
                   variant="ghost"
                   size="icon"
                   onClick={toggleFullscreen}
@@ -185,6 +199,7 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
                   <Shrink />
                 </Button>
                 <Button
+                  className="relative z-[999999]"
                   variant="ghost"
                   size="icon"
                   onClick={onClose}
@@ -232,6 +247,7 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
+                    className="relative z-[999999]"
                     variant="ghost"
                     size="icon"
                     onClick={toggleFullscreen}
@@ -240,6 +256,7 @@ const DesmosCalculator = ({ isOpen, onClose }: DesmosCalculatorProps) => {
                     <Maximize />
                   </Button>
                   <Button
+                    className="relative z-[999999]"
                     variant="ghost"
                     size="icon"
                     onClick={onClose}

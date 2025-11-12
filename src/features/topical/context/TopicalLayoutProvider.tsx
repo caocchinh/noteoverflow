@@ -265,10 +265,7 @@ export default function TopicalLayoutProvider({
         savedActivitiesIsError,
       }}
     >
-      <DesmosCalculator
-        isOpen={isCalculatorOpen}
-        onClose={() => setIsCalculatorOpen(false)}
-      />
+      <DesmosCalculator isOpen={isCalculatorOpen} />
       <div>
         <div className="absolute left-0 w-full">
           <SidebarProvider
