@@ -47,7 +47,7 @@ export type ValidContentType = "questions" | "answers";
 export type ValidCurriculum = "CIE IGCSE" | "CIE A-LEVEL";
 
 export type CIE_A_LEVEL_SUBDIVISION = "AS-Level" | "A-Level";
-type OUTDATED = "Outdated";
+export type OUTDATED = "Outdated";
 
 interface Topic {
   topicName: string;

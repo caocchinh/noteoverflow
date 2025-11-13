@@ -20,7 +20,12 @@ import type {
   SelectedQuestion,
   SubjectMetadata,
 } from "../constants/types";
-import type { ValidCurriculum, ValidSeason } from "@/constants/types";
+import type {
+  OUTDATED,
+  CIE_A_LEVEL_SUBDIVISION,
+  ValidCurriculum,
+  ValidSeason,
+} from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { getShortSeason } from "@/lib/utils";
 
@@ -760,4 +765,23 @@ export function chunkQuestionsData<T>(
   }
 
   return chunkedData;
+}
+
+/**
+ * Extracts unique topicCurriculumnSubdivision values from an array of options
+ * @param options - Array of options containing topicCurriculumnSubdivision
+ * @returns Array of unique subdivision values
+ */
+export function extractUniqueTopicCurriculumnSubdivisions(
+  options: {
+    value: string;
+    topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+    isTopicUpToDate?: boolean;
+  }[]
+): (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[] {
+  const allSubdivisions = options
+    .filter((option) => option.topicCurriculumnSubdivision)
+    .flatMap((option) => option.topicCurriculumnSubdivision!);
+
+  return [...new Set(allSubdivisions)];
 }

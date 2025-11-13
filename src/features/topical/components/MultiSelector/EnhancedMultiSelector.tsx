@@ -13,6 +13,7 @@ import React, {
   SetStateAction,
   useCallback,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -46,16 +47,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import type {
-  MultiSelectorListProps,
+  EnhancedMultiSelectorListProps,
+  EnhancedMultiSelectorProps,
+  EnhancedMultiSelectorSharedProps,
   MultiSelectorListRef,
-  MultiSelectorProps,
-  MultiSelectorSharedProps,
 } from "../../constants/types";
 import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
+import { extractUniqueTopicCurriculumnSubdivisions } from "../../lib/utils";
 
-const MultiSelector = memo(
+const EnhancedMultiSelector = memo(
   ({
     label,
     prerequisite,
@@ -63,7 +65,7 @@ const MultiSelector = memo(
     maxLength = undefined,
     onValuesChange: onValueChange,
     allAvailableOptions,
-  }: MultiSelectorProps) => {
+  }: EnhancedMultiSelectorProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
     if (
@@ -73,11 +75,18 @@ const MultiSelector = memo(
     ) {
       throw new Error("maxLength must be greater than 0");
     }
+    const allFilterOptions = useMemo(() => {
+      return extractUniqueTopicCurriculumnSubdivisions(allAvailableOptions);
+    }, [allAvailableOptions]);
+
+    const allValue = useMemo(() => {
+      return allAvailableOptions.map((item) => item.value);
+    }, [allAvailableOptions]);
 
     const onValueChangeHandler = useCallback(
       (val: string | string[], option?: "selectAll" | "removeAll") => {
         if (option === "selectAll" && allAvailableOptions) {
-          onValueChange(allAvailableOptions);
+          onValueChange(allValue);
         } else if (option === "removeAll") {
           onValueChange([]);
         } else if (typeof val === "string") {
@@ -91,27 +100,31 @@ const MultiSelector = memo(
           onValueChange(val);
         }
       },
-      [selectedValues, allAvailableOptions, onValueChange]
+      [allAvailableOptions, onValueChange, allValue, selectedValues]
     );
 
     return (
       <>
         {isMobileDevice ? (
-          <MobileMultiSelector
+          <EnhancedMobileMultiSelector
             selectedValues={selectedValues}
             onValueChange={onValueChangeHandler}
             allAvailableOptions={allAvailableOptions}
             label={label}
+            allValue={allValue}
+            allFilterOptions={allFilterOptions}
             maxLength={maxLength}
             prerequisite={prerequisite}
             inputRef={inputRef}
           />
         ) : (
-          <DesktopMultiSelector
+          <EnhancedDesktopMultiSelector
             selectedValues={selectedValues}
             onValueChange={onValueChangeHandler}
             allAvailableOptions={allAvailableOptions}
             label={label}
+            allValue={allValue}
+            allFilterOptions={allFilterOptions}
             maxLength={maxLength}
             prerequisite={prerequisite}
             inputRef={inputRef}
@@ -122,9 +135,9 @@ const MultiSelector = memo(
   }
 );
 
-MultiSelector.displayName = "MultiSelector";
+EnhancedMultiSelector.displayName = "EnhancedMultiSelector";
 
-export default MultiSelector;
+export default EnhancedMultiSelector;
 
 // Shared error message component
 const MaxLengthErrorMessage = memo(
@@ -138,16 +151,18 @@ const MaxLengthErrorMessage = memo(
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
 
-const MobileMultiSelector = memo(
+const EnhancedMobileMultiSelector = memo(
   ({
     selectedValues,
     onValueChange,
     allAvailableOptions,
     label,
+    allValue,
+    allFilterOptions,
     maxLength,
     prerequisite,
     inputRef,
-  }: MultiSelectorSharedProps) => {
+  }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
 
@@ -158,7 +173,7 @@ const MobileMultiSelector = memo(
           onValueChange={onValueChange}
           open={open}
           setOpen={setOpen}
-          allAvailableOptions={allAvailableOptions}
+          allAvailableOptions={allValue}
           label={label}
           setInputValue={multiSelectorListRef.current?.setInputValue}
           maxLength={maxLength}
@@ -189,7 +204,7 @@ const MobileMultiSelector = memo(
                   (label.toLowerCase() === "topic" ? "s" : "")}
               </h3>
             )}
-            <MultiSelectorMobiletUltilityButtons
+            <EnhancedMultiSelectorMobiletUltilityButtons
               onValueChange={useCallback(
                 (
                   val: string | string[],
@@ -200,7 +215,7 @@ const MobileMultiSelector = memo(
                 // eslint-disable-next-line react-hooks/exhaustive-deps
                 []
               )}
-              allAvailableOptions={allAvailableOptions}
+              allAvailableOptions={allValue}
               maxLength={maxLength}
               setOpen={setOpen}
             />
@@ -210,11 +225,13 @@ const MobileMultiSelector = memo(
               inputRef={inputRef}
               multiSelectorListRef={multiSelectorListRef}
             >
-              <MultiSelectorList
+              <EnhancedMultiSelectorList
                 ref={multiSelectorListRef}
                 selectedValues={selectedValues}
                 onValueChange={onValueChange}
                 inputRef={inputRef}
+                allFilterOptions={allFilterOptions}
+                allValue={allValue}
                 label={label}
                 allAvailableOptions={allAvailableOptions}
                 prerequisite={prerequisite}
@@ -229,22 +246,24 @@ const MobileMultiSelector = memo(
   }
 );
 
-MobileMultiSelector.displayName = "MobileMultiSelector";
+EnhancedMobileMultiSelector.displayName = "EnhancedMobileMultiSelector";
 
-const DesktopMultiSelector = memo(
+const EnhancedDesktopMultiSelector = memo(
   ({
     selectedValues,
     onValueChange,
     allAvailableOptions,
     label,
+    allFilterOptions,
+    allValue,
     maxLength,
     prerequisite,
     inputRef,
-  }: MultiSelectorSharedProps) => {
+  }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
-
     const [open, setOpen] = useState<boolean>(false);
+
     return (
       <Popover modal={false} open={open}>
         <PopoverTrigger asChild>
@@ -254,7 +273,7 @@ const DesktopMultiSelector = memo(
               onValueChange={onValueChange}
               open={open}
               setOpen={setOpen}
-              allAvailableOptions={allAvailableOptions}
+              allAvailableOptions={allValue}
               label={label}
               setInputValue={multiSelectorListRef.current?.setInputValue}
               maxLength={maxLength}
@@ -286,10 +305,12 @@ const DesktopMultiSelector = memo(
             inputRef={inputRef}
             multiSelectorListRef={multiSelectorListRef}
           >
-            <MultiSelectorList
+            <EnhancedMultiSelectorList
               ref={multiSelectorListRef}
               selectedValues={selectedValues}
               onValueChange={onValueChange}
+              allFilterOptions={allFilterOptions}
+              allValue={allValue}
               inputRef={inputRef}
               label={label}
               allAvailableOptions={allAvailableOptions}
@@ -298,7 +319,7 @@ const DesktopMultiSelector = memo(
               maxLength={maxLength}
             />
           </MultiSelectorContent>
-          <MultiSelectorDesktoptUltilityButtons
+          <EnhancedMultiSelectorDesktoptUltilityButtons
             onValueChange={useCallback(
               (val: string | string[], option?: "selectAll" | "removeAll") => {
                 onValueChange(val, option);
@@ -306,12 +327,12 @@ const DesktopMultiSelector = memo(
               // eslint-disable-next-line react-hooks/exhaustive-deps
               [allAvailableOptions]
             )}
-            allAvailableOptions={allAvailableOptions}
+            allAvailableOptions={allValue}
             maxLength={maxLength}
           />
           <div className="m-2">
             <Button
-              className="w-full cursor-pointer h-[30px]"
+              className="w-full cursor-pointer "
               onClick={() => {
                 setOpen(false);
               }}
@@ -325,19 +346,21 @@ const DesktopMultiSelector = memo(
   }
 );
 
-DesktopMultiSelector.displayName = "DesktopMultiSelector";
+EnhancedDesktopMultiSelector.displayName = "EnhancedDesktopMultiSelector";
 
-const MultiSelectorList = forwardRef(
+const EnhancedMultiSelectorList = forwardRef(
   (
     {
       selectedValues,
       onValueChange,
       inputRef,
+      allFilterOptions,
+      allValue,
       label,
       allAvailableOptions,
       prerequisite,
       setOpen,
-    }: MultiSelectorListProps,
+    }: EnhancedMultiSelectorListProps,
     ref
   ) => {
     const temporaryFix = (item: string) => {
@@ -370,7 +393,7 @@ const MultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
-          allAvailableOptions={allAvailableOptions}
+          allAvailableOptions={allValue}
           prerequisite={prerequisite}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
@@ -476,9 +499,9 @@ const MultiSelectorList = forwardRef(
   }
 );
 
-MultiSelectorList.displayName = "MultiSelectorList";
+EnhancedMultiSelectorList.displayName = "EnhancedMultiSelectorList";
 
-const MultiSelectorDesktoptUltilityButtons = memo(
+const EnhancedMultiSelectorDesktoptUltilityButtons = memo(
   ({
     onValueChange,
     allAvailableOptions,
@@ -505,7 +528,7 @@ const MultiSelectorDesktoptUltilityButtons = memo(
           </Button>
         )}
         <Button
-          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]"
+          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]c  "
           onClick={() => {
             onValueChange([], "removeAll");
           }}
@@ -519,10 +542,10 @@ const MultiSelectorDesktoptUltilityButtons = memo(
   }
 );
 
-MultiSelectorDesktoptUltilityButtons.displayName =
-  "MultiSelectorDesktoptUltilityButtons";
+EnhancedMultiSelectorDesktoptUltilityButtons.displayName =
+  "EnhancedMultiSelectorDesktoptUltilityButtons";
 
-const MultiSelectorMobiletUltilityButtons = memo(
+const EnhancedMultiSelectorMobiletUltilityButtons = memo(
   ({
     onValueChange,
     allAvailableOptions,
@@ -575,5 +598,5 @@ const MultiSelectorMobiletUltilityButtons = memo(
   }
 );
 
-MultiSelectorMobiletUltilityButtons.displayName =
-  "MultiSelectorMobiletUltilityButtons";
+EnhancedMultiSelectorMobiletUltilityButtons.displayName =
+  "EnhancedMultiSelectorMobiletUltilityButtons";

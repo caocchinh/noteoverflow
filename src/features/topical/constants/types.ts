@@ -1,5 +1,9 @@
 import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
-import type { ValidCurriculum } from "@/constants/types";
+import type {
+  CIE_A_LEVEL_SUBDIVISION,
+  OUTDATED,
+  ValidCurriculum,
+} from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 
 export interface EnhancedSelectContentRef {
@@ -9,11 +13,26 @@ export interface EnhancedSelectContentRef {
 export interface MultiSelectorProps {
   selectedValues: string[];
   onValuesChange: (value: string[]) => void;
-  loop?: boolean;
   allAvailableOptions: string[];
   maxLength?: number;
   label: VALID_LABEL;
   prerequisite: string;
+}
+
+export interface EnhancedSelectAvailableOptions {
+  value: string;
+  topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+  isTopicUpToDate?: boolean;
+}
+
+export interface EnhancedMultiSelectorProps {
+  selectedValues: string[];
+  onValuesChange: (value: string[]) => void;
+  allAvailableOptions: EnhancedSelectAvailableOptions[];
+  maxLength?: number;
+  label: VALID_LABEL;
+  prerequisite: string;
+  isTopic: boolean;
 }
 
 export interface MultiSelectorSharedProps {
@@ -25,6 +44,21 @@ export interface MultiSelectorSharedProps {
   allAvailableOptions: string[];
   label: string;
   maxLength: number | undefined;
+  prerequisite: string;
+  inputRef: RefObject<HTMLInputElement | null>;
+}
+
+export interface EnhancedMultiSelectorSharedProps {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  allAvailableOptions: EnhancedSelectAvailableOptions[];
+  allValue: string[];
+  label: string;
+  maxLength: number | undefined;
+  allFilterOptions: string[];
   prerequisite: string;
   inputRef: RefObject<HTMLInputElement | null>;
 }
@@ -51,6 +85,22 @@ export interface MultiSelectorListProps {
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
   allAvailableOptions: string[];
+  prerequisite: string;
+  setOpen: (open: boolean) => void;
+  maxLength: number | undefined;
+}
+
+export interface EnhancedMultiSelectorListProps {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
+  label: string;
+  allValue: string[];
+  allFilterOptions: string[];
+  allAvailableOptions: EnhancedSelectAvailableOptions[];
   prerequisite: string;
   setOpen: (open: boolean) => void;
   maxLength: number | undefined;
