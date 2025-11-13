@@ -6,6 +6,7 @@ import { X as RemoveIcon } from "lucide-react";
 const MultiSelectorSearchInput = memo(
   ({
     inputValue,
+    isBlockingMobileKeyboard,
     setInputValue,
     inputRef,
     label,
@@ -22,6 +23,7 @@ const MultiSelectorSearchInput = memo(
         <CommandInput
           className="w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
           enterKeyHint="search"
+          readOnly={isBlockingMobileKeyboard}
           onValueChange={(e) => {
             setInputValue(e);
             if (!e) {

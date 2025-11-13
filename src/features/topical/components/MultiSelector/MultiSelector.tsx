@@ -358,6 +358,16 @@ const MultiSelectorList = forwardRef(
       });
     }, [inputValue, selectedValues]);
 
+    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] =
+      useState(false);
+
+    const blockMobileKeyboardOpen = useCallback(() => {
+      setIsBlockingMobileKeyboard(true);
+      setTimeout(() => {
+        setIsBlockingMobileKeyboard(false);
+      }, 0);
+    }, []);
+
     return (
       <div className="flex h-full flex-col gap-2">
         <MultiSelectorSearchInput
@@ -365,6 +375,7 @@ const MultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
+          isBlockingMobileKeyboard={isBlockingMobileKeyboard}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
@@ -407,6 +418,7 @@ const MultiSelectorList = forwardRef(
                       <CommandItem
                         className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
                         key={item}
+                        onTouchStart={blockMobileKeyboardOpen}
                         onSelect={() => {
                           onValueChange(item);
                         }}
@@ -446,6 +458,7 @@ const MultiSelectorList = forwardRef(
                         "cursor-default opacity-50"
                     )}
                     key={item}
+                    onTouchStart={blockMobileKeyboardOpen}
                     onSelect={() => {
                       onValueChange(item);
                     }}

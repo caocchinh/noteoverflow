@@ -25,6 +25,8 @@ import type {
   CIE_A_LEVEL_SUBDIVISION,
   ValidCurriculum,
   ValidSeason,
+  TopicalData,
+  TopicalSubject,
 } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { getShortSeason } from "@/lib/utils";
@@ -153,12 +155,91 @@ export const validateFilterData = ({
   }
 };
 
-export const validateSubcurriculumnDivision = (value: string): boolean => {
+export const validateSubcurriculumnDivision = ({
+  value,
+  curriculum,
+  subject,
+  type,
+}: {
+  value: string;
+  curriculum: string;
+  subject: string;
+  type: "topic" | "paperType";
+}): boolean => {
   try {
-    if (typeof value !== "string") {
+    if (typeof value !== "string" || !curriculum || !subject) {
       return false;
     }
-    return value === "AS-Level" || value === "A-Level" || value === "Outdated";
+
+    // Import TOPICAL_DATA to validate against actual data
+    // Find the curriculum data
+    const curriculumData = TOPICAL_DATA.find(
+      (data: TopicalData) => data.curriculum === curriculum
+    );
+    if (!curriculumData) return false;
+
+    // Find the subject data
+    const subjectData = curriculumData.subject.find(
+      (subj: TopicalSubject) => subj.code === subject
+    );
+    if (!subjectData) return false;
+
+    // Get the relevant data based on type
+    let items: (
+      | {
+          topicName: string;
+          topicCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+          isTopicUpToDate: boolean;
+        }
+      | {
+          paperType: number;
+          paperTypeCurriculumnSubdivision: (
+            | CIE_A_LEVEL_SUBDIVISION
+            | OUTDATED
+          )[];
+        }
+    )[] = [];
+    if (type === "topic") {
+      items = subjectData.topic;
+    } else if (type === "paperType") {
+      items = subjectData.paperType;
+    }
+
+    // Extract unique subdivisions using the utility function
+    const options = items.map((item) => {
+      if (type === "topic") {
+        const topicItem = item as {
+          topicName: string;
+          topicCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+          isTopicUpToDate: boolean;
+        };
+        return {
+          value: topicItem.topicName,
+          curriculumnSubdivision: topicItem.topicCurriculumnSubdivision,
+          isUpToDate: topicItem.isTopicUpToDate,
+        };
+      } else {
+        const paperTypeItem = item as {
+          paperType: number;
+          paperTypeCurriculumnSubdivision: (
+            | CIE_A_LEVEL_SUBDIVISION
+            | OUTDATED
+          )[];
+        };
+        return {
+          value: paperTypeItem.paperType.toString(),
+          curriculumnSubdivision: paperTypeItem.paperTypeCurriculumnSubdivision,
+          isUpToDate: true,
+        };
+      }
+    });
+    const validSubdivisions =
+      extractUniqueTopicCurriculumnSubdivisions(options);
+
+    // Check if the value is in the valid subdivisions
+    return validSubdivisions.includes(
+      value as CIE_A_LEVEL_SUBDIVISION | OUTDATED
+    );
   } catch {
     return false;
   }

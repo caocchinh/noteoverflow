@@ -29,15 +29,17 @@ const MultiSelectorFilterNavigation = memo(
             duration: 0.3,
           }}
         >
-          {items.map((item) => (
-            <div
-              className="cursor-pointer flex-1 text-center flex items-center justify-center rounded-none bg-transparent p-2 text-primary shadow-none hover:bg-transparent hover:text-primary"
-              key={item}
-              data-id={item}
-            >
-              {item}
-            </div>
-          ))}
+          {items
+            .toSorted((a, b) => b.localeCompare(a))
+            .map((item) => (
+              <div
+                className="cursor-pointer flex-1 text-center flex items-center justify-center rounded-none bg-transparent p-2 text-primary shadow-none hover:bg-transparent hover:text-primary"
+                key={item}
+                data-id={item}
+              >
+                {item}
+              </div>
+            ))}
         </AnimatedBackground>
       </div>
     );

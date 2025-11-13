@@ -29,6 +29,7 @@ export interface EnhancedMultiSelectorProps {
   setCurrentFilter: Dispatch<
     SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
   >;
+  isMounted: boolean;
   selectedValues: string[];
   onValuesChange: (value: string[]) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
@@ -112,6 +113,7 @@ export interface MultiSelectorTriggerButtonUltilityProps {
 
 export interface MultiSelectorSearchInputProps {
   inputValue: string;
+  isBlockingMobileKeyboard: boolean;
   setInputValue: (value: string) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;

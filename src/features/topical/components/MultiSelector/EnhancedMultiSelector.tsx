@@ -61,6 +61,7 @@ import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
 
 const EnhancedMultiSelector = memo(
   ({
+    isMounted,
     label,
     selectedValues,
     maxLength = undefined,
@@ -83,11 +84,12 @@ const EnhancedMultiSelector = memo(
       return extractUniqueTopicCurriculumnSubdivisions(allAvailableOptions);
     }, [allAvailableOptions]);
 
+    // Guard against undefined
     useEffect(() => {
-      if (!currentFilter) {
+      if (!currentFilter && isMounted) {
         setCurrentFilter(allFilterOptions[0]);
       }
-    }, [allFilterOptions, currentFilter, setCurrentFilter]);
+    }, [allFilterOptions, currentFilter, isMounted, setCurrentFilter]);
 
     const allValue = useMemo(() => {
       return allAvailableOptions.map((item) => item.value);
@@ -465,10 +467,19 @@ const EnhancedMultiSelectorList = forwardRef(
       inputValue,
       selectedValues,
     ]);
+    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] =
+      useState(false);
 
     const totalAmountOfItems =
       filteredUpToDateAvailableOption.length +
       filteredOutdatedAvailableOption.length;
+
+    const blockMobileKeyboardOpen = useCallback(() => {
+      setIsBlockingMobileKeyboard(true);
+      setTimeout(() => {
+        setIsBlockingMobileKeyboard(false);
+      }, 0);
+    }, []);
 
     return (
       <div className="flex h-full flex-col gap-2">
@@ -477,6 +488,7 @@ const EnhancedMultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
+          isBlockingMobileKeyboard={isBlockingMobileKeyboard}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
@@ -526,6 +538,7 @@ const EnhancedMultiSelectorList = forwardRef(
                       <CommandItem
                         className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
                         key={item}
+                        onTouchStart={blockMobileKeyboardOpen}
                         onSelect={() => {
                           onValueChange(item);
                         }}
@@ -561,6 +574,7 @@ const EnhancedMultiSelectorList = forwardRef(
                         "cursor-default opacity-50"
                     )}
                     key={item}
+                    onTouchStart={blockMobileKeyboardOpen}
                     onSelect={() => {
                       onValueChange(item);
                     }}
@@ -590,6 +604,7 @@ const EnhancedMultiSelectorList = forwardRef(
                             "cursor-default opacity-50"
                         )}
                         key={item}
+                        onTouchStart={blockMobileKeyboardOpen}
                         onSelect={() => {
                           onValueChange(item);
                         }}

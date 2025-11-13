@@ -430,17 +430,34 @@ const AppSidebar = memo(
               .topicSubcurriculumnDivisionPreference;
           if (
             savedPaperTypeSubcurriculumnDivision &&
-            validateSubcurriculumnDivision(savedPaperTypeSubcurriculumnDivision)
+            validateSubcurriculumnDivision({
+              value: savedPaperTypeSubcurriculumnDivision,
+              type: "paperType",
+              subject,
+              curriculum: curriculumn,
+            })
           ) {
             setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
+          } else {
+            setCurrentPaperTypeFilter(undefined);
           }
           if (
             savedTopicSubcurriculumnDivision &&
-            validateSubcurriculumnDivision(savedTopicSubcurriculumnDivision)
+            validateSubcurriculumnDivision({
+              value: savedTopicSubcurriculumnDivision,
+              type: "topic",
+              subject,
+              curriculum: curriculumn,
+            })
           ) {
             setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+          } else {
+            setCurrentTopicFilter(undefined);
           }
-        } catch {}
+        } catch {
+          setCurrentTopicFilter(undefined);
+          setCurrentPaperTypeFilter(undefined);
+        }
       }
 
       setTimeout(() => {
@@ -484,19 +501,34 @@ const AppSidebar = memo(
                   .topicSubcurriculumnDivisionPreference;
               if (
                 savedPaperTypeSubcurriculumnDivision &&
-                validateSubcurriculumnDivision(
-                  savedPaperTypeSubcurriculumnDivision
-                )
+                validateSubcurriculumnDivision({
+                  value: savedPaperTypeSubcurriculumnDivision,
+                  type: "paperType",
+                  curriculum: selectedCurriculum,
+                  subject: selectedSubject,
+                })
               ) {
                 setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
+              } else {
+                setCurrentPaperTypeFilter(undefined);
               }
               if (
                 savedTopicSubcurriculumnDivision &&
-                validateSubcurriculumnDivision(savedTopicSubcurriculumnDivision)
+                validateSubcurriculumnDivision({
+                  value: savedTopicSubcurriculumnDivision,
+                  type: "topic",
+                  curriculum: selectedCurriculum,
+                  subject: selectedSubject,
+                })
               ) {
                 setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+              } else {
+                setCurrentTopicFilter(undefined);
               }
-            } catch {}
+            } catch {
+              setCurrentTopicFilter(undefined);
+              setCurrentPaperTypeFilter(undefined);
+            }
             if (
               isSubjectValid &&
               validateFilterData({
@@ -529,18 +561,24 @@ const AppSidebar = memo(
             setSelectedYear([]);
             setSelectedPaperType([]);
             setSelectedSeason([]);
+            setCurrentTopicFilter(undefined);
+            setCurrentPaperTypeFilter(undefined);
           }
         } catch {
           setSelectedTopic([]);
           setSelectedYear([]);
           setSelectedPaperType([]);
           setSelectedSeason([]);
+          setCurrentTopicFilter(undefined);
+          setCurrentPaperTypeFilter(undefined);
         }
       } else {
         setSelectedTopic([]);
         setSelectedYear([]);
         setSelectedPaperType([]);
         setSelectedSeason([]);
+        setCurrentTopicFilter(undefined);
+        setCurrentPaperTypeFilter(undefined);
       }
 
       setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
@@ -733,6 +771,7 @@ const AppSidebar = memo(
                     Topic
                   </h3>
                   <EnhancedMultiSelector
+                    isMounted={isMounted}
                     currentFilter={currentTopicFilter}
                     setCurrentFilter={setCurrentTopicFilter}
                     allAvailableOptions={availableTopicsFullInfo ?? []}
@@ -762,6 +801,7 @@ const AppSidebar = memo(
                     Paper
                   </h3>
                   <EnhancedMultiSelector
+                    isMounted={isMounted}
                     currentFilter={currentPaperTypeFilter}
                     setCurrentFilter={setCurrentPaperTypeFilter}
                     allAvailableOptions={availablePaperTypeFullInfo ?? []}
