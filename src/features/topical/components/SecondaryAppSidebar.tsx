@@ -286,7 +286,6 @@ const SecondaryAppSidebar = ({
                   (values) => setSelectedTopic(values as string[]),
                   []
                 )}
-                prerequisite="Subject"
                 selectedValues={selectedTopic ?? []}
               />
               {invalidInputs.topic && (
@@ -312,7 +311,6 @@ const SecondaryAppSidebar = ({
                   (values) => setSelectedPaperType(values as string[]),
                   []
                 )}
-                prerequisite="Subject"
                 selectedValues={selectedPaperType ?? []}
               />
               {invalidInputs.paperType && (
@@ -338,7 +336,6 @@ const SecondaryAppSidebar = ({
                   (values) => setSelectedYear(values as string[]),
                   []
                 )}
-                prerequisite="Subject"
                 selectedValues={selectedYear ?? []}
               />
               {invalidInputs.year && (
@@ -364,7 +361,6 @@ const SecondaryAppSidebar = ({
                   (values) => setSelectedSeason(values as string[]),
                   []
                 )}
-                prerequisite="Subject"
                 selectedValues={selectedSeason ?? []}
               />
               {invalidInputs.season && (

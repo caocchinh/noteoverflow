@@ -66,6 +66,8 @@ const EnhancedMultiSelector = memo(
     maxLength = undefined,
     onValuesChange: onValueChange,
     allAvailableOptions,
+    currentFilter,
+    setCurrentFilter,
   }: EnhancedMultiSelectorProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
@@ -81,13 +83,11 @@ const EnhancedMultiSelector = memo(
       return extractUniqueTopicCurriculumnSubdivisions(allAvailableOptions);
     }, [allAvailableOptions]);
 
-    const [currentFilter, setCurrentFilter] = useState(allFilterOptions[0]);
-
     useEffect(() => {
       if (!currentFilter) {
         setCurrentFilter(allFilterOptions[0]);
       }
-    }, [allFilterOptions, currentFilter]);
+    }, [allFilterOptions, currentFilter, setCurrentFilter]);
 
     const allValue = useMemo(() => {
       return allAvailableOptions.map((item) => item.value);
@@ -480,10 +480,13 @@ const EnhancedMultiSelectorList = forwardRef(
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
-        <MultiSelectorFilterNavigation
-          items={allFilterOptions}
-          setItems={setCurrentFilter}
-        />
+        {currentFilter && (
+          <MultiSelectorFilterNavigation
+            items={allFilterOptions}
+            currentItem={currentFilter}
+            setItems={setCurrentFilter}
+          />
+        )}
 
         <ScrollArea
           viewPortClassName="max-h-[50vh]"

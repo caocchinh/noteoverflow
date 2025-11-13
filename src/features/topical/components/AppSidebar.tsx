@@ -29,13 +29,18 @@ import {
   INVALID_INPUTS_DEFAULT,
   UI_PREFERENCES_CACHE_KEY,
 } from "../constants/constants";
-import type { TopicalSubject, ValidCurriculum } from "@/constants/types";
+import type {
+  CIE_A_LEVEL_SUBDIVISION,
+  TopicalSubject,
+  ValidCurriculum,
+} from "@/constants/types";
 import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
   syncFilterCacheToLocalStorage,
   isValidInputs as isValidInputsUtils,
+  validateSubcurriculumnDivision,
 } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { Button } from "@/components/ui/button";
@@ -67,6 +72,13 @@ const AppSidebar = memo(
     const [selectedYear, setSelectedYear] = useState<string[]>([]);
     const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
     const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
+    const [currentTopicFilter, setCurrentTopicFilter] = useState<
+      CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
+    >(undefined);
+    const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
+      CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
+    >(undefined);
+
     const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
       ...INVALID_INPUTS_DEFAULT,
     });
@@ -186,6 +198,8 @@ const AppSidebar = memo(
                 paperType: [],
                 year: [],
                 season: [],
+                paperTypeSubcurriculumnDivisionPreference: undefined,
+                topicSubcurriculumnDivisionPreference: undefined,
               },
             },
           };
@@ -331,6 +345,10 @@ const AppSidebar = memo(
       const parsedUiPreferences: UiPreferencesCache = savedUiPreferences
         ? JSON.parse(savedUiPreferences)
         : false;
+
+      let subject: string | undefined;
+      let curriculumn: string | undefined;
+
       if (savedState && savedUiPreferences && !parsedQueryFromSearchParams) {
         if (
           parsedUiPreferences.isSessionCacheEnabled &&
@@ -340,12 +358,14 @@ const AppSidebar = memo(
           setSelectedCurriculum(
             parsedState.lastSessionCurriculum as ValidCurriculum
           );
+          curriculumn = parsedState.lastSessionCurriculum;
           const isSubjectValid = validateSubject(
             parsedState.lastSessionCurriculum,
             parsedState.lastSessionSubject
           );
           if (parsedState.lastSessionSubject && isSubjectValid) {
             setSelectedSubject(parsedState.lastSessionSubject);
+            subject = parsedState.lastSessionSubject;
           }
           if (
             isSubjectValid &&
@@ -381,6 +401,8 @@ const AppSidebar = memo(
           }
         }
       } else if (parsedQueryFromSearchParams) {
+        curriculumn = parsedQueryFromSearchParams.curriculumId;
+        subject = parsedQueryFromSearchParams.subjectId;
         setSelectedCurriculum(
           parsedQueryFromSearchParams.curriculumId as ValidCurriculum
         );
@@ -397,6 +419,28 @@ const AppSidebar = memo(
           selectedYear: parsedQueryFromSearchParams.year,
           selectedSeason: parsedQueryFromSearchParams.season,
         });
+      }
+      if (curriculumn && subject) {
+        try {
+          const savedPaperTypeSubcurriculumnDivision =
+            parsedState.filters[curriculumn][subject]
+              .paperTypeSubcurriculumnDivisionPreference;
+          const savedTopicSubcurriculumnDivision =
+            parsedState.filters[curriculumn][subject]
+              .topicSubcurriculumnDivisionPreference;
+          if (
+            savedPaperTypeSubcurriculumnDivision &&
+            validateSubcurriculumnDivision(savedPaperTypeSubcurriculumnDivision)
+          ) {
+            setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
+          }
+          if (
+            savedTopicSubcurriculumnDivision &&
+            validateSubcurriculumnDivision(savedTopicSubcurriculumnDivision)
+          ) {
+            setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+          }
+        } catch {}
       }
 
       setTimeout(() => {
@@ -431,6 +475,28 @@ const AppSidebar = memo(
             if (selectedSubject && isSubjectValid) {
               setSelectedSubject(selectedSubject);
             }
+            try {
+              const savedPaperTypeSubcurriculumnDivision =
+                parsedState.filters[selectedCurriculum][selectedSubject]
+                  .paperTypeSubcurriculumnDivisionPreference;
+              const savedTopicSubcurriculumnDivision =
+                parsedState.filters[selectedCurriculum][selectedSubject]
+                  .topicSubcurriculumnDivisionPreference;
+              if (
+                savedPaperTypeSubcurriculumnDivision &&
+                validateSubcurriculumnDivision(
+                  savedPaperTypeSubcurriculumnDivision
+                )
+              ) {
+                setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
+              }
+              if (
+                savedTopicSubcurriculumnDivision &&
+                validateSubcurriculumnDivision(savedTopicSubcurriculumnDivision)
+              ) {
+                setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+              }
+            } catch {}
             if (
               isSubjectValid &&
               validateFilterData({
@@ -504,6 +570,8 @@ const AppSidebar = memo(
         selectedPaperType,
         selectedYear,
         selectedSeason,
+        paperTypeSubcurriculumnDivisionPreference: currentPaperTypeFilter,
+        topicSubcurriculumnDivisionPreference: currentTopicFilter,
       });
     }, [
       selectedCurriculum,
@@ -512,6 +580,8 @@ const AppSidebar = memo(
       selectedPaperType,
       selectedYear,
       selectedSeason,
+      currentPaperTypeFilter,
+      currentTopicFilter,
       mountedRef,
     ]);
 
@@ -663,13 +733,14 @@ const AppSidebar = memo(
                     Topic
                   </h3>
                   <EnhancedMultiSelector
+                    currentFilter={currentTopicFilter}
+                    setCurrentFilter={setCurrentTopicFilter}
                     allAvailableOptions={availableTopicsFullInfo ?? []}
                     label="Topic"
                     onValuesChange={useCallback(
                       (values) => setSelectedTopic(values as string[]),
                       []
                     )}
-                    prerequisite="Subject"
                     selectedValues={selectedTopic}
                   />
                   {invalidInputs.topic && (
@@ -691,13 +762,14 @@ const AppSidebar = memo(
                     Paper
                   </h3>
                   <EnhancedMultiSelector
+                    currentFilter={currentPaperTypeFilter}
+                    setCurrentFilter={setCurrentPaperTypeFilter}
                     allAvailableOptions={availablePaperTypeFullInfo ?? []}
                     label="Paper"
                     onValuesChange={useCallback(
                       (values) => setSelectedPaperType(values as string[]),
                       []
                     )}
-                    prerequisite="Subject"
                     selectedValues={selectedPaperType}
                   />
                   {invalidInputs.paperType && (
@@ -725,7 +797,6 @@ const AppSidebar = memo(
                       (values) => setSelectedYear(values as string[]),
                       []
                     )}
-                    prerequisite="Subject"
                     selectedValues={selectedYear}
                   />
                   {invalidInputs.year && (
@@ -751,7 +822,6 @@ const AppSidebar = memo(
                       (values) => setSelectedSeason(values as string[]),
                       []
                     )}
-                    prerequisite="Subject"
                     selectedValues={selectedSeason}
                   />
                   {invalidInputs.season && (

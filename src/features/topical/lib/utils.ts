@@ -153,6 +153,17 @@ export const validateFilterData = ({
   }
 };
 
+export const validateSubcurriculumnDivision = (value: string): boolean => {
+  try {
+    if (typeof value !== "string") {
+      return false;
+    }
+    return value === "AS-Level" || value === "A-Level" || value === "Outdated";
+  } catch {
+    return false;
+  }
+};
+
 export const fuzzySearch = (query: string, text: string): boolean => {
   try {
     if (!query) {
@@ -383,13 +394,19 @@ export const syncFilterCacheToLocalStorage = ({
   selectedPaperType,
   selectedYear,
   selectedSeason,
+  topicSubcurriculumnDivisionPreference,
+  paperTypeSubcurriculumnDivisionPreference,
 }: {
   selectedCurriculum: string;
   selectedSubject: string;
-  selectedTopic: string[];
-  selectedPaperType: string[];
-  selectedYear: string[];
-  selectedSeason: string[];
+  selectedTopic?: string[];
+  selectedPaperType?: string[];
+  selectedYear?: string[];
+  selectedSeason?: string[];
+  topicSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+  paperTypeSubcurriculumnDivisionPreference?:
+    | CIE_A_LEVEL_SUBDIVISION
+    | OUTDATED;
 }) => {
   if (typeof window === "undefined") {
     return;
@@ -412,16 +429,47 @@ export const syncFilterCacheToLocalStorage = ({
     };
 
     if (selectedCurriculum && selectedSubject) {
+      // Get existing filter data or create empty object
+      const existingFilterData =
+        stateToSave.filters?.[selectedCurriculum]?.[selectedSubject] || {};
+
+      const newFilterData: FilterData & {
+        topicSubcurriculumnDivisionPreference?:
+          | CIE_A_LEVEL_SUBDIVISION
+          | OUTDATED;
+        paperTypeSubcurriculumnDivisionPreference?:
+          | CIE_A_LEVEL_SUBDIVISION
+          | OUTDATED;
+      } = { ...existingFilterData };
+
+      if (selectedTopic) {
+        newFilterData.topic = selectedTopic;
+      }
+      if (selectedPaperType) {
+        newFilterData.paperType = selectedPaperType;
+      }
+      if (selectedYear) {
+        newFilterData.year = selectedYear;
+      }
+      if (selectedSeason) {
+        newFilterData.season = selectedSeason;
+      }
+
+      if (topicSubcurriculumnDivisionPreference) {
+        newFilterData.topicSubcurriculumnDivisionPreference =
+          topicSubcurriculumnDivisionPreference;
+      }
+
+      if (paperTypeSubcurriculumnDivisionPreference) {
+        newFilterData.paperTypeSubcurriculumnDivisionPreference =
+          paperTypeSubcurriculumnDivisionPreference;
+      }
+
       stateToSave.filters = {
         ...stateToSave.filters,
         [selectedCurriculum]: {
           ...stateToSave.filters?.[selectedCurriculum],
-          [selectedSubject]: {
-            topic: selectedTopic,
-            paperType: selectedPaperType,
-            year: selectedYear,
-            season: selectedSeason,
-          },
+          [selectedSubject]: newFilterData,
         },
       };
     }

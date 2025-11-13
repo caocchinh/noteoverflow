@@ -31,7 +31,7 @@ const MultiSelectorTrigger = memo(
     const [contentHeight, setContentHeight] = useState<number>(0);
     const [isClickingUltility, setIsClickingUltility] =
       useState<boolean>(false);
-    const [paddingRight, setPaddingRight] = useState<string>("initial");
+    const [paddingRight, setPaddingRight] = useState("initial");
 
     const mousePreventDefault = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
@@ -51,7 +51,7 @@ const MultiSelectorTrigger = memo(
       }
     }, [selectedValues]);
 
-    const temporaryFix = useCallback(
+    const getSeason = useCallback(
       (item: string) => {
         if (label === "Season") {
           if (item === "Winter") {
@@ -135,13 +135,12 @@ const MultiSelectorTrigger = memo(
                   key={item}
                   variant={"secondary"}
                 >
-                  <span className="text-xs">{temporaryFix(item) ?? item}</span>
+                  <span className="text-xs">{getSeason(item) ?? item}</span>
                   <button
                     aria-label={`Remove ${item} option`}
                     aria-roledescription="button to remove option"
                     onClick={() => {
                       onValueChange(item);
-
                       if (selectedValues.length === 1) {
                         setContentHeight(0);
                       }

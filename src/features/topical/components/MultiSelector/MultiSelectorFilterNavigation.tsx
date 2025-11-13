@@ -7,15 +7,19 @@ const MultiSelectorFilterNavigation = memo(
   ({
     items,
     setItems,
+    currentItem,
   }: {
     items: string[];
-    setItems: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>>;
+    setItems: Dispatch<
+      SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
+    >;
+    currentItem: string;
   }) => {
     return (
       <div className="-my-2 flex h-max w-full flex-wrap items-center justify-center gap-4 sm:flex-nowrap">
         <AnimatedBackground
           className=" h-full w-full border-[#0084ff] border-b-2"
-          defaultValue={items[0]}
+          defaultValue={currentItem}
           onValueChange={(value) => {
             setItems((value as CIE_A_LEVEL_SUBDIVISION | OUTDATED) ?? items[0]);
           }}
@@ -26,13 +30,13 @@ const MultiSelectorFilterNavigation = memo(
           }}
         >
           {items.map((item) => (
-            <p
+            <div
               className="cursor-pointer flex-1 text-center flex items-center justify-center rounded-none bg-transparent p-2 text-primary shadow-none hover:bg-transparent hover:text-primary"
               key={item}
               data-id={item}
             >
               {item}
-            </p>
+            </div>
           ))}
         </AnimatedBackground>
       </div>

@@ -25,12 +25,15 @@ export interface EnhancedSelectAvailableOptions {
 }
 
 export interface EnhancedMultiSelectorProps {
+  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
+  setCurrentFilter: Dispatch<
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
+  >;
   selectedValues: string[];
   onValuesChange: (value: string[]) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
   maxLength?: number;
   label: VALID_LABEL;
-  prerequisite: string;
 }
 
 export interface MultiSelectorSharedProps {
@@ -46,9 +49,9 @@ export interface EnhancedMultiSelectorSharedProps {
   selectedValues: string[];
   onValueChange: (val: string | string[]) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
-  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
   setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
   >;
   allValue: string[];
   label: string;
@@ -87,9 +90,9 @@ export interface EnhancedMultiSelectorListProps {
   onValueChange: (val: string | string[]) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
-  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
   setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
   >;
   allFilterOptions: string[];
   allAvailableOptions: EnhancedSelectAvailableOptions[];
@@ -192,7 +195,14 @@ export type FiltersCache = {
   lastSessionSubject: string;
   filters: {
     [curriculum: string]: {
-      [subject: string]: FilterData;
+      [subject: string]: FilterData & {
+        topicSubcurriculumnDivisionPreference?:
+          | CIE_A_LEVEL_SUBDIVISION
+          | OUTDATED;
+        paperTypeSubcurriculumnDivisionPreference?:
+          | CIE_A_LEVEL_SUBDIVISION
+          | OUTDATED;
+      };
     };
   };
 };
