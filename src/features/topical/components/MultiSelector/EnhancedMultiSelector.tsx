@@ -56,7 +56,7 @@ import {
 import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
-} from "./EnhancedSelectUltilityButtons";
+} from "./MultiSelectUltilityButtons";
 import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
 
 const EnhancedMultiSelector = memo(
@@ -93,41 +93,9 @@ const EnhancedMultiSelector = memo(
       return allAvailableOptions.map((item) => item.value);
     }, [allAvailableOptions]);
 
-    console.log(currentFilter, "aaaaaaaaaaaaajjjjjjjjjjjjjjjjjj");
-
     const onValueChangeHandler = useCallback(
-      (val: string | string[], option?: "selectAll" | "removeAll") => {
-        if (option === "selectAll") {
-          const allValueUnderFilterThatIsNotSelectedYet = allAvailableOptions
-            .filter((item) => {
-              return (
-                item.curriculumnSubdivision.some(
-                  (item) => item === currentFilter
-                ) && !selectedValues.includes(item.value)
-              );
-            })
-            .map((item) => item.value);
-          console.log(allValueUnderFilterThatIsNotSelectedYet, currentFilter);
-          // Add all unselected items under current filter to selectedValues
-          onValueChange([
-            ...selectedValues,
-            ...allValueUnderFilterThatIsNotSelectedYet,
-          ]);
-        } else if (option === "removeAll") {
-          const valuesToRemove = selectedValues.filter((selectedValue) =>
-            allAvailableOptions.some(
-              (option) =>
-                option.value === selectedValue &&
-                option.curriculumnSubdivision.some(
-                  (sub) => sub === currentFilter
-                )
-            )
-          );
-
-          onValueChange(
-            selectedValues.filter((value) => !valuesToRemove.includes(value))
-          );
-        } else if (typeof val === "string") {
+      (val: string | string[]) => {
+        if (typeof val === "string") {
           if (selectedValues.includes(val)) {
             onValueChange(selectedValues.filter((item) => item !== val));
           } else {
@@ -138,8 +106,38 @@ const EnhancedMultiSelector = memo(
           onValueChange(val);
         }
       },
-      [allAvailableOptions, onValueChange, currentFilter, selectedValues]
+      [onValueChange, selectedValues]
     );
+
+    const onSelectAll = useCallback(() => {
+      const allValueUnderFilterThatIsNotSelectedYet = allAvailableOptions
+        .filter((item) => {
+          return (
+            item.curriculumnSubdivision.some(
+              (item) => item === currentFilter
+            ) && !selectedValues.includes(item.value)
+          );
+        })
+        .map((item) => item.value);
+      onValueChange([
+        ...selectedValues,
+        ...allValueUnderFilterThatIsNotSelectedYet,
+      ]);
+    }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
+
+    const onDeleteAll = useCallback(() => {
+      const valuesToRemove = selectedValues.filter((selectedValue) =>
+        allAvailableOptions.some(
+          (option) =>
+            option.value === selectedValue &&
+            option.curriculumnSubdivision.some((sub) => sub === currentFilter)
+        )
+      );
+
+      onValueChange(
+        selectedValues.filter((value) => !valuesToRemove.includes(value))
+      );
+    }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
 
     return (
       <>
@@ -155,6 +153,8 @@ const EnhancedMultiSelector = memo(
             allFilterOptions={allFilterOptions}
             maxLength={maxLength}
             inputRef={inputRef}
+            onDeleteAll={onDeleteAll}
+            onSelectAll={onSelectAll}
           />
         ) : (
           <EnhancedDesktopMultiSelector
@@ -168,6 +168,8 @@ const EnhancedMultiSelector = memo(
             allFilterOptions={allFilterOptions}
             maxLength={maxLength}
             inputRef={inputRef}
+            onDeleteAll={onDeleteAll}
+            onSelectAll={onSelectAll}
           />
         )}
       </>
@@ -203,6 +205,8 @@ const EnhancedMobileMultiSelector = memo(
     allFilterOptions,
     maxLength,
     inputRef,
+    onDeleteAll,
+    onSelectAll,
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
@@ -218,6 +222,8 @@ const EnhancedMobileMultiSelector = memo(
           label={label}
           setInputValue={multiSelectorListRef.current?.setInputValue}
           maxLength={maxLength}
+          showDeleteAll={true}
+          showSelectAll={false}
         />
         {maxLength && selectedValues.length > maxLength && (
           <MaxLengthErrorMessage maxLength={maxLength} label={label} />
@@ -246,15 +252,10 @@ const EnhancedMobileMultiSelector = memo(
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
-              onValueChange={(
-                val: string | string[],
-                option?: "selectAll" | "removeAll"
-              ) => {
-                onValueChange(val, option);
-              }}
-              allAvailableOptions={allValue}
               maxLength={maxLength}
               setOpen={setOpen}
+              onDeleteAll={onDeleteAll}
+              onSelectAll={onSelectAll}
             />
             <MultiSelectorContent
               open={open}
@@ -297,6 +298,8 @@ const EnhancedDesktopMultiSelector = memo(
     allValue,
     maxLength,
     inputRef,
+    onDeleteAll,
+    onSelectAll,
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
@@ -315,6 +318,8 @@ const EnhancedDesktopMultiSelector = memo(
               label={label}
               setInputValue={multiSelectorListRef.current?.setInputValue}
               maxLength={maxLength}
+              showDeleteAll={true}
+              showSelectAll={false}
             />
             {maxLength && selectedValues.length > maxLength && (
               <MaxLengthErrorMessage maxLength={maxLength} label={label} />
@@ -358,14 +363,9 @@ const EnhancedDesktopMultiSelector = memo(
             />
           </MultiSelectorContent>
           <MultiSelectorDesktoptUltilityButtons
-            onValueChange={(
-              val: string | string[],
-              option?: "selectAll" | "removeAll"
-            ) => {
-              onValueChange(val, option);
-            }}
-            allAvailableOptions={allValue}
             maxLength={maxLength}
+            onDeleteAll={onDeleteAll}
+            onSelectAll={onSelectAll}
           />
           <div className="m-2">
             <Button
@@ -563,13 +563,44 @@ const EnhancedMultiSelectorList = forwardRef(
                     }}
                   >
                     <Checkbox
-                      checked={filteredSelectedValue.includes(item)}
+                      checked={selectedValues.includes(item)}
                       className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
                     />
                     {temporaryFix(item) ?? item}
                   </CommandItem>
                 ))}
               </CommandGroup>
+
+              {filteredOutdatedAvailableOption.length > 0 && (
+                <>
+                  <CommandSeparator />
+
+                  <CommandGroup
+                    heading="Old syllabus"
+                    className={cn(inputValue && "-mt-4")}
+                  >
+                    {filteredOutdatedAvailableOption.map((item) => (
+                      <CommandItem
+                        className={cn(
+                          "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
+                          selectedValues.includes(item) &&
+                            "cursor-default opacity-50"
+                        )}
+                        key={item}
+                        onSelect={() => {
+                          onValueChange(item);
+                        }}
+                      >
+                        <Checkbox
+                          checked={selectedValues.includes(item)}
+                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
+                        />
+                        {temporaryFix(item) ?? item}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
             </Collapsible>
             <CommandEmpty>
               <span className="text-muted-foreground">No results found</span>

@@ -35,10 +35,7 @@ export interface EnhancedMultiSelectorProps {
 
 export interface MultiSelectorSharedProps {
   selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   allAvailableOptions: string[];
   label: string;
   maxLength: number | undefined;
@@ -47,10 +44,7 @@ export interface MultiSelectorSharedProps {
 
 export interface EnhancedMultiSelectorSharedProps {
   selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
   currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
   setCurrentFilter: Dispatch<
@@ -61,6 +55,8 @@ export interface EnhancedMultiSelectorSharedProps {
   maxLength: number | undefined;
   allFilterOptions: string[];
   inputRef: RefObject<HTMLInputElement | null>;
+  onDeleteAll: () => void;
+  onSelectAll: () => void;
 }
 
 export interface MultiSelectorContentProps {
@@ -78,10 +74,7 @@ export interface MultiSelectorListRef {
 
 export interface MultiSelectorListProps {
   selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
   allAvailableOptions: string[];
@@ -91,10 +84,7 @@ export interface MultiSelectorListProps {
 
 export interface EnhancedMultiSelectorListProps {
   selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
   currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
@@ -108,14 +98,13 @@ export interface EnhancedMultiSelectorListProps {
 }
 
 export interface MultiSelectorTriggerButtonUltilityProps {
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   mousePreventDefault: (e: React.MouseEvent) => void;
   setIsClickingUltility: Dispatch<SetStateAction<boolean>>;
   allAvailableOptions: string[];
   maxLength: number | undefined;
+  showSelectAll: boolean;
+  showDeleteAll: boolean;
 }
 
 export interface MultiSelectorSearchInputProps {
@@ -129,16 +118,15 @@ export interface MultiSelectorSearchInputProps {
 
 export interface MultiSelectorTriggerProps {
   selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
+  onValueChange: (val: string | string[]) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
   allAvailableOptions: string[];
   label: string;
   setInputValue: Dispatch<SetStateAction<string>> | undefined;
   maxLength: number | undefined;
+  showSelectAll?: boolean;
+  showDeleteAll?: boolean;
 }
 
 export type VALID_LABEL =
@@ -279,8 +267,7 @@ export interface SavedActivitiesResponse {
 
 export interface MultiSelectContextProps {
   value: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValueChange: (value: any, option?: "selectAll" | "removeAll") => void;
+  onValueChange: (value: string | string[]) => void;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   inputValue: string;

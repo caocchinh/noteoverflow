@@ -24,6 +24,8 @@ const MultiSelectorTrigger = memo(
     label,
     setInputValue,
     maxLength,
+    showSelectAll = true,
+    showDeleteAll = true,
   }: MultiSelectorTriggerProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [contentHeight, setContentHeight] = useState<number>(0);
@@ -77,16 +79,14 @@ const MultiSelectorTrigger = memo(
         <div className="flex items-center justify-center gap-2 px-1">
           <MultiSelectorTriggerButtonUltility
             setIsClickingUltility={setIsClickingUltility}
-            onValueChange={useCallback(
-              (val: string | string[], option?: "selectAll" | "removeAll") => {
-                onValueChange(val, option);
-              },
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [allAvailableOptions]
-            )}
+            onValueChange={(val: string | string[]) => {
+              onValueChange(val);
+            }}
             allAvailableOptions={allAvailableOptions}
             maxLength={maxLength}
             mousePreventDefault={mousePreventDefault}
+            showSelectAll={showSelectAll}
+            showDeleteAll={showDeleteAll}
           />
           <Button
             className="h-6 flex-1 cursor-pointer text-xs"
@@ -186,50 +186,54 @@ const MultiSelectorTriggerButtonUltility = memo(
     setIsClickingUltility,
     allAvailableOptions,
     maxLength,
+    showSelectAll,
+    showDeleteAll,
   }: MultiSelectorTriggerButtonUltilityProps) => {
     return (
       <>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
-              onClick={() => {
-                onValueChange([], "removeAll");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && allAvailableOptions) {
-                  onValueChange([], "removeAll");
-                }
-              }}
-              onMouseDown={(e) => {
-                mousePreventDefault(e);
-                setIsClickingUltility(true);
-              }}
-              onMouseUp={() => {
-                setTimeout(() => {
-                  setIsClickingUltility(false);
-                }, 0);
-              }}
-              variant="outline"
-            >
-              <Trash2 className="h-4 w-4 " />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="z-[100000000000]">
-            Remove all
-          </TooltipContent>
-        </Tooltip>
-        {!maxLength && (
+        {showDeleteAll && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
+                onClick={() => {
+                  onValueChange([]);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && allAvailableOptions) {
+                    onValueChange([]);
+                  }
+                }}
+                onMouseDown={(e) => {
+                  mousePreventDefault(e);
+                  setIsClickingUltility(true);
+                }}
+                onMouseUp={() => {
+                  setTimeout(() => {
+                    setIsClickingUltility(false);
+                  }, 0);
+                }}
+                variant="outline"
+              >
+                <Trash2 className="h-4 w-4 " />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="z-[100000000000]">
+              Remove all
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {!maxLength && showSelectAll && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
                 onClick={() => {
-                  onValueChange(allAvailableOptions ?? [], "selectAll");
+                  onValueChange(allAvailableOptions ?? []);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && allAvailableOptions) {
-                    onValueChange(allAvailableOptions ?? [], "selectAll");
+                    onValueChange(allAvailableOptions ?? []);
                   }
                 }}
                 onMouseDown={(e) => {

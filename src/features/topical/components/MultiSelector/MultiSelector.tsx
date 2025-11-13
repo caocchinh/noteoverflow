@@ -51,7 +51,7 @@ import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
-} from "./EnhancedSelectUltilityButtons";
+} from "./MultiSelectUltilityButtons";
 import { fuzzySearch } from "../../lib/utils";
 
 const MultiSelector = memo(
@@ -73,12 +73,8 @@ const MultiSelector = memo(
     }
 
     const onValueChangeHandler = useCallback(
-      (val: string | string[], option?: "selectAll" | "removeAll") => {
-        if (option === "selectAll" && allAvailableOptions) {
-          onValueChange(allAvailableOptions);
-        } else if (option === "removeAll") {
-          onValueChange([]);
-        } else if (typeof val === "string") {
+      (val: string | string[]) => {
+        if (typeof val === "string") {
           if (selectedValues.includes(val)) {
             onValueChange(selectedValues.filter((item) => item !== val));
           } else {
@@ -89,7 +85,7 @@ const MultiSelector = memo(
           onValueChange(val);
         }
       },
-      [selectedValues, allAvailableOptions, onValueChange]
+      [selectedValues, onValueChange]
     );
 
     return (
@@ -185,15 +181,14 @@ const MobileMultiSelector = memo(
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
-              onValueChange={(
-                val: string | string[],
-                option?: "selectAll" | "removeAll"
-              ) => {
-                onValueChange(val, option);
-              }}
-              allAvailableOptions={allAvailableOptions}
               maxLength={maxLength}
               setOpen={setOpen}
+              onDeleteAll={() => {
+                onValueChange([]);
+              }}
+              onSelectAll={() => {
+                onValueChange(allAvailableOptions);
+              }}
             />
             <MultiSelectorContent
               open={open}
@@ -287,14 +282,13 @@ const DesktopMultiSelector = memo(
             />
           </MultiSelectorContent>
           <MultiSelectorDesktoptUltilityButtons
-            onValueChange={(
-              val: string | string[],
-              option?: "selectAll" | "removeAll"
-            ) => {
-              onValueChange(val, option);
-            }}
-            allAvailableOptions={allAvailableOptions}
             maxLength={maxLength}
+            onDeleteAll={() => {
+              onValueChange([]);
+            }}
+            onSelectAll={() => {
+              onValueChange(allAvailableOptions);
+            }}
           />
           <div className="m-2">
             <Button

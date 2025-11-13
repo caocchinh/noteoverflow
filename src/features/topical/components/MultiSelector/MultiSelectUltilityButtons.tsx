@@ -4,15 +4,12 @@ import { Dispatch, memo, SetStateAction } from "react";
 
 export const MultiSelectorDesktoptUltilityButtons = memo(
   ({
-    onValueChange,
-    allAvailableOptions,
+    onDeleteAll,
+    onSelectAll,
     maxLength,
   }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
+    onDeleteAll: () => void;
+    onSelectAll: () => void;
     maxLength: number | undefined;
   }) => {
     return (
@@ -20,9 +17,7 @@ export const MultiSelectorDesktoptUltilityButtons = memo(
         {!maxLength && (
           <Button
             className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center h-[30px]"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? [], "selectAll");
-            }}
+            onClick={onSelectAll}
           >
             Select all
             <Sparkles className="h-4 w-4" />
@@ -30,9 +25,7 @@ export const MultiSelectorDesktoptUltilityButtons = memo(
         )}
         <Button
           className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center h-[30px] "
-          onClick={() => {
-            onValueChange([], "removeAll");
-          }}
+          onClick={onDeleteAll}
           variant="destructive"
         >
           Remove all
@@ -48,16 +41,13 @@ MultiSelectorDesktoptUltilityButtons.displayName =
 
 export const MultiSelectorMobiletUltilityButtons = memo(
   ({
-    onValueChange,
-    allAvailableOptions,
+    onDeleteAll,
+    onSelectAll,
     maxLength,
     setOpen,
   }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
+    onDeleteAll: () => void;
+    onSelectAll: () => void;
     maxLength: number | undefined;
     setOpen: Dispatch<SetStateAction<boolean>>;
   }) => {
@@ -65,21 +55,14 @@ export const MultiSelectorMobiletUltilityButtons = memo(
       <div className="flex flex-row gap-3 p-2 ">
         <Button
           className="flex-1/3 cursor-pointer"
-          onClick={() => {
-            onValueChange([]);
-          }}
+          onClick={onDeleteAll}
           variant="destructive"
         >
           Remove all
           <Trash2 className="h-4 w-4" />
         </Button>
         {!maxLength && (
-          <Button
-            className="flex-1/3 cursor-pointer"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? []);
-            }}
-          >
+          <Button className="flex-1/3 cursor-pointer" onClick={onSelectAll}>
             Select all
             <Sparkles className="h-4 w-4" />
           </Button>
