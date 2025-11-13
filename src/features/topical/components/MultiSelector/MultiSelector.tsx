@@ -6,6 +6,7 @@ import {
   memo,
   useCallback,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -51,6 +52,7 @@ import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
 } from "./EnhancedSelectUltilityButtons";
+import { fuzzySearch } from "../../lib/utils";
 
 const MultiSelector = memo(
   ({
@@ -360,6 +362,21 @@ const MultiSelectorList = forwardRef(
     );
     const commandListScrollArea = useRef<HTMLDivElement | null>(null);
 
+    const filteredAvailableOption = useMemo(() => {
+      return allAvailableOptions.filter((item) => {
+        return fuzzySearch(inputValue, item);
+      });
+    }, [allAvailableOptions, inputValue]);
+
+    const filteredSelectedValue = useMemo(() => {
+      return selectedValues.filter((item) => {
+        return (
+          selectedValues.some((all) => all === item) &&
+          fuzzySearch(inputValue, item)
+        );
+      });
+    }, [inputValue, selectedValues]);
+
     return (
       <div className="flex h-full flex-col gap-2">
         <MultiSelectorSearchInput
@@ -393,21 +410,21 @@ const MultiSelectorList = forwardRef(
                   <h3
                     className={cn(
                       "font-medium text-xs",
-                      selectedValues.length > 0
+                      filteredSelectedValue.length > 0
                         ? "text-logo-main"
                         : "text-muted-foreground"
                     )}
                   >
-                    {`${selectedValues.length} selected`}
+                    {`${filteredSelectedValue.length} selected`}
                   </h3>
                   <ChevronsUpDown className="h-4 w-4" />
                 </CollapsibleTrigger>
               )}
-              <CommandGroup value={`${selectedValues.length} selected`}>
+              <CommandGroup value={`${filteredSelectedValue.length} selected`}>
                 <CollapsibleContent>
-                  {selectedValues.length > 0 &&
+                  {filteredSelectedValue.length > 0 &&
                     !inputValue &&
-                    selectedValues.map((item) => (
+                    filteredSelectedValue.map((item) => (
                       <CommandItem
                         className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
                         key={item}
@@ -433,16 +450,16 @@ const MultiSelectorList = forwardRef(
                   inputValue
                     ? "Search results"
                     : `${
-                        allAvailableOptions?.length
+                        filteredAvailableOption?.length
                       } available ${label.toLowerCase()}${
-                        allAvailableOptions?.length &&
-                        allAvailableOptions?.length > 1
+                        filteredAvailableOption?.length &&
+                        filteredAvailableOption?.length > 1
                           ? "s"
                           : ""
                       }`
                 }
               >
-                {allAvailableOptions?.map((item) => (
+                {filteredAvailableOption?.map((item) => (
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",

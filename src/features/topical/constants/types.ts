@@ -97,7 +97,6 @@ export interface EnhancedMultiSelectorListProps {
   ) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
-  allValue: string[];
   allFilterOptions: string[];
   allAvailableOptions: EnhancedSelectAvailableOptions[];
   prerequisite: string;

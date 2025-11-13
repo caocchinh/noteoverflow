@@ -775,13 +775,13 @@ export function chunkQuestionsData<T>(
 export function extractUniqueTopicCurriculumnSubdivisions(
   options: {
     value: string;
-    topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
-    isTopicUpToDate?: boolean;
+    curriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+    isUpToDate: boolean;
   }[]
 ): (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[] {
   const allSubdivisions = options
-    .filter((option) => option.topicCurriculumnSubdivision)
-    .flatMap((option) => option.topicCurriculumnSubdivision!);
+    .filter((option) => option.curriculumnSubdivision)
+    .flatMap((option) => option.curriculumnSubdivision!);
 
   return [...new Set(allSubdivisions)];
 }

@@ -48,7 +48,10 @@ import type {
 import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
-import { extractUniqueTopicCurriculumnSubdivisions } from "../../lib/utils";
+import {
+  extractUniqueTopicCurriculumnSubdivisions,
+  fuzzySearch,
+} from "../../lib/utils";
 import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
@@ -76,6 +79,8 @@ const EnhancedMultiSelector = memo(
     const allFilterOptions = useMemo(() => {
       return extractUniqueTopicCurriculumnSubdivisions(allAvailableOptions);
     }, [allAvailableOptions]);
+
+    console.log(allFilterOptions);
 
     const allValue = useMemo(() => {
       return allAvailableOptions.map((item) => item.value);
@@ -229,7 +234,6 @@ const EnhancedMobileMultiSelector = memo(
                 onValueChange={onValueChange}
                 inputRef={inputRef}
                 allFilterOptions={allFilterOptions}
-                allValue={allValue}
                 label={label}
                 allAvailableOptions={allAvailableOptions}
                 prerequisite={prerequisite}
@@ -308,7 +312,6 @@ const EnhancedDesktopMultiSelector = memo(
               selectedValues={selectedValues}
               onValueChange={onValueChange}
               allFilterOptions={allFilterOptions}
-              allValue={allValue}
               inputRef={inputRef}
               label={label}
               allAvailableOptions={allAvailableOptions}
@@ -353,7 +356,6 @@ const EnhancedMultiSelectorList = forwardRef(
       onValueChange,
       inputRef,
       allFilterOptions,
-      allValue,
       label,
       allAvailableOptions,
       prerequisite,
@@ -373,7 +375,6 @@ const EnhancedMultiSelectorList = forwardRef(
       }
     };
     const [inputValue, setInputValue] = useState("");
-
     useImperativeHandle(
       ref,
       () => ({
@@ -383,6 +384,28 @@ const EnhancedMultiSelectorList = forwardRef(
       [inputValue]
     );
     const commandListScrollArea = useRef<HTMLDivElement | null>(null);
+    const [currentFilter, setCurrentFilter] = useState(allFilterOptions[0]);
+
+    const filteredAvailableOption = useMemo(() => {
+      return allAvailableOptions
+        .filter((item) => {
+          return (
+            item.curriculumnSubdivision.some(
+              (item) => item === currentFilter
+            ) && fuzzySearch(inputValue, item.value)
+          );
+        })
+        .map((item) => item.value);
+    }, [allAvailableOptions, currentFilter, inputValue]);
+
+    const filteredSelectedValue = useMemo(() => {
+      return selectedValues.filter((item) => {
+        return (
+          filteredAvailableOption.some((all) => all === item) &&
+          fuzzySearch(inputValue, item)
+        );
+      });
+    }, [filteredAvailableOption, inputValue, selectedValues]);
 
     return (
       <div className="flex h-full flex-col gap-2">
@@ -391,12 +414,15 @@ const EnhancedMultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
-          allAvailableOptions={allValue}
+          allAvailableOptions={filteredAvailableOption}
           prerequisite={prerequisite}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
-        <MultiSelectorFilterNavigation items={allFilterOptions} />
+        <MultiSelectorFilterNavigation
+          items={allFilterOptions}
+          setItems={setCurrentFilter}
+        />
 
         <ScrollArea
           viewPortClassName="max-h-[50vh]"
@@ -418,21 +444,21 @@ const EnhancedMultiSelectorList = forwardRef(
                   <h3
                     className={cn(
                       "font-medium text-xs",
-                      selectedValues.length > 0
+                      filteredSelectedValue.length > 0
                         ? "text-logo-main"
                         : "text-muted-foreground"
                     )}
                   >
-                    {`${selectedValues.length} selected`}
+                    {`${filteredSelectedValue.length} selected`}
                   </h3>
                   <ChevronsUpDown className="h-4 w-4" />
                 </CollapsibleTrigger>
               )}
-              <CommandGroup value={`${selectedValues.length} selected`}>
+              <CommandGroup value={`${filteredSelectedValue.length} selected`}>
                 <CollapsibleContent>
-                  {selectedValues.length > 0 &&
+                  {filteredSelectedValue.length > 0 &&
                     !inputValue &&
-                    selectedValues.map((item) => (
+                    filteredSelectedValue.map((item) => (
                       <CommandItem
                         className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
                         key={item}
@@ -458,16 +484,17 @@ const EnhancedMultiSelectorList = forwardRef(
                   inputValue
                     ? "Search results"
                     : `${
-                        allAvailableOptions?.length
+                        filteredAvailableOption?.length
                       } available ${label.toLowerCase()}${
-                        allAvailableOptions?.length &&
-                        allAvailableOptions?.length > 1
+                        filteredAvailableOption?.length &&
+                        filteredAvailableOption?.length > 1
                           ? "s"
                           : ""
                       }`
                 }
+                className={cn(inputValue && "-mt-4")}
               >
-                {allValue.map((item) => (
+                {filteredAvailableOption.map((item) => (
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
@@ -480,7 +507,7 @@ const EnhancedMultiSelectorList = forwardRef(
                     }}
                   >
                     <Checkbox
-                      checked={selectedValues.includes(item)}
+                      checked={filteredSelectedValue.includes(item)}
                       className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
                     />
                     {temporaryFix(item) ?? item}
