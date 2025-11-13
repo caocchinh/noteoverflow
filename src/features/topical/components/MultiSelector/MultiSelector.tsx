@@ -1,16 +1,9 @@
 "use client";
 
+import { ChevronsUpDown } from "lucide-react";
 import {
-  ChevronsUpDown,
-  X as RemoveIcon,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
-import React, {
-  Dispatch,
   forwardRef,
   memo,
-  SetStateAction,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -54,6 +47,10 @@ import type {
 import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
+import {
+  MultiSelectorDesktoptUltilityButtons,
+  MultiSelectorMobiletUltilityButtons,
+} from "./EnhancedSelectUltilityButtons";
 
 const MultiSelector = memo(
   ({
@@ -477,103 +474,3 @@ const MultiSelectorList = forwardRef(
 );
 
 MultiSelectorList.displayName = "MultiSelectorList";
-
-const MultiSelectorDesktoptUltilityButtons = memo(
-  ({
-    onValueChange,
-    allAvailableOptions,
-    maxLength,
-  }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
-    maxLength: number | undefined;
-  }) => {
-    return (
-      <div className="flex flex-row gap-2 m-2">
-        {!maxLength && (
-          <Button
-            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? [], "selectAll");
-            }}
-          >
-            Select all
-            <Sparkles className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]"
-          onClick={() => {
-            onValueChange([], "removeAll");
-          }}
-          variant="destructive"
-        >
-          Remove all
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
-);
-
-MultiSelectorDesktoptUltilityButtons.displayName =
-  "MultiSelectorDesktoptUltilityButtons";
-
-const MultiSelectorMobiletUltilityButtons = memo(
-  ({
-    onValueChange,
-    allAvailableOptions,
-    maxLength,
-    setOpen,
-  }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
-    maxLength: number | undefined;
-    setOpen: Dispatch<SetStateAction<boolean>>;
-  }) => {
-    return (
-      <div className="flex flex-row gap-3 p-2 ">
-        <Button
-          className="flex-1/3 cursor-pointer"
-          onClick={() => {
-            onValueChange([]);
-          }}
-          variant="destructive"
-        >
-          Remove all
-          <Trash2 className="h-4 w-4" />
-        </Button>
-        {!maxLength && (
-          <Button
-            className="flex-1/3 cursor-pointer"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? []);
-            }}
-          >
-            Select all
-            <Sparkles className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          className="flex-1/3 cursor-pointer"
-          onClick={() => {
-            setOpen(false);
-          }}
-          variant="outline"
-        >
-          Close
-          <RemoveIcon className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
-);
-
-MultiSelectorMobiletUltilityButtons.displayName =
-  "MultiSelectorMobiletUltilityButtons";

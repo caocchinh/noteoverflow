@@ -51,13 +51,13 @@ export type OUTDATED = "Outdated";
 
 interface Topic {
   topicName: string;
-  topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+  topicCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
   isTopicUpToDate: boolean;
 }
 
 interface PaperType {
   paperType: number;
-  paperTypeCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+  paperTypeCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
 }
 
 export interface TopicalSubject {

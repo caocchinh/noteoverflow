@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  ChevronsUpDown,
-  X as RemoveIcon,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import React, {
-  Dispatch,
   forwardRef,
   memo,
-  SetStateAction,
   useCallback,
   useImperativeHandle,
   useMemo,
@@ -56,6 +49,11 @@ import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 import { extractUniqueTopicCurriculumnSubdivisions } from "../../lib/utils";
+import {
+  MultiSelectorDesktoptUltilityButtons,
+  MultiSelectorMobiletUltilityButtons,
+} from "./EnhancedSelectUltilityButtons";
+import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
 
 const EnhancedMultiSelector = memo(
   ({
@@ -204,7 +202,7 @@ const EnhancedMobileMultiSelector = memo(
                   (label.toLowerCase() === "topic" ? "s" : "")}
               </h3>
             )}
-            <EnhancedMultiSelectorMobiletUltilityButtons
+            <MultiSelectorMobiletUltilityButtons
               onValueChange={useCallback(
                 (
                   val: string | string[],
@@ -319,7 +317,7 @@ const EnhancedDesktopMultiSelector = memo(
               maxLength={maxLength}
             />
           </MultiSelectorContent>
-          <EnhancedMultiSelectorDesktoptUltilityButtons
+          <MultiSelectorDesktoptUltilityButtons
             onValueChange={useCallback(
               (val: string | string[], option?: "selectAll" | "removeAll") => {
                 onValueChange(val, option);
@@ -398,6 +396,7 @@ const EnhancedMultiSelectorList = forwardRef(
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
+        <MultiSelectorFilterNavigation items={allFilterOptions} />
 
         <ScrollArea
           viewPortClassName="max-h-[50vh]"
@@ -468,7 +467,7 @@ const EnhancedMultiSelectorList = forwardRef(
                       }`
                 }
               >
-                {allAvailableOptions?.map((item) => (
+                {allValue.map((item) => (
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
@@ -500,103 +499,3 @@ const EnhancedMultiSelectorList = forwardRef(
 );
 
 EnhancedMultiSelectorList.displayName = "EnhancedMultiSelectorList";
-
-const EnhancedMultiSelectorDesktoptUltilityButtons = memo(
-  ({
-    onValueChange,
-    allAvailableOptions,
-    maxLength,
-  }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
-    maxLength: number | undefined;
-  }) => {
-    return (
-      <div className="flex flex-row gap-2 m-2">
-        {!maxLength && (
-          <Button
-            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? [], "selectAll");
-            }}
-          >
-            Select all
-            <Sparkles className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center  h-[30px]c  "
-          onClick={() => {
-            onValueChange([], "removeAll");
-          }}
-          variant="destructive"
-        >
-          Remove all
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
-);
-
-EnhancedMultiSelectorDesktoptUltilityButtons.displayName =
-  "EnhancedMultiSelectorDesktoptUltilityButtons";
-
-const EnhancedMultiSelectorMobiletUltilityButtons = memo(
-  ({
-    onValueChange,
-    allAvailableOptions,
-    maxLength,
-    setOpen,
-  }: {
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    allAvailableOptions: string[];
-    maxLength: number | undefined;
-    setOpen: Dispatch<SetStateAction<boolean>>;
-  }) => {
-    return (
-      <div className="flex flex-row gap-3 p-2 ">
-        <Button
-          className="flex-1/3 cursor-pointer"
-          onClick={() => {
-            onValueChange([]);
-          }}
-          variant="destructive"
-        >
-          Remove all
-          <Trash2 className="h-4 w-4" />
-        </Button>
-        {!maxLength && (
-          <Button
-            className="flex-1/3 cursor-pointer"
-            onClick={() => {
-              onValueChange(allAvailableOptions ?? []);
-            }}
-          >
-            Select all
-            <Sparkles className="h-4 w-4" />
-          </Button>
-        )}
-        <Button
-          className="flex-1/3 cursor-pointer"
-          onClick={() => {
-            setOpen(false);
-          }}
-          variant="outline"
-        >
-          Close
-          <RemoveIcon className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
-);
-
-EnhancedMultiSelectorMobiletUltilityButtons.displayName =
-  "EnhancedMultiSelectorMobiletUltilityButtons";

@@ -44,6 +44,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 
 const AppSidebar = memo(
   ({
@@ -99,10 +100,16 @@ const AppSidebar = memo(
       (item) => item.curriculum === selectedCurriculum
     )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
 
-    const availableTopics = useMemo(() => {
+    const availableTopicsFullInfo = useMemo(() => {
       return availableSubjects
         ?.find((item) => item.code === selectedSubject)
-        ?.topic.map((topic) => topic.topicName);
+        ?.topic.map((item) => {
+          return {
+            value: item.topicName,
+            curriculumnSubdivision: item.topicCurriculumnSubdivision,
+            isUpToDate: item.isTopicUpToDate,
+          };
+        });
     }, [availableSubjects, selectedSubject]);
 
     const availableYears = useMemo(() => {
@@ -110,10 +117,16 @@ const AppSidebar = memo(
         ?.year;
     }, [availableSubjects, selectedSubject]);
 
-    const availablePaperTypes = useMemo(() => {
+    const availablePaperTypeFullInfo = useMemo(() => {
       return availableSubjects
         ?.find((item) => item.code === selectedSubject)
-        ?.paperType.map((paper) => paper.paperType);
+        ?.paperType.map((item) => {
+          return {
+            value: item.paperType.toString(),
+            curriculumnSubdivision: item.paperTypeCurriculumnSubdivision,
+            isUpToDate: true,
+          };
+        });
     }, [availableSubjects, selectedSubject]);
 
     const availableSeasons = useMemo(() => {
@@ -132,10 +145,6 @@ const AppSidebar = memo(
     const subjectPrerequisite = useMemo(() => {
       return selectedCurriculum ? "" : "Curriculum";
     }, [selectedCurriculum]);
-
-    const paperTypeData = useMemo(() => {
-      return availablePaperTypes?.map((item) => item.toString());
-    }, [availablePaperTypes]);
 
     const yearData = useMemo(() => {
       return availableYears?.map((item) => item.toString());
@@ -653,8 +662,8 @@ const AppSidebar = memo(
                   >
                     Topic
                   </h3>
-                  <MultiSelector
-                    allAvailableOptions={availableTopics ?? []}
+                  <EnhancedMultiSelector
+                    allAvailableOptions={availableTopicsFullInfo ?? []}
                     label="Topic"
                     onValuesChange={useCallback(
                       (values) => setSelectedTopic(values as string[]),
@@ -681,8 +690,8 @@ const AppSidebar = memo(
                   >
                     Paper
                   </h3>
-                  <MultiSelector
-                    allAvailableOptions={paperTypeData ?? []}
+                  <EnhancedMultiSelector
+                    allAvailableOptions={availablePaperTypeFullInfo ?? []}
                     label="Paper"
                     onValuesChange={useCallback(
                       (values) => setSelectedPaperType(values as string[]),

@@ -21,8 +21,8 @@ export interface MultiSelectorProps {
 
 export interface EnhancedSelectAvailableOptions {
   value: string;
-  topicCurriculumnSubdivision?: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
-  isTopicUpToDate?: boolean;
+  curriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
+  isUpToDate: boolean;
 }
 
 export interface EnhancedMultiSelectorProps {
@@ -32,7 +32,6 @@ export interface EnhancedMultiSelectorProps {
   maxLength?: number;
   label: VALID_LABEL;
   prerequisite: string;
-  isTopic: boolean;
 }
 
 export interface MultiSelectorSharedProps {
