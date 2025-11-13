@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
+import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import CacheSetting from "@/features/topical/components/CacheSetting";
@@ -653,7 +653,7 @@ const AppSidebar = memo(
                   >
                     Topic
                   </h3>
-                  <EnhancedMultiSelect
+                  <MultiSelector
                     allAvailableOptions={availableTopics ?? []}
                     label="Topic"
                     onValuesChange={useCallback(
@@ -681,7 +681,7 @@ const AppSidebar = memo(
                   >
                     Paper
                   </h3>
-                  <EnhancedMultiSelect
+                  <MultiSelector
                     allAvailableOptions={paperTypeData ?? []}
                     label="Paper"
                     onValuesChange={useCallback(
@@ -709,7 +709,7 @@ const AppSidebar = memo(
                   >
                     Year
                   </h3>
-                  <EnhancedMultiSelect
+                  <MultiSelector
                     allAvailableOptions={yearData ?? []}
                     label="Year"
                     onValuesChange={useCallback(
@@ -735,7 +735,7 @@ const AppSidebar = memo(
                   >
                     Season
                   </h3>
-                  <EnhancedMultiSelect
+                  <MultiSelector
                     allAvailableOptions={availableSeasons ?? []}
                     label="Season"
                     onValuesChange={useCallback(

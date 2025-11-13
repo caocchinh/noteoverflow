@@ -12,12 +12,10 @@ import React, {
   memo,
   SetStateAction,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -26,10 +24,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -47,24 +43,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import type {
-  MultiSelectorContentProps,
   MultiSelectorListProps,
   MultiSelectorListRef,
   MultiSelectorProps,
-  MultiSelectorSearchInputProps,
   MultiSelectorSharedProps,
-  MultiSelectorTriggerButtonUltilityProps,
-} from "../constants/types";
+} from "../../constants/types";
+import MultiSelectorContent from "./MultiSelectorContent";
+import MultiSelectorTrigger from "./MultiSelectorTrigger";
+import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 
-const EnhancedMultiSelect = memo(
+const MultiSelector = memo(
   ({
     label,
     prerequisite,
@@ -131,34 +122,9 @@ const EnhancedMultiSelect = memo(
   }
 );
 
-EnhancedMultiSelect.displayName = "EnhancedMultiSelect";
+MultiSelector.displayName = "MultiSelector";
 
-export default EnhancedMultiSelect;
-
-const useMultiSelectorKeyDown = (
-  multiSelectorListRef: React.RefObject<MultiSelectorListRef | null>,
-  inputRef: React.RefObject<HTMLInputElement | null>,
-  open: boolean,
-  setOpen: (open: boolean) => void
-) => {
-  return useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-
-      if (e.key === "Escape") {
-        if (multiSelectorListRef.current?.inputValue) {
-          multiSelectorListRef.current?.setInputValue("");
-          return;
-        }
-        inputRef.current?.blur();
-        if (open) {
-          setOpen(false);
-        }
-      }
-    },
-    [inputRef, multiSelectorListRef, open, setOpen]
-  );
-};
+export default MultiSelector;
 
 // Shared error message component
 const MaxLengthErrorMessage = memo(
@@ -171,49 +137,6 @@ const MaxLengthErrorMessage = memo(
 );
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
-
-const MultiSelectorContent = memo(
-  ({
-    selectedValues,
-    onValueChange,
-    allAvailableOptions,
-    label,
-    maxLength,
-    prerequisite,
-    inputRef,
-    open,
-    setOpen,
-    multiSelectorListRef,
-  }: MultiSelectorContentProps) => {
-    const handleKeyDown = useMultiSelectorKeyDown(
-      multiSelectorListRef,
-      inputRef,
-      open,
-      setOpen
-    );
-
-    return (
-      <Command
-        className="!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
-        onKeyDown={handleKeyDown}
-      >
-        <MultiSelectorList
-          ref={multiSelectorListRef}
-          selectedValues={selectedValues}
-          onValueChange={onValueChange}
-          inputRef={inputRef}
-          label={label}
-          allAvailableOptions={allAvailableOptions}
-          prerequisite={prerequisite}
-          setOpen={setOpen}
-          maxLength={maxLength}
-        />
-      </Command>
-    );
-  }
-);
-
-MultiSelectorContent.displayName = "MultiSelectorContent";
 
 const MobileMultiSelector = memo(
   ({
@@ -282,17 +205,23 @@ const MobileMultiSelector = memo(
               setOpen={setOpen}
             />
             <MultiSelectorContent
-              selectedValues={selectedValues}
-              onValueChange={onValueChange}
               open={open}
               setOpen={setOpen}
-              allAvailableOptions={allAvailableOptions}
-              label={label}
-              maxLength={maxLength}
-              prerequisite={prerequisite}
               inputRef={inputRef}
               multiSelectorListRef={multiSelectorListRef}
-            />
+            >
+              <MultiSelectorList
+                ref={multiSelectorListRef}
+                selectedValues={selectedValues}
+                onValueChange={onValueChange}
+                inputRef={inputRef}
+                label={label}
+                allAvailableOptions={allAvailableOptions}
+                prerequisite={prerequisite}
+                setOpen={setOpen}
+                maxLength={maxLength}
+              />
+            </MultiSelectorContent>
           </DrawerContent>
         </Drawer>
       </>
@@ -352,17 +281,23 @@ const DesktopMultiSelector = memo(
           }}
         >
           <MultiSelectorContent
-            selectedValues={selectedValues}
-            onValueChange={onValueChange}
             open={open}
             setOpen={setOpen}
-            allAvailableOptions={allAvailableOptions}
-            label={label}
-            maxLength={maxLength}
-            prerequisite={prerequisite}
             inputRef={inputRef}
             multiSelectorListRef={multiSelectorListRef}
-          />
+          >
+            <MultiSelectorList
+              ref={multiSelectorListRef}
+              selectedValues={selectedValues}
+              onValueChange={onValueChange}
+              inputRef={inputRef}
+              label={label}
+              allAvailableOptions={allAvailableOptions}
+              prerequisite={prerequisite}
+              setOpen={setOpen}
+              maxLength={maxLength}
+            />
+          </MultiSelectorContent>
         </PopoverContent>
       </Popover>
     );
@@ -370,324 +305,6 @@ const DesktopMultiSelector = memo(
 );
 
 DesktopMultiSelector.displayName = "DesktopMultiSelector";
-
-const MultiSelectorTrigger = memo(
-  ({
-    selectedValues,
-    onValueChange,
-    open,
-    setOpen,
-    allAvailableOptions,
-    label,
-    setInputValue,
-    maxLength,
-  }: {
-    selectedValues: string[];
-    onValueChange: (
-      val: string | string[],
-      option?: "selectAll" | "removeAll"
-    ) => void;
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    allAvailableOptions: string[];
-    label: string;
-    setInputValue: Dispatch<SetStateAction<string>> | undefined;
-    maxLength: number | undefined;
-  }) => {
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [contentHeight, setContentHeight] = useState<number>(0);
-    const [isClickingUltility, setIsClickingUltility] =
-      useState<boolean>(false);
-    const [paddingRight, setPaddingRight] = useState<string>("initial");
-
-    const mousePreventDefault = useCallback((e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }, []);
-
-    useEffect(() => {
-      if (contentRef.current) {
-        const containerHeight = contentRef.current.clientHeight;
-        const height = Math.min(containerHeight || 0, 85);
-        if (height >= 85) {
-          setPaddingRight("10px");
-        } else {
-          setPaddingRight("initial");
-        }
-        setContentHeight(height);
-      }
-    }, [selectedValues]);
-
-    const temporaryFix = useCallback(
-      (item: string) => {
-        if (label === "Season") {
-          if (item === "Winter") {
-            return "Winter - O/N";
-          } else if (item === "Summer") {
-            return "Summer - M/J";
-          } else if (item === "Spring") {
-            return "Spring - F/M";
-          }
-        }
-      },
-      [label]
-    );
-
-    return (
-      <div
-        className={cn(
-          "relative mb-0 flex w-[300px] flex-col flex-wrap gap-1 rounded-lg bg-background p-1 py-2 ring-1 ring-muted dark:bg-secondary",
-          {
-            "opacity-50": !allAvailableOptions,
-          },
-          !allAvailableOptions && "pointer-events-none "
-        )}
-      >
-        <div className="flex items-center justify-center gap-2 px-1">
-          <MultiSelectorTriggerButtonUltility
-            setIsClickingUltility={setIsClickingUltility}
-            onValueChange={useCallback(
-              (val: string | string[], option?: "selectAll" | "removeAll") => {
-                onValueChange(val, option);
-              },
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [allAvailableOptions]
-            )}
-            allAvailableOptions={allAvailableOptions}
-            maxLength={maxLength}
-            mousePreventDefault={mousePreventDefault}
-          />
-          <Button
-            className="h-6 flex-1 cursor-pointer text-xs"
-            onClick={() => {
-              if (!isClickingUltility) {
-                setInputValue?.("");
-                setOpen(!open);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (
-                e.key === "Enter" &&
-                !isClickingUltility &&
-                allAvailableOptions
-              ) {
-                setInputValue?.("");
-                setOpen(!open);
-              }
-            }}
-            onMouseDown={mousePreventDefault}
-            variant="default"
-          >
-            {selectedValues.length === 0
-              ? `Select ${label.toLowerCase()}`
-              : `${selectedValues.length} ${label.toLowerCase()}${
-                  selectedValues.length > 1 ? "s" : ""
-                } selected`}
-          </Button>
-        </div>
-
-        {selectedValues.length > 0 && (
-          <ScrollArea
-            className="w-full overflow-hidden"
-            onClick={() => {
-              if (!isClickingUltility) {
-                setInputValue?.("");
-                setOpen(!open);
-              }
-            }}
-            style={{ height: `${contentHeight}px`, paddingRight }}
-          >
-            <div className="flex w-full flex-wrap gap-2 p-1" ref={contentRef}>
-              {selectedValues.map((item) => (
-                <Badge
-                  className={cn(
-                    "wrap-anywhere dark:!border-white/25 flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left"
-                  )}
-                  key={item}
-                  variant={"secondary"}
-                >
-                  <span className="text-xs">{temporaryFix(item) ?? item}</span>
-                  <button
-                    aria-label={`Remove ${item} option`}
-                    aria-roledescription="button to remove option"
-                    onClick={() => {
-                      onValueChange(item);
-
-                      if (selectedValues.length === 1) {
-                        setContentHeight(0);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && allAvailableOptions) {
-                        onValueChange(item);
-                      }
-                    }}
-                    onMouseDown={(e) => {
-                      mousePreventDefault(e);
-                      setIsClickingUltility(true);
-                    }}
-                    onMouseUp={() => {
-                      setTimeout(() => {
-                        setIsClickingUltility(false);
-                      }, 0);
-                    }}
-                    type="button"
-                  >
-                    <span className="sr-only">Remove {item} option</span>
-                    <RemoveIcon className="h-4 w-4 cursor-pointer transition-colors duration-100 ease-in-out hover:stroke-destructive" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-      </div>
-    );
-  }
-);
-
-MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
-
-const MultiSelectorTriggerButtonUltility = memo(
-  ({
-    onValueChange,
-    mousePreventDefault,
-    setIsClickingUltility,
-    allAvailableOptions,
-    maxLength,
-  }: MultiSelectorTriggerButtonUltilityProps) => {
-    return (
-      <>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
-              onClick={() => {
-                onValueChange([], "removeAll");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && allAvailableOptions) {
-                  onValueChange([], "removeAll");
-                }
-              }}
-              onMouseDown={(e) => {
-                mousePreventDefault(e);
-                setIsClickingUltility(true);
-              }}
-              onMouseUp={() => {
-                setTimeout(() => {
-                  setIsClickingUltility(false);
-                }, 0);
-              }}
-              variant="outline"
-            >
-              <Trash2 className="h-4 w-4 " />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="z-[100000000000]">
-            Remove all
-          </TooltipContent>
-        </Tooltip>
-        {!maxLength && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
-                onClick={() => {
-                  onValueChange(allAvailableOptions ?? [], "selectAll");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && allAvailableOptions) {
-                    onValueChange(allAvailableOptions ?? [], "selectAll");
-                  }
-                }}
-                onMouseDown={(e) => {
-                  mousePreventDefault(e);
-                  setIsClickingUltility(true);
-                }}
-                onMouseUp={() => {
-                  setTimeout(() => {
-                    setIsClickingUltility(false);
-                  }, 0);
-                }}
-                variant="outline"
-              >
-                <Sparkles className="h-4 w-4 " />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
-              Select all
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </>
-    );
-  }
-);
-
-MultiSelectorTriggerButtonUltility.displayName =
-  "MultiSelectorTriggerButtonUltility";
-
-const MultiSelectorSearchInput = memo(
-  ({
-    inputValue,
-    setInputValue,
-    inputRef,
-    label,
-    allAvailableOptions,
-    prerequisite,
-    setOpen,
-    commandListScrollArea,
-  }: MultiSelectorSearchInputProps) => {
-    return (
-      <div
-        className="flex items-center gap-1 dark:bg-accent"
-        onClick={() => {
-          inputRef.current?.focus();
-        }}
-      >
-        <CommandInput
-          className="w-full bg-transparent text-sm outline-none placeholder:text-[14px] placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-          enterKeyHint="search"
-          onValueChange={(e) => {
-            setInputValue(e);
-            if (!e) {
-              setTimeout(() => {
-                commandListScrollArea.current?.scrollTo({
-                  top: 0,
-                  behavior: "instant",
-                });
-              }, 0);
-            }
-          }}
-          placeholder={
-            allAvailableOptions
-              ? `Search ${label.toLowerCase()}`
-              : `Select ${prerequisite.toLowerCase()} first`
-          }
-          ref={inputRef}
-          tabIndex={0}
-          value={inputValue}
-          wrapperClassName="w-full py-6 px-4 border-b"
-        />
-        <RemoveIcon
-          className="!bg-transparent cursor-pointer mr-2 text-destructive"
-          size={20}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (inputValue === "") {
-              setOpen(false);
-            } else {
-              setInputValue("");
-            }
-          }}
-        />
-      </div>
-    );
-  }
-);
-
-MultiSelectorSearchInput.displayName = "MultiSelectorSearchInput";
 
 const MultiSelectorList = forwardRef(
   (
@@ -850,6 +467,8 @@ const MultiSelectorList = forwardRef(
   }
 );
 
+MultiSelectorList.displayName = "MultiSelectorList";
+
 const MultiSelectorDesktoptUltilityButtons = memo(
   ({
     onValueChange,
@@ -949,5 +568,3 @@ const MultiSelectorMobiletUltilityButtons = memo(
 
 MultiSelectorMobiletUltilityButtons.displayName =
   "MultiSelectorMobiletUltilityButtons";
-
-MultiSelectorList.displayName = "MultiSelectorList";

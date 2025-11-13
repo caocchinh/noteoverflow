@@ -30,19 +30,11 @@ export interface MultiSelectorSharedProps {
 }
 
 export interface MultiSelectorContentProps {
-  selectedValues: string[];
-  onValueChange: (
-    val: string | string[],
-    option?: "selectAll" | "removeAll"
-  ) => void;
-  allAvailableOptions: string[];
-  label: string;
-  maxLength: number | undefined;
-  prerequisite: string;
   inputRef: RefObject<HTMLInputElement | null>;
   open: boolean;
   setOpen: (open: boolean) => void;
   multiSelectorListRef: RefObject<MultiSelectorListRef | null>;
+  children: ReactNode;
 }
 
 export interface MultiSelectorListRef {
@@ -84,6 +76,20 @@ export interface MultiSelectorSearchInputProps {
   prerequisite: string;
   setOpen: (open: boolean) => void;
   commandListScrollArea: RefObject<HTMLDivElement | null>;
+}
+
+export interface MultiSelectorTriggerProps {
+  selectedValues: string[];
+  onValueChange: (
+    val: string | string[],
+    option?: "selectAll" | "removeAll"
+  ) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  allAvailableOptions: string[];
+  label: string;
+  setInputValue: Dispatch<SetStateAction<string>> | undefined;
+  maxLength: number | undefined;
 }
 
 export type VALID_LABEL =

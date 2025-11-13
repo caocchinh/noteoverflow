@@ -5,7 +5,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ScanText } from "lucide-react";
-import EnhancedMultiSelect from "@/features/topical/components/EnhancedMultiSelect";
+import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
@@ -279,7 +279,7 @@ const SecondaryAppSidebar = ({
               >
                 Topic
               </h3>
-              <EnhancedMultiSelect
+              <MultiSelector
                 allAvailableOptions={subjectMetadata?.topic ?? []}
                 label="Topic"
                 onValuesChange={useCallback(
@@ -305,7 +305,7 @@ const SecondaryAppSidebar = ({
               >
                 Paper
               </h3>
-              <EnhancedMultiSelect
+              <MultiSelector
                 allAvailableOptions={subjectMetadata?.paperType ?? []}
                 label="Paper"
                 onValuesChange={useCallback(
@@ -331,7 +331,7 @@ const SecondaryAppSidebar = ({
               >
                 Year
               </h3>
-              <EnhancedMultiSelect
+              <MultiSelector
                 allAvailableOptions={subjectMetadata?.year ?? []}
                 label="Year"
                 onValuesChange={useCallback(
@@ -357,7 +357,7 @@ const SecondaryAppSidebar = ({
               >
                 Season
               </h3>
-              <EnhancedMultiSelect
+              <MultiSelector
                 allAvailableOptions={subjectMetadata?.season ?? []}
                 label="Season"
                 onValuesChange={useCallback(
