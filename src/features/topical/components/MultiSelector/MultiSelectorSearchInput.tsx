@@ -9,8 +9,6 @@ const MultiSelectorSearchInput = memo(
     setInputValue,
     inputRef,
     label,
-    allAvailableOptions,
-    prerequisite,
     setOpen,
     commandListScrollArea,
   }: MultiSelectorSearchInputProps) => {
@@ -35,11 +33,7 @@ const MultiSelectorSearchInput = memo(
               }, 0);
             }
           }}
-          placeholder={
-            allAvailableOptions
-              ? `Search ${label.toLowerCase()}`
-              : `Select ${prerequisite.toLowerCase()} first`
-          }
+          placeholder={`Search ${label.toLowerCase()}`}
           ref={inputRef}
           tabIndex={0}
           value={inputValue}

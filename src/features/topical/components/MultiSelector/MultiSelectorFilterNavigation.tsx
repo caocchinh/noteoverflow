@@ -1,5 +1,6 @@
 "use client";
 import { AnimatedBackground } from "@/components/ui/animated-background";
+import { CIE_A_LEVEL_SUBDIVISION, OUTDATED } from "@/constants/types";
 import { Dispatch, memo, SetStateAction } from "react";
 
 const MultiSelectorFilterNavigation = memo(
@@ -8,7 +9,7 @@ const MultiSelectorFilterNavigation = memo(
     setItems,
   }: {
     items: string[];
-    setItems: Dispatch<SetStateAction<string>>;
+    setItems: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>>;
   }) => {
     return (
       <div className="-my-2 flex h-max w-full flex-wrap items-center justify-center gap-4 sm:flex-nowrap">
@@ -16,7 +17,7 @@ const MultiSelectorFilterNavigation = memo(
           className=" h-full w-full border-[#0084ff] border-b-2"
           defaultValue={items[0]}
           onValueChange={(value) => {
-            setItems(value ?? items[0]);
+            setItems((value as CIE_A_LEVEL_SUBDIVISION | OUTDATED) ?? items[0]);
           }}
           transition={{
             type: "spring",

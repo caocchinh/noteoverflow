@@ -57,7 +57,6 @@ import { fuzzySearch } from "../../lib/utils";
 const MultiSelector = memo(
   ({
     label,
-    prerequisite,
     selectedValues,
     maxLength = undefined,
     onValuesChange: onValueChange,
@@ -102,7 +101,6 @@ const MultiSelector = memo(
             allAvailableOptions={allAvailableOptions}
             label={label}
             maxLength={maxLength}
-            prerequisite={prerequisite}
             inputRef={inputRef}
           />
         ) : (
@@ -112,7 +110,6 @@ const MultiSelector = memo(
             allAvailableOptions={allAvailableOptions}
             label={label}
             maxLength={maxLength}
-            prerequisite={prerequisite}
             inputRef={inputRef}
           />
         )}
@@ -144,7 +141,6 @@ const MobileMultiSelector = memo(
     allAvailableOptions,
     label,
     maxLength,
-    prerequisite,
     inputRef,
   }: MultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
@@ -189,16 +185,12 @@ const MobileMultiSelector = memo(
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
-              onValueChange={useCallback(
-                (
-                  val: string | string[],
-                  option?: "selectAll" | "removeAll"
-                ) => {
-                  onValueChange(val, option);
-                },
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-                []
-              )}
+              onValueChange={(
+                val: string | string[],
+                option?: "selectAll" | "removeAll"
+              ) => {
+                onValueChange(val, option);
+              }}
               allAvailableOptions={allAvailableOptions}
               maxLength={maxLength}
               setOpen={setOpen}
@@ -216,7 +208,6 @@ const MobileMultiSelector = memo(
                 inputRef={inputRef}
                 label={label}
                 allAvailableOptions={allAvailableOptions}
-                prerequisite={prerequisite}
                 setOpen={setOpen}
                 maxLength={maxLength}
               />
@@ -237,7 +228,6 @@ const DesktopMultiSelector = memo(
     allAvailableOptions,
     label,
     maxLength,
-    prerequisite,
     inputRef,
   }: MultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
@@ -292,19 +282,17 @@ const DesktopMultiSelector = memo(
               inputRef={inputRef}
               label={label}
               allAvailableOptions={allAvailableOptions}
-              prerequisite={prerequisite}
               setOpen={setOpen}
               maxLength={maxLength}
             />
           </MultiSelectorContent>
           <MultiSelectorDesktoptUltilityButtons
-            onValueChange={useCallback(
-              (val: string | string[], option?: "selectAll" | "removeAll") => {
-                onValueChange(val, option);
-              },
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [allAvailableOptions]
-            )}
+            onValueChange={(
+              val: string | string[],
+              option?: "selectAll" | "removeAll"
+            ) => {
+              onValueChange(val, option);
+            }}
             allAvailableOptions={allAvailableOptions}
             maxLength={maxLength}
           />
@@ -334,7 +322,6 @@ const MultiSelectorList = forwardRef(
       inputRef,
       label,
       allAvailableOptions,
-      prerequisite,
       setOpen,
     }: MultiSelectorListProps,
     ref
@@ -384,8 +371,6 @@ const MultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
-          allAvailableOptions={allAvailableOptions}
-          prerequisite={prerequisite}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />

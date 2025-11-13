@@ -5,6 +5,7 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -61,7 +62,6 @@ import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
 const EnhancedMultiSelector = memo(
   ({
     label,
-    prerequisite,
     selectedValues,
     maxLength = undefined,
     onValuesChange: onValueChange,
@@ -76,22 +76,57 @@ const EnhancedMultiSelector = memo(
     ) {
       throw new Error("maxLength must be greater than 0");
     }
+
     const allFilterOptions = useMemo(() => {
       return extractUniqueTopicCurriculumnSubdivisions(allAvailableOptions);
     }, [allAvailableOptions]);
 
-    console.log(allFilterOptions);
+    const [currentFilter, setCurrentFilter] = useState(allFilterOptions[0]);
+
+    useEffect(() => {
+      if (!currentFilter) {
+        setCurrentFilter(allFilterOptions[0]);
+      }
+    }, [allFilterOptions, currentFilter]);
 
     const allValue = useMemo(() => {
       return allAvailableOptions.map((item) => item.value);
     }, [allAvailableOptions]);
 
+    console.log(currentFilter, "aaaaaaaaaaaaajjjjjjjjjjjjjjjjjj");
+
     const onValueChangeHandler = useCallback(
       (val: string | string[], option?: "selectAll" | "removeAll") => {
-        if (option === "selectAll" && allAvailableOptions) {
-          onValueChange(allValue);
+        if (option === "selectAll") {
+          const allValueUnderFilterThatIsNotSelectedYet = allAvailableOptions
+            .filter((item) => {
+              return (
+                item.curriculumnSubdivision.some(
+                  (item) => item === currentFilter
+                ) && !selectedValues.includes(item.value)
+              );
+            })
+            .map((item) => item.value);
+          console.log(allValueUnderFilterThatIsNotSelectedYet, currentFilter);
+          // Add all unselected items under current filter to selectedValues
+          onValueChange([
+            ...selectedValues,
+            ...allValueUnderFilterThatIsNotSelectedYet,
+          ]);
         } else if (option === "removeAll") {
-          onValueChange([]);
+          const valuesToRemove = selectedValues.filter((selectedValue) =>
+            allAvailableOptions.some(
+              (option) =>
+                option.value === selectedValue &&
+                option.curriculumnSubdivision.some(
+                  (sub) => sub === currentFilter
+                )
+            )
+          );
+
+          onValueChange(
+            selectedValues.filter((value) => !valuesToRemove.includes(value))
+          );
         } else if (typeof val === "string") {
           if (selectedValues.includes(val)) {
             onValueChange(selectedValues.filter((item) => item !== val));
@@ -103,13 +138,15 @@ const EnhancedMultiSelector = memo(
           onValueChange(val);
         }
       },
-      [allAvailableOptions, onValueChange, allValue, selectedValues]
+      [allAvailableOptions, onValueChange, currentFilter, selectedValues]
     );
 
     return (
       <>
         {isMobileDevice ? (
           <EnhancedMobileMultiSelector
+            currentFilter={currentFilter}
+            setCurrentFilter={setCurrentFilter}
             selectedValues={selectedValues}
             onValueChange={onValueChangeHandler}
             allAvailableOptions={allAvailableOptions}
@@ -117,7 +154,6 @@ const EnhancedMultiSelector = memo(
             allValue={allValue}
             allFilterOptions={allFilterOptions}
             maxLength={maxLength}
-            prerequisite={prerequisite}
             inputRef={inputRef}
           />
         ) : (
@@ -127,9 +163,10 @@ const EnhancedMultiSelector = memo(
             allAvailableOptions={allAvailableOptions}
             label={label}
             allValue={allValue}
+            currentFilter={currentFilter}
+            setCurrentFilter={setCurrentFilter}
             allFilterOptions={allFilterOptions}
             maxLength={maxLength}
-            prerequisite={prerequisite}
             inputRef={inputRef}
           />
         )}
@@ -160,10 +197,11 @@ const EnhancedMobileMultiSelector = memo(
     onValueChange,
     allAvailableOptions,
     label,
+    setCurrentFilter,
+    currentFilter,
     allValue,
     allFilterOptions,
     maxLength,
-    prerequisite,
     inputRef,
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
@@ -208,16 +246,12 @@ const EnhancedMobileMultiSelector = memo(
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
-              onValueChange={useCallback(
-                (
-                  val: string | string[],
-                  option?: "selectAll" | "removeAll"
-                ) => {
-                  onValueChange(val, option);
-                },
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-                []
-              )}
+              onValueChange={(
+                val: string | string[],
+                option?: "selectAll" | "removeAll"
+              ) => {
+                onValueChange(val, option);
+              }}
               allAvailableOptions={allValue}
               maxLength={maxLength}
               setOpen={setOpen}
@@ -231,12 +265,13 @@ const EnhancedMobileMultiSelector = memo(
               <EnhancedMultiSelectorList
                 ref={multiSelectorListRef}
                 selectedValues={selectedValues}
+                currentFilter={currentFilter}
+                setCurrentFilter={setCurrentFilter}
                 onValueChange={onValueChange}
                 inputRef={inputRef}
                 allFilterOptions={allFilterOptions}
                 label={label}
                 allAvailableOptions={allAvailableOptions}
-                prerequisite={prerequisite}
                 setOpen={setOpen}
                 maxLength={maxLength}
               />
@@ -255,11 +290,12 @@ const EnhancedDesktopMultiSelector = memo(
     selectedValues,
     onValueChange,
     allAvailableOptions,
+    setCurrentFilter,
     label,
     allFilterOptions,
+    currentFilter,
     allValue,
     maxLength,
-    prerequisite,
     inputRef,
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
@@ -311,29 +347,29 @@ const EnhancedDesktopMultiSelector = memo(
               ref={multiSelectorListRef}
               selectedValues={selectedValues}
               onValueChange={onValueChange}
+              currentFilter={currentFilter}
+              setCurrentFilter={setCurrentFilter}
               allFilterOptions={allFilterOptions}
               inputRef={inputRef}
               label={label}
               allAvailableOptions={allAvailableOptions}
-              prerequisite={prerequisite}
               setOpen={setOpen}
               maxLength={maxLength}
             />
           </MultiSelectorContent>
           <MultiSelectorDesktoptUltilityButtons
-            onValueChange={useCallback(
-              (val: string | string[], option?: "selectAll" | "removeAll") => {
-                onValueChange(val, option);
-              },
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [allAvailableOptions]
-            )}
+            onValueChange={(
+              val: string | string[],
+              option?: "selectAll" | "removeAll"
+            ) => {
+              onValueChange(val, option);
+            }}
             allAvailableOptions={allValue}
             maxLength={maxLength}
           />
           <div className="m-2">
             <Button
-              className="w-full cursor-pointer "
+              className="w-full cursor-pointer h-[30px]"
               onClick={() => {
                 setOpen(false);
               }}
@@ -358,7 +394,8 @@ const EnhancedMultiSelectorList = forwardRef(
       allFilterOptions,
       label,
       allAvailableOptions,
-      prerequisite,
+      setCurrentFilter,
+      currentFilter,
       setOpen,
     }: EnhancedMultiSelectorListProps,
     ref
@@ -384,15 +421,30 @@ const EnhancedMultiSelectorList = forwardRef(
       [inputValue]
     );
     const commandListScrollArea = useRef<HTMLDivElement | null>(null);
-    const [currentFilter, setCurrentFilter] = useState(allFilterOptions[0]);
 
-    const filteredAvailableOption = useMemo(() => {
+    const filteredUpToDateAvailableOption = useMemo(() => {
       return allAvailableOptions
         .filter((item) => {
           return (
             item.curriculumnSubdivision.some(
               (item) => item === currentFilter
-            ) && fuzzySearch(inputValue, item.value)
+            ) &&
+            fuzzySearch(inputValue, item.value) &&
+            item.isUpToDate
+          );
+        })
+        .map((item) => item.value);
+    }, [allAvailableOptions, currentFilter, inputValue]);
+
+    const filteredOutdatedAvailableOption = useMemo(() => {
+      return allAvailableOptions
+        .filter((item) => {
+          return (
+            item.curriculumnSubdivision.some(
+              (item) => item === currentFilter
+            ) &&
+            fuzzySearch(inputValue, item.value) &&
+            !item.isUpToDate
           );
         })
         .map((item) => item.value);
@@ -401,11 +453,22 @@ const EnhancedMultiSelectorList = forwardRef(
     const filteredSelectedValue = useMemo(() => {
       return selectedValues.filter((item) => {
         return (
-          filteredAvailableOption.some((all) => all === item) &&
-          fuzzySearch(inputValue, item)
+          [
+            ...filteredOutdatedAvailableOption,
+            ...filteredUpToDateAvailableOption,
+          ].some((all) => all === item) && fuzzySearch(inputValue, item)
         );
       });
-    }, [filteredAvailableOption, inputValue, selectedValues]);
+    }, [
+      filteredOutdatedAvailableOption,
+      filteredUpToDateAvailableOption,
+      inputValue,
+      selectedValues,
+    ]);
+
+    const totalAmountOfItems =
+      filteredUpToDateAvailableOption.length +
+      filteredOutdatedAvailableOption.length;
 
     return (
       <div className="flex h-full flex-col gap-2">
@@ -414,8 +477,6 @@ const EnhancedMultiSelectorList = forwardRef(
           setInputValue={setInputValue}
           inputRef={inputRef}
           label={label}
-          allAvailableOptions={filteredAvailableOption}
-          prerequisite={prerequisite}
           setOpen={setOpen}
           commandListScrollArea={commandListScrollArea}
         />
@@ -483,18 +544,13 @@ const EnhancedMultiSelectorList = forwardRef(
                 heading={
                   inputValue
                     ? "Search results"
-                    : `${
-                        filteredAvailableOption?.length
-                      } available ${label.toLowerCase()}${
-                        filteredAvailableOption?.length &&
-                        filteredAvailableOption?.length > 1
-                          ? "s"
-                          : ""
+                    : `${totalAmountOfItems} available ${label.toLowerCase()}${
+                        totalAmountOfItems && totalAmountOfItems > 1 ? "s" : ""
                       }`
                 }
                 className={cn(inputValue && "-mt-4")}
               >
-                {filteredAvailableOption.map((item) => (
+                {filteredUpToDateAvailableOption.map((item) => (
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",

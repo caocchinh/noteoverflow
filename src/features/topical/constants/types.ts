@@ -16,7 +16,6 @@ export interface MultiSelectorProps {
   allAvailableOptions: string[];
   maxLength?: number;
   label: VALID_LABEL;
-  prerequisite: string;
 }
 
 export interface EnhancedSelectAvailableOptions {
@@ -43,7 +42,6 @@ export interface MultiSelectorSharedProps {
   allAvailableOptions: string[];
   label: string;
   maxLength: number | undefined;
-  prerequisite: string;
   inputRef: RefObject<HTMLInputElement | null>;
 }
 
@@ -54,11 +52,14 @@ export interface EnhancedMultiSelectorSharedProps {
     option?: "selectAll" | "removeAll"
   ) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
+  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+  setCurrentFilter: Dispatch<
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>
+  >;
   allValue: string[];
   label: string;
   maxLength: number | undefined;
   allFilterOptions: string[];
-  prerequisite: string;
   inputRef: RefObject<HTMLInputElement | null>;
 }
 
@@ -84,7 +85,6 @@ export interface MultiSelectorListProps {
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
   allAvailableOptions: string[];
-  prerequisite: string;
   setOpen: (open: boolean) => void;
   maxLength: number | undefined;
 }
@@ -97,9 +97,12 @@ export interface EnhancedMultiSelectorListProps {
   ) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
+  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+  setCurrentFilter: Dispatch<
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED>
+  >;
   allFilterOptions: string[];
   allAvailableOptions: EnhancedSelectAvailableOptions[];
-  prerequisite: string;
   setOpen: (open: boolean) => void;
   maxLength: number | undefined;
 }
@@ -120,8 +123,6 @@ export interface MultiSelectorSearchInputProps {
   setInputValue: (value: string) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
-  allAvailableOptions: string[] | undefined;
-  prerequisite: string;
   setOpen: (open: boolean) => void;
   commandListScrollArea: RefObject<HTMLDivElement | null>;
 }
