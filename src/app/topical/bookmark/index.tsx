@@ -160,68 +160,70 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }: BreadcrumbContentProps) =>
     chosenList ? (
       <div
-        className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
+        className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
         ref={sideBarInsetRef}
       >
-        <Breadcrumb className="self-end flex h-full mr-0 sm:mr-6 max-w-full w-max">
-          <BreadcrumbList>
-            <BreadcrumbItem
-              className="cursor-pointer"
-              onClick={() => {
-                setChosenList(null);
-                setSelectedCurriculum(null);
-                setSelecteSubject(null);
-              }}
-            >
-              {chosenList ? (
-                <>
-                  {chosenList.visibility === "public" ? (
-                    <Globe size={13} />
-                  ) : (
-                    <Lock size={13} />
-                  )}
-                  {truncateListName({ listName: chosenList.listName })}
-                </>
-              ) : (
-                "List"
-              )}
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-
-            {chosenList && (
-              <>
-                <BreadcrumbItem
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSelectedCurriculum(null);
-                    setSelecteSubject(null);
-                  }}
-                >
-                  Curriculum
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </>
-            )}
-            {selectedCurriculumn && (
-              <>
-                <BreadcrumbItem
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSelecteSubject(null);
-                  }}
-                >
-                  Subject
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </>
-            )}
-            {selectedSubject && (
-              <BreadcrumbItem className="cursor-pointer">
-                {selectedCurriculumn + " " + selectedSubject}
+        <div>
+          <Breadcrumb className="flex mr-0 sm:mr-6 max-w-full w-max">
+            <BreadcrumbList>
+              <BreadcrumbItem
+                className="cursor-pointer"
+                onClick={() => {
+                  setChosenList(null);
+                  setSelectedCurriculum(null);
+                  setSelecteSubject(null);
+                }}
+              >
+                {chosenList ? (
+                  <>
+                    {chosenList.visibility === "public" ? (
+                      <Globe size={13} />
+                    ) : (
+                      <Lock size={13} />
+                    )}
+                    {truncateListName({ listName: chosenList.listName })}
+                  </>
+                ) : (
+                  "List"
+                )}
               </BreadcrumbItem>
-            )}
-          </BreadcrumbList>
-        </Breadcrumb>
+              <BreadcrumbSeparator />
+
+              {chosenList && (
+                <>
+                  <BreadcrumbItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedCurriculum(null);
+                      setSelecteSubject(null);
+                    }}
+                  >
+                    Curriculum
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                </>
+              )}
+              {selectedCurriculumn && (
+                <>
+                  <BreadcrumbItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelecteSubject(null);
+                    }}
+                  >
+                    Subject
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                </>
+              )}
+              {selectedSubject && (
+                <BreadcrumbItem className="cursor-pointer">
+                  {selectedCurriculumn + " " + selectedSubject}
+                </BreadcrumbItem>
+              )}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
         <SecondaryAppUltilityBar
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}

@@ -21,21 +21,22 @@ import {
 } from "@/components/ui/select";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
-export default function LayoutSetting() {
+export default function LayoutSetting({
+  triggerClassName,
+}: {
+  triggerClassName: string;
+}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { uiPreferences, setUiPreference } = useTopicalApp();
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button
-          className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
-          variant="secondary"
-        >
+        <Button className={triggerClassName} variant="secondary">
           <Blocks />
           Layout settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006]  flex flex-col items-center justify-center gap-3">
+      <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
         <X
           className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}

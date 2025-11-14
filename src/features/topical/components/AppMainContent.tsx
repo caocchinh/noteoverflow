@@ -38,6 +38,9 @@ import QuestionInspect from "@/features/topical/components/QuestionInspect/Quest
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
 import { useMutationState } from "@tanstack/react-query";
+import Image from "next/image";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 const AppMainContent = ({
   mountedRef,
@@ -55,15 +58,18 @@ const AppMainContent = ({
   sideBarInsetRef,
   ultilityRef,
   filterUrl,
+  isExportModeEnabled,
+  setIsExportModeEnabled,
 }: AppMainContentProps) => {
   const pathname = usePathname();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
+  const [questionsForExport, setQuestionsForExport] = useState<string[]>([]);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const { uiPreferences } = useTopicalApp();
+  const { uiPreferences, finishedQuestionsData } = useTopicalApp();
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -81,12 +87,30 @@ const AppMainContent = ({
   const [fullPartitionedData, setFullPartitionedData] = useState<
     SelectedQuestion[][] | undefined
   >(undefined);
+  const [
+    fullFinishedFilteredPartitionedData,
+    setFullFinishedFilteredPartitionedData,
+  ] = useState<SelectedQuestion[][] | undefined>(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
+
+  const shouldIncludeQuestion = useCallback(
+    (question: SelectedQuestion) => {
+      if (!finishedQuestionsData) return true;
+      if (
+        !showFinishedQuestion &&
+        finishedQuestionsData.some((item) => item.question.id === question.id)
+      ) {
+        return false;
+      }
+      return true;
+    },
+    [finishedQuestionsData, showFinishedQuestion]
+  );
 
   const processedData = useMemo(() => {
     if (!topicalData?.data) return null;
@@ -128,13 +152,71 @@ const AppMainContent = ({
     sortParameters.sortBy,
   ]);
 
-  // Memoized callbacks to prevent child re-renders
-  const handleQuestionClick = useCallback((questionId: string) => {
-    questionInspectRef.current?.setIsInspectOpen({
-      isOpen: true,
-      questionId,
+  const filteredProcessedData = useMemo(() => {
+    if (!topicalData?.data) return null;
+
+    const chunkSize =
+      uiPreferences.layoutStyle === "pagination"
+        ? uiPreferences.numberOfQuestionsPerPage
+        : INFINITE_SCROLL_CHUNK_SIZE;
+
+    const filteredStrictModeData = uiPreferences.isStrictModeEnabled
+      ? topicalData.data.filter((item) => {
+          return isSubset(item.topics, currentQuery.topic);
+        })
+      : topicalData.data;
+
+    const filteredFinishedData = filteredStrictModeData.filter((item) => {
+      return shouldIncludeQuestion(item);
     });
-  }, []);
+
+    const sortedData = filteredFinishedData.toSorted(
+      (a: SelectedQuestion, b: SelectedQuestion) => {
+        if (sortParameters.sortBy === "ascending") {
+          return a.year - b.year;
+        } else {
+          // Default to year-desc
+          return b.year - a.year;
+        }
+      }
+    );
+
+    const chunkedData = chunkQuestionsData(sortedData, chunkSize);
+
+    return {
+      sortedData,
+      chunkedData,
+    };
+  }, [
+    topicalData?.data,
+    uiPreferences.layoutStyle,
+    uiPreferences.numberOfQuestionsPerPage,
+    uiPreferences.isStrictModeEnabled,
+    currentQuery.topic,
+    shouldIncludeQuestion,
+    sortParameters.sortBy,
+  ]);
+
+  // Memoized callbacks to prevent child re-renders
+  const handleQuestionClick = useCallback(
+    (questionId: string) => {
+      if (isExportModeEnabled) {
+        if (questionsForExport.includes(questionId)) {
+          setQuestionsForExport((prev) =>
+            prev.filter((id) => id !== questionId)
+          );
+          return;
+        }
+        setQuestionsForExport((prev) => [...prev, questionId]);
+        return;
+      }
+      questionInspectRef.current?.setIsInspectOpen({
+        isOpen: true,
+        questionId,
+      });
+    },
+    [isExportModeEnabled, questionsForExport]
+  );
 
   const handleScrollEnd = useCallback(() => {
     if (mainContentScrollAreaRef.current?.scrollTop === 0) {
@@ -159,16 +241,17 @@ const AppMainContent = ({
   }, [fullPartitionedData, currentChunkIndex, displayedData]);
 
   useEffect(() => {
-    if (processedData) {
+    if (processedData && filteredProcessedData) {
       setFullPartitionedData(processedData.chunkedData);
-      setDisplayedData(processedData.chunkedData[0] ?? []);
+      setFullFinishedFilteredPartitionedData(filteredProcessedData.chunkedData);
+      setDisplayedData(filteredProcessedData.chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
       });
     }
-  }, [processedData]);
+  }, [processedData, filteredProcessedData]);
 
   useEffect(() => {
     if (topicalData) {
@@ -224,10 +307,12 @@ const AppMainContent = ({
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
 
+  const doesSearchYieldAnyQuestions = (topicalData?.data?.length ?? 0) > 0;
+
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
-      displayedData.length === 0 ||
+      !doesSearchYieldAnyQuestions ||
       isTopicalDataError ||
       !fullPartitionedData ||
       fullPartitionedData.length === 0 ||
@@ -236,7 +321,7 @@ const AppMainContent = ({
     );
   }, [
     isSearchEnabled,
-    displayedData.length,
+    doesSearchYieldAnyQuestions,
     isTopicalDataError,
     fullPartitionedData,
     isTopicalDataFetching,
@@ -264,7 +349,7 @@ const AppMainContent = ({
   return (
     <>
       <SidebarInset
-        className="!relative flex flex-col items-center justify-start !px-0 gap-4 p-4 pl-2 md:items-start w-full overflow-hidden"
+        className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
         ref={sideBarInsetRef}
       >
         <ScrollToTopButton
@@ -275,7 +360,7 @@ const AppMainContent = ({
         />
 
         <AppUltilityBar
-          fullPartitionedData={fullPartitionedData}
+          fullPartitionedData={fullFinishedFilteredPartitionedData}
           ultilityRef={ultilityRef}
           ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
@@ -292,6 +377,8 @@ const AppMainContent = ({
           setShowFinishedQuestion={setShowFinishedQuestion}
           filterUrl={filterUrl}
           sideBarInsetRef={sideBarInsetRef}
+          isExportModeEnabled={isExportModeEnabled}
+          setIsExportModeEnabled={setIsExportModeEnabled}
         />
 
         <ScrollArea
@@ -443,13 +530,14 @@ const AppMainContent = ({
             <Loader2 className="animate-spin m-auto mb-2" />
           )}
           <MainContent
-            displayedData={displayedData}
-            showFinishedQuestion={showFinishedQuestion}
+            doesSearchYieldAnyQuestions={doesSearchYieldAnyQuestions}
+            filteredDisplayData={displayedData}
+            questionsForExport={questionsForExport}
+            isExportModeEnabled={isExportModeEnabled}
             handleQuestionClick={handleQuestionClick}
             handleInfiniteScrollNext={handleInfiniteScrollNext}
             fullPartitionedData={fullPartitionedData}
             currentChunkIndex={currentChunkIndex}
-            topicalData={topicalData?.data}
             isTopicalDataFetching={isTopicalDataFetching}
             isTopicalDataFetched={isTopicalDataFetched}
             isTopicalDataError={isTopicalDataError}
@@ -473,44 +561,31 @@ export default AppMainContent;
 
 export const MainContent = memo(
   ({
-    showFinishedQuestion,
-    displayedData,
+    doesSearchYieldAnyQuestions,
+    filteredDisplayData,
+    questionsForExport,
+    isExportModeEnabled,
     handleQuestionClick,
     handleInfiniteScrollNext,
     fullPartitionedData,
     currentChunkIndex,
-    topicalData,
     isTopicalDataFetching,
     isTopicalDataFetched,
     isTopicalDataError,
   }: {
+    doesSearchYieldAnyQuestions: boolean;
     isTopicalDataFetching: boolean;
     isTopicalDataFetched: boolean;
     isTopicalDataError: boolean;
-    topicalData: SelectedQuestion[] | undefined;
-    showFinishedQuestion: boolean;
-    displayedData: SelectedQuestion[];
+    filteredDisplayData: SelectedQuestion[];
+    questionsForExport: string[];
+    isExportModeEnabled: boolean;
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
     fullPartitionedData: SelectedQuestion[][] | undefined;
     currentChunkIndex: number;
   }) => {
-    const { uiPreferences, finishedQuestionsData } = useTopicalApp();
-
-    const filteredDisplayData = displayedData.filter(
-      (question: SelectedQuestion) => {
-        if (!finishedQuestionsData) {
-          return true;
-        }
-        if (
-          !showFinishedQuestion &&
-          finishedQuestionsData.some((item) => item.question.id === question.id)
-        ) {
-          return false;
-        }
-        return true;
-      }
-    );
+    const { uiPreferences } = useTopicalApp();
 
     useMutationState({
       filters: {
@@ -523,7 +598,7 @@ export const MainContent = memo(
 
     return (
       <>
-        {topicalData && topicalData.length > 0 && (
+        {doesSearchYieldAnyQuestions && (
           <p className="text-sm text-left mb-1">
             {filteredDisplayData.length} question
             {filteredDisplayData.length > 1 ? "s" : ""} found
@@ -531,14 +606,21 @@ export const MainContent = memo(
         )}
 
         {filteredDisplayData.length == 0 &&
-          displayedData.length > 0 &&
+          doesSearchYieldAnyQuestions &&
           isTopicalDataFetched &&
           !isTopicalDataError &&
           !isTopicalDataFetching && (
-            <div className="flex items-center justify-center w-full h-full">
-              <p className="text-md text-center mb-2 text-green">
+            <div className="flex items-center justify-center w-full h-full flex-col gap-2">
+              <p className="text-xl font-semibold text-center text-green-700">
                 You finished everything!
               </p>
+              <Image
+                src="/assets/elon-musk-elon-dance.gif"
+                alt="Elon Musk"
+                height={400}
+                width={400}
+                className="rounded-md"
+              />
             </div>
           )}
         <ResponsiveMasonry
@@ -551,16 +633,17 @@ export const MainContent = memo(
           gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
         >
           <Masonry>
-            {filteredDisplayData?.map(
-              (question) =>
-                question?.questionImages.map((imageSrc: string) => (
-                  <QuestionPreview
-                    question={question}
-                    onQuestionClick={() => handleQuestionClick(question.id)}
-                    key={`${question.id}-${imageSrc}`}
-                    imageSrc={imageSrc}
-                  />
-                )) ?? []
+            {filteredDisplayData?.map((question) =>
+              question?.questionImages.map((imageSrc: string) => (
+                <QuestionViewItem
+                  key={`${question.id}-${imageSrc}`}
+                  question={question}
+                  handleQuestionClick={handleQuestionClick}
+                  imageSrc={imageSrc}
+                  isExportModeEnabled={isExportModeEnabled}
+                  questionsForExport={questionsForExport}
+                />
+              ))
             )}
           </Masonry>
         </ResponsiveMasonry>
@@ -581,3 +664,46 @@ export const MainContent = memo(
 );
 
 MainContent.displayName = "MainContent";
+
+const QuestionViewItem = memo(
+  ({
+    question,
+    imageSrc,
+    handleQuestionClick,
+    isExportModeEnabled,
+    questionsForExport,
+  }: {
+    question: SelectedQuestion;
+    imageSrc: string;
+    handleQuestionClick: (questionId: string) => void;
+    isExportModeEnabled: boolean;
+    questionsForExport: string[];
+  }) => {
+    const isQuestionChecked = questionsForExport.includes(question.id);
+    return (
+      <div
+        key={`${question.id}-${imageSrc}`}
+        className={cn(
+          "relative transition-all duration-200 ease-in-out",
+          isQuestionChecked && "transform-[scale(0.97)]"
+        )}
+      >
+        {isExportModeEnabled && (
+          <div className="absolute z-20 top-2 left-2 w-max h-max">
+            <Checkbox
+              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full"
+              checked={isQuestionChecked}
+            />
+          </div>
+        )}
+        <QuestionPreview
+          question={question}
+          onQuestionClick={() => handleQuestionClick(question.id)}
+          imageSrc={imageSrc}
+        />
+      </div>
+    );
+  }
+);
+
+QuestionViewItem.displayName = "QuestionViewItem";

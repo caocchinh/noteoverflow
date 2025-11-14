@@ -57,6 +57,7 @@ const AppSidebar = memo(
     setCurrentQuery,
     setIsSearchEnabled,
     filterUrl,
+    isExportModeEnabled,
     mountedRef,
     searchParams,
     setIsValidSearchParams,
@@ -895,11 +896,11 @@ const AppSidebar = memo(
             </div>
             <SidebarSeparator />
             <CacheSetting />
-            <LayoutSetting />
+            <LayoutSetting triggerClassName="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2" />
             <VisualSetting />
           </SidebarContent>
         </ScrollArea>
-        <SidebarRail />
+        <SidebarRail disabled={isExportModeEnabled} />
       </Sidebar>
     );
   }

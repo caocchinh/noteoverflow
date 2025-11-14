@@ -397,7 +397,7 @@ const SecondaryAppSidebar = ({
             </ButtonUltility>
             <Separator />
 
-            <LayoutSetting />
+            <LayoutSetting triggerClassName="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2" />
             <VisualSetting />
           </div>
         </ScrollArea>

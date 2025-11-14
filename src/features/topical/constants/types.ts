@@ -360,6 +360,8 @@ export interface AppUltilityBarProps {
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
   filterUrl: string;
   setShowFinishedQuestion: Dispatch<SetStateAction<boolean>>;
+  isExportModeEnabled: boolean;
+  setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface AppUltilityBarRef {
@@ -371,6 +373,7 @@ export interface AppSidebarProps {
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
   isTopicalDataFetching: boolean;
   filterUrl: string;
+  isExportModeEnabled: boolean;
   mountedRef: RefObject<boolean>;
   searchParams: { [key: string]: string | string[] | undefined };
   setIsValidSearchParams: Dispatch<SetStateAction<boolean>>;
@@ -418,6 +421,8 @@ export interface SecondaryAppUltilityBarProps {
 }
 
 export interface AppMainContentProps {
+  setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
+  isExportModeEnabled: boolean;
   mountedRef: RefObject<boolean>;
   currentQuery: CurrentQuery;
   topicalData: { data: SelectedQuestion[]; isRateLimited: boolean } | undefined;

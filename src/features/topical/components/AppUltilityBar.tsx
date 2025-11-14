@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Monitor,
   SlidersHorizontal,
 } from "lucide-react";
@@ -36,12 +37,15 @@ import { Switch } from "@/components/ui/switch";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../lib/utils";
+import LayoutSetting from "./LayoutSetting";
 
 const AppUltilityBar = memo(
   forwardRef(
     (
       {
         fullPartitionedData,
+        isExportModeEnabled,
+        setIsExportModeEnabled,
         ultilityRef,
         isQuestionViewDisabled,
         setIsQuestionInspectOpen,
@@ -58,8 +62,12 @@ const AppUltilityBar = memo(
       }: AppUltilityBarProps,
       ref
     ) => {
-      const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
-        useTopicalApp();
+      const {
+        isAppSidebarOpen,
+        setIsAppSidebarOpen,
+        uiPreferences,
+        setUiPreference,
+      } = useTopicalApp();
       const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
         useState(false);
       const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
@@ -145,50 +153,57 @@ const AppUltilityBar = memo(
             viewportRef={ultilityHorizontalScrollBarRef}
           >
             <div
-              className="flex flex-row h-full items-center justify-start gap-2 w-max pl-4 pr-2"
+              className="flex flex-row h-full items-center justify-start gap-2 w-max mt-1 pl-4 pr-2"
               ref={ultilityRef}
             >
-              <Button
-                className="!bg-background flex cursor-pointer items-center gap-2 border"
-                onClick={() => {
-                  setIsAppSidebarOpen(!isAppSidebarOpen);
-                }}
-                variant="outline"
-              >
-                Filters
-                <SlidersHorizontal />
-              </Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      className="flex cursor-pointer items-center gap-2 border"
-                      disabled={isQuestionViewDisabled}
-                      onClick={() => {
-                        if (setIsQuestionInspectOpen) {
-                          setIsQuestionInspectOpen((prev) => ({
-                            ...prev,
-                            isOpen: true,
-                          }));
-                        }
-                      }}
-                      variant="default"
+              {!isExportModeEnabled && (
+                <>
+                  <Button
+                    className="!bg-background flex cursor-pointer items-center gap-2 border"
+                    onClick={() => {
+                      setIsAppSidebarOpen(!isAppSidebarOpen);
+                    }}
+                    variant="outline"
+                  >
+                    Filters
+                    <SlidersHorizontal />
+                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Button
+                          className="flex cursor-pointer items-center gap-2 border"
+                          disabled={isQuestionViewDisabled}
+                          onClick={() => {
+                            if (setIsQuestionInspectOpen) {
+                              setIsQuestionInspectOpen((prev) => ({
+                                ...prev,
+                                isOpen: true,
+                              }));
+                            }
+                          }}
+                          variant="default"
+                        >
+                          Inspect
+                          <Monitor />
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      className={cn(
+                        !isQuestionViewDisabled && "!hidden",
+                        "flex justify-center items-center gap-2"
+                      )}
                     >
-                      Inspect
-                      <Monitor />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className={cn(
-                    !isQuestionViewDisabled && "!hidden",
-                    "flex justify-center items-center gap-2"
-                  )}
-                >
-                  To inspect questions, run a search first.
-                </TooltipContent>
-              </Tooltip>
+                      To inspect questions, run a search first.
+                    </TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+              {isExportModeEnabled && (
+                <LayoutSetting triggerClassName="flex w-max -mt-1 cursor-pointer items-center justify-start gap-2 bg-white dark:bg-black border border-black dark:border-white" />
+              )}
               {uiPreferences.layoutStyle === "pagination" &&
                 !isQuestionViewDisabled && (
                   <>
@@ -310,6 +325,54 @@ const AppUltilityBar = memo(
                   To toggle this, run a search first.
                 </TooltipContent>
               </Tooltip>
+              {isExportModeEnabled && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                        uiPreferences.isStrictModeEnabled
+                          ? "border-logo-main"
+                          : "border-muted-foreground"
+                      )}
+                      onClick={() => {
+                        setUiPreference("isStrictModeEnabled", (prev) => !prev);
+                      }}
+                    >
+                      <Switch
+                        checked={uiPreferences.isStrictModeEnabled}
+                        className="cursor-pointer"
+                      />
+                      <p
+                        className={cn(
+                          uiPreferences.isStrictModeEnabled
+                            ? "text-logo-main"
+                            : "text-muted-foreground",
+                          "cursor-pointer text-sm"
+                        )}
+                      >
+                        Strict mode
+                      </p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    Questions containing unrelated topics will be excluded.
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              <Button
+                className="flex cursor-pointer items-center gap-2 !bg-logo-main !text-white"
+                disabled={isQuestionViewDisabled}
+                onClick={() => {
+                  setIsAppSidebarOpen(false);
+                  setIsExportModeEnabled(true);
+                }}
+                variant="outline"
+              >
+                Export
+                <Download />
+              </Button>
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
                 url={filterUrl}

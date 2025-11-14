@@ -139,41 +139,44 @@ const FinishedQuestionsClient = ({
     scrollAreaRef,
   }: BreadcrumbContentProps) => (
     <div
-      className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
+      className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
       ref={sideBarInsetRef}
     >
-      <Breadcrumb className="self-end flex h-full mr-0 sm:mr-6 max-w-full w-max">
-        <BreadcrumbList>
-          <BreadcrumbItem
-            className="cursor-pointer"
-            onClick={() => {
-              setSelectedCurriculum(null);
-              setSelecteSubject(null);
-            }}
-          >
-            Curriculum
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          {selectedCurriculumn && (
-            <>
-              <BreadcrumbItem
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelecteSubject(null);
-                }}
-              >
-                Subject
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-            </>
-          )}
-          {selectedSubject && (
-            <BreadcrumbItem className="cursor-pointer">
-              {selectedCurriculumn + " " + selectedSubject}
+      <div>
+        {" "}
+        <Breadcrumb className="flex mr-0 sm:mr-6 max-w-full w-max">
+          <BreadcrumbList>
+            <BreadcrumbItem
+              className="cursor-pointer"
+              onClick={() => {
+                setSelectedCurriculum(null);
+                setSelecteSubject(null);
+              }}
+            >
+              Curriculum
             </BreadcrumbItem>
-          )}
-        </BreadcrumbList>
-      </Breadcrumb>
+            <BreadcrumbSeparator />
+            {selectedCurriculumn && (
+              <>
+                <BreadcrumbItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSelecteSubject(null);
+                  }}
+                >
+                  Subject
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
+            {selectedSubject && (
+              <BreadcrumbItem className="cursor-pointer">
+                {selectedCurriculumn + " " + selectedSubject}
+              </BreadcrumbItem>
+            )}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       <SecondaryAppUltilityBar
         setIsSidebarOpen={setIsSidebarOpen}

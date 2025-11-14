@@ -34,10 +34,9 @@ const TopicalClient = ({
     ...INITIAL_QUERY,
   });
   const [isValidSearchParams, setIsValidSearchParams] = useState(true);
-
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const ultilityRef = useRef<HTMLDivElement | null>(null);
-
+  const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
   const recentQueryRef = useRef<RecentQueryRef | null>(null);
   const filterUrl = useMemo(() => {
     if (typeof window === "undefined") {
@@ -184,12 +183,13 @@ const TopicalClient = ({
         <SidebarProvider
           onOpenChange={setIsAppSidebarOpen}
           onOpenChangeMobile={setIsAppSidebarOpen}
-          open={isAppSidebarOpen}
-          openMobile={isAppSidebarOpen}
+          open={isAppSidebarOpen && !isExportModeEnabled}
+          openMobile={isAppSidebarOpen && !isExportModeEnabled}
         >
           <AppSidebar
             currentQuery={currentQuery}
             setCurrentQuery={setCurrentQuery}
+            isExportModeEnabled={isExportModeEnabled}
             setIsSearchEnabled={setIsSearchEnabled}
             isTopicalDataFetching={isTopicalDataFetching}
             filterUrl={filterUrl}
@@ -200,6 +200,8 @@ const TopicalClient = ({
             appUltilityBarRef={appUltilityBarRef}
           />
           <AppMainContent
+            isExportModeEnabled={isExportModeEnabled}
+            setIsExportModeEnabled={setIsExportModeEnabled}
             currentQuery={currentQuery}
             topicalData={topicalData}
             isSearchEnabled={isSearchEnabled}
