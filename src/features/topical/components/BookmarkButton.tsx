@@ -768,7 +768,6 @@ const BookmarkButtonConsumer = memo(
                 if (triggerRef.current?.contains(e.target as Node)) {
                   return;
                 }
-                console.log("interact outside", e.target);
                 setOpen(false);
                 setSearchInput("");
               }}

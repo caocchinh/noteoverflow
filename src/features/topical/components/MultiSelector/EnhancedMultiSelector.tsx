@@ -87,7 +87,9 @@ const EnhancedMultiSelector = memo(
     // Guard against undefined
     useEffect(() => {
       if (!currentFilter && isMounted) {
-        setCurrentFilter(allFilterOptions[0]);
+        setTimeout(() => {
+          setCurrentFilter(allFilterOptions[0]);
+        }, 0);
       }
     }, [allFilterOptions, currentFilter, isMounted, setCurrentFilter]);
 
@@ -212,7 +214,6 @@ const EnhancedMobileMultiSelector = memo(
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
-
     return (
       <>
         <MultiSelectorTrigger

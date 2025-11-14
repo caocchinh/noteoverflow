@@ -391,8 +391,6 @@ const InspectSidebar = forwardRef(
       partitionedTopicalData,
     ]);
 
-    console.log(currentQuestionId, currentTabThatContainsQuestion);
-
     const navigateToQuestion = useCallback(
       (questionId: string, scroll: boolean = true) => {
         const tab = questionId
