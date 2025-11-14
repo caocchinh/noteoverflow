@@ -221,7 +221,6 @@ const QuestionInspectMainContent = forwardRef(
                 imageSource={currentQuestionData?.questionImages ?? []}
                 currentQuestionId={currentQuestionData?.id}
               />
-              <div className="my-6"></div>
               <BrowseMoreQuestions
                 partitionedTopicalData={partitionedTopicalData}
                 onQuestionClick={onQuestionClick}

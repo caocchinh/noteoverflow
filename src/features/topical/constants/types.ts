@@ -319,8 +319,8 @@ export type CurrentQuery = {
 
 export interface QuestionHoverCardProps {
   question: SelectedQuestion;
-  currentTab: number;
-  currentQuestionId?: string;
+  navigateToQuestion: (questionId: string, scroll?: boolean) => void;
+  currentQuestionId: string | undefined;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
@@ -381,7 +381,7 @@ export interface AppSidebarProps {
 
 export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
-  navigateToQuestion: (questionId: string) => void;
+  navigateToQuestion: (questionId: string, scroll?: boolean) => void;
 }
 
 export type QuestionInspectOpenState = {
@@ -478,7 +478,7 @@ export interface InspectSidebarProps {
 export interface InspectSidebarRef {
   handleNextQuestion(): void;
   handlePreviousQuestion(): void;
-  navigateToQuestion(questionId: string): void;
+  navigateToQuestion(questionId: string, scroll?: boolean): void;
   isHandleNextQuestionDisabled: boolean;
   isHandlePreviousQuestionDisabled: boolean;
 }

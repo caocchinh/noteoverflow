@@ -21,10 +21,8 @@ import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 const QuestionHoverCard = memo(
   ({
     question,
-    currentTab,
     currentQuestionId,
-    setCurrentQuestionId,
-    setCurrentTabThatContainsQuestion,
+    navigateToQuestion,
     isMobileDevice,
     listId,
     isInspectSidebarOpen,
@@ -110,8 +108,7 @@ const QuestionHoverCard = memo(
               }
             }}
             onClick={() => {
-              setCurrentQuestionId(question?.id);
-              setCurrentTabThatContainsQuestion(currentTab);
+              navigateToQuestion(question?.id, false);
               resetScrollPositions();
             }}
           >

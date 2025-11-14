@@ -33,11 +33,7 @@ import {
   fuzzySearch,
 } from "../../lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  InspectSidebarProps,
-  InspectSidebarRef,
-  SelectedQuestion,
-} from "../../constants/types";
+import { InspectSidebarProps, SelectedQuestion } from "../../constants/types";
 
 const InspectSidebar = forwardRef(
   (
@@ -66,7 +62,6 @@ const InspectSidebar = forwardRef(
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
     const listScrollAreaRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
-    const sidebarRef = useRef<InspectSidebarRef | null>(null);
 
     const searchResults = useMemo(() => {
       return searchInput.length > 0
@@ -396,8 +391,10 @@ const InspectSidebar = forwardRef(
       partitionedTopicalData,
     ]);
 
+    console.log(currentQuestionId, currentTabThatContainsQuestion);
+
     const navigateToQuestion = useCallback(
-      (questionId: string) => {
+      (questionId: string, scroll: boolean = true) => {
         const tab = questionId
           ? partitionedTopicalData?.findIndex((partition) =>
               partition.some((question) => question.id === questionId)
@@ -410,14 +407,12 @@ const InspectSidebar = forwardRef(
           !questionId ? partitionedTopicalData?.[tab]?.[0]?.id : questionId
         );
 
-        if (partitionedTopicalData?.[tab] && isVirtualizationReady) {
+        if (partitionedTopicalData?.[tab] && isVirtualizationReady && scroll) {
           scrollToQuestion({ questionId, tab });
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [
         partitionedTopicalData,
-        allQuestions,
         isVirtualizationReady,
         scrollToQuestion,
         setCurrentTabThatContainsQuestion,
@@ -428,24 +423,6 @@ const InspectSidebar = forwardRef(
 
     useImperativeHandle(
       ref,
-      () => ({
-        handleNextQuestion,
-        handlePreviousQuestion,
-        navigateToQuestion,
-        isHandleNextQuestionDisabled,
-        isHandlePreviousQuestionDisabled,
-      }),
-      [
-        handleNextQuestion,
-        handlePreviousQuestion,
-        navigateToQuestion,
-        isHandleNextQuestionDisabled,
-        isHandlePreviousQuestionDisabled,
-      ]
-    );
-
-    useImperativeHandle(
-      sidebarRef,
       () => ({
         handleNextQuestion,
         handlePreviousQuestion,
@@ -566,7 +543,7 @@ const InspectSidebar = forwardRef(
                               virtualItem.index
                             ]
                           }
-                          currentTab={currentTab}
+                          navigateToQuestion={navigateToQuestion}
                           currentQuestionId={currentQuestionId}
                           setCurrentQuestionId={setCurrentQuestionId}
                           setCurrentTabThatContainsQuestion={
@@ -601,7 +578,7 @@ const InspectSidebar = forwardRef(
                       <QuestionHoverCard
                         resetScrollPositions={resetScrollPositions}
                         question={searchResults[virtualItem.index]}
-                        currentTab={currentTab}
+                        navigateToQuestion={navigateToQuestion}
                         currentQuestionId={currentQuestionId}
                         setCurrentTabThatContainsQuestion={
                           setCurrentTabThatContainsQuestion
