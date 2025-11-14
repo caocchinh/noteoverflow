@@ -59,7 +59,6 @@ const AppMainContent = ({
   const pathname = usePathname();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
-  const [numberOfQuestion, setNumberOfQuetion] = useState(0);
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
@@ -119,7 +118,6 @@ const AppMainContent = ({
     return {
       sortedData,
       chunkedData,
-      totalCount: sortedData.length,
     };
   }, [
     topicalData?.data,
@@ -162,7 +160,6 @@ const AppMainContent = ({
 
   useEffect(() => {
     if (processedData) {
-      setNumberOfQuetion(processedData.totalCount);
       setFullPartitionedData(processedData.chunkedData);
       setDisplayedData(processedData.chunkedData[0] ?? []);
       setCurrentChunkIndex(0);
@@ -230,7 +227,7 @@ const AppMainContent = ({
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
-      numberOfQuestion === 0 ||
+      displayedData.length === 0 ||
       isTopicalDataError ||
       !fullPartitionedData ||
       fullPartitionedData.length === 0 ||
@@ -239,7 +236,7 @@ const AppMainContent = ({
     );
   }, [
     isSearchEnabled,
-    numberOfQuestion,
+    displayedData.length,
     isTopicalDataError,
     fullPartitionedData,
     isTopicalDataFetching,
@@ -394,12 +391,6 @@ const AppMainContent = ({
               </div>
             )}
 
-          {topicalData?.data && topicalData?.data.length > 0 && (
-            <p className="text-sm text-left mb-1">
-              {numberOfQuestion} question
-              {numberOfQuestion > 1 ? "s" : ""} found
-            </p>
-          )}
           {topicalData?.isRateLimited && (
             <p className="text-md text-center mb-2 text-red-600">
               Limited results displayed due to rate limiting. Sign in for
@@ -436,7 +427,7 @@ const AppMainContent = ({
                 </Button>
               </div>
             )}
-          {numberOfQuestion == 0 &&
+          {displayedData.length == 0 &&
             isTopicalDataFetched &&
             !isTopicalDataError &&
             !isTopicalDataFetching && (
@@ -447,6 +438,7 @@ const AppMainContent = ({
                 </p>
               </div>
             )}
+
           {isTopicalDataFetching && (
             <Loader2 className="animate-spin m-auto mb-2" />
           )}
@@ -457,6 +449,10 @@ const AppMainContent = ({
             handleInfiniteScrollNext={handleInfiniteScrollNext}
             fullPartitionedData={fullPartitionedData}
             currentChunkIndex={currentChunkIndex}
+            topicalData={topicalData?.data}
+            isTopicalDataFetching={isTopicalDataFetching}
+            isTopicalDataFetched={isTopicalDataFetched}
+            isTopicalDataError={isTopicalDataError}
           />
         </ScrollArea>
       </SidebarInset>
@@ -477,21 +473,44 @@ export default AppMainContent;
 
 export const MainContent = memo(
   ({
-    displayedData,
     showFinishedQuestion,
+    displayedData,
     handleQuestionClick,
     handleInfiniteScrollNext,
     fullPartitionedData,
     currentChunkIndex,
+    topicalData,
+    isTopicalDataFetching,
+    isTopicalDataFetched,
+    isTopicalDataError,
   }: {
-    displayedData: SelectedQuestion[];
+    isTopicalDataFetching: boolean;
+    isTopicalDataFetched: boolean;
+    isTopicalDataError: boolean;
+    topicalData: SelectedQuestion[] | undefined;
     showFinishedQuestion: boolean;
+    displayedData: SelectedQuestion[];
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
     fullPartitionedData: SelectedQuestion[][] | undefined;
     currentChunkIndex: number;
   }) => {
     const { uiPreferences, finishedQuestionsData } = useTopicalApp();
+
+    const filteredDisplayData = displayedData.filter(
+      (question: SelectedQuestion) => {
+        if (!finishedQuestionsData) {
+          return true;
+        }
+        if (
+          !showFinishedQuestion &&
+          finishedQuestionsData.some((item) => item.question.id === question.id)
+        ) {
+          return false;
+        }
+        return true;
+      }
+    );
 
     useMutationState({
       filters: {
@@ -504,6 +523,24 @@ export const MainContent = memo(
 
     return (
       <>
+        {topicalData && topicalData.length > 0 && (
+          <p className="text-sm text-left mb-1">
+            {filteredDisplayData.length} question
+            {filteredDisplayData.length > 1 ? "s" : ""} found
+          </p>
+        )}
+
+        {filteredDisplayData.length == 0 &&
+          displayedData.length > 0 &&
+          isTopicalDataFetched &&
+          !isTopicalDataError &&
+          !isTopicalDataFetching && (
+            <div className="flex items-center justify-center w-full h-full">
+              <p className="text-md text-center mb-2 text-green">
+                You finished everything!
+              </p>
+            </div>
+          )}
         <ResponsiveMasonry
           columnsCountBreakPoints={
             COLUMN_BREAKPOINTS[
@@ -514,32 +551,17 @@ export const MainContent = memo(
           gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
         >
           <Masonry>
-            {displayedData
-              ?.filter((question: SelectedQuestion) => {
-                if (!finishedQuestionsData) {
-                  return true;
-                }
-                if (
-                  !showFinishedQuestion &&
-                  finishedQuestionsData.some(
-                    (item) => item.question.id === question.id
-                  )
-                ) {
-                  return false;
-                }
-                return true;
-              })
-              ?.map(
-                (question) =>
-                  question?.questionImages.map((imageSrc: string) => (
-                    <QuestionPreview
-                      question={question}
-                      onQuestionClick={() => handleQuestionClick(question.id)}
-                      key={`${question.id}-${imageSrc}`}
-                      imageSrc={imageSrc}
-                    />
-                  )) ?? []
-              )}
+            {filteredDisplayData?.map(
+              (question) =>
+                question?.questionImages.map((imageSrc: string) => (
+                  <QuestionPreview
+                    question={question}
+                    onQuestionClick={() => handleQuestionClick(question.id)}
+                    key={`${question.id}-${imageSrc}`}
+                    imageSrc={imageSrc}
+                  />
+                )) ?? []
+            )}
           </Masonry>
         </ResponsiveMasonry>
 
