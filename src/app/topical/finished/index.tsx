@@ -3,8 +3,8 @@
 import { ValidCurriculum } from "@/constants/types";
 import {
   QuestionInspectRef,
-  SortParameters,
   SubjectMetadata,
+  BreadcrumbContentProps,
 } from "@/features/topical/constants/types";
 import {
   computeFinishedQuestionsMetadata,
@@ -31,7 +31,6 @@ import {
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import { useAuth } from "@/context/AuthContext";
 
 const FinishedQuestionsClient = ({
@@ -40,9 +39,6 @@ const FinishedQuestionsClient = ({
   BETTER_AUTH_URL: string;
 }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
-  const [sortParameters, setSortParameters] = useState<SortParameters>({
-    sortBy: DEFAULT_SORT_OPTIONS,
-  });
   const isMutatingThisQuestion =
     useIsMutating({
       mutationKey: ["user_saved_activities", "finished_questions"],
@@ -129,12 +125,20 @@ const FinishedQuestionsClient = ({
   );
 
   // Breadcrumb content
-  const breadcrumbContent = (
+  const breadcrumbContent = ({
+    sortParameters,
+    setSortParameters,
+    fullPartitionedData,
+    currentChunkIndex,
+    setCurrentChunkIndex,
+    setDisplayedData,
+    scrollAreaRef,
+  }: BreadcrumbContentProps) => (
     <div
       className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
       ref={sideBarInsetRef}
     >
-      <Breadcrumb className="self-end mr-0 sm:mr-6 max-w-full w-max">
+      <Breadcrumb className="self-end flex h-full mr-0 sm:mr-6 max-w-full w-max">
         <BreadcrumbList>
           <BreadcrumbItem
             className="cursor-pointer"
@@ -175,6 +179,11 @@ const FinishedQuestionsClient = ({
         sortParameters={sortParameters}
         setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
         setSortParameters={setSortParameters}
+        fullPartitionedData={fullPartitionedData}
+        currentChunkIndex={currentChunkIndex}
+        setCurrentChunkIndex={setCurrentChunkIndex}
+        setDisplayedData={setDisplayedData}
+        scrollAreaRef={scrollAreaRef}
       />
     </div>
   );

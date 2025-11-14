@@ -445,6 +445,16 @@ export type SortableTopicalItem =
   | SelectedPublickBookmark
   | SelectedFinishedQuestion;
 
+export interface BreadcrumbContentProps {
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  fullPartitionedData: SelectedQuestion[][] | undefined;
+  currentChunkIndex: number;
+  setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
+  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+}
+
 export interface SecondaryMainContentProps {
   topicalData: TopicalData;
   isQuestionViewDisabled: boolean;
@@ -452,7 +462,7 @@ export interface SecondaryMainContentProps {
   listId?: string;
   questionInspectRef: RefObject<QuestionInspectRef | null>;
   preContent?: ReactNode;
-  breadcrumbContent: ReactNode;
+  breadcrumbContent: (props: BreadcrumbContentProps) => ReactNode;
   mainContent: ReactNode;
 }
 

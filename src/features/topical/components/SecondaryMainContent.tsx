@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -13,6 +13,7 @@ import {
 } from "@/features/topical/constants/constants";
 import type {
   SecondaryMainContentProps,
+  SelectedQuestion,
   SortableTopicalItem,
   SortParameters,
 } from "@/features/topical/constants/types";
@@ -34,10 +35,10 @@ const SecondaryMainContent = ({
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
   const [fullPartitionedData, setFullPartitionedData] = useState<
-    SortableTopicalItem[][] | undefined
+    SelectedQuestion[][] | undefined
   >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [displayedData, setDisplayedData] = useState<SortableTopicalItem[]>([]);
+  const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: "descending",
   });
@@ -51,22 +52,18 @@ const SecondaryMainContent = ({
           ? uiPreferences.numberOfQuestionsPerPage
           : 20; // INFINITE_SCROLL_CHUNK_SIZE equivalent
 
-      const sortedData = topicalData.toSorted(
-        (a: SortableTopicalItem, b: SortableTopicalItem) => {
+      const sortedData = topicalData
+        .toSorted((a: SortableTopicalItem, b: SortableTopicalItem) => {
           const aIndex = new Date(a.updatedAt || 0).getTime();
           const bIndex = new Date(b.updatedAt || 0).getTime();
           return sortParameters.sortBy === "descending"
             ? bIndex - aIndex
             : aIndex - bIndex;
-        }
-      );
+        })
+        .map((item) => item.question);
 
       const chunkedData = sortedData.reduce(
-        (
-          acc: SortableTopicalItem[][],
-          item: SortableTopicalItem,
-          index: number
-        ) => {
+        (acc: SelectedQuestion[][], item: SelectedQuestion, index: number) => {
           const chunkIndex = Math.floor(index / chunkSize);
           if (!acc[chunkIndex]) {
             acc[chunkIndex] = [];
@@ -99,16 +96,18 @@ const SecondaryMainContent = ({
     });
   };
 
-  const partitionedTopicalData = useMemo(() => {
-    return fullPartitionedData?.map((chunk) =>
-      chunk.map((item) => item.question)
-    );
-  }, [fullPartitionedData]);
-
   return (
     <>
       <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-start p-4 overflow-hidden h-screen">
-        {breadcrumbContent}
+        {breadcrumbContent({
+          setSortParameters,
+          sortParameters,
+          fullPartitionedData,
+          currentChunkIndex,
+          setCurrentChunkIndex,
+          setDisplayedData,
+          scrollAreaRef,
+        })}
 
         {preContent}
         {mainContent}
@@ -145,13 +144,11 @@ const SecondaryMainContent = ({
             >
               <Masonry>
                 {displayedData?.map((question) =>
-                  question?.question.questionImages.map((imageSrc: string) => (
+                  question?.questionImages.map((imageSrc: string) => (
                     <QuestionPreview
-                      question={question.question}
-                      onQuestionClick={() =>
-                        handleQuestionClick(question.question.id)
-                      }
-                      key={`${question.question.id}-${imageSrc}`}
+                      question={question}
+                      onQuestionClick={() => handleQuestionClick(question.id)}
+                      key={`${question.id}-${imageSrc}`}
                       imageSrc={imageSrc}
                       listId={listId}
                     />
@@ -187,7 +184,7 @@ const SecondaryMainContent = ({
           ref={questionInspectRef}
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}
-          partitionedTopicalData={partitionedTopicalData}
+          partitionedTopicalData={fullPartitionedData}
           BETTER_AUTH_URL={BETTER_AUTH_URL}
           listId={listId}
         />

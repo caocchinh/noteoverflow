@@ -3,8 +3,8 @@
 import { ValidCurriculum } from "@/constants/types";
 import {
   QuestionInspectRef,
-  SortParameters,
   SubjectMetadata,
+  BreadcrumbContentProps,
 } from "@/features/topical/constants/types";
 import {
   computeBookmarksMetadata,
@@ -33,7 +33,6 @@ import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSideb
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
-import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import { useAuth } from "@/context/AuthContext";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
@@ -92,9 +91,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
     null
   );
-  const [sortParameters, setSortParameters] = useState<SortParameters>({
-    sortBy: DEFAULT_SORT_OPTIONS,
-  });
+
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -148,81 +145,97 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   );
 
   // Breadcrumb content
-  const breadcrumbContent = chosenList ? (
-    <div
-      className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
-      ref={sideBarInsetRef}
-    >
-      <Breadcrumb className="self-end mr-0 sm:mr-6 max-w-full w-max">
-        <BreadcrumbList>
-          <BreadcrumbItem
-            className="cursor-pointer"
-            onClick={() => {
-              setChosenList(null);
-              setSelectedCurriculum(null);
-              setSelecteSubject(null);
-            }}
-          >
-            {chosenList ? (
-              <>
-                {chosenList.visibility === "public" ? (
-                  <Globe size={13} />
-                ) : (
-                  <Lock size={13} />
-                )}
-                {truncateListName({ listName: chosenList.listName })}
-              </>
-            ) : (
-              "List"
-            )}
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-
-          {chosenList && (
-            <>
-              <BreadcrumbItem
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelectedCurriculum(null);
-                  setSelecteSubject(null);
-                }}
-              >
-                Curriculum
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-            </>
-          )}
-          {selectedCurriculumn && (
-            <>
-              <BreadcrumbItem
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelecteSubject(null);
-                }}
-              >
-                Subject
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-            </>
-          )}
-          {selectedSubject && (
-            <BreadcrumbItem className="cursor-pointer">
-              {selectedCurriculumn + " " + selectedSubject}
+  const breadcrumbContent = ({
+    sortParameters,
+    setSortParameters,
+    fullPartitionedData,
+    currentChunkIndex,
+    setCurrentChunkIndex,
+    setDisplayedData,
+    scrollAreaRef,
+  }: BreadcrumbContentProps) =>
+    chosenList ? (
+      <div
+        className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
+        ref={sideBarInsetRef}
+      >
+        <Breadcrumb className="self-end flex h-full mr-0 sm:mr-6 max-w-full w-max">
+          <BreadcrumbList>
+            <BreadcrumbItem
+              className="cursor-pointer"
+              onClick={() => {
+                setChosenList(null);
+                setSelectedCurriculum(null);
+                setSelecteSubject(null);
+              }}
+            >
+              {chosenList ? (
+                <>
+                  {chosenList.visibility === "public" ? (
+                    <Globe size={13} />
+                  ) : (
+                    <Lock size={13} />
+                  )}
+                  {truncateListName({ listName: chosenList.listName })}
+                </>
+              ) : (
+                "List"
+              )}
             </BreadcrumbItem>
-          )}
-        </BreadcrumbList>
-      </Breadcrumb>
-      <SecondaryAppUltilityBar
-        sortParameters={sortParameters}
-        setSortParameters={setSortParameters}
-        setIsSidebarOpen={setIsSidebarOpen}
-        isQuestionViewDisabled={isQuestionViewDisabled}
-        sideBarInsetRef={sideBarInsetRef}
-        isSidebarOpen={isSidebarOpen}
-        setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
-      />
-    </div>
-  ) : null;
+            <BreadcrumbSeparator />
+
+            {chosenList && (
+              <>
+                <BreadcrumbItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSelectedCurriculum(null);
+                    setSelecteSubject(null);
+                  }}
+                >
+                  Curriculum
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
+            {selectedCurriculumn && (
+              <>
+                <BreadcrumbItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSelecteSubject(null);
+                  }}
+                >
+                  Subject
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
+            {selectedSubject && (
+              <BreadcrumbItem className="cursor-pointer">
+                {selectedCurriculumn + " " + selectedSubject}
+              </BreadcrumbItem>
+            )}
+          </BreadcrumbList>
+        </Breadcrumb>
+        <SecondaryAppUltilityBar
+          sortParameters={sortParameters}
+          setSortParameters={setSortParameters}
+          setIsSidebarOpen={setIsSidebarOpen}
+          isQuestionViewDisabled={isQuestionViewDisabled}
+          sideBarInsetRef={sideBarInsetRef}
+          isSidebarOpen={isSidebarOpen}
+          setIsQuestionInspectOpen={
+            questionInspectRef.current?.setIsInspectOpen
+          }
+          fullPartitionedData={fullPartitionedData}
+          currentChunkIndex={currentChunkIndex}
+          setCurrentChunkIndex={setCurrentChunkIndex}
+          setDisplayedData={setDisplayedData}
+          scrollAreaRef={scrollAreaRef}
+        />
+      </div>
+    ) : null;
 
   // Main content
   const mainContent = (

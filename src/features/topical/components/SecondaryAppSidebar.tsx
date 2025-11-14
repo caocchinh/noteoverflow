@@ -11,7 +11,11 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { isValidInputs as isValidInputsUtils } from "@/features/topical/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { InvalidInputs, SecondaryAppSidebarProps } from "../constants/types";
+import {
+  InvalidInputs,
+  SecondaryAppSidebarProps,
+  SubjectMetadata,
+} from "../constants/types";
 import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -145,85 +149,93 @@ const SecondaryAppSidebar = ({
   ]);
 
   useEffect(() => {
-    if (subjectMetadata && !currentFilter) {
-      setSelectedTopic(subjectMetadata.topic);
-      setSelectedYear(subjectMetadata.year);
-      setSelectedPaperType(subjectMetadata.paperType);
-      setSelectedSeason(subjectMetadata.season);
-      setCurrentFilter({
-        topic: subjectMetadata.topic,
-        year: subjectMetadata.year,
-        paperType: subjectMetadata.paperType,
-        season: subjectMetadata.season,
-      });
-    } else if (currentFilter) {
-      // Remove selections that are no longer available in subjectMetadata
-      let hasChanges = false;
-      const updatedFilter = { ...currentFilter };
+    // When subjectMetadata changes, filter selections to keep only available options
+    if (!subjectMetadata) return;
 
-      if (selectedTopicRef.current && subjectMetadata?.topic) {
-        const availableTopics = subjectMetadata.topic;
-        const filteredTopics = selectedTopicRef.current.filter((topic) =>
-          availableTopics.includes(topic)
-        );
-        if (filteredTopics.length !== selectedTopicRef.current.length) {
-          const newTopics = filteredTopics.length > 0 ? filteredTopics : [];
-          setSelectedTopic(filteredTopics.length > 0 ? filteredTopics : null);
-          updatedFilter.topic = newTopics;
-          hasChanges = true;
-        }
-      }
+    let didUpdate = false;
+    const updatedFilter: SubjectMetadata = {
+      topic: [],
+      year: [],
+      paperType: [],
+      season: [],
+    };
 
-      if (selectedYearRef.current && subjectMetadata?.year) {
-        const availableYears = subjectMetadata.year;
-        const filteredYears = selectedYearRef.current.filter((year) =>
-          availableYears.includes(year)
-        );
-        if (filteredYears.length !== selectedYearRef.current.length) {
-          const newYears = filteredYears.length > 0 ? filteredYears : [];
-          setSelectedYear(filteredYears.length > 0 ? filteredYears : null);
-          updatedFilter.year = newYears;
-          hasChanges = true;
-        }
+    // Filter topics - keep only those still in metadata
+    if (subjectMetadata.topic) {
+      const filteredTopics =
+        selectedTopicRef.current?.filter((topic) =>
+          subjectMetadata.topic!.includes(topic)
+        ) ?? [];
+      const newTopics =
+        filteredTopics.length > 0 ? filteredTopics : subjectMetadata.topic;
+      if (
+        JSON.stringify(newTopics) !== JSON.stringify(selectedTopicRef.current)
+      ) {
+        setSelectedTopic(newTopics);
+        didUpdate = true;
       }
-
-      if (selectedPaperTypeRef.current && subjectMetadata?.paperType) {
-        const availablePaperTypes = subjectMetadata.paperType;
-        const filteredPaperTypes = selectedPaperTypeRef.current.filter(
-          (paperType) => availablePaperTypes.includes(paperType)
-        );
-        if (filteredPaperTypes.length !== selectedPaperTypeRef.current.length) {
-          const newPaperTypes =
-            filteredPaperTypes.length > 0 ? filteredPaperTypes : [];
-          setSelectedPaperType(
-            filteredPaperTypes.length > 0 ? filteredPaperTypes : null
-          );
-          updatedFilter.paperType = newPaperTypes;
-          hasChanges = true;
-        }
-      }
-
-      if (selectedSeasonRef.current && subjectMetadata?.season) {
-        const availableSeasons = subjectMetadata.season;
-        const filteredSeasons = selectedSeasonRef.current.filter((season) =>
-          availableSeasons.includes(season)
-        );
-        if (filteredSeasons.length !== selectedSeasonRef.current.length) {
-          const newSeasons = filteredSeasons.length > 0 ? filteredSeasons : [];
-          setSelectedSeason(
-            filteredSeasons.length > 0 ? filteredSeasons : null
-          );
-          updatedFilter.season = newSeasons;
-          hasChanges = true;
-        }
-      }
-
-      // Update currentFilter if any changes were made
-      if (hasChanges) {
-        setCurrentFilter(updatedFilter);
-      }
+      updatedFilter.topic = newTopics;
     }
-  }, [currentFilter, setCurrentFilter, subjectMetadata]);
+
+    // Filter years
+    if (subjectMetadata.year) {
+      const filteredYears =
+        selectedYearRef.current?.filter((year) =>
+          subjectMetadata.year!.includes(year)
+        ) ?? [];
+      const newYears =
+        filteredYears.length > 0 ? filteredYears : subjectMetadata.year;
+      if (
+        JSON.stringify(newYears) !== JSON.stringify(selectedYearRef.current)
+      ) {
+        setSelectedYear(newYears);
+        didUpdate = true;
+      }
+      updatedFilter.year = newYears;
+    }
+
+    // Filter paperTypes
+    if (subjectMetadata.paperType) {
+      const filteredPaperTypes =
+        selectedPaperTypeRef.current?.filter((paperType) =>
+          subjectMetadata.paperType!.includes(paperType)
+        ) ?? [];
+      const newPaperTypes =
+        filteredPaperTypes.length > 0
+          ? filteredPaperTypes
+          : subjectMetadata.paperType;
+      if (
+        JSON.stringify(newPaperTypes) !==
+        JSON.stringify(selectedPaperTypeRef.current)
+      ) {
+        setSelectedPaperType(newPaperTypes);
+        didUpdate = true;
+      }
+      updatedFilter.paperType = newPaperTypes;
+    }
+
+    // Filter seasons
+    if (subjectMetadata.season) {
+      const filteredSeasons =
+        selectedSeasonRef.current?.filter((season) =>
+          subjectMetadata.season!.includes(season)
+        ) ?? [];
+      const newSeasons =
+        filteredSeasons.length > 0 ? filteredSeasons : subjectMetadata.season;
+      if (
+        JSON.stringify(newSeasons) !== JSON.stringify(selectedSeasonRef.current)
+      ) {
+        setSelectedSeason(newSeasons);
+        didUpdate = true;
+      }
+      updatedFilter.season = newSeasons;
+    }
+
+    // Update filter if anything changed
+    if (didUpdate) {
+      setCurrentFilter(updatedFilter);
+    }
+  }, [subjectMetadata, setCurrentFilter]);
 
   const handleFilter = useCallback(() => {
     const filter = {

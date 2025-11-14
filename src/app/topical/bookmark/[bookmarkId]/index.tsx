@@ -2,8 +2,8 @@
 import {
   SelectedPublickBookmark,
   SubjectMetadata,
-  SortParameters,
   QuestionInspectRef,
+  BreadcrumbContentProps,
 } from "@/features/topical/constants/types";
 import { useMemo, useRef, useState } from "react";
 import { useIsMutating, useQuery } from "@tanstack/react-query";
@@ -31,7 +31,6 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
-import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import { useAuth } from "@/context/AuthContext";
 
 export const BookmarkView = ({
@@ -104,9 +103,6 @@ export const BookmarkView = ({
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
-  const [sortParameters, setSortParameters] = useState<SortParameters>({
-    sortBy: DEFAULT_SORT_OPTIONS,
-  });
 
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
@@ -171,12 +167,20 @@ export const BookmarkView = ({
   );
 
   // Breadcrumb content
-  const breadcrumbContent = (
+  const breadcrumbContent = ({
+    sortParameters,
+    setSortParameters,
+    fullPartitionedData,
+    currentChunkIndex,
+    setCurrentChunkIndex,
+    setDisplayedData,
+    scrollAreaRef,
+  }: BreadcrumbContentProps) => (
     <div
       className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-4 flex-wrap gap-2"
       ref={sideBarInsetRef}
     >
-      <Breadcrumb className="self-end mr-0 sm:mr-6 max-w-full w-max">
+      <Breadcrumb className="self-end flex h-full mr-0 sm:mr-6 max-w-full w-max">
         <BreadcrumbList>
           <BreadcrumbItem
             className="cursor-pointer"
@@ -214,8 +218,13 @@ export const BookmarkView = ({
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
         sortParameters={sortParameters}
-        setSortParameters={setSortParameters}
         setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
+        setSortParameters={setSortParameters}
+        fullPartitionedData={fullPartitionedData}
+        currentChunkIndex={currentChunkIndex}
+        setCurrentChunkIndex={setCurrentChunkIndex}
+        setDisplayedData={setDisplayedData}
+        scrollAreaRef={scrollAreaRef}
       />
     </div>
   );
