@@ -201,13 +201,12 @@ const AppUltilityBar = memo(
                   </Tooltip>
                 </>
               )}
-              {isExportModeEnabled && (
-                <LayoutSetting triggerClassName="flex w-max -mt-1 cursor-pointer items-center justify-start gap-2 bg-white dark:bg-black border border-black dark:border-white" />
-              )}
               {uiPreferences.layoutStyle === "pagination" &&
                 !isQuestionViewDisabled && (
                   <>
-                    <Separator orientation="vertical" className="!h-[30px]" />
+                    {!isExportModeEnabled && (
+                      <Separator orientation="vertical" className="!h-[30px]" />
+                    )}
                     <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
                       <FirstPageButton
                         currentChunkIndex={currentChunkIndex}
@@ -326,53 +325,78 @@ const AppUltilityBar = memo(
                 </TooltipContent>
               </Tooltip>
               {isExportModeEnabled && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                          uiPreferences.isStrictModeEnabled
+                            ? "border-logo-main"
+                            : "border-muted-foreground"
+                        )}
+                        onClick={() => {
+                          setUiPreference(
+                            "isStrictModeEnabled",
+                            (prev) => !prev
+                          );
+                        }}
+                      >
+                        <Switch
+                          checked={uiPreferences.isStrictModeEnabled}
+                          className="cursor-pointer"
+                        />
+                        <p
+                          className={cn(
+                            uiPreferences.isStrictModeEnabled
+                              ? "text-logo-main"
+                              : "text-muted-foreground",
+                            "cursor-pointer text-sm"
+                          )}
+                        >
+                          Strict mode
+                        </p>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      Questions containing unrelated topics will be excluded.
+                    </TooltipContent>
+                  </Tooltip>
+                  <LayoutSetting triggerClassName="flex w-max cursor-pointer items-center justify-start gap-2 bg-white dark:bg-black border border-black dark:border-white" />
+                </>
+              )}
+
+              {!isExportModeEnabled && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div
+                    <Button
                       className={cn(
-                        "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-                        uiPreferences.isStrictModeEnabled
-                          ? "border-logo-main"
-                          : "border-muted-foreground"
+                        "flex cursor-pointer items-center gap-2 !bg-logo-main !text-white",
+                        isQuestionViewDisabled && "opacity-50 !cursor-default"
                       )}
                       onClick={() => {
-                        setUiPreference("isStrictModeEnabled", (prev) => !prev);
+                        if (isQuestionViewDisabled) {
+                          return;
+                        }
+                        setIsExportModeEnabled(true);
                       }}
+                      variant="outline"
                     >
-                      <Switch
-                        checked={uiPreferences.isStrictModeEnabled}
-                        className="cursor-pointer"
-                      />
-                      <p
-                        className={cn(
-                          uiPreferences.isStrictModeEnabled
-                            ? "text-logo-main"
-                            : "text-muted-foreground",
-                          "cursor-pointer text-sm"
-                        )}
-                      >
-                        Strict mode
-                      </p>
-                    </div>
+                      Export
+                      <Download />
+                    </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    Questions containing unrelated topics will be excluded.
+                  <TooltipContent
+                    side="bottom"
+                    className="!bg-logo-main !text-white z-[99999999] flex justify-center items-center gap-2"
+                    arrowClassName="!bg-logo-main !fill-logo-main"
+                  >
+                    {isQuestionViewDisabled
+                      ? "To export questions, run a search first."
+                      : "Export questions & answers to PDF"}
                   </TooltipContent>
                 </Tooltip>
               )}
-
-              <Button
-                className="flex cursor-pointer items-center gap-2 !bg-logo-main !text-white"
-                disabled={isQuestionViewDisabled}
-                onClick={() => {
-                  setIsAppSidebarOpen(false);
-                  setIsExportModeEnabled(true);
-                }}
-                variant="outline"
-              >
-                Export
-                <Download />
-              </Button>
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
                 url={filterUrl}

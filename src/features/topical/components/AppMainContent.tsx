@@ -41,6 +41,7 @@ import { useMutationState } from "@tanstack/react-query";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import ExportBar from "./ExportBar";
 
 const AppMainContent = ({
   mountedRef,
@@ -69,7 +70,12 @@ const AppMainContent = ({
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const { uiPreferences, finishedQuestionsData } = useTopicalApp();
+  const {
+    uiPreferences,
+    finishedQuestionsData,
+    isAppSidebarOpen,
+    setIsAppSidebarOpen,
+  } = useTopicalApp();
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -97,6 +103,21 @@ const AppMainContent = ({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
+  const previousSidebarOpenRef = useRef(isAppSidebarOpen);
+
+  useEffect(() => {
+    if (isExportModeEnabled) {
+      previousSidebarOpenRef.current = isAppSidebarOpen;
+      setIsAppSidebarOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExportModeEnabled, setIsAppSidebarOpen]);
+
+  useEffect(() => {
+    if (!isExportModeEnabled) {
+      setIsAppSidebarOpen(previousSidebarOpenRef.current);
+    }
+  }, [isExportModeEnabled, setIsAppSidebarOpen]);
 
   const shouldIncludeQuestion = useCallback(
     (question: SelectedQuestion) => {
@@ -306,9 +327,7 @@ const AppMainContent = ({
   }, [currentQuery]);
 
   const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
-
   const doesSearchYieldAnyQuestions = (topicalData?.data?.length ?? 0) > 0;
-
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -553,6 +572,14 @@ const AppMainContent = ({
         setSortParameters={setSortParameters}
         sortParameters={sortParameters}
       />
+      {isExportModeEnabled && (
+        <ExportBar
+          allQuestions={processedData?.sortedData ?? []}
+          questionsForExport={questionsForExport}
+          setIsExportModeEnabled={setIsExportModeEnabled}
+          setQuestionsForExport={setQuestionsForExport}
+        />
+      )}
     </>
   );
 };
@@ -684,14 +711,18 @@ const QuestionViewItem = memo(
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
-          "relative transition-all duration-200 ease-in-out",
-          isQuestionChecked && "transform-[scale(0.97)]"
+          "relative transition-all duration-200 border-2 border-transparent ease-in-out w-full ",
+          isQuestionChecked &&
+            "transform-[scale(0.975)]  border-logo-main rounded-md"
         )}
       >
         {isExportModeEnabled && (
-          <div className="absolute z-20 top-2 left-2 w-max h-max">
+          <div
+            className="absolute z-20 top-2 left-2 w-max h-max"
+            onClick={() => handleQuestionClick(question.id)}
+          >
             <Checkbox
-              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full"
+              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full  cursor-pointer"
               checked={isQuestionChecked}
             />
           </div>

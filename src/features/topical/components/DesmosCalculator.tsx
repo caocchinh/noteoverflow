@@ -179,20 +179,20 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
         {/* Fullscreen container */}
         <div
           className={cn(
-            "fixed inset-0 z-[999999] border border-gray-300 bg-white dark:bg-gray-800",
+            "fixed inset-0 z-[999999] border border-gray-300 bg-gray-800",
             isFullscreen ? "block" : "hidden"
           )}
           style={{ width: "100vw", height: "100vh", top: 0, left: 0 }}
         >
           <div className="flex flex-col h-full">
             {/* Header with close button */}
-            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-700 bg-gray-700">
+              <span className="text-sm font-medium text-gray-300">
                 Desmos Calculator
               </span>
               <div className="flex items-center gap-1">
                 <Button
-                  className="relative z-[999999]"
+                  className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
                   variant="ghost"
                   size="icon"
                   onClick={toggleFullscreen}
@@ -202,7 +202,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                 </Button>
                 <Button
                   data-calculator-close
-                  className="relative z-[999999]"
+                  className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
                   variant="ghost"
                   size="icon"
                   onClick={onClose}
@@ -229,7 +229,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
             minWidth={rndMinWidth}
             minHeight={rndMinHeight}
             bounds="window"
-            className="z-[999999] border border-gray-300 rounded-t-lg shadow-2xl bg-white dark:bg-gray-800"
+            className="z-[999999] border border-gray-300 rounded-t-lg shadow-2xl bg-gray-800"
             dragHandleClassName="calculator-drag-handle"
             onDragStop={(e, d) => {
               setRndPosition({ x: d.x, y: d.y });
@@ -244,13 +244,13 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
           >
             <div className="flex flex-col h-full">
               {/* Header with close button */}
-              <div className="flex items-center justify-between px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-t-lg">
-                <span className="text-sm font-medium py-1  min-h-[50px] flex items-center text-gray-700 dark:text-gray-300  calculator-drag-handle cursor-move flex-1">
+              <div className="flex items-center justify-between px-2 border-b border-gray-700 bg-gray-700 rounded-t-lg">
+                <span className="text-sm font-medium py-1  min-h-[50px] flex items-center text-gray-300  calculator-drag-handle cursor-move flex-1">
                   Desmos Calculator
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
-                    className="relative z-[999999]"
+                    className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
                     variant="ghost"
                     size="icon"
                     onClick={toggleFullscreen}
@@ -259,7 +259,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                     <Maximize />
                   </Button>
                   <Button
-                    className="relative z-[999999]"
+                    className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
                     variant="ghost"
                     size="icon"
                     onClick={onClose}
