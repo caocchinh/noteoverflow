@@ -8,12 +8,15 @@ import {
 import {
   addFinishedQuestionAction,
   removeFinishedQuestionAction,
-} from "../server/actions";
+} from "../../server/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { SavedActivitiesResponse, SelectedQuestion } from "../constants/types";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import {
+  SavedActivitiesResponse,
+  SelectedQuestion,
+} from "../../constants/types";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import { memo } from "react";
 

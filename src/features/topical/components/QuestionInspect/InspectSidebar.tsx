@@ -53,7 +53,7 @@ const InspectSidebar = forwardRef(
       listId,
       overflowScrollHandler,
       currentQuestionIndex,
-      navigationButtonsPortalContainer,
+      navigationButtonsContainerRef,
     }: InspectSidebarProps,
     ref
   ) => {
@@ -612,7 +612,7 @@ const InspectSidebar = forwardRef(
           </SidebarContent>
           <SidebarRail />
         </Sidebar>
-        {navigationButtonsPortalContainer &&
+        {navigationButtonsContainerRef.current &&
           createPortal(
             <NavigationButtons
               handleNextQuestion={handleNextQuestion}
@@ -622,7 +622,7 @@ const InspectSidebar = forwardRef(
                 isHandlePreviousQuestionDisabled
               }
             />,
-            navigationButtonsPortalContainer
+            navigationButtonsContainerRef.current
           )}
       </>
     );

@@ -12,7 +12,7 @@ import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
 } from "@/features/topical/lib/utils";
-import { useIsMutating } from "@tanstack/react-query";
+import { useMutationState } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -41,16 +41,20 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
     useTopicalApp();
 
-  const isMutatingBookmarks =
-    useIsMutating({
+  const settledBookmarksMutations = useMutationState({
+    filters: {
       mutationKey: ["user_saved_activities", "bookmarks"],
-    }) > 0;
+      predicate: (mutation) =>
+        mutation.state.status === "success" ||
+        mutation.state.status === "error",
+    },
+  });
 
   const metadata = useMemo(() => {
     if (!bookmarks) return null;
     return computeBookmarksMetadata(bookmarks);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookmarks, isMutatingBookmarks]);
+  }, [bookmarks, settledBookmarksMutations]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -75,7 +79,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     return bookmarks?.find((bookmark) => bookmark.id === chosenList.id)
       ?.userBookmarks;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chosenList, bookmarks, isMutatingBookmarks]);
+  }, [chosenList, bookmarks, settledBookmarksMutations]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);

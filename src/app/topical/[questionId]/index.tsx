@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { BookmarkButton } from "@/features/topical/components/BookmarkButton";
-import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspectFinishedCheckbox";
+import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspect/QuestionInspectFinishedCheckbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";

@@ -2,7 +2,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
-import { useIsMutating } from "@tanstack/react-query";
+import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
@@ -47,14 +47,18 @@ const QuestionPreview = memo(
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
 
-    const isMutatingThisFinishedQuestion =
-      useIsMutating({
+    const isThisFinishedQuestionSettled = useMutationState({
+      filters: {
         mutationKey: [
           "user_saved_activities",
           "finished_questions",
           question.id,
         ],
-      }) > 0;
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
 
     const doesThisQuestionFinished = useMemo(() => {
       if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
@@ -64,7 +68,7 @@ const QuestionPreview = memo(
         (item) => item.question.id === question.id
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userFinishedQuestions, question.id, isMutatingThisFinishedQuestion]);
+    }, [userFinishedQuestions, question.id, isThisFinishedQuestionSettled]);
 
     return (
       <div

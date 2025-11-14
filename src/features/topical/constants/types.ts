@@ -482,7 +482,7 @@ export interface InspectSidebarProps {
   listId: string | undefined;
   currentQuestionIndex: number;
   overflowScrollHandler?: () => void;
-  navigationButtonsPortalContainer?: HTMLElement | null;
+  navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
 }
 
 export interface InspectSidebarRef {

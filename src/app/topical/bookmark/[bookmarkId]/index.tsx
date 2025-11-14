@@ -6,7 +6,7 @@ import {
   BreadcrumbContentProps,
 } from "@/features/topical/constants/types";
 import { useMemo, useRef, useState } from "react";
-import { useIsMutating, useQuery } from "@tanstack/react-query";
+import { useMutationState, useQuery } from "@tanstack/react-query";
 import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
@@ -55,10 +55,14 @@ export const BookmarkView = ({
   const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
     useTopicalApp();
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
-  const isMutatingThisQuestion =
-    useIsMutating({
+  const settledBookmarksMutations = useMutationState({
+    filters: {
       mutationKey: ["user_saved_activities", "bookmarks"],
-    }) > 0;
+      predicate: (mutation) =>
+        mutation.state.status === "success" ||
+        mutation.state.status === "error",
+    },
+  });
 
   // Fetch bookmark data only if user is not the owner
   const { data: fetchedBookmarkData, isLoading: isFetchedBookmarkLoading } =
@@ -92,7 +96,7 @@ export const BookmarkView = ({
     bookmarks,
     bookmarkId,
     fetchedBookmarkData,
-    isMutatingThisQuestion,
+    settledBookmarksMutations,
   ]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

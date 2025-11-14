@@ -296,7 +296,7 @@ const AppUltilityBar = memo(
                         isQuestionViewDisabled && "!cursor-default"
                       )}
                     >
-                      Show finished questions
+                      Show finished
                     </p>
                   </div>
                 </TooltipTrigger>

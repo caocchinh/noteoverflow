@@ -2,7 +2,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { QuestionHoverCardProps } from "../../constants/types";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { useIsMutating } from "@tanstack/react-query";
+import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -39,15 +39,20 @@ const QuestionHoverCard = memo(
       useIsMutating({
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const isMutatingFinishedQuestionOfThisQuestion =
-      useIsMutating({
+
+    useMutationState({
+      filters: {
         mutationKey: [
           "user_saved_activities",
           "finished_questions",
           question.id,
         ],
-      }) > 0;
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
+
     const isThisQuestionFinished =
       userFinishedQuestions?.some(
         (item) => item.question.id === question?.id

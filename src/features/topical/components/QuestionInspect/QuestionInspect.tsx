@@ -229,9 +229,7 @@ const QuestionInspect = memo(
                   listId={listId}
                   currentQuestionIndex={currentQuestionIndex}
                   isInputFocused={isInputFocused}
-                  navigationButtonsPortalContainer={
-                    navigationButtonsContainerRef.current
-                  }
+                  navigationButtonsContainerRef={navigationButtonsContainerRef}
                 />
                 <QuestionInspectMainContent
                   ref={questionInspectMainContentRef}

@@ -22,7 +22,6 @@ import {
 import type {
   SortParameters,
   AppMainContentProps,
-  SelectedFinishedQuestion,
   QuestionInspectRef,
 } from "@/features/topical/constants/types";
 import { SelectedQuestion } from "@/features/topical/constants/types";
@@ -38,6 +37,7 @@ import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
+import { useMutationState } from "@tanstack/react-query";
 
 const AppMainContent = ({
   mountedRef,
@@ -64,8 +64,7 @@ const AppMainContent = ({
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const { uiPreferences, finishedQuestionsData: userFinishedQuestions } =
-    useTopicalApp();
+  const { uiPreferences } = useTopicalApp();
 
   useEffect(() => {
     if (typeof window === "undefined" || !mountedRef.current) {
@@ -453,7 +452,6 @@ const AppMainContent = ({
           )}
           <MainContent
             displayedData={displayedData}
-            userFinishedQuestions={userFinishedQuestions}
             showFinishedQuestion={showFinishedQuestion}
             handleQuestionClick={handleQuestionClick}
             handleInfiniteScrollNext={handleInfiniteScrollNext}
@@ -480,7 +478,6 @@ export default AppMainContent;
 export const MainContent = memo(
   ({
     displayedData,
-    userFinishedQuestions,
     showFinishedQuestion,
     handleQuestionClick,
     handleInfiniteScrollNext,
@@ -488,14 +485,23 @@ export const MainContent = memo(
     currentChunkIndex,
   }: {
     displayedData: SelectedQuestion[];
-    userFinishedQuestions: SelectedFinishedQuestion[] | undefined;
     showFinishedQuestion: boolean;
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
     fullPartitionedData: SelectedQuestion[][] | undefined;
     currentChunkIndex: number;
   }) => {
-    const { uiPreferences } = useTopicalApp();
+    const { uiPreferences, finishedQuestionsData } = useTopicalApp();
+
+    useMutationState({
+      filters: {
+        mutationKey: ["user_saved_activities", "finished_questions"],
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
+
     return (
       <>
         <ResponsiveMasonry
@@ -510,12 +516,12 @@ export const MainContent = memo(
           <Masonry>
             {displayedData
               ?.filter((question: SelectedQuestion) => {
-                if (!userFinishedQuestions) {
+                if (!finishedQuestionsData) {
                   return true;
                 }
                 if (
                   !showFinishedQuestion &&
-                  userFinishedQuestions.some(
+                  finishedQuestionsData.some(
                     (item) => item.question.id === question.id
                   )
                 ) {

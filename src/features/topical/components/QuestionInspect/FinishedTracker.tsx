@@ -33,7 +33,7 @@ import {
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { Button } from "@/components/ui/button";
-import { useIsMutating } from "@tanstack/react-query";
+import { useMutationState } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import Sort from "../Sort";
@@ -60,11 +60,14 @@ export const FinishedTracker = memo(
       finishedQuestionsData: userFinishedQuestions,
     } = useTopicalApp();
     const { isAuthenticated, isSessionPending } = useAuth();
-    const isMutatingThisFinishedQuestion =
-      useIsMutating({
+    const settledFinishedQuestionMutations = useMutationState({
+      filters: {
         mutationKey: ["user_saved_activities", "finished_questions"],
-      }) > 0;
-
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
     const finishedCount = useMemo(
       () =>
@@ -72,7 +75,7 @@ export const FinishedTracker = memo(
           userFinishedQuestions?.some((fq) => fq.question.id === q.id)
         ).length,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [allQuestions, userFinishedQuestions, isMutatingThisFinishedQuestion]
+      [allQuestions, userFinishedQuestions, settledFinishedQuestionMutations]
     );
 
     const progressPercentage =
@@ -104,7 +107,7 @@ export const FinishedTracker = memo(
       allQuestions,
       userFinishedQuestions,
       sortParameters.sortBy,
-      isMutatingThisFinishedQuestion,
+      settledFinishedQuestionMutations,
     ]);
 
     const fullPartitionedData = useMemo(() => {

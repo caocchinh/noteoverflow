@@ -11,7 +11,7 @@ import {
   computeSubjectMetadata,
   filterQuestionsByCriteria,
 } from "@/features/topical/lib/utils";
-import { useIsMutating } from "@tanstack/react-query";
+import { useMutationState } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -39,10 +39,14 @@ const FinishedQuestionsClient = ({
   BETTER_AUTH_URL: string;
 }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
-  const isMutatingThisQuestion =
-    useIsMutating({
+  const settledFinishedQuestionMutations = useMutationState({
+    filters: {
       mutationKey: ["user_saved_activities", "finished_questions"],
-    }) > 0;
+      predicate: (mutation) =>
+        mutation.state.status === "success" ||
+        mutation.state.status === "error",
+    },
+  });
 
   const {
     finishedQuestionsData: userFinishedQuestions,
@@ -54,7 +58,7 @@ const FinishedQuestionsClient = ({
     }
     return computeFinishedQuestionsMetadata(userFinishedQuestions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userFinishedQuestions, isMutatingThisQuestion]);
+  }, [userFinishedQuestions, settledFinishedQuestionMutations]);
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCurriculumn, setSelectedCurriculum] =
@@ -74,7 +78,7 @@ const FinishedQuestionsClient = ({
     userFinishedQuestions,
     selectedCurriculumn,
     selectedSubject,
-    isMutatingThisQuestion,
+    settledFinishedQuestionMutations,
   ]);
 
   const topicalData = useMemo(() => {
@@ -87,7 +91,7 @@ const FinishedQuestionsClient = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     userFinishedQuestions,
-    isMutatingThisQuestion,
+    settledFinishedQuestionMutations,
     currentFilter,
     selectedCurriculumn,
     selectedSubject,
