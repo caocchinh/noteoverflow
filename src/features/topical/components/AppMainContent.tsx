@@ -108,6 +108,16 @@ const AppMainContent = ({
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const previousSidebarOpenRef = useRef(isAppSidebarOpen);
 
+  const onSettledFinishedQuestion = useMutationState({
+    filters: {
+      mutationKey: ["user_saved_activities", "finished_questions"],
+      predicate: (mutation) =>
+        (mutation.state.status === "success" ||
+          mutation.state.status === "error") &&
+        !showFinishedQuestion,
+    },
+  });
+
   useEffect(() => {
     if (isExportModeEnabled) {
       previousSidebarOpenRef.current = isAppSidebarOpen;
@@ -133,7 +143,8 @@ const AppMainContent = ({
       }
       return true;
     },
-    [finishedQuestionsData, showFinishedQuestion]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [finishedQuestionsData, showFinishedQuestion, onSettledFinishedQuestion]
   );
 
   const processedData = useMemo(() => {
@@ -549,17 +560,6 @@ const AppMainContent = ({
                 </Button>
               </div>
             )}
-          {finishedQuestionsFilteredDisplayData.length == 0 &&
-            isTopicalDataFetched &&
-            !isTopicalDataError &&
-            !isTopicalDataFetching && (
-              <div className="flex items-center justify-center w-full h-full">
-                <p className="text-md text-center mb-2 text-red-600">
-                  No questions found. Try changing the filters. Certain topics
-                  may be paired with specific papers.
-                </p>
-              </div>
-            )}
 
           {isTopicalDataFetching && (
             <Loader2 className="animate-spin m-auto mb-2" />
@@ -637,17 +637,20 @@ export const MainContent = memo(
   }) => {
     const { uiPreferences } = useTopicalApp();
 
-    useMutationState({
-      filters: {
-        mutationKey: ["user_saved_activities", "finished_questions"],
-        predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
-      },
-    });
-
     return (
       <>
+        {!doesSearchYieldAnyQuestions &&
+          isTopicalDataFetched &&
+          !isTopicalDataError &&
+          !isTopicalDataFetching && (
+            <div className="flex items-center justify-center w-full h-full">
+              <p className="text-md text-center mb-2 text-red-600">
+                No questions found. Try changing the filters. Certain topics may
+                be paired with specific papers.
+              </p>
+            </div>
+          )}
+
         {doesSearchYieldAnyQuestions && (
           <p className="text-sm text-left mb-1">
             {totalNumberOfQuestions} question
