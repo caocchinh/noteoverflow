@@ -273,7 +273,7 @@ export const BookmarkView = ({
 
       {Object.keys(metadata).length === 0 && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             Nothing found in this bookmark list!
           </p>
           <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>

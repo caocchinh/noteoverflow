@@ -292,7 +292,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               isAuthenticated &&
               !isSessionPending && (
                 <div className="flex flex-col gap-4 items-center justify-center w-full">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground text-center">
                     No lists found. Search for questions and add them to a new
                     list!
                   </p>
@@ -311,7 +311,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
             {Object.keys(curriculumnMetadata).length === 0 && (
               <div className="flex flex-col gap-4 items-center justify-center w-full">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground text-center">
                   No curriculums found. Search for questions and add them to a
                   this list!
                 </p>
@@ -388,7 +388,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
             </ScrollArea>
           ) : (
             <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-center">
                 No subjects found. Search for questions and add them to a this
                 list!
               </p>
@@ -400,7 +400,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
       {topicalData?.length === 0 && selectedSubject && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             No questions found. Search for questions and add them to this list!
           </p>
           <NavigateToTopicalApp>Search for questions</NavigateToTopicalApp>

@@ -230,7 +230,7 @@ const FinishedQuestionsClient = ({
             </div>
           ) : (
             <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-center">
                 No curriculums found. Search for questions and add them to your
                 finished questions!
               </p>
@@ -279,7 +279,7 @@ const FinishedQuestionsClient = ({
             </ScrollArea>
           ) : (
             <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-center">
                 No subjects found. Search for questions and add them to your
                 finished questions!
               </p>
@@ -291,7 +291,7 @@ const FinishedQuestionsClient = ({
 
       {selectedSubject && topicalData && topicalData.length === 0 && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             No questions found. Search for questions and add them to your
             finished questions!
           </p>
