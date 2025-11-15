@@ -94,11 +94,14 @@ const AppMainContent = ({
     SelectedQuestion[][] | undefined
   >(undefined);
   const [
-    fullFinishedFilteredPartitionedData,
-    setFullFinishedFilteredPartitionedData,
+    finishedQuestionsFilteredPartitionedData,
+    setFinishedQuestionsFilteredPartitionedData,
   ] = useState<SelectedQuestion[][] | undefined>(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
+  const [
+    finishedQuestionsFilteredDisplayData,
+    setFinishedQuestionsFilteredDisplayData,
+  ] = useState<SelectedQuestion[]>([]);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
@@ -252,20 +255,29 @@ const AppMainContent = ({
   }, [refetchTopicalData]);
 
   const handleInfiniteScrollNext = useCallback(() => {
-    if (fullPartitionedData) {
+    if (finishedQuestionsFilteredPartitionedData) {
       setCurrentChunkIndex(currentChunkIndex + 1);
-      setDisplayedData([
-        ...displayedData,
-        ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
+      setFinishedQuestionsFilteredDisplayData([
+        ...finishedQuestionsFilteredDisplayData,
+        ...(finishedQuestionsFilteredPartitionedData[currentChunkIndex + 1] ??
+          []),
       ]);
     }
-  }, [fullPartitionedData, currentChunkIndex, displayedData]);
+  }, [
+    finishedQuestionsFilteredPartitionedData,
+    currentChunkIndex,
+    finishedQuestionsFilteredDisplayData,
+  ]);
 
   useEffect(() => {
     if (processedData && filteredProcessedData) {
       setFullPartitionedData(processedData.chunkedData);
-      setFullFinishedFilteredPartitionedData(filteredProcessedData.chunkedData);
-      setDisplayedData(filteredProcessedData.chunkedData[0] ?? []);
+      setFinishedQuestionsFilteredPartitionedData(
+        filteredProcessedData.chunkedData
+      );
+      setFinishedQuestionsFilteredDisplayData(
+        filteredProcessedData.chunkedData[0] ?? []
+      );
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
@@ -379,7 +391,9 @@ const AppMainContent = ({
         />
 
         <AppUltilityBar
-          fullPartitionedData={fullFinishedFilteredPartitionedData}
+          finishedQuestionsFilteredPartitionedData={
+            finishedQuestionsFilteredPartitionedData
+          }
           ultilityRef={ultilityRef}
           ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
@@ -389,7 +403,9 @@ const AppMainContent = ({
           scrollAreaRef={mainContentScrollAreaRef}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}
-          setDisplayedData={setDisplayedData}
+          setFinishedQuestionsFilteredDisplayData={
+            setFinishedQuestionsFilteredDisplayData
+          }
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}
           showFinishedQuestion={showFinishedQuestion}
@@ -533,7 +549,7 @@ const AppMainContent = ({
                 </Button>
               </div>
             )}
-          {displayedData.length == 0 &&
+          {finishedQuestionsFilteredDisplayData.length == 0 &&
             isTopicalDataFetched &&
             !isTopicalDataError &&
             !isTopicalDataFetching && (
@@ -550,12 +566,17 @@ const AppMainContent = ({
           )}
           <MainContent
             doesSearchYieldAnyQuestions={doesSearchYieldAnyQuestions}
-            filteredDisplayData={displayedData}
+            filteredDisplayData={finishedQuestionsFilteredDisplayData}
             questionsForExport={questionsForExport}
+            totalNumberOfQuestions={
+              filteredProcessedData?.sortedData.length ?? 0
+            }
             isExportModeEnabled={isExportModeEnabled}
             handleQuestionClick={handleQuestionClick}
             handleInfiniteScrollNext={handleInfiniteScrollNext}
-            fullPartitionedData={fullPartitionedData}
+            finishedQuestionsFilteredPartitionedData={
+              finishedQuestionsFilteredPartitionedData
+            }
             currentChunkIndex={currentChunkIndex}
             isTopicalDataFetching={isTopicalDataFetching}
             isTopicalDataFetched={isTopicalDataFetched}
@@ -591,10 +612,11 @@ export const MainContent = memo(
     doesSearchYieldAnyQuestions,
     filteredDisplayData,
     questionsForExport,
+    totalNumberOfQuestions,
     isExportModeEnabled,
     handleQuestionClick,
     handleInfiniteScrollNext,
-    fullPartitionedData,
+    finishedQuestionsFilteredPartitionedData,
     currentChunkIndex,
     isTopicalDataFetching,
     isTopicalDataFetched,
@@ -606,10 +628,11 @@ export const MainContent = memo(
     isTopicalDataError: boolean;
     filteredDisplayData: SelectedQuestion[];
     questionsForExport: string[];
+    totalNumberOfQuestions: number;
     isExportModeEnabled: boolean;
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
-    fullPartitionedData: SelectedQuestion[][] | undefined;
+    finishedQuestionsFilteredPartitionedData: SelectedQuestion[][] | undefined;
     currentChunkIndex: number;
   }) => {
     const { uiPreferences } = useTopicalApp();
@@ -627,8 +650,8 @@ export const MainContent = memo(
       <>
         {doesSearchYieldAnyQuestions && (
           <p className="text-sm text-left mb-1">
-            {filteredDisplayData.length} question
-            {filteredDisplayData.length > 1 ? "s" : ""} found
+            {totalNumberOfQuestions} question
+            {totalNumberOfQuestions > 1 ? "s" : ""} found
           </p>
         )}
 
@@ -679,10 +702,11 @@ export const MainContent = memo(
           <InfiniteScroll
             next={handleInfiniteScrollNext}
             hasMore={
-              !!fullPartitionedData &&
-              currentChunkIndex < fullPartitionedData.length - 1
+              !!finishedQuestionsFilteredPartitionedData &&
+              currentChunkIndex <
+                finishedQuestionsFilteredPartitionedData.length - 1
             }
-            isLoading={!fullPartitionedData}
+            isLoading={!finishedQuestionsFilteredPartitionedData}
           />
         )}
       </>

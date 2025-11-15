@@ -346,14 +346,16 @@ export interface QuestionInspectProps {
 }
 
 export interface AppUltilityBarProps {
-  fullPartitionedData: SelectedQuestion[][] | undefined;
+  finishedQuestionsFilteredPartitionedData: SelectedQuestion[][] | undefined;
   ultilityRef: RefObject<HTMLDivElement | null>;
   isQuestionViewDisabled: boolean;
   setIsQuestionInspectOpen?: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
-  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
+  setFinishedQuestionsFilteredDisplayData: Dispatch<
+    SetStateAction<SelectedQuestion[]>
+  >;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   showFinishedQuestion: boolean;

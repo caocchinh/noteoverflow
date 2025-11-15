@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
-  Download,
   Monitor,
   SlidersHorizontal,
 } from "lucide-react";
@@ -43,8 +42,9 @@ const AppUltilityBar = memo(
   forwardRef(
     (
       {
-        fullPartitionedData,
+        finishedQuestionsFilteredPartitionedData,
         isExportModeEnabled,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setIsExportModeEnabled,
         ultilityRef,
         isQuestionViewDisabled,
@@ -52,7 +52,7 @@ const AppUltilityBar = memo(
         scrollAreaRef,
         currentChunkIndex,
         setCurrentChunkIndex,
-        setDisplayedData,
+        setFinishedQuestionsFilteredDisplayData,
         sortParameters,
         sideBarInsetRef,
         setSortParameters,
@@ -101,7 +101,7 @@ const AppUltilityBar = memo(
         overflowScrollHandler();
       }, [
         overflowScrollHandler,
-        fullPartitionedData,
+        finishedQuestionsFilteredPartitionedData,
         uiPreferences.layoutStyle,
       ]);
 
@@ -211,8 +211,12 @@ const AppUltilityBar = memo(
                       <FirstPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={fullPartitionedData}
-                        setDisplayedData={setDisplayedData}
+                        fullPartitionedData={
+                          finishedQuestionsFilteredPartitionedData
+                        }
+                        setDisplayedData={
+                          setFinishedQuestionsFilteredDisplayData
+                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -221,8 +225,12 @@ const AppUltilityBar = memo(
                       <PreviousPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={fullPartitionedData}
-                        setDisplayedData={setDisplayedData}
+                        fullPartitionedData={
+                          finishedQuestionsFilteredPartitionedData
+                        }
+                        setDisplayedData={
+                          setFinishedQuestionsFilteredDisplayData
+                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -231,11 +239,15 @@ const AppUltilityBar = memo(
                       <JumpToTabButton
                         className="mx-4"
                         tab={currentChunkIndex}
-                        totalTabs={fullPartitionedData!.length}
+                        totalTabs={
+                          finishedQuestionsFilteredPartitionedData!.length
+                        }
                         prefix="page"
                         onTabChangeCallback={({ tab }) => {
                           setCurrentChunkIndex(tab);
-                          setDisplayedData(fullPartitionedData![tab]);
+                          setFinishedQuestionsFilteredDisplayData(
+                            finishedQuestionsFilteredPartitionedData![tab]
+                          );
                           if (uiPreferences.scrollUpWhenPageChange) {
                             scrollAreaRef.current?.scrollTo({
                               top: 0,
@@ -247,8 +259,12 @@ const AppUltilityBar = memo(
                       <NextPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={fullPartitionedData}
-                        setDisplayedData={setDisplayedData}
+                        fullPartitionedData={
+                          finishedQuestionsFilteredPartitionedData
+                        }
+                        setDisplayedData={
+                          setFinishedQuestionsFilteredDisplayData
+                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -257,8 +273,12 @@ const AppUltilityBar = memo(
                       <LastPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={fullPartitionedData}
-                        setDisplayedData={setDisplayedData}
+                        fullPartitionedData={
+                          finishedQuestionsFilteredPartitionedData
+                        }
+                        setDisplayedData={
+                          setFinishedQuestionsFilteredDisplayData
+                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -365,7 +385,7 @@ const AppUltilityBar = memo(
                   <LayoutSetting triggerClassName="flex w-max cursor-pointer items-center justify-start gap-2 bg-white dark:bg-black border border-black dark:border-white" />
                 </>
               )}
-
+              {/* 
               {!isExportModeEnabled && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -393,10 +413,10 @@ const AppUltilityBar = memo(
                   >
                     {isQuestionViewDisabled
                       ? "To export questions, run a search first."
-                      : "Export questions & answers to PDF"}
+                      : "Export questions & answers to PDF."}
                   </TooltipContent>
                 </Tooltip>
-              )}
+              )} */}
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
                 url={filterUrl}

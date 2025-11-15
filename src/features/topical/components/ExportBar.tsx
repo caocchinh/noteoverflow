@@ -13,6 +13,7 @@ import { SelectedQuestion } from "../constants/types";
 import { Eraser, WandSparkles } from "lucide-react";
 
 const ExportBar = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   questionsForExport,
   allQuestions,
   setIsExportModeEnabled,
