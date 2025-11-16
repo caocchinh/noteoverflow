@@ -5,7 +5,7 @@ import {
   useMotionValue,
   useMotionValueEvent,
   useTransform,
-} from "framer-motion";
+} from "motion/react";
 import { Button } from "@/components/ui/button";
 import { SquareMinus, SquarePlus } from "lucide-react";
 

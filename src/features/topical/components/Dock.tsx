@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   AnimatePresence,
@@ -8,7 +8,7 @@ import {
   useMotionValue,
   useSpring,
   useTransform,
-} from 'framer-motion';
+} from "motion/react";
 import {
   Children,
   cloneElement,
@@ -16,8 +16,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { cn } from '@/lib/utils';
+} from "react";
+import { cn } from "@/lib/utils";
 
 export type DockItemData = {
   icon: React.ReactNode;
@@ -53,7 +53,7 @@ type DockItemProps = {
 
 function DockItem({
   children,
-  className = '',
+  className = "",
   onClick,
   mouseX,
   spring,
@@ -84,7 +84,7 @@ function DockItem({
     <motion.div
       aria-haspopup="true"
       className={cn(
-        'relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-white',
+        "relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-white",
         className,
         backgroundColor
       )}
@@ -119,7 +119,7 @@ type DockLabelProps = {
 
 function DockLabel({
   children,
-  className = '',
+  className = "",
   isHovered,
   backgroundColor,
 }: DockLabelProps) {
@@ -129,7 +129,7 @@ function DockLabel({
     if (!isHovered) {
       return;
     }
-    const unsubscribe = isHovered.on('change', (latest) => {
+    const unsubscribe = isHovered.on("change", (latest) => {
       setIsVisible(latest === 1);
     });
     return () => unsubscribe();
@@ -142,13 +142,13 @@ function DockLabel({
           animate={{ opacity: 1, y: -10 }}
           className={cn(
             className,
-            '-top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs',
+            "-top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs",
             backgroundColor
           )}
           exit={{ opacity: 0, y: 0 }}
           initial={{ opacity: 0, y: 0 }}
           role="tooltip"
-          style={{ x: '-50%' }}
+          style={{ x: "-50%" }}
           transition={{ duration: 0.2 }}
         >
           {children}
@@ -164,7 +164,7 @@ type DockIconProps = {
   isHovered?: MotionValue<number>;
 };
 
-function DockIcon({ children, className = '' }: DockIconProps) {
+function DockIcon({ children, className = "" }: DockIconProps) {
   return (
     <div className={`flex items-center justify-center ${className}`}>
       {children}
@@ -174,7 +174,7 @@ function DockIcon({ children, className = '' }: DockIconProps) {
 
 export default function Dock({
   items,
-  className = '',
+  className = "",
   spring = { mass: 0.1, stiffness: 150, damping: 12 },
   magnification = 70,
   distance = 200,
@@ -195,7 +195,7 @@ export default function Dock({
   return (
     <motion.div
       className="mx-2 flex max-w-full items-center"
-      style={{ height, scrollbarWidth: 'none' }}
+      style={{ height, scrollbarWidth: "none" }}
     >
       <motion.div
         aria-label="Application dock"

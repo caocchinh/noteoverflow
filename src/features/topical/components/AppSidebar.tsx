@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";

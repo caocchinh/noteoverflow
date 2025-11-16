@@ -11,6 +11,7 @@ import {
   Pi,
   RectangleEllipsis,
 } from "lucide-react";
+import { easeInOut } from "motion";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -115,7 +116,7 @@ const glowAnimation = {
   transition: {
     duration: 3,
     repeat: Infinity,
-    ease: "easeInOut",
+    ease: easeInOut,
   },
 };
 
