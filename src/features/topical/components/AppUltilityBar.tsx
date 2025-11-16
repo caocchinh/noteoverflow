@@ -1,13 +1,18 @@
 import {
+  Dispatch,
   forwardRef,
   memo,
+  SetStateAction,
   useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import { AppUltilityBarProps } from "../constants/types";
+import {
+  AppUltilityBarProps,
+  QuestionInspectOpenState,
+} from "../constants/types";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
@@ -158,47 +163,14 @@ const AppUltilityBar = memo(
             >
               {!isExportModeEnabled && (
                 <>
-                  <Button
-                    className="!bg-background flex cursor-pointer items-center gap-2 border"
-                    onClick={() => {
-                      setIsAppSidebarOpen(!isAppSidebarOpen);
-                    }}
-                    variant="outline"
-                  >
-                    Filters
-                    <SlidersHorizontal />
-                  </Button>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <Button
-                          className="flex cursor-pointer items-center gap-2 border"
-                          disabled={isQuestionViewDisabled}
-                          onClick={() => {
-                            if (setIsQuestionInspectOpen) {
-                              setIsQuestionInspectOpen((prev) => ({
-                                ...prev,
-                                isOpen: true,
-                              }));
-                            }
-                          }}
-                          variant="default"
-                        >
-                          Inspect
-                          <Monitor />
-                        </Button>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className={cn(
-                        !isQuestionViewDisabled && "!hidden",
-                        "flex justify-center items-center gap-2"
-                      )}
-                    >
-                      To inspect questions, run a search first.
-                    </TooltipContent>
-                  </Tooltip>
+                  <FilterToggleButton
+                    isAppSidebarOpen={isAppSidebarOpen}
+                    setIsAppSidebarOpen={setIsAppSidebarOpen}
+                  />
+                  <InspectTriggerButton
+                    isQuestionViewDisabled={isQuestionViewDisabled}
+                    setIsQuestionInspectOpen={setIsQuestionInspectOpen}
+                  />
                 </>
               )}
               {uiPreferences.layoutStyle === "pagination" &&
@@ -296,54 +268,11 @@ const AppUltilityBar = memo(
                 descendingSortText="Newest year first"
                 ascendingSortText="Oldest year first"
               />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className={cn(
-                      "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-                      isQuestionViewDisabled && "opacity-50 !cursor-default",
-                      showFinishedQuestion
-                        ? "border-green-600"
-                        : "border-muted-foreground"
-                    )}
-                    onClick={() => {
-                      if (isQuestionViewDisabled) {
-                        return;
-                      }
-                      setShowFinishedQuestion(!showFinishedQuestion);
-                    }}
-                  >
-                    <Switch
-                      className={cn(
-                        "border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid ",
-                        isQuestionViewDisabled && "!cursor-default"
-                      )}
-                      id="show-finished-question"
-                      checked={showFinishedQuestion ?? false}
-                    />
-                    <p
-                      className={cn(
-                        showFinishedQuestion
-                          ? "text-green-600"
-                          : "text-muted-foreground",
-                        "cursor-pointer text-sm",
-                        isQuestionViewDisabled && "!cursor-default"
-                      )}
-                    >
-                      {showFinishedQuestion ? "Show" : "Hide"} finished
-                    </p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className={cn(
-                    !isQuestionViewDisabled && "!hidden",
-                    "flex justify-center items-center gap-2"
-                  )}
-                >
-                  To toggle this, run a search first.
-                </TooltipContent>
-              </Tooltip>
+              <ShowFinishedToggle
+                isQuestionViewDisabled={isQuestionViewDisabled}
+                showFinishedQuestion={showFinishedQuestion}
+                setShowFinishedQuestion={setShowFinishedQuestion}
+              />
               {isExportModeEnabled && (
                 <>
                   <Tooltip>
@@ -437,3 +366,139 @@ const AppUltilityBar = memo(
 AppUltilityBar.displayName = "AppUltilityBar";
 
 export default AppUltilityBar;
+
+const ShowFinishedToggle = memo(
+  ({
+    isQuestionViewDisabled,
+    showFinishedQuestion,
+    setShowFinishedQuestion,
+  }: {
+    isQuestionViewDisabled: boolean;
+    showFinishedQuestion: boolean;
+    setShowFinishedQuestion: Dispatch<SetStateAction<boolean>>;
+  }) => {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+              isQuestionViewDisabled && "opacity-50 !cursor-default",
+              showFinishedQuestion
+                ? "border-green-600"
+                : "border-muted-foreground"
+            )}
+            onClick={() => {
+              if (isQuestionViewDisabled) {
+                return;
+              }
+              setShowFinishedQuestion(!showFinishedQuestion);
+            }}
+          >
+            <Switch
+              className={cn(
+                "border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid ",
+                isQuestionViewDisabled && "!cursor-default"
+              )}
+              id="show-finished-question"
+              checked={showFinishedQuestion ?? false}
+            />
+            <p
+              className={cn(
+                showFinishedQuestion
+                  ? "text-green-600"
+                  : "text-muted-foreground",
+                "cursor-pointer text-sm",
+                isQuestionViewDisabled && "!cursor-default"
+              )}
+            >
+              {showFinishedQuestion ? "Show" : "Hide"} finished
+            </p>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          className={cn(
+            !isQuestionViewDisabled && "!hidden",
+            "flex justify-center items-center gap-2"
+          )}
+        >
+          To toggle this, run a search first.
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+);
+ShowFinishedToggle.displayName = "ShowFinishedToggle";
+
+const FilterToggleButton = memo(
+  ({
+    isAppSidebarOpen,
+    setIsAppSidebarOpen,
+  }: {
+    isAppSidebarOpen: boolean;
+    setIsAppSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  }) => {
+    return (
+      <Button
+        className="!bg-background flex cursor-pointer items-center gap-2 border"
+        onClick={useCallback(() => {
+          setIsAppSidebarOpen(!isAppSidebarOpen);
+        }, [isAppSidebarOpen, setIsAppSidebarOpen])}
+        variant="outline"
+      >
+        Filters
+        <SlidersHorizontal />
+      </Button>
+    );
+  }
+);
+FilterToggleButton.displayName = "FilterToggleButton";
+
+const InspectTriggerButton = memo(
+  ({
+    isQuestionViewDisabled,
+    setIsQuestionInspectOpen,
+  }: {
+    isQuestionViewDisabled: boolean;
+    setIsQuestionInspectOpen:
+      | Dispatch<SetStateAction<QuestionInspectOpenState>>
+      | undefined;
+  }) => {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Button
+              className="flex cursor-pointer items-center gap-2 border"
+              disabled={isQuestionViewDisabled}
+              onClick={() => {
+                if (setIsQuestionInspectOpen) {
+                  setIsQuestionInspectOpen((prev) => ({
+                    ...prev,
+                    isOpen: true,
+                  }));
+                }
+              }}
+              variant="default"
+            >
+              Inspect
+              <Monitor />
+            </Button>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          className={cn(
+            !isQuestionViewDisabled && "!hidden",
+            "flex justify-center items-center gap-2"
+          )}
+        >
+          To inspect questions, run a search first.
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+);
+
+InspectTriggerButton.displayName = "InspectTriggerButton";

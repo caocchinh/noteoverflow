@@ -320,7 +320,7 @@ export type CurrentQuery = {
 export interface QuestionHoverCardProps {
   question: SelectedQuestion;
   navigateToQuestion: (questionId: string, scroll?: boolean) => void;
-  currentQuestionId: string | undefined;
+  isThisTheCurrentQuestion: boolean;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;

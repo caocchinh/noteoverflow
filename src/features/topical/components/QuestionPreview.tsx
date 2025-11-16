@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
@@ -76,17 +76,23 @@ const QuestionPreview = memo(
           "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]",
           uiPreferences.imageTheme === "dark" && "!bg-black dark:!border-white"
         )}
-        onClick={() => {
+        onClick={useCallback(() => {
           onQuestionClick();
-        }}
-        onMouseEnter={() => setIsHovering(true)}
-        onFocus={() => setIsHovering(true)}
-        onBlur={() => setIsHovering(false)}
-        onMouseLeave={() => {
+        }, [onQuestionClick])}
+        onMouseEnter={useCallback(() => {
+          setIsHovering(true);
+        }, [setIsHovering])}
+        onFocus={useCallback(() => {
+          setIsHovering(true);
+        }, [setIsHovering])}
+        onBlur={useCallback(() => {
+          setIsHovering(false);
+        }, [setIsHovering])}
+        onMouseLeave={useCallback(() => {
           if (!isPopoverOpen) {
             setIsHovering(false);
           }
-        }}
+        }, [isPopoverOpen])}
       >
         <div
           className={cn(

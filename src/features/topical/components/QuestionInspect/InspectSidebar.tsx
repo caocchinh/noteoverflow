@@ -33,7 +33,33 @@ import {
   fuzzySearch,
 } from "../../lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { InspectSidebarProps, SelectedQuestion } from "../../constants/types";
+import {
+  InspectSidebarProps,
+  SelectedQuestion,
+  QuestionHoverCardProps,
+} from "../../constants/types";
+
+// Memoized wrapper with custom comparison to prevent unnecessary re-renders
+const MemoizedQuestionItem = memo(
+  (props: QuestionHoverCardProps) => (
+    <>
+      <QuestionHoverCard {...props} />
+      <SelectSeparator />
+    </>
+  ),
+  (prevProps, nextProps) => {
+    // Only re-render if these specific props change
+    return (
+      prevProps.question.id === nextProps.question.id &&
+      prevProps.isThisTheCurrentQuestion ===
+        nextProps.isThisTheCurrentQuestion &&
+      prevProps.isInspectSidebarOpen === nextProps.isInspectSidebarOpen &&
+      prevProps.isMobileDevice === nextProps.isMobileDevice &&
+      prevProps.listId === nextProps.listId
+    );
+  }
+);
+MemoizedQuestionItem.displayName = "MemoizedQuestionItem";
 
 const InspectSidebar = forwardRef(
   (
@@ -533,26 +559,28 @@ const InspectSidebar = forwardRef(
                     {partitionedTopicalData?.[currentTab][
                       virtualItem.index
                     ] && (
-                      <Fragment key={virtualItem.index}>
-                        <QuestionHoverCard
-                          resetScrollPositions={resetScrollPositions}
-                          question={
-                            partitionedTopicalData[currentTab][
-                              virtualItem.index
-                            ]
-                          }
-                          navigateToQuestion={navigateToQuestion}
-                          currentQuestionId={currentQuestionId}
-                          setCurrentQuestionId={setCurrentQuestionId}
-                          setCurrentTabThatContainsQuestion={
-                            setCurrentTabThatContainsQuestion
-                          }
-                          listId={listId}
-                          isInspectSidebarOpen={isInspectSidebarOpen}
-                          isMobileDevice={isMobile}
-                        />
-                        <SelectSeparator />
-                      </Fragment>
+                      <MemoizedQuestionItem
+                        key={
+                          partitionedTopicalData[currentTab][virtualItem.index]
+                            .id
+                        }
+                        resetScrollPositions={resetScrollPositions}
+                        question={
+                          partitionedTopicalData[currentTab][virtualItem.index]
+                        }
+                        navigateToQuestion={navigateToQuestion}
+                        isThisTheCurrentQuestion={
+                          partitionedTopicalData[currentTab][virtualItem.index]
+                            ?.id === currentQuestionId
+                        }
+                        setCurrentQuestionId={setCurrentQuestionId}
+                        setCurrentTabThatContainsQuestion={
+                          setCurrentTabThatContainsQuestion
+                        }
+                        listId={listId}
+                        isInspectSidebarOpen={isInspectSidebarOpen}
+                        isMobileDevice={isMobile}
+                      />
                     )}
                   </div>
                 ))}
@@ -572,22 +600,23 @@ const InspectSidebar = forwardRef(
                     key={virtualItem.key}
                     data-index={virtualItem.index}
                   >
-                    <Fragment key={virtualItem.index}>
-                      <QuestionHoverCard
-                        resetScrollPositions={resetScrollPositions}
-                        question={searchResults[virtualItem.index]}
-                        navigateToQuestion={navigateToQuestion}
-                        currentQuestionId={currentQuestionId}
-                        setCurrentTabThatContainsQuestion={
-                          setCurrentTabThatContainsQuestion
-                        }
-                        listId={listId}
-                        setCurrentQuestionId={setCurrentQuestionId}
-                        isInspectSidebarOpen={isInspectSidebarOpen}
-                        isMobileDevice={isMobile}
-                      />
-                      <SelectSeparator />
-                    </Fragment>
+                    <MemoizedQuestionItem
+                      key={searchResults[virtualItem.index].id}
+                      resetScrollPositions={resetScrollPositions}
+                      question={searchResults[virtualItem.index]}
+                      navigateToQuestion={navigateToQuestion}
+                      isThisTheCurrentQuestion={
+                        searchResults[virtualItem.index]?.id ===
+                        currentQuestionId
+                      }
+                      setCurrentTabThatContainsQuestion={
+                        setCurrentTabThatContainsQuestion
+                      }
+                      listId={listId}
+                      setCurrentQuestionId={setCurrentQuestionId}
+                      isInspectSidebarOpen={isInspectSidebarOpen}
+                      isMobileDevice={isMobile}
+                    />
                   </div>
                 ))}
               </div>

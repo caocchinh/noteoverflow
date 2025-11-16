@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionHoverCardProps } from "../../constants/types";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 const QuestionHoverCard = memo(
   ({
     question,
-    currentQuestionId,
+    isThisTheCurrentQuestion,
     navigateToQuestion,
     isMobileDevice,
     listId,
@@ -40,7 +40,7 @@ const QuestionHoverCard = memo(
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
 
-    useMutationState({
+    const isThisFinishedQuestionSettled = useMutationState({
       filters: {
         mutationKey: [
           "user_saved_activities",
@@ -53,10 +53,14 @@ const QuestionHoverCard = memo(
       },
     });
 
-    const isThisQuestionFinished =
-      userFinishedQuestions?.some(
-        (item) => item.question.id === question?.id
-      ) ?? false;
+    const isThisQuestionFinished = useMemo(
+      () =>
+        userFinishedQuestions?.some(
+          (item) => item.question.id === question?.id
+        ) ?? false,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled]
+    );
 
     useEffect(() => {
       return () => {
@@ -82,14 +86,14 @@ const QuestionHoverCard = memo(
           <div
             className={cn(
               "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
-              currentQuestionId === question?.id && "!bg-logo-main text-white",
+              isThisTheCurrentQuestion && "!bg-logo-main text-white",
               isThisQuestionFinished &&
                 "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
             )}
-            onTouchStart={() => {
+            onTouchStart={useCallback(() => {
               touchStartTimeRef.current = Date.now();
-            }}
-            onMouseEnter={() => {
+            }, [])}
+            onMouseEnter={useCallback(() => {
               if (touchStartTimeRef.current) {
                 return;
               }
@@ -99,8 +103,8 @@ const QuestionHoverCard = memo(
               hoverTimeoutRef.current = setTimeout(() => {
                 setHoverCardOpen(true);
               }, 375);
-            }}
-            onMouseLeave={() => {
+            }, [isPopoverOpen])}
+            onMouseLeave={useCallback(() => {
               if (touchStartTimeRef.current) {
                 return;
               }
@@ -111,11 +115,11 @@ const QuestionHoverCard = memo(
                 clearTimeout(hoverTimeoutRef.current);
                 hoverTimeoutRef.current = null;
               }
-            }}
-            onClick={() => {
+            }, [isPopoverOpen])}
+            onClick={useCallback(() => {
               navigateToQuestion(question?.id, false);
               resetScrollPositions();
-            }}
+            }, [navigateToQuestion, question?.id, resetScrollPositions])}
           >
             <p>
               {extractPaperCode({
@@ -184,7 +188,7 @@ const QuestionHoverCard = memo(
         <HoverCardContent
           className={cn(
             "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
-            currentQuestionId === question?.id && "!hidden"
+            isThisTheCurrentQuestion && "!hidden"
           )}
           side="left"
           sideOffset={25}
