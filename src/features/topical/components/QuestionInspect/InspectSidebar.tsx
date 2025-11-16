@@ -417,13 +417,21 @@ const InspectSidebar = forwardRef(
       partitionedTopicalData,
     ]);
 
-    const navigateToQuestion = useCallback(
-      (questionId: string, scroll: boolean = true) => {
+    const calculateTabThatQuestionResidesIn = useCallback(
+      (questionId: string) => {
         const tab = questionId
           ? partitionedTopicalData?.findIndex((partition) =>
               partition.some((question) => question.id === questionId)
             ) ?? 0
           : 0;
+        return tab;
+      },
+      [partitionedTopicalData]
+    );
+
+    const navigateToQuestion = useCallback(
+      (questionId: string, scroll: boolean = true) => {
+        const tab = calculateTabThatQuestionResidesIn(questionId);
 
         setCurrentTabThatContainsQuestion(tab);
         setCurrentTab(tab);
@@ -436,12 +444,12 @@ const InspectSidebar = forwardRef(
         }
       },
       [
+        calculateTabThatQuestionResidesIn,
+        setCurrentTabThatContainsQuestion,
+        setCurrentQuestionId,
         partitionedTopicalData,
         isVirtualizationReady,
         scrollToQuestion,
-        setCurrentTabThatContainsQuestion,
-        setCurrentTab,
-        setCurrentQuestionId,
       ]
     );
 
@@ -471,9 +479,20 @@ const InspectSidebar = forwardRef(
       if (overflowScrollHandler) {
         overflowScrollHandler();
       }
-      navigateToQuestion(isOpen.questionId);
+      const tab = calculateTabThatQuestionResidesIn(isOpen.questionId);
+      if (!isVirtualizationReady) {
+        setCurrentTabThatContainsQuestion(tab);
+        setCurrentTab(tab);
+        setCurrentQuestionId(
+          !isOpen.questionId
+            ? partitionedTopicalData?.[tab]?.[0]?.id
+            : isOpen.questionId
+        );
+      } else {
+        scrollToQuestion({ questionId: isOpen.questionId, tab });
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, overflowScrollHandler]);
+    }, [isOpen, overflowScrollHandler, isVirtualizationReady]);
 
     useEffect(() => {
       setSearchInput("");

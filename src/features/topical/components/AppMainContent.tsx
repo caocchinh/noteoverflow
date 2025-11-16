@@ -42,6 +42,7 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import ExportBar from "./ExportBar";
+import IntergrationTips from "./IntergrationTips";
 
 const AppMainContent = ({
   mountedRef,
@@ -523,14 +524,12 @@ const AppMainContent = ({
                 manually using the filter on the left.
               </div>
             )}
-
           {topicalData?.isRateLimited && (
             <p className="text-md text-center mb-2 text-red-600">
               Limited results displayed due to rate limiting. Sign in for
               complete access.
             </p>
           )}
-
           {topicalData?.isRateLimited &&
             window.location.href ===
               "https://noteoverflow.com/topical?queryKey=%7B%22curriculumId%22%3A%22CIE+A-LEVEL%22%2C%22subjectId%22%3A%22Physics+%289702%29%22%2C%22topic%22%3A%5B%22GRAVITATIONAL+FIELDS%22%2C%22MOTION+IN+A+CIRCLE%22%5D%2C%22paperType%22%3A%5B%224%22%5D%2C%22year%22%3A%5B%222025%22%2C%222024%22%2C%222023%22%2C%222022%22%2C%222021%22%2C%222020%22%2C%222019%22%2C%222018%22%2C%222017%22%2C%222016%22%2C%222015%22%2C%222014%22%2C%222013%22%2C%222012%22%2C%222011%22%2C%222010%22%2C%222009%22%5D%2C%22season%22%3A%5B%22Spring%22%2C%22Summer%22%2C%22Winter%22%5D%7D" && (
@@ -559,8 +558,51 @@ const AppMainContent = ({
                   <RefreshCcw />
                 </Button>
               </div>
+            )}{" "}
+          {!doesSearchYieldAnyQuestions &&
+            isTopicalDataFetched &&
+            !isTopicalDataError &&
+            !isTopicalDataFetching && (
+              <div className="flex items-center justify-center w-full h-full">
+                <p className="text-md text-center mb-2 text-red-600">
+                  No questions found. Try changing the filters. Certain topics
+                  may be paired with specific papers.
+                </p>
+              </div>
             )}
-
+          {doesSearchYieldAnyQuestions && (
+            <p className="text-sm text-left mb-1">
+              {filteredProcessedData?.sortedData.length ?? 0} question
+              {filteredProcessedData?.sortedData.length ?? 0 > 1
+                ? "s"
+                : ""}{" "}
+              found
+            </p>
+          )}
+          {currentChunkIndex === 0 &&
+            isTopicalDataFetched &&
+            !isTopicalDataError &&
+            !isTopicalDataFetching &&
+            currentQuery.topic.includes("INTEGRATION") && <IntergrationTips />}
+          {finishedQuestionsFilteredDisplayData.length == 0 &&
+            currentChunkIndex == 0 &&
+            doesSearchYieldAnyQuestions &&
+            isTopicalDataFetched &&
+            !isTopicalDataError &&
+            !isTopicalDataFetching && (
+              <div className="flex items-center justify-center w-full h-full flex-col gap-2">
+                <p className="text-xl font-semibold text-center text-green-700">
+                  You finished everything!
+                </p>
+                <Image
+                  src="/assets/elon-musk-elon-dance.gif"
+                  alt="Elon Musk"
+                  height={400}
+                  width={400}
+                  className="rounded-md"
+                />
+              </div>
+            )}
           {isTopicalDataFetching && (
             <Loader2 className="animate-spin m-auto mb-2" />
           )}
@@ -568,9 +610,6 @@ const AppMainContent = ({
             doesSearchYieldAnyQuestions={doesSearchYieldAnyQuestions}
             filteredDisplayData={finishedQuestionsFilteredDisplayData}
             questionsForExport={questionsForExport}
-            totalNumberOfQuestions={
-              filteredProcessedData?.sortedData.length ?? 0
-            }
             isExportModeEnabled={isExportModeEnabled}
             handleQuestionClick={handleQuestionClick}
             handleInfiniteScrollNext={handleInfiniteScrollNext}
@@ -578,9 +617,6 @@ const AppMainContent = ({
               finishedQuestionsFilteredPartitionedData
             }
             currentChunkIndex={currentChunkIndex}
-            isTopicalDataFetching={isTopicalDataFetching}
-            isTopicalDataFetched={isTopicalDataFetched}
-            isTopicalDataError={isTopicalDataError}
           />
         </ScrollArea>
       </SidebarInset>
@@ -609,26 +645,17 @@ export default AppMainContent;
 
 export const MainContent = memo(
   ({
-    doesSearchYieldAnyQuestions,
     filteredDisplayData,
     questionsForExport,
-    totalNumberOfQuestions,
     isExportModeEnabled,
     handleQuestionClick,
     handleInfiniteScrollNext,
     finishedQuestionsFilteredPartitionedData,
     currentChunkIndex,
-    isTopicalDataFetching,
-    isTopicalDataFetched,
-    isTopicalDataError,
   }: {
     doesSearchYieldAnyQuestions: boolean;
-    isTopicalDataFetching: boolean;
-    isTopicalDataFetched: boolean;
-    isTopicalDataError: boolean;
     filteredDisplayData: SelectedQuestion[];
     questionsForExport: string[];
-    totalNumberOfQuestions: number;
     isExportModeEnabled: boolean;
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
@@ -639,43 +666,6 @@ export const MainContent = memo(
 
     return (
       <>
-        {!doesSearchYieldAnyQuestions &&
-          isTopicalDataFetched &&
-          !isTopicalDataError &&
-          !isTopicalDataFetching && (
-            <div className="flex items-center justify-center w-full h-full">
-              <p className="text-md text-center mb-2 text-red-600">
-                No questions found. Try changing the filters. Certain topics may
-                be paired with specific papers.
-              </p>
-            </div>
-          )}
-
-        {doesSearchYieldAnyQuestions && (
-          <p className="text-sm text-left mb-1">
-            {totalNumberOfQuestions} question
-            {totalNumberOfQuestions > 1 ? "s" : ""} found
-          </p>
-        )}
-
-        {filteredDisplayData.length == 0 &&
-          doesSearchYieldAnyQuestions &&
-          isTopicalDataFetched &&
-          !isTopicalDataError &&
-          !isTopicalDataFetching && (
-            <div className="flex items-center justify-center w-full h-full flex-col gap-2">
-              <p className="text-xl font-semibold text-center text-green-700">
-                You finished everything!
-              </p>
-              <Image
-                src="/assets/elon-musk-elon-dance.gif"
-                alt="Elon Musk"
-                height={400}
-                width={400}
-                className="rounded-md"
-              />
-            </div>
-          )}
         <ResponsiveMasonry
           columnsCountBreakPoints={
             COLUMN_BREAKPOINTS[
