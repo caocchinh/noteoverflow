@@ -117,6 +117,7 @@ const QuestionHoverCard = memo(
               }
             }, [isPopoverOpen])}
             onClick={useCallback(() => {
+              setHoverCardOpen(false);
               navigateToQuestion(question?.id, false);
               resetScrollPositions();
             }, [navigateToQuestion, question?.id, resetScrollPositions])}
@@ -192,6 +193,12 @@ const QuestionHoverCard = memo(
           )}
           side="left"
           sideOffset={25}
+          onTouchStart={() => {
+            setHoverCardOpen(false);
+          }}
+          onClick={() => {
+            setHoverCardOpen(false);
+          }}
         >
           {!isImageLoaded && !isImageError && (
             <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">

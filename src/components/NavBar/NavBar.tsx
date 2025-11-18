@@ -56,9 +56,17 @@ const NavBar = () => {
             </a>
           </>
         )}
-
         <SearchPastPaper />
-        <div className="header-content-group flex items-center gap-4">
+
+        <div className="header-content-group flex items-center gap-2">
+          {/* <Button className="flex items-center gap-2" asChild>
+            <Link
+              className="text-sm font-medium text-[var(--navbar-text)] opacity-80 transition hover:opacity-100 border border-[var(--navbar-border)] bg-[var(--navbar-bg)]"
+              href="/resources"
+            >
+              Resources
+            </Link>
+          </Button> */}
           <Button
             asChild
             className="group relative rounded-lg border border-[var(--navbar-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] hover:bg-[var(--navbar-bg)] "
