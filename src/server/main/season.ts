@@ -1,7 +1,7 @@
-import 'server-only';
-import { and, eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { season } from '@/drizzle/schema';
+import "server-only";
+import { and, eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
+import { season } from "@/drizzle/schema";
 
 export const createSeason = async ({
   season: seasonProp,

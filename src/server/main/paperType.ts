@@ -1,7 +1,7 @@
-import 'server-only';
-import { and, eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { paperType } from '@/drizzle/schema';
+import "server-only";
+import { and, eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
+import { paperType } from "@/drizzle/schema";
 
 export const createPaperType = async ({
   paperType: paperTypeProp,

@@ -1,7 +1,7 @@
-import 'server-only';
-import { eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { curriculum } from '@/drizzle/schema';
+import "server-only";
+import { eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
+import { curriculum } from "@/drizzle/schema";
 
 export const createCurriculum = async ({ name }: { name: string }) => {
   const db = await getDbAsync();

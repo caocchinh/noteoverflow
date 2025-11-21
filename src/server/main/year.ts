@@ -1,7 +1,7 @@
-import 'server-only';
-import { and, eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { year } from '@/drizzle/schema';
+import "server-only";
+import { and, eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
+import { year } from "@/drizzle/schema";
 
 export const createYear = async ({
   year: yearProp,

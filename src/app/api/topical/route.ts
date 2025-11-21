@@ -8,7 +8,7 @@ import { question } from "@/drizzle/schema";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/dal/verifySession";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import {
   FilterData,
   SelectedQuestion,

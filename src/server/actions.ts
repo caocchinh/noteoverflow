@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
 import type { ServerActionResponse } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { user } from "@/drizzle/schema";
 import type {
   CurriculumType,

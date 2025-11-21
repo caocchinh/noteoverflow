@@ -1,6 +1,6 @@
 import "server-only";
 import { eq } from "drizzle-orm";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
 
 export const isQuestionExists = async (

@@ -1,5 +1,5 @@
 import Loader from "@/components/Loader/Loader";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { question as questionTable } from "@/drizzle/schema";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";

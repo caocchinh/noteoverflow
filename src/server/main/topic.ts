@@ -1,7 +1,7 @@
-import 'server-only';
-import { and, eq } from 'drizzle-orm';
-import { getDbAsync } from '@/drizzle/db';
-import { topic } from '@/drizzle/schema';
+import "server-only";
+import { and, eq } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
+import { topic } from "@/drizzle/schema";
 
 export const createTopic = async ({
   topic: topicProp,

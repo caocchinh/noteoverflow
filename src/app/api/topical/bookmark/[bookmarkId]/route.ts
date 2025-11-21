@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
 import { SelectedPublickBookmark } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";

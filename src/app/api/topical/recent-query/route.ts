@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { recentQuery } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";

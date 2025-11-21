@@ -13,7 +13,7 @@ import type {
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getCache, setCache } from "@/drizzle/db";
+import { getCache, setCache } from "@/lib/client-cache";
 import { INITIAL_QUERY } from "@/constants/constants";
 import AppSidebar from "@/features/topical/components/AppSidebar";
 import AppMainContent from "@/features/topical/components/AppMainContent";

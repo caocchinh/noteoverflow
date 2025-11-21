@@ -1,6 +1,6 @@
 import Loader from "@/components/Loader/Loader";
 import { verifySession } from "@/dal/verifySession";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";

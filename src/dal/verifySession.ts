@@ -1,7 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { cache } from "react";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 import { auth } from "@/lib/auth/auth";
 
 export const verifySession = cache(async () => {

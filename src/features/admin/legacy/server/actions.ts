@@ -28,7 +28,7 @@ import {
 } from "../../content/lib/utils";
 import { question, topic as topicTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-import { getDbAsync } from "@/drizzle/db";
+import { getDbAsync } from "@/drizzle/db.server";
 
 function insertAtIndex(array: string[], index: number, element: string) {
   const newArray = [...array];
