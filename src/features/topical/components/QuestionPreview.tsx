@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
-import Image from "next/image";
 
 const QuestionPreview = memo(
   ({
@@ -264,7 +264,7 @@ const QuestionPreview = memo(
           </Button>
         )}
 
-        <Image
+        <img
           className={cn(
             "w-full h-full object-contain",
             uiPreferences.imageTheme === "dark" && "!invert"
@@ -272,11 +272,12 @@ const QuestionPreview = memo(
           src={imageSrc}
           alt="Question preview"
           loading="lazy"
-          onLoad={() => setLoading(false)}
-          onLoadingComplete={(img) => {
+          onLoad={(event) => {
+            setLoading(false);
+            const target = event.currentTarget;
             setImageDimensions({
-              width: img.naturalWidth,
-              height: img.naturalHeight,
+              width: target.naturalWidth,
+              height: target.naturalHeight,
             });
           }}
           onError={() => {
