@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "./BookmarkButton";
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 const QuestionPreview = memo(
   ({
@@ -37,6 +37,10 @@ const QuestionPreview = memo(
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
+    const [imageDimensions, setImageDimensions] = useState<{
+      width: number;
+      height: number;
+    } | null>(null);
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
     const { bookmarksData: bookmarks } = useTopicalApp();
@@ -260,7 +264,7 @@ const QuestionPreview = memo(
           </Button>
         )}
 
-        <img
+        <Image
           className={cn(
             "w-full h-full object-contain",
             uiPreferences.imageTheme === "dark" && "!invert"
@@ -269,10 +273,18 @@ const QuestionPreview = memo(
           alt="Question preview"
           loading="lazy"
           onLoad={() => setLoading(false)}
+          onLoadingComplete={(img) => {
+            setImageDimensions({
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+            });
+          }}
           onError={() => {
             setLoading(false);
             setError(true);
           }}
+          width={imageDimensions?.width ?? 1}
+          height={imageDimensions?.height ?? 1}
         />
       </div>
     );
