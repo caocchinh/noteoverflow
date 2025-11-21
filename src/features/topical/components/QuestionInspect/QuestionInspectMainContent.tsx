@@ -18,7 +18,10 @@ import {
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
+import {
+  AnnotatableInspectImages,
+  AnnotatableInspectImagesHandle,
+} from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { QuestionInformation } from "../QuestionInformation";
 import BothViews from "./BothViews";
 
@@ -61,9 +64,23 @@ const QuestionInspectMainContent = forwardRef(
     const questionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
+    const questionImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
+    const answerImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
+    const bothViewsImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
     const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
     const [currentView, setCurrentView] =
       useState<QuestionInspectViewMode>("question");
+
+    useEffect(() => {
+      console.log("currentView", currentView);
+      if (currentView === "question") {
+        questionImagesRef.current?.updatePdfViewerSize();
+      } else if (currentView === "answer") {
+        answerImagesRef.current?.updatePdfViewerSize();
+      } else {
+        bothViewsImagesRef.current?.updatePdfViewerSize();
+      }
+    }, [currentView]);
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -161,6 +178,9 @@ const QuestionInspectMainContent = forwardRef(
         resetScrollPositions,
         setCurrentView,
         handleKeyboardNavigation,
+        questionImagesRef,
+        answerImagesRef,
+        bothViewsImagesRef,
       }),
       [resetScrollPositions, setCurrentView, handleKeyboardNavigation]
     );
@@ -202,7 +222,7 @@ const QuestionInspectMainContent = forwardRef(
 
           <div
             className={cn(
-              currentView === "question" ? "block w-full" : "hidden"
+              currentView === "question" ? "w-full" : "absolute top-[-99999px]"
             )}
           >
             <ScrollArea
@@ -218,6 +238,8 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
+                ref={questionImagesRef}
+                viewerId="pdf-viewer-question"
                 imageSource={currentQuestionData?.questionImages ?? []}
                 currentQuestionId={currentQuestionData?.id}
               />
@@ -230,7 +252,9 @@ const QuestionInspectMainContent = forwardRef(
             </ScrollArea>
           </div>
           <div
-            className={cn(currentView === "answer" ? "block w-full" : "hidden")}
+            className={cn(
+              currentView === "answer" ? "w-full" : "absolute top-[-99999px]"
+            )}
           >
             <ScrollArea
               className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
@@ -245,13 +269,17 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
+                ref={answerImagesRef}
+                viewerId="pdf-viewer-answer"
                 imageSource={currentQuestionData?.answers ?? []}
                 currentQuestionId={currentQuestionData?.id}
               />
             </ScrollArea>
           </div>
           <div
-            className={cn(currentView === "both" ? "block w-full" : "hidden")}
+            className={cn(
+              currentView === "both" ? "w-full" : "absolute top-[-99999px]"
+            )}
           >
             <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
               <QuestionInformation
@@ -264,6 +292,8 @@ const QuestionInspectMainContent = forwardRef(
               currentQuestionData={currentQuestionData}
               questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
               answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
+              questionImagesRef={questionImagesRef}
+              answerImagesRef={answerImagesRef}
             />
           </div>
         </div>

@@ -147,16 +147,18 @@ const QuestionInspect = memo(
 
       const handleInteractOutside = useCallback(
         (e: Event) => {
-          const targetElement = e.target as Element;
-          if (targetElement?.closest("[data-calculator-close]")) {
-            e.preventDefault();
-            return;
-          }
+          e.preventDefault();
 
-          if (isInspectOpen.isOpen && isCalculatorOpen) {
-            e.preventDefault();
-            return;
-          }
+          // const targetElement = e.target as Element;
+          // if (targetElement?.closest("[data-calculator-close]")) {
+          //   e.preventDefault();
+          //   return;
+          // }
+
+          // if (isInspectOpen.isOpen && isCalculatorOpen) {
+          //   e.preventDefault();
+          //   return;
+          // }
         },
         [isInspectOpen.isOpen, isCalculatorOpen]
       );
@@ -265,6 +267,7 @@ const QuestionInspect = memo(
                   currentQuestionIndex={currentQuestionIndex}
                   isInputFocused={isInputFocused}
                   navigationButtonsContainerRef={navigationButtonsContainerRef}
+                  questionInspectMainContentRef={questionInspectMainContentRef}
                 />
                 <QuestionInspectMainContent
                   ref={questionInspectMainContentRef}

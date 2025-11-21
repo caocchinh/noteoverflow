@@ -914,3 +914,33 @@ export function extractUniqueTopicCurriculumnSubdivisions(
 
   return [...new Set(allSubdivisions)];
 }
+
+/**
+ * Converts an image from a URL to a PNG Base64 string.
+ * This is useful for rendering WebP images in libraries that don't support them (like @react-pdf/renderer).
+ * @param url The URL of the image to convert.
+ * @returns A Promise that resolves to the Base64 string of the PNG image.
+ */
+export const convertImageToPngBase64 = (url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // Enable CORS to prevent tainted canvas
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL("image/png");
+      resolve(dataURL);
+    };
+    img.onerror = (error) => {
+      reject(error);
+    };
+    img.src = url;
+  });
+};

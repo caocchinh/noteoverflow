@@ -38,6 +38,7 @@ import {
   SelectedQuestion,
   QuestionHoverCardProps,
 } from "../../constants/types";
+import { QuestionView } from "@/app/topical/[questionId]";
 
 // Memoized wrapper with custom comparison to prevent unnecessary re-renders
 const MemoizedQuestionItem = memo(
@@ -81,6 +82,7 @@ const InspectSidebar = memo(
         overflowScrollHandler,
         currentQuestionIndex,
         navigationButtonsContainerRef,
+        questionInspectMainContentRef,
       }: InspectSidebarProps,
       ref
     ) => {
@@ -150,9 +152,13 @@ const InspectSidebar = memo(
             if (overflowScrollHandler) {
               overflowScrollHandler();
             }
+            // Trigger PDF resize after sidebar transition
+            questionInspectMainContentRef.current?.questionImagesRef.current?.updatePdfViewerSize();
+            questionInspectMainContentRef.current?.answerImagesRef.current?.updatePdfViewerSize();
+            questionInspectMainContentRef.current?.bothViewsImagesRef.current?.updatePdfViewerSize();
           }
         },
-        [overflowScrollHandler]
+        [overflowScrollHandler, questionInspectMainContentRef]
       );
 
       const handleNextQuestion = useCallback(() => {

@@ -37,10 +37,6 @@ const QuestionPreview = memo(
     const [error, setError] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
-    const [imageDimensions, setImageDimensions] = useState<{
-      width: number;
-      height: number;
-    } | null>(null);
     const [shouldOpen, setShouldOpen] = useState(false);
     const isMobileDevice = useIsMobile();
     const { bookmarksData: bookmarks } = useTopicalApp();
@@ -77,7 +73,7 @@ const QuestionPreview = memo(
     return (
       <div
         className={cn(
-          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50  relative overflow-hidden min-h-[110px]",
+          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50 relative overflow-hidden min-h-[110px]",
           uiPreferences.imageTheme === "dark" && "!bg-black dark:!border-white"
         )}
         onClick={useCallback(() => {
@@ -272,20 +268,15 @@ const QuestionPreview = memo(
           src={imageSrc}
           alt="Question preview"
           loading="lazy"
-          onLoad={(event) => {
+          onLoad={() => {
             setLoading(false);
-            const target = event.currentTarget;
-            setImageDimensions({
-              width: target.naturalWidth,
-              height: target.naturalHeight,
-            });
           }}
           onError={() => {
             setLoading(false);
             setError(true);
           }}
-          width={imageDimensions?.width ?? 1}
-          height={imageDimensions?.height ?? 1}
+          width={1}
+          height={1}
         />
       </div>
     );
