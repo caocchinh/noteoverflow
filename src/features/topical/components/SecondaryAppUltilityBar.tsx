@@ -36,6 +36,7 @@ const SecondaryAppUltilityBar = ({
   setCurrentChunkIndex,
   setDisplayedData,
   scrollAreaRef,
+  isFilteredDisabled,
   sortParameters,
   setSortParameters,
   setIsQuestionInspectOpen,
@@ -153,7 +154,7 @@ const SecondaryAppUltilityBar = ({
                 onClick={() => {
                   setIsSidebarOpen(!isSidebarOpen);
                 }}
-                disabled={isQuestionViewDisabled}
+                disabled={isFilteredDisabled}
                 variant="outline"
               >
                 Filters
@@ -164,11 +165,11 @@ const SecondaryAppUltilityBar = ({
           <TooltipContent
             side="bottom"
             className={cn(
-              !isQuestionViewDisabled && "!hidden",
+              !isFilteredDisabled && "!hidden",
               "flex justify-center items-center gap-2"
             )}
           >
-            To filter questions, select a subject first
+            No question to filter
           </TooltipContent>
         </Tooltip>
 

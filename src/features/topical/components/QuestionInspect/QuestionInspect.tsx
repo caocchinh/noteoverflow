@@ -29,6 +29,7 @@ import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import InspectSidebar from "./InspectSidebar";
 import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
+import { usePathname } from "next/navigation";
 
 const sidebarProviderStyle = {
   "--sidebar-width": "299.6px",
@@ -49,6 +50,13 @@ const QuestionInspect = memo(
       }: QuestionInspectProps,
       ref
     ) => {
+      const pathname = usePathname();
+      const pathNameRef = useRef(pathname);
+
+      useEffect(() => {
+        pathNameRef.current = pathname;
+      }, [pathname]);
+
       const [isInspectOpen, setIsInspectOpen] =
         useState<QuestionInspectOpenState>({
           isOpen: false,
@@ -133,6 +141,9 @@ const QuestionInspect = memo(
       );
 
       useEffect(() => {
+        if (pathNameRef.current !== "/topical") {
+          return;
+        }
         if (isInspectOpen.isOpen) {
           questionInspectMainContentRef.current?.setCurrentView("question");
           updateSearchParams({
@@ -153,6 +164,9 @@ const QuestionInspect = memo(
       }, [currentQuery, isInspectOpen]);
 
       useEffect(() => {
+        if (pathNameRef.current !== "/topical") {
+          return;
+        }
         if (currentQuery && currentQuestionId) {
           updateSearchParams({
             query: JSON.stringify(currentQuery),

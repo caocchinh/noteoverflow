@@ -412,6 +412,7 @@ export interface SecondaryAppUltilityBarProps {
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
   // Optional props for inspect and pagination functionality
   fullPartitionedData?: SelectedQuestion[][] | undefined;
+  isFilteredDisabled: boolean;
   currentChunkIndex?: number;
   setCurrentChunkIndex?: Dispatch<SetStateAction<number>>;
   setDisplayedData?: Dispatch<SetStateAction<SelectedQuestion[]>>;

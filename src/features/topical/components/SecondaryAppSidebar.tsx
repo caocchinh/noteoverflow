@@ -150,7 +150,11 @@ const SecondaryAppSidebar = ({
 
   useEffect(() => {
     // When subjectMetadata changes, filter selections to keep only available options
-    if (!subjectMetadata) return;
+    if (!subjectMetadata) {
+      console.log("fuck");
+      setCurrentFilter(null);
+      return;
+    }
 
     let didUpdate = false;
     const updatedFilter: SubjectMetadata = {
@@ -166,15 +170,14 @@ const SecondaryAppSidebar = ({
         selectedTopicRef.current?.filter((topic) =>
           subjectMetadata.topic!.includes(topic)
         ) ?? [];
-      const newTopics =
-        filteredTopics.length > 0 ? filteredTopics : subjectMetadata.topic;
       if (
-        JSON.stringify(newTopics) !== JSON.stringify(selectedTopicRef.current)
+        JSON.stringify(filteredTopics) !==
+        JSON.stringify(selectedTopicRef.current)
       ) {
-        setSelectedTopic(newTopics);
+        setSelectedTopic(filteredTopics);
         didUpdate = true;
       }
-      updatedFilter.topic = newTopics;
+      updatedFilter.topic = filteredTopics;
     }
 
     // Filter years
@@ -183,15 +186,15 @@ const SecondaryAppSidebar = ({
         selectedYearRef.current?.filter((year) =>
           subjectMetadata.year!.includes(year)
         ) ?? [];
-      const newYears =
-        filteredYears.length > 0 ? filteredYears : subjectMetadata.year;
+
       if (
-        JSON.stringify(newYears) !== JSON.stringify(selectedYearRef.current)
+        JSON.stringify(filteredYears) !==
+        JSON.stringify(selectedYearRef.current)
       ) {
-        setSelectedYear(newYears);
+        setSelectedYear(filteredYears);
         didUpdate = true;
       }
-      updatedFilter.year = newYears;
+      updatedFilter.year = filteredYears;
     }
 
     // Filter paperTypes
@@ -200,18 +203,15 @@ const SecondaryAppSidebar = ({
         selectedPaperTypeRef.current?.filter((paperType) =>
           subjectMetadata.paperType!.includes(paperType)
         ) ?? [];
-      const newPaperTypes =
-        filteredPaperTypes.length > 0
-          ? filteredPaperTypes
-          : subjectMetadata.paperType;
+
       if (
-        JSON.stringify(newPaperTypes) !==
+        JSON.stringify(filteredPaperTypes) !==
         JSON.stringify(selectedPaperTypeRef.current)
       ) {
-        setSelectedPaperType(newPaperTypes);
+        setSelectedPaperType(filteredPaperTypes);
         didUpdate = true;
       }
-      updatedFilter.paperType = newPaperTypes;
+      updatedFilter.paperType = filteredPaperTypes;
     }
 
     // Filter seasons
@@ -220,15 +220,15 @@ const SecondaryAppSidebar = ({
         selectedSeasonRef.current?.filter((season) =>
           subjectMetadata.season!.includes(season)
         ) ?? [];
-      const newSeasons =
-        filteredSeasons.length > 0 ? filteredSeasons : subjectMetadata.season;
+
       if (
-        JSON.stringify(newSeasons) !== JSON.stringify(selectedSeasonRef.current)
+        JSON.stringify(filteredSeasons) !==
+        JSON.stringify(selectedSeasonRef.current)
       ) {
-        setSelectedSeason(newSeasons);
+        setSelectedSeason(filteredSeasons);
         didUpdate = true;
       }
-      updatedFilter.season = newSeasons;
+      updatedFilter.season = filteredSeasons;
     }
 
     // Update filter if anything changed
@@ -236,6 +236,21 @@ const SecondaryAppSidebar = ({
       setCurrentFilter(updatedFilter);
     }
   }, [subjectMetadata, setCurrentFilter]);
+
+  useEffect(() => {
+    if (!currentFilter && subjectMetadata?.topic) {
+      setSelectedPaperType(subjectMetadata?.paperType);
+      setSelectedSeason(subjectMetadata.season);
+      setSelectedYear(subjectMetadata.year);
+      setSelectedTopic(subjectMetadata.topic);
+      setCurrentFilter({
+        paperType: subjectMetadata?.paperType,
+        topic: subjectMetadata?.topic,
+        year: subjectMetadata?.year,
+        season: subjectMetadata?.season,
+      });
+    }
+  }, [currentFilter, selectedSubject, setCurrentFilter, subjectMetadata]);
 
   const handleFilter = useCallback(() => {
     const filter = {
@@ -247,12 +262,13 @@ const SecondaryAppSidebar = ({
       season: selectedSeason?.toSorted() ?? [],
     };
     const isSameQuery = JSON.stringify(currentFilter) == JSON.stringify(filter);
-    if (isValidInputs({ scrollOnError: true }) && !isSameQuery) {
+    const isValid = isValidInputs({ scrollOnError: true });
+    if (isValid && isValidInputs({ scrollOnError: true }) && !isSameQuery) {
       setCurrentFilter({
         ...filter,
       });
-      // Update URL parameters without page reload
-    } else if (isSameQuery) {
+    }
+    if (isValid) {
       setIsSidebarOpen(false);
     }
   }, [

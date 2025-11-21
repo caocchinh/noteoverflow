@@ -1,3 +1,4 @@
+import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
@@ -10,7 +11,11 @@ export const BookmarkRepo = {
     });
   },
 
-  async findListByUserIdAndName(userId: string, listName: string, visibility: "public" | "private") {
+  async findListByUserIdAndName(
+    userId: string,
+    listName: string,
+    visibility: "public" | "private"
+  ) {
     const db = await getDbAsync();
     return db
       .select()
@@ -24,7 +29,11 @@ export const BookmarkRepo = {
       );
   },
 
-  async findListByUserIdAndIdAndName(userId: string, listId: string, listName: string) {
+  async findListByUserIdAndIdAndName(
+    userId: string,
+    listId: string,
+    listName: string
+  ) {
     const db = await getDbAsync();
     return db
       .select()
@@ -38,7 +47,11 @@ export const BookmarkRepo = {
       );
   },
 
-  async findListByUserIdAndIdAndVisibility(userId: string, listId: string, visibility: "public" | "private") {
+  async findListByUserIdAndIdAndVisibility(
+    userId: string,
+    listId: string,
+    visibility: "public" | "private"
+  ) {
     const db = await getDbAsync();
     return db
       .select()
@@ -79,7 +92,12 @@ export const BookmarkRepo = {
       });
   },
 
-  async createList(userId: string, listId: string, listName: string, visibility: "public" | "private") {
+  async createList(
+    userId: string,
+    listId: string,
+    listName: string,
+    visibility: "public" | "private"
+  ) {
     const db = await getDbAsync();
     return db
       .insert(userBookmarkList)
@@ -131,7 +149,11 @@ export const BookmarkRepo = {
       );
   },
 
-  async updateListVisibility(userId: string, listId: string, newVisibility: "public" | "private") {
+  async updateListVisibility(
+    userId: string,
+    listId: string,
+    newVisibility: "public" | "private"
+  ) {
     const db = await getDbAsync();
     return db
       .update(userBookmarkList)

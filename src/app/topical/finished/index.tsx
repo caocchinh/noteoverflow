@@ -179,6 +179,7 @@ const FinishedQuestionsClient = ({
       </div>
 
       <SecondaryAppUltilityBar
+        isFilteredDisabled={!selectedSubject}
         setIsSidebarOpen={setIsSidebarOpen}
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
@@ -293,7 +294,7 @@ const FinishedQuestionsClient = ({
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <p className="text-sm text-muted-foreground text-center">
             No questions found. Search for questions and add them to your
-            finished questions!
+            finished questions! Or change your filters.
           </p>
           <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
         </div>

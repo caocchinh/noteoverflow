@@ -95,7 +95,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
     null
   );
-
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
       questionUnderThatBookmarkList,
@@ -225,6 +224,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           </Breadcrumb>
         </div>
         <SecondaryAppUltilityBar
+          isFilteredDisabled={!selectedSubject}
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -402,6 +402,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <p className="text-sm text-muted-foreground text-center">
             No questions found. Search for questions and add them to this list!
+            Or change your filters.
           </p>
           <NavigateToTopicalApp>Search for questions</NavigateToTopicalApp>
         </div>
