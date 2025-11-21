@@ -651,6 +651,7 @@ const BookmarkButtonConsumer = memo(
       >
         {isMobileDevice ? (
           <Drawer
+            autoFocus={false}
             onOpenChange={(open) => {
               setOpen(open);
               if (!open) {
@@ -685,6 +686,9 @@ const BookmarkButtonConsumer = memo(
               }}
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
+              }}
+              onOpenAutoFocus={(e) => {
                 e.preventDefault();
               }}
               onInteractOutside={() => {
@@ -737,6 +741,7 @@ const BookmarkButtonConsumer = memo(
                 scrollAreaRef={scrollAreaRef}
                 searchInputRef={searchInputRef}
                 isMobileDevice={true}
+                setOpen={setOpen}
               />
             </DrawerContent>
           </Drawer>
@@ -763,6 +768,10 @@ const BookmarkButtonConsumer = memo(
               className="flex flex-col z-[100010] w-[270px] !px-0 dark:bg-accent"
               onClick={(e) => e.stopPropagation()}
               align={popOverAlign}
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+              }}
+              autoFocus={false}
               side="left"
               onInteractOutside={(e) => {
                 if (triggerRef.current?.contains(e.target as Node)) {
@@ -776,6 +785,7 @@ const BookmarkButtonConsumer = memo(
                 scrollAreaRef={scrollAreaRef}
                 searchInputRef={searchInputRef}
                 isMobileDevice={false}
+                setOpen={setOpen}
               />
               <div className="w-full px-2 mt-2 flex items-center justify-center">
                 <Button
@@ -859,8 +869,10 @@ BookmarkTrigger.displayName = "BookmarkTrigger";
 const BookmarkSearchInput = memo(
   ({
     searchInputRef,
+    setOpen,
   }: {
     searchInputRef: React.RefObject<HTMLInputElement | null>;
+    setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   }) => {
     const setSearchInput = useBookmarkContext(
       (state) => state.actions.setSearchInput
@@ -890,9 +902,10 @@ const BookmarkSearchInput = memo(
           size={20}
           onClick={(e) => {
             e.stopPropagation();
-            setSearchInput("");
             if (searchInput) {
-              searchInputRef.current?.focus();
+              setSearchInput("");
+            } else {
+              setOpen(false);
             }
           }}
         />
@@ -908,10 +921,12 @@ const BookmarkList = memo(
     scrollAreaRef,
     searchInputRef,
     isMobileDevice,
+    setOpen,
   }: {
     scrollAreaRef: React.RefObject<HTMLDivElement | null>;
     searchInputRef: React.RefObject<HTMLInputElement | null>;
     isMobileDevice: boolean;
+    setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   }) => {
     const searchInput = useBookmarkContext((state) => state.searchInput);
     const setIsBlockingInput = useBookmarkContext(
@@ -970,7 +985,10 @@ const BookmarkList = memo(
 
     return (
       <div className="h-full flex flex-col mb-2 md:mb-0">
-        <BookmarkSearchInput searchInputRef={searchInputRef} />
+        <BookmarkSearchInput
+          searchInputRef={searchInputRef}
+          setOpen={setOpen}
+        />
         <ScrollArea
           viewportRef={scrollAreaRef}
           className="h-[60%] md:h-[200px] [&_.bg-border]:bg-logo-main/50"

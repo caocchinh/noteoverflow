@@ -323,7 +323,6 @@ export interface QuestionHoverCardProps {
   isThisTheCurrentQuestion: boolean;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
   listId?: string;
   isMobileDevice: boolean;
   resetScrollPositions: () => void;
@@ -480,11 +479,11 @@ export interface InspectSidebarProps {
   isOpen: QuestionInspectOpenState;
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   currentTabThatContainsQuestion: number;
+  calculateTabThatQuestionResidesIn: (questionId: string) => number;
   isInspectSidebarOpen: boolean;
   currentQuestionId: string | undefined;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  setCurrentTabThatContainsQuestion: Dispatch<SetStateAction<number>>;
   isInputFocused: RefObject<boolean>;
   resetScrollPositions: () => void;
   listId: string | undefined;

@@ -151,7 +151,6 @@ const SecondaryAppSidebar = ({
   useEffect(() => {
     // When subjectMetadata changes, filter selections to keep only available options
     if (!subjectMetadata) {
-      console.log("fuck");
       setCurrentFilter(null);
       return;
     }

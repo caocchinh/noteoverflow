@@ -93,7 +93,7 @@ export const AnnotatableInspectImages = memo(
                 >
                   <img
                     className={cn(
-                      "w-full h-full object-contain relative z-10 !max-w-[750px] cursor-pointer",
+                      "w-full h-full object-contain relative z-2 !max-w-[750px] cursor-pointer",
                       uiPreferences.imageTheme === "dark" && "!invert"
                     )}
                     src={item}

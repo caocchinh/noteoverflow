@@ -145,11 +145,11 @@ const QuestionPreview = memo(
         <BookmarkButton
           isBookmarkDisabled={isSessionPending}
           triggerButtonClassName={cn(
-            "absolute bottom-1 right-1 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
+            "absolute bottom-1 right-1 h-7 w-7 cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
           )}
           popOverTriggerClassName={cn(
-            "absolute bottom-0 right-0 h-7 w-7 md:hidden flex cursor-pointer z-[30]",
+            "absolute bottom-0 right-0 h-7 w-7 cursor-pointer z-[30]",
             isHovering && !isMobileDevice && "md:flex hidden"
           )}
           badgeClassName="hidden"

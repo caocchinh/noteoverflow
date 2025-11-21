@@ -143,7 +143,7 @@ const SecondaryAppUltilityBar = ({
               "flex justify-center items-center gap-2"
             )}
           >
-            To inspect questions, select a subject first
+            No question available
           </TooltipContent>
         </Tooltip>
         <Tooltip>

@@ -370,7 +370,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                         height={200}
                         loading="lazy"
                         title={subject}
-                        className=" object-cover rounded-[1px] "
+                        className="object-cover rounded-[3px] "
                         alt="Curriculum cover image"
                         src={
                           SUBJECT_COVER_IMAGE[

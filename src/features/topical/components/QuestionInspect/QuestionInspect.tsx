@@ -105,6 +105,27 @@ const QuestionInspect = memo(
         [setIsInspectOpen, isInspectOpen]
       );
 
+      const calculateTabThatQuestionResidesIn = useCallback(
+        (questionId: string) => {
+          const tab = questionId
+            ? partitionedTopicalData?.findIndex((partition) =>
+                partition.some((question) => question.id === questionId)
+              ) ?? 0
+            : 0;
+          return tab;
+        },
+        [partitionedTopicalData]
+      );
+
+      useEffect(() => {
+        if (!currentQuestionId) {
+          return;
+        }
+        setCurrentTabThatContainsQuestion(
+          calculateTabThatQuestionResidesIn(currentQuestionId)
+        );
+      }, [currentQuestionId, calculateTabThatQuestionResidesIn]);
+
       const questionInspectMainContentRef =
         useRef<QuestionInspectMainContentRef | null>(null);
       const sideBarInspectRef = useRef<InspectSidebarRef | null>(null);
@@ -221,15 +242,15 @@ const QuestionInspect = memo(
                   overflowScrollHandler={
                     inspectUltilityBarRef.current?.overflowScrollHandler
                   }
+                  calculateTabThatQuestionResidesIn={
+                    calculateTabThatQuestionResidesIn
+                  }
                   allQuestions={allQuestions}
                   partitionedTopicalData={partitionedTopicalData}
                   isOpen={isInspectOpen}
                   setIsOpen={setIsInspectOpen}
                   currentTabThatContainsQuestion={
                     currentTabThatContainsQuestion
-                  }
-                  setCurrentTabThatContainsQuestion={
-                    setCurrentTabThatContainsQuestion
                   }
                   isInspectSidebarOpen={isInspectSidebarOpen}
                   currentQuestionId={currentQuestionId}

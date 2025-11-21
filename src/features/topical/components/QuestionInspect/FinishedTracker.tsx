@@ -134,15 +134,15 @@ export const FinishedTracker = memo(
     return (
       <>
         {isDialogOpen && (
-          <div className="fixed inset-0 z-[100007] bg-black/67" />
+          <div className="fixed inset-0 z-[100010] bg-black/67" />
         )}
+
         <Dialog
           open={isDialogOpen}
           onOpenChange={(open) => {
             setIsDialogOpen(open);
             setIsCalculatorOpen(false);
           }}
-          modal={false}
         >
           <Tooltip>
             <TooltipTrigger asChild>

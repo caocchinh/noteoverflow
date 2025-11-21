@@ -46,7 +46,7 @@ const BrowseMoreQuestions = memo(
 
     return (
       <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
-        <div className="w-full mb-4 mt-[40px] sticky top-0 z-10 flex gap-4 dark:bg-accent bg-white flex-wrap">
+        <div className="w-full mb-4 mt-[40px] sticky top-0 z-1 flex gap-4 dark:bg-accent bg-white flex-wrap">
           <Button
             variant="outline"
             type="button"
