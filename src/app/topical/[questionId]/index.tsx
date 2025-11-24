@@ -80,6 +80,7 @@ export const QuestionView = ({
           <AnnotatableInspectImages
             imageSource={data?.questionImages ?? []}
             currentQuestionId={data?.id}
+            viewerId="pdf-viewer-question"
           />
         </ScrollArea>
       </div>
@@ -98,6 +99,7 @@ export const QuestionView = ({
           <AnnotatableInspectImages
             imageSource={data?.answers ?? []}
             currentQuestionId={data?.id}
+            viewerId="pdf-viewer-answer"
           />
         </ScrollArea>
       </div>

@@ -17,10 +17,12 @@ import {
   Shrink,
   Calculator,
   Brush,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   convertImageToPngBase64,
+  extractPaperCode,
   extractQuestionNumber,
 } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
@@ -32,7 +34,9 @@ import {
   Page,
   Image as PdfImage,
   View,
+  Link,
   StyleSheet,
+  Text,
   pdf,
 } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";
@@ -40,6 +44,7 @@ import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
 import dynamic from "next/dynamic";
 import type { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
+import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -52,6 +57,7 @@ const initPdfElement = ({
   pdfViewerElementRef,
   pdfViewerRootRef,
   author,
+  fileName,
 }: {
   pdfBlob: Blob;
   viewerId: string;
@@ -59,6 +65,7 @@ const initPdfElement = ({
   pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
   pdfViewerRootRef: React.RefObject<Root | null>;
   author: string | undefined;
+  fileName: string;
 }) => {
   if (!pdfViewerElementRef.current) {
     pdfViewerElementRef.current = document.createElement("div");
@@ -76,6 +83,7 @@ const initPdfElement = ({
         ref={pdfViewerRef}
         id={viewerId}
         author={author}
+        fileName={fileName}
       />
     );
   }
@@ -85,22 +93,123 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
-    padding: 10,
+    padding: 5,
+    paddingTop: 50,
+    paddingBottom: 15,
+  },
+  header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingLeft: "18px",
+    paddingRight: "18px",
+    paddingTop: "5px",
+    paddingBottom: "5px",
+    backgroundColor: "#f8fafc",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+  headerContent: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  branding: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerLogo: {
+    width: 27,
+    height: 27,
+    objectFit: "contain",
+    marginRight: "-2px",
+  },
+  headerText: {
+    marginLeft: 8,
+  },
+  headerTitle: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#0f172a",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    fontSize: 9,
+    color: "#475569",
+    textDecoration: "none",
+  },
+  headerTagline: {
+    fontSize: 10,
+    color: "#475569",
+    fontWeight: 500,
   },
   image: {
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 0,
+  },
+  pageNumber: {
+    position: "absolute",
+    bottom: 12,
+    right: 14,
+    fontSize: 8,
+    color: "black",
+  },
+  paperCode: {
+    position: "absolute",
+    bottom: 12,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    fontSize: 8,
+    color: "black",
   },
 });
 
-const MyDocument = ({ images }: { images: string[] }) => (
+const MyDocument = ({
+  images,
+  headerLogo,
+  paperCode,
+}: {
+  images: string[];
+  headerLogo: string;
+  paperCode: string;
+}) => (
   <Document>
     <Page size="A4" style={styles.page}>
+      <View style={styles.header} fixed>
+        <View style={styles.headerContent}>
+          <View style={styles.branding}>
+            <PdfImage src={headerLogo} style={styles.headerLogo} />
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>NoteOverflow</Text>
+              <Link src="https://noteoverflow.com" style={styles.subtitle}>
+                noteoverflow.com
+              </Link>
+            </View>
+          </View>
+          <Text style={styles.headerTagline}>AS & A-Level resources</Text>
+        </View>
+      </View>
       <View>
         {images.map((src, index) => (
           <PdfImage key={index} src={src} style={styles.image} />
         ))}
       </View>
+      <Text
+        style={styles.pageNumber}
+        render={({ pageNumber, totalPages }) =>
+          `Page ${pageNumber} of ${totalPages}`
+        }
+        fixed
+      />
+      <Text style={styles.paperCode} fixed>
+        {paperCode}
+      </Text>
     </Page>
   </Document>
 );
@@ -129,6 +238,29 @@ const AnnotatableInspectImagesComponent = memo(
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
 
     const [key, setKey] = useState(0);
+
+    const paperCode = useMemo(
+      () =>
+        extractPaperCode({
+          questionId: currentQuestionId || "",
+        }),
+      [currentQuestionId]
+    );
+
+    const questionNumber = useMemo(
+      () =>
+        extractQuestionNumber({
+          questionId: currentQuestionId || "",
+        }),
+      [currentQuestionId]
+    );
+
+    const pdfBaseFileName = useMemo(() => {
+      const sanitizedPaperCode = (paperCode || "").replace("/", "_");
+      return `NoteOverflow_${sanitizedPaperCode}_Q${questionNumber || ""}`;
+    }, [paperCode, questionNumber]);
+
+    const downloadFileName = `${pdfBaseFileName}.pdf`;
 
     useEffect(() => {
       setIsFullscreen(false);
@@ -161,14 +293,28 @@ const AnnotatableInspectImagesComponent = memo(
       const generatePdf = async () => {
         if (isEditMode && imageUrls.length > 0) {
           try {
-            const convertedImages = await Promise.all(
-              imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
-            );
+            const headerLogoPromise = convertImageToPngBase64(
+              PDF_HEADER_LOGO_SRC
+            ).catch((error) => {
+              console.error("Failed to load header logo", error);
+              return null;
+            });
+
+            const [convertedImages, headerLogo] = await Promise.all([
+              Promise.all(
+                imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
+              ),
+              headerLogoPromise,
+            ]);
 
             if (!active) return;
 
             const blob = await pdf(
-              <MyDocument images={convertedImages} />
+              <MyDocument
+                images={convertedImages}
+                headerLogo={headerLogo || ""}
+                paperCode={paperCode}
+              />
             ).toBlob();
             if (!active) return;
             setPdfBlob(blob);
@@ -185,7 +331,7 @@ const AnnotatableInspectImagesComponent = memo(
       return () => {
         active = false;
       };
-    }, [isEditMode, imageUrls]);
+    }, [isEditMode, imageUrls, currentQuestionId, paperCode]);
 
     useEffect(() => {
       if (
@@ -204,6 +350,7 @@ const AnnotatableInspectImagesComponent = memo(
         pdfViewerElementRef,
         pdfViewerRootRef,
         author: user?.name,
+        fileName: pdfBaseFileName,
       });
       setKey((prev) => prev + 1);
 
@@ -226,6 +373,8 @@ const AnnotatableInspectImagesComponent = memo(
       viewerId,
       imageSource,
       isEditMode,
+      currentQuestionId,
+      pdfBaseFileName,
     ]);
 
     if (!imageSource || imageSource.length === 0) {
@@ -237,7 +386,7 @@ const AnnotatableInspectImagesComponent = memo(
       <>
         <div className="flex flex-col w-full relative">
           <div
-            className="flex items-center justify-end mb-2 mr-2 gap-2"
+            className="flex items-center justify-end mb-2 mr-2 mt-2 gap-2"
             ref={ultilityBarRef}
           >
             <Button
@@ -265,6 +414,11 @@ const AnnotatableInspectImagesComponent = memo(
                 <ClearAllButton
                   isSessionFetching={isSessionFetching}
                   pdfViewerRef={pdfViewerRef}
+                />
+                <DownloadPdfButton
+                  isSessionFetching={isSessionFetching}
+                  pdfBlob={pdfBlob}
+                  fileName={downloadFileName}
                 />
                 <Button
                   className="cursor-pointer h-[26px]"
@@ -308,6 +462,11 @@ const AnnotatableInspectImagesComponent = memo(
                         <ClearAllButton
                           isSessionFetching={isSessionFetching}
                           pdfViewerRef={pdfViewerRef}
+                        />
+                        <DownloadPdfButton
+                          isSessionFetching={isSessionFetching}
+                          pdfBlob={pdfBlob}
+                          fileName={downloadFileName}
                         />
                         <Button
                           className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
@@ -429,3 +588,46 @@ const ClearAllButton = memo(
 );
 
 ClearAllButton.displayName = "ClearAllButton";
+
+const DownloadPdfButton = memo(
+  ({
+    pdfBlob,
+    isSessionFetching,
+    fileName,
+  }: {
+    pdfBlob: Blob | null;
+    isSessionFetching: boolean;
+    fileName: string;
+  }) => {
+    const handleDownload = useCallback(() => {
+      if (!pdfBlob) return;
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, [pdfBlob, fileName]);
+
+    return (
+      <Button
+        className="cursor-pointer h-[26px]"
+        disabled={!pdfBlob || isSessionFetching}
+        variant="outline"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleDownload();
+        }}
+        title={pdfBlob ? "Download annotated PDF" : "Generating PDF"}
+      >
+        <span>Download</span>
+        <Download className="h-4 w-4" />
+      </Button>
+    );
+  }
+);
+
+DownloadPdfButton.displayName = "DownloadPdfButton";

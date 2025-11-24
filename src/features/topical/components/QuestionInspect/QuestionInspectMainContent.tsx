@@ -70,7 +70,6 @@ const QuestionInspectMainContent = forwardRef(
       useState<QuestionInspectViewMode>("question");
 
     useEffect(() => {
-      console.log("currentView", currentView);
       if (currentView === "question") {
         questionImagesRef.current?.updatePdfViewerSize();
       } else if (currentView === "answer") {

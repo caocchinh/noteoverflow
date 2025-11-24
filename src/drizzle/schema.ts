@@ -313,3 +313,22 @@ export const recentQuery = sqliteTable(
     return [primaryKey({ columns: [table.userId, table.queryKey] })];
   }
 );
+
+export const userQuestionAnnotations = sqliteTable(
+  "user_question_annotations",
+  {
+    userId: text("user_id")
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    questionId: text("question_id")
+      .references(() => question.id, { onDelete: "cascade" })
+      .notNull(),
+    xfdf: text("xfdf").notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.userId, table.questionId] })];
+  }
+);
