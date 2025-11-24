@@ -115,11 +115,11 @@ export default function RootLayout({
         <link rel="canonical" href="https://noteoverflow.com/" />
       </head>
 
-      <body
-        className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
-      >
-        <QueryProvider>
-          <AuthProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <body
+            className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
+          >
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"
@@ -134,11 +134,11 @@ export default function RootLayout({
               <NavBar />
               {children}
             </ThemeProvider>
-          </AuthProvider>
-        </QueryProvider>
 
-        <Toaster />
-      </body>
+            <Toaster />
+          </body>
+        </AuthProvider>
+      </QueryProvider>
     </html>
   );
 }

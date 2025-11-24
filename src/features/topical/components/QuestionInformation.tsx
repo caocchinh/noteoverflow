@@ -30,7 +30,7 @@ export const QuestionInformation = ({
   };
 
   return (
-    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start mb-3">
+    <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
       {showCurriculumn && (
         <Badge className="bg-green-600 text-white">
           {extractCurriculumCode({ questionId: question.id })}

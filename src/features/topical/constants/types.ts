@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
-import { AnnotatableInspectImagesHandle } from "../components/QuestionInspect/AnnotatableInspectImages/AnnotatableInspectImages";
 import type {
   CIE_A_LEVEL_SUBDIVISION,
   OUTDATED,
@@ -548,9 +547,9 @@ export interface QuestionInspectMainContentRef {
   resetScrollPositions: () => void;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   handleKeyboardNavigation: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  questionImagesRef: RefObject<AnnotatableInspectImagesHandle | null>;
-  answerImagesRef: RefObject<AnnotatableInspectImagesHandle | null>;
-  bothViewsImagesRef: RefObject<AnnotatableInspectImagesHandle | null>;
+  questionImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
+  answerImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
+  bothViewsImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
 }
 
 export interface RecentQueryProps {
@@ -585,4 +584,8 @@ export interface RecentQueryRef {
     unknown
   >;
   isAddRecentQueryPending: boolean;
+}
+
+export interface AnnotatableInspectImagesRef {
+  updatePdfViewerSize: () => void;
 }

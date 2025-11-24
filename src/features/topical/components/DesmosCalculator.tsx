@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  memo,
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Rnd } from "react-rnd";
 // @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
 import Desmos from "desmos";
@@ -20,36 +13,24 @@ interface DesmosCalculatorProps {
   isOpen: boolean;
 }
 
-interface CalculatorProps {
-  calculatorRef: React.RefObject<HTMLDivElement | null>;
-}
-
 const aspectRatio = 850 / 500;
 const scaleFactor = 0.75;
 
 // Create calculator element outside React's management to avoid cleanup issues
 let calculatorElement: HTMLDivElement | null = null;
-let isInitialized = false;
 
-const getCalculatorElement = (
-  calculatorRef: RefObject<HTMLDivElement | null>
-) => {
+const initCalculatorElement = () => {
   if (!calculatorElement) {
     calculatorElement = document.createElement("div");
     calculatorElement.className = "w-full h-full flex-1 border-0";
-    calculatorRef.current = calculatorElement;
-  }
-
-  if (!isInitialized && calculatorElement) {
     Desmos.GraphingCalculator(calculatorElement);
-    isInitialized = true;
   }
-
-  return calculatorElement;
 };
 
-const Calculator = memo(({ calculatorRef }: CalculatorProps) => {
-  getCalculatorElement(calculatorRef);
+const Calculator = memo(() => {
+  useEffect(() => {
+    initCalculatorElement();
+  }, []);
   return null;
 });
 
@@ -60,7 +41,6 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
   const draggableContainerRef = useRef<HTMLDivElement>(null);
-  const calculatorRef = useRef<HTMLDivElement>(null);
   // Function to calculate Rnd dimensions based on window size
   const getCalculatedDimensions = () => {
     const defaultDimensions = {
@@ -214,9 +194,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
             </div>
             {/* Calculator container */}
             <div ref={fullscreenContainerRef} className="flex-1">
-              {isFullscreen && isOpen && (
-                <Calculator calculatorRef={calculatorRef} />
-              )}
+              {isFullscreen && isOpen && <Calculator />}
             </div>
           </div>
         </div>
@@ -271,9 +249,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                 </div>
               </div>
               <div ref={draggableContainerRef} className="flex-1">
-                {!isFullscreen && isOpen && (
-                  <Calculator calculatorRef={calculatorRef} />
-                )}
+                {!isFullscreen && isOpen && <Calculator />}
               </div>
             </div>
           </Rnd>

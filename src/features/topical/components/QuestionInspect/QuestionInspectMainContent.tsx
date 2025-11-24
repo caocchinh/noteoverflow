@@ -13,15 +13,13 @@ import {
   useState,
 } from "react";
 import {
+  AnnotatableInspectImagesRef,
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import {
-  AnnotatableInspectImages,
-  AnnotatableInspectImagesHandle,
-} from "./AnnotatableInspectImages/AnnotatableInspectImages";
+import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { QuestionInformation } from "../QuestionInformation";
 import BothViews from "./BothViews";
 
@@ -64,9 +62,9 @@ const QuestionInspectMainContent = forwardRef(
     const questionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
-    const questionImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
-    const answerImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
-    const bothViewsImagesRef = useRef<AnnotatableInspectImagesHandle>(null);
+    const questionImagesRef = useRef<AnnotatableInspectImagesRef>(null);
+    const answerImagesRef = useRef<AnnotatableInspectImagesRef>(null);
+    const bothViewsImagesRef = useRef<AnnotatableInspectImagesRef>(null);
     const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
     const [currentView, setCurrentView] =
       useState<QuestionInspectViewMode>("question");

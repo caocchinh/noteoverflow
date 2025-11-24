@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.842.0",
+    "@nutrient-sdk/viewer": "^1.9.1",
     "@opennextjs/cloudflare": "^1.11.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -55,6 +56,7 @@
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.8.16",
     "posthog-js": "^1.258.3",
+    "pspdfkit": "^2024.8.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.0.0",

@@ -142,7 +142,7 @@ export default function TopicalLayoutProvider({
 
   // UI Preferences state
   const [uiPreferences, setUiPreferences] = useState<UiPreferences>(
-    getInitialUiPreferences
+    DEFAULT_UI_PREFERENCES_CACHE
   );
 
   useEffect(() => {
