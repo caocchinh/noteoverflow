@@ -228,7 +228,7 @@ const QuestionInspectMainContent = forwardRef(
               type="always"
               viewportRef={questionScrollAreaRef}
             >
-              <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+              <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
                 <QuestionInformation
                   question={currentQuestionData}
                   showCurriculumn={false}
@@ -258,7 +258,7 @@ const QuestionInspectMainContent = forwardRef(
               type="always"
               viewportRef={answerScrollAreaRef}
             >
-              <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
+              <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
                 <QuestionInformation
                   question={currentQuestionData}
                   showCurriculumn={false}

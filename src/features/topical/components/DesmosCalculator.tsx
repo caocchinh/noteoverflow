@@ -144,7 +144,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
         >
           <div className="flex flex-col h-full">
             {/* Header with close button */}
-            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-700 bg-gray-700">
+            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 h-[40px]">
               <span className="text-sm font-medium text-gray-300">
                 Desmos Calculator
               </span>

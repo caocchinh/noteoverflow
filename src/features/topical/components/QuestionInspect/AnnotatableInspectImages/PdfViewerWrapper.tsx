@@ -42,10 +42,17 @@ const PdfViewerWrapper = forwardRef<
     },
     deleteAllAnnotations: () => {
       const instance = instanceRef.current;
-      if (!instance) return;
-      const { annotationManager } = instance.Core;
-      const allAnnotations = annotationManager.getAnnotationsList();
-      annotationManager.deleteAnnotations(allAnnotations);
+      if (!instance) {
+        console.warn("deleteAllAnnotations: instance not ready");
+        return;
+      }
+      setTimeout(() => {
+        const { annotationManager } = instance.Core;
+        const allAnnotations = annotationManager.getAnnotationsList();
+        if (allAnnotations.length > 0) {
+          annotationManager.deleteAnnotations(allAnnotations, { force: true });
+        }
+      }, 0);
     },
   }));
 
@@ -68,10 +75,38 @@ const PdfViewerWrapper = forwardRef<
 
       const { documentViewer, annotationManager } = instance.Core;
 
+      instance.UI.disableElements([
+        "stickyToolButton",
+        "highlightToolButton",
+        "underlineToolButton",
+        "strikeoutToolButton",
+        "squigglyToolButton",
+        "markReplaceTextToolButton",
+        "markInsertTextToolButton",
+      ]);
+
       annotationManager.setCurrentUser(author || "Guest");
 
       if (isBlob) {
         instance.UI.loadDocument(documentPath, { filename: "document.pdf" });
+      }
+
+      const { Tools } = instance.Core;
+      interface CreateToolWithDelay {
+        setCreateDelay: (delay: number) => void;
+      }
+      const freeHandTool = documentViewer.getTool(
+        Tools.ToolNames.FREEHAND
+      ) as unknown as CreateToolWithDelay;
+      if (freeHandTool) {
+        freeHandTool.setCreateDelay(0);
+      }
+
+      const freeHandHighlightTool = documentViewer.getTool(
+        Tools.ToolNames.FREEHAND_HIGHLIGHT
+      ) as unknown as CreateToolWithDelay;
+      if (freeHandHighlightTool && freeHandHighlightTool.setCreateDelay) {
+        freeHandHighlightTool.setCreateDelay(0);
       }
 
       const handleDocumentLoaded = async () => {

@@ -1,6 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { memo, useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  memo,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  RefObject,
+} from "react";
 import {
   Loader2,
   Edit3,
@@ -8,6 +16,7 @@ import {
   Maximize,
   Shrink,
   Calculator,
+  Brush,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -112,17 +121,25 @@ const AnnotatableInspectImagesComponent = memo(
     const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
     const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
     const pdfViewerRootRef = useRef<Root | null>(null);
+    const normalContainerRef = useRef<HTMLDivElement | null>(null);
+    const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
     const { uiPreferences } = useTopicalApp();
     const { isSessionFetching, user } = useAuth();
     const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
-    const normalContainerRef = useRef<HTMLDivElement | null>(null);
-    const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
+    const ultilityBarRef = useRef<HTMLDivElement | null>(null);
+
     const [key, setKey] = useState(0);
 
     useEffect(() => {
       setIsFullscreen(false);
       setIsEditMode(false);
     }, [imageSource]);
+
+    useEffect(() => {
+      if (isEditMode) {
+        ultilityBarRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }, [isEditMode]);
 
     const toggleFullscreen = useCallback(() => {
       setIsFullscreen((prev) => !prev);
@@ -219,12 +236,16 @@ const AnnotatableInspectImagesComponent = memo(
     return (
       <>
         <div className="flex flex-col w-full relative">
-          <div className="flex items-center justify-end pb-2 mr-2 gap-2">
+          <div
+            className="flex items-center justify-end mb-2 mr-2 gap-2"
+            ref={ultilityBarRef}
+          >
             <Button
               type="button"
-              variant={isEditMode ? "default" : "outline"}
+              variant="outline"
               disabled={isSessionFetching}
-              className="cursor-pointer gap-2"
+              className="cursor-pointer gap-2 h-[26px]"
+              title={isEditMode ? "Switch to view mode" : "Switch to edit mode"}
               onClick={() => setIsEditMode(!isEditMode)}
             >
               {isEditMode ? (
@@ -240,15 +261,21 @@ const AnnotatableInspectImagesComponent = memo(
               )}
             </Button>
             {!isFullscreen && isEditMode && (
-              <Button
-                className="cursor-pointer"
-                size="icon"
-                disabled={isSessionFetching}
-                onClick={toggleFullscreen}
-                title="Enter Fullscreen"
-              >
-                <Maximize className="h-4 w-4" />
-              </Button>
+              <>
+                <ClearAllButton
+                  isSessionFetching={isSessionFetching}
+                  pdfViewerRef={pdfViewerRef}
+                />
+                <Button
+                  className="cursor-pointer h-[26px]"
+                  disabled={isSessionFetching}
+                  variant="outline"
+                  onClick={toggleFullscreen}
+                  title="Enter Fullscreen"
+                >
+                  Fullscreen <Maximize className="h-4 w-4" />
+                </Button>
+              </>
             )}
           </div>
 
@@ -257,7 +284,7 @@ const AnnotatableInspectImagesComponent = memo(
               <>
                 <div
                   ref={normalContainerRef}
-                  className="w-full relative h-[75dvh]"
+                  className="w-full relative h-[72dvh]"
                 >
                   {!pdfBlob && (
                     <div className="flex items-center justify-center gap-1">
@@ -278,6 +305,10 @@ const AnnotatableInspectImagesComponent = memo(
                         NoteOverflow Inspector
                       </span>
                       <div className="flex items-center gap-1">
+                        <ClearAllButton
+                          isSessionFetching={isSessionFetching}
+                          pdfViewerRef={pdfViewerRef}
+                        />
                         <Button
                           className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
                           variant="ghost"
@@ -287,6 +318,7 @@ const AnnotatableInspectImagesComponent = memo(
                         >
                           <Calculator className="h-4 w-4" />
                         </Button>
+
                         <Button
                           className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
                           variant="ghost"
@@ -300,7 +332,7 @@ const AnnotatableInspectImagesComponent = memo(
                     </div>
                     <div
                       ref={fullscreenContainerRef}
-                      className="h-full w-full"
+                      className="h-[calc(100dvh-30px)] w-full"
                     ></div>
                   </div>,
                   document.body
@@ -368,3 +400,32 @@ AnnotatableInspectImagesComponent.displayName =
 
 // Export with memo and forwardRef
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
+
+const ClearAllButton = memo(
+  ({
+    isSessionFetching,
+    pdfViewerRef,
+  }: {
+    isSessionFetching: boolean;
+    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+  }) => {
+    return (
+      <Button
+        className="cursor-pointer h-[26px]"
+        disabled={isSessionFetching}
+        variant="outline"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pdfViewerRef.current?.deleteAllAnnotations();
+        }}
+        title="Clear all annotations"
+      >
+        <span>Clear all</span>
+        <Brush className="h-4 w-4" />
+      </Button>
+    );
+  }
+);
+
+ClearAllButton.displayName = "ClearAllButton";
