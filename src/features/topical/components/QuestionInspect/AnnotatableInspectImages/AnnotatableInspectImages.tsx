@@ -1,15 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import {
-  memo,
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useImperativeHandle,
-  forwardRef,
-  useCallback,
-} from "react";
+import { memo, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Loader2,
   Edit3,
@@ -35,31 +26,27 @@ import {
   StyleSheet,
   pdf,
 } from "@react-pdf/renderer";
-import { PdfViewerComponent } from "@syncfusion/ej2-react-pdfviewer";
-import "@syncfusion/ej2-base/styles/material.css";
-import "@syncfusion/ej2-buttons/styles/material.css";
-import "@syncfusion/ej2-dropdowns/styles/material.css";
-import "@syncfusion/ej2-inputs/styles/material.css";
-import "@syncfusion/ej2-navigations/styles/material.css";
-import "@syncfusion/ej2-popups/styles/material.css";
-import "@syncfusion/ej2-splitbuttons/styles/material.css";
-import "@syncfusion/ej2-react-pdfviewer/styles/material.css";
 import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
-import PdfViewerWrapper from "./PdfViewerWrapper";
+import dynamic from "next/dynamic";
+import type { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
+
+const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
+  ssr: false,
+});
 
 const initPdfElement = ({
-  pdfUrl,
+  pdfBlob,
   viewerId,
   pdfViewerRef,
   pdfViewerElementRef,
   pdfViewerRootRef,
   author,
 }: {
-  pdfUrl: string;
+  pdfBlob: Blob;
   viewerId: string;
-  pdfViewerRef: React.RefObject<PdfViewerComponent | null>;
+  pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
   pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
   pdfViewerRootRef: React.RefObject<Root | null>;
   author: string | undefined;
@@ -76,7 +63,7 @@ const initPdfElement = ({
   if (pdfViewerRootRef.current) {
     pdfViewerRootRef.current.render(
       <PdfViewerWrapper
-        documentPath={pdfUrl}
+        documentPath={pdfBlob}
         ref={pdfViewerRef}
         id={viewerId}
         author={author}
@@ -88,13 +75,13 @@ const initPdfElement = ({
 const PdfViewer = memo(
   ({
     pdfViewerRef,
-    pdfUrl,
+    pdfBlob,
     viewerId,
     pdfViewerElementRef,
     pdfViewerRootRef,
   }: {
-    pdfViewerRef: React.RefObject<PdfViewerComponent | null>;
-    pdfUrl: string;
+    pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
+    pdfBlob: Blob;
     viewerId: string;
     pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
     pdfViewerRootRef: React.RefObject<Root | null>;
@@ -102,7 +89,7 @@ const PdfViewer = memo(
     const { user } = useAuth();
     useEffect(() => {
       initPdfElement({
-        pdfUrl,
+        pdfBlob,
         viewerId,
         pdfViewerRef,
         pdfViewerElementRef,
@@ -110,7 +97,7 @@ const PdfViewer = memo(
         author: user?.name,
       });
     }, [
-      pdfUrl,
+      pdfBlob,
       viewerId,
       pdfViewerRef,
       pdfViewerElementRef,
@@ -148,51 +135,31 @@ const MyDocument = ({ images }: { images: string[] }) => (
   </Document>
 );
 
-const AnnotatableInspectImagesComponent = forwardRef(
-  (
-    {
-      imageSource,
-      currentQuestionId,
-      viewerId,
-    }: {
-      imageSource: string[] | undefined;
-      currentQuestionId: string | undefined;
-      viewerId: string;
-    },
-    ref
-  ) => {
+const AnnotatableInspectImagesComponent = memo(
+  ({
+    imageSource,
+    currentQuestionId,
+    viewerId,
+  }: {
+    imageSource: string[] | undefined;
+    currentQuestionId: string | undefined;
+    viewerId: string;
+  }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-    const pdfViewerRef = useRef<PdfViewerComponent>(null);
+    const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+    const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
     const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
     const pdfViewerRootRef = useRef<Root | null>(null);
     const { uiPreferences } = useTopicalApp();
     const { isSessionFetching } = useAuth();
     const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
-
-    const updatePdfViewerSize = useCallback(() => {
-      if (pdfViewerRef.current && isEditMode) {
-        pdfViewerRef.current.updateViewerContainer();
-      }
-    }, [isEditMode]);
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
 
     const toggleFullscreen = useCallback(() => {
       setIsFullscreen((prev) => !prev);
-      setTimeout(() => {
-        updatePdfViewerSize();
-      }, 0);
-    }, [updatePdfViewerSize]);
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        updatePdfViewerSize,
-      }),
-      [updatePdfViewerSize]
-    );
+    }, []);
 
     // Filter only image URLs
     const imageUrls = useMemo(
@@ -206,7 +173,6 @@ const AnnotatableInspectImagesComponent = forwardRef(
 
     useEffect(() => {
       let active = true;
-      let url: string | null = null;
 
       const generatePdf = async () => {
         if (isEditMode && imageUrls.length > 0) {
@@ -221,15 +187,14 @@ const AnnotatableInspectImagesComponent = forwardRef(
             const blob = await pdf(
               <MyDocument images={convertedImages} />
             ).toBlob();
+            console.log("PDF Blob:", blob);
             if (!active) return;
-            url = URL.createObjectURL(blob);
-            console.log("PDF Generated:", url);
-            setPdfUrl(url);
+            setPdfBlob(blob);
           } catch (error) {
             console.error("Error generating PDF:", error);
           }
         } else {
-          setPdfUrl(null);
+          setPdfBlob(null);
         }
       };
 
@@ -237,22 +202,8 @@ const AnnotatableInspectImagesComponent = forwardRef(
 
       return () => {
         active = false;
-        if (url) {
-          console.log("Revoking PDF URL:", url);
-          URL.revokeObjectURL(url);
-        }
       };
     }, [isEditMode, imageUrls]);
-
-    useEffect(() => {
-      if (pdfUrl && pdfViewerRef.current) {
-        const timer = setTimeout(() => {
-          pdfViewerRef.current?.toolbar.showAnnotationToolbar(true);
-          pdfViewerRef.current?.toolbar.showToolbar(true);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    }, [pdfUrl]);
 
     // Move pdf editor between containers when fullscreen state changes
     useEffect(() => {
@@ -261,7 +212,7 @@ const AnnotatableInspectImagesComponent = forwardRef(
         fullscreenContainerRef.current &&
         normalContainerRef.current &&
         isEditMode &&
-        pdfUrl
+        pdfBlob
       ) {
         const targetContainer = isFullscreen
           ? fullscreenContainerRef.current
@@ -274,7 +225,7 @@ const AnnotatableInspectImagesComponent = forwardRef(
           targetContainer.appendChild(pdfViewerElementRef.current);
         }
       }
-    }, [isFullscreen, isEditMode, pdfUrl]);
+    }, [isFullscreen, isEditMode, pdfBlob]);
 
     if (!imageSource || imageSource.length === 0) {
       return (
@@ -319,19 +270,20 @@ const AnnotatableInspectImagesComponent = forwardRef(
         <div className="flex flex-col w-full items-center relative">
           {isEditMode ? (
             <>
-              <div ref={normalContainerRef} className="w-full relative ">
-                {pdfUrl ? (
-                  <div className="flex-1 relative h-full w-full overflow-hidden"></div>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
+              <div
+                ref={normalContainerRef}
+                className="w-full relative h-[75dvh]"
+              >
+                {!pdfBlob && (
+                  <div className="flex items-center justify-center">
                     <Loader2 className="animate-spin h-8 w-8" />
                     <span className="ml-2">Generating PDF...</span>
                   </div>
                 )}
-                {!isFullscreen && pdfUrl && (
+                {!isFullscreen && pdfBlob && (
                   <PdfViewer
                     pdfViewerRef={pdfViewerRef}
-                    pdfUrl={pdfUrl}
+                    pdfBlob={pdfBlob}
                     viewerId={viewerId}
                     pdfViewerElementRef={pdfViewerElementRef}
                     pdfViewerRootRef={pdfViewerRootRef}
@@ -371,10 +323,10 @@ const AnnotatableInspectImagesComponent = forwardRef(
                     </div>
                   </div>
                   <div ref={fullscreenContainerRef} className="h-full w-full">
-                    {pdfUrl && isFullscreen && (
+                    {pdfBlob && isFullscreen && (
                       <PdfViewer
                         pdfViewerRef={pdfViewerRef}
-                        pdfUrl={pdfUrl}
+                        pdfBlob={pdfBlob}
                         viewerId={viewerId}
                         pdfViewerElementRef={pdfViewerElementRef}
                         pdfViewerRootRef={pdfViewerRootRef}

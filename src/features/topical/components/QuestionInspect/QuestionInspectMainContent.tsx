@@ -236,7 +236,6 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
-                ref={questionImagesRef}
                 viewerId="pdf-viewer-question"
                 imageSource={currentQuestionData?.questionImages ?? []}
                 currentQuestionId={currentQuestionData?.id}
@@ -267,7 +266,6 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
-                ref={answerImagesRef}
                 viewerId="pdf-viewer-answer"
                 imageSource={currentQuestionData?.answers ?? []}
                 currentQuestionId={currentQuestionData?.id}
@@ -290,8 +288,6 @@ const QuestionInspectMainContent = forwardRef(
               currentQuestionData={currentQuestionData}
               questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
               answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
-              questionImagesRef={questionImagesRef}
-              answerImagesRef={answerImagesRef}
             />
           </div>
         </div>

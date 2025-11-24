@@ -8,10 +8,7 @@ import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
 import { Eye, EyeClosed } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  AnnotatableInspectImages,
-  AnnotatableInspectImagesHandle,
-} from "./AnnotatableInspectImages/AnnotatableInspectImages";
+import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InspectPanelProps {
@@ -23,7 +20,6 @@ interface InspectPanelProps {
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   scrollAreaClassName?: string;
   initialHidden?: boolean;
-  imagesRef?: RefObject<AnnotatableInspectImagesHandle | null>;
   viewerId: string;
 }
 
@@ -36,20 +32,13 @@ const InspectPanel = ({
   scrollAreaRef,
   scrollAreaClassName,
   initialHidden = false,
-  imagesRef,
   viewerId,
 }: InspectPanelProps) => {
   const [isHiding, setIsHiding] = useState(initialHidden);
   const isMobile = useIsMobile();
 
   return (
-    <ResizablePanel
-      defaultSize={defaultSize}
-      minSize={minSize}
-      onResize={(e) => {
-        imagesRef?.current?.updatePdfViewerSize();
-      }}
-    >
+    <ResizablePanel defaultSize={defaultSize} minSize={minSize}>
       <div
         className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
         title="Toggle visibility"
@@ -71,7 +60,6 @@ const InspectPanel = ({
         viewportRef={scrollAreaRef}
       >
         <AnnotatableInspectImages
-          ref={imagesRef as RefObject<AnnotatableInspectImagesHandle>}
           viewerId={viewerId}
           imageSource={imageSource}
           currentQuestionId={currentQuestionId}
@@ -85,14 +73,10 @@ const BothViews = ({
   currentQuestionData,
   questionScrollAreaRef,
   answerScrollAreaRef,
-  questionImagesRef,
-  answerImagesRef,
 }: {
   currentQuestionData: SelectedQuestion | undefined;
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
-  questionImagesRef?: RefObject<AnnotatableInspectImagesHandle | null>;
-  answerImagesRef?: RefObject<AnnotatableInspectImagesHandle | null>;
 }) => {
   const isAnswerMultipleChoice =
     !currentQuestionData?.answers?.[0]?.includes("http");
@@ -114,7 +98,6 @@ const BothViews = ({
         imageSource={currentQuestionData?.questionImages ?? []}
         currentQuestionId={currentQuestionData?.id}
         scrollAreaRef={questionScrollAreaRef}
-        imagesRef={questionImagesRef}
         viewerId="pdf-viewer-both-question"
       />
       <ResizableHandle withHandle />
@@ -128,7 +111,6 @@ const BothViews = ({
         scrollAreaRef={answerScrollAreaRef}
         scrollAreaClassName="pl-3 pr-0"
         initialHidden={true}
-        imagesRef={answerImagesRef}
         viewerId="pdf-viewer-both-answer"
       />
     </ResizablePanelGroup>
