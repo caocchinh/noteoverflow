@@ -72,45 +72,6 @@ const initPdfElement = ({
   }
 };
 
-const PdfViewer = memo(
-  ({
-    pdfViewerRef,
-    pdfBlob,
-    viewerId,
-    pdfViewerElementRef,
-    pdfViewerRootRef,
-  }: {
-    pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
-    pdfBlob: Blob;
-    viewerId: string;
-    pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
-    pdfViewerRootRef: React.RefObject<Root | null>;
-  }) => {
-    const { user } = useAuth();
-    useEffect(() => {
-      initPdfElement({
-        pdfBlob,
-        viewerId,
-        pdfViewerRef,
-        pdfViewerElementRef,
-        pdfViewerRootRef,
-        author: user?.name,
-      });
-    }, [
-      pdfBlob,
-      viewerId,
-      pdfViewerRef,
-      pdfViewerElementRef,
-      pdfViewerRootRef,
-      user?.name,
-    ]);
-
-    return null;
-  }
-);
-
-PdfViewer.displayName = "PdfViewer";
-
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -152,10 +113,16 @@ const AnnotatableInspectImagesComponent = memo(
     const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
     const pdfViewerRootRef = useRef<Root | null>(null);
     const { uiPreferences } = useTopicalApp();
-    const { isSessionFetching } = useAuth();
+    const { isSessionFetching, user } = useAuth();
     const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
+    const [key, setKey] = useState(0);
+
+    useEffect(() => {
+      setIsFullscreen(false);
+      setIsEditMode(false);
+    }, [imageSource]);
 
     const toggleFullscreen = useCallback(() => {
       setIsFullscreen((prev) => !prev);
@@ -177,7 +144,6 @@ const AnnotatableInspectImagesComponent = memo(
       const generatePdf = async () => {
         if (isEditMode && imageUrls.length > 0) {
           try {
-            console.log("Generating PDF...");
             const convertedImages = await Promise.all(
               imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
             );
@@ -187,7 +153,6 @@ const AnnotatableInspectImagesComponent = memo(
             const blob = await pdf(
               <MyDocument images={convertedImages} />
             ).toBlob();
-            console.log("PDF Blob:", blob);
             if (!active) return;
             setPdfBlob(blob);
           } catch (error) {
@@ -205,27 +170,46 @@ const AnnotatableInspectImagesComponent = memo(
       };
     }, [isEditMode, imageUrls]);
 
-    // Move pdf editor between containers when fullscreen state changes
     useEffect(() => {
       if (
-        pdfViewerElementRef.current &&
-        fullscreenContainerRef.current &&
-        normalContainerRef.current &&
-        isEditMode &&
-        pdfBlob
-      ) {
-        const targetContainer = isFullscreen
-          ? fullscreenContainerRef.current
-          : normalContainerRef.current;
+        !pdfBlob ||
+        isSessionFetching ||
+        pdfViewerRootRef.current ||
+        pdfViewerElementRef.current ||
+        !isEditMode
+      )
+        return;
 
-        if (
-          targetContainer &&
-          pdfViewerElementRef.current.parentElement !== targetContainer
-        ) {
-          targetContainer.appendChild(pdfViewerElementRef.current);
-        }
-      }
-    }, [isFullscreen, isEditMode, pdfBlob]);
+      initPdfElement({
+        pdfBlob,
+        viewerId,
+        pdfViewerRef,
+        pdfViewerElementRef,
+        pdfViewerRootRef,
+        author: user?.name,
+      });
+      setKey((prev) => prev + 1);
+
+      return () => {
+        setTimeout(() => {
+          if (pdfViewerRootRef.current) {
+            pdfViewerRootRef.current.unmount();
+            pdfViewerRootRef.current = null;
+          }
+          if (pdfViewerElementRef.current) {
+            pdfViewerElementRef.current.remove();
+            pdfViewerElementRef.current = null;
+          }
+        }, 0);
+      };
+    }, [
+      isSessionFetching,
+      pdfBlob,
+      user?.name,
+      viewerId,
+      imageSource,
+      isEditMode,
+    ]);
 
     if (!imageSource || imageSource.length === 0) {
       return (
@@ -233,146 +217,148 @@ const AnnotatableInspectImagesComponent = memo(
       );
     }
     return (
-      <div className="flex flex-col w-full relative">
-        <div className="flex items-center justify-end pb-2 mr-2">
-          <Button
-            type="button"
-            variant={isEditMode ? "default" : "outline"}
-            disabled={isSessionFetching}
-            className="cursor-pointer gap-2"
-            onClick={() => setIsEditMode(!isEditMode)}
-          >
+      <>
+        <div className="flex flex-col w-full relative">
+          <div className="flex items-center justify-end pb-2 mr-2 gap-2">
+            <Button
+              type="button"
+              variant={isEditMode ? "default" : "outline"}
+              disabled={isSessionFetching}
+              className="cursor-pointer gap-2"
+              onClick={() => setIsEditMode(!isEditMode)}
+            >
+              {isEditMode ? (
+                <>
+                  <Eye className="h-4 w-4" />
+                  View Mode
+                </>
+              ) : (
+                <>
+                  <Edit3 className="h-4 w-4" />
+                  Edit Mode
+                </>
+              )}
+            </Button>
+            {!isFullscreen && isEditMode && (
+              <Button
+                className="cursor-pointer"
+                size="icon"
+                disabled={isSessionFetching}
+                onClick={toggleFullscreen}
+                title="Enter Fullscreen"
+              >
+                <Maximize className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-col w-full items-center relative">
             {isEditMode ? (
               <>
-                <Eye className="h-4 w-4" />
-                View Mode
+                <div
+                  ref={normalContainerRef}
+                  className="w-full relative h-[75dvh]"
+                >
+                  {!pdfBlob && (
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="ml-2">Generating PDF</span>
+                      <Loader2 className="animate-spin h-6 w-6" />
+                    </div>
+                  )}
+                </div>
+                {createPortal(
+                  <div
+                    className={cn(
+                      "fixed inset-0 z-[999998] bg-white flex flex-col h-[100dvh] w-[100vw]",
+                      isFullscreen ? "block" : "hidden"
+                    )}
+                  >
+                    <div className="flex items-center h-[40px] justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 shrink-0">
+                      <span className="text-sm font-medium text-gray-300">
+                        NoteOverflow Inspector
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
+                          title="Calculator"
+                        >
+                          <Calculator className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                          variant="ghost"
+                          size="icon"
+                          onClick={toggleFullscreen}
+                          title="Exit Fullscreen"
+                        >
+                          <Shrink className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div
+                      ref={fullscreenContainerRef}
+                      className="h-full w-full"
+                    ></div>
+                  </div>,
+                  document.body
+                )}
               </>
             ) : (
               <>
-                <Edit3 className="h-4 w-4" />
-                Edit Mode
+                <PhotoProvider>
+                  {imageUrls.map((item) => (
+                    <PhotoView
+                      key={`${item}${currentQuestionId}${
+                        currentQuestionId &&
+                        extractQuestionNumber({
+                          questionId: currentQuestionId,
+                        })
+                      }`}
+                      src={item}
+                    >
+                      <img
+                        className={cn(
+                          "w-full h-full object-contain relative z-2 !max-w-[750px] cursor-pointer",
+                          uiPreferences.imageTheme === "dark" && "!invert"
+                        )}
+                        src={item}
+                        alt="Question image"
+                        loading="lazy"
+                      />
+                    </PhotoView>
+                  ))}
+                </PhotoProvider>
+                {!isEditMode && imageUrls.length > 0 && (
+                  <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
+                )}
               </>
             )}
-          </Button>
-        </div>
-        {!isFullscreen && (
-          <Button
-            className="absolute top-2 right-14 z-[999] bg-white/80 hover:bg-white text-black border border-gray-200 shadow-sm"
-            variant="ghost"
-            size="icon"
-            onClick={toggleFullscreen}
-            title="Enter Fullscreen"
-          >
-            <Maximize className="h-4 w-4" />
-          </Button>
-        )}
 
-        <div className="flex flex-col w-full items-center relative">
-          {isEditMode ? (
-            <>
-              <div
-                ref={normalContainerRef}
-                className="w-full relative h-[75dvh]"
-              >
-                {!pdfBlob && (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="animate-spin h-8 w-8" />
-                    <span className="ml-2">Generating PDF...</span>
-                  </div>
-                )}
-                {!isFullscreen && pdfBlob && (
-                  <PdfViewer
-                    pdfViewerRef={pdfViewerRef}
-                    pdfBlob={pdfBlob}
-                    viewerId={viewerId}
-                    pdfViewerElementRef={pdfViewerElementRef}
-                    pdfViewerRootRef={pdfViewerRootRef}
-                  />
-                )}
-              </div>
-              {createPortal(
-                <div
-                  className={cn(
-                    "fixed inset-0 z-[999998] bg-white flex flex-col h-[100dvh] w-[100vw]",
-                    isFullscreen ? "block" : "hidden"
-                  )}
-                >
-                  <div className="flex items-center h-[40px] justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 shrink-0">
-                    <span className="text-sm font-medium text-gray-300">
-                      NoteOverflow Inspector
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
-                        title="Calculator"
-                      >
-                        <Calculator className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleFullscreen}
-                        title="Exit Fullscreen"
-                      >
-                        <Shrink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div ref={fullscreenContainerRef} className="h-full w-full">
-                    {pdfBlob && isFullscreen && (
-                      <PdfViewer
-                        pdfViewerRef={pdfViewerRef}
-                        pdfBlob={pdfBlob}
-                        viewerId={viewerId}
-                        pdfViewerElementRef={pdfViewerElementRef}
-                        pdfViewerRootRef={pdfViewerRootRef}
-                      />
-                    )}
-                  </div>
-                </div>,
-                document.body
-              )}
-            </>
-          ) : (
-            <>
-              <PhotoProvider>
-                {imageUrls.map((item) => (
-                  <PhotoView
-                    key={`${item}${currentQuestionId}${
-                      currentQuestionId &&
-                      extractQuestionNumber({
-                        questionId: currentQuestionId,
-                      })
-                    }`}
-                    src={item}
-                  >
-                    <img
-                      className={cn(
-                        "w-full h-full object-contain relative z-2 !max-w-[750px] cursor-pointer",
-                        uiPreferences.imageTheme === "dark" && "!invert"
-                      )}
-                      src={item}
-                      alt="Question image"
-                      loading="lazy"
-                    />
-                  </PhotoView>
-                ))}
-              </PhotoProvider>
-              {!isEditMode && imageUrls.length > 0 && (
-                <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
-              )}
-            </>
+            {textItems.map((item, index) => (
+              <p key={`text-${index}`}>{item}</p>
+            ))}
+          </div>
+        </div>
+        {fullscreenContainerRef.current &&
+          normalContainerRef.current &&
+          createPortal(
+            <div
+              key={key}
+              ref={(node) => {
+                if (node && pdfViewerElementRef.current) {
+                  node.appendChild(pdfViewerElementRef.current);
+                }
+              }}
+              className="w-full h-full"
+            />,
+            isFullscreen
+              ? fullscreenContainerRef.current
+              : normalContainerRef.current
           )}
-
-          {textItems.map((item, index) => (
-            <p key={`text-${index}`}>{item}</p>
-          ))}
-        </div>
-      </div>
+      </>
     );
   }
 );

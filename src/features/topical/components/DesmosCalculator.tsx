@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Maximize, Shrink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { createPortal } from "react-dom";
 
 interface DesmosCalculatorProps {
   isOpen: boolean;
@@ -27,16 +28,7 @@ const initCalculatorElement = () => {
   }
 };
 
-const Calculator = memo(() => {
-  useEffect(() => {
-    initCalculatorElement();
-  }, []);
-  return null;
-});
-
-Calculator.displayName = "Calculator";
-
-const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
+const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
   const { setIsCalculatorOpen } = useTopicalApp();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
@@ -101,26 +93,6 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
     setRndMinHeight(dimensions.minHeight);
   }, []);
 
-  // Move calculator between containers when fullscreen state changes
-  useEffect(() => {
-    if (
-      calculatorElement &&
-      fullscreenContainerRef.current &&
-      draggableContainerRef.current &&
-      isOpen
-    ) {
-      const targetContainer = isFullscreen
-        ? fullscreenContainerRef.current
-        : draggableContainerRef.current;
-      if (
-        targetContainer &&
-        calculatorElement.parentElement !== targetContainer
-      ) {
-        targetContainer.appendChild(calculatorElement);
-      }
-    }
-  }, [isFullscreen, isOpen]);
-
   // Recalculate Rnd dimensions when window resizes
   useEffect(() => {
     const handleResize = () => {
@@ -152,6 +124,12 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
     },
     [setIsCalculatorOpen]
   );
+
+  useEffect(() => {
+    if (!calculatorElement) {
+      initCalculatorElement();
+    }
+  }, []);
 
   return (
     <>
@@ -192,10 +170,7 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                 </Button>
               </div>
             </div>
-            {/* Calculator container */}
-            <div ref={fullscreenContainerRef} className="flex-1">
-              {isFullscreen && isOpen && <Calculator />}
-            </div>
+            <div ref={fullscreenContainerRef} className="flex-1"></div>
           </div>
         </div>
 
@@ -248,15 +223,29 @@ const DesmosCalculator = ({ isOpen }: DesmosCalculatorProps) => {
                   </Button>
                 </div>
               </div>
-              <div ref={draggableContainerRef} className="flex-1">
-                {!isFullscreen && isOpen && <Calculator />}
-              </div>
+              <div ref={draggableContainerRef} className="flex-1"></div>
             </div>
           </Rnd>
         </div>
       </div>
+      {fullscreenContainerRef.current &&
+        draggableContainerRef.current &&
+        createPortal(
+          <div
+            ref={(node) => {
+              if (node && calculatorElement) {
+                node.appendChild(calculatorElement);
+              }
+            }}
+            className="w-full h-full"
+          />,
+          isFullscreen
+            ? fullscreenContainerRef.current
+            : draggableContainerRef.current
+        )}
     </>
   );
-};
+});
 
+DesmosCalculator.displayName = "DesmosCalculator";
 export default DesmosCalculator;

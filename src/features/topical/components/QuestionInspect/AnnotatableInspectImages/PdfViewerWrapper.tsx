@@ -7,101 +7,118 @@ import {
 } from "react";
 import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
 
+type AnnotationManager = WebViewerInstance["Core"]["annotationManager"];
+type AnnotationChangedHandler = Parameters<
+  AnnotationManager["addEventListener"]
+>[1];
+
 interface PdfViewerWrapperProps {
   id: string;
   documentPath: string | Blob;
   author: string | undefined;
+  initialXfdf?: string | null;
+  onAnnotationsChanged?: (xfdf: string) => void;
 }
 
 export interface PdfViewerWrapperHandle {
   instance: WebViewerInstance | null;
+  exportAnnotations: () => Promise<string | null>;
+  deleteAllAnnotations: () => void;
 }
 
 const PdfViewerWrapper = forwardRef<
   PdfViewerWrapperHandle,
   PdfViewerWrapperProps
->(({ id, documentPath, author }, ref) => {
+>(({ id, documentPath, author, initialXfdf, onAnnotationsChanged }, ref) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<WebViewerInstance | null>(null);
 
   useImperativeHandle(ref, () => ({
     instance: instanceRef.current,
+    exportAnnotations: async () => {
+      const instance = instanceRef.current;
+      if (!instance) return null;
+      return instance.Core.annotationManager.exportAnnotations();
+    },
+    deleteAllAnnotations: () => {
+      const instance = instanceRef.current;
+      if (!instance) return;
+      const { annotationManager } = instance.Core;
+      const allAnnotations = annotationManager.getAnnotationsList();
+      annotationManager.deleteAnnotations(allAnnotations);
+    },
   }));
 
   useEffect(() => {
     if (!viewerRef.current) return;
 
+    let mounted = true;
+    let detachListeners: (() => void) | undefined;
     const isBlob = documentPath instanceof Blob;
 
     WebViewer(
       {
         path: "http://localhost:3000/lib/webviewer",
-        ...(isBlob ? {} : { initialDoc: documentPath }),
         licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
       },
       viewerRef.current
     ).then((instance) => {
+      if (!mounted) return;
       instanceRef.current = instance;
 
       const { documentViewer, annotationManager } = instance.Core;
 
-      // Set annotation author
       annotationManager.setCurrentUser(author || "Guest");
 
-      // Configure toolbar
-      instance.UI.setToolbarGroup("toolbarGroup-Annotate");
-
-      // Disable text markup annotations if needed
-      instance.UI.disableElements([
-        "highlightToolGroupButton",
-        "underlineToolGroupButton",
-        "strikeoutToolGroupButton",
-        "squigglyToolGroupButton",
-      ]);
-
-      // If documentPath is a Blob, load it using loadDocument
       if (isBlob) {
-        console.log("Loading PDF from Blob...");
         instance.UI.loadDocument(documentPath, { filename: "document.pdf" });
       }
 
-      // Configure measurement tools with cm units
-      documentViewer.addEventListener("documentLoaded", () => {
-        const pageInfo = documentViewer.getDocument().getPageInfo(1);
-        const scale = pageInfo.width / 21; // A4 width in cm
-
-        // Set default scale for measurement tools
-        const measurementScale = [
-          [scale, "cm"],
-          [1, "cm"],
-        ];
-
-        // Apply scale to measurement annotation tools
-        const toolsToUpdate = [
-          "AnnotationCreateDistanceMeasurement",
-          "AnnotationCreatePerimeterMeasurement",
-          "AnnotationCreateAreaMeasurement",
-        ];
-
-        toolsToUpdate.forEach((toolName) => {
-          const tool = instance.Core.documentViewer.getTool(toolName);
-          if (tool && typeof tool.setStyles === "function") {
-            tool.setStyles({
-              Scale: measurementScale,
-              Precision: 0.01,
-            });
+      const handleDocumentLoaded = async () => {
+        if (initialXfdf) {
+          await annotationManager.importAnnotations(initialXfdf);
+        } else {
+          instance.UI.setFitMode(instance.UI.FitMode.FitWidth);
+          const scrollView = documentViewer.getScrollViewElement();
+          if (scrollView) {
+            scrollView.scrollTop = 0;
           }
-        });
-      });
+        }
+      };
 
-      // Enable download
-      instance.UI.enableFeatures([instance.UI.Feature.Download]);
+      const handleAnnotationChanged: AnnotationChangedHandler = () => {
+        if (!onAnnotationsChanged) return;
+        annotationManager.exportAnnotations().then((xfdf) => {
+          if (!mounted) return;
+          onAnnotationsChanged(xfdf);
+        });
+      };
+
+      documentViewer.addEventListener("documentLoaded", handleDocumentLoaded);
+      annotationManager.addEventListener(
+        "annotationChanged",
+        handleAnnotationChanged
+      );
+
+      detachListeners = () => {
+        documentViewer.removeEventListener(
+          "documentLoaded",
+          handleDocumentLoaded
+        );
+        annotationManager.removeEventListener(
+          "annotationChanged",
+          handleAnnotationChanged
+        );
+      };
     });
 
     return () => {
+      mounted = false;
+      detachListeners?.();
+      detachListeners = undefined;
       instanceRef.current = null;
     };
-  }, [documentPath, author]);
+  }, [documentPath, author, initialXfdf, onAnnotationsChanged]);
 
   return (
     <div id={id} ref={viewerRef} style={{ height: "100%", width: "100%" }} />
