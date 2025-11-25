@@ -147,7 +147,7 @@ const PdfViewerWrapper = forwardRef<
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
           } else {
-            instance.UI.setFitMode(instance.UI.FitMode.FitWidth);
+            instance.UI.setZoomLevel(1.41);
             const scrollView = documentViewer.getScrollViewElement();
             if (scrollView) {
               scrollView.scrollTop = 0;

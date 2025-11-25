@@ -18,7 +18,6 @@ import {
 import {
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
-  SelectedQuestion,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -41,8 +40,9 @@ const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
 CloseButton.displayName = "CloseButton";
 
 const initAnnotableImagesElement = ({
-  currentQuestionData,
+  imageSource,
   elementRef,
+  questionId,
   elementRootRef,
   isSessionFetching,
   userName,
@@ -50,9 +50,10 @@ const initAnnotableImagesElement = ({
   isCalculatorOpen,
   imageTheme,
 }: {
-  currentQuestionData: SelectedQuestion | undefined;
+  imageSource: string[];
   elementRef: RefObject<HTMLDivElement | null>;
   elementRootRef: RefObject<Root | null>;
+  questionId: string;
   isSessionFetching: boolean;
   userName: string | undefined;
   setIsCalculatorOpen: (isOpen: boolean) => void;
@@ -71,8 +72,8 @@ const initAnnotableImagesElement = ({
   if (elementRootRef.current) {
     elementRootRef.current.render(
       <AnnotatableInspectImages
-        imageSource={currentQuestionData?.questionImages ?? []}
-        currentQuestionId={currentQuestionData?.id}
+        imageSource={imageSource}
+        currentQuestionId={questionId}
         isSessionFetching={isSessionFetching}
         userName={userName}
         setIsCalculatorOpen={setIsCalculatorOpen}
@@ -123,10 +124,10 @@ const QuestionInspectMainContent = forwardRef(
     const annotatableAnswerInspectImagesElementRef =
       useRef<HTMLDivElement | null>(null);
     const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
-
     const { isSessionFetching, user } = useAuth();
     const { setIsCalculatorOpen, isCalculatorOpen, uiPreferences } =
       useTopicalApp();
+    const [isMounted, setIsMounted] = useState(false);
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -139,13 +140,17 @@ const QuestionInspectMainContent = forwardRef(
     ]);
 
     useEffect(() => {
-      if (!currentQuestionData) return;
+      if (!currentQuestionData || !isMounted) return;
 
+      // Call initAnnotableImagesElement every time to update props
+      // The function creates the root only if it doesn't exist,
+      // then always calls render() with the updated component
       initAnnotableImagesElement({
-        currentQuestionData,
+        imageSource: currentQuestionData?.questionImages ?? [],
         elementRef: annotatableQuestionInspectImagesElementRef,
         elementRootRef: annotatableQuestionInspectImagesRootRef,
         isSessionFetching,
+        questionId: currentQuestionData?.id,
         userName: user?.name,
         setIsCalculatorOpen,
         isCalculatorOpen,
@@ -153,36 +158,16 @@ const QuestionInspectMainContent = forwardRef(
       });
 
       initAnnotableImagesElement({
-        currentQuestionData,
+        imageSource: currentQuestionData?.answers ?? [],
         elementRef: annotatableAnswerInspectImagesElementRef,
         elementRootRef: annotatableAnswerInspectImagesRootRef,
         isSessionFetching,
+        questionId: currentQuestionData?.id,
         userName: user?.name,
         setIsCalculatorOpen,
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
       });
-
-      return () => {
-        setTimeout(() => {
-          if (annotatableQuestionInspectImagesRootRef.current) {
-            annotatableQuestionInspectImagesRootRef.current.unmount();
-            annotatableQuestionInspectImagesRootRef.current = null;
-          }
-          if (annotatableQuestionInspectImagesElementRef.current) {
-            annotatableQuestionInspectImagesElementRef.current.remove();
-            annotatableQuestionInspectImagesElementRef.current = null;
-          }
-          if (annotatableAnswerInspectImagesRootRef.current) {
-            annotatableAnswerInspectImagesRootRef.current.unmount();
-            annotatableAnswerInspectImagesRootRef.current = null;
-          }
-          if (annotatableAnswerInspectImagesElementRef.current) {
-            annotatableAnswerInspectImagesElementRef.current.remove();
-            annotatableAnswerInspectImagesElementRef.current = null;
-          }
-        }, 0);
-      };
     }, [
       currentQuestionId,
       currentQuestionData,
@@ -191,7 +176,32 @@ const QuestionInspectMainContent = forwardRef(
       setIsCalculatorOpen,
       isCalculatorOpen,
       uiPreferences.imageTheme,
+      isMounted,
     ]);
+
+    // Cleanup roots only when component unmounts
+    useEffect(() => {
+      setIsMounted(true);
+      return () => {
+        setIsMounted(false);
+        if (annotatableQuestionInspectImagesRootRef.current) {
+          annotatableQuestionInspectImagesRootRef.current.unmount();
+          annotatableQuestionInspectImagesRootRef.current = null;
+        }
+        if (annotatableQuestionInspectImagesElementRef.current) {
+          annotatableQuestionInspectImagesElementRef.current.remove();
+          annotatableQuestionInspectImagesElementRef.current = null;
+        }
+        if (annotatableAnswerInspectImagesRootRef.current) {
+          annotatableAnswerInspectImagesRootRef.current.unmount();
+          annotatableAnswerInspectImagesRootRef.current = null;
+        }
+        if (annotatableAnswerInspectImagesElementRef.current) {
+          annotatableAnswerInspectImagesElementRef.current.remove();
+          annotatableAnswerInspectImagesElementRef.current = null;
+        }
+      };
+    }, []);
 
     const resetScrollPositions = useCallback(() => {
       questionScrollAreaRef.current?.scrollTo({

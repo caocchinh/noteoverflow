@@ -123,7 +123,6 @@ const AnnotatableInspectImagesComponent = memo(
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
-    const [key, setKey] = useState(0);
 
     const paperCode = useMemo(
       () =>
@@ -266,8 +265,6 @@ const AnnotatableInspectImagesComponent = memo(
           setIsPdfViewerLoaded(false);
         },
       });
-      setKey((prev) => prev + 1);
-
       return () => {
         setTimeout(() => {
           if (pdfViewerRootRef.current) {
@@ -472,7 +469,6 @@ const AnnotatableInspectImagesComponent = memo(
           normalContainerRef.current &&
           createPortal(
             <div
-              key={key}
               ref={(node) => {
                 if (node && pdfViewerElementRef.current) {
                   node.appendChild(pdfViewerElementRef.current);
