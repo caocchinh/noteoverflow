@@ -24,6 +24,9 @@ import {
   convertImageToPngBase64,
   extractPaperCode,
   extractQuestionNumber,
+  extractSeasonFromPaperCode,
+  extractYearFromPaperCode,
+  parsePastPaperUrl,
   handleDownloadPdf,
 } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
@@ -129,6 +132,22 @@ const AnnotatableInspectImagesComponent = memo(
       [currentQuestionId]
     );
 
+    const questionLink = useMemo(() => {
+      if (!currentQuestionId || !paperCode) return "";
+
+      const season = extractSeasonFromPaperCode({ paperCode });
+      const year = extractYearFromPaperCode({ paperCode });
+
+      if (!season || !year) return "";
+
+      return parsePastPaperUrl({
+        questionId: currentQuestionId,
+        year,
+        season,
+        type: "qp", // question paper
+      });
+    }, [currentQuestionId, paperCode]);
+
     const pdfBaseFileName = useMemo(() => {
       const sanitizedPaperCode = (paperCode || "").replace("/", "_");
       return `NoteOverflow_${sanitizedPaperCode}_Q${questionNumber || ""}`;
@@ -183,6 +202,8 @@ const AnnotatableInspectImagesComponent = memo(
               images={convertedImages}
               headerLogo={headerLogo || ""}
               paperCode={paperCode}
+              questionLink={questionLink}
+              questionNumber={questionNumber.toString()}
             />
           ).toBlob();
         } catch (error) {
@@ -192,7 +213,7 @@ const AnnotatableInspectImagesComponent = memo(
         return null;
       }
       return null;
-    }, [imageUrls, paperCode]);
+    }, [imageUrls, paperCode, questionNumber, questionLink]);
 
     useEffect(() => {
       let isActive = true;

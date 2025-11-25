@@ -319,6 +319,53 @@ export const extractSubjectCode = ({
   }
 };
 
+export const extractSeasonFromPaperCode = ({
+  paperCode,
+}: {
+  paperCode: string;
+}): ValidSeason | undefined => {
+  try {
+    // paperCode format: "9702/11/M/J/24" where M/J is the season
+    const parts = paperCode.split("/");
+    if (parts.length >= 4) {
+      const seasonPart = `${parts[2]}/${parts[3]}`; // e.g., "M/J"
+      if (seasonPart === "M/J") {
+        return "Summer";
+      } else if (seasonPart === "O/N") {
+        return "Winter";
+      } else if (seasonPart === "F/M") {
+        return "Spring";
+      }
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const extractYearFromPaperCode = ({
+  paperCode,
+}: {
+  paperCode: string;
+}): string => {
+  try {
+    // paperCode format: "9702/11/M/J/24" where 24 is the year
+    const parts = paperCode.split("/");
+    if (parts.length >= 5) {
+      const yearPart = parts[4]; // e.g., "24"
+      // Convert 2-digit year to 4-digit year
+      const twoDigitYear = parseInt(yearPart);
+      if (twoDigitYear >= 0 && twoDigitYear <= 99) {
+        // Assume years 00-99 map to 2000-2099
+        return `20${yearPart.padStart(2, "0")}`;
+      }
+    }
+    return "";
+  } catch {
+    return "";
+  }
+};
+
 export const parsePastPaperUrl = ({
   questionId,
   year,

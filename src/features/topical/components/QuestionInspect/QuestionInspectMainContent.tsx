@@ -13,7 +13,6 @@ import {
   useState,
 } from "react";
 import {
-  AnnotatableInspectImagesRef,
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
 } from "../../constants/types";
@@ -62,22 +61,9 @@ const QuestionInspectMainContent = forwardRef(
     const questionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
     const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
-    const questionImagesRef = useRef<AnnotatableInspectImagesRef>(null);
-    const answerImagesRef = useRef<AnnotatableInspectImagesRef>(null);
-    const bothViewsImagesRef = useRef<AnnotatableInspectImagesRef>(null);
     const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
     const [currentView, setCurrentView] =
       useState<QuestionInspectViewMode>("question");
-
-    useEffect(() => {
-      if (currentView === "question") {
-        questionImagesRef.current?.updatePdfViewerSize();
-      } else if (currentView === "answer") {
-        answerImagesRef.current?.updatePdfViewerSize();
-      } else {
-        bothViewsImagesRef.current?.updatePdfViewerSize();
-      }
-    }, [currentView]);
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -175,9 +161,6 @@ const QuestionInspectMainContent = forwardRef(
         resetScrollPositions,
         setCurrentView,
         handleKeyboardNavigation,
-        questionImagesRef,
-        answerImagesRef,
-        bothViewsImagesRef,
       }),
       [resetScrollPositions, setCurrentView, handleKeyboardNavigation]
     );

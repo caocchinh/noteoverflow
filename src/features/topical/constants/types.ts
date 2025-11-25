@@ -547,9 +547,6 @@ export interface QuestionInspectMainContentRef {
   resetScrollPositions: () => void;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   handleKeyboardNavigation: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  questionImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
-  answerImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
-  bothViewsImagesRef: RefObject<AnnotatableInspectImagesRef | null>;
 }
 
 export interface RecentQueryProps {
@@ -584,8 +581,4 @@ export interface RecentQueryRef {
     unknown
   >;
   isAddRecentQueryPending: boolean;
-}
-
-export interface AnnotatableInspectImagesRef {
-  updatePdfViewerSize: () => void;
 }

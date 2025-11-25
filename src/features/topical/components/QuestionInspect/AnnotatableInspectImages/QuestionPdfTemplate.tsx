@@ -87,16 +87,27 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: "black",
   },
+  bigPaperCode: {
+    fontSize: 16,
+    color: "#0084ff",
+    textAlign: "left",
+    paddingLeft: 2,
+    fontWeight: "bold",
+  },
 });
 
 const QuestionPdfTemplate = ({
   images,
   headerLogo,
   paperCode,
+  questionLink,
+  questionNumber,
 }: {
   images: string[];
   headerLogo: string;
   paperCode: string;
+  questionLink: string;
+  questionNumber: string;
 }) => (
   <Document>
     <Page size="A4" style={styles.page}>
@@ -106,7 +117,7 @@ const QuestionPdfTemplate = ({
             <PdfImage src={headerLogo} style={styles.headerLogo} />
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>NoteOverflow</Text>
-              <Link src="https://noteoverflow.com" style={styles.subtitle}>
+              <Link href="https://noteoverflow.com" style={styles.subtitle}>
                 noteoverflow.com
               </Link>
             </View>
@@ -114,6 +125,9 @@ const QuestionPdfTemplate = ({
           <Text style={styles.headerTagline}>AS & A-Level resources</Text>
         </View>
       </View>
+      <Link href={questionLink} style={styles.bigPaperCode}>
+        {paperCode} Q{questionNumber}
+      </Link>
       <View>
         {images.map((src, index) => (
           <PdfImage key={index} src={src} style={styles.image} />
