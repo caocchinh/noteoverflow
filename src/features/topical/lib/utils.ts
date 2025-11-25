@@ -944,3 +944,15 @@ export const convertImageToPngBase64 = (url: string): Promise<string> => {
     img.src = url;
   });
 };
+
+export const handleDownloadPdf = (pdfBlob: Blob | null, fileName: string) => {
+  if (!pdfBlob) return;
+  const url = URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};

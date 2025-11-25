@@ -19,11 +19,14 @@ interface PdfViewerWrapperProps {
   initialXfdf?: string | null;
   fileName: string;
   onAnnotationsChanged?: (xfdf: string) => void;
+  onDocumentLoaded?: () => void;
+  onUnmount?: () => void;
 }
 
 export interface PdfViewerWrapperHandle {
   instance: WebViewerInstance | null;
   exportAnnotations: () => Promise<string | null>;
+  exportPdfWithAnnotations: () => Promise<Blob | null>;
   deleteAllAnnotations: () => void;
 }
 
@@ -32,40 +35,66 @@ const PdfViewerWrapper = forwardRef<
   PdfViewerWrapperProps
 >(
   (
-    { id, documentPath, author, initialXfdf, onAnnotationsChanged, fileName },
+    {
+      id,
+      documentPath,
+      author,
+      initialXfdf,
+      onAnnotationsChanged,
+      fileName,
+      onDocumentLoaded,
+      onUnmount,
+    },
     ref
   ) => {
-    const viewerRef = useRef<HTMLDivElement>(null);
+    const viewerRef = useRef<HTMLDivElement | null>(null);
     const instanceRef = useRef<WebViewerInstance | null>(null);
+    const isMountedRef = useRef(false);
 
-    useImperativeHandle(ref, () => ({
-      instance: instanceRef.current,
-      exportAnnotations: async () => {
-        const instance = instanceRef.current;
-        if (!instance) return null;
-        return instance.Core.annotationManager.exportAnnotations();
-      },
-      deleteAllAnnotations: () => {
-        const instance = instanceRef.current;
-        if (!instance) {
-          return;
-        }
-        setTimeout(() => {
-          const { annotationManager } = instance.Core;
-          const allAnnotations = annotationManager.getAnnotationsList();
-          if (allAnnotations.length > 0) {
-            annotationManager.deleteAnnotations(allAnnotations, {
-              force: true,
-            });
+    useImperativeHandle(
+      ref,
+      () => ({
+        instance: instanceRef.current,
+        exportAnnotations: async () => {
+          const instance = instanceRef.current;
+          if (!instance) return null;
+          return instance.Core.annotationManager.exportAnnotations();
+        },
+        exportPdfWithAnnotations: async () => {
+          const instance = instanceRef.current;
+          if (!instance) return null;
+
+          const { documentViewer, annotationManager } = instance.Core;
+          const doc = documentViewer.getDocument();
+          if (!doc) return null;
+
+          const xfdfString = await annotationManager.exportAnnotations();
+          const data = await doc.getFileData({ xfdfString });
+          const arr = new Uint8Array(data);
+          return new Blob([arr], { type: "application/pdf" });
+        },
+        deleteAllAnnotations: () => {
+          const instance = instanceRef.current;
+          if (!instance) {
+            return;
           }
-        }, 0);
-      },
-    }));
+          setTimeout(() => {
+            const { annotationManager } = instance.Core;
+            const allAnnotations = annotationManager.getAnnotationsList();
+            if (allAnnotations.length > 0) {
+              annotationManager.deleteAnnotations(allAnnotations, {
+                force: true,
+              });
+            }
+          }, 0);
+        },
+      }),
+      []
+    );
 
     useEffect(() => {
-      if (!viewerRef.current) return;
+      if (!viewerRef.current || isMountedRef.current) return;
 
-      let mounted = true;
       let detachListeners: (() => void) | undefined;
       const isBlob = documentPath instanceof Blob;
 
@@ -76,7 +105,7 @@ const PdfViewerWrapper = forwardRef<
         },
         viewerRef.current
       ).then((instance) => {
-        if (!mounted) return;
+        isMountedRef.current = true;
         instanceRef.current = instance;
 
         const { documentViewer, annotationManager } = instance.Core;
@@ -116,6 +145,7 @@ const PdfViewerWrapper = forwardRef<
         }
 
         const handleDocumentLoaded = async () => {
+          if (!isMountedRef.current) return;
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
           } else {
@@ -125,12 +155,14 @@ const PdfViewerWrapper = forwardRef<
               scrollView.scrollTop = 0;
             }
           }
+          onDocumentLoaded?.();
         };
 
         const handleAnnotationChanged: AnnotationChangedHandler = () => {
+          if (!isMountedRef.current) return;
           if (!onAnnotationsChanged) return;
           annotationManager.exportAnnotations().then((xfdf) => {
-            if (!mounted) return;
+            if (!isMountedRef.current) return;
             onAnnotationsChanged(xfdf);
           });
         };
@@ -154,12 +186,21 @@ const PdfViewerWrapper = forwardRef<
       });
 
       return () => {
-        mounted = false;
+        isMountedRef.current = false;
         detachListeners?.();
         detachListeners = undefined;
         instanceRef.current = null;
+        onUnmount?.();
       };
-    }, [documentPath, author, initialXfdf, onAnnotationsChanged, fileName]);
+    }, [
+      documentPath,
+      author,
+      initialXfdf,
+      onAnnotationsChanged,
+      fileName,
+      onDocumentLoaded,
+      onUnmount,
+    ]);
 
     return (
       <div id={id} ref={viewerRef} style={{ height: "100%", width: "100%" }} />

@@ -24,27 +24,25 @@ import {
   convertImageToPngBase64,
   extractPaperCode,
   extractQuestionNumber,
+  handleDownloadPdf,
 } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
 import { Button } from "@/components/ui/button";
-import {
-  Document,
-  Page,
-  Image as PdfImage,
-  View,
-  Link,
-  StyleSheet,
-  Text,
-  pdf,
-} from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { useAuth } from "@/context/AuthContext";
 import dynamic from "next/dynamic";
 import type { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
 import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import QuestionPdfTemplate from "./QuestionPdfTemplate";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -56,6 +54,8 @@ const initPdfElement = ({
   pdfViewerRef,
   pdfViewerElementRef,
   pdfViewerRootRef,
+  onDocumentLoaded,
+  onUnmount,
   author,
   fileName,
 }: {
@@ -64,6 +64,8 @@ const initPdfElement = ({
   pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
   pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
   pdfViewerRootRef: React.RefObject<Root | null>;
+  onDocumentLoaded: () => void;
+  onUnmount: () => void;
   author: string | undefined;
   fileName: string;
 }) => {
@@ -82,137 +84,14 @@ const initPdfElement = ({
         documentPath={pdfBlob}
         ref={pdfViewerRef}
         id={viewerId}
+        onDocumentLoaded={onDocumentLoaded}
         author={author}
         fileName={fileName}
+        onUnmount={onUnmount}
       />
     );
   }
 };
-
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "column",
-    backgroundColor: "#ffffff",
-    padding: 5,
-    paddingTop: 50,
-    paddingBottom: 15,
-  },
-  header: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingLeft: "18px",
-    paddingRight: "18px",
-    paddingTop: "5px",
-    paddingBottom: "5px",
-    backgroundColor: "#f8fafc",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  headerContent: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  branding: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerLogo: {
-    width: 27,
-    height: 27,
-    objectFit: "contain",
-    marginRight: "-2px",
-  },
-  headerText: {
-    marginLeft: 8,
-  },
-  headerTitle: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#0f172a",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  subtitle: {
-    fontSize: 9,
-    color: "#475569",
-    textDecoration: "none",
-  },
-  headerTagline: {
-    fontSize: 10,
-    color: "#475569",
-    fontWeight: 500,
-  },
-  image: {
-    width: "100%",
-    marginBottom: 0,
-  },
-  pageNumber: {
-    position: "absolute",
-    bottom: 12,
-    right: 14,
-    fontSize: 8,
-    color: "black",
-  },
-  paperCode: {
-    position: "absolute",
-    bottom: 12,
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    fontSize: 8,
-    color: "black",
-  },
-});
-
-const MyDocument = ({
-  images,
-  headerLogo,
-  paperCode,
-}: {
-  images: string[];
-  headerLogo: string;
-  paperCode: string;
-}) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header} fixed>
-        <View style={styles.headerContent}>
-          <View style={styles.branding}>
-            <PdfImage src={headerLogo} style={styles.headerLogo} />
-            <View style={styles.headerText}>
-              <Text style={styles.headerTitle}>NoteOverflow</Text>
-              <Link src="https://noteoverflow.com" style={styles.subtitle}>
-                noteoverflow.com
-              </Link>
-            </View>
-          </View>
-          <Text style={styles.headerTagline}>AS & A-Level resources</Text>
-        </View>
-      </View>
-      <View>
-        {images.map((src, index) => (
-          <PdfImage key={index} src={src} style={styles.image} />
-        ))}
-      </View>
-      <Text
-        style={styles.pageNumber}
-        render={({ pageNumber, totalPages }) =>
-          `Page ${pageNumber} of ${totalPages}`
-        }
-        fixed
-      />
-      <Text style={styles.paperCode} fixed>
-        {paperCode}
-      </Text>
-    </Page>
-  </Document>
-);
 
 const AnnotatableInspectImagesComponent = memo(
   ({
@@ -227,6 +106,7 @@ const AnnotatableInspectImagesComponent = memo(
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+    const [isPdfViewerLoaded, setIsPdfViewerLoaded] = useState(false);
     const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
     const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
     const pdfViewerRootRef = useRef<Root | null>(null);
@@ -236,7 +116,6 @@ const AnnotatableInspectImagesComponent = memo(
     const { isSessionFetching, user } = useAuth();
     const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
-
     const [key, setKey] = useState(0);
 
     const paperCode = useMemo(
@@ -287,51 +166,56 @@ const AnnotatableInspectImagesComponent = memo(
       [imageSource]
     );
 
+    const generatePdfBlob = useCallback(async () => {
+      if (imageUrls.length > 0) {
+        try {
+          const headerLogoPromise = convertImageToPngBase64(
+            PDF_HEADER_LOGO_SRC
+          ).catch((error) => {
+            console.error("Failed to load header logo", error);
+            return null;
+          });
+
+          const [convertedImages, headerLogo] = await Promise.all([
+            Promise.all(
+              imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
+            ),
+            headerLogoPromise,
+          ]);
+
+          return await pdf(
+            <QuestionPdfTemplate
+              images={convertedImages}
+              headerLogo={headerLogo || ""}
+              paperCode={paperCode}
+            />
+          ).toBlob();
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+        }
+      } else {
+        return null;
+      }
+      return null;
+    }, [imageUrls, paperCode]);
+
     useEffect(() => {
-      let active = true;
+      let isActive = true;
 
-      const generatePdf = async () => {
-        if (isEditMode && imageUrls.length > 0) {
-          try {
-            const headerLogoPromise = convertImageToPngBase64(
-              PDF_HEADER_LOGO_SRC
-            ).catch((error) => {
-              console.error("Failed to load header logo", error);
-              return null;
-            });
-
-            const [convertedImages, headerLogo] = await Promise.all([
-              Promise.all(
-                imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
-              ),
-              headerLogoPromise,
-            ]);
-
-            if (!active) return;
-
-            const blob = await pdf(
-              <MyDocument
-                images={convertedImages}
-                headerLogo={headerLogo || ""}
-                paperCode={paperCode}
-              />
-            ).toBlob();
-            if (!active) return;
-            setPdfBlob(blob);
-          } catch (error) {
-            console.error("Error generating PDF:", error);
-          }
-        } else {
-          setPdfBlob(null);
+      const generate = async () => {
+        if (isActive && isEditMode) {
+          const blob = await generatePdfBlob();
+          setPdfBlob(blob);
         }
       };
 
-      generatePdf();
+      setTimeout(generate, 0);
 
       return () => {
-        active = false;
+        isActive = false;
+        setPdfBlob(null);
       };
-    }, [isEditMode, imageUrls, currentQuestionId, paperCode]);
+    }, [generatePdfBlob, isEditMode]);
 
     useEffect(() => {
       if (
@@ -351,6 +235,12 @@ const AnnotatableInspectImagesComponent = memo(
         pdfViewerRootRef,
         author: user?.name,
         fileName: pdfBaseFileName,
+        onDocumentLoaded: () => {
+          setIsPdfViewerLoaded(true);
+        },
+        onUnmount: () => {
+          setIsPdfViewerLoaded(false);
+        },
       });
       setKey((prev) => prev + 1);
 
@@ -379,16 +269,31 @@ const AnnotatableInspectImagesComponent = memo(
 
     if (!imageSource || imageSource.length === 0) {
       return (
-        <p className="text-center text-red-600">Unable to fetch resource</p>
+        <p className="text-center text-red-600 mt-2">
+          Unable to fetch resource
+        </p>
       );
     }
     return (
       <>
         <div className="flex flex-col w-full relative">
           <div
-            className="flex items-center justify-end mb-2 mr-2 mt-2 gap-2"
+            className="flex items-center justify-end mb-2 mt-2 gap-2 flex-wrap"
             ref={ultilityBarRef}
           >
+            {!isEditMode && (
+              <Button
+                className="cursor-pointer h-[26px]"
+                variant="outline"
+                onClick={async () => {
+                  handleDownloadPdf(await generatePdfBlob(), pdfBaseFileName);
+                }}
+                title="Download question"
+              >
+                <span className="hidden sm:block">Download</span>
+                <Download className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -412,13 +317,14 @@ const AnnotatableInspectImagesComponent = memo(
             {!isFullscreen && isEditMode && (
               <>
                 <ClearAllButton
-                  isSessionFetching={isSessionFetching}
                   pdfViewerRef={pdfViewerRef}
+                  isPdfViewerLoaded={isPdfViewerLoaded}
                 />
                 <DownloadPdfButton
-                  isSessionFetching={isSessionFetching}
                   pdfBlob={pdfBlob}
                   fileName={downloadFileName}
+                  pdfViewerRef={pdfViewerRef}
+                  isPdfViewerLoaded={isPdfViewerLoaded}
                 />
                 <Button
                   className="cursor-pointer h-[26px]"
@@ -427,7 +333,8 @@ const AnnotatableInspectImagesComponent = memo(
                   onClick={toggleFullscreen}
                   title="Enter Fullscreen"
                 >
-                  Fullscreen <Maximize className="h-4 w-4" />
+                  <span className="hidden sm:block">Fullscreen</span>{" "}
+                  <Maximize className="h-4 w-4" />
                 </Button>
               </>
             )}
@@ -460,13 +367,14 @@ const AnnotatableInspectImagesComponent = memo(
                       </span>
                       <div className="flex items-center gap-1">
                         <ClearAllButton
-                          isSessionFetching={isSessionFetching}
                           pdfViewerRef={pdfViewerRef}
+                          isPdfViewerLoaded={isPdfViewerLoaded}
                         />
                         <DownloadPdfButton
-                          isSessionFetching={isSessionFetching}
                           pdfBlob={pdfBlob}
                           fileName={downloadFileName}
+                          pdfViewerRef={pdfViewerRef}
+                          isPdfViewerLoaded={isPdfViewerLoaded}
                         />
                         <Button
                           className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
@@ -562,16 +470,17 @@ export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
 
 const ClearAllButton = memo(
   ({
-    isSessionFetching,
     pdfViewerRef,
+    isPdfViewerLoaded,
   }: {
-    isSessionFetching: boolean;
     pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+    isPdfViewerLoaded: boolean;
   }) => {
+    const { isSessionFetching } = useAuth();
     return (
       <Button
         className="cursor-pointer h-[26px]"
-        disabled={isSessionFetching}
+        disabled={isSessionFetching || !isPdfViewerLoaded}
         variant="outline"
         onClick={(e) => {
           e.preventDefault();
@@ -580,7 +489,7 @@ const ClearAllButton = memo(
         }}
         title="Clear all annotations"
       >
-        <span>Clear all</span>
+        <span className="hidden sm:block">Clear all</span>
         <Brush className="h-4 w-4" />
       </Button>
     );
@@ -589,43 +498,110 @@ const ClearAllButton = memo(
 
 ClearAllButton.displayName = "ClearAllButton";
 
-const DownloadPdfButton = memo(
-  ({
-    pdfBlob,
-    isSessionFetching,
-    fileName,
-  }: {
-    pdfBlob: Blob | null;
-    isSessionFetching: boolean;
-    fileName: string;
-  }) => {
-    const handleDownload = useCallback(() => {
-      if (!pdfBlob) return;
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, [pdfBlob, fileName]);
+const DownloadOrginalButton = memo(
+  ({ pdfBlob, fileName }: { pdfBlob: Blob | null; fileName: string }) => {
+    const { isSessionFetching } = useAuth();
 
     return (
       <Button
         className="cursor-pointer h-[26px]"
         disabled={!pdfBlob || isSessionFetching}
         variant="outline"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleDownload();
-        }}
-        title={pdfBlob ? "Download annotated PDF" : "Generating PDF"}
+        onClick={() => handleDownloadPdf(pdfBlob, fileName)}
       >
-        <span>Download</span>
-        <Download className="h-4 w-4" />
+        Original
       </Button>
+    );
+  }
+);
+
+DownloadOrginalButton.displayName = "DownloadOrginalButton";
+
+const DownloadWithAnnotationsButton = memo(
+  ({
+    fileName,
+    pdfViewerRef,
+    isPdfViewerLoaded,
+  }: {
+    fileName: string;
+    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+    isPdfViewerLoaded: boolean;
+  }) => {
+    const { isSessionFetching } = useAuth();
+    const handleDownload = useCallback(async () => {
+      if (!pdfViewerRef.current || !isPdfViewerLoaded) return;
+
+      try {
+        const pdfWithAnnotations =
+          await pdfViewerRef.current.exportPdfWithAnnotations();
+
+        if (!pdfWithAnnotations) {
+          console.error("Failed to export PDF with annotations");
+          return;
+        }
+
+        const url = URL.createObjectURL(pdfWithAnnotations);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error downloading PDF with annotations:", error);
+      }
+    }, [fileName, isPdfViewerLoaded, pdfViewerRef]);
+
+    return (
+      <Button
+        className="cursor-pointer h-[26px]"
+        disabled={isSessionFetching || !isPdfViewerLoaded}
+        variant="outline"
+        onClick={handleDownload}
+      >
+        With annotations
+      </Button>
+    );
+  }
+);
+
+DownloadWithAnnotationsButton.displayName = "DownloadWithAnnotationsButton";
+
+const DownloadPdfButton = memo(
+  ({
+    pdfBlob,
+    fileName,
+    pdfViewerRef,
+    isPdfViewerLoaded,
+  }: {
+    pdfBlob: Blob | null;
+    fileName: string;
+    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+    isPdfViewerLoaded: boolean;
+  }) => {
+    const { isSessionFetching } = useAuth();
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            className="cursor-pointer h-[26px]"
+            disabled={!pdfBlob || isSessionFetching}
+            variant="outline"
+          >
+            <span className="hidden sm:block">Download</span>
+            <Download className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="z-[999998] flex flex-col dark:bg-accent p-2 gap-2">
+          <DownloadOrginalButton pdfBlob={pdfBlob} fileName={fileName} />
+          <DownloadWithAnnotationsButton
+            fileName={fileName}
+            isPdfViewerLoaded={isPdfViewerLoaded}
+            pdfViewerRef={pdfViewerRef}
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 );
