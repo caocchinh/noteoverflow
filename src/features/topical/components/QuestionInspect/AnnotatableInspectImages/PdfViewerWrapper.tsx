@@ -13,7 +13,6 @@ type AnnotationChangedHandler = Parameters<
 >[1];
 
 interface PdfViewerWrapperProps {
-  id: string;
   documentPath: string | Blob;
   author: string | undefined;
   initialXfdf?: string | null;
@@ -36,7 +35,6 @@ const PdfViewerWrapper = forwardRef<
 >(
   (
     {
-      id,
       documentPath,
       author,
       initialXfdf,
@@ -202,9 +200,7 @@ const PdfViewerWrapper = forwardRef<
       onUnmount,
     ]);
 
-    return (
-      <div id={id} ref={viewerRef} style={{ height: "100%", width: "100%" }} />
-    );
+    return <div ref={viewerRef} style={{ height: "100%", width: "100%" }} />;
   }
 );
 

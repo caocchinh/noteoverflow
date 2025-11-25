@@ -50,7 +50,6 @@ const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
 
 const initPdfElement = ({
   pdfBlob,
-  viewerId,
   pdfViewerRef,
   pdfViewerElementRef,
   pdfViewerRootRef,
@@ -60,7 +59,6 @@ const initPdfElement = ({
   fileName,
 }: {
   pdfBlob: Blob;
-  viewerId: string;
   pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
   pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
   pdfViewerRootRef: React.RefObject<Root | null>;
@@ -83,7 +81,6 @@ const initPdfElement = ({
       <PdfViewerWrapper
         documentPath={pdfBlob}
         ref={pdfViewerRef}
-        id={viewerId}
         onDocumentLoaded={onDocumentLoaded}
         author={author}
         fileName={fileName}
@@ -97,11 +94,9 @@ const AnnotatableInspectImagesComponent = memo(
   ({
     imageSource,
     currentQuestionId,
-    viewerId,
   }: {
     imageSource: string[] | undefined;
     currentQuestionId: string | undefined;
-    viewerId: string;
   }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -229,7 +224,6 @@ const AnnotatableInspectImagesComponent = memo(
 
       initPdfElement({
         pdfBlob,
-        viewerId,
         pdfViewerRef,
         pdfViewerElementRef,
         pdfViewerRootRef,
@@ -260,7 +254,6 @@ const AnnotatableInspectImagesComponent = memo(
       isSessionFetching,
       pdfBlob,
       user?.name,
-      viewerId,
       imageSource,
       isEditMode,
       currentQuestionId,

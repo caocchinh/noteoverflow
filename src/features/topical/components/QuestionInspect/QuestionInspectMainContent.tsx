@@ -235,7 +235,6 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
-                viewerId="pdf-viewer-question"
                 imageSource={currentQuestionData?.questionImages ?? []}
                 currentQuestionId={currentQuestionData?.id}
               />
@@ -265,7 +264,6 @@ const QuestionInspectMainContent = forwardRef(
                 />
               </div>
               <AnnotatableInspectImages
-                viewerId="pdf-viewer-answer"
                 imageSource={currentQuestionData?.answers ?? []}
                 currentQuestionId={currentQuestionData?.id}
               />
