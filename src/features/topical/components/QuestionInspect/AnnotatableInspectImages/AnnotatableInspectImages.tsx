@@ -16,7 +16,6 @@ import {
   Maximize,
   Shrink,
   Calculator,
-  Brush,
   Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,14 +28,12 @@ import {
   parsePastPaperUrl,
   handleDownloadPdf,
 } from "@/features/topical/lib/utils";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
 import { Button } from "@/components/ui/button";
 import { pdf } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
-import { useAuth } from "@/context/AuthContext";
 import dynamic from "next/dynamic";
 import type { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
 import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
@@ -46,6 +43,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import QuestionPdfTemplate from "./QuestionPdfTemplate";
+import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
+import DownloadOrginalButton from "./DownloadOrginalButton";
+import ClearAllButton from "./ClearAllButton";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -62,9 +62,9 @@ const initPdfElement = ({
   fileName,
 }: {
   pdfBlob: Blob;
-  pdfViewerRef: React.RefObject<PdfViewerWrapperHandle | null>;
-  pdfViewerElementRef: React.RefObject<HTMLDivElement | null>;
-  pdfViewerRootRef: React.RefObject<Root | null>;
+  pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+  pdfViewerElementRef: RefObject<HTMLDivElement | null>;
+  pdfViewerRootRef: RefObject<Root | null>;
   onDocumentLoaded: () => void;
   onUnmount: () => void;
   author: string | undefined;
@@ -93,14 +93,26 @@ const initPdfElement = ({
   }
 };
 
+interface AnnotatableInspectImagesProps {
+  imageSource: string[] | undefined;
+  currentQuestionId: string | undefined;
+  isSessionFetching: boolean;
+  userName: string | undefined;
+  setIsCalculatorOpen: (isOpen: boolean) => void;
+  isCalculatorOpen: boolean;
+  imageTheme: "light" | "dark";
+}
+
 const AnnotatableInspectImagesComponent = memo(
   ({
     imageSource,
     currentQuestionId,
-  }: {
-    imageSource: string[] | undefined;
-    currentQuestionId: string | undefined;
-  }) => {
+    isSessionFetching,
+    userName,
+    setIsCalculatorOpen,
+    isCalculatorOpen,
+    imageTheme,
+  }: AnnotatableInspectImagesProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -110,9 +122,6 @@ const AnnotatableInspectImagesComponent = memo(
     const pdfViewerRootRef = useRef<Root | null>(null);
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
-    const { uiPreferences } = useTopicalApp();
-    const { isSessionFetching, user } = useAuth();
-    const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
     const [key, setKey] = useState(0);
 
@@ -248,7 +257,7 @@ const AnnotatableInspectImagesComponent = memo(
         pdfViewerRef,
         pdfViewerElementRef,
         pdfViewerRootRef,
-        author: user?.name,
+        author: userName,
         fileName: pdfBaseFileName,
         onDocumentLoaded: () => {
           setIsPdfViewerLoaded(true);
@@ -274,7 +283,7 @@ const AnnotatableInspectImagesComponent = memo(
     }, [
       isSessionFetching,
       pdfBlob,
-      user?.name,
+      userName,
       imageSource,
       isEditMode,
       currentQuestionId,
@@ -333,12 +342,14 @@ const AnnotatableInspectImagesComponent = memo(
                 <ClearAllButton
                   pdfViewerRef={pdfViewerRef}
                   isPdfViewerLoaded={isPdfViewerLoaded}
+                  isSessionFetching={isSessionFetching}
                 />
                 <DownloadPdfButton
                   pdfBlob={pdfBlob}
                   fileName={downloadFileName}
                   pdfViewerRef={pdfViewerRef}
                   isPdfViewerLoaded={isPdfViewerLoaded}
+                  isSessionFetching={isSessionFetching}
                 />
                 <Button
                   className="cursor-pointer h-[26px]"
@@ -383,12 +394,14 @@ const AnnotatableInspectImagesComponent = memo(
                         <ClearAllButton
                           pdfViewerRef={pdfViewerRef}
                           isPdfViewerLoaded={isPdfViewerLoaded}
+                          isSessionFetching={isSessionFetching}
                         />
                         <DownloadPdfButton
                           pdfBlob={pdfBlob}
                           fileName={downloadFileName}
                           pdfViewerRef={pdfViewerRef}
                           isPdfViewerLoaded={isPdfViewerLoaded}
+                          isSessionFetching={isSessionFetching}
                         />
                         <Button
                           className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
@@ -435,7 +448,7 @@ const AnnotatableInspectImagesComponent = memo(
                       <img
                         className={cn(
                           "w-full h-full object-contain relative z-2 !max-w-[750px] cursor-pointer",
-                          uiPreferences.imageTheme === "dark" && "!invert"
+                          imageTheme === "dark" && "!invert"
                         )}
                         src={item}
                         alt="Question image"
@@ -482,119 +495,20 @@ AnnotatableInspectImagesComponent.displayName =
 // Export with memo and forwardRef
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
 
-const ClearAllButton = memo(
-  ({
-    pdfViewerRef,
-    isPdfViewerLoaded,
-  }: {
-    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
-    isPdfViewerLoaded: boolean;
-  }) => {
-    const { isSessionFetching } = useAuth();
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        disabled={isSessionFetching || !isPdfViewerLoaded}
-        variant="outline"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          pdfViewerRef.current?.deleteAllAnnotations();
-        }}
-        title="Clear all annotations"
-      >
-        <span className="hidden sm:block">Clear all</span>
-        <Brush className="h-4 w-4" />
-      </Button>
-    );
-  }
-);
-
-ClearAllButton.displayName = "ClearAllButton";
-
-const DownloadOrginalButton = memo(
-  ({ pdfBlob, fileName }: { pdfBlob: Blob | null; fileName: string }) => {
-    const { isSessionFetching } = useAuth();
-
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        disabled={!pdfBlob || isSessionFetching}
-        variant="outline"
-        onClick={() => handleDownloadPdf(pdfBlob, fileName)}
-      >
-        Original
-      </Button>
-    );
-  }
-);
-
-DownloadOrginalButton.displayName = "DownloadOrginalButton";
-
-const DownloadWithAnnotationsButton = memo(
-  ({
-    fileName,
-    pdfViewerRef,
-    isPdfViewerLoaded,
-  }: {
-    fileName: string;
-    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
-    isPdfViewerLoaded: boolean;
-  }) => {
-    const { isSessionFetching } = useAuth();
-    const handleDownload = useCallback(async () => {
-      if (!pdfViewerRef.current || !isPdfViewerLoaded) return;
-
-      try {
-        const pdfWithAnnotations =
-          await pdfViewerRef.current.exportPdfWithAnnotations();
-
-        if (!pdfWithAnnotations) {
-          console.error("Failed to export PDF with annotations");
-          return;
-        }
-
-        const url = URL.createObjectURL(pdfWithAnnotations);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error("Error downloading PDF with annotations:", error);
-      }
-    }, [fileName, isPdfViewerLoaded, pdfViewerRef]);
-
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        disabled={isSessionFetching || !isPdfViewerLoaded}
-        variant="outline"
-        onClick={handleDownload}
-      >
-        With annotations
-      </Button>
-    );
-  }
-);
-
-DownloadWithAnnotationsButton.displayName = "DownloadWithAnnotationsButton";
-
 const DownloadPdfButton = memo(
   ({
     pdfBlob,
     fileName,
     pdfViewerRef,
     isPdfViewerLoaded,
+    isSessionFetching,
   }: {
     pdfBlob: Blob | null;
     fileName: string;
     pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
     isPdfViewerLoaded: boolean;
+    isSessionFetching: boolean;
   }) => {
-    const { isSessionFetching } = useAuth();
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -608,11 +522,16 @@ const DownloadPdfButton = memo(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="z-[999998] flex flex-col dark:bg-accent p-2 gap-2">
-          <DownloadOrginalButton pdfBlob={pdfBlob} fileName={fileName} />
+          <DownloadOrginalButton
+            pdfBlob={pdfBlob}
+            fileName={fileName}
+            isSessionFetching={isSessionFetching}
+          />
           <DownloadWithAnnotationsButton
             fileName={fileName}
             isPdfViewerLoaded={isPdfViewerLoaded}
             pdfViewerRef={pdfViewerRef}
+            isSessionFetching={isSessionFetching}
           />
         </DropdownMenuContent>
       </DropdownMenu>

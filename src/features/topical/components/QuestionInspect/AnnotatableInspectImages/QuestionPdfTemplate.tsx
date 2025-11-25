@@ -87,6 +87,9 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: "black",
   },
+  bigPaperCodeContainer: {
+    alignSelf: "flex-start",
+  },
   bigPaperCode: {
     fontSize: 16,
     color: "#0084ff",
@@ -125,9 +128,11 @@ const QuestionPdfTemplate = ({
           <Text style={styles.headerTagline}>AS & A-Level resources</Text>
         </View>
       </View>
-      <Link href={questionLink} style={styles.bigPaperCode}>
-        {paperCode} Q{questionNumber}
-      </Link>
+      <View style={styles.bigPaperCodeContainer}>
+        <Link href={questionLink} style={styles.bigPaperCode}>
+          {paperCode} Q{questionNumber}
+        </Link>
+      </View>
       <View>
         {images.map((src, index) => (
           <PdfImage key={index} src={src} style={styles.image} />

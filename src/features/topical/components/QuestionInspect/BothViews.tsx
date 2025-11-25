@@ -8,31 +8,26 @@ import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
 import { Eye, EyeClosed } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface InspectPanelProps {
   title: string;
   defaultSize: number;
   minSize: number;
-  imageSource: string[];
-  currentQuestionId: string | undefined;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   scrollAreaClassName?: string;
   initialHidden?: boolean;
-  viewerId: string;
+  annotableContainerRef: RefObject<HTMLDivElement | null>;
 }
 
 const InspectPanel = ({
   title,
   defaultSize,
   minSize,
-  imageSource,
-  currentQuestionId,
   scrollAreaRef,
   scrollAreaClassName,
   initialHidden = false,
-  viewerId,
+  annotableContainerRef,
 }: InspectPanelProps) => {
   const [isHiding, setIsHiding] = useState(initialHidden);
   const isMobile = useIsMobile();
@@ -59,11 +54,7 @@ const InspectPanel = ({
         type="always"
         viewportRef={scrollAreaRef}
       >
-        <AnnotatableInspectImages
-          viewerId={viewerId}
-          imageSource={imageSource}
-          currentQuestionId={currentQuestionId}
-        />
+        <div ref={annotableContainerRef}></div>
       </ScrollArea>
     </ResizablePanel>
   );
@@ -73,10 +64,14 @@ const BothViews = ({
   currentQuestionData,
   questionScrollAreaRef,
   answerScrollAreaRef,
+  annotableQuestionContainerRef,
+  annotableAnswerContainerRef,
 }: {
   currentQuestionData: SelectedQuestion | undefined;
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
+  annotableQuestionContainerRef: RefObject<HTMLDivElement | null>;
+  annotableAnswerContainerRef: RefObject<HTMLDivElement | null>;
 }) => {
   const isAnswerMultipleChoice =
     !currentQuestionData?.answers?.[0]?.includes("http");
@@ -95,10 +90,8 @@ const BothViews = ({
         title="Question"
         defaultSize={isAnswerMultipleChoice ? 77 : 50}
         minSize={15}
-        imageSource={currentQuestionData?.questionImages ?? []}
-        currentQuestionId={currentQuestionData?.id}
         scrollAreaRef={questionScrollAreaRef}
-        viewerId="pdf-viewer-both-question"
+        annotableContainerRef={annotableQuestionContainerRef}
       />
       <ResizableHandle withHandle />
       <InspectPanel
@@ -106,12 +99,10 @@ const BothViews = ({
         title="Answer"
         defaultSize={isAnswerMultipleChoice ? 23 : 50}
         minSize={15}
-        imageSource={currentQuestionData?.answers ?? []}
-        currentQuestionId={currentQuestionData?.id}
         scrollAreaRef={answerScrollAreaRef}
         scrollAreaClassName="pl-3 pr-0"
         initialHidden={true}
-        viewerId="pdf-viewer-both-answer"
+        annotableContainerRef={annotableAnswerContainerRef}
       />
     </ResizablePanelGroup>
   );
