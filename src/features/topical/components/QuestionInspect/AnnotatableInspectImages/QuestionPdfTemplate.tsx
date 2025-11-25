@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#ffffff",
     padding: 5,
-    paddingTop: 50,
+    paddingTop: 43,
     paddingBottom: 15,
   },
   header: {
@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
   },
   bigPaperCode: {
     fontSize: 16,
+    marginBottom: 11,
     color: "#0084ff",
     textAlign: "left",
     paddingLeft: 2,

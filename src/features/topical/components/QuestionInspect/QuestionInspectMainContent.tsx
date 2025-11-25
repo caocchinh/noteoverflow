@@ -128,6 +128,8 @@ const QuestionInspectMainContent = forwardRef(
     const { setIsCalculatorOpen, isCalculatorOpen, uiPreferences } =
       useTopicalApp();
     const [isMounted, setIsMounted] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [key, setKey] = useState(0);
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -168,6 +170,7 @@ const QuestionInspectMainContent = forwardRef(
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
       });
+      setKey((prev) => prev + 1);
     }, [
       currentQuestionId,
       currentQuestionData,
@@ -181,25 +184,29 @@ const QuestionInspectMainContent = forwardRef(
 
     // Cleanup roots only when component unmounts
     useEffect(() => {
-      setIsMounted(true);
+      setTimeout(() => {
+        setIsMounted(true);
+      }, 0);
       return () => {
-        setIsMounted(false);
-        if (annotatableQuestionInspectImagesRootRef.current) {
-          annotatableQuestionInspectImagesRootRef.current.unmount();
-          annotatableQuestionInspectImagesRootRef.current = null;
-        }
-        if (annotatableQuestionInspectImagesElementRef.current) {
-          annotatableQuestionInspectImagesElementRef.current.remove();
-          annotatableQuestionInspectImagesElementRef.current = null;
-        }
-        if (annotatableAnswerInspectImagesRootRef.current) {
-          annotatableAnswerInspectImagesRootRef.current.unmount();
-          annotatableAnswerInspectImagesRootRef.current = null;
-        }
-        if (annotatableAnswerInspectImagesElementRef.current) {
-          annotatableAnswerInspectImagesElementRef.current.remove();
-          annotatableAnswerInspectImagesElementRef.current = null;
-        }
+        setTimeout(() => {
+          setIsMounted(false);
+          if (annotatableQuestionInspectImagesRootRef.current) {
+            annotatableQuestionInspectImagesRootRef.current.unmount();
+            annotatableQuestionInspectImagesRootRef.current = null;
+          }
+          if (annotatableQuestionInspectImagesElementRef.current) {
+            annotatableQuestionInspectImagesElementRef.current.remove();
+            annotatableQuestionInspectImagesElementRef.current = null;
+          }
+          if (annotatableAnswerInspectImagesRootRef.current) {
+            annotatableAnswerInspectImagesRootRef.current.unmount();
+            annotatableAnswerInspectImagesRootRef.current = null;
+          }
+          if (annotatableAnswerInspectImagesElementRef.current) {
+            annotatableAnswerInspectImagesElementRef.current.remove();
+            annotatableAnswerInspectImagesElementRef.current = null;
+          }
+        }, 0);
       };
     }, []);
 

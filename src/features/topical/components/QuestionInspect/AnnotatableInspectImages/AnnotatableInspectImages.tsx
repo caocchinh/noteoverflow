@@ -123,6 +123,8 @@ const AnnotatableInspectImagesComponent = memo(
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
+    const [key, setKey] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
 
     const paperCode = useMemo(
       () =>
@@ -162,11 +164,6 @@ const AnnotatableInspectImagesComponent = memo(
     }, [paperCode, questionNumber]);
 
     const downloadFileName = `${pdfBaseFileName}.pdf`;
-
-    useEffect(() => {
-      setIsFullscreen(false);
-      setIsEditMode(false);
-    }, [imageSource]);
 
     useEffect(() => {
       if (isEditMode) {
@@ -227,8 +224,9 @@ const AnnotatableInspectImagesComponent = memo(
       let isActive = true;
 
       const generate = async () => {
-        if (isActive && isEditMode) {
+        if (isActive && !pdfBlob && isEditMode) {
           const blob = await generatePdfBlob();
+          console.log("Generated pdf blob");
           setPdfBlob(blob);
         }
       };
@@ -237,20 +235,11 @@ const AnnotatableInspectImagesComponent = memo(
 
       return () => {
         isActive = false;
-        setPdfBlob(null);
       };
-    }, [generatePdfBlob, isEditMode]);
+    }, [generatePdfBlob, isEditMode, pdfBlob]);
 
     useEffect(() => {
-      if (
-        !pdfBlob ||
-        isSessionFetching ||
-        pdfViewerRootRef.current ||
-        pdfViewerElementRef.current ||
-        !isEditMode
-      )
-        return;
-
+      if (!pdfBlob || isSessionFetching || !isEditMode || !isMounted) return;
       initPdfElement({
         pdfBlob,
         pdfViewerRef,
@@ -265,8 +254,26 @@ const AnnotatableInspectImagesComponent = memo(
           setIsPdfViewerLoaded(false);
         },
       });
+      setKey((prev) => prev + 1);
+    }, [
+      isEditMode,
+      isMounted,
+      isSessionFetching,
+      pdfBaseFileName,
+      pdfBlob,
+      userName,
+    ]);
+
+    useEffect(() => {
+      setIsFullscreen(false);
+      setIsEditMode(false);
+      setPdfBlob(null);
+      setTimeout(() => {
+        setIsMounted(true);
+      }, 0);
       return () => {
         setTimeout(() => {
+          setIsMounted(false);
           if (pdfViewerRootRef.current) {
             pdfViewerRootRef.current.unmount();
             pdfViewerRootRef.current = null;
@@ -277,15 +284,7 @@ const AnnotatableInspectImagesComponent = memo(
           }
         }, 0);
       };
-    }, [
-      isSessionFetching,
-      pdfBlob,
-      userName,
-      imageSource,
-      isEditMode,
-      currentQuestionId,
-      pdfBaseFileName,
-    ]);
+    }, [imageSource]);
 
     if (!imageSource || imageSource.length === 0) {
       return (
@@ -469,6 +468,7 @@ const AnnotatableInspectImagesComponent = memo(
           normalContainerRef.current &&
           createPortal(
             <div
+              key={key}
               ref={(node) => {
                 if (node && pdfViewerElementRef.current) {
                   node.appendChild(pdfViewerElementRef.current);

@@ -314,8 +314,8 @@ export const recentQuery = sqliteTable(
   }
 );
 
-export const userQuestionAnnotations = sqliteTable(
-  "user_question_annotations",
+export const userAnnotations = sqliteTable(
+  "user_annotations",
   {
     userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
@@ -323,7 +323,8 @@ export const userQuestionAnnotations = sqliteTable(
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
       .notNull(),
-    xfdf: text("xfdf").notNull(),
+    questionXfdf: text("question_xfdf").notNull(),
+    answerXfdf: text("answer_xfdf").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
