@@ -236,6 +236,13 @@ export interface SelectedFinishedQuestion {
   question: SelectedQuestion;
 }
 
+export interface SelectedAnnotation {
+  questionId: string;
+  questionXfdf: string;
+  answerXfdf: string;
+  updatedAt: Date;
+}
+
 export interface SelectedPublickBookmark {
   updatedAt: Date;
   question: SelectedQuestion;
@@ -275,6 +282,7 @@ export type FinishedQuestionsMetadata = Partial<
 export interface SavedActivitiesResponse {
   finishedQuestions: SelectedFinishedQuestion[];
   bookmarks: SelectedBookmark[];
+  annotations: SelectedAnnotation[];
 }
 
 export interface MultiSelectContextProps {

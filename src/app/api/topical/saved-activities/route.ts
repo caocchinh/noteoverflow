@@ -1,10 +1,15 @@
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
-import { finishedQuestions, userBookmarkList } from "@/drizzle/schema";
+import {
+  finishedQuestions,
+  userBookmarkList,
+  userAnnotations,
+} from "@/drizzle/schema";
 import {
   SelectedBookmark,
   SelectedFinishedQuestion,
+  SelectedAnnotation,
   SavedActivitiesResponse,
 } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";
@@ -102,6 +107,28 @@ async function fetchBookmarks(userId: string) {
   return data;
 }
 
+async function fetchAnnotations(userId: string) {
+  const db = await getDbAsync();
+  const annotationsData = await db.query.userAnnotations.findMany({
+    where: eq(userAnnotations.userId, userId),
+    columns: {
+      questionId: true,
+      questionXfdf: true,
+      answerXfdf: true,
+      updatedAt: true,
+    },
+  });
+
+  const data: SelectedAnnotation[] = annotationsData.map((item) => ({
+    questionId: item.questionId,
+    questionXfdf: item.questionXfdf,
+    answerXfdf: item.answerXfdf,
+    updatedAt: item.updatedAt,
+  }));
+
+  return data;
+}
+
 export async function GET() {
   try {
     const session = await verifySession();
@@ -110,15 +137,18 @@ export async function GET() {
     }
     const userId = session.user.id;
 
-    // Fetch finished questions and bookmarks in parallel
-    const [finishedQuestionsData, bookmarksData] = await Promise.all([
-      fetchFinishedQuestions(userId),
-      fetchBookmarks(userId),
-    ]);
+    // Fetch finished questions, bookmarks, and annotations in parallel
+    const [finishedQuestionsData, bookmarksData, annotationsData] =
+      await Promise.all([
+        fetchFinishedQuestions(userId),
+        fetchBookmarks(userId),
+        fetchAnnotations(userId),
+      ]);
 
     const responseData: SavedActivitiesResponse = {
       finishedQuestions: finishedQuestionsData,
       bookmarks: bookmarksData,
+      annotations: annotationsData,
     };
 
     return NextResponse.json(responseData, { status: 200 });

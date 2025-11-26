@@ -46,6 +46,8 @@ import QuestionPdfTemplate from "./QuestionPdfTemplate";
 import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 import DownloadOrginalButton from "./DownloadOrginalButton";
 import ClearAllButton from "./ClearAllButton";
+import { saveAnnotationsAction } from "@/features/topical/server/actions";
+import { toast } from "sonner";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -60,6 +62,7 @@ const initPdfElement = ({
   onUnmount,
   author,
   fileName,
+  onAnnotationsChanged,
 }: {
   pdfBlob: Blob;
   pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
@@ -69,6 +72,7 @@ const initPdfElement = ({
   onUnmount: () => void;
   author: string | undefined;
   fileName: string;
+  onAnnotationsChanged?: (xfdf: string) => void;
 }) => {
   if (!pdfViewerElementRef.current) {
     pdfViewerElementRef.current = document.createElement("div");
@@ -88,6 +92,7 @@ const initPdfElement = ({
         author={author}
         fileName={fileName}
         onUnmount={onUnmount}
+        onAnnotationsChanged={onAnnotationsChanged}
       />
     );
   }
@@ -125,6 +130,10 @@ const AnnotatableInspectImagesComponent = memo(
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
     const [key, setKey] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
+
+    // Auto-save state
+    const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
+    const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const paperCode = useMemo(
       () =>
@@ -238,6 +247,47 @@ const AnnotatableInspectImagesComponent = memo(
       };
     }, [generatePdfBlob, isEditMode, pdfBlob]);
 
+    // Handle annotations changed callback
+    const handleAnnotationsChanged = useCallback((xfdf: string) => {
+      setCurrentXfdf(xfdf);
+    }, []);
+
+    // Debounced auto-save effect
+    useEffect(() => {
+      if (!currentXfdf || !currentQuestionId) return;
+
+      // Clear existing timeout
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+
+      // Set new timeout for auto-save
+      autoSaveTimeoutRef.current = setTimeout(async () => {
+        try {
+          const result = await saveAnnotationsAction({
+            questionId: currentQuestionId,
+            questionXfdf: currentXfdf,
+            answerXfdf: "", // Single PDF per component
+          });
+
+          if (result.success) {
+            toast.success("Annotations saved", { duration: 2000 });
+          } else {
+            toast.error("Failed to save annotations");
+          }
+        } catch (error) {
+          console.error("Error saving annotations:", error);
+          toast.error("Failed to save annotations");
+        }
+      }, 1500);
+
+      return () => {
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current);
+        }
+      };
+    }, [currentXfdf, currentQuestionId]);
+
     useEffect(() => {
       if (!pdfBlob || isSessionFetching || !isEditMode || !isMounted) return;
       initPdfElement({
@@ -253,6 +303,7 @@ const AnnotatableInspectImagesComponent = memo(
         onUnmount: () => {
           setIsPdfViewerLoaded(false);
         },
+        onAnnotationsChanged: handleAnnotationsChanged,
       });
       setKey((prev) => prev + 1);
     }, [
@@ -262,6 +313,7 @@ const AnnotatableInspectImagesComponent = memo(
       pdfBaseFileName,
       pdfBlob,
       userName,
+      handleAnnotationsChanged,
     ]);
 
     useEffect(() => {

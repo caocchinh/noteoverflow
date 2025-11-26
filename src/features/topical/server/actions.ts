@@ -1,7 +1,11 @@
 "use server";
 import { and, eq, sql } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
-import { finishedQuestions, recentQuery } from "@/drizzle/schema";
+import {
+  finishedQuestions,
+  recentQuery,
+  userAnnotations,
+} from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
 import {
   BAD_REQUEST,
@@ -10,6 +14,7 @@ import {
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
 import { BookmarkService } from "../services/bookmark.service";
+import { AnnotationService } from "../services/annotation.service";
 import { FilterData } from "../constants/types";
 import {
   validateCurriculum,
@@ -379,6 +384,72 @@ export const deleteRecentQuery = async ({
     return {
       success: true,
     };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
+  }
+};
+
+// Annotation Actions
+
+export const saveAnnotationsAction = async ({
+  questionId,
+  questionXfdf,
+  answerXfdf,
+}: {
+  questionId: string;
+  questionXfdf: string;
+  answerXfdf: string;
+}): Promise<ServerActionResponse<void>> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      throw new Error(UNAUTHORIZED);
+    }
+    const userId = session.user.id;
+
+    return await AnnotationService.saveAnnotations(
+      userId,
+      questionId,
+      questionXfdf,
+      answerXfdf
+    );
+  } catch (error) {
+    if (error instanceof Error && error.message === UNAUTHORIZED) {
+      return {
+        error: UNAUTHORIZED,
+        success: false,
+      };
+    }
+    console.error(error);
+    return {
+      error: INTERNAL_SERVER_ERROR,
+      success: false,
+    };
+  }
+};
+
+export const getAnnotationsAction = async ({
+  questionId,
+}: {
+  questionId: string;
+}): Promise<
+  ServerActionResponse<{ questionXfdf: string; answerXfdf: string } | null>
+> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return {
+        success: true,
+        data: null,
+      };
+    }
+    const userId = session.user.id;
+
+    return await AnnotationService.getAnnotations(userId, questionId);
   } catch (error) {
     console.error(error);
     return {

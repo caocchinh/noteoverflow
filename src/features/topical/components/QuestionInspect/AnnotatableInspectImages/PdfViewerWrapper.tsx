@@ -160,10 +160,9 @@ const PdfViewerWrapper = forwardRef<
 
         const handleAnnotationChanged: AnnotationChangedHandler = () => {
           if (!isMountedRef.current) return;
-          // if (!onAnnotationsChanged) return;
+          if (!onAnnotationsChanged) return;
           annotationManager.exportAnnotations().then((xfdf) => {
-            console.log("Annotations changed:", xfdf);
-            // onAnnotationsChanged(xfdf);
+            onAnnotationsChanged(xfdf);
           });
         };
 
