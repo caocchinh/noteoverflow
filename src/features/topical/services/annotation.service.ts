@@ -37,7 +37,17 @@ export const AnnotationService = {
     }
   },
 
-  async getAnnotations(userId: string, questionId: string) {
+  async getAnnotations(
+    userId: string,
+    questionId: string
+  ): Promise<
+    | {
+        success: true;
+        data: { questionXfdf: string | null; answerXfdf: string | null };
+      }
+    | { success: true; data: null }
+    | { error: string; success: false }
+  > {
     try {
       const db = await getDbAsync();
       const result = await db.query.userAnnotations.findFirst({

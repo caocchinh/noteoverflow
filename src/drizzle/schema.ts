@@ -323,8 +323,8 @@ export const userAnnotations = sqliteTable(
     questionId: text("question_id")
       .references(() => question.id, { onDelete: "cascade" })
       .notNull(),
-    questionXfdf: text("question_xfdf").notNull(),
-    answerXfdf: text("answer_xfdf").notNull(),
+    questionXfdf: text("question_xfdf"),
+    answerXfdf: text("answer_xfdf"),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),

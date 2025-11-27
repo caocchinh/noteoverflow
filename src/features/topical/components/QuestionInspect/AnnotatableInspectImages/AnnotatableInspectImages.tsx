@@ -253,7 +253,14 @@ const AnnotatableInspectImagesComponent = memo(
 
     // Debounced auto-save effect
     useEffect(() => {
-      if (!currentXfdf || !currentQuestionId) return;
+      if (
+        !currentXfdf ||
+        !currentQuestionId ||
+        !isEditMode ||
+        !isMounted ||
+        !isPdfViewerLoaded
+      )
+        return;
 
       // Clear existing timeout
       if (autoSaveTimeoutRef.current) {
@@ -278,14 +285,20 @@ const AnnotatableInspectImagesComponent = memo(
           console.error("Error saving annotations:", error);
           toast.error("Failed to save annotations");
         }
-      }, 1500);
+      }, 5000);
 
       return () => {
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
       };
-    }, [currentXfdf, currentQuestionId]);
+    }, [
+      currentXfdf,
+      currentQuestionId,
+      isEditMode,
+      isMounted,
+      isPdfViewerLoaded,
+    ]);
 
     useEffect(() => {
       if (
@@ -495,7 +508,7 @@ const AnnotatableInspectImagesComponent = memo(
             </div>
             <div
               className={cn(
-                "w-full h-full flex items-center justify-center",
+                "w-full h-full flex items-center justify-center flex-col",
                 !isEditMode
                   ? ""
                   : "absolute top-[999999px] left-[999999px] z-[-999999]"
@@ -540,7 +553,11 @@ const AnnotatableInspectImagesComponent = memo(
             <div
               key={key}
               ref={(node) => {
-                if (node && pdfViewerElementRef.current) {
+                if (
+                  node &&
+                  pdfViewerElementRef.current &&
+                  pdfViewerElementRef.current.parentNode !== node
+                ) {
                   node.appendChild(pdfViewerElementRef.current);
                 }
               }}

@@ -1,11 +1,7 @@
 "use server";
 import { and, eq, sql } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
-import {
-  finishedQuestions,
-  recentQuery,
-  userAnnotations,
-} from "@/drizzle/schema";
+import { finishedQuestions, recentQuery } from "@/drizzle/schema";
 import { verifySession } from "@/dal/verifySession";
 import {
   BAD_REQUEST,
@@ -437,7 +433,10 @@ export const getAnnotationsAction = async ({
 }: {
   questionId: string;
 }): Promise<
-  ServerActionResponse<{ questionXfdf: string; answerXfdf: string } | null>
+  ServerActionResponse<{
+    questionXfdf: string | null;
+    answerXfdf: string | null;
+  } | null>
 > => {
   try {
     const session = await verifySession();

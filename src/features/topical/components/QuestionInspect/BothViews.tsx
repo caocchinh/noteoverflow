@@ -1,4 +1,4 @@
-import { RefObject, useState } from "react";
+import { RefObject, useCallback, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -37,9 +37,9 @@ const InspectPanel = ({
       <div
         className="ml-3 mt-2 mb-2 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
         title="Toggle visibility"
-        onClick={() => {
+        onClick={useCallback(() => {
           setIsHiding(!isHiding);
-        }}
+        }, [isHiding])}
       >
         <p className="text-sm">{title}</p>
         {!isHiding ? <Eye strokeWidth={2} /> : <EyeClosed strokeWidth={2} />}

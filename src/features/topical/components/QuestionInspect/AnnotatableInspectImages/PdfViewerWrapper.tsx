@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  memo,
   forwardRef,
   useEffect,
   useRef,
   useImperativeHandle,
+  useState,
+  memo,
 } from "react";
 import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
 
@@ -31,121 +32,147 @@ export interface PdfViewerWrapperHandle {
   deleteAllAnnotations: () => void;
 }
 
-const PdfViewerWrapper = forwardRef<
-  PdfViewerWrapperHandle,
-  PdfViewerWrapperProps
->(
-  (
-    {
-      documentPath,
-      author,
-      initialXfdf,
-      onAnnotationsChanged,
-      fileName,
-      onDocumentLoaded,
-      onUnmount,
-    },
-    ref
-  ) => {
-    const viewerRef = useRef<HTMLDivElement | null>(null);
-    const instanceRef = useRef<WebViewerInstance | null>(null);
-    const isMountedRef = useRef(false);
+const PdfViewerWrapper = memo(
+  forwardRef<PdfViewerWrapperHandle, PdfViewerWrapperProps>(
+    (
+      {
+        documentPath,
+        author,
+        initialXfdf,
+        onAnnotationsChanged,
+        fileName,
+        onDocumentLoaded,
+        onUnmount,
+      },
+      ref
+    ) => {
+      const viewerRef = useRef<HTMLDivElement | null>(null);
+      const isInitalXfdfLoaded = useRef(false);
+      const [instance, setInstance] = useState<WebViewerInstance | null>(null);
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        instance: instanceRef.current,
-        exportAnnotations: async () => {
-          const instance = instanceRef.current;
-          if (!instance) return null;
-          return instance.Core.annotationManager.exportAnnotations();
-        },
-        exportPdfWithAnnotations: async () => {
-          const instance = instanceRef.current;
-          if (!instance) return null;
+      // Keep refs for callbacks to access latest values without triggering effects
+      const callbacksRef = useRef({
+        onAnnotationsChanged,
+        onDocumentLoaded,
+        onUnmount,
+      });
 
-          const { documentViewer, annotationManager } = instance.Core;
-          const doc = documentViewer.getDocument();
-          if (!doc) return null;
+      useEffect(() => {
+        callbacksRef.current = {
+          onAnnotationsChanged,
+          onDocumentLoaded,
+          onUnmount,
+        };
+      }, [onAnnotationsChanged, onDocumentLoaded, onUnmount]);
 
-          const xfdfString = await annotationManager.exportAnnotations();
-          const data = await doc.getFileData({ xfdfString });
-          const arr = new Uint8Array(data);
-          return new Blob([arr], { type: "application/pdf" });
-        },
-        deleteAllAnnotations: () => {
-          const instance = instanceRef.current;
-          if (!instance) {
-            return;
-          }
-          setTimeout(() => {
-            const { annotationManager } = instance.Core;
-            const allAnnotations = annotationManager.getAnnotationsList();
-            if (allAnnotations.length > 0) {
-              annotationManager.deleteAnnotations(allAnnotations, {
-                force: true,
-              });
+      useImperativeHandle(
+        ref,
+        () => ({
+          instance: instance,
+          exportAnnotations: async () => {
+            if (!instance) return null;
+            return instance.Core.annotationManager.exportAnnotations();
+          },
+          exportPdfWithAnnotations: async () => {
+            if (!instance) return null;
+
+            const { documentViewer, annotationManager } = instance.Core;
+            const doc = documentViewer.getDocument();
+            if (!doc) return null;
+
+            const xfdfString = await annotationManager.exportAnnotations();
+            const data = await doc.getFileData({ xfdfString });
+            const arr = new Uint8Array(data);
+            return new Blob([arr], { type: "application/pdf" });
+          },
+          deleteAllAnnotations: () => {
+            if (!instance) {
+              return;
             }
-          }, 0);
-        },
-      }),
-      []
-    );
+            setTimeout(() => {
+              const { annotationManager } = instance.Core;
+              const allAnnotations = annotationManager.getAnnotationsList();
+              if (allAnnotations.length > 0) {
+                annotationManager.deleteAnnotations(allAnnotations, {
+                  force: true,
+                });
+              }
+            }, 0);
+          },
+        }),
+        [instance]
+      );
 
-    useEffect(() => {
-      if (!viewerRef.current || isMountedRef.current) return;
+      // Initialize WebViewer
+      useEffect(() => {
+        if (!viewerRef.current) return;
 
-      let detachListeners: (() => void) | undefined;
-      const isBlob = documentPath instanceof Blob;
+        let isMounted = true;
 
-      WebViewer(
-        {
-          path: "http://localhost:3000/lib/webviewer",
-          licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
-        },
-        viewerRef.current
-      ).then((instance) => {
-        isMountedRef.current = true;
-        instanceRef.current = instance;
+        WebViewer(
+          {
+            path: "http://localhost:3000/lib/webviewer",
+            licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
+          },
+          viewerRef.current
+        ).then((inst) => {
+          if (!isMounted) return;
 
+          setInstance(inst);
+
+          const { documentViewer, Tools } = inst.Core;
+
+          inst.UI.disableElements([
+            "stickyToolButton",
+            "highlightToolButton",
+            "underlineToolButton",
+            "strikeoutToolButton",
+            "squigglyToolButton",
+            "markReplaceTextToolButton",
+            "markInsertTextToolButton",
+          ]);
+
+          // Tool setup
+          interface CreateToolWithDelay {
+            setCreateDelay: (delay: number) => void;
+          }
+          const freeHandTool = documentViewer.getTool(
+            Tools.ToolNames.FREEHAND
+          ) as unknown as CreateToolWithDelay;
+          if (freeHandTool) {
+            freeHandTool.setCreateDelay(0);
+          }
+
+          const freeHandHighlightTool = documentViewer.getTool(
+            Tools.ToolNames.FREEHAND_HIGHLIGHT
+          ) as unknown as CreateToolWithDelay;
+          if (freeHandHighlightTool && freeHandHighlightTool.setCreateDelay) {
+            freeHandHighlightTool.setCreateDelay(0);
+          }
+        });
+
+        return () => {
+          isMounted = false;
+          setInstance(null);
+          callbacksRef.current.onUnmount?.();
+          isInitalXfdfLoaded.current = false;
+        };
+      }, []);
+
+      // Handle Author Update
+      useEffect(() => {
+        if (!instance) return;
+        instance.Core.annotationManager.setCurrentUser(author || "Guest");
+      }, [instance, author]);
+
+      // Handle Document Loaded Listener
+      useEffect(() => {
+        if (!instance || isInitalXfdfLoaded.current) return;
         const { documentViewer, annotationManager } = instance.Core;
 
-        instance.UI.disableElements([
-          "stickyToolButton",
-          "highlightToolButton",
-          "underlineToolButton",
-          "strikeoutToolButton",
-          "squigglyToolButton",
-          "markReplaceTextToolButton",
-          "markInsertTextToolButton",
-        ]);
-
-        annotationManager.setCurrentUser(author || "Guest");
-
-        if (isBlob) {
-          instance.UI.loadDocument(documentPath, { filename: fileName });
-        }
-
-        const { Tools } = instance.Core;
-        interface CreateToolWithDelay {
-          setCreateDelay: (delay: number) => void;
-        }
-        const freeHandTool = documentViewer.getTool(
-          Tools.ToolNames.FREEHAND
-        ) as unknown as CreateToolWithDelay;
-        if (freeHandTool) {
-          freeHandTool.setCreateDelay(0);
-        }
-
-        const freeHandHighlightTool = documentViewer.getTool(
-          Tools.ToolNames.FREEHAND_HIGHLIGHT
-        ) as unknown as CreateToolWithDelay;
-        if (freeHandHighlightTool && freeHandHighlightTool.setCreateDelay) {
-          freeHandHighlightTool.setCreateDelay(0);
-        }
-
         const handleDocumentLoaded = async () => {
-          if (!isMountedRef.current) return;
+          if (isInitalXfdfLoaded.current) return;
+          isInitalXfdfLoaded.current = true;
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
           } else {
@@ -155,56 +182,61 @@ const PdfViewerWrapper = forwardRef<
               scrollView.scrollTop = 0;
             }
           }
-          onDocumentLoaded?.();
+          callbacksRef.current.onDocumentLoaded?.();
         };
 
+        documentViewer.addEventListener("documentLoaded", handleDocumentLoaded);
+        return () => {
+          if (!isInitalXfdfLoaded.current) {
+            documentViewer.removeEventListener(
+              "documentLoaded",
+              handleDocumentLoaded
+            );
+          }
+        };
+      }, [instance, initialXfdf]);
+
+      // Handle Document Load
+      useEffect(() => {
+        if (!instance) return;
+        const isBlob = documentPath instanceof Blob;
+        if (isBlob) {
+          instance.UI.loadDocument(documentPath, { filename: fileName });
+        }
+      }, [instance, documentPath, fileName]);
+
+      // Handle Annotation Changed Listener
+      useEffect(() => {
+        if (!instance) return;
+        const { annotationManager } = instance.Core;
+
         const handleAnnotationChanged: AnnotationChangedHandler = () => {
-          if (!isMountedRef.current) return;
+          const onAnnotationsChanged =
+            callbacksRef.current.onAnnotationsChanged;
           if (!onAnnotationsChanged) return;
           annotationManager.exportAnnotations().then((xfdf) => {
             onAnnotationsChanged(xfdf);
           });
         };
 
-        documentViewer.addEventListener("documentLoaded", handleDocumentLoaded);
         annotationManager.addEventListener(
           "annotationChanged",
           handleAnnotationChanged
         );
 
-        detachListeners = () => {
-          documentViewer.removeEventListener(
-            "documentLoaded",
-            handleDocumentLoaded
-          );
+        return () => {
           annotationManager.removeEventListener(
             "annotationChanged",
             handleAnnotationChanged
           );
         };
-      });
+      }, [instance]);
 
-      return () => {
-        isMountedRef.current = false;
-        detachListeners?.();
-        detachListeners = undefined;
-        instanceRef.current = null;
-        onUnmount?.();
-      };
-    }, [
-      documentPath,
-      author,
-      initialXfdf,
-      onAnnotationsChanged,
-      fileName,
-      onDocumentLoaded,
-      onUnmount,
-    ]);
-
-    return <div ref={viewerRef} style={{ height: "100%", width: "100%" }} />;
-  }
+      return <div ref={viewerRef} style={{ height: "100%", width: "100%" }} />;
+    }
+  )
 );
 
 PdfViewerWrapper.displayName = "PdfViewerWrapper";
 
-export default memo(PdfViewerWrapper);
+export default PdfViewerWrapper;
