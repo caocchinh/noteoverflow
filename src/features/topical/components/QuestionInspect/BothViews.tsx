@@ -35,7 +35,7 @@ const InspectPanel = ({
   return (
     <ResizablePanel defaultSize={defaultSize} minSize={minSize}>
       <div
-        className="ml-3 m-2 mb-3 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
+        className="ml-3 mt-2 mb-2 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
         title="Toggle visibility"
         onClick={() => {
           setIsHiding(!isHiding);

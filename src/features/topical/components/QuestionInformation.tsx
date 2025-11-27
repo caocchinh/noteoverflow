@@ -32,7 +32,7 @@ export const QuestionInformation = memo(
     };
 
     return (
-      <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
+      <div className="flex flex-row flex-wrap w-full mb-3 gap-2 justify-start items-start">
         {showCurriculumn && (
           <Badge className="bg-green-600 text-white">
             {extractCurriculumCode({ questionId: question.id })}
