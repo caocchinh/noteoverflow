@@ -114,6 +114,7 @@ const TopicalContext = createContext<{
   finishedQuestionsData:
     | SavedActivitiesResponse["finishedQuestions"]
     | undefined;
+  annotationsData: SavedActivitiesResponse["annotations"] | undefined;
   savedActivitiesError: Error | null;
   savedActivitiesIsLoading: boolean;
   savedActivitiesIsFetching: boolean;
@@ -228,6 +229,11 @@ export default function TopicalLayoutProvider({
     [userSavedActivitiesQuery.data?.finishedQuestions]
   );
 
+  const annotationsData = useMemo(
+    () => userSavedActivitiesQuery.data?.annotations,
+    [userSavedActivitiesQuery.data?.annotations]
+  );
+
   const savedActivitiesError = useMemo(
     () => userSavedActivitiesQuery.error,
     [userSavedActivitiesQuery.error]
@@ -258,6 +264,7 @@ export default function TopicalLayoutProvider({
         uiPreferences,
         setUiPreference,
         bookmarksData,
+        annotationsData,
         finishedQuestionsData,
         savedActivitiesError,
         savedActivitiesIsLoading,

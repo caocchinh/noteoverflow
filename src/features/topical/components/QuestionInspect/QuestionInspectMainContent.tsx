@@ -50,6 +50,9 @@ const initAnnotableImagesElement = ({
   isCalculatorOpen,
   imageTheme,
   typeOfView,
+  initialXfdf,
+  isSavedActivitiesLoading,
+  isSavedActivitiesError,
 }: InnitAnnotatableInspectImagesProps) => {
   if (!elementRef.current) {
     elementRef.current = document.createElement("div");
@@ -63,6 +66,9 @@ const initAnnotableImagesElement = ({
   if (elementRootRef.current) {
     elementRootRef.current.render(
       <AnnotatableInspectImages
+        isSavedActivitiesLoading={isSavedActivitiesLoading}
+        isSavedActivitiesError={isSavedActivitiesError}
+        initialXfdf={initialXfdf}
         typeOfView={typeOfView}
         imageSource={imageSource}
         currentQuestionId={questionId}
@@ -117,8 +123,14 @@ const QuestionInspectMainContent = forwardRef(
       useRef<HTMLDivElement | null>(null);
     const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
     const { isSessionFetching, user } = useAuth();
-    const { setIsCalculatorOpen, isCalculatorOpen, uiPreferences } =
-      useTopicalApp();
+    const {
+      setIsCalculatorOpen,
+      isCalculatorOpen,
+      uiPreferences,
+      annotationsData,
+      savedActivitiesIsLoading,
+      savedActivitiesIsError,
+    } = useTopicalApp();
     const [isMounted, setIsMounted] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [key, setKey] = useState(0);
@@ -132,6 +144,12 @@ const QuestionInspectMainContent = forwardRef(
       currentTabThatContainsQuestion,
       currentQuestionIndex,
     ]);
+
+    const currentQuestionAnnotationData = useMemo(() => {
+      return annotationsData?.find(
+        (annotation) => annotation.questionId === currentQuestionId
+      );
+    }, [annotationsData, currentQuestionId]);
 
     useEffect(() => {
       if (!currentQuestionData || !isMounted) return;
@@ -150,6 +168,9 @@ const QuestionInspectMainContent = forwardRef(
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
         typeOfView: "question",
+        initialXfdf: currentQuestionAnnotationData?.questionXfdf ?? null,
+        isSavedActivitiesLoading: savedActivitiesIsLoading,
+        isSavedActivitiesError: savedActivitiesIsError,
       });
 
       initAnnotableImagesElement({
@@ -163,6 +184,9 @@ const QuestionInspectMainContent = forwardRef(
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
         typeOfView: "answer",
+        initialXfdf: currentQuestionAnnotationData?.answerXfdf ?? null,
+        isSavedActivitiesLoading: savedActivitiesIsLoading,
+        isSavedActivitiesError: savedActivitiesIsError,
       });
       setKey((prev) => prev + 1);
     }, [
@@ -172,8 +196,11 @@ const QuestionInspectMainContent = forwardRef(
       user?.name,
       setIsCalculatorOpen,
       isCalculatorOpen,
+      currentQuestionAnnotationData,
       uiPreferences.imageTheme,
       isMounted,
+      savedActivitiesIsLoading,
+      savedActivitiesIsError,
     ]);
 
     // Cleanup roots only when component unmounts

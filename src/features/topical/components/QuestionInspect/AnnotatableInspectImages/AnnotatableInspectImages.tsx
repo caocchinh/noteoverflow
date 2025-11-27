@@ -17,6 +17,7 @@ import {
   Shrink,
   Calculator,
   Download,
+  TriangleAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -66,6 +67,7 @@ const initPdfElement = ({
   onUnmount,
   author,
   fileName,
+  initialXfdf,
   onAnnotationsChanged,
 }: InnitPdfProps) => {
   if (!pdfViewerElementRef.current) {
@@ -86,11 +88,58 @@ const initPdfElement = ({
         author={author}
         fileName={fileName}
         onUnmount={onUnmount}
+        initialXfdf={initialXfdf}
         onAnnotationsChanged={onAnnotationsChanged}
       />
     );
   }
 };
+
+const DownloadQuestionButton = memo(
+  ({
+    onGeneratePdf,
+    pdfBaseFileName,
+  }: {
+    onGeneratePdf: () => Promise<Blob | null>;
+    pdfBaseFileName: string;
+  }) => {
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const handleDownload = useCallback(async () => {
+      setIsGenerating(true);
+      try {
+        const blob = await onGeneratePdf();
+        handleDownloadPdf(blob, pdfBaseFileName);
+      } finally {
+        setIsGenerating(false);
+      }
+    }, [onGeneratePdf, pdfBaseFileName]);
+
+    return (
+      <Button
+        className="cursor-pointer h-[26px]"
+        variant="outline"
+        onClick={handleDownload}
+        disabled={isGenerating}
+        title="Download question"
+      >
+        {isGenerating ? (
+          <>
+            <span className="hidden sm:block">Generating</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </>
+        ) : (
+          <>
+            <span className="hidden sm:block">Download</span>
+            <Download className="h-4 w-4" />
+          </>
+        )}
+      </Button>
+    );
+  }
+);
+
+DownloadQuestionButton.displayName = "DownloadQuestionButton";
 
 const AnnotatableInspectImagesComponent = memo(
   ({
@@ -102,22 +151,26 @@ const AnnotatableInspectImagesComponent = memo(
     setIsCalculatorOpen,
     isCalculatorOpen,
     imageTheme,
+    initialXfdf,
+    isSavedActivitiesLoading,
+    isSavedActivitiesError,
   }: AnnotatableInspectImageProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
     const [isPdfViewerLoaded, setIsPdfViewerLoaded] = useState(false);
+    const [key, setKey] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
+    const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
+
     const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
     const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
     const pdfViewerRootRef = useRef<Root | null>(null);
     const normalContainerRef = useRef<HTMLDivElement | null>(null);
     const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
     const ultilityBarRef = useRef<HTMLDivElement | null>(null);
-    const [key, setKey] = useState(0);
-    const [isMounted, setIsMounted] = useState(false);
 
     // Auto-save state
-    const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
     const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const paperCode = useMemo(
@@ -304,6 +357,7 @@ const AnnotatableInspectImagesComponent = memo(
         pdfViewerRootRef,
         author: userName,
         fileName: pdfBaseFileName,
+        initialXfdf,
         onDocumentLoaded: () => {
           setIsPdfViewerLoaded(true);
         },
@@ -321,6 +375,7 @@ const AnnotatableInspectImagesComponent = memo(
       pdfBlob,
       userName,
       handleAnnotationsChanged,
+      initialXfdf,
     ]);
 
     useEffect(() => {
@@ -360,35 +415,44 @@ const AnnotatableInspectImagesComponent = memo(
             ref={ultilityBarRef}
           >
             {!isEditMode && (
-              <Button
-                className="cursor-pointer h-[26px]"
-                variant="outline"
-                onClick={async () => {
-                  handleDownloadPdf(await generatePdfBlob(), pdfBaseFileName);
-                }}
-                title="Download question"
-              >
-                <span className="hidden sm:block">Download</span>
-                <Download className="h-4 w-4" />
-              </Button>
+              <DownloadQuestionButton
+                onGeneratePdf={generatePdfBlob}
+                pdfBaseFileName={pdfBaseFileName}
+              />
             )}
             <Button
               type="button"
-              variant="outline"
-              disabled={isSessionFetching}
+              variant={
+                !isSavedActivitiesLoading && isSavedActivitiesError
+                  ? "destructive"
+                  : "outline"
+              }
+              disabled={
+                isSessionFetching ||
+                isSavedActivitiesLoading ||
+                isSavedActivitiesError
+              }
               className="cursor-pointer gap-2 h-[26px]"
               title={isEditMode ? "Switch to view mode" : "Switch to edit mode"}
               onClick={() => setIsEditMode(!isEditMode)}
             >
-              {isEditMode ? (
+              {!isSavedActivitiesLoading && isSavedActivitiesError ? (
                 <>
-                  <Eye className="h-4 w-4" />
-                  View Mode
+                  <TriangleAlert /> Error{" "}
                 </>
               ) : (
                 <>
-                  <Edit3 className="h-4 w-4" />
-                  Edit Mode
+                  {isEditMode ? (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      View Mode
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className="h-4 w-4" />
+                      Edit Mode
+                    </>
+                  )}
                 </>
               )}
             </Button>

@@ -167,14 +167,13 @@ const PdfViewerWrapper = memo(
         const handleDocumentLoaded = async () => {
           if (isInitalXfdfLoaded.current) return;
           isInitalXfdfLoaded.current = true;
+          instance.UI.setZoomLevel(1.41);
+          const scrollView = documentViewer.getScrollViewElement();
+          if (scrollView) {
+            scrollView.scrollTop = 0;
+          }
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
-          } else {
-            instance.UI.setZoomLevel(1.41);
-            const scrollView = documentViewer.getScrollViewElement();
-            if (scrollView) {
-              scrollView.scrollTop = 0;
-            }
           }
           callbacksRef.current.onDocumentLoaded?.();
         };

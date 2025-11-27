@@ -608,11 +608,13 @@ export interface InnitPdfProps {
   onDocumentLoaded: () => void;
   onUnmount: () => void;
   author: string | undefined;
+  initialXfdf: string | null;
   fileName: string;
   onAnnotationsChanged?: (xfdf: string) => void;
 }
 
 export interface InnitAnnotatableInspectImagesProps {
+  initialXfdf: string | null;
   imageSource: string[];
   elementRef: RefObject<HTMLDivElement | null>;
   elementRootRef: RefObject<Root | null>;
@@ -623,6 +625,8 @@ export interface InnitAnnotatableInspectImagesProps {
   isCalculatorOpen: boolean;
   imageTheme: "light" | "dark";
   typeOfView: "question" | "answer";
+  isSavedActivitiesLoading: boolean;
+  isSavedActivitiesError: boolean;
 }
 
 export interface AnnotatableInspectImageProps {
@@ -634,4 +638,7 @@ export interface AnnotatableInspectImageProps {
   setIsCalculatorOpen: (isOpen: boolean) => void;
   isCalculatorOpen: boolean;
   imageTheme: "light" | "dark";
+  initialXfdf: string | null;
+  isSavedActivitiesLoading: boolean;
+  isSavedActivitiesError: boolean;
 }
