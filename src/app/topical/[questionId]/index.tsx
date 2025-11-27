@@ -80,6 +80,7 @@ export const QuestionView = ({
           <AnnotatableInspectImages
             imageSource={data?.questionImages ?? []}
             currentQuestionId={data?.id}
+            typeOfView="question"
           />
         </ScrollArea>
       </div>
@@ -98,6 +99,7 @@ export const QuestionView = ({
           <AnnotatableInspectImages
             imageSource={data?.answers ?? []}
             currentQuestionId={data?.id}
+            typeOfView="answer"
           />
         </ScrollArea>
       </div>

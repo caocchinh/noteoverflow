@@ -7,27 +7,40 @@ export const AnnotationService = {
   async saveAnnotations(
     userId: string,
     questionId: string,
-    questionXfdf: string,
-    answerXfdf: string
+    questionXfdf?: string,
+    answerXfdf?: string
   ) {
     try {
       const db = await getDbAsync();
+
+      const conflictUpdateSet: {
+        questionXfdf?: string | null;
+        answerXfdf?: string | null;
+        updatedAt: Date;
+      } = {
+        updatedAt: new Date(),
+      };
+
+      if (questionXfdf !== undefined) {
+        conflictUpdateSet.questionXfdf = questionXfdf;
+      }
+
+      if (answerXfdf !== undefined) {
+        conflictUpdateSet.answerXfdf = answerXfdf;
+      }
+
       await db
         .insert(userAnnotations)
         .values({
           userId,
           questionId,
-          questionXfdf,
-          answerXfdf,
+          questionXfdf: questionXfdf ?? null,
+          answerXfdf: answerXfdf ?? null,
           updatedAt: new Date(),
         })
         .onConflictDoUpdate({
           target: [userAnnotations.userId, userAnnotations.questionId],
-          set: {
-            questionXfdf,
-            answerXfdf,
-            updatedAt: new Date(),
-          },
+          set: conflictUpdateSet,
         });
 
       return { success: true };

@@ -1,7 +1,7 @@
 import { memo, RefObject } from "react";
-import { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
 import { Button } from "@/components/ui/button";
 import { Brush } from "lucide-react";
+import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 
 const ClearAllButton = memo(
   ({

@@ -1,6 +1,6 @@
 import { memo, RefObject, useCallback } from "react";
-import { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
 import { Button } from "@/components/ui/button";
+import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 
 const DownloadWithAnnotationsButton = memo(
   ({

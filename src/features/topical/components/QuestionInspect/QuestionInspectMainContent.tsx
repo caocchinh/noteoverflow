@@ -7,7 +7,6 @@ import InspectUltilityBar from "./InspectUltilityBar";
 import {
   forwardRef,
   memo,
-  RefObject,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -16,6 +15,7 @@ import {
   useState,
 } from "react";
 import {
+  InnitAnnotatableInspectImagesProps,
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
 } from "../../constants/types";
@@ -49,17 +49,8 @@ const initAnnotableImagesElement = ({
   setIsCalculatorOpen,
   isCalculatorOpen,
   imageTheme,
-}: {
-  imageSource: string[];
-  elementRef: RefObject<HTMLDivElement | null>;
-  elementRootRef: RefObject<Root | null>;
-  questionId: string;
-  isSessionFetching: boolean;
-  userName: string | undefined;
-  setIsCalculatorOpen: (isOpen: boolean) => void;
-  isCalculatorOpen: boolean;
-  imageTheme: "light" | "dark";
-}) => {
+  typeOfView,
+}: InnitAnnotatableInspectImagesProps) => {
   if (!elementRef.current) {
     elementRef.current = document.createElement("div");
     elementRef.current.className = "w-full h-full";
@@ -72,6 +63,7 @@ const initAnnotableImagesElement = ({
   if (elementRootRef.current) {
     elementRootRef.current.render(
       <AnnotatableInspectImages
+        typeOfView={typeOfView}
         imageSource={imageSource}
         currentQuestionId={questionId}
         isSessionFetching={isSessionFetching}
@@ -157,6 +149,7 @@ const QuestionInspectMainContent = forwardRef(
         setIsCalculatorOpen,
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
+        typeOfView: "question",
       });
 
       initAnnotableImagesElement({
@@ -169,6 +162,7 @@ const QuestionInspectMainContent = forwardRef(
         setIsCalculatorOpen,
         isCalculatorOpen,
         imageTheme: uiPreferences.imageTheme,
+        typeOfView: "answer",
       });
       setKey((prev) => prev + 1);
     }, [

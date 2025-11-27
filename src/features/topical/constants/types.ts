@@ -5,6 +5,8 @@ import type {
   ValidCurriculum,
 } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
+import { WebViewerInstance } from "@pdftron/webviewer";
+import { Root } from "react-dom/client";
 
 export interface EnhancedSelectContentRef {
   setInputValue: Dispatch<SetStateAction<string>>;
@@ -589,4 +591,47 @@ export interface RecentQueryRef {
     unknown
   >;
   isAddRecentQueryPending: boolean;
+}
+
+export interface PdfViewerWrapperHandle {
+  instance: WebViewerInstance | null;
+  exportAnnotations: () => Promise<string | null>;
+  exportPdfWithAnnotations: () => Promise<Blob | null>;
+  deleteAllAnnotations: () => void;
+}
+
+export interface InnitPdfProps {
+  pdfBlob: Blob;
+  pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
+  pdfViewerElementRef: RefObject<HTMLDivElement | null>;
+  pdfViewerRootRef: RefObject<Root | null>;
+  onDocumentLoaded: () => void;
+  onUnmount: () => void;
+  author: string | undefined;
+  fileName: string;
+  onAnnotationsChanged?: (xfdf: string) => void;
+}
+
+export interface InnitAnnotatableInspectImagesProps {
+  imageSource: string[];
+  elementRef: RefObject<HTMLDivElement | null>;
+  elementRootRef: RefObject<Root | null>;
+  questionId: string;
+  isSessionFetching: boolean;
+  userName: string | undefined;
+  setIsCalculatorOpen: (isOpen: boolean) => void;
+  isCalculatorOpen: boolean;
+  imageTheme: "light" | "dark";
+  typeOfView: "question" | "answer";
+}
+
+export interface AnnotatableInspectImageProps {
+  typeOfView: "question" | "answer";
+  imageSource: string[] | undefined;
+  currentQuestionId: string | undefined;
+  isSessionFetching: boolean;
+  userName: string | undefined;
+  setIsCalculatorOpen: (isOpen: boolean) => void;
+  isCalculatorOpen: boolean;
+  imageTheme: "light" | "dark";
 }

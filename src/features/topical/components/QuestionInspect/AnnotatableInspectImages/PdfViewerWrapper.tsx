@@ -9,6 +9,7 @@ import {
   memo,
 } from "react";
 import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
+import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 
 type AnnotationManager = WebViewerInstance["Core"]["annotationManager"];
 type AnnotationChangedHandler = Parameters<
@@ -23,13 +24,6 @@ interface PdfViewerWrapperProps {
   onAnnotationsChanged?: (xfdf: string) => void;
   onDocumentLoaded?: () => void;
   onUnmount?: () => void;
-}
-
-export interface PdfViewerWrapperHandle {
-  instance: WebViewerInstance | null;
-  exportAnnotations: () => Promise<string | null>;
-  exportPdfWithAnnotations: () => Promise<Blob | null>;
-  deleteAllAnnotations: () => void;
 }
 
 const PdfViewerWrapper = memo(

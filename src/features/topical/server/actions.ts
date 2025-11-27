@@ -397,8 +397,8 @@ export const saveAnnotationsAction = async ({
   answerXfdf,
 }: {
   questionId: string;
-  questionXfdf: string;
-  answerXfdf: string;
+  questionXfdf?: string;
+  answerXfdf?: string;
 }): Promise<ServerActionResponse<void>> => {
   try {
     const session = await verifySession();

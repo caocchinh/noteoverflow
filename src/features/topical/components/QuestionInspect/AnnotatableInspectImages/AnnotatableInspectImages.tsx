@@ -35,7 +35,6 @@ import { pdf } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
-import type { PdfViewerWrapperHandle } from "./PdfViewerWrapper";
 import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
 import {
   DropdownMenu,
@@ -48,6 +47,11 @@ import DownloadOrginalButton from "./DownloadOrginalButton";
 import ClearAllButton from "./ClearAllButton";
 import { saveAnnotationsAction } from "@/features/topical/server/actions";
 import { toast } from "sonner";
+import {
+  PdfViewerWrapperHandle,
+  AnnotatableInspectImageProps,
+  InnitPdfProps,
+} from "@/features/topical/constants/types";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -63,17 +67,7 @@ const initPdfElement = ({
   author,
   fileName,
   onAnnotationsChanged,
-}: {
-  pdfBlob: Blob;
-  pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
-  pdfViewerElementRef: RefObject<HTMLDivElement | null>;
-  pdfViewerRootRef: RefObject<Root | null>;
-  onDocumentLoaded: () => void;
-  onUnmount: () => void;
-  author: string | undefined;
-  fileName: string;
-  onAnnotationsChanged?: (xfdf: string) => void;
-}) => {
+}: InnitPdfProps) => {
   if (!pdfViewerElementRef.current) {
     pdfViewerElementRef.current = document.createElement("div");
     pdfViewerElementRef.current.className = "w-full h-full";
@@ -98,26 +92,17 @@ const initPdfElement = ({
   }
 };
 
-interface AnnotatableInspectImagesProps {
-  imageSource: string[] | undefined;
-  currentQuestionId: string | undefined;
-  isSessionFetching: boolean;
-  userName: string | undefined;
-  setIsCalculatorOpen: (isOpen: boolean) => void;
-  isCalculatorOpen: boolean;
-  imageTheme: "light" | "dark";
-}
-
 const AnnotatableInspectImagesComponent = memo(
   ({
     imageSource,
     currentQuestionId,
     isSessionFetching,
     userName,
+    typeOfView,
     setIsCalculatorOpen,
     isCalculatorOpen,
     imageTheme,
-  }: AnnotatableInspectImagesProps) => {
+  }: AnnotatableInspectImageProps) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -272,8 +257,9 @@ const AnnotatableInspectImagesComponent = memo(
         try {
           const result = await saveAnnotationsAction({
             questionId: currentQuestionId,
-            questionXfdf: currentXfdf,
-            answerXfdf: "", // Single PDF per component
+            ...(typeOfView === "question"
+              ? { questionXfdf: currentXfdf || undefined }
+              : { answerXfdf: currentXfdf || undefined }),
           });
 
           if (result.success) {
@@ -298,6 +284,7 @@ const AnnotatableInspectImagesComponent = memo(
       isEditMode,
       isMounted,
       isPdfViewerLoaded,
+      typeOfView,
     ]);
 
     useEffect(() => {
