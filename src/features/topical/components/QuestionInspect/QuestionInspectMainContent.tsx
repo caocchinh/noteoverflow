@@ -282,6 +282,22 @@ const QuestionInspectMainContent = forwardRef(
       setIsOpen,
     ]);
 
+    useEffect(() => {
+      if (
+        isPendingCloseInspect &&
+        currentQuestionId &&
+        !isAnnotationGuardDialogOpen
+      ) {
+        setIsPendingCloseInspect(false);
+        setIsOpen({ isOpen: false, questionId: currentQuestionId });
+      }
+    }, [
+      currentQuestionId,
+      isAnnotationGuardDialogOpen,
+      isPendingCloseInspect,
+      setIsOpen,
+    ]);
+
     return (
       <>
         <AnnotatableImagesUpdater

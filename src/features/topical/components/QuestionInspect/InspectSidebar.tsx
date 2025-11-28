@@ -83,6 +83,7 @@ const InspectSidebar = memo(
         overflowScrollHandler,
         currentQuestionIndex,
         navigationButtonsContainerRef,
+        isAnnotationGuardDialogOpen,
       }: InspectSidebarProps,
       ref
     ) => {
@@ -583,6 +584,36 @@ const InspectSidebar = memo(
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [allQuestions]);
+
+      useEffect(() => {
+        if (
+          !isAnnotationGuardDialogOpen &&
+          currentQuestionId &&
+          pendingQuestionId &&
+          pendingTab !== undefined
+        ) {
+          setCurrentQuestionId(pendingQuestionId);
+          setCurrentTab(pendingTab);
+          if (willScrollToQuestionAfterGuard) {
+            scrollToQuestion({
+              questionId: pendingQuestionId,
+              tab: pendingTab,
+            });
+          }
+          setWillScrollToQuestionAfterGuard(false);
+          setPendingQuestionId(undefined);
+          setPendingTab(undefined);
+        }
+      }, [
+        currentQuestionId,
+        isAnnotationGuardDialogOpen,
+        navigateToQuestion,
+        pendingQuestionId,
+        pendingTab,
+        scrollToQuestion,
+        setCurrentQuestionId,
+        willScrollToQuestionAfterGuard,
+      ]);
 
       return (
         <>

@@ -63,6 +63,23 @@ const QuestionInspect = memo(
         pathNameRef.current = pathname;
       }, [pathname]);
 
+      useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+          if (
+            isHavingUnsafeChangesRef.current["answer"] ||
+            isHavingUnsafeChangesRef.current["question"]
+          ) {
+            e.preventDefault();
+          }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+      }, []);
+
       const [isInspectOpen, setIsInspectOpen] =
         useState<QuestionInspectOpenState>({
           isOpen: false,
@@ -269,6 +286,7 @@ const QuestionInspect = memo(
                     calculateTabThatQuestionResidesIn
                   }
                   isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                   setIsAnnotationGuardDialogOpen={
                     setIsAnnotationGuardDialogOpen
                   }

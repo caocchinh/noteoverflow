@@ -510,6 +510,7 @@ export interface InspectSidebarProps {
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface InspectSidebarRef {
@@ -650,8 +651,8 @@ export interface AnnotatableInspectImageProps {
   initialXfdf: string | null;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
-  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   isAnnotationGuardDialogOpen: boolean;
+  isSavingAnnotations: boolean;
   onSaveAnnotations: UseMutateFunction<
     ServerActionResponse<void>,
     Error,

@@ -18,7 +18,10 @@ const QuestionAnnotationGuardDialog = ({ isOpen }: { isOpen: boolean }) => {
           <p className="text-lg font-semibold tracking-tight">Saving Changes</p>
           <Loader />
           <p className="text-sm text-muted-foreground mt-2">
-            Syncing your annotations to the database
+            Syncing your annotations to the database. Your annotations are
+            periodically autosave to the database. All questions that are
+            annotated will be automatically saved to &quot;Your
+            annotations&quot; bookmark list.
           </p>
         </div>
       </AlertDialogContent>

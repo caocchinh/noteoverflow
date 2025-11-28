@@ -20,6 +20,7 @@ import {
   Calculator,
   Download,
   TriangleAlert,
+  Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -143,6 +144,44 @@ const DownloadQuestionButton = memo(
 
 DownloadQuestionButton.displayName = "DownloadQuestionButton";
 
+const SaveAnnotationsButton = memo(
+  ({
+    onSave,
+    isSaving,
+    hasUnsavedChanges,
+    isDisabled,
+  }: {
+    onSave: () => void;
+    isSaving: boolean;
+    hasUnsavedChanges: boolean;
+    isDisabled: boolean;
+  }) => {
+    return (
+      <Button
+        className="cursor-pointer h-[26px]"
+        variant={hasUnsavedChanges ? "default" : "outline"}
+        onClick={onSave}
+        disabled={isDisabled || isSaving || !hasUnsavedChanges}
+        title={hasUnsavedChanges ? "Save annotations" : "No unsaved changes"}
+      >
+        {isSaving ? (
+          <>
+            <span className="hidden sm:block">Saving</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </>
+        ) : (
+          <>
+            <span className="hidden sm:block">Save</span>
+            <Save className="h-4 w-4" />
+          </>
+        )}
+      </Button>
+    );
+  }
+);
+
+SaveAnnotationsButton.displayName = "SaveAnnotationsButton";
+
 const AnnotatableInspectImagesComponent = memo(
   forwardRef<AnnotatableInspectImagesHandle, AnnotatableInspectImageProps>(
     (
@@ -160,8 +199,8 @@ const AnnotatableInspectImagesComponent = memo(
         isSavedActivitiesError,
         onSaveAnnotations,
         isHavingUnsafeChangesRef,
-        setIsAnnotationGuardDialogOpen,
         isAnnotationGuardDialogOpen,
+        isSavingAnnotations,
       },
       ref
     ) => {
@@ -313,24 +352,11 @@ const AnnotatableInspectImagesComponent = memo(
         [isHavingUnsafeChangesRef, typeOfView]
       );
 
-      // Debounced auto-save effect
-      useEffect(() => {
-        if (
-          !currentXfdf ||
-          !currentQuestionId ||
-          !isEditMode ||
-          !isMounted ||
-          !isPdfViewerLoaded
-        )
-          return;
-
-        // Clear existing timeout
+      const handleSave = useCallback(() => {
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
-
-        // Set new timeout for auto-save
-        autoSaveTimeoutRef.current = setTimeout(() => {
+        if (currentXfdf && currentQuestionId) {
           const xfdfBeingSaved = currentXfdf;
           onSaveAnnotations(
             {
@@ -347,6 +373,35 @@ const AnnotatableInspectImagesComponent = memo(
               },
             }
           );
+        }
+      }, [
+        currentQuestionId,
+        currentXfdf,
+        isHavingUnsafeChangesRef,
+        onSaveAnnotations,
+        typeOfView,
+      ]);
+
+      // Debounced auto-save effect
+      useEffect(() => {
+        if (
+          !isHavingUnsafeChangesRef.current[typeOfView] ||
+          !currentXfdf ||
+          !currentQuestionId ||
+          !isEditMode ||
+          !isMounted ||
+          !isPdfViewerLoaded
+        )
+          return;
+
+        // Clear existing timeout
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current);
+        }
+
+        // Set new timeout for auto-save
+        autoSaveTimeoutRef.current = setTimeout(() => {
+          handleSave();
         }, 6769);
 
         return () => {
@@ -361,8 +416,32 @@ const AnnotatableInspectImagesComponent = memo(
         isMounted,
         isPdfViewerLoaded,
         typeOfView,
-        onSaveAnnotations,
+        handleSave,
         isHavingUnsafeChangesRef,
+      ]);
+
+      useEffect(() => {
+        if (
+          !isHavingUnsafeChangesRef.current[typeOfView] ||
+          !currentQuestionId ||
+          !isEditMode ||
+          !isMounted ||
+          !isAnnotationGuardDialogOpen ||
+          isSavingAnnotations
+        ) {
+          return;
+        }
+
+        handleSave();
+      }, [
+        isAnnotationGuardDialogOpen,
+        currentQuestionId,
+        isHavingUnsafeChangesRef,
+        typeOfView,
+        isSavingAnnotations,
+        isEditMode,
+        isMounted,
+        handleSave,
       ]);
 
       useEffect(() => {
@@ -485,6 +564,14 @@ const AnnotatableInspectImagesComponent = memo(
               </Button>
               {!isFullscreen && isEditMode && (
                 <>
+                  <SaveAnnotationsButton
+                    onSave={handleSave}
+                    isSaving={isSavingAnnotations}
+                    hasUnsavedChanges={
+                      isHavingUnsafeChangesRef.current[typeOfView]
+                    }
+                    isDisabled={isSessionFetching || !isPdfViewerLoaded}
+                  />
                   <ClearAllButton
                     pdfViewerRef={pdfViewerRef}
                     isPdfViewerLoaded={isPdfViewerLoaded}
@@ -549,6 +636,14 @@ const AnnotatableInspectImagesComponent = memo(
                         NoteOverflow Inspector
                       </span>
                       <div className="flex items-center gap-1">
+                        <SaveAnnotationsButton
+                          onSave={handleSave}
+                          isSaving={isSavingAnnotations}
+                          hasUnsavedChanges={
+                            isHavingUnsafeChangesRef.current[typeOfView]
+                          }
+                          isDisabled={isSessionFetching || !isPdfViewerLoaded}
+                        />
                         <ClearAllButton
                           pdfViewerRef={pdfViewerRef}
                           isPdfViewerLoaded={isPdfViewerLoaded}

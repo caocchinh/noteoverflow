@@ -39,69 +39,69 @@ const AnnotatableImagesUpdater = memo(
     const { isSessionFetching, user } = useAuth();
     const queryClient = useQueryClient();
 
-    const { mutate: onSaveAnnotations } = useMutation({
-      mutationKey: [
-        "user_saved_activities",
-        "annotations",
-        questionId,
-        typeOfView,
-      ],
-      mutationFn: async (data: {
-        questionId: string;
-        questionXfdf?: string;
-        answerXfdf?: string;
-      }) => {
-        const result = await saveAnnotationsAction(data);
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        return result;
-      },
-      onSuccess: (_data, variables) => {
-        console.log("Annotations saved", variables);
-        queryClient.setQueryData<SavedActivitiesResponse>(
-          ["user_saved_activities"],
-          (prev) => {
-            if (!prev) return prev;
-            const nextAnnotations = prev.annotations
-              ? [...prev.annotations]
-              : [];
-            const existingIndex = nextAnnotations.findIndex(
-              (a) => a.questionId === variables.questionId
-            );
-
-            const newAnnotation: SelectedAnnotation = {
-              questionId: variables.questionId,
-              questionXfdf:
-                variables.questionXfdf ??
-                (existingIndex !== -1
-                  ? nextAnnotations[existingIndex].questionXfdf
-                  : ""),
-              answerXfdf:
-                variables.answerXfdf ??
-                (existingIndex !== -1
-                  ? nextAnnotations[existingIndex].answerXfdf
-                  : ""),
-              updatedAt: new Date(),
-            };
-
-            if (existingIndex !== -1) {
-              nextAnnotations[existingIndex] = newAnnotation;
-            } else {
-              nextAnnotations.push(newAnnotation);
-            }
-
-            return {
-              ...prev,
-              annotations: nextAnnotations,
-            };
+    const { mutate: onSaveAnnotations, isPending: isSavingAnnotations } =
+      useMutation({
+        mutationKey: [
+          "user_saved_activities",
+          "annotations",
+          questionId,
+          typeOfView,
+        ],
+        mutationFn: async (data: {
+          questionId: string;
+          questionXfdf?: string;
+          answerXfdf?: string;
+        }) => {
+          const result = await saveAnnotationsAction(data);
+          if (result.error) {
+            throw new Error(result.error);
           }
-        );
-      },
-      retry: false,
-    });
+          return result;
+        },
+        onSuccess: (_data, variables) => {
+          queryClient.setQueryData<SavedActivitiesResponse>(
+            ["user_saved_activities"],
+            (prev) => {
+              if (!prev) return prev;
+              const nextAnnotations = prev.annotations
+                ? [...prev.annotations]
+                : [];
+              const existingIndex = nextAnnotations.findIndex(
+                (a) => a.questionId === variables.questionId
+              );
 
-    useMutationState({
+              const newAnnotation: SelectedAnnotation = {
+                questionId: variables.questionId,
+                questionXfdf:
+                  variables.questionXfdf ??
+                  (existingIndex !== -1
+                    ? nextAnnotations[existingIndex].questionXfdf
+                    : ""),
+                answerXfdf:
+                  variables.answerXfdf ??
+                  (existingIndex !== -1
+                    ? nextAnnotations[existingIndex].answerXfdf
+                    : ""),
+                updatedAt: new Date(),
+              };
+
+              if (existingIndex !== -1) {
+                nextAnnotations[existingIndex] = newAnnotation;
+              } else {
+                nextAnnotations.push(newAnnotation);
+              }
+
+              return {
+                ...prev,
+                annotations: nextAnnotations,
+              };
+            }
+          );
+        },
+        retry: false,
+      });
+
+    const annotationsMutationState = useMutationState({
       filters: {
         mutationKey: ["user_saved_activities", "annotations"],
         predicate: (mutation) =>
@@ -109,6 +109,19 @@ const AnnotatableImagesUpdater = memo(
           mutation.state.status === "error",
       },
     });
+
+    useEffect(() => {
+      if (
+        !isHavingUnsafeChangesRef.current["answer"] &&
+        !isHavingUnsafeChangesRef.current["question"]
+      ) {
+        setIsAnnotationGuardDialogOpen(false);
+      }
+    }, [
+      annotationsMutationState,
+      isHavingUnsafeChangesRef,
+      setIsAnnotationGuardDialogOpen,
+    ]);
 
     const currentQuestionAnnotationData = useMemo(() => {
       return annotationsData?.find(
@@ -155,8 +168,8 @@ const AnnotatableImagesUpdater = memo(
             isCalculatorOpen={isCalculatorOpen}
             imageTheme={uiPreferences?.imageTheme}
             onSaveAnnotations={onSaveAnnotations}
-            setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
             isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+            isSavingAnnotations={isSavingAnnotations}
           />
         );
       }
@@ -180,6 +193,7 @@ const AnnotatableImagesUpdater = memo(
       isHavingUnsafeChangesRef,
       setIsAnnotationGuardDialogOpen,
       isAnnotationGuardDialogOpen,
+      isSavingAnnotations,
     ]);
 
     return null;
