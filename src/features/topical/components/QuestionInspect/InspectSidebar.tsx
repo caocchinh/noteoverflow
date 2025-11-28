@@ -78,7 +78,7 @@ const InspectSidebar = memo(
         setCurrentView,
         calculateTabThatQuestionResidesIn,
         setCurrentQuestionId,
-        isInputFocused,
+        isInputFocusedRef,
         resetScrollPositions,
         listId,
         overflowScrollHandler,
@@ -574,7 +574,7 @@ const InspectSidebar = memo(
                 <SearchInputSection
                   searchInput={searchInput}
                   setSearchInput={setSearchInput}
-                  isInputFocused={isInputFocused}
+                  isInputFocusedRef={isInputFocusedRef}
                   currentQuestionId={currentQuestionId}
                   currentTabThatContainsQuestion={
                     currentTabThatContainsQuestion
@@ -732,7 +732,7 @@ const SearchInputSection = memo(
   ({
     searchInput,
     setSearchInput,
-    isInputFocused,
+    isInputFocusedRef,
     currentQuestionId,
     currentTabThatContainsQuestion,
     setCurrentTab,
@@ -741,7 +741,7 @@ const SearchInputSection = memo(
   }: {
     searchInput: string;
     setSearchInput: (value: string) => void;
-    isInputFocused: RefObject<boolean>;
+    isInputFocusedRef: RefObject<boolean>;
     currentQuestionId?: string;
     currentTabThatContainsQuestion: number;
     setCurrentTab: (tab: number) => void;
@@ -759,10 +759,10 @@ const SearchInputSection = memo(
         <Search />
         <Input
           onFocus={() => {
-            isInputFocused.current = true;
+            isInputFocusedRef.current = true;
           }}
           onBlur={() => {
-            isInputFocused.current = false;
+            isInputFocusedRef.current = false;
           }}
           className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
           placeholder="Search questions"

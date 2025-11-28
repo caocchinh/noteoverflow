@@ -18,6 +18,7 @@ import {
   InnitAnnotatableInspectImagesProps,
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
+  AnnotatableInspectImagesHandle,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const initAnnotableImagesElement = ({
   initialXfdf,
   isSavedActivitiesLoading,
   isSavedActivitiesError,
+  componentRef,
 }: InnitAnnotatableInspectImagesProps) => {
   if (!elementRef.current) {
     elementRef.current = document.createElement("div");
@@ -66,6 +68,7 @@ const initAnnotableImagesElement = ({
   if (elementRootRef.current) {
     elementRootRef.current.render(
       <AnnotatableInspectImages
+        ref={componentRef}
         isSavedActivitiesLoading={isSavedActivitiesLoading}
         isSavedActivitiesError={isSavedActivitiesError}
         initialXfdf={initialXfdf}
@@ -99,8 +102,8 @@ const QuestionInspectMainContent = forwardRef(
       BETTER_AUTH_URL,
       navigationButtonsContainerRef,
       setIsOpen,
-      isCoolDown,
-      isInputFocused,
+      isCoolDownRef,
+      isInputFocusedRef,
     }: QuestionInspectMainContentProps,
     ref
   ) => {
@@ -122,6 +125,12 @@ const QuestionInspectMainContent = forwardRef(
     const annotatableAnswerInspectImagesElementRef =
       useRef<HTMLDivElement | null>(null);
     const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
+
+    const annotatableQuestionInspectImagesRootElementRef =
+      useRef<AnnotatableInspectImagesHandle | null>(null);
+    const annotatableAnswerInspectImagesRootElementRef =
+      useRef<AnnotatableInspectImagesHandle | null>(null);
+
     const { isSessionFetching, user } = useAuth();
     const {
       setIsCalculatorOpen,
@@ -171,6 +180,7 @@ const QuestionInspectMainContent = forwardRef(
         initialXfdf: currentQuestionAnnotationData?.questionXfdf ?? null,
         isSavedActivitiesLoading: savedActivitiesIsLoading,
         isSavedActivitiesError: savedActivitiesIsError,
+        componentRef: annotatableQuestionInspectImagesRootElementRef,
       });
 
       initAnnotableImagesElement({
@@ -187,6 +197,7 @@ const QuestionInspectMainContent = forwardRef(
         initialXfdf: currentQuestionAnnotationData?.answerXfdf ?? null,
         isSavedActivitiesLoading: savedActivitiesIsLoading,
         isSavedActivitiesError: savedActivitiesIsError,
+        componentRef: annotatableAnswerInspectImagesRootElementRef,
       });
       setKey((prev) => prev + 1);
     }, [
@@ -252,7 +263,17 @@ const QuestionInspectMainContent = forwardRef(
 
     const handleKeyboardNavigation = useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === "e" && !isInputFocused.current) {
+        const isInterferingWithPdfEditor =
+          (currentView === "question" &&
+            annotatableQuestionInspectImagesRootElementRef.current
+              ?.isEditMode) ||
+          (currentView === "answer" &&
+            annotatableAnswerInspectImagesRootElementRef.current?.isEditMode);
+        if (
+          e.key === "e" &&
+          !isInputFocusedRef.current &&
+          !isInterferingWithPdfEditor
+        ) {
           e.preventDefault();
           if (currentView === "question") {
             setCurrentView("answer");
@@ -260,46 +281,50 @@ const QuestionInspectMainContent = forwardRef(
             setCurrentView("question");
           }
         }
-        if (e.key === "r" && !isInputFocused.current) {
+        if (
+          e.key === "r" &&
+          !isInputFocusedRef.current &&
+          !isInterferingWithPdfEditor
+        ) {
           e.preventDefault();
           setCurrentView("both");
           setIsInspectSidebarOpen(false);
         }
-        if (e.key === "t" && !isInputFocused.current) {
+        if (e.key === "t" && !isInputFocusedRef.current) {
           e.preventDefault();
           setIsInspectSidebarOpen(!isInspectSidebarOpen);
         }
-        if (isCoolDown.current) return;
+        if (isCoolDownRef.current || isInterferingWithPdfEditor) return;
 
         if (
           (e.key === "ArrowUp" ||
-            ((e.key === "w" || e.key === "a") && !isInputFocused.current)) &&
+            ((e.key === "w" || e.key === "a") && !isInputFocusedRef.current)) &&
           !sideBarInspectRef.current?.isHandlePreviousQuestionDisabled
         ) {
           e.preventDefault();
           sideBarInspectRef.current?.handlePreviousQuestion();
-          isCoolDown.current = true;
+          isCoolDownRef.current = true;
           setTimeout(() => {
-            isCoolDown.current = false;
+            isCoolDownRef.current = false;
           }, 25);
         } else if (
           (e.key === "ArrowDown" ||
-            ((e.key === "s" || e.key === "d") && !isInputFocused.current)) &&
+            ((e.key === "s" || e.key === "d") && !isInputFocusedRef.current)) &&
           !sideBarInspectRef.current?.isHandleNextQuestionDisabled
         ) {
           e.preventDefault();
           sideBarInspectRef.current?.handleNextQuestion();
 
-          isCoolDown.current = true;
+          isCoolDownRef.current = true;
           setTimeout(() => {
-            isCoolDown.current = false;
+            isCoolDownRef.current = false;
           }, 25);
         }
       },
       [
         currentView,
-        isCoolDown,
-        isInputFocused,
+        isCoolDownRef,
+        isInputFocusedRef,
         isInspectSidebarOpen,
         setIsInspectSidebarOpen,
         sideBarInspectRef,

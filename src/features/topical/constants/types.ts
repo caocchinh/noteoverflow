@@ -500,7 +500,7 @@ export interface InspectSidebarProps {
   currentQuestionId: string | undefined;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  isInputFocused: RefObject<boolean>;
+  isInputFocusedRef: RefObject<boolean>;
   resetScrollPositions: () => void;
   listId: string | undefined;
   currentQuestionIndex: number;
@@ -559,8 +559,8 @@ export interface QuestionInspectMainContentProps {
   setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
   BETTER_AUTH_URL: string;
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
-  isCoolDown: RefObject<boolean>;
-  isInputFocused: RefObject<boolean>;
+  isCoolDownRef: RefObject<boolean>;
+  isInputFocusedRef: RefObject<boolean>;
 }
 
 export interface QuestionInspectMainContentRef {
@@ -637,6 +637,7 @@ export interface InnitAnnotatableInspectImagesProps {
   typeOfView: "question" | "answer";
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
+  componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
 }
 
 export interface AnnotatableInspectImageProps {
@@ -651,4 +652,8 @@ export interface AnnotatableInspectImageProps {
   initialXfdf: string | null;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
+}
+
+export interface AnnotatableInspectImagesHandle {
+  isEditMode: boolean;
 }

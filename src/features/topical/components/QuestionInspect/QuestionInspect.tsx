@@ -53,6 +53,7 @@ const QuestionInspect = memo(
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
       const isHavingUnsafeChanges = useRef(false);
+
       const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
         useState(false);
       const [pendingQuestionId, setPendingQuestionId] = useState<
@@ -94,7 +95,7 @@ const QuestionInspect = memo(
         currentTabThatContainsQuestion,
         currentQuestionId,
       ]);
-      const isInputFocused = useRef(false);
+      const isInputFocusedRef = useRef(false);
       const allQuestions = useMemo(() => {
         return partitionedTopicalData?.flat() ?? [];
       }, [partitionedTopicalData]);
@@ -141,7 +142,7 @@ const QuestionInspect = memo(
       const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
       const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
 
-      const isCoolDown = useRef(false);
+      const isCoolDownRef = useRef(false);
 
       const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -151,7 +152,7 @@ const QuestionInspect = memo(
       );
 
       const handleKeyUp = useCallback(() => {
-        isCoolDown.current = false;
+        isCoolDownRef.current = false;
       }, []);
 
       const handleInteractOutside = useCallback(
@@ -184,7 +185,7 @@ const QuestionInspect = memo(
             questionId: isInspectOpen.questionId ?? "",
           });
         } else {
-          isInputFocused.current = false;
+          isInputFocusedRef.current = false;
           if (currentQuery?.curriculumId && currentQuery?.subjectId) {
             updateSearchParams({
               query: JSON.stringify(currentQuery),
@@ -295,7 +296,7 @@ const QuestionInspect = memo(
                   }
                   listId={listId}
                   currentQuestionIndex={currentQuestionIndex}
-                  isInputFocused={isInputFocused}
+                  isInputFocusedRef={isInputFocusedRef}
                   navigationButtonsContainerRef={navigationButtonsContainerRef}
                   questionInspectMainContentRef={questionInspectMainContentRef}
                 />
@@ -317,8 +318,8 @@ const QuestionInspect = memo(
                   setIsInspectSidebarOpen={setIsInspectSidebarOpen}
                   BETTER_AUTH_URL={BETTER_AUTH_URL}
                   setIsOpen={setIsInspectOpen}
-                  isCoolDown={isCoolDown}
-                  isInputFocused={isInputFocused}
+                  isCoolDownRef={isCoolDownRef}
+                  isInputFocusedRef={isInputFocusedRef}
                 />
               </SidebarProvider>
             </DialogContent>
