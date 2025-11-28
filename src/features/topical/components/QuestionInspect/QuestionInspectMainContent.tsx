@@ -89,7 +89,6 @@ const AnnotatableImagesUpdater = memo(
         return result;
       },
       onSuccess: (_data, variables) => {
-        isHavingUnsafeChangesRef.current = false;
         queryClient.setQueryData<SavedActivitiesResponse>(
           ["user_saved_activities"],
           (prev) => {

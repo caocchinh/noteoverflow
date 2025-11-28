@@ -178,7 +178,10 @@ const InspectSidebar = memo(
                 partitionedTopicalData[currentTabThatContainsQuestion][
                   currentQuestionIndex + 1
                 ].id;
-              if (isHavingUnsafeChangesRef.current) {
+              if (
+                isHavingUnsafeChangesRef.current["answer"] ||
+                isHavingUnsafeChangesRef.current["question"]
+              ) {
                 setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setPendingTab(currentTabThatContainsQuestion);
@@ -199,7 +202,10 @@ const InspectSidebar = memo(
                 const newQuestionId =
                   partitionedTopicalData[currentTabThatContainsQuestion + 1][0]
                     .id;
-                if (isHavingUnsafeChangesRef.current) {
+                if (
+                  isHavingUnsafeChangesRef.current["answer"] ||
+                  isHavingUnsafeChangesRef.current["question"]
+                ) {
                   setIsAnnotationGuardDialogOpen(true);
                   setPendingQuestionId(newQuestionId);
                   setPendingTab(currentTabThatContainsQuestion + 1);
@@ -225,7 +231,10 @@ const InspectSidebar = memo(
               const newQuestionId =
                 searchResults[currentQuestionIndexInSearchResult + 1].id;
 
-              if (isHavingUnsafeChangesRef.current) {
+              if (
+                isHavingUnsafeChangesRef.current["answer"] ||
+                isHavingUnsafeChangesRef.current["question"]
+              ) {
                 setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setWillScrollToQuestionAfterGuard(true);
@@ -262,7 +271,10 @@ const InspectSidebar = memo(
                 partitionedTopicalData[currentTabThatContainsQuestion][
                   currentQuestionIndex - 1
                 ].id;
-              if (isHavingUnsafeChangesRef.current) {
+              if (
+                isHavingUnsafeChangesRef.current["answer"] ||
+                isHavingUnsafeChangesRef.current["question"]
+              ) {
                 setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setPendingTab(currentTabThatContainsQuestion);
@@ -282,7 +294,10 @@ const InspectSidebar = memo(
                     partitionedTopicalData[currentTabThatContainsQuestion - 1]
                       .length - 1
                   ].id;
-                if (isHavingUnsafeChangesRef.current) {
+                if (
+                  isHavingUnsafeChangesRef.current["answer"] ||
+                  isHavingUnsafeChangesRef.current["question"]
+                ) {
                   setIsAnnotationGuardDialogOpen(true);
                   setPendingQuestionId(newQuestionId);
                   setPendingTab(currentTabThatContainsQuestion - 1);
@@ -310,7 +325,10 @@ const InspectSidebar = memo(
               const newQuestionId =
                 searchResults[currentQuestionIndexInSearchResult - 1].id;
 
-              if (isHavingUnsafeChangesRef.current) {
+              if (
+                isHavingUnsafeChangesRef.current["answer"] ||
+                isHavingUnsafeChangesRef.current["question"]
+              ) {
                 setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setWillScrollToQuestionAfterGuard(true);
@@ -453,7 +471,11 @@ const InspectSidebar = memo(
         }) => {
           const tab = calculateTabThatQuestionResidesIn(questionId);
 
-          if (showAnnotationGuard && isHavingUnsafeChangesRef.current) {
+          if (
+            showAnnotationGuard &&
+            (isHavingUnsafeChangesRef.current["answer"] ||
+              isHavingUnsafeChangesRef.current["question"])
+          ) {
             setIsAnnotationGuardDialogOpen(true);
             setPendingQuestionId(questionId);
             setPendingTab(tab);

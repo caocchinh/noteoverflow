@@ -54,6 +54,7 @@ import {
   InnitPdfProps,
   AnnotatableInspectImagesHandle,
 } from "@/features/topical/constants/types";
+import Loader from "../../Loader/Loader";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -177,6 +178,8 @@ const AnnotatableInspectImagesComponent = memo(
       const [key, setKey] = useState(0);
       const [isMounted, setIsMounted] = useState(false);
       const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
+      const latestXfdfRef = useRef(currentXfdf);
+      latestXfdfRef.current = currentXfdf;
 
       const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
       const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
@@ -302,10 +305,10 @@ const AnnotatableInspectImagesComponent = memo(
       // Handle annotations changed callback
       const handleAnnotationsChanged = useCallback(
         (xfdf: string) => {
-          isHavingUnsafeChangesRef.current = true;
+          isHavingUnsafeChangesRef.current[typeOfView] = true;
           setCurrentXfdf(xfdf);
         },
-        [isHavingUnsafeChangesRef]
+        [isHavingUnsafeChangesRef, typeOfView]
       );
 
       // Debounced auto-save effect
@@ -326,14 +329,23 @@ const AnnotatableInspectImagesComponent = memo(
 
         // Set new timeout for auto-save
         autoSaveTimeoutRef.current = setTimeout(() => {
-          isHavingUnsafeChangesRef.current = true;
-          onSaveAnnotations({
-            questionId: currentQuestionId,
-            ...(typeOfView === "question"
-              ? { questionXfdf: currentXfdf || undefined }
-              : { answerXfdf: currentXfdf || undefined }),
-          });
-        }, 1000);
+          const xfdfBeingSaved = currentXfdf;
+          onSaveAnnotations(
+            {
+              questionId: currentQuestionId,
+              ...(typeOfView === "question"
+                ? { questionXfdf: xfdfBeingSaved || undefined }
+                : { answerXfdf: xfdfBeingSaved || undefined }),
+            },
+            {
+              onSuccess: () => {
+                if (latestXfdfRef.current === xfdfBeingSaved) {
+                  isHavingUnsafeChangesRef.current[typeOfView] = false;
+                }
+              },
+            }
+          );
+        }, 6769);
 
         return () => {
           if (autoSaveTimeoutRef.current) {
@@ -498,6 +510,12 @@ const AnnotatableInspectImagesComponent = memo(
             </div>
 
             <div className="flex flex-col w-full items-center relative">
+              {!isPdfViewerLoaded && pdfBlob && (
+                <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
+                  <p className="w-full">Initalizing PDF inspector</p>
+                  <Loader />
+                </div>
+              )}
               <div
                 className={cn(
                   !isEditMode
@@ -511,9 +529,9 @@ const AnnotatableInspectImagesComponent = memo(
                   className="w-full relative h-[72dvh]"
                 >
                   {!pdfBlob && (
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
                       <span className="ml-2">Generating PDF</span>
-                      <Loader2 className="animate-spin h-6 w-6" />
+                      <Loader />
                     </div>
                   )}
                 </div>

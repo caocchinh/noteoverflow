@@ -3,6 +3,7 @@ import type {
   CIE_A_LEVEL_SUBDIVISION,
   OUTDATED,
   ValidCurriculum,
+  ServerActionResponse,
 } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { WebViewerInstance } from "@pdftron/webviewer";
@@ -507,7 +508,7 @@ export interface InspectSidebarProps {
   overflowScrollHandler?: () => void;
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
-  isHavingUnsafeChangesRef: RefObject<boolean>;
+  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   setPendingQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setPendingTab: Dispatch<SetStateAction<number | undefined>>;
@@ -561,7 +562,7 @@ export interface QuestionInspectMainContentProps {
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isCoolDownRef: RefObject<boolean>;
   isInputFocusedRef: RefObject<boolean>;
-  isHavingUnsafeChangesRef: RefObject<boolean>;
+  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
 }
 
 export interface QuestionInspectMainContentRef {
@@ -632,7 +633,7 @@ export interface AnnotatableImagesUpdaterProps {
   questionId: string;
   typeOfView: "question" | "answer";
   componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
-  isHavingUnsafeChangesRef: RefObject<boolean>;
+  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
 }
 
 export interface AnnotatableInspectImageProps {
@@ -647,12 +648,17 @@ export interface AnnotatableInspectImageProps {
   initialXfdf: string | null;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
-  onSaveAnnotations: (data: {
-    questionId: string;
-    questionXfdf?: string;
-    answerXfdf?: string;
-  }) => void;
-  isHavingUnsafeChangesRef: RefObject<boolean>;
+  onSaveAnnotations: UseMutateFunction<
+    ServerActionResponse<void>,
+    Error,
+    {
+      questionId: string;
+      questionXfdf?: string;
+      answerXfdf?: string;
+    },
+    unknown
+  >;
+  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
 }
 
 export interface AnnotatableInspectImagesHandle {

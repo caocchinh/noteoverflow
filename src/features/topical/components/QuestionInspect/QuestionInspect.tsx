@@ -52,7 +52,10 @@ const QuestionInspect = memo(
     ) => {
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
-      const isHavingUnsafeChangesRef = useRef(false);
+      const isHavingUnsafeChangesRef = useRef({
+        answer: false,
+        question: false,
+      });
       const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
         useState(false);
       const [pendingQuestionId, setPendingQuestionId] = useState<
@@ -212,7 +215,8 @@ const QuestionInspect = memo(
         (open: boolean) => {
           if (!open) {
             if (
-              isHavingUnsafeChangesRef.current ||
+              isHavingUnsafeChangesRef.current["answer"] ||
+              isHavingUnsafeChangesRef.current["question"] ||
               !isAnnotationGuardDialogOpen
             ) {
               return;
