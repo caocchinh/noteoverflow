@@ -623,21 +623,15 @@ export interface InnitPdfProps {
   onAnnotationsChanged?: (xfdf: string) => void;
 }
 
-export interface InnitAnnotatableInspectImagesProps {
-  initialXfdf: string | null;
+export interface AnnotatableImagesUpdaterProps {
+  isMounted: boolean;
   imageSource: string[];
-  elementRef: RefObject<HTMLDivElement | null>;
-  elementRootRef: RefObject<Root | null>;
+  elementRef: React.RefObject<HTMLDivElement | null>;
+  elementRootRef: React.RefObject<Root | null>;
   questionId: string;
-  isSessionFetching: boolean;
-  userName: string | undefined;
-  setIsCalculatorOpen: (isOpen: boolean) => void;
-  isCalculatorOpen: boolean;
-  imageTheme: "light" | "dark";
   typeOfView: "question" | "answer";
-  isSavedActivitiesLoading: boolean;
-  isSavedActivitiesError: boolean;
-  componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
+  initialXfdf: string | null;
+  componentRef: React.RefObject<AnnotatableInspectImagesHandle | null>;
 }
 
 export interface AnnotatableInspectImageProps {

@@ -15,10 +15,10 @@ import {
   useState,
 } from "react";
 import {
-  InnitAnnotatableInspectImagesProps,
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
   AnnotatableInspectImagesHandle,
+  AnnotatableImagesUpdaterProps,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -40,50 +40,82 @@ const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
 
 CloseButton.displayName = "CloseButton";
 
-const initAnnotableImagesElement = ({
-  imageSource,
-  elementRef,
-  questionId,
-  elementRootRef,
-  isSessionFetching,
-  userName,
-  setIsCalculatorOpen,
-  isCalculatorOpen,
-  imageTheme,
-  typeOfView,
-  initialXfdf,
-  isSavedActivitiesLoading,
-  isSavedActivitiesError,
-  componentRef,
-}: InnitAnnotatableInspectImagesProps) => {
-  if (!elementRef.current) {
-    elementRef.current = document.createElement("div");
-    elementRef.current.className = "w-full h-full";
-  }
+const AnnotatableImagesUpdater = memo(
+  ({
+    isMounted,
+    imageSource,
+    elementRef,
+    elementRootRef,
+    questionId,
+    typeOfView,
+    initialXfdf,
+    componentRef,
+  }: AnnotatableImagesUpdaterProps) => {
+    const {
+      setIsCalculatorOpen,
+      isCalculatorOpen,
+      savedActivitiesIsLoading: isSavedActivitiesLoading,
+      savedActivitiesIsError: isSavedActivitiesError,
+      uiPreferences,
+    } = useTopicalApp();
+    const { isSessionFetching, user } = useAuth();
 
-  if (!elementRootRef.current && elementRef.current) {
-    elementRootRef.current = createRoot(elementRef.current);
-  }
+    useEffect(() => {
+      if (!isMounted || !imageSource) return;
 
-  if (elementRootRef.current) {
-    elementRootRef.current.render(
-      <AnnotatableInspectImages
-        ref={componentRef}
-        isSavedActivitiesLoading={isSavedActivitiesLoading}
-        isSavedActivitiesError={isSavedActivitiesError}
-        initialXfdf={initialXfdf}
-        typeOfView={typeOfView}
-        imageSource={imageSource}
-        currentQuestionId={questionId}
-        isSessionFetching={isSessionFetching}
-        userName={userName}
-        setIsCalculatorOpen={setIsCalculatorOpen}
-        isCalculatorOpen={isCalculatorOpen}
-        imageTheme={imageTheme}
-      />
-    );
+      // Call initAnnotableImagesElement every time to update props
+      // The function creates the root only if it doesn't exist,
+      // then always calls render() with the updated component
+      if (!elementRef.current) {
+        elementRef.current = document.createElement("div");
+        elementRef.current.className = "w-full h-full";
+      }
+
+      if (!elementRootRef.current && elementRef.current) {
+        elementRootRef.current = createRoot(elementRef.current);
+      }
+
+      if (elementRootRef.current) {
+        elementRootRef.current.render(
+          <AnnotatableInspectImages
+            ref={componentRef}
+            isSavedActivitiesLoading={isSavedActivitiesLoading}
+            isSavedActivitiesError={isSavedActivitiesError}
+            initialXfdf={initialXfdf}
+            typeOfView={typeOfView}
+            imageSource={imageSource}
+            currentQuestionId={questionId}
+            isSessionFetching={isSessionFetching}
+            userName={user?.name}
+            setIsCalculatorOpen={setIsCalculatorOpen}
+            isCalculatorOpen={isCalculatorOpen}
+            imageTheme={uiPreferences?.imageTheme}
+          />
+        );
+      }
+    }, [
+      isMounted,
+      imageSource,
+      elementRef,
+      elementRootRef,
+      questionId,
+      isSessionFetching,
+      setIsCalculatorOpen,
+      isCalculatorOpen,
+      typeOfView,
+      initialXfdf,
+      componentRef,
+      user?.name,
+      uiPreferences?.imageTheme,
+      isSavedActivitiesLoading,
+      isSavedActivitiesError,
+    ]);
+
+    return null;
   }
-};
+);
+
+AnnotatableImagesUpdater.displayName = "AnnotatableImagesUpdater";
 
 const QuestionInspectMainContent = forwardRef(
   (
@@ -130,16 +162,7 @@ const QuestionInspectMainContent = forwardRef(
       useRef<AnnotatableInspectImagesHandle | null>(null);
     const annotatableAnswerInspectImagesRootElementRef =
       useRef<AnnotatableInspectImagesHandle | null>(null);
-
-    const { isSessionFetching, user } = useAuth();
-    const {
-      setIsCalculatorOpen,
-      isCalculatorOpen,
-      uiPreferences,
-      annotationsData,
-      savedActivitiesIsLoading,
-      savedActivitiesIsError,
-    } = useTopicalApp();
+    const { annotationsData } = useTopicalApp();
     const [isMounted, setIsMounted] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [key, setKey] = useState(0);
@@ -159,60 +182,6 @@ const QuestionInspectMainContent = forwardRef(
         (annotation) => annotation.questionId === currentQuestionId
       );
     }, [annotationsData, currentQuestionId]);
-
-    useEffect(() => {
-      if (!currentQuestionData || !isMounted) return;
-
-      // Call initAnnotableImagesElement every time to update props
-      // The function creates the root only if it doesn't exist,
-      // then always calls render() with the updated component
-      initAnnotableImagesElement({
-        imageSource: currentQuestionData?.questionImages ?? [],
-        elementRef: annotatableQuestionInspectImagesElementRef,
-        elementRootRef: annotatableQuestionInspectImagesRootRef,
-        isSessionFetching,
-        questionId: currentQuestionData?.id,
-        userName: user?.name,
-        setIsCalculatorOpen,
-        isCalculatorOpen,
-        imageTheme: uiPreferences.imageTheme,
-        typeOfView: "question",
-        initialXfdf: currentQuestionAnnotationData?.questionXfdf ?? null,
-        isSavedActivitiesLoading: savedActivitiesIsLoading,
-        isSavedActivitiesError: savedActivitiesIsError,
-        componentRef: annotatableQuestionInspectImagesRootElementRef,
-      });
-
-      initAnnotableImagesElement({
-        imageSource: currentQuestionData?.answers ?? [],
-        elementRef: annotatableAnswerInspectImagesElementRef,
-        elementRootRef: annotatableAnswerInspectImagesRootRef,
-        isSessionFetching,
-        questionId: currentQuestionData?.id,
-        userName: user?.name,
-        setIsCalculatorOpen,
-        isCalculatorOpen,
-        imageTheme: uiPreferences.imageTheme,
-        typeOfView: "answer",
-        initialXfdf: currentQuestionAnnotationData?.answerXfdf ?? null,
-        isSavedActivitiesLoading: savedActivitiesIsLoading,
-        isSavedActivitiesError: savedActivitiesIsError,
-        componentRef: annotatableAnswerInspectImagesRootElementRef,
-      });
-      setKey((prev) => prev + 1);
-    }, [
-      currentQuestionId,
-      currentQuestionData,
-      isSessionFetching,
-      user?.name,
-      setIsCalculatorOpen,
-      isCalculatorOpen,
-      currentQuestionAnnotationData,
-      uiPreferences.imageTheme,
-      isMounted,
-      savedActivitiesIsLoading,
-      savedActivitiesIsError,
-    ]);
 
     // Cleanup roots only when component unmounts
     useEffect(() => {
@@ -362,6 +331,26 @@ const QuestionInspectMainContent = forwardRef(
 
     return (
       <>
+        <AnnotatableImagesUpdater
+          isMounted={isMounted}
+          imageSource={currentQuestionData?.questionImages ?? []}
+          elementRef={annotatableQuestionInspectImagesElementRef}
+          elementRootRef={annotatableQuestionInspectImagesRootRef}
+          questionId={currentQuestionData?.id ?? ""}
+          typeOfView="question"
+          initialXfdf={currentQuestionAnnotationData?.questionXfdf ?? null}
+          componentRef={annotatableQuestionInspectImagesRootElementRef}
+        />
+        <AnnotatableImagesUpdater
+          isMounted={isMounted}
+          imageSource={currentQuestionData?.answers ?? []}
+          elementRef={annotatableAnswerInspectImagesElementRef}
+          elementRootRef={annotatableAnswerInspectImagesRootRef}
+          questionId={currentQuestionData?.id ?? ""}
+          typeOfView="answer"
+          initialXfdf={currentQuestionAnnotationData?.answerXfdf ?? null}
+          componentRef={annotatableAnswerInspectImagesRootElementRef}
+        />
         <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
           <div
             className="w-full h-[inherit] flex flex-col gap-2 items-center justify-start relative"
