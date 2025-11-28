@@ -723,8 +723,8 @@ export const isValidInputs = ({
 };
 
 export const truncateListName = ({ listName }: { listName: string }) => {
-  if (listName.length > 12) {
-    return listName.slice(0, 12) + "...";
+  if (listName.length > 15) {
+    return listName.slice(0, 15) + "...";
   }
   return listName;
 };

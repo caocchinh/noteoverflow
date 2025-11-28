@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo, useCallback } from "react";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import {
   AnnotatableImagesUpdaterProps,
@@ -14,6 +14,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
+import {
+  bookmarkMutationFn,
+  handleBookmarkError,
+  handleBookmarkOptimisticUpdate,
+} from "../../utils/bookmarkUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AnnotatableImagesUpdater = memo(
   ({
@@ -27,6 +34,7 @@ const AnnotatableImagesUpdater = memo(
     componentRef,
     setIsAnnotationGuardDialogOpen,
     isAnnotationGuardDialogOpen,
+    question,
   }: AnnotatableImagesUpdaterProps) => {
     const {
       setIsCalculatorOpen,
@@ -35,11 +43,28 @@ const AnnotatableImagesUpdater = memo(
       savedActivitiesIsError: isSavedActivitiesError,
       uiPreferences,
       annotationsData,
+      bookmarksData,
     } = useTopicalApp();
     const { isSessionFetching, user } = useAuth();
     const queryClient = useQueryClient();
+    const isMobileDevice = useIsMobile();
 
-    const { mutate: onSaveAnnotations, isPending: isSavingAnnotations } =
+    const { mutate: bookmarkMutate } = useMutation({
+      mutationKey: ["user_saved_activities", "bookmarks", questionId],
+      mutationFn: bookmarkMutationFn,
+      onSuccess: (data) => {
+        handleBookmarkOptimisticUpdate(queryClient, data);
+        toast.success("Question added to My annotations", {
+          duration: 2000,
+          position: isMobileDevice ? "top-center" : "bottom-right",
+        });
+      },
+      onError: (error, variables) => {
+        handleBookmarkError(error, variables, isMobileDevice);
+      },
+    });
+
+    const { mutate: saveAnnotationsMutation, isPending: isSavingAnnotations } =
       useMutation({
         mutationKey: [
           "user_saved_activities",
@@ -98,8 +123,58 @@ const AnnotatableImagesUpdater = memo(
             }
           );
         },
-        retry: false,
+        onError: () => {
+          toast.error(
+            "Failed to save annotations. Please try again or reload the website."
+          );
+        },
+        retry: 2,
       });
+
+    const onSaveAnnotations = useCallback(
+      (
+        data: {
+          questionId: string;
+          questionXfdf?: string;
+          answerXfdf?: string;
+        },
+        callbacks?: {
+          onSuccess?: () => void;
+        }
+      ) => {
+        saveAnnotationsMutation(data, {
+          onSuccess: () => {
+            callbacks?.onSuccess?.();
+          },
+        });
+
+        if (!question) return;
+
+        const myAnnotationsList = bookmarksData?.find(
+          (b) => b.listName === "My annotations" && b.visibility === "private"
+        );
+
+        const isCreateNew = !myAnnotationsList;
+        const isRealBookmarked =
+          myAnnotationsList?.userBookmarks.some(
+            (b) => b.question.id === question.id
+          ) ?? false;
+
+        if (!isCreateNew && isRealBookmarked) {
+          return;
+        }
+
+        bookmarkMutate({
+          realQuestion: question,
+          realBookmarkListName: "My annotations",
+          isRealBookmarked: false,
+          realVisibility: "private",
+          realListId: myAnnotationsList?.id ?? "",
+          isCreateNew: isCreateNew,
+        });
+      },
+      [saveAnnotationsMutation, question, bookmarksData, bookmarkMutate]
+    );
 
     const annotationsMutationState = useMutationState({
       filters: {

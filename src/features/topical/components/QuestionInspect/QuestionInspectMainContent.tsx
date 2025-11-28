@@ -311,6 +311,7 @@ const QuestionInspectMainContent = forwardRef(
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
           setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
           isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+          question={currentQuestionData}
         />
         <AnnotatableImagesUpdater
           isMounted={isMounted}
@@ -323,6 +324,7 @@ const QuestionInspectMainContent = forwardRef(
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
           setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
           isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+          question={currentQuestionData}
         />
         <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
           <div

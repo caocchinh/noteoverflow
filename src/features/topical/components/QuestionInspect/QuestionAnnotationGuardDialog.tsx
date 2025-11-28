@@ -21,7 +21,7 @@ const QuestionAnnotationGuardDialog = ({ isOpen }: { isOpen: boolean }) => {
             Syncing your annotations to the database. Your annotations are
             periodically autosave to the database. All questions that are
             annotated will be automatically saved to &quot;Your
-            annotations&quot; bookmark list.
+            annotations&quot; private bookmark list.
           </p>
         </div>
       </AlertDialogContent>

@@ -635,7 +635,7 @@ const AnnotatableInspectImagesComponent = memo(
                       <span className="text-sm font-medium text-gray-300">
                         NoteOverflow Inspector
                       </span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         <SaveAnnotationsButton
                           onSave={handleSave}
                           isSaving={isSavingAnnotations}

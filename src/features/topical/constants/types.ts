@@ -3,7 +3,6 @@ import type {
   CIE_A_LEVEL_SUBDIVISION,
   OUTDATED,
   ValidCurriculum,
-  ServerActionResponse,
 } from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { WebViewerInstance } from "@pdftron/webviewer";
@@ -632,6 +631,7 @@ export interface AnnotatableImagesUpdaterProps {
   elementRef: RefObject<HTMLDivElement | null>;
   elementRootRef: RefObject<Root | null>;
   questionId: string;
+  question: SelectedQuestion | undefined;
   typeOfView: "question" | "answer";
   componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
@@ -653,16 +653,16 @@ export interface AnnotatableInspectImageProps {
   isSavedActivitiesError: boolean;
   isAnnotationGuardDialogOpen: boolean;
   isSavingAnnotations: boolean;
-  onSaveAnnotations: UseMutateFunction<
-    ServerActionResponse<void>,
-    Error,
-    {
+  onSaveAnnotations: (
+    data: {
       questionId: string;
       questionXfdf?: string;
       answerXfdf?: string;
     },
-    unknown
-  >;
+    callbacks?: {
+      onSuccess?: () => void;
+    }
+  ) => void;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
 }
 
