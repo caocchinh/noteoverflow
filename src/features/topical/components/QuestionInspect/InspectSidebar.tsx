@@ -73,7 +73,7 @@ const InspectSidebar = memo(
         isInspectSidebarOpen,
         currentQuestionId,
         isHavingUnsafeChanges,
-        setIsGuardDialogOpen,
+        setIsAnnotationGuardDialogOpen,
         setPendingQuestionId,
         setCurrentView,
         calculateTabThatQuestionResidesIn,
@@ -179,7 +179,7 @@ const InspectSidebar = memo(
                   currentQuestionIndex + 1
                 ].id;
               if (isHavingUnsafeChanges.current) {
-                setIsGuardDialogOpen(true);
+                setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setPendingTab(currentTabThatContainsQuestion);
                 setWillScrollToQuestionAfterGuard(true);
@@ -200,7 +200,7 @@ const InspectSidebar = memo(
                   partitionedTopicalData[currentTabThatContainsQuestion + 1][0]
                     .id;
                 if (isHavingUnsafeChanges.current) {
-                  setIsGuardDialogOpen(true);
+                  setIsAnnotationGuardDialogOpen(true);
                   setPendingQuestionId(newQuestionId);
                   setPendingTab(currentTabThatContainsQuestion + 1);
                   setWillScrollToQuestionAfterGuard(true);
@@ -226,7 +226,7 @@ const InspectSidebar = memo(
                 searchResults[currentQuestionIndexInSearchResult + 1].id;
 
               if (isHavingUnsafeChanges.current) {
-                setIsGuardDialogOpen(true);
+                setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setWillScrollToQuestionAfterGuard(true);
               } else {
@@ -249,7 +249,7 @@ const InspectSidebar = memo(
         searchResults,
         searchVirtualizer,
         setCurrentQuestionId,
-        setIsGuardDialogOpen,
+        setIsAnnotationGuardDialogOpen,
         setPendingQuestionId,
         setPendingTab,
       ]);
@@ -263,7 +263,7 @@ const InspectSidebar = memo(
                   currentQuestionIndex - 1
                 ].id;
               if (isHavingUnsafeChanges.current) {
-                setIsGuardDialogOpen(true);
+                setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setPendingTab(currentTabThatContainsQuestion);
                 setWillScrollToQuestionAfterGuard(true);
@@ -283,7 +283,7 @@ const InspectSidebar = memo(
                       .length - 1
                   ].id;
                 if (isHavingUnsafeChanges.current) {
-                  setIsGuardDialogOpen(true);
+                  setIsAnnotationGuardDialogOpen(true);
                   setPendingQuestionId(newQuestionId);
                   setPendingTab(currentTabThatContainsQuestion - 1);
                   setWillScrollToQuestionAfterGuard(true);
@@ -311,7 +311,7 @@ const InspectSidebar = memo(
                 searchResults[currentQuestionIndexInSearchResult - 1].id;
 
               if (isHavingUnsafeChanges.current) {
-                setIsGuardDialogOpen(true);
+                setIsAnnotationGuardDialogOpen(true);
                 setPendingQuestionId(newQuestionId);
                 setWillScrollToQuestionAfterGuard(true);
               } else {
@@ -334,7 +334,7 @@ const InspectSidebar = memo(
         searchResults,
         searchVirtualizer,
         setCurrentQuestionId,
-        setIsGuardDialogOpen,
+        setIsAnnotationGuardDialogOpen,
         setPendingQuestionId,
         setPendingTab,
       ]);
@@ -442,8 +442,24 @@ const InspectSidebar = memo(
       ]);
 
       const navigateToQuestion = useCallback(
-        (questionId: string, scroll: boolean = true) => {
+        ({
+          questionId,
+          scroll = true,
+          showAnnotationGuard = true,
+        }: {
+          questionId: string;
+          scroll?: boolean;
+          showAnnotationGuard?: boolean;
+        }) => {
           const tab = calculateTabThatQuestionResidesIn(questionId);
+
+          if (showAnnotationGuard && isHavingUnsafeChanges.current) {
+            setIsAnnotationGuardDialogOpen(true);
+            setPendingQuestionId(questionId);
+            setPendingTab(tab);
+            setWillScrollToQuestionAfterGuard(true);
+            return;
+          }
           setCurrentTab(tab);
           setCurrentQuestionId(questionId);
 
@@ -453,8 +469,12 @@ const InspectSidebar = memo(
         },
         [
           calculateTabThatQuestionResidesIn,
+          isHavingUnsafeChanges,
           setCurrentQuestionId,
           isVirtualizationReady,
+          setIsAnnotationGuardDialogOpen,
+          setPendingQuestionId,
+          setPendingTab,
           scrollToQuestion,
         ]
       );
@@ -515,11 +535,17 @@ const InspectSidebar = memo(
           currentQuestionId &&
           !allQuestions.some((question) => question.id === currentQuestionId)
         ) {
-          navigateToQuestion(allQuestions[0].id);
+          navigateToQuestion({
+            questionId: allQuestions[0].id,
+            showAnnotationGuard: false,
+          });
           return;
         } else {
           if (currentQuestionId) {
-            navigateToQuestion(currentQuestionId);
+            navigateToQuestion({
+              questionId: currentQuestionId,
+              showAnnotationGuard: false,
+            });
           }
         }
         if (allQuestions && allQuestions.length === 0) {

@@ -118,7 +118,7 @@ const QuestionHoverCard = memo(
             }, [isPopoverOpen])}
             onClick={useCallback(() => {
               setHoverCardOpen(false);
-              navigateToQuestion(question?.id, false);
+              navigateToQuestion({ questionId: question?.id, scroll: false });
               resetScrollPositions();
             }, [navigateToQuestion, question?.id, resetScrollPositions])}
           >

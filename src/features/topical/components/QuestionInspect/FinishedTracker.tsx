@@ -247,7 +247,9 @@ export const FinishedTracker = memo(
                                 imageSrc={imageSrc}
                                 onQuestionClick={() => {
                                   setIsDialogOpen(false);
-                                  navigateToQuestion(question?.id);
+                                  navigateToQuestion({
+                                    questionId: question?.id,
+                                  });
                                 }}
                               />
                             ))

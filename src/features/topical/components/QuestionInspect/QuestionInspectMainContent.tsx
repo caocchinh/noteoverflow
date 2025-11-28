@@ -323,7 +323,7 @@ const QuestionInspectMainContent = forwardRef(
 
     const onQuestionClick = useCallback(
       (questionId: string) => {
-        sideBarInspectRef.current?.navigateToQuestion(questionId);
+        sideBarInspectRef.current?.navigateToQuestion({ questionId });
         resetScrollPositions();
       },
       [sideBarInspectRef, resetScrollPositions]

@@ -329,7 +329,10 @@ export type CurrentQuery = {
 
 export interface QuestionHoverCardProps {
   question: SelectedQuestion;
-  navigateToQuestion: (questionId: string, scroll?: boolean) => void;
+  navigateToQuestion: (params: {
+    questionId: string;
+    scroll?: boolean;
+  }) => void;
   isThisTheCurrentQuestion: boolean;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
@@ -395,7 +398,10 @@ export interface AppSidebarProps {
 
 export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
-  navigateToQuestion: (questionId: string, scroll?: boolean) => void;
+  navigateToQuestion: (params: {
+    questionId: string;
+    scroll?: boolean;
+  }) => void;
 }
 
 export type QuestionInspectOpenState = {
@@ -502,7 +508,7 @@ export interface InspectSidebarProps {
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
   isHavingUnsafeChanges: RefObject<boolean>;
-  setIsGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   setPendingQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setPendingTab: Dispatch<SetStateAction<number | undefined>>;
 }
@@ -510,7 +516,7 @@ export interface InspectSidebarProps {
 export interface InspectSidebarRef {
   handleNextQuestion(): void;
   handlePreviousQuestion(): void;
-  navigateToQuestion(questionId: string, scroll?: boolean): void;
+  navigateToQuestion(params: { questionId: string; scroll?: boolean }): void;
   isHandleNextQuestionDisabled: boolean;
   isHandlePreviousQuestionDisabled: boolean;
 }
