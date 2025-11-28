@@ -72,6 +72,9 @@ const InspectSidebar = memo(
         currentTabThatContainsQuestion,
         isInspectSidebarOpen,
         currentQuestionId,
+        isHavingUnsafeChanges,
+        setIsGuardDialogOpen,
+        setPendingQuestionId,
         setCurrentView,
         calculateTabThatQuestionResidesIn,
         setCurrentQuestionId,
@@ -81,12 +84,17 @@ const InspectSidebar = memo(
         overflowScrollHandler,
         currentQuestionIndex,
         navigationButtonsContainerRef,
+        setPendingTab,
       }: InspectSidebarProps,
       ref
     ) => {
       const [currentTab, setCurrentTab] = useState(0);
       const [searchInput, setSearchInput] = useState("");
       const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
+      const [
+        willScrollToQuestionAfterGuard,
+        setWillScrollToQuestionAfterGuard,
+      ] = useState(false);
       const listScrollAreaRef = useRef<HTMLDivElement>(null);
       const isMobile = useIsMobile();
 
@@ -166,34 +174,44 @@ const InspectSidebar = memo(
               currentQuestionIndex <
               partitionedTopicalData[currentTabThatContainsQuestion].length - 1
             ) {
-              setCurrentQuestionId(
+              const newQuestionId =
                 partitionedTopicalData[currentTabThatContainsQuestion][
                   currentQuestionIndex + 1
-                ].id
-              );
-              setCurrentTab(currentTabThatContainsQuestion);
-              scrollToQuestion({
-                questionId:
-                  partitionedTopicalData[currentTabThatContainsQuestion][
-                    currentQuestionIndex + 1
-                  ].id,
-                tab: currentTabThatContainsQuestion,
-              });
+                ].id;
+              if (isHavingUnsafeChanges.current) {
+                setIsGuardDialogOpen(true);
+                setPendingQuestionId(newQuestionId);
+                setPendingTab(currentTabThatContainsQuestion);
+                setWillScrollToQuestionAfterGuard(true);
+              } else {
+                setCurrentQuestionId(newQuestionId);
+                setCurrentTab(currentTabThatContainsQuestion);
+                scrollToQuestion({
+                  questionId: newQuestionId,
+                  tab: currentTabThatContainsQuestion,
+                });
+              }
             } else {
               if (
                 currentTabThatContainsQuestion <
                 partitionedTopicalData.length - 1
               ) {
-                setCurrentTab(currentTabThatContainsQuestion + 1);
-
-                setCurrentQuestionId(
+                const newQuestionId =
                   partitionedTopicalData[currentTabThatContainsQuestion + 1][0]
-                    .id
-                );
-                listScrollAreaRef.current?.scrollTo({
-                  top: 0,
-                  behavior: "instant",
-                });
+                    .id;
+                if (isHavingUnsafeChanges.current) {
+                  setIsGuardDialogOpen(true);
+                  setPendingQuestionId(newQuestionId);
+                  setPendingTab(currentTabThatContainsQuestion + 1);
+                  setWillScrollToQuestionAfterGuard(true);
+                } else {
+                  setCurrentTab(currentTabThatContainsQuestion + 1);
+                  setCurrentQuestionId(newQuestionId);
+                  listScrollAreaRef.current?.scrollTo({
+                    top: 0,
+                    behavior: "instant",
+                  });
+                }
               }
             }
           } else {
@@ -204,13 +222,19 @@ const InspectSidebar = memo(
               return;
             }
             if (currentQuestionIndexInSearchResult < searchResults.length - 1) {
-              setCurrentQuestionId(
-                searchResults[currentQuestionIndexInSearchResult + 1].id
-              );
+              const newQuestionId =
+                searchResults[currentQuestionIndexInSearchResult + 1].id;
 
-              searchVirtualizer.scrollToIndex(
-                currentQuestionIndexInSearchResult + 1
-              );
+              if (isHavingUnsafeChanges.current) {
+                setIsGuardDialogOpen(true);
+                setPendingQuestionId(newQuestionId);
+                setWillScrollToQuestionAfterGuard(true);
+              } else {
+                setCurrentQuestionId(newQuestionId);
+                searchVirtualizer.scrollToIndex(
+                  currentQuestionIndexInSearchResult + 1
+                );
+              }
             }
           }
         }
@@ -218,52 +242,61 @@ const InspectSidebar = memo(
         currentQuestionId,
         currentQuestionIndex,
         currentTabThatContainsQuestion,
+        isHavingUnsafeChanges,
         partitionedTopicalData,
         scrollToQuestion,
         searchInput,
         searchResults,
         searchVirtualizer,
         setCurrentQuestionId,
+        setIsGuardDialogOpen,
+        setPendingQuestionId,
+        setPendingTab,
       ]);
+
       const handlePreviousQuestion = useCallback(() => {
         if (partitionedTopicalData) {
           if (searchInput === "") {
             if (currentQuestionIndex > 0) {
-              setCurrentQuestionId(
+              const newQuestionId =
                 partitionedTopicalData[currentTabThatContainsQuestion][
                   currentQuestionIndex - 1
-                ].id
-              );
-              setCurrentTab(currentTabThatContainsQuestion);
-              scrollToQuestion({
-                questionId:
-                  partitionedTopicalData[currentTabThatContainsQuestion][
-                    currentQuestionIndex - 1
-                  ].id,
-                tab: currentTabThatContainsQuestion,
-              });
+                ].id;
+              if (isHavingUnsafeChanges.current) {
+                setIsGuardDialogOpen(true);
+                setPendingQuestionId(newQuestionId);
+                setPendingTab(currentTabThatContainsQuestion);
+                setWillScrollToQuestionAfterGuard(true);
+              } else {
+                setCurrentQuestionId(newQuestionId);
+                setCurrentTab(currentTabThatContainsQuestion);
+                scrollToQuestion({
+                  questionId: newQuestionId,
+                  tab: currentTabThatContainsQuestion,
+                });
+              }
             } else {
               if (currentTabThatContainsQuestion > 0) {
-                setCurrentTab(currentTabThatContainsQuestion - 1);
-                setCurrentQuestionId(
+                const newQuestionId =
                   partitionedTopicalData[currentTabThatContainsQuestion - 1][
                     partitionedTopicalData[currentTabThatContainsQuestion - 1]
                       .length - 1
-                  ].id
-                );
-                setTimeout(() => {
-                  scrollToQuestion({
-                    questionId:
-                      partitionedTopicalData[
-                        currentTabThatContainsQuestion - 1
-                      ][
-                        partitionedTopicalData[
-                          currentTabThatContainsQuestion - 1
-                        ].length - 1
-                      ].id,
-                    tab: currentTabThatContainsQuestion - 1,
-                  });
-                }, 0);
+                  ].id;
+                if (isHavingUnsafeChanges.current) {
+                  setIsGuardDialogOpen(true);
+                  setPendingQuestionId(newQuestionId);
+                  setPendingTab(currentTabThatContainsQuestion - 1);
+                  setWillScrollToQuestionAfterGuard(true);
+                } else {
+                  setCurrentTab(currentTabThatContainsQuestion - 1);
+                  setCurrentQuestionId(newQuestionId);
+                  setTimeout(() => {
+                    scrollToQuestion({
+                      questionId: newQuestionId,
+                      tab: currentTabThatContainsQuestion - 1,
+                    });
+                  }, 0);
+                }
               }
             }
           } else {
@@ -274,12 +307,19 @@ const InspectSidebar = memo(
               return;
             }
             if (currentQuestionIndexInSearchResult > 0) {
-              setCurrentQuestionId(
-                searchResults[currentQuestionIndexInSearchResult - 1].id
-              );
-              searchVirtualizer.scrollToIndex(
-                currentQuestionIndexInSearchResult - 1
-              );
+              const newQuestionId =
+                searchResults[currentQuestionIndexInSearchResult - 1].id;
+
+              if (isHavingUnsafeChanges.current) {
+                setIsGuardDialogOpen(true);
+                setPendingQuestionId(newQuestionId);
+                setWillScrollToQuestionAfterGuard(true);
+              } else {
+                setCurrentQuestionId(newQuestionId);
+                searchVirtualizer.scrollToIndex(
+                  currentQuestionIndexInSearchResult - 1
+                );
+              }
             }
           }
         }
@@ -287,12 +327,16 @@ const InspectSidebar = memo(
         currentQuestionId,
         currentQuestionIndex,
         currentTabThatContainsQuestion,
+        isHavingUnsafeChanges,
         partitionedTopicalData,
         scrollToQuestion,
         searchInput,
         searchResults,
         searchVirtualizer,
         setCurrentQuestionId,
+        setIsGuardDialogOpen,
+        setPendingQuestionId,
+        setPendingTab,
       ]);
 
       const isHandleNextQuestionDisabled = useMemo(() => {
@@ -401,22 +445,15 @@ const InspectSidebar = memo(
         (questionId: string, scroll: boolean = true) => {
           const tab = calculateTabThatQuestionResidesIn(questionId);
           setCurrentTab(tab);
-          setCurrentQuestionId(
-            !questionId ? partitionedTopicalData?.[tab]?.[0]?.id : questionId
-          );
+          setCurrentQuestionId(questionId);
 
-          if (
-            partitionedTopicalData?.[tab] &&
-            isVirtualizationReady &&
-            scroll
-          ) {
+          if (isVirtualizationReady && scroll) {
             scrollToQuestion({ questionId, tab });
           }
         },
         [
           calculateTabThatQuestionResidesIn,
           setCurrentQuestionId,
-          partitionedTopicalData,
           isVirtualizationReady,
           scrollToQuestion,
         ]

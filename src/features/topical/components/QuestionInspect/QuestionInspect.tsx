@@ -52,6 +52,14 @@ const QuestionInspect = memo(
     ) => {
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
+      const isHavingUnsafeChanges = useRef(false);
+      const [isGuardDialogOpen, setIsGuardDialogOpen] = useState(false);
+      const [pendingQuestionId, setPendingQuestionId] = useState<
+        string | undefined
+      >(undefined);
+      const [pendingTab, setPendingTab] = useState<number | undefined>(
+        undefined
+      );
 
       useEffect(() => {
         pathNameRef.current = pathname;
@@ -199,20 +207,35 @@ const QuestionInspect = memo(
         }
       }, [currentQuestionId, currentQuery]);
 
+      const handleOpenChange = useCallback(
+        (open: boolean) => {
+          if (!open) {
+            if (isHavingUnsafeChanges.current || !isGuardDialogOpen) {
+              return;
+            }
+          }
+          setIsInspectOpen({
+            isOpen: open,
+            questionId:
+              currentQuestionId ??
+              isInspectOpen.questionId ??
+              partitionedTopicalData?.[0]?.[0]?.id ??
+              "",
+          });
+        },
+        [
+          currentQuestionId,
+          isInspectOpen.questionId,
+          partitionedTopicalData,
+          isGuardDialogOpen,
+        ]
+      );
+
       return (
         <>
           <Dialog
             open={isInspectOpen.isOpen}
-            onOpenChange={(open) => {
-              setIsInspectOpen({
-                isOpen: open,
-                questionId:
-                  currentQuestionId ??
-                  isInspectOpen.questionId ??
-                  partitionedTopicalData?.[0]?.[0]?.id ??
-                  "",
-              });
-            }}
+            onOpenChange={handleOpenChange}
             modal={false}
           >
             {isInspectOpen.isOpen && (
@@ -247,6 +270,10 @@ const QuestionInspect = memo(
                   calculateTabThatQuestionResidesIn={
                     calculateTabThatQuestionResidesIn
                   }
+                  setPendingTab={setPendingTab}
+                  isHavingUnsafeChanges={isHavingUnsafeChanges}
+                  setIsGuardDialogOpen={setIsGuardDialogOpen}
+                  setPendingQuestionId={setPendingQuestionId}
                   allQuestions={allQuestions}
                   partitionedTopicalData={partitionedTopicalData}
                   isOpen={isInspectOpen}

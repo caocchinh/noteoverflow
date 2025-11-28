@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     marginBottom: 0,
+    maxHeight: "750px",
   },
   pageNumber: {
     position: "absolute",

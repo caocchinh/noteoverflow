@@ -501,6 +501,10 @@ export interface InspectSidebarProps {
   overflowScrollHandler?: () => void;
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
+  isHavingUnsafeChanges: RefObject<boolean>;
+  setIsGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setPendingQuestionId: Dispatch<SetStateAction<string | undefined>>;
+  setPendingTab: Dispatch<SetStateAction<number | undefined>>;
 }
 
 export interface InspectSidebarRef {
