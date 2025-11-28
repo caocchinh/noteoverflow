@@ -510,8 +510,6 @@ export interface InspectSidebarProps {
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
-  setPendingQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  setPendingTab: Dispatch<SetStateAction<number | undefined>>;
 }
 
 export interface InspectSidebarRef {
@@ -563,6 +561,8 @@ export interface QuestionInspectMainContentProps {
   isCoolDownRef: RefObject<boolean>;
   isInputFocusedRef: RefObject<boolean>;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface QuestionInspectMainContentRef {
@@ -634,6 +634,8 @@ export interface AnnotatableImagesUpdaterProps {
   typeOfView: "question" | "answer";
   componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
   isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface AnnotatableInspectImageProps {
@@ -648,6 +650,8 @@ export interface AnnotatableInspectImageProps {
   initialXfdf: string | null;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isAnnotationGuardDialogOpen: boolean;
   onSaveAnnotations: UseMutateFunction<
     ServerActionResponse<void>,
     Error,

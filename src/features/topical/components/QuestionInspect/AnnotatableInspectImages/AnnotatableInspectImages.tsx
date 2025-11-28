@@ -160,6 +160,8 @@ const AnnotatableInspectImagesComponent = memo(
         isSavedActivitiesError,
         onSaveAnnotations,
         isHavingUnsafeChangesRef,
+        setIsAnnotationGuardDialogOpen,
+        isAnnotationGuardDialogOpen,
       },
       ref
     ) => {

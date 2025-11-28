@@ -74,7 +74,6 @@ const InspectSidebar = memo(
         currentQuestionId,
         isHavingUnsafeChangesRef,
         setIsAnnotationGuardDialogOpen,
-        setPendingQuestionId,
         setCurrentView,
         calculateTabThatQuestionResidesIn,
         setCurrentQuestionId,
@@ -84,13 +83,18 @@ const InspectSidebar = memo(
         overflowScrollHandler,
         currentQuestionIndex,
         navigationButtonsContainerRef,
-        setPendingTab,
       }: InspectSidebarProps,
       ref
     ) => {
       const [currentTab, setCurrentTab] = useState(0);
       const [searchInput, setSearchInput] = useState("");
       const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
+      const [pendingQuestionId, setPendingQuestionId] = useState<
+        string | undefined
+      >(undefined);
+      const [pendingTab, setPendingTab] = useState<number | undefined>(
+        undefined
+      );
       const [
         willScrollToQuestionAfterGuard,
         setWillScrollToQuestionAfterGuard,

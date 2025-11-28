@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { SidebarInset } from "@/components/ui/sidebar";
 import BrowseMoreQuestions from "./BrowseMoreQuestions";
-import { useAuth } from "@/context/AuthContext";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+
 import InspectUltilityBar from "./InspectUltilityBar";
 import {
   forwardRef,
@@ -14,27 +13,19 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  useMutation,
-  useMutationState,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { saveAnnotationsAction } from "@/features/topical/server/actions";
+
 import {
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
   AnnotatableInspectImagesHandle,
-  AnnotatableImagesUpdaterProps,
-  SavedActivitiesResponse,
-  SelectedAnnotation,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
 import { QuestionInformation } from "../QuestionInformation";
 import BothViews from "./BothViews";
-import { createRoot, Root } from "react-dom/client";
+import { Root } from "react-dom/client";
 import { createPortal } from "react-dom";
+import AnnotatableImagesUpdater from "./AnnotatableImagesUpdater";
 
 const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
@@ -47,176 +38,6 @@ const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
 ));
 
 CloseButton.displayName = "CloseButton";
-
-const AnnotatableImagesUpdater = memo(
-  ({
-    isMounted,
-    imageSource,
-    elementRef,
-    elementRootRef,
-    questionId,
-    typeOfView,
-    isHavingUnsafeChangesRef,
-    componentRef,
-  }: AnnotatableImagesUpdaterProps) => {
-    const {
-      setIsCalculatorOpen,
-      isCalculatorOpen,
-      savedActivitiesIsLoading: isSavedActivitiesLoading,
-      savedActivitiesIsError: isSavedActivitiesError,
-      uiPreferences,
-      annotationsData,
-    } = useTopicalApp();
-    const { isSessionFetching, user } = useAuth();
-    const queryClient = useQueryClient();
-
-    const { mutate: onSaveAnnotations } = useMutation({
-      mutationKey: [
-        "user_saved_activities",
-        "annotations",
-        questionId,
-        typeOfView,
-      ],
-      mutationFn: async (data: {
-        questionId: string;
-        questionXfdf?: string;
-        answerXfdf?: string;
-      }) => {
-        const result = await saveAnnotationsAction(data);
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        return result;
-      },
-      onSuccess: (_data, variables) => {
-        queryClient.setQueryData<SavedActivitiesResponse>(
-          ["user_saved_activities"],
-          (prev) => {
-            if (!prev) return prev;
-            const nextAnnotations = prev.annotations
-              ? [...prev.annotations]
-              : [];
-            const existingIndex = nextAnnotations.findIndex(
-              (a) => a.questionId === variables.questionId
-            );
-
-            const newAnnotation: SelectedAnnotation = {
-              questionId: variables.questionId,
-              questionXfdf:
-                variables.questionXfdf ??
-                (existingIndex !== -1
-                  ? nextAnnotations[existingIndex].questionXfdf
-                  : ""),
-              answerXfdf:
-                variables.answerXfdf ??
-                (existingIndex !== -1
-                  ? nextAnnotations[existingIndex].answerXfdf
-                  : ""),
-              updatedAt: new Date(),
-            };
-
-            if (existingIndex !== -1) {
-              nextAnnotations[existingIndex] = newAnnotation;
-            } else {
-              nextAnnotations.push(newAnnotation);
-            }
-
-            return {
-              ...prev,
-              annotations: nextAnnotations,
-            };
-          }
-        );
-      },
-      retry: false,
-    });
-
-    useMutationState({
-      filters: {
-        mutationKey: ["user_saved_activities", "annotations"],
-        predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
-      },
-    });
-
-    const currentQuestionAnnotationData = useMemo(() => {
-      return annotationsData?.find(
-        (annotation) => annotation.questionId === questionId
-      );
-    }, [annotationsData, questionId]);
-
-    const initialXfdf = useMemo(() => {
-      if (!currentQuestionAnnotationData) {
-        return null;
-      }
-      if (typeOfView == "answer") {
-        return currentQuestionAnnotationData.answerXfdf;
-      } else {
-        return currentQuestionAnnotationData.questionXfdf;
-      }
-    }, [currentQuestionAnnotationData, typeOfView]);
-
-    useEffect(() => {
-      if (!isMounted || !imageSource) return;
-
-      // Call initAnnotableImagesElement every time to update props
-      // The function creates the root only if it doesn't exist,
-      // then always calls render() with the updated component
-      if (!elementRef.current) {
-        elementRef.current = document.createElement("div");
-        elementRef.current.className = "w-full h-full";
-      }
-
-      if (!elementRootRef.current && elementRef.current) {
-        elementRootRef.current = createRoot(elementRef.current);
-      }
-
-      if (elementRootRef.current) {
-        elementRootRef.current.render(
-          <AnnotatableInspectImages
-            ref={componentRef}
-            isSavedActivitiesLoading={isSavedActivitiesLoading}
-            isSavedActivitiesError={isSavedActivitiesError}
-            initialXfdf={initialXfdf}
-            typeOfView={typeOfView}
-            imageSource={imageSource}
-            isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-            currentQuestionId={questionId}
-            isSessionFetching={isSessionFetching}
-            userName={user?.name}
-            setIsCalculatorOpen={setIsCalculatorOpen}
-            isCalculatorOpen={isCalculatorOpen}
-            imageTheme={uiPreferences?.imageTheme}
-            onSaveAnnotations={onSaveAnnotations}
-          />
-        );
-      }
-    }, [
-      isMounted,
-      imageSource,
-      elementRef,
-      elementRootRef,
-      questionId,
-      isSessionFetching,
-      setIsCalculatorOpen,
-      isCalculatorOpen,
-      typeOfView,
-      initialXfdf,
-      componentRef,
-      user?.name,
-      uiPreferences?.imageTheme,
-      isSavedActivitiesLoading,
-      isSavedActivitiesError,
-      onSaveAnnotations,
-      isHavingUnsafeChangesRef,
-    ]);
-
-    return null;
-  }
-);
-
-AnnotatableImagesUpdater.displayName = "AnnotatableImagesUpdater";
 
 const QuestionInspectMainContent = forwardRef(
   (
@@ -238,6 +59,8 @@ const QuestionInspectMainContent = forwardRef(
       setIsOpen,
       isCoolDownRef,
       isInputFocusedRef,
+      setIsAnnotationGuardDialogOpen,
+      isAnnotationGuardDialogOpen,
     }: QuestionInspectMainContentProps,
     ref
   ) => {
@@ -259,7 +82,7 @@ const QuestionInspectMainContent = forwardRef(
     const annotatableAnswerInspectImagesElementRef =
       useRef<HTMLDivElement | null>(null);
     const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
-
+    const [isPendingCloseInspect, setIsPendingCloseInspect] = useState(false);
     const annotatableQuestionInspectImagesRootElementRef =
       useRef<AnnotatableInspectImagesHandle | null>(null);
     const annotatableAnswerInspectImagesRootElementRef =
@@ -267,6 +90,27 @@ const QuestionInspectMainContent = forwardRef(
     const [isMounted, setIsMounted] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [key, setKey] = useState(0);
+
+    // Instantly initalizes the element since there's no constrain (act like normal React rerender cycle)
+    if (
+      !annotatableQuestionInspectImagesElementRef.current &&
+      typeof document !== "undefined"
+    ) {
+      annotatableQuestionInspectImagesElementRef.current =
+        document.createElement("div");
+      annotatableQuestionInspectImagesElementRef.current.className =
+        "w-full h-full";
+    }
+
+    if (
+      !annotatableAnswerInspectImagesElementRef.current &&
+      typeof document !== "undefined"
+    ) {
+      annotatableAnswerInspectImagesElementRef.current =
+        document.createElement("div");
+      annotatableAnswerInspectImagesElementRef.current.className =
+        "w-full h-full";
+    }
 
     const currentQuestionData = useMemo(() => {
       return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
@@ -419,10 +263,24 @@ const QuestionInspectMainContent = forwardRef(
     );
 
     const handleCloseClick = useCallback(() => {
+      if (
+        isHavingUnsafeChangesRef.current.question ||
+        isHavingUnsafeChangesRef.current.answer
+      ) {
+        setIsAnnotationGuardDialogOpen(true);
+        setIsPendingCloseInspect(true);
+        return;
+      }
+
       if (currentQuestionId) {
         setIsOpen({ isOpen: false, questionId: currentQuestionId });
       }
-    }, [currentQuestionId, setIsOpen]);
+    }, [
+      currentQuestionId,
+      isHavingUnsafeChangesRef,
+      setIsAnnotationGuardDialogOpen,
+      setIsOpen,
+    ]);
 
     return (
       <>
@@ -435,6 +293,8 @@ const QuestionInspectMainContent = forwardRef(
           typeOfView="question"
           componentRef={annotatableQuestionInspectImagesRootElementRef}
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+          setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+          isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
         />
         <AnnotatableImagesUpdater
           isMounted={isMounted}
@@ -445,6 +305,8 @@ const QuestionInspectMainContent = forwardRef(
           typeOfView="answer"
           componentRef={annotatableAnswerInspectImagesRootElementRef}
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+          setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+          isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
         />
         <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
           <div

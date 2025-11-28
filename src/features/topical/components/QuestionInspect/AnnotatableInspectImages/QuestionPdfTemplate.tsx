@@ -67,10 +67,12 @@ const styles = StyleSheet.create({
     color: "#475569",
     fontWeight: 500,
   },
+
   image: {
-    width: "100%",
+    width: "90%",
     marginBottom: 0,
     maxHeight: "750px",
+    alignSelf: "center",
   },
   pageNumber: {
     position: "absolute",

@@ -173,12 +173,8 @@ const PdfViewerWrapper = memo(
           }
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
-            setTimeout(() => {
-              isInitalXfdfLoaded.current = true;
-            }, 0);
-          } else {
-            isInitalXfdfLoaded.current = true;
           }
+          isInitalXfdfLoaded.current = true;
           callbacksRef.current.onDocumentLoaded?.();
         };
 
@@ -207,8 +203,12 @@ const PdfViewerWrapper = memo(
         if (!instance) return;
         const { annotationManager } = instance.Core;
 
-        const handleAnnotationChanged: AnnotationChangedHandler = () => {
-          if (!isInitalXfdfLoaded.current) return;
+        const handleAnnotationChanged: AnnotationChangedHandler = (
+          annotations,
+          action,
+          info
+        ) => {
+          if (info?.imported) return;
           const onAnnotationsChanged =
             callbacksRef.current.onAnnotationsChanged;
           if (!onAnnotationsChanged) return;

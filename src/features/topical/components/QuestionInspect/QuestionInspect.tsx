@@ -25,11 +25,11 @@ import {
 } from "../../constants/types";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import InspectSidebar from "./InspectSidebar";
 import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
 import { usePathname } from "next/navigation";
+import QuestionAnnotationGuardDialog from "./QuestionAnnotationGuardDialog";
 
 const sidebarProviderStyle = {
   "--sidebar-width": "299.6px",
@@ -58,12 +58,6 @@ const QuestionInspect = memo(
       });
       const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
         useState(false);
-      const [pendingQuestionId, setPendingQuestionId] = useState<
-        string | undefined
-      >(undefined);
-      const [pendingTab, setPendingTab] = useState<number | undefined>(
-        undefined
-      );
 
       useEffect(() => {
         pathNameRef.current = pathname;
@@ -82,7 +76,6 @@ const QuestionInspect = memo(
       const [currentQuestionId, setCurrentQuestionId] = useState<
         string | undefined
       >(undefined);
-      const { isCalculatorOpen } = useTopicalApp();
       const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
 
       const isMobile = useIsMobile();
@@ -143,7 +136,6 @@ const QuestionInspect = memo(
       const sideBarInspectRef = useRef<InspectSidebarRef | null>(null);
       const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
       const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
-
       const isCoolDownRef = useRef(false);
 
       const handleKeyDown = useCallback(
@@ -157,23 +149,20 @@ const QuestionInspect = memo(
         isCoolDownRef.current = false;
       }, []);
 
-      const handleInteractOutside = useCallback(
-        (e: Event) => {
-          e.preventDefault();
+      const handleInteractOutside = useCallback((e: Event) => {
+        e.preventDefault();
 
-          // const targetElement = e.target as Element;
-          // if (targetElement?.closest("[data-calculator-close]")) {
-          //   e.preventDefault();
-          //   return;
-          // }
+        // const targetElement = e.target as Element;
+        // if (targetElement?.closest("[data-calculator-close]")) {
+        //   e.preventDefault();
+        //   return;
+        // }
 
-          // if (isInspectOpen.isOpen && isCalculatorOpen) {
-          //   e.preventDefault();
-          //   return;
-          // }
-        },
-        [isInspectOpen.isOpen, isCalculatorOpen]
-      );
+        // if (isInspectOpen.isOpen && isCalculatorOpen) {
+        //   e.preventDefault();
+        //   return;
+        // }
+      }, []);
 
       useEffect(() => {
         if (pathNameRef.current !== "/topical") {
@@ -241,6 +230,7 @@ const QuestionInspect = memo(
 
       return (
         <>
+          <QuestionAnnotationGuardDialog isOpen={isAnnotationGuardDialogOpen} />
           <Dialog
             open={isInspectOpen.isOpen}
             onOpenChange={handleOpenChange}
@@ -278,12 +268,10 @@ const QuestionInspect = memo(
                   calculateTabThatQuestionResidesIn={
                     calculateTabThatQuestionResidesIn
                   }
-                  setPendingTab={setPendingTab}
                   isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
                   setIsAnnotationGuardDialogOpen={
                     setIsAnnotationGuardDialogOpen
                   }
-                  setPendingQuestionId={setPendingQuestionId}
                   allQuestions={allQuestions}
                   partitionedTopicalData={partitionedTopicalData}
                   isOpen={isInspectOpen}
@@ -313,6 +301,10 @@ const QuestionInspect = memo(
                   currentTabThatContainsQuestion={
                     currentTabThatContainsQuestion
                   }
+                  setIsAnnotationGuardDialogOpen={
+                    setIsAnnotationGuardDialogOpen
+                  }
+                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                   currentQuestionIndex={currentQuestionIndex}
                   currentQuestionId={currentQuestionId}
                   listId={listId}
