@@ -65,3 +65,5 @@ export const LIST_NAME_MAX_LENGTH = 100;
 export const MANSONRY_GUTTER_BREAKPOINTS = { 0: "10px" };
 
 export const PDF_HEADER_LOGO_SRC = "/assets/logo-bg-colorised-modified.webp";
+export const MY_ANNOTATIONS_BOOKMARK_LIST_NAME = "My annotations";
+export const MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY = "private";

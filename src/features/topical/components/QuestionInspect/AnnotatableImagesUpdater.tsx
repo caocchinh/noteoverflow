@@ -21,6 +21,10 @@ import {
   handleBookmarkOptimisticUpdate,
 } from "../../utils/bookmarkUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
+  MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
+} from "../../constants/constants";
 
 const AnnotatableImagesUpdater = memo(
   ({
@@ -151,7 +155,9 @@ const AnnotatableImagesUpdater = memo(
         if (!question) return;
 
         const myAnnotationsList = bookmarksData?.find(
-          (b) => b.listName === "My annotations" && b.visibility === "private"
+          (b) =>
+            b.listName === MY_ANNOTATIONS_BOOKMARK_LIST_NAME &&
+            b.visibility === MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY
         );
 
         const isCreateNew = !myAnnotationsList;
@@ -166,9 +172,9 @@ const AnnotatableImagesUpdater = memo(
 
         bookmarkMutate({
           realQuestion: question,
-          realBookmarkListName: "My annotations",
+          realBookmarkListName: MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
           isRealBookmarked: false,
-          realVisibility: "private",
+          realVisibility: MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
           realListId: myAnnotationsList?.id ?? "",
           isCreateNew: isCreateNew,
         });
