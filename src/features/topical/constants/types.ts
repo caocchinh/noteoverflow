@@ -507,7 +507,7 @@ export interface InspectSidebarProps {
   overflowScrollHandler?: () => void;
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
-  isHavingUnsafeChanges: RefObject<boolean>;
+  isHavingUnsafeChangesRef: RefObject<boolean>;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   setPendingQuestionId: Dispatch<SetStateAction<string | undefined>>;
   setPendingTab: Dispatch<SetStateAction<number | undefined>>;
@@ -561,6 +561,7 @@ export interface QuestionInspectMainContentProps {
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isCoolDownRef: RefObject<boolean>;
   isInputFocusedRef: RefObject<boolean>;
+  isHavingUnsafeChangesRef: RefObject<boolean>;
 }
 
 export interface QuestionInspectMainContentRef {
@@ -626,12 +627,12 @@ export interface InnitPdfProps {
 export interface AnnotatableImagesUpdaterProps {
   isMounted: boolean;
   imageSource: string[];
-  elementRef: React.RefObject<HTMLDivElement | null>;
-  elementRootRef: React.RefObject<Root | null>;
+  elementRef: RefObject<HTMLDivElement | null>;
+  elementRootRef: RefObject<Root | null>;
   questionId: string;
   typeOfView: "question" | "answer";
-  initialXfdf: string | null;
-  componentRef: React.RefObject<AnnotatableInspectImagesHandle | null>;
+  componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
+  isHavingUnsafeChangesRef: RefObject<boolean>;
 }
 
 export interface AnnotatableInspectImageProps {
@@ -646,6 +647,12 @@ export interface AnnotatableInspectImageProps {
   initialXfdf: string | null;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
+  onSaveAnnotations: (data: {
+    questionId: string;
+    questionXfdf?: string;
+    answerXfdf?: string;
+  }) => void;
+  isHavingUnsafeChangesRef: RefObject<boolean>;
 }
 
 export interface AnnotatableInspectImagesHandle {

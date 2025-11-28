@@ -166,7 +166,6 @@ const PdfViewerWrapper = memo(
 
         const handleDocumentLoaded = async () => {
           if (isInitalXfdfLoaded.current) return;
-          isInitalXfdfLoaded.current = true;
           instance.UI.setZoomLevel(1.41);
           const scrollView = documentViewer.getScrollViewElement();
           if (scrollView) {
@@ -174,6 +173,11 @@ const PdfViewerWrapper = memo(
           }
           if (initialXfdf) {
             await annotationManager.importAnnotations(initialXfdf);
+            setTimeout(() => {
+              isInitalXfdfLoaded.current = true;
+            }, 0);
+          } else {
+            isInitalXfdfLoaded.current = true;
           }
           callbacksRef.current.onDocumentLoaded?.();
         };
@@ -204,6 +208,7 @@ const PdfViewerWrapper = memo(
         const { annotationManager } = instance.Core;
 
         const handleAnnotationChanged: AnnotationChangedHandler = () => {
+          if (!isInitalXfdfLoaded.current) return;
           const onAnnotationsChanged =
             callbacksRef.current.onAnnotationsChanged;
           if (!onAnnotationsChanged) return;

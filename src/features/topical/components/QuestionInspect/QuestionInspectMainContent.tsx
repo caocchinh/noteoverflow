@@ -15,10 +15,18 @@ import {
   useState,
 } from "react";
 import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { saveAnnotationsAction } from "@/features/topical/server/actions";
+import {
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
   AnnotatableInspectImagesHandle,
   AnnotatableImagesUpdaterProps,
+  SavedActivitiesResponse,
+  SelectedAnnotation,
 } from "../../constants/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -48,7 +56,7 @@ const AnnotatableImagesUpdater = memo(
     elementRootRef,
     questionId,
     typeOfView,
-    initialXfdf,
+    isHavingUnsafeChangesRef,
     componentRef,
   }: AnnotatableImagesUpdaterProps) => {
     const {
@@ -57,8 +65,98 @@ const AnnotatableImagesUpdater = memo(
       savedActivitiesIsLoading: isSavedActivitiesLoading,
       savedActivitiesIsError: isSavedActivitiesError,
       uiPreferences,
+      annotationsData,
     } = useTopicalApp();
     const { isSessionFetching, user } = useAuth();
+    const queryClient = useQueryClient();
+
+    const { mutate: onSaveAnnotations } = useMutation({
+      mutationKey: [
+        "user_saved_activities",
+        "annotations",
+        questionId,
+        typeOfView,
+      ],
+      mutationFn: async (data: {
+        questionId: string;
+        questionXfdf?: string;
+        answerXfdf?: string;
+      }) => {
+        const result = await saveAnnotationsAction(data);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        return result;
+      },
+      onSuccess: (_data, variables) => {
+        isHavingUnsafeChangesRef.current = false;
+        queryClient.setQueryData<SavedActivitiesResponse>(
+          ["user_saved_activities"],
+          (prev) => {
+            if (!prev) return prev;
+            const nextAnnotations = prev.annotations
+              ? [...prev.annotations]
+              : [];
+            const existingIndex = nextAnnotations.findIndex(
+              (a) => a.questionId === variables.questionId
+            );
+
+            const newAnnotation: SelectedAnnotation = {
+              questionId: variables.questionId,
+              questionXfdf:
+                variables.questionXfdf ??
+                (existingIndex !== -1
+                  ? nextAnnotations[existingIndex].questionXfdf
+                  : ""),
+              answerXfdf:
+                variables.answerXfdf ??
+                (existingIndex !== -1
+                  ? nextAnnotations[existingIndex].answerXfdf
+                  : ""),
+              updatedAt: new Date(),
+            };
+
+            if (existingIndex !== -1) {
+              nextAnnotations[existingIndex] = newAnnotation;
+            } else {
+              nextAnnotations.push(newAnnotation);
+            }
+
+            return {
+              ...prev,
+              annotations: nextAnnotations,
+            };
+          }
+        );
+      },
+      retry: false,
+    });
+
+    useMutationState({
+      filters: {
+        mutationKey: ["user_saved_activities", "annotations"],
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
+
+    const currentQuestionAnnotationData = useMemo(() => {
+      return annotationsData?.find(
+        (annotation) => annotation.questionId === questionId
+      );
+    }, [annotationsData, questionId]);
+
+    const initialXfdf = useMemo(() => {
+      if (!currentQuestionAnnotationData) {
+        return null;
+      }
+      if (typeOfView == "answer") {
+        return currentQuestionAnnotationData.answerXfdf;
+      } else {
+        return currentQuestionAnnotationData.questionXfdf;
+      }
+    }, [currentQuestionAnnotationData, typeOfView]);
 
     useEffect(() => {
       if (!isMounted || !imageSource) return;
@@ -84,12 +182,14 @@ const AnnotatableImagesUpdater = memo(
             initialXfdf={initialXfdf}
             typeOfView={typeOfView}
             imageSource={imageSource}
+            isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
             currentQuestionId={questionId}
             isSessionFetching={isSessionFetching}
             userName={user?.name}
             setIsCalculatorOpen={setIsCalculatorOpen}
             isCalculatorOpen={isCalculatorOpen}
             imageTheme={uiPreferences?.imageTheme}
+            onSaveAnnotations={onSaveAnnotations}
           />
         );
       }
@@ -109,6 +209,8 @@ const AnnotatableImagesUpdater = memo(
       uiPreferences?.imageTheme,
       isSavedActivitiesLoading,
       isSavedActivitiesError,
+      onSaveAnnotations,
+      isHavingUnsafeChangesRef,
     ]);
 
     return null;
@@ -133,6 +235,7 @@ const QuestionInspectMainContent = forwardRef(
       setIsInspectSidebarOpen,
       BETTER_AUTH_URL,
       navigationButtonsContainerRef,
+      isHavingUnsafeChangesRef,
       setIsOpen,
       isCoolDownRef,
       isInputFocusedRef,
@@ -162,7 +265,6 @@ const QuestionInspectMainContent = forwardRef(
       useRef<AnnotatableInspectImagesHandle | null>(null);
     const annotatableAnswerInspectImagesRootElementRef =
       useRef<AnnotatableInspectImagesHandle | null>(null);
-    const { annotationsData } = useTopicalApp();
     const [isMounted, setIsMounted] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [key, setKey] = useState(0);
@@ -176,12 +278,6 @@ const QuestionInspectMainContent = forwardRef(
       currentTabThatContainsQuestion,
       currentQuestionIndex,
     ]);
-
-    const currentQuestionAnnotationData = useMemo(() => {
-      return annotationsData?.find(
-        (annotation) => annotation.questionId === currentQuestionId
-      );
-    }, [annotationsData, currentQuestionId]);
 
     // Cleanup roots only when component unmounts
     useEffect(() => {
@@ -338,8 +434,8 @@ const QuestionInspectMainContent = forwardRef(
           elementRootRef={annotatableQuestionInspectImagesRootRef}
           questionId={currentQuestionData?.id ?? ""}
           typeOfView="question"
-          initialXfdf={currentQuestionAnnotationData?.questionXfdf ?? null}
           componentRef={annotatableQuestionInspectImagesRootElementRef}
+          isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
         />
         <AnnotatableImagesUpdater
           isMounted={isMounted}
@@ -348,8 +444,8 @@ const QuestionInspectMainContent = forwardRef(
           elementRootRef={annotatableAnswerInspectImagesRootRef}
           questionId={currentQuestionData?.id ?? ""}
           typeOfView="answer"
-          initialXfdf={currentQuestionAnnotationData?.answerXfdf ?? null}
           componentRef={annotatableAnswerInspectImagesRootElementRef}
+          isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
         />
         <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
           <div

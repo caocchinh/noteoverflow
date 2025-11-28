@@ -48,8 +48,6 @@ import QuestionPdfTemplate from "./QuestionPdfTemplate";
 import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 import DownloadOrginalButton from "./DownloadOrginalButton";
 import ClearAllButton from "./ClearAllButton";
-import { saveAnnotationsAction } from "@/features/topical/server/actions";
-import { toast } from "sonner";
 import {
   PdfViewerWrapperHandle,
   AnnotatableInspectImageProps,
@@ -159,6 +157,8 @@ const AnnotatableInspectImagesComponent = memo(
         initialXfdf,
         isSavedActivitiesLoading,
         isSavedActivitiesError,
+        onSaveAnnotations,
+        isHavingUnsafeChangesRef,
       },
       ref
     ) => {
@@ -300,9 +300,13 @@ const AnnotatableInspectImagesComponent = memo(
       }, [generatePdfBlob, isEditMode, pdfBlob]);
 
       // Handle annotations changed callback
-      const handleAnnotationsChanged = useCallback((xfdf: string) => {
-        setCurrentXfdf(xfdf);
-      }, []);
+      const handleAnnotationsChanged = useCallback(
+        (xfdf: string) => {
+          isHavingUnsafeChangesRef.current = true;
+          setCurrentXfdf(xfdf);
+        },
+        [isHavingUnsafeChangesRef]
+      );
 
       // Debounced auto-save effect
       useEffect(() => {
@@ -321,25 +325,15 @@ const AnnotatableInspectImagesComponent = memo(
         }
 
         // Set new timeout for auto-save
-        autoSaveTimeoutRef.current = setTimeout(async () => {
-          try {
-            const result = await saveAnnotationsAction({
-              questionId: currentQuestionId,
-              ...(typeOfView === "question"
-                ? { questionXfdf: currentXfdf || undefined }
-                : { answerXfdf: currentXfdf || undefined }),
-            });
-
-            if (result.success) {
-              toast.success("Annotations saved", { duration: 2000 });
-            } else {
-              toast.error("Failed to save annotations");
-            }
-          } catch (error) {
-            console.error("Error saving annotations:", error);
-            toast.error("Failed to save annotations");
-          }
-        }, 5000);
+        autoSaveTimeoutRef.current = setTimeout(() => {
+          isHavingUnsafeChangesRef.current = true;
+          onSaveAnnotations({
+            questionId: currentQuestionId,
+            ...(typeOfView === "question"
+              ? { questionXfdf: currentXfdf || undefined }
+              : { answerXfdf: currentXfdf || undefined }),
+          });
+        }, 1000);
 
         return () => {
           if (autoSaveTimeoutRef.current) {
@@ -353,6 +347,8 @@ const AnnotatableInspectImagesComponent = memo(
         isMounted,
         isPdfViewerLoaded,
         typeOfView,
+        onSaveAnnotations,
+        isHavingUnsafeChangesRef,
       ]);
 
       useEffect(() => {

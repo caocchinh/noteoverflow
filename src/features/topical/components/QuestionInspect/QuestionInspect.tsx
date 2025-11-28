@@ -52,8 +52,7 @@ const QuestionInspect = memo(
     ) => {
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
-      const isHavingUnsafeChanges = useRef(false);
-
+      const isHavingUnsafeChangesRef = useRef(false);
       const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
         useState(false);
       const [pendingQuestionId, setPendingQuestionId] = useState<
@@ -212,7 +211,10 @@ const QuestionInspect = memo(
       const handleOpenChange = useCallback(
         (open: boolean) => {
           if (!open) {
-            if (isHavingUnsafeChanges.current || !isAnnotationGuardDialogOpen) {
+            if (
+              isHavingUnsafeChangesRef.current ||
+              !isAnnotationGuardDialogOpen
+            ) {
               return;
             }
           }
@@ -273,7 +275,7 @@ const QuestionInspect = memo(
                     calculateTabThatQuestionResidesIn
                   }
                   setPendingTab={setPendingTab}
-                  isHavingUnsafeChanges={isHavingUnsafeChanges}
+                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
                   setIsAnnotationGuardDialogOpen={
                     setIsAnnotationGuardDialogOpen
                   }
@@ -302,6 +304,7 @@ const QuestionInspect = memo(
                 />
                 <QuestionInspectMainContent
                   ref={questionInspectMainContentRef}
+                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
                   partitionedTopicalData={partitionedTopicalData}
                   currentTabThatContainsQuestion={
                     currentTabThatContainsQuestion
