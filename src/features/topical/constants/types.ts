@@ -699,14 +699,11 @@ export interface BookmarkItemProps {
   listName: string;
   visibility: "public" | "private";
   listId: string;
-  onSelect: () => void;
   question: SelectedQuestion;
-  chosenBookmarkList: Set<string>;
 }
 
 export interface BookmarkActionDialogsProps {
   question: SelectedQuestion;
-  chosenBookmarkList: Set<string>;
   listId?: string;
   searchInputRef: RefObject<HTMLInputElement | null>;
 }

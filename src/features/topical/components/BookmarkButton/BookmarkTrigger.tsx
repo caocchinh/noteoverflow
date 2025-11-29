@@ -28,7 +28,7 @@ export const BookmarkTrigger = memo(
       return (
         <Badge
           className={cn(
-            "text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
+            "text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
             badgeClassName
           )}
         >
@@ -43,7 +43,7 @@ export const BookmarkTrigger = memo(
         className={cn(
           triggerButtonClassName,
           "rounded-[3px]",
-          isBookmarked && "!bg-logo-main !text-white",
+          isBookmarked && "bg-logo-main! text-white!",
           (isBookmarkDisabled || savedActivitiesIsFetching) && "opacity-50"
         )}
         tabIndex={-1}

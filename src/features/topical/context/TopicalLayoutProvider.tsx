@@ -276,10 +276,10 @@ export default function TopicalLayoutProvider({
             open={isAppSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
           >
             {!isMobileDevice && (
-              <Sidebar className="!bg-background !border-none !z-[-1]" />
+              <Sidebar className="bg-background! border-none! z-[-1]!" />
             )}
             <SidebarInset className="relative w-full">
-              <div className="absolute left-0 z-[1000] flex w-full items-start justify-center">
+              <div className="absolute left-0 z-1000 flex w-full items-start justify-center">
                 <div className="fixed bottom-1">
                   <DockWrapper />
                 </div>

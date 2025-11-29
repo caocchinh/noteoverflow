@@ -86,7 +86,7 @@ const QuestionHoverCard = memo(
           <div
             className={cn(
               "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
-              isThisTheCurrentQuestion && "!bg-logo-main text-white",
+              isThisTheCurrentQuestion && "bg-logo-main! text-white",
               isThisQuestionFinished &&
                 "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
             )}
@@ -147,7 +147,7 @@ const QuestionHoverCard = memo(
             />
             {isMutatingBookmarkOfThisQuestion && (
               <Badge
-                className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
+                className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]! z-31"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -188,8 +188,8 @@ const QuestionHoverCard = memo(
         </HoverCardTrigger>
         <HoverCardContent
           className={cn(
-            "z-[100007] w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] !bg-white md:flex hidden items-center justify-center rounded-sm",
-            isThisTheCurrentQuestion && "!hidden"
+            "z-100007 w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] bg-white! md:flex hidden items-center justify-center rounded-sm",
+            isThisTheCurrentQuestion && "hidden!"
           )}
           side="left"
           sideOffset={25}
@@ -201,12 +201,12 @@ const QuestionHoverCard = memo(
           }}
         >
           {!isImageLoaded && !isImageError && (
-            <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
               <Loader />
             </div>
           )}
           {isImageError && (
-            <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
               <p className="text-red-500 text-sm">Image failed to load</p>
             </div>
           )}

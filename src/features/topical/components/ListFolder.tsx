@@ -255,7 +255,7 @@ export const ListFolder = ({
   return (
     <>
       <div
-        className="flex flex-row gap-2 bg-[#f0f4f9] w-[250px] p-2 rounded-sm items-center justify-between"
+        className="flex flex-row gap-2 bg-[#f0f4f9] w-[265px] p-2 rounded-sm items-center justify-between"
         title={listName}
         onClick={() => {
           setChosenList({
@@ -266,7 +266,7 @@ export const ListFolder = ({
         }}
       >
         <div className="flex flex-row gap-4 items-center justify-center">
-          <Folder className="!text-black" fill="black" />
+          <Folder className="text-black!" fill="black" />
           <h3 className=" text-lg text-black">
             {truncateListName({ listName })}
           </h3>
@@ -279,9 +279,9 @@ export const ListFolder = ({
               e.stopPropagation();
             }}
           >
-            <EllipsisVertical size={18} className="!text-black" />
+            <EllipsisVertical size={18} className="text-black!" />
           </PopoverTrigger>
-          <PopoverContent className="!p-2 w-[190px] gap-2 flex flex-col items-center justify-center">
+          <PopoverContent className="p-2! w-[190px] gap-2 flex flex-col items-center justify-center">
             <AlertDialog
               open={isDeleteAlertDialogOpen}
               onOpenChange={setIsDeleteAlertDialogOpen}

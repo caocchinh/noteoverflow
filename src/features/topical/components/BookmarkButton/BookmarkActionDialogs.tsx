@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   useIsMutating,
   useMutation,
+  useMutationState,
   useQueryClient,
 } from "@tanstack/react-query";
 import { SelectVisibility } from "../SelectVisibility";
@@ -35,12 +36,7 @@ import {
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 
 export const BookmarkActionDialogs = memo(
-  ({
-    question,
-    chosenBookmarkList,
-    listId,
-    searchInputRef,
-  }: BookmarkActionDialogsProps) => {
+  ({ question, listId, searchInputRef }: BookmarkActionDialogsProps) => {
     const [visibility, setVisibility] = useState<"public" | "private">(
       "public"
     );
@@ -60,6 +56,26 @@ export const BookmarkActionDialogs = memo(
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
     const { bookmarksData } = useTopicalApp();
+
+    const isThisBookmarkSettled = useMutationState({
+      filters: {
+        mutationKey: ["user_saved_activities", "bookmarks"],
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
+
+    const chosenBookmarkList = useMemo(() => {
+      const set = new Set<string>();
+      for (const bookmark of bookmarksData ?? []) {
+        if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
+          set.add(bookmark.id);
+        }
+      }
+      return set;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bookmarksData, question.id, isThisBookmarkSettled]);
 
     const createListMutationKey = [
       "user_saved_activities",
@@ -211,7 +227,7 @@ export const BookmarkActionDialogs = memo(
             </div>
           </AlertDialogTrigger>
           <AlertDialogContent
-            className="z-[100011] dark:bg-accent"
+            className="z-100011 dark:bg-accent"
             overlayClassName="z-[100010] "
           >
             <AlertDialogHeader>
@@ -339,7 +355,7 @@ export const BookmarkActionDialogs = memo(
               </div>
             </AlertDialogTrigger>
             <AlertDialogContent
-              className="z-[100011] dark:bg-accent"
+              className="z-100011 dark:bg-accent"
               overlayClassName="z-[100010] "
             >
               <AlertDialogHeader>

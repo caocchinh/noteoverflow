@@ -146,7 +146,7 @@ export const QuestionInspectFinishedCheckbox = memo(
     return (
       <div
         className={cn(
-          "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+          "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
           (isMutatingThisQuestion ||
             isSessionPending ||
             savedActivitiesIsFetching) &&

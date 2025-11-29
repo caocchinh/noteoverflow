@@ -26,7 +26,7 @@ export const BookmarkSearchInput = memo(
           }}
         />
         <XIcon
-          className="!bg-transparent cursor-pointer mr-2 text-destructive"
+          className="bg-transparent! cursor-pointer mr-2 text-destructive"
           size={20}
           onClick={(e) => {
             e.stopPropagation();
