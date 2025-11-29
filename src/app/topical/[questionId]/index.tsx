@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
 import { useAuth } from "@/context/AuthContext";
-import { AnnotatableInspectImages } from "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/AnnotatableInspectImages";
+// import { AnnotatableInspectImages } from "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/AnnotatableInspectImages";
 
 export const QuestionView = ({
   data,
@@ -77,11 +77,11 @@ export const QuestionView = ({
               showSubject={true}
             />
           </div>
-          <AnnotatableInspectImages
+          {/* <AnnotatableInspectImages
             imageSource={data?.questionImages ?? []}
             currentQuestionId={data?.id}
             typeOfView="question"
-          />
+          /> */}
         </ScrollArea>
       </div>
       <div className={cn(currentView === "answer" ? "block w-full" : "hidden")}>
@@ -96,11 +96,11 @@ export const QuestionView = ({
               showSubject={true}
             />
           </div>
-          <AnnotatableInspectImages
+          {/* <AnnotatableInspectImages
             imageSource={data?.answers ?? []}
             currentQuestionId={data?.id}
             typeOfView="answer"
-          />
+          /> */}
         </ScrollArea>
       </div>
     </div>

@@ -109,12 +109,7 @@ export const ListFolder = ({
         throw new Error(result.error);
       }
     },
-    onSuccess: (
-      _,
-      {
-        realListId,
-      }: { realListId: string; realVisibility: "public" | "private" }
-    ) => {
+    onSuccess: (_, { realListId }: { realListId: string }) => {
       toast.success("List deleted successfully");
       setIsDeleteAlertDialogOpen(false);
       queryClient.setQueryData<SavedActivitiesResponse>(
@@ -330,7 +325,6 @@ export const ListFolder = ({
                     onClick={() =>
                       deleteList({
                         realListId: listId,
-                        realVisibility: visibility,
                       })
                     }
                   >
