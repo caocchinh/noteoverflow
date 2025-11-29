@@ -74,11 +74,8 @@ const TopicalClient = ({
     });
 
     if (error) {
-      const errorMessage =
-        typeof error.value === "object" && "error" in error.value
-          ? String(error.value.error)
-          : "An error occurred";
-      throw new Error(errorMessage);
+      // @ts-expect-error Wait for the library to fix the type inference
+      throw new Error(error.value.error);
     }
 
     return data;

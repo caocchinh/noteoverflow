@@ -74,7 +74,8 @@ export const BookmarkView = ({
           .bookmark({ bookmarkId: bookmarkId })
           .get();
         if (error) {
-          throw new Error("Failed to fetch bookmark");
+          // @ts-expect-error Wait for the library to fix the type inference
+          throw new Error(error.value.error);
         }
         return data;
       },

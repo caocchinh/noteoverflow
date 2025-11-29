@@ -4,6 +4,7 @@ import {
   validateCurriculum,
   validateSubject,
   validateFilterData,
+  hashQuery,
 } from "@/features/topical/lib/utils";
 import { question } from "@/drizzle/schema";
 import { and, eq, inArray, like, or } from "drizzle-orm";
@@ -28,21 +29,21 @@ import {
   SavedActivitiesResponse,
   SelectedBookmark,
 } from "@/features/topical/constants/types";
-
-// Function to hash the query string
-async function hashQuery(queryString: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(queryString);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return hashHex;
-}
+import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 
 const app = new Elysia({ prefix: "/api" })
-
+  .onError(({ code, status }) => {
+    if (code === "VALIDATION") {
+      return status(HTTP_STATUS.BAD_REQUEST, {
+        error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+        code: ERROR_CODES.BAD_REQUEST,
+      });
+    }
+    return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+      error: ERROR_MESSAGES[ERROR_CODES.INTERNAL_SERVER_ERROR],
+      code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+    });
+  })
   .all("/auth/*", async ({ request }) => {
     const db = await auth(getDb);
     return db.handler(request);
@@ -67,10 +68,16 @@ const app = new Elysia({ prefix: "/api" })
       ).toSorted() as string[];
 
       if (!validateCurriculum(curriculumId)) {
-        return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+        return status(HTTP_STATUS.BAD_REQUEST, {
+          error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+          code: ERROR_CODES.BAD_REQUEST,
+        });
       }
       if (!validateSubject(curriculumId, subjectId)) {
-        return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+        return status(HTTP_STATUS.BAD_REQUEST, {
+          error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+          code: ERROR_CODES.BAD_REQUEST,
+        });
       }
       if (
         !validateFilterData({
@@ -79,7 +86,10 @@ const app = new Elysia({ prefix: "/api" })
           subject: subjectId,
         })
       ) {
-        return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+        return status(HTTP_STATUS.BAD_REQUEST, {
+          error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+          code: ERROR_CODES.BAD_REQUEST,
+        });
       }
 
       const session = await verifySession();
@@ -117,24 +127,36 @@ const app = new Elysia({ prefix: "/api" })
           const paperTypeNumbers = paperType.map((p) => Number.parseInt(p, 10));
           conditions.push(inArray(question.paperType, paperTypeNumbers));
         } else {
-          return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+          return status(HTTP_STATUS.BAD_REQUEST, {
+            error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+            code: ERROR_CODES.BAD_REQUEST,
+          });
         }
 
         if (year.length > 0) {
           const yearNumbers = year.map((y) => Number.parseInt(y, 10));
           conditions.push(inArray(question.year, yearNumbers));
         } else {
-          return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+          return status(HTTP_STATUS.BAD_REQUEST, {
+            error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+            code: ERROR_CODES.BAD_REQUEST,
+          });
         }
 
         if (season.length > 0) {
           conditions.push(inArray(question.season, season));
         } else {
-          return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+          return status(HTTP_STATUS.BAD_REQUEST, {
+            error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+            code: ERROR_CODES.BAD_REQUEST,
+          });
         }
 
         if (topic.length === 0) {
-          return status(400, { error: "Bad Request", code: "BAD_REQUEST" });
+          return status(HTTP_STATUS.BAD_REQUEST, {
+            error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+            code: ERROR_CODES.BAD_REQUEST,
+          });
         }
 
         const topicsCondition = topic.map((t) =>
@@ -233,7 +255,10 @@ const app = new Elysia({ prefix: "/api" })
       const session = await verifySession();
 
       if (!session) {
-        return status(401, { error: "Unauthorized", code: "UNAUTHORIZED" });
+        return status(HTTP_STATUS.UNAUTHORIZED, {
+          error: ERROR_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+          code: ERROR_CODES.UNAUTHORIZED,
+        });
       }
 
       const db = await getDbAsync();
@@ -248,9 +273,9 @@ const app = new Elysia({ prefix: "/api" })
       });
 
       if (!bookmarkList) {
-        return status(404, {
-          error: "Bookmark list not found",
-          code: "NOT_FOUND",
+        return status(HTTP_STATUS.NOT_FOUND, {
+          error: ERROR_MESSAGES[ERROR_CODES.BOOKMARK_LIST_NOT_FOUND],
+          code: ERROR_CODES.NOT_FOUND,
         });
       }
 
@@ -259,9 +284,9 @@ const app = new Elysia({ prefix: "/api" })
         bookmarkList.visibility === "private" &&
         session.user.id !== bookmarkList.userId
       ) {
-        return status(403, {
-          error: "This list is private",
-          code: "FORBIDDEN",
+        return status(HTTP_STATUS.FORBIDDEN, {
+          error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
+          code: ERROR_CODES.FORBIDDEN,
         });
       }
 
@@ -312,7 +337,10 @@ const app = new Elysia({ prefix: "/api" })
   .get("/topical/recent-query", async ({ status }) => {
     const session = await verifySession();
     if (!session) {
-      return status(401, { error: "Unauthorized", code: "UNAUTHORIZED" });
+      return status(HTTP_STATUS.UNAUTHORIZED, {
+        error: ERROR_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        code: ERROR_CODES.UNAUTHORIZED,
+      });
     }
     const userId = session.user.id;
     const db = await getDbAsync();
@@ -329,7 +357,10 @@ const app = new Elysia({ prefix: "/api" })
   .get("/topical/saved-activities", async ({ status }) => {
     const session = await verifySession();
     if (!session) {
-      return status(401, { error: "Unauthorized", code: "UNAUTHORIZED" });
+      return status(HTTP_STATUS.UNAUTHORIZED, {
+        error: ERROR_MESSAGES[ERROR_CODES.UNAUTHORIZED],
+        code: ERROR_CODES.UNAUTHORIZED,
+      });
     }
     const userId = session.user.id;
 

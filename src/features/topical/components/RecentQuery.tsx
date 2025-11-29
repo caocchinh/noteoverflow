@@ -84,15 +84,9 @@ export const RecentQuery = forwardRef(
       queryKey: ["user_recent_query"],
       queryFn: async () => {
         const { data, error } = await api.topical["recent-query"].get();
-
         if (error) {
-          const errorMessage =
-            typeof error.value === "object" && "error" in error.value
-              ? String(error.value.error)
-              : "An error occurred";
-          throw new Error(errorMessage);
+          throw new Error(error.value.error);
         }
-
         return data;
       },
       enabled: isAuthenticated,

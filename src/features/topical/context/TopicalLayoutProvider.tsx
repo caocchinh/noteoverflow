@@ -205,12 +205,7 @@ export default function TopicalLayoutProvider({
       const { data, error } = await api.topical["saved-activities"].get();
 
       if (error) {
-        switch (error.status) {
-          case 401:
-            throw new Error("Unauthorized");
-          default:
-            throw new Error("An error occurred");
-        }
+        throw new Error(error.value.error);
       }
 
       // Type is now properly narrowed to SavedActivitiesResponse
