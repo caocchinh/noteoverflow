@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { CommandItem } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Lock, Globe, Loader2 } from "lucide-react";
@@ -8,8 +8,8 @@ import {
   ToggleBookmarkMutationVariables,
 } from "../../constants/types";
 import {
+  useIsMutating,
   useMutation,
-  useMutationState,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -23,7 +23,13 @@ import { toast } from "sonner";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 
 export const BookmarkItem = memo(
-  ({ listName, visibility, listId, question }: BookmarkItemProps) => {
+  ({
+    listName,
+    visibility,
+    listId,
+    question,
+    chosenBookmarkList,
+  }: BookmarkItemProps) => {
     const isMobileDevice = useIsMobile();
     const queryClient = useQueryClient();
     const { bookmarksData } = useTopicalApp();
@@ -36,7 +42,12 @@ export const BookmarkItem = memo(
       visibility,
     ];
 
-    const { mutate, isPending } = useMutation({
+    const isMutatingThisList =
+      useIsMutating({
+        mutationKey,
+      }) > 0;
+
+    const { mutate } = useMutation({
       mutationKey: mutationKey,
       mutationFn: toggleBookmarkMutationFn,
       onSuccess: (data) => {
@@ -62,26 +73,6 @@ export const BookmarkItem = memo(
         );
       },
     });
-
-    const isThisBookmarkSettled = useMutationState({
-      filters: {
-        mutationKey,
-        predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
-      },
-    });
-
-    const chosenBookmarkList = useMemo(() => {
-      const set = new Set<string>();
-      for (const bookmark of bookmarksData ?? []) {
-        if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
-          set.add(bookmark.id);
-        }
-      }
-      return set;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bookmarksData, question.id, isThisBookmarkSettled]);
 
     const onListSelect = useCallback(() => {
       if (listName.trim() === "") {
@@ -123,10 +114,10 @@ export const BookmarkItem = memo(
       <CommandItem
         className={cn(
           "cursor-pointer wrap-anywhere flex items-center justify-between",
-          isPending && "opacity-50 cursor-default"
+          isMutatingThisList && "opacity-50 cursor-default"
         )}
         onSelect={() => {
-          if (isPending) {
+          if (isMutatingThisList) {
             return;
           }
           onListSelect();
@@ -138,7 +129,8 @@ export const BookmarkItem = memo(
             className="data-[state=checked]:bg-logo-main!"
           />
           {listName}
-          {isPending && <Loader2 className="animate-spin" />}
+          <span className="hidden">{visibility}</span>
+          {isMutatingThisList && <Loader2 className="animate-spin" />}
         </div>
         {visibility === "private" ? (
           <Lock className="w-4 h-4" />

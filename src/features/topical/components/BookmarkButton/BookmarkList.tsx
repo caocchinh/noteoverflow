@@ -43,17 +43,25 @@ export const BookmarkList = memo(
 
       const isThisBookmarkSettled = useMutationState({
         filters: {
-          mutationKey: [
-            "user_saved_activities",
-            "bookmarks",
-            question.id,
-            "create_list",
-          ],
+          mutationKey: ["user_saved_activities", "bookmarks", question.id],
           predicate: (mutation) =>
             mutation.state.status === "success" ||
             mutation.state.status === "error",
         },
       });
+
+      const chosenBookmarkList = useMemo(() => {
+        const set = new Set<string>();
+        for (const bookmark of bookmarksData ?? []) {
+          if (
+            bookmark.userBookmarks.some((b) => b.question.id === question.id)
+          ) {
+            set.add(bookmark.id);
+          }
+        }
+        return set;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [bookmarksData, question.id, isThisBookmarkSettled]);
 
       const filteredAvailableOption = useMemo(() => {
         if (!bookmarksData) {
@@ -91,6 +99,7 @@ export const BookmarkList = memo(
               <SelectedValueList
                 searchInput={searchInput}
                 question={question}
+                chosenBookmarkList={chosenBookmarkList}
               />
               <CommandSeparator />
 
@@ -110,6 +119,7 @@ export const BookmarkList = memo(
                             bookmark.visibility as "public" | "private"
                           }
                           question={question}
+                          chosenBookmarkList={chosenBookmarkList}
                         />
                       );
                     })}
@@ -123,6 +133,7 @@ export const BookmarkList = memo(
             question={question}
             listId={listId}
             searchInputRef={searchInputRef}
+            chosenBookmarkList={chosenBookmarkList}
           />
         </div>
       );
@@ -136,31 +147,13 @@ const SelectedValueList = memo(
   ({
     searchInput,
     question,
+    chosenBookmarkList,
   }: {
     searchInput: string;
     question: SelectedQuestion;
+    chosenBookmarkList: Set<string>;
   }) => {
     const { bookmarksData } = useTopicalApp();
-
-    const isThisBookmarkSettled = useMutationState({
-      filters: {
-        mutationKey: ["user_saved_activities", "bookmarks"],
-        predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
-      },
-    });
-
-    const chosenBookmarkList = useMemo(() => {
-      const set = new Set<string>();
-      for (const bookmark of bookmarksData ?? []) {
-        if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
-          set.add(bookmark.id);
-        }
-      }
-      return set;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bookmarksData, question.id, isThisBookmarkSettled]);
 
     const filteredSelectedValue = useMemo(() => {
       if (!bookmarksData) {
@@ -205,6 +198,7 @@ const SelectedValueList = memo(
                   listId={bookmark.id}
                   visibility={bookmark.visibility as "public" | "private"}
                   question={question}
+                  chosenBookmarkList={chosenBookmarkList}
                 />
               ))}
           </CollapsibleContent>
