@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SelectedBookmark, SelectedQuestion } from "../constants/types";
+import { SelectedBookmark, SelectedQuestion } from "../../constants/types";
 import {
   Command,
   CommandEmpty,
@@ -70,18 +70,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import createBookmarkStore, {
   BookmarkState,
   BookmarkStore,
-} from "../store/useBookmark";
+} from "../../store/useBookmark";
 import { createContext, useContext } from "react";
 import { useStore } from "zustand";
-import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
-import { SelectVisibility } from "./SelectVisibility";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { LIST_NAME_MAX_LENGTH } from "../../constants/constants";
+import { SelectVisibility } from "../SelectVisibility";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import {
   bookmarkMutationFn,
   handleBookmarkError,
   handleBookmarkOptimisticUpdate,
-} from "../utils/bookmarkUtils";
+} from "../../utils/bookmarkUtils";
 import {
   MAXIMUM_BOOKMARK_LISTS_PER_USER,
   MAXIMUM_BOOKMARKS_PER_LIST,

@@ -1,7 +1,7 @@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ShareFilter } from "../ShareFilter";
 import { BestExamHelpUltility } from "../BestExamHelpUltility";
-import { BookmarkButton } from "../BookmarkButton";
+import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, PanelsTopLeft } from "lucide-react";

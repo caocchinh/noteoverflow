@@ -14,7 +14,7 @@ import Loader from "../Loader/Loader";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { BookmarkButton } from "../BookmarkButton";
+import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
 import { Loader2 } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 

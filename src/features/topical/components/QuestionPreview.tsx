@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
-import { BookmarkButton } from "./BookmarkButton";
+import { BookmarkButton } from "./BookmarkButton/BookmarkButton";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
