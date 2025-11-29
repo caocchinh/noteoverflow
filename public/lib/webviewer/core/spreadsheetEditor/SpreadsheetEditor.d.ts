@@ -3,7 +3,7 @@
 //***********************************************************************************************
 //***********************************************************************************************
 //   Type definitions for SpreadsheetEditor.js
-//   Updated: 9/17/2025 16:46
+//   Updated: 11/14/2025 07:53
 //   Version: 23.0.0.3
 //   https://www.leadtools.com
 //***********************************************************************************************
@@ -172,7 +172,8 @@ declare module lt.Document.SheetEditor {
 
    class SearchResults {
       get_results(): SearchResult[];
-      clearResults(): void;
+      clearHighlights(): void;
+      highlightResults(currentResult: SearchResult): void;
       moveToIndex(index: number): SearchResult;
       get_selectedResultIndex(): number;
       moveToNext(): SearchResult;
@@ -184,13 +185,10 @@ declare module lt.Document.SheetEditor {
    }
 
    class SheetEditorSearch {
-      get_highlightSearchResults(): boolean;
-      set_highlightSearchResults(value: boolean): void;
       searchSheet(sheetOrder: number, content: string, matchCase: boolean): SearchResults;
       searchSheetRegExp(sheetOrder: number, regex: any): SearchResults;
       search(content: string, matchCase: boolean): SearchResults;
       searchRegex(regex: any): SearchResults;
-      highlightSearchResults: boolean;
    }
 
    class SheetEditorHistory {
@@ -288,6 +286,7 @@ declare module lt.Document.SheetEditor {
       setWorkbookJsonData(json: string): void;
       getWorkbookJsonData(): string;
       selectRange(range: CellRange): void;
+      selectRanges(ranges: CellRange[]): void;
       get_zoomRatio(): number;
       set_zoomRatio(value: number): void;
       get_editingEnabled(): boolean;
@@ -326,7 +325,6 @@ declare module lt.Document.SheetEditor {
       get_cellType(): CellType;
       getDisplayStringValue(): string;
       setCellFormula(formula: string): void;
-      internalSetCellFormula(formula: string): void;
       setCellBooleanValue(value: boolean): void;
       setCellNumericValue(value: number): void;
       setCellStringValue(value: string): void;

@@ -7,6 +7,7 @@ import type {
 import { UseMutateFunction } from "@tanstack/react-query";
 import { WebViewerInstance } from "@pdftron/webviewer";
 import { Root } from "react-dom/client";
+import { BookmarkMutationVariables } from "../utils/bookmarkUtils";
 
 export interface EnhancedSelectContentRef {
   setInputValue: Dispatch<SetStateAction<string>>;
@@ -668,4 +669,97 @@ export interface AnnotatableInspectImageProps {
 
 export interface AnnotatableInspectImagesHandle {
   isEditMode: boolean;
+}
+
+export interface BookmarkTriggerProps {
+  question: SelectedQuestion;
+  isBookmarkDisabled: boolean;
+  badgeClassName?: string;
+  triggerButtonClassName?: string;
+}
+
+export interface BookmarkSearchInputProps {
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  setOpen: (value: boolean) => void;
+}
+
+export interface BookmarkListProps {
+  scrollAreaRef: RefObject<HTMLDivElement | null>;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  setOpen: (value: boolean) => void;
+  bookmarks: SelectedBookmark[];
+  chosenBookmarkList: Set<string>;
+  question: SelectedQuestion;
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+  setBookmarkListName: (value: string) => void;
+  mutate: UseMutateFunction<
+    BookmarkMutationVariables,
+    unknown,
+    BookmarkMutationVariables,
+    unknown
+  >;
+  setVisibility: (value: "public" | "private") => void;
+  listId?: string;
+  isAddNewListDialogOpen: boolean;
+  setIsAddNewListDialogOpen: (value: boolean) => void;
+  newBookmarkListNameInput: string;
+  setNewBookmarkListNameInput: (value: string) => void;
+  isInputError: boolean;
+  setIsInputError: (value: boolean) => void;
+  visibility: "public" | "private";
+  isRemoveFromListDialogOpen: boolean;
+  setIsRemoveFromListDialogOpen: (value: boolean) => void;
+}
+
+export interface BookmarkItemProps {
+  listName: string;
+  visibility: "public" | "private";
+  listId: string;
+  isPlaceholder: boolean;
+  onSelect: () => void;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+  question: SelectedQuestion;
+  chosenBookmarkList: Set<string>;
+}
+
+export interface BookmarkActionDialogsProps {
+  isAddNewListDialogOpen: boolean;
+  setIsAddNewListDialogOpen: (value: boolean) => void;
+  newBookmarkListNameInput: string;
+  setNewBookmarkListNameInput: (value: string) => void;
+  isInputError: boolean;
+  setIsInputError: (value: boolean) => void;
+  bookmarks: SelectedBookmark[];
+  question: SelectedQuestion;
+  visibility: "public" | "private";
+  setVisibility: (value: "public" | "private") => void;
+  mutate: UseMutateFunction<
+    BookmarkMutationVariables,
+    unknown,
+    BookmarkMutationVariables,
+    unknown
+  >;
+  chosenBookmarkList: Set<string>;
+  listId?: string;
+  isRemoveFromListDialogOpen: boolean;
+  setIsRemoveFromListDialogOpen: (value: boolean) => void;
+  searchInputRef: RefObject<HTMLInputElement | null>;
+}
+
+export interface BookmarkButtonProps {
+  question: SelectedQuestion;
+  isBookmarkDisabled: boolean;
+  isPopoverOpen?: boolean;
+  setIsPopoverOpen?: (open: boolean) => void;
+  setIsHovering?: (value: boolean) => void;
+  popOverAlign?: "start" | "end";
+  setShouldOpen?: (value: boolean) => void;
+  listId?: string;
+  badgeClassName?: string;
+  popOverTriggerClassName?: string;
+  triggerButtonClassName?: string;
+  isInView: boolean;
 }

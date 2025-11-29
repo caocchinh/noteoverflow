@@ -1,2 +1,2 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[7],{1600:function(n,o,i){"use strict";i(82),i(154);o.a=function(n,o){return[n,o.isOpen?"open":"closed"].join(" ").trim()}}}]);
+(window.webpackJsonpWebViewerUI=window.webpackJsonpWebViewerUI||[]).push([[7],{1608:function(e,n,i){"use strict";i(84),i(136);n.a=function(e,n){return[e,n.isOpen?"open":"closed"].join(" ").trim()}}}]);
 //# sourceMappingURL=chunk.7.js.map

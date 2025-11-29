@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SidebarInset } from "@/components/ui/sidebar";
 import BrowseMoreQuestions from "./BrowseMoreQuestions";
-
 import InspectUltilityBar from "./InspectUltilityBar";
 import {
   forwardRef,
@@ -13,7 +12,6 @@ import {
   useRef,
   useState,
 } from "react";
-
 import {
   QuestionInspectMainContentProps,
   QuestionInspectViewMode,
