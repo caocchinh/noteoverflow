@@ -31,6 +31,7 @@ import type {
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/eden";
 
 type UiPreferencesKey = keyof UiPreferences;
 
@@ -201,18 +202,18 @@ export default function TopicalLayoutProvider({
   const userSavedActivitiesQuery = useQuery({
     queryKey: ["user_saved_activities"],
     queryFn: async () => {
-      const response = await fetch("/api/topical/saved-activities", {
-        method: "GET",
-      });
-      const data: SavedActivitiesResponse = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof data === "object" && data && "error" in data
-            ? String(data.error)
-            : "An error occurred";
-        throw new Error(errorMessage);
+      const { data, error } = await api.topical["saved-activities"].get();
+
+      if (error) {
+        switch (error.status) {
+          case 401:
+            throw new Error("Unauthorized");
+          default:
+            throw new Error("An error occurred");
+        }
       }
 
+      // Type is now properly narrowed to SavedActivitiesResponse
       return data;
     },
     enabled: isAuthenticated,

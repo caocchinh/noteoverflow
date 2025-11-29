@@ -17,6 +17,7 @@ import { getCache, setCache } from "@/lib/client-cache";
 import { INITIAL_QUERY } from "@/constants/constants";
 import AppSidebar from "@/features/topical/components/AppSidebar";
 import AppMainContent from "@/features/topical/components/AppMainContent";
+import { api } from "@/lib/eden";
 
 const TopicalClient = ({
   searchParams,
@@ -61,44 +62,26 @@ const TopicalClient = ({
   }, [currentQuery, uiPreferences.isStrictModeEnabled]);
 
   const search = async () => {
-    const params = new URLSearchParams();
-    params.append(
-      "curriculumId",
-      encodeURIComponent(currentQuery.curriculumId)
-    );
-    params.append("subjectId", encodeURIComponent(currentQuery.subjectId));
-    params.append(
-      "topic",
-      encodeURIComponent(JSON.stringify(currentQuery.topic))
-    );
-    params.append(
-      "paperType",
-      encodeURIComponent(JSON.stringify(currentQuery.paperType))
-    );
-    params.append(
-      "year",
-      encodeURIComponent(JSON.stringify(currentQuery.year))
-    );
-    params.append(
-      "season",
-      encodeURIComponent(JSON.stringify(currentQuery.season))
-    );
-    const response = await fetch(`/api/topical?${params.toString()}`, {
-      method: "GET",
+    const { data, error } = await api.topical.get({
+      query: {
+        curriculumId: encodeURIComponent(currentQuery.curriculumId),
+        subjectId: encodeURIComponent(currentQuery.subjectId),
+        topic: encodeURIComponent(JSON.stringify(currentQuery.topic)),
+        paperType: encodeURIComponent(JSON.stringify(currentQuery.paperType)),
+        year: encodeURIComponent(JSON.stringify(currentQuery.year)),
+        season: encodeURIComponent(JSON.stringify(currentQuery.season)),
+      },
     });
-    const data = await response.json();
-    if (!response.ok) {
+
+    if (error) {
       const errorMessage =
-        typeof data === "object" && data && "error" in data
-          ? String(data.error)
+        typeof error.value === "object" && "error" in error.value
+          ? String(error.value.error)
           : "An error occurred";
       throw new Error(errorMessage);
     }
 
-    return data as {
-      data: SelectedQuestion[];
-      isRateLimited: boolean;
-    };
+    return data;
   };
 
   const {

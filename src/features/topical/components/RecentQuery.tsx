@@ -55,6 +55,7 @@ import { BAD_REQUEST } from "@/constants/constants";
 import Sort from "./Sort";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/eden";
 
 export const RecentQuery = forwardRef(
   (
@@ -82,26 +83,17 @@ export const RecentQuery = forwardRef(
     } = useQuery({
       queryKey: ["user_recent_query"],
       queryFn: async () => {
-        const response = await fetch("/api/topical/recent-query", {
-          method: "GET",
-        });
-        const data: {
-          data: {
-            queryKey: string;
-            sortParams: string | null;
-            lastSearch: number;
-          }[];
-          error?: string;
-        } = await response.json();
-        if (!response.ok) {
+        const { data, error } = await api.topical["recent-query"].get();
+
+        if (error) {
           const errorMessage =
-            typeof data === "object" && data && "error" in data
-              ? String(data.error)
+            typeof error.value === "object" && "error" in error.value
+              ? String(error.value.error)
               : "An error occurred";
           throw new Error(errorMessage);
         }
 
-        return data.data;
+        return data;
       },
       enabled: isAuthenticated,
     });
@@ -404,8 +396,7 @@ const RecentQueryItem = ({
 }: {
   item: {
     queryKey: string;
-    sortParams: string | null;
-    lastSearch: number;
+    lastSearch: Date;
   };
   index: number;
   setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;

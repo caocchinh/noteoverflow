@@ -32,6 +32,7 @@ import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider"
 import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/eden";
 
 export const BookmarkView = ({
   BETTER_AUTH_URL,
@@ -69,11 +70,13 @@ export const BookmarkView = ({
     useQuery({
       queryKey: ["bookmark", bookmarkId],
       queryFn: async () => {
-        const response = await fetch(`/api/topical/bookmark/${bookmarkId}`);
-        if (!response.ok) {
+        const { data, error } = await api.topical
+          .bookmark({ bookmarkId: bookmarkId })
+          .get();
+        if (error) {
           throw new Error("Failed to fetch bookmark");
         }
-        return response.json();
+        return data;
       },
       enabled: !isOwnerOfTheList && !!bookmarkId,
     });
