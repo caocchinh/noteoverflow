@@ -81,7 +81,6 @@ const MultiSelector = memo(
             onValueChange([...selectedValues, val]);
           }
         } else {
-          // val is string[], directly set the value
           onValueChange(val);
         }
       },

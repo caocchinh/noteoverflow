@@ -7,7 +7,6 @@ import type {
 import { UseMutateFunction } from "@tanstack/react-query";
 import { WebViewerInstance } from "@pdftron/webviewer";
 import { Root } from "react-dom/client";
-import { BookmarkMutationVariables } from "../utils/bookmarkUtils";
 
 export interface EnhancedSelectContentRef {
   setInputValue: Dispatch<SetStateAction<string>>;
@@ -694,13 +693,7 @@ export interface BookmarkListProps {
   question: SelectedQuestion;
   searchInput: string;
   setSearchInput: (value: string) => void;
-  setBookmarkListName: (value: string) => void;
-  mutate: UseMutateFunction<
-    BookmarkMutationVariables,
-    unknown,
-    BookmarkMutationVariables,
-    unknown
-  >;
+
   setVisibility: (value: "public" | "private") => void;
   listId?: string;
   isAddNewListDialogOpen: boolean;
@@ -736,12 +729,7 @@ export interface BookmarkActionDialogsProps {
   question: SelectedQuestion;
   visibility: "public" | "private";
   setVisibility: (value: "public" | "private") => void;
-  mutate: UseMutateFunction<
-    BookmarkMutationVariables,
-    unknown,
-    BookmarkMutationVariables,
-    unknown
-  >;
+
   chosenBookmarkList: Set<string>;
   listId?: string;
   isRemoveFromListDialogOpen: boolean;

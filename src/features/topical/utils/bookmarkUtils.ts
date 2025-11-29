@@ -16,93 +16,173 @@ import {
   MAXIMUM_BOOKMARKS_PER_LIST,
 } from "@/constants/constants";
 
-export interface BookmarkMutationVariables {
-  realQuestion: SelectedQuestion;
-  isRealBookmarked: boolean;
-  realBookmarkListName: string;
-  realVisibility: "public" | "private";
-  realListId: string;
-  isCreateNew: boolean;
+export interface CreateListMutationVariables {
+  question: SelectedQuestion;
+  bookmarkListName: string;
+  visibility: "public" | "private";
 }
 
-export const bookmarkMutationFn = async ({
-  realQuestion,
-  realBookmarkListName,
-  isRealBookmarked,
-  realVisibility,
-  realListId,
-  isCreateNew,
-}: BookmarkMutationVariables) => {
-  if (isCreateNew) {
-    const result = await createBookmarkListAndAddBookmarkAction({
-      listName: realBookmarkListName,
-      visibility: realVisibility,
-      questionId: realQuestion.id,
-    });
-    if (!result.success) {
-      throw new Error(result.error + "list");
-    }
-    return {
-      realQuestion,
-      realBookmarkListName,
-      isRealBookmarked: false,
-      realListId: result.data as string,
-      isCreateNew: true,
-      realVisibility,
-    };
+export interface ToggleBookmarkMutationVariables {
+  question: SelectedQuestion;
+  listId: string;
+  isBookmarked: boolean;
+  bookmarkListName: string;
+}
+
+export const createListMutationFn = async ({
+  question,
+  bookmarkListName,
+  visibility,
+}: CreateListMutationVariables) => {
+  const result = await createBookmarkListAndAddBookmarkAction({
+    listName: bookmarkListName,
+    visibility,
+    questionId: question.id,
+  });
+  if (!result.success) {
+    throw new Error(result.error + "list");
   }
-  if (isRealBookmarked) {
+  return {
+    question,
+    bookmarkListName,
+    listId: result.data as string,
+    visibility,
+  };
+};
+
+export const toggleBookmarkMutationFn = async ({
+  question,
+  listId,
+  isBookmarked,
+  bookmarkListName,
+}: ToggleBookmarkMutationVariables) => {
+  if (isBookmarked) {
     const result = await removeBookmarkAction({
-      questionId: realQuestion.id,
-      listId: realListId,
+      questionId: question.id,
+      listId,
     });
     if (result.error) {
       throw new Error(result.error);
     }
     return {
-      realQuestion,
-      realListId,
-      realBookmarkListName,
-      isRealBookmarked: true,
-      isCreateNew,
-      realVisibility,
+      question,
+      listId,
+      isBookmarked: true,
+      bookmarkListName,
     };
   } else {
     const result = await addBookmarkAction({
-      questionId: realQuestion.id,
-      listId: realListId,
+      questionId: question.id,
+      listId,
     });
     if (result.error) {
       throw new Error(result.error + "bookmark");
     }
     return {
-      realQuestion,
-      realBookmarkListName,
-      realListId,
-      isRealBookmarked: false,
-      isCreateNew,
-      realVisibility,
+      question,
+      listId,
+      isBookmarked: false,
+      bookmarkListName,
     };
   }
 };
 
-export const handleBookmarkOptimisticUpdate = (
+export const handleCreateListOptimisticUpdate = (
   queryClient: QueryClient,
-  data: BookmarkMutationVariables,
+  data: {
+    question: SelectedQuestion;
+    bookmarkListName: string;
+    listId: string;
+    visibility: "public" | "private";
+  },
   callbacks?: {
     onSuccess?: () => void;
+    addChosenBookmarkList?: (listId: string) => void;
+  }
+) => {
+  const { question, listId, bookmarkListName, visibility } = data;
+
+  queryClient.setQueryData<SavedActivitiesResponse>(
+    ["user_saved_activities"],
+    (prev: SavedActivitiesResponse | undefined) => {
+      if (!prev) {
+        return prev;
+      }
+
+      const updatedBookmarks = prev.bookmarks ?? [];
+      const isListAlreadyExist = updatedBookmarks.some(
+        (bookmark) => bookmark.id === listId
+      );
+
+      callbacks?.onSuccess?.();
+
+      if (isListAlreadyExist) {
+        // Add bookmark to existing list (shouldn't happen for create new, but safe fallback)
+        callbacks?.addChosenBookmarkList?.(listId);
+        const existingBookmark = updatedBookmarks.find(
+          (bookmark) => bookmark.id === listId
+        );
+        if (existingBookmark) {
+          existingBookmark.userBookmarks.push({
+            question: {
+              year: question.year,
+              season: question.season,
+              paperType: question.paperType,
+              questionImages: question.questionImages,
+              answers: question.answers,
+              topics: question.topics,
+              id: question.id,
+            },
+            updatedAt: new Date(),
+          });
+        }
+      } else {
+        // Create new list and add bookmark
+        callbacks?.addChosenBookmarkList?.(listId);
+        updatedBookmarks.push({
+          id: listId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          listName: bookmarkListName,
+          visibility,
+          userBookmarks: [
+            {
+              question: {
+                year: question.year,
+                season: question.season,
+                paperType: question.paperType,
+                questionImages: question.questionImages,
+                answers: question.answers,
+                topics: question.topics,
+                id: question.id,
+              },
+              updatedAt: new Date(),
+            },
+          ],
+        });
+      }
+
+      return {
+        ...prev,
+        bookmarks: updatedBookmarks,
+      };
+    }
+  );
+};
+
+export const handleToggleBookmarkOptimisticUpdate = (
+  queryClient: QueryClient,
+  data: {
+    question: SelectedQuestion;
+    listId: string;
+    isBookmarked: boolean;
+  },
+  callbacks?: {
     addChosenBookmarkList?: (listId: string) => void;
     removeChosenBookmarkList?: (listId: string) => void;
   }
 ) => {
-  const {
-    realQuestion: newQuestion,
-    isRealBookmarked,
-    realListId,
-    realBookmarkListName: newBookmarkListName,
-    isCreateNew,
-    realVisibility,
-  } = data;
+  const { question, listId, isBookmarked } = data;
 
   queryClient.setQueryData<SavedActivitiesResponse>(
     ["user_saved_activities"],
@@ -113,89 +193,36 @@ export const handleBookmarkOptimisticUpdate = (
 
       const updatedBookmarks = prev.bookmarks ?? [];
 
-      if (isCreateNew) {
-        const isListAlreadyExist = updatedBookmarks.some(
-          (bookmark) => bookmark.id === realListId
-        );
-
-        callbacks?.onSuccess?.();
-
-        if (isListAlreadyExist) {
-          // Add bookmark to existing list
-          callbacks?.addChosenBookmarkList?.(realListId);
-          const existingBookmark = updatedBookmarks.find(
-            (bookmark) => bookmark.id === realListId
-          );
-          if (existingBookmark) {
-            existingBookmark.userBookmarks.push({
-              question: {
-                year: newQuestion.year,
-                season: newQuestion.season,
-                paperType: newQuestion.paperType,
-                questionImages: newQuestion.questionImages,
-                answers: newQuestion.answers,
-                topics: newQuestion.topics,
-                id: newQuestion.id,
-              },
-              updatedAt: new Date(),
-            });
-          }
-        } else {
-          // Create new list and add bookmark
-          callbacks?.addChosenBookmarkList?.(realListId);
-          updatedBookmarks.push({
-            id: realListId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            listName: newBookmarkListName,
-            visibility: realVisibility as "public" | "private",
-
-            userBookmarks: [
-              {
-                question: {
-                  year: newQuestion.year,
-                  season: newQuestion.season,
-                  paperType: newQuestion.paperType,
-                  questionImages: newQuestion.questionImages,
-                  answers: newQuestion.answers,
-                  topics: newQuestion.topics,
-                  id: newQuestion.id,
-                },
-                updatedAt: new Date(),
-              },
-            ],
-          });
-        }
-      } else if (!isCreateNew && !isRealBookmarked) {
+      if (!isBookmarked) {
         // Add bookmark to existing list
-        callbacks?.addChosenBookmarkList?.(realListId);
+        callbacks?.addChosenBookmarkList?.(listId);
         const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === realListId
+          (bookmark) => bookmark.id === listId
         );
         if (existingBookmark) {
           existingBookmark.userBookmarks.push({
             question: {
-              year: newQuestion.year,
-              season: newQuestion.season,
-              paperType: newQuestion.paperType,
-              questionImages: newQuestion.questionImages,
-              answers: newQuestion.answers,
-              topics: newQuestion.topics,
-              id: newQuestion.id,
+              year: question.year,
+              season: question.season,
+              paperType: question.paperType,
+              questionImages: question.questionImages,
+              answers: question.answers,
+              topics: question.topics,
+              id: question.id,
             },
             updatedAt: new Date(),
           });
         }
-      } else if (!isCreateNew && isRealBookmarked) {
+      } else {
         // Remove bookmark from list
-        callbacks?.removeChosenBookmarkList?.(realListId);
+        callbacks?.removeChosenBookmarkList?.(listId);
         const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === realListId
+          (bookmark) => bookmark.id === listId
         );
         if (existingBookmark) {
           existingBookmark.userBookmarks =
             existingBookmark.userBookmarks.filter(
-              (userBookmark) => userBookmark.question.id !== newQuestion.id
+              (userBookmark) => userBookmark.question.id !== question.id
             );
         }
       }
@@ -210,7 +237,7 @@ export const handleBookmarkOptimisticUpdate = (
 
 export const handleBookmarkError = (
   error: unknown,
-  variables: BookmarkMutationVariables,
+  variables: CreateListMutationVariables | ToggleBookmarkMutationVariables,
   isMobileDevice: boolean
 ) => {
   if (error instanceof Error) {
@@ -238,7 +265,7 @@ export const handleBookmarkError = (
       }
     } else if (error.message.includes(DOES_NOT_EXIST)) {
       toast.error(
-        `Failed to update bookmarks. The list ${variables.realBookmarkListName} does not exist.`,
+        `Failed to update bookmarks. The list ${variables.bookmarkListName} does not exist.`,
         {
           duration: 2000,
           position: isMobileDevice ? "top-center" : "bottom-right",

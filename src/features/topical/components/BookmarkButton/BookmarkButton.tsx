@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Popover,
@@ -28,11 +27,6 @@ import {
 } from "@/components/ui/drawer";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
-import {
-  bookmarkMutationFn,
-  handleBookmarkError,
-  handleBookmarkOptimisticUpdate,
-} from "../../utils/bookmarkUtils";
 import { BookmarkTrigger } from "./BookmarkTrigger";
 import { BookmarkList } from "./BookmarkList";
 
@@ -54,7 +48,6 @@ export const BookmarkButton = memo(
     const [_open, _setOpen] = useState(false);
     const open = openProp ?? _open;
     const [searchInput, setSearchInput] = useState("");
-    const [bookmarkListName, setBookmarkListName] = useState("");
     const [visibility, setVisibility] = useState<"public" | "private">(
       "public"
     );
@@ -75,7 +68,6 @@ export const BookmarkButton = memo(
       savedActivitiesIsError,
     } = useTopicalApp();
     const { isAuthenticated } = useAuth();
-    const queryClient = useQueryClient();
     const isMobileDevice = useIsMobile();
 
     const chosenBookmarkList = useMemo(() => {
@@ -110,56 +102,6 @@ export const BookmarkButton = memo(
       },
       [open, setOpenProp, setIsHovering, setShouldOpen]
     );
-
-    const mutationKey = [
-      "user_saved_activities",
-      "bookmarks",
-      question.id,
-      bookmarkListName,
-      visibility,
-    ];
-
-    const { mutate } = useMutation({
-      mutationKey: mutationKey,
-      mutationFn: bookmarkMutationFn,
-      onSuccess: (data) => {
-        const { isRealBookmarked, realBookmarkListName: newBookmarkListName } =
-          data;
-
-        setTimeout(() => {
-          searchInputRef?.current?.focus();
-        }, 0);
-
-        handleBookmarkOptimisticUpdate(queryClient, data, {
-          onSuccess: () => {
-            setIsAddNewListDialogOpen(false);
-            setIsInputError(false);
-            setNewBookmarkListNameInput("");
-
-            scrollAreaRef?.current?.scrollTo({
-              top: 0,
-            });
-          },
-          addChosenBookmarkList: () => {},
-          removeChosenBookmarkList: () => {
-            setIsRemoveFromListDialogOpen(false);
-          },
-        });
-
-        toast.success(
-          isRealBookmarked
-            ? `Question removed from ${newBookmarkListName}`
-            : `Question added to ${newBookmarkListName}`,
-          {
-            duration: 2000,
-            position: isMobileDevice ? "top-center" : "bottom-right",
-          }
-        );
-      },
-      onError: (error, variables) => {
-        handleBookmarkError(error, variables, isMobileDevice);
-      },
-    });
 
     const handleKeyDown = useCallback(
       (e: KeyboardEvent<HTMLDivElement>) => {
@@ -287,8 +229,6 @@ export const BookmarkButton = memo(
                 question={question}
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
-                setBookmarkListName={setBookmarkListName}
-                mutate={mutate}
                 setVisibility={setVisibility}
                 listId={listId}
                 isAddNewListDialogOpen={isAddNewListDialogOpen}
@@ -353,8 +293,6 @@ export const BookmarkButton = memo(
                 question={question}
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
-                setBookmarkListName={setBookmarkListName}
-                mutate={mutate}
                 setVisibility={setVisibility}
                 listId={listId}
                 isAddNewListDialogOpen={isAddNewListDialogOpen}

@@ -13,11 +13,23 @@ import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useIsMutating } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { SelectVisibility } from "../SelectVisibility";
 import { MAXIMUM_BOOKMARK_LISTS_PER_USER } from "@/constants/constants";
 import { LIST_NAME_MAX_LENGTH } from "../../constants/constants";
 import { BookmarkActionDialogsProps } from "../../constants/types";
+import {
+  createListMutationFn,
+  handleBookmarkError,
+  handleCreateListOptimisticUpdate,
+  handleToggleBookmarkOptimisticUpdate,
+  toggleBookmarkMutationFn,
+  CreateListMutationVariables,
+} from "../../utils/bookmarkUtils";
 
 export const BookmarkActionDialogs = memo(
   ({
@@ -31,7 +43,6 @@ export const BookmarkActionDialogs = memo(
     question,
     visibility,
     setVisibility,
-    mutate,
     chosenBookmarkList,
     listId,
     isRemoveFromListDialogOpen,
@@ -39,6 +50,7 @@ export const BookmarkActionDialogs = memo(
     searchInputRef,
   }: BookmarkActionDialogsProps) => {
     const isMobileDevice = useIsMobile();
+    const queryClient = useQueryClient();
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
@@ -46,6 +58,74 @@ export const BookmarkActionDialogs = memo(
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
+
+    const createListMutationKey = [
+      "user_saved_activities",
+      "bookmarks",
+      question.id,
+      "create_list",
+    ];
+
+    const { mutate: createListMutate } = useMutation({
+      mutationKey: createListMutationKey,
+      mutationFn: createListMutationFn,
+      onSuccess: (data) => {
+        const { bookmarkListName: newBookmarkListName } = data;
+        setTimeout(() => {
+          searchInputRef?.current?.focus();
+        }, 0);
+
+        handleCreateListOptimisticUpdate(queryClient, data, {
+          onSuccess: () => {
+            setIsAddNewListDialogOpen(false);
+            setIsInputError(false);
+            setNewBookmarkListNameInput("");
+          },
+          addChosenBookmarkList: () => {},
+        });
+
+        toast.success(`Question added to ${newBookmarkListName}`, {
+          duration: 2000,
+          position: isMobileDevice ? "top-center" : "bottom-right",
+        });
+      },
+      onError: (error, variables) => {
+        handleBookmarkError(
+          error,
+          variables as CreateListMutationVariables,
+          isMobileDevice
+        );
+      },
+    });
+
+    const removeFromListMutationKey = [
+      "user_saved_activities",
+      "bookmarks",
+      question.id,
+      "remove_from_list",
+    ];
+
+    const { mutate: removeFromListMutate } = useMutation({
+      mutationKey: removeFromListMutationKey,
+      mutationFn: toggleBookmarkMutationFn,
+      onSuccess: (data) => {
+        const { bookmarkListName: newBookmarkListName } = data;
+
+        handleToggleBookmarkOptimisticUpdate(queryClient, data, {
+          removeChosenBookmarkList: () => {
+            setIsRemoveFromListDialogOpen(false);
+          },
+        });
+
+        toast.success(`Question removed from ${newBookmarkListName}`, {
+          duration: 2000,
+          position: isMobileDevice ? "top-center" : "bottom-right",
+        });
+      },
+      onError: (error, variables) => {
+        handleBookmarkError(error, variables, isMobileDevice);
+      },
+    });
 
     const createNewList = () => {
       setIsBlockingDialogInput(true);
@@ -71,13 +151,10 @@ export const BookmarkActionDialogs = memo(
       }
       setNewBookmarkListNameInput(newBookmarkListNameInput.trim());
       setTimeout(() => {
-        mutate?.({
-          realQuestion: question,
-          realListId: "",
-          realBookmarkListName: newBookmarkListNameInput.trim(),
-          isRealBookmarked: false,
-          isCreateNew: true,
-          realVisibility: visibility,
+        createListMutate({
+          question,
+          bookmarkListName: newBookmarkListNameInput.trim(),
+          visibility,
         });
         setIsBlockingDialogInput(false);
       }, 0);
@@ -100,13 +177,11 @@ export const BookmarkActionDialogs = memo(
         setIsRemoveFromListDialogOpen(false);
         return;
       }
-      mutate?.({
-        realQuestion: question,
-        realListId: listId,
-        realBookmarkListName: list.listName,
-        isRealBookmarked: true,
-        isCreateNew: false,
-        realVisibility: list.visibility as "public" | "private",
+      removeFromListMutate({
+        question,
+        listId,
+        bookmarkListName: list.listName,
+        isBookmarked: true,
       });
     };
 

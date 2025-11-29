@@ -16,9 +16,11 @@ import {
 import { createRoot } from "react-dom/client";
 import { toast } from "sonner";
 import {
-  bookmarkMutationFn,
+  createListMutationFn,
   handleBookmarkError,
-  handleBookmarkOptimisticUpdate,
+  handleCreateListOptimisticUpdate,
+  handleToggleBookmarkOptimisticUpdate,
+  toggleBookmarkMutationFn,
 } from "../../utils/bookmarkUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -53,15 +55,36 @@ const AnnotatableImagesUpdater = memo(
     const queryClient = useQueryClient();
     const isMobileDevice = useIsMobile();
 
-    const { mutate: bookmarkMutate } = useMutation({
+    const { mutate: createListMutate } = useMutation({
       mutationKey: ["user_saved_activities", "bookmarks", questionId],
-      mutationFn: bookmarkMutationFn,
+      mutationFn: createListMutationFn,
       onSuccess: (data) => {
-        handleBookmarkOptimisticUpdate(queryClient, data);
-        toast.success("Question added to My annotations", {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        });
+        handleCreateListOptimisticUpdate(queryClient, data);
+        toast.success(
+          `Question added to ${MY_ANNOTATIONS_BOOKMARK_LIST_NAME}`,
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
+      },
+      onError: (error, variables) => {
+        handleBookmarkError(error, variables, isMobileDevice);
+      },
+    });
+
+    const { mutate: toggleBookmarkMutate } = useMutation({
+      mutationKey: ["user_saved_activities", "bookmarks", questionId],
+      mutationFn: toggleBookmarkMutationFn,
+      onSuccess: (data) => {
+        handleToggleBookmarkOptimisticUpdate(queryClient, data);
+        toast.success(
+          `Question added to ${MY_ANNOTATIONS_BOOKMARK_LIST_NAME}`,
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
       },
       onError: (error, variables) => {
         handleBookmarkError(error, variables, isMobileDevice);
@@ -170,16 +193,28 @@ const AnnotatableImagesUpdater = memo(
           return;
         }
 
-        bookmarkMutate({
-          realQuestion: question,
-          realBookmarkListName: MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
-          isRealBookmarked: false,
-          realVisibility: MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
-          realListId: myAnnotationsList?.id ?? "",
-          isCreateNew: isCreateNew,
-        });
+        if (isCreateNew) {
+          createListMutate({
+            question,
+            bookmarkListName: MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
+            visibility: MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
+          });
+        } else {
+          toggleBookmarkMutate({
+            question,
+            listId: myAnnotationsList.id,
+            isBookmarked: false,
+            bookmarkListName: MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
+          });
+        }
       },
-      [saveAnnotationsMutation, question, bookmarksData, bookmarkMutate]
+      [
+        saveAnnotationsMutation,
+        question,
+        bookmarksData,
+        createListMutate,
+        toggleBookmarkMutate,
+      ]
     );
 
     const annotationsMutationState = useMutationState({

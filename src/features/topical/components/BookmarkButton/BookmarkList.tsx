@@ -20,6 +20,13 @@ import { MAXIMUM_BOOKMARKS_PER_LIST } from "@/constants/constants";
 import { BookmarkSearchInput } from "./BookmarkSearchInput";
 import { BookmarkItem } from "./BookmarkItem";
 import { BookmarkActionDialogs } from "./BookmarkActionDialogs";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  handleBookmarkError,
+  handleToggleBookmarkOptimisticUpdate,
+  toggleBookmarkMutationFn,
+  ToggleBookmarkMutationVariables,
+} from "../../utils/bookmarkUtils";
 
 export const BookmarkList = memo(
   ({
@@ -31,8 +38,7 @@ export const BookmarkList = memo(
     question,
     searchInput,
     setSearchInput,
-    setBookmarkListName,
-    mutate,
+
     setVisibility,
     listId,
     isAddNewListDialogOpen,
@@ -46,6 +52,45 @@ export const BookmarkList = memo(
     setIsRemoveFromListDialogOpen,
   }: BookmarkListProps) => {
     const isMobileDevice = useIsMobile();
+    const queryClient = useQueryClient();
+
+    const mutationKey = [
+      "user_saved_activities",
+      "bookmarks",
+      question.id,
+      "list_update",
+    ];
+
+    const { mutate } = useMutation({
+      mutationKey: mutationKey,
+      mutationFn: toggleBookmarkMutationFn,
+      onSuccess: (data) => {
+        const { isBookmarked, bookmarkListName: newBookmarkListName } = data;
+
+        setTimeout(() => {
+          searchInputRef?.current?.focus();
+        }, 0);
+
+        handleToggleBookmarkOptimisticUpdate(queryClient, data);
+
+        toast.success(
+          isBookmarked
+            ? `Question removed from ${newBookmarkListName}`
+            : `Question added to ${newBookmarkListName}`,
+          {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          }
+        );
+      },
+      onError: (error, variables) => {
+        handleBookmarkError(
+          error,
+          variables as ToggleBookmarkMutationVariables,
+          isMobileDevice
+        );
+      },
+    });
 
     const onListSelect = ({
       bookmark,
@@ -73,15 +118,13 @@ export const BookmarkList = memo(
         return;
       }
       setVisibility(visibility);
-      setBookmarkListName(bookmark.listName);
+
       setTimeout(() => {
-        mutate?.({
-          realQuestion: question,
-          realListId: bookmark.id,
-          realBookmarkListName: bookmark.listName,
-          isRealBookmarked: isItemBookmarked,
-          isCreateNew: false,
-          realVisibility: visibility,
+        mutate({
+          question,
+          listId: bookmark.id,
+          bookmarkListName: bookmark.listName,
+          isBookmarked: isItemBookmarked,
         });
       }, 0);
     };
@@ -216,7 +259,6 @@ export const BookmarkList = memo(
           question={question}
           visibility={visibility}
           setVisibility={setVisibility}
-          mutate={mutate}
           chosenBookmarkList={chosenBookmarkList}
           listId={listId}
           isRemoveFromListDialogOpen={isRemoveFromListDialogOpen}
