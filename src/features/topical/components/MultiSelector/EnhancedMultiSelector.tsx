@@ -143,38 +143,27 @@ const EnhancedMultiSelector = memo(
       );
     }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
 
+    const sharedProps: EnhancedMultiSelectorSharedProps = {
+      currentFilter,
+      setCurrentFilter,
+      selectedValues,
+      onValueChange: onValueChangeHandler,
+      allAvailableOptions,
+      label,
+      allValue,
+      allFilterOptions,
+      maxLength,
+      inputRef,
+      onDeleteAll,
+      onSelectAll,
+    };
+
     return (
       <>
         {isMobileDevice ? (
-          <EnhancedMobileMultiSelector
-            currentFilter={currentFilter}
-            setCurrentFilter={setCurrentFilter}
-            selectedValues={selectedValues}
-            onValueChange={onValueChangeHandler}
-            allAvailableOptions={allAvailableOptions}
-            label={label}
-            allValue={allValue}
-            allFilterOptions={allFilterOptions}
-            maxLength={maxLength}
-            inputRef={inputRef}
-            onDeleteAll={onDeleteAll}
-            onSelectAll={onSelectAll}
-          />
+          <EnhancedMobileMultiSelector {...sharedProps} />
         ) : (
-          <EnhancedDesktopMultiSelector
-            selectedValues={selectedValues}
-            onValueChange={onValueChangeHandler}
-            allAvailableOptions={allAvailableOptions}
-            label={label}
-            allValue={allValue}
-            currentFilter={currentFilter}
-            setCurrentFilter={setCurrentFilter}
-            allFilterOptions={allFilterOptions}
-            maxLength={maxLength}
-            inputRef={inputRef}
-            onDeleteAll={onDeleteAll}
-            onSelectAll={onSelectAll}
-          />
+          <EnhancedDesktopMultiSelector {...sharedProps} />
         )}
       </>
     );

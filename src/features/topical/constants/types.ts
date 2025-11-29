@@ -685,55 +685,29 @@ export interface BookmarkSearchInputProps {
 }
 
 export interface BookmarkListProps {
-  scrollAreaRef: RefObject<HTMLDivElement | null>;
-  searchInputRef: RefObject<HTMLInputElement | null>;
   setOpen: (value: boolean) => void;
-  bookmarks: SelectedBookmark[];
-  chosenBookmarkList: Set<string>;
   question: SelectedQuestion;
-  searchInput: string;
-  setSearchInput: (value: string) => void;
-
-  setVisibility: (value: "public" | "private") => void;
   listId?: string;
-  isAddNewListDialogOpen: boolean;
-  setIsAddNewListDialogOpen: (value: boolean) => void;
-  newBookmarkListNameInput: string;
-  setNewBookmarkListNameInput: (value: string) => void;
-  isInputError: boolean;
-  setIsInputError: (value: boolean) => void;
-  visibility: "public" | "private";
-  isRemoveFromListDialogOpen: boolean;
-  setIsRemoveFromListDialogOpen: (value: boolean) => void;
+}
+
+export interface BookmarkListRef {
+  searchInput: string;
+  setSearchInput: Dispatch<SetStateAction<string>>;
 }
 
 export interface BookmarkItemProps {
   listName: string;
   visibility: "public" | "private";
   listId: string;
-  isPlaceholder: boolean;
   onSelect: () => void;
-  searchInputRef: RefObject<HTMLInputElement | null>;
   question: SelectedQuestion;
   chosenBookmarkList: Set<string>;
 }
 
 export interface BookmarkActionDialogsProps {
-  isAddNewListDialogOpen: boolean;
-  setIsAddNewListDialogOpen: (value: boolean) => void;
-  newBookmarkListNameInput: string;
-  setNewBookmarkListNameInput: (value: string) => void;
-  isInputError: boolean;
-  setIsInputError: (value: boolean) => void;
-  bookmarks: SelectedBookmark[];
   question: SelectedQuestion;
-  visibility: "public" | "private";
-  setVisibility: (value: "public" | "private") => void;
-
   chosenBookmarkList: Set<string>;
   listId?: string;
-  isRemoveFromListDialogOpen: boolean;
-  setIsRemoveFromListDialogOpen: (value: boolean) => void;
   searchInputRef: RefObject<HTMLInputElement | null>;
 }
 
@@ -750,4 +724,17 @@ export interface BookmarkButtonProps {
   popOverTriggerClassName?: string;
   triggerButtonClassName?: string;
   isInView: boolean;
+}
+
+export interface CreateListMutationVariables {
+  question: SelectedQuestion;
+  bookmarkListName: string;
+  visibility: "public" | "private";
+}
+
+export interface ToggleBookmarkMutationVariables {
+  question: SelectedQuestion;
+  listId: string;
+  isBookmarked: boolean;
+  bookmarkListName: string;
 }

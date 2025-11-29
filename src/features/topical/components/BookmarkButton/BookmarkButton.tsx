@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useRef,
-  type KeyboardEvent,
-  memo,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useRef, memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -14,8 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { BookmarkButtonProps } from "../../constants/types";
-import { Command } from "@/components/ui/command";
+import { BookmarkButtonProps, BookmarkListRef } from "../../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
@@ -29,6 +21,23 @@ import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import { BookmarkTrigger } from "./BookmarkTrigger";
 import { BookmarkList } from "./BookmarkList";
+import BookmarkContent from "./BookmarkContent";
+
+// Shared props interface for mobile and desktop components
+interface BookmarkButtonSharedProps {
+  question: BookmarkButtonProps["question"];
+  isBookmarkDisabled: boolean;
+  badgeClassName?: string;
+  triggerButtonClassName?: string;
+  popOverTriggerClassName?: string;
+  popOverAlign?: "start" | "center" | "end";
+  listId: string | undefined;
+  open: boolean;
+  handleOpenChange: (value: boolean | ((prev: boolean) => boolean)) => void;
+  setIsHovering?: (value: boolean) => void;
+  setShouldOpen?: (value: boolean) => void;
+  openUI: (e: React.MouseEvent) => void;
+}
 
 export const BookmarkButton = memo(
   ({
@@ -47,38 +56,10 @@ export const BookmarkButton = memo(
   }: BookmarkButtonProps) => {
     const [_open, _setOpen] = useState(false);
     const open = openProp ?? _open;
-    const [searchInput, setSearchInput] = useState("");
-    const [visibility, setVisibility] = useState<"public" | "private">(
-      "public"
-    );
-    const [newBookmarkListNameInput, setNewBookmarkListNameInput] =
-      useState("");
-    const [isInputError, setIsInputError] = useState(false);
-    const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
-    const [isRemoveFromListDialogOpen, setIsRemoveFromListDialogOpen] =
-      useState(false);
-
-    const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-    const searchInputRef = useRef<HTMLInputElement | null>(null);
-    const triggerRef = useRef<HTMLButtonElement | null>(null);
-
-    const {
-      bookmarksData: bookmarks,
-      savedActivitiesIsLoading,
-      savedActivitiesIsError,
-    } = useTopicalApp();
+    const { savedActivitiesIsLoading, savedActivitiesIsError } =
+      useTopicalApp();
     const { isAuthenticated } = useAuth();
     const isMobileDevice = useIsMobile();
-
-    const chosenBookmarkList = useMemo(() => {
-      const set = new Set<string>();
-      for (const bookmark of bookmarks ?? []) {
-        if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
-          set.add(bookmark.id);
-        }
-      }
-      return set;
-    }, [bookmarks, question.id]);
 
     const handleOpenChange = useCallback(
       (value: boolean | ((prev: boolean) => boolean)) => {
@@ -95,233 +76,246 @@ export const BookmarkButton = memo(
         if (setShouldOpen && !newOpenState) {
           setShouldOpen(false);
         }
-        if (!newOpenState) {
-          setNewBookmarkListNameInput("");
-          setSearchInput("");
-        }
       },
       [open, setOpenProp, setIsHovering, setShouldOpen]
     );
 
-    const handleKeyDown = useCallback(
-      (e: KeyboardEvent<HTMLDivElement>) => {
+    const openUI = useCallback(
+      (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (e.key === "Escape") {
-          if (searchInput) {
-            setSearchInput("");
-            return;
-          }
-          if (open) {
-            handleOpenChange(false);
-          }
+        if (isBookmarkDisabled || savedActivitiesIsLoading) {
+          return;
         }
+        if (savedActivitiesIsError) {
+          toast.error("Bookmark error. Please refresh the page.", {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          });
+          return;
+        }
+        if (!isAuthenticated) {
+          toast.error("Please sign in to bookmark questions.", {
+            duration: 2000,
+            position: isMobileDevice && open ? "top-center" : "bottom-right",
+          });
+          return;
+        }
+        handleOpenChange(true);
       },
-      [searchInput, open, handleOpenChange]
+      [
+        isBookmarkDisabled,
+        savedActivitiesIsLoading,
+        savedActivitiesIsError,
+        isAuthenticated,
+        handleOpenChange,
+        isMobileDevice,
+        open,
+      ]
     );
-
-    const openUI = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (isBookmarkDisabled || savedActivitiesIsLoading) {
-        return;
-      }
-      if (savedActivitiesIsError) {
-        toast.error("Bookmark error. Please refresh the page.", {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        });
-        return;
-      }
-      if (!isAuthenticated) {
-        toast.error("Please sign in to bookmark questions.", {
-          duration: 2000,
-          position: isMobileDevice && open ? "top-center" : "bottom-right",
-        });
-        return;
-      }
-      handleOpenChange(true);
-    };
 
     if (!isInView) {
       return null;
     }
 
-    return (
-      <Command
-        onKeyDown={handleKeyDown}
-        className="!h-max bg-transparent overflow-visible !w-max"
-      >
-        {isMobileDevice ? (
-          <Drawer
-            autoFocus={false}
-            onOpenChange={(open) => {
-              handleOpenChange(open);
-            }}
-            open={open}
-          >
-            <DrawerTrigger
-              asChild
-              onClick={(e) => {
-                openUI(e);
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-              >
-                <BookmarkTrigger
-                  question={question}
-                  isBookmarkDisabled={isBookmarkDisabled}
-                  badgeClassName={badgeClassName}
-                  triggerButtonClassName={triggerButtonClassName}
-                />
-              </div>
-            </DrawerTrigger>
-            <DrawerContent
-              className="z-[100009] h-[95vh] max-h-[95vh] dark:bg-accent"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onOpenAutoFocus={(e) => {
-                e.preventDefault();
-              }}
-              onInteractOutside={() => {
-                setSearchInput("");
-                handleOpenChange(false);
-              }}
-            >
-              <DrawerHeader className="sr-only">
-                <DrawerTitle>Select</DrawerTitle>
-                <DrawerDescription />
-                Save to book mark list
-              </DrawerHeader>
-              <div className="w-full pt-2 pb-4">
-                <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
-              </div>
+    const sharedProps: BookmarkButtonSharedProps = {
+      question,
+      isBookmarkDisabled,
+      badgeClassName,
+      triggerButtonClassName,
+      popOverTriggerClassName,
+      popOverAlign,
+      listId,
+      open,
+      handleOpenChange,
+      setIsHovering,
+      setShouldOpen,
+      openUI,
+    };
 
-              <div className="flex flex-row gap-3 p-2 ">
-                <Button
-                  className="flex-1/3 cursor-pointer mb-4"
-                  onClick={() => {
-                    handleOpenChange(false);
-                  }}
-                  variant="outline"
-                >
-                  Close
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <BookmarkList
-                scrollAreaRef={scrollAreaRef}
-                searchInputRef={searchInputRef}
-                setOpen={handleOpenChange}
-                bookmarks={bookmarks ?? []}
-                chosenBookmarkList={chosenBookmarkList}
-                question={question}
-                searchInput={searchInput}
-                setSearchInput={setSearchInput}
-                setVisibility={setVisibility}
-                listId={listId}
-                isAddNewListDialogOpen={isAddNewListDialogOpen}
-                setIsAddNewListDialogOpen={setIsAddNewListDialogOpen}
-                newBookmarkListNameInput={newBookmarkListNameInput}
-                setNewBookmarkListNameInput={setNewBookmarkListNameInput}
-                isInputError={isInputError}
-                setIsInputError={setIsInputError}
-                visibility={visibility}
-                isRemoveFromListDialogOpen={isRemoveFromListDialogOpen}
-                setIsRemoveFromListDialogOpen={setIsRemoveFromListDialogOpen}
-              />
-            </DrawerContent>
-          </Drawer>
+    return (
+      <>
+        {isMobileDevice ? (
+          <MobileBookmarkButton {...sharedProps} />
         ) : (
-          <Popover modal={true} open={open}>
-            <PopoverTrigger
-              onClick={(e) => {
-                openUI(e);
-              }}
-              ref={triggerRef}
-              asChild
-            >
-              <div
-                className={popOverTriggerClassName}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-              >
-                <BookmarkTrigger
-                  question={question}
-                  isBookmarkDisabled={isBookmarkDisabled}
-                  badgeClassName={badgeClassName}
-                  triggerButtonClassName={triggerButtonClassName}
-                />
-              </div>
-            </PopoverTrigger>
-            <PopoverContent
-              className="flex flex-col z-[100010] w-[270px] !px-0 dark:bg-accent"
-              onClick={(e) => e.stopPropagation()}
-              align={popOverAlign}
-              onOpenAutoFocus={(e) => {
-                e.preventDefault();
-              }}
-              autoFocus={false}
-              side="left"
-              onInteractOutside={(e) => {
-                if (triggerRef.current?.contains(e.target as Node)) {
-                  return;
-                }
-                handleOpenChange(false);
-                setSearchInput("");
-              }}
-            >
-              <BookmarkList
-                scrollAreaRef={scrollAreaRef}
-                searchInputRef={searchInputRef}
-                setOpen={handleOpenChange}
-                bookmarks={bookmarks ?? []}
-                chosenBookmarkList={chosenBookmarkList}
-                question={question}
-                searchInput={searchInput}
-                setSearchInput={setSearchInput}
-                setVisibility={setVisibility}
-                listId={listId}
-                isAddNewListDialogOpen={isAddNewListDialogOpen}
-                setIsAddNewListDialogOpen={setIsAddNewListDialogOpen}
-                newBookmarkListNameInput={newBookmarkListNameInput}
-                setNewBookmarkListNameInput={setNewBookmarkListNameInput}
-                isInputError={isInputError}
-                setIsInputError={setIsInputError}
-                visibility={visibility}
-                isRemoveFromListDialogOpen={isRemoveFromListDialogOpen}
-                setIsRemoveFromListDialogOpen={setIsRemoveFromListDialogOpen}
-              />
-              <div className="w-full px-2 mt-2 flex items-center justify-center">
-                <Button
-                  className="w-full cursor-pointer"
-                  variant="destructive"
-                  onClick={() => {
-                    handleOpenChange(false);
-                  }}
-                >
-                  Close
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <DesktopBookmarkButton {...sharedProps} />
         )}
-      </Command>
+      </>
     );
   }
 );
 
 BookmarkButton.displayName = "BookmarkButton";
+
+const MobileBookmarkButton = memo(
+  ({
+    question,
+    isBookmarkDisabled,
+    badgeClassName,
+    triggerButtonClassName,
+    open,
+    handleOpenChange,
+    setIsHovering,
+    setShouldOpen,
+    openUI,
+    listId,
+  }: BookmarkButtonSharedProps) => {
+    const bookmarkListRef = useRef<BookmarkListRef | null>(null);
+    return (
+      <BookmarkContent
+        bookmarkListRef={bookmarkListRef}
+        open={open}
+        handleOpenChange={handleOpenChange}
+        setIsHovering={setIsHovering}
+        setShouldOpen={setShouldOpen}
+      >
+        <Drawer
+          autoFocus={false}
+          onOpenChange={(open) => {
+            handleOpenChange(open);
+          }}
+          open={open}
+        >
+          <DrawerTrigger
+            asChild
+            onClick={(e) => {
+              openUI(e);
+            }}
+          >
+            <BookmarkTrigger
+              question={question}
+              isBookmarkDisabled={isBookmarkDisabled}
+              badgeClassName={badgeClassName}
+              triggerButtonClassName={triggerButtonClassName}
+            />
+          </DrawerTrigger>
+          <DrawerContent
+            className="z-[100009] h-[95vh] max-h-[95vh] dark:bg-accent"
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+            onInteractOutside={() => {
+              bookmarkListRef.current?.setSearchInput("");
+              handleOpenChange(false);
+            }}
+          >
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>Select</DrawerTitle>
+              <DrawerDescription />
+              Save to book mark list
+            </DrawerHeader>
+            <div className="w-full pt-2 pb-4">
+              <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
+            </div>
+
+            <div className="flex flex-row gap-3 p-2 ">
+              <Button
+                className="flex-1/3 cursor-pointer mb-4"
+                onClick={() => {
+                  handleOpenChange(false);
+                }}
+                variant="outline"
+              >
+                Close
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <BookmarkList
+              setOpen={handleOpenChange}
+              question={question}
+              listId={listId}
+              ref={bookmarkListRef}
+            />
+          </DrawerContent>
+        </Drawer>
+      </BookmarkContent>
+    );
+  }
+);
+
+MobileBookmarkButton.displayName = "MobileBookmarkButton";
+
+const DesktopBookmarkButton = memo(
+  ({
+    question,
+    isBookmarkDisabled,
+    badgeClassName,
+    triggerButtonClassName,
+    popOverTriggerClassName,
+    popOverAlign,
+    open,
+    handleOpenChange,
+    setIsHovering,
+    setShouldOpen,
+    openUI,
+    listId,
+  }: BookmarkButtonSharedProps) => {
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const bookmarkListRef = useRef<BookmarkListRef | null>(null);
+
+    return (
+      <BookmarkContent
+        bookmarkListRef={bookmarkListRef}
+        open={open}
+        handleOpenChange={handleOpenChange}
+        setIsHovering={setIsHovering}
+        setShouldOpen={setShouldOpen}
+      >
+        <Popover modal={true} open={open}>
+          <PopoverTrigger
+            onClick={(e) => {
+              openUI(e);
+            }}
+            ref={triggerRef}
+            asChild
+          >
+            <div className={popOverTriggerClassName}>
+              <BookmarkTrigger
+                question={question}
+                isBookmarkDisabled={isBookmarkDisabled}
+                badgeClassName={badgeClassName}
+                triggerButtonClassName={triggerButtonClassName}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent
+            className="flex flex-col z-[100010] w-[270px] !px-0 dark:bg-accent"
+            onClick={(e) => e.stopPropagation()}
+            align={popOverAlign}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+            autoFocus={false}
+            side="left"
+            onInteractOutside={(e) => {
+              if (triggerRef.current?.contains(e.target as Node)) {
+                return;
+              }
+              handleOpenChange(false);
+              bookmarkListRef.current?.setSearchInput("");
+            }}
+          >
+            <BookmarkList
+              setOpen={handleOpenChange}
+              question={question}
+              listId={listId}
+              ref={bookmarkListRef}
+            />
+            <div className="w-full px-2 mt-2 flex items-center justify-center">
+              <Button
+                className="w-full cursor-pointer"
+                variant="destructive"
+                onClick={() => {
+                  handleOpenChange(false);
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </BookmarkContent>
+    );
+  }
+);
+
+DesktopBookmarkButton.displayName = "DesktopBookmarkButton";

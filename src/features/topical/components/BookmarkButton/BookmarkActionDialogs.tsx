@@ -21,34 +21,35 @@ import {
 import { SelectVisibility } from "../SelectVisibility";
 import { MAXIMUM_BOOKMARK_LISTS_PER_USER } from "@/constants/constants";
 import { LIST_NAME_MAX_LENGTH } from "../../constants/constants";
-import { BookmarkActionDialogsProps } from "../../constants/types";
+import {
+  BookmarkActionDialogsProps,
+  CreateListMutationVariables,
+} from "../../constants/types";
 import {
   createListMutationFn,
   handleBookmarkError,
   handleCreateListOptimisticUpdate,
   handleToggleBookmarkOptimisticUpdate,
   toggleBookmarkMutationFn,
-  CreateListMutationVariables,
 } from "../../utils/bookmarkUtils";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 
 export const BookmarkActionDialogs = memo(
   ({
-    isAddNewListDialogOpen,
-    setIsAddNewListDialogOpen,
-    newBookmarkListNameInput,
-    setNewBookmarkListNameInput,
-    isInputError,
-    setIsInputError,
-    bookmarks,
     question,
-    visibility,
-    setVisibility,
     chosenBookmarkList,
     listId,
-    isRemoveFromListDialogOpen,
-    setIsRemoveFromListDialogOpen,
     searchInputRef,
   }: BookmarkActionDialogsProps) => {
+    const [visibility, setVisibility] = useState<"public" | "private">(
+      "public"
+    );
+    const [isInputError, setIsInputError] = useState(false);
+    const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
+    const [newBookmarkListNameInput, setNewBookmarkListNameInput] =
+      useState("");
+    const [isRemoveFromListDialogOpen, setIsRemoveFromListDialogOpen] =
+      useState(false);
     const isMobileDevice = useIsMobile();
     const queryClient = useQueryClient();
     const isMutatingThisQuestion =
@@ -58,6 +59,7 @@ export const BookmarkActionDialogs = memo(
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
+    const { bookmarksData } = useTopicalApp();
 
     const createListMutationKey = [
       "user_saved_activities",
@@ -137,7 +139,10 @@ export const BookmarkActionDialogs = memo(
         setIsInputError(true);
         return;
       }
-      if (bookmarks.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
+      if (
+        bookmarksData &&
+        bookmarksData.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER
+      ) {
         toast.error(
           "Failed to update bookmarks. You can only have maximum of " +
             MAXIMUM_BOOKMARK_LISTS_PER_USER +
@@ -161,7 +166,7 @@ export const BookmarkActionDialogs = memo(
     };
 
     const removeFromList = ({ listId }: { listId: string }) => {
-      const list = bookmarks.find((bookmark) => bookmark.id === listId);
+      const list = bookmarksData?.find((bookmark) => bookmark.id === listId);
       if (!list) {
         toast.error("List not found, please refresh the page!", {
           duration: 2000,

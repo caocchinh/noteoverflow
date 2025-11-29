@@ -1,6 +1,8 @@
 import {
+  CreateListMutationVariables,
   SavedActivitiesResponse,
   SelectedQuestion,
+  ToggleBookmarkMutationVariables,
 } from "@/features/topical/constants/types";
 import {
   addBookmarkAction,
@@ -15,19 +17,6 @@ import {
   MAXIMUM_BOOKMARK_LISTS_PER_USER,
   MAXIMUM_BOOKMARKS_PER_LIST,
 } from "@/constants/constants";
-
-export interface CreateListMutationVariables {
-  question: SelectedQuestion;
-  bookmarkListName: string;
-  visibility: "public" | "private";
-}
-
-export interface ToggleBookmarkMutationVariables {
-  question: SelectedQuestion;
-  listId: string;
-  isBookmarked: boolean;
-  bookmarkListName: string;
-}
 
 export const createListMutationFn = async ({
   question,
