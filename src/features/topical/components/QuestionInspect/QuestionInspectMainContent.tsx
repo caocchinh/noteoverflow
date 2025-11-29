@@ -300,10 +300,8 @@ const QuestionInspectMainContent = forwardRef(
       <>
         <AnnotatableImagesUpdater
           isMounted={isMounted}
-          imageSource={currentQuestionData?.questionImages ?? []}
           elementRef={annotatableQuestionInspectImagesElementRef}
           elementRootRef={annotatableQuestionInspectImagesRootRef}
-          questionId={currentQuestionData?.id ?? ""}
           typeOfView="question"
           componentRef={annotatableQuestionInspectImagesRootElementRef}
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
@@ -313,10 +311,8 @@ const QuestionInspectMainContent = forwardRef(
         />
         <AnnotatableImagesUpdater
           isMounted={isMounted}
-          imageSource={currentQuestionData?.answers ?? []}
           elementRef={annotatableAnswerInspectImagesElementRef}
           elementRootRef={annotatableAnswerInspectImagesRootRef}
-          questionId={currentQuestionData?.id ?? ""}
           typeOfView="answer"
           componentRef={annotatableAnswerInspectImagesRootElementRef}
           isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}

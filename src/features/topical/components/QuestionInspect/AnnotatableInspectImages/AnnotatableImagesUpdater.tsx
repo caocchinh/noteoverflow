@@ -31,10 +31,8 @@ import {
 const AnnotatableImagesUpdater = memo(
   ({
     isMounted,
-    imageSource,
     elementRef,
     elementRootRef,
-    questionId,
     typeOfView,
     isHavingUnsafeChangesRef,
     componentRef,
@@ -56,7 +54,7 @@ const AnnotatableImagesUpdater = memo(
     const isMobileDevice = useIsMobile();
 
     const { mutate: createListMutate } = useMutation({
-      mutationKey: ["user_saved_activities", "bookmarks", questionId],
+      mutationKey: ["user_saved_activities", "bookmarks", question?.id],
       mutationFn: createListMutationFn,
       onSuccess: (data) => {
         handleCreateListOptimisticUpdate(queryClient, data);
@@ -74,7 +72,7 @@ const AnnotatableImagesUpdater = memo(
     });
 
     const { mutate: toggleBookmarkMutate } = useMutation({
-      mutationKey: ["user_saved_activities", "bookmarks", questionId],
+      mutationKey: ["user_saved_activities", "bookmarks", question?.id],
       mutationFn: toggleBookmarkMutationFn,
       onSuccess: (data) => {
         handleToggleBookmarkOptimisticUpdate(queryClient, data);
@@ -96,7 +94,7 @@ const AnnotatableImagesUpdater = memo(
         mutationKey: [
           "user_saved_activities",
           "annotations",
-          questionId,
+          question?.id,
           typeOfView,
         ],
         mutationFn: async (data: {
@@ -241,9 +239,9 @@ const AnnotatableImagesUpdater = memo(
 
     const currentQuestionAnnotationData = useMemo(() => {
       return annotationsData?.find(
-        (annotation) => annotation.questionId === questionId
+        (annotation) => annotation.questionId === question?.id
       );
-    }, [annotationsData, questionId]);
+    }, [annotationsData, question?.id]);
 
     const initialXfdf = useMemo(() => {
       if (!currentQuestionAnnotationData) {
@@ -257,7 +255,7 @@ const AnnotatableImagesUpdater = memo(
     }, [currentQuestionAnnotationData, typeOfView]);
 
     useEffect(() => {
-      if (!isMounted || !imageSource) return;
+      if (!isMounted || !question) return;
 
       // Call initAnnotableImagesElement every time to update props
       // The function creates the root only if it doesn't exist,
@@ -275,9 +273,7 @@ const AnnotatableImagesUpdater = memo(
             isSavedActivitiesError={isSavedActivitiesError}
             initialXfdf={initialXfdf}
             typeOfView={typeOfView}
-            imageSource={imageSource}
             isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-            currentQuestionId={questionId}
             isSessionFetching={isSessionFetching}
             userName={user?.name}
             setIsCalculatorOpen={setIsCalculatorOpen}
@@ -287,15 +283,14 @@ const AnnotatableImagesUpdater = memo(
             isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
             isSavingAnnotations={isSavingAnnotations}
             isAuthenticated={isAuthenticated}
+            question={question}
           />
         );
       }
     }, [
       isMounted,
-      imageSource,
       elementRef,
       elementRootRef,
-      questionId,
       isSessionFetching,
       setIsCalculatorOpen,
       isCalculatorOpen,
@@ -312,6 +307,7 @@ const AnnotatableImagesUpdater = memo(
       isAnnotationGuardDialogOpen,
       isSavingAnnotations,
       isAuthenticated,
+      question,
     ]);
 
     return null;

@@ -627,10 +627,8 @@ export interface InnitPdfProps {
 
 export interface AnnotatableImagesUpdaterProps {
   isMounted: boolean;
-  imageSource: string[];
   elementRef: RefObject<HTMLDivElement | null>;
   elementRootRef: RefObject<Root | null>;
-  questionId: string;
   question: SelectedQuestion | undefined;
   typeOfView: "question" | "answer";
   componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
@@ -641,8 +639,6 @@ export interface AnnotatableImagesUpdaterProps {
 
 export interface AnnotatableInspectImageProps {
   typeOfView: "question" | "answer";
-  imageSource: string[] | undefined;
-  currentQuestionId: string | undefined;
   isSessionFetching: boolean;
   isAuthenticated: boolean;
   userName: string | undefined;
@@ -650,6 +646,7 @@ export interface AnnotatableInspectImageProps {
   isCalculatorOpen: boolean;
   imageTheme: "light" | "dark";
   initialXfdf: string | null;
+  question: SelectedQuestion | undefined;
   isSavedActivitiesLoading: boolean;
   isSavedActivitiesError: boolean;
   isAnnotationGuardDialogOpen: boolean;

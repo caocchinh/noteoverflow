@@ -29,7 +29,6 @@ import {
   extractSeasonFromPaperCode,
   extractYearFromPaperCode,
   parsePastPaperUrl,
-  handleDownloadPdf,
 } from "@/features/topical/lib/utils";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
@@ -57,6 +56,7 @@ import {
 import Loader from "../../Loader/Loader";
 import SaveAnnotationsButton from "./SaveAnnotationsButton";
 import { toast } from "sonner";
+import NonEditModeDownloadMenu from "./NonEditModeDownloadMenu";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -99,58 +99,11 @@ const initPdfElement = ({
   }
 };
 
-const DownloadQuestionButton = memo(
-  ({
-    onGeneratePdf,
-    pdfBaseFileName,
-  }: {
-    onGeneratePdf: () => Promise<Blob | null>;
-    pdfBaseFileName: string;
-  }) => {
-    const [isGenerating, setIsGenerating] = useState(false);
-
-    const handleDownload = useCallback(async () => {
-      setIsGenerating(true);
-      try {
-        const blob = await onGeneratePdf();
-        handleDownloadPdf(blob, pdfBaseFileName);
-      } finally {
-        setIsGenerating(false);
-      }
-    }, [onGeneratePdf, pdfBaseFileName]);
-
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        variant="outline"
-        onClick={handleDownload}
-        disabled={isGenerating}
-        title="Download question"
-      >
-        {isGenerating ? (
-          <>
-            <span className="hidden sm:block">Generating</span>
-            <Loader2 className="h-4 w-4 animate-spin" />
-          </>
-        ) : (
-          <>
-            <span className="hidden sm:block">Download</span>
-            <Download className="h-4 w-4" />
-          </>
-        )}
-      </Button>
-    );
-  }
-);
-
-DownloadQuestionButton.displayName = "DownloadQuestionButton";
-
 const AnnotatableInspectImagesComponent = memo(
   forwardRef<AnnotatableInspectImagesHandle, AnnotatableInspectImageProps>(
     (
       {
-        imageSource,
-        currentQuestionId,
+        question,
         isSessionFetching,
         userName,
         typeOfView,
@@ -197,24 +150,22 @@ const AnnotatableInspectImagesComponent = memo(
       // Auto-save state
       const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-      const paperCode = useMemo(
-        () =>
-          extractPaperCode({
-            questionId: currentQuestionId || "",
-          }),
-        [currentQuestionId]
-      );
+      const paperCode = useMemo(() => {
+        if (!question) return "";
+        return extractPaperCode({
+          questionId: question.id || "",
+        });
+      }, [question]);
 
-      const questionNumber = useMemo(
-        () =>
-          extractQuestionNumber({
-            questionId: currentQuestionId || "",
-          }),
-        [currentQuestionId]
-      );
+      const questionNumber = useMemo(() => {
+        if (!question) return "";
+        return extractQuestionNumber({
+          questionId: question.id || "",
+        });
+      }, [question]);
 
       const questionLink = useMemo(() => {
-        if (!currentQuestionId || !paperCode) return "";
+        if (!question || !paperCode) return "";
 
         const season = extractSeasonFromPaperCode({ paperCode });
         const year = extractYearFromPaperCode({ paperCode });
@@ -222,12 +173,12 @@ const AnnotatableInspectImagesComponent = memo(
         if (!season || !year) return "";
 
         return parsePastPaperUrl({
-          questionId: currentQuestionId,
+          questionId: question.id,
           year,
           season,
           type: "qp", // question paper
         });
-      }, [currentQuestionId, paperCode]);
+      }, [question, paperCode]);
 
       const pdfBaseFileName = useMemo(() => {
         const sanitizedPaperCode = (paperCode || "").replace("/", "_");
@@ -251,14 +202,26 @@ const AnnotatableInspectImagesComponent = memo(
       }, []);
 
       // Filter only image URLs
-      const imageUrls = useMemo(
-        () => imageSource?.filter((item) => item.includes("http")) || [],
-        [imageSource]
-      );
-      const textItems = useMemo(
-        () => imageSource?.filter((item) => !item.includes("http")) || [],
-        [imageSource]
-      );
+      const imageUrls = useMemo(() => {
+        if (!question) return [];
+        if (typeOfView === "question") {
+          return question.questionImages.filter((item) =>
+            item.includes("http")
+          );
+        } else {
+          return question.answers.filter((item) => item.includes("http"));
+        }
+      }, [question, typeOfView]);
+      const textItems = useMemo(() => {
+        if (!question) return [];
+        if (typeOfView === "question") {
+          return question.questionImages.filter(
+            (item) => !item.includes("http")
+          );
+        } else {
+          return question.answers.filter((item) => !item.includes("http"));
+        }
+      }, [question, typeOfView]);
 
       const generatePdfBlob = useCallback(async () => {
         if (imageUrls.length > 0) {
@@ -328,15 +291,16 @@ const AnnotatableInspectImagesComponent = memo(
           toast.error("Please login to save annotations!");
           return;
         }
+        if (!question) return;
 
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
-        if (currentXfdf && currentQuestionId) {
+        if (currentXfdf && question.id) {
           const xfdfBeingSaved = currentXfdf;
           onSaveAnnotations(
             {
-              questionId: currentQuestionId,
+              questionId: question.id,
               ...(typeOfView === "question"
                 ? { questionXfdf: xfdfBeingSaved || undefined }
                 : { answerXfdf: xfdfBeingSaved || undefined }),
@@ -351,10 +315,10 @@ const AnnotatableInspectImagesComponent = memo(
           );
         }
       }, [
-        currentQuestionId,
         currentXfdf,
         isHavingUnsafeChangesRef,
         onSaveAnnotations,
+        question,
         typeOfView,
       ]);
 
@@ -363,7 +327,7 @@ const AnnotatableInspectImagesComponent = memo(
         if (
           !isHavingUnsafeChangesRef.current[typeOfView] ||
           !currentXfdf ||
-          !currentQuestionId ||
+          !question ||
           !isEditMode ||
           !isMounted ||
           !isPdfViewerLoaded ||
@@ -389,7 +353,6 @@ const AnnotatableInspectImagesComponent = memo(
         };
       }, [
         currentXfdf,
-        currentQuestionId,
         isEditMode,
         isMounted,
         isPdfViewerLoaded,
@@ -397,12 +360,13 @@ const AnnotatableInspectImagesComponent = memo(
         handleSave,
         isHavingUnsafeChangesRef,
         isSessionFetching,
+        question,
       ]);
 
       useEffect(() => {
         if (
           !isHavingUnsafeChangesRef.current[typeOfView] ||
-          !currentQuestionId ||
+          !question ||
           !isEditMode ||
           !isMounted ||
           !isAnnotationGuardDialogOpen ||
@@ -416,7 +380,6 @@ const AnnotatableInspectImagesComponent = memo(
         handleSave();
       }, [
         isAnnotationGuardDialogOpen,
-        currentQuestionId,
         isHavingUnsafeChangesRef,
         typeOfView,
         isSavingAnnotations,
@@ -424,6 +387,7 @@ const AnnotatableInspectImagesComponent = memo(
         isMounted,
         handleSave,
         isSessionFetching,
+        question,
       ]);
 
       useEffect(() => {
@@ -484,9 +448,9 @@ const AnnotatableInspectImagesComponent = memo(
             }
           }, 0);
         };
-      }, [imageSource]);
+      }, [question]);
 
-      if (!imageSource || imageSource.length === 0) {
+      if (!question || (!question.questionImages && !question.answers)) {
         return (
           <p className="text-center text-red-600 mt-2">
             Unable to fetch resource
@@ -501,49 +465,51 @@ const AnnotatableInspectImagesComponent = memo(
               ref={ultilityBarRef}
             >
               {!isEditMode && (
-                <DownloadQuestionButton
+                <NonEditModeDownloadMenu
                   onGeneratePdf={generatePdfBlob}
                   pdfBaseFileName={pdfBaseFileName}
                 />
               )}
-              <Button
-                type="button"
-                variant={
-                  !isSavedActivitiesLoading && isSavedActivitiesError
-                    ? "destructive"
-                    : "outline"
-                }
-                disabled={
-                  isSessionFetching ||
-                  isSavedActivitiesLoading ||
-                  isSavedActivitiesError
-                }
-                className="cursor-pointer gap-2 h-[26px]"
-                title={
-                  isEditMode ? "Switch to view mode" : "Switch to edit mode"
-                }
-                onClick={() => setIsEditMode(!isEditMode)}
-              >
-                {!isSavedActivitiesLoading && isSavedActivitiesError ? (
-                  <>
-                    <TriangleAlert /> Error{" "}
-                  </>
-                ) : (
-                  <>
-                    {isEditMode ? (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        View Mode
-                      </>
-                    ) : (
-                      <>
-                        <Edit3 className="h-4 w-4" />
-                        Edit Mode
-                      </>
-                    )}
-                  </>
-                )}
-              </Button>
+              {imageUrls.length > 0 && (
+                <Button
+                  type="button"
+                  variant={
+                    !isSavedActivitiesLoading && isSavedActivitiesError
+                      ? "destructive"
+                      : "outline"
+                  }
+                  disabled={
+                    isSessionFetching ||
+                    isSavedActivitiesLoading ||
+                    isSavedActivitiesError
+                  }
+                  className="cursor-pointer gap-2 h-[26px]"
+                  title={
+                    isEditMode ? "Switch to view mode" : "Switch to edit mode"
+                  }
+                  onClick={() => setIsEditMode(!isEditMode)}
+                >
+                  {!isSavedActivitiesLoading && isSavedActivitiesError ? (
+                    <>
+                      <TriangleAlert /> Error{" "}
+                    </>
+                  ) : (
+                    <>
+                      {isEditMode ? (
+                        <>
+                          View Mode
+                          <Eye className="h-4 w-4" />
+                        </>
+                      ) : (
+                        <>
+                          Edit Mode
+                          <Edit3 className="h-4 w-4" />
+                        </>
+                      )}
+                    </>
+                  )}
+                </Button>
+              )}
               {!isFullscreen && isEditMode && (
                 <>
                   <SaveAnnotationsButton
@@ -684,10 +650,10 @@ const AnnotatableInspectImagesComponent = memo(
                 <PhotoProvider>
                   {imageUrls.map((item) => (
                     <PhotoView
-                      key={`${item}${currentQuestionId}${
-                        currentQuestionId &&
+                      key={`${item}${question.id}${
+                        question.id &&
                         extractQuestionNumber({
-                          questionId: currentQuestionId,
+                          questionId: question.id,
                         })
                       }`}
                       src={item}

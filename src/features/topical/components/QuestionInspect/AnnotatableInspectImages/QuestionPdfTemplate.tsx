@@ -129,6 +129,7 @@ const QuestionPdfTemplate = ({
               </Link>
             </View>
           </View>
+
           <Text style={styles.headerTagline}>AS & A-Level resources</Text>
         </View>
       </View>

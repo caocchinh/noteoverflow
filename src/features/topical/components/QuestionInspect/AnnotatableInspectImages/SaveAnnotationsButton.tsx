@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Save } from "lucide-react";
+import { CloudCheck, Loader2, Save } from "lucide-react";
 import { memo } from "react";
 
 const SaveAnnotationsButton = memo(
@@ -45,8 +45,17 @@ const SaveAnnotationsButton = memo(
                 </>
               ) : (
                 <>
-                  <span className="hidden sm:block">Save</span>
-                  <Save className="h-4 w-4" />
+                  {hasUnsavedChanges ? (
+                    <>
+                      <span className="hidden sm:block">Save</span>
+                      <Save className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:block">Saved</span>
+                      <CloudCheck className="h-4 w-4" />
+                    </>
+                  )}
                 </>
               )}
             </Button>
