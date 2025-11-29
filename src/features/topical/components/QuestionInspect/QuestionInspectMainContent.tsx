@@ -23,7 +23,7 @@ import { QuestionInformation } from "../QuestionInformation";
 import BothViews from "./BothViews";
 import { Root } from "react-dom/client";
 import { createPortal } from "react-dom";
-import AnnotatableImagesUpdater from "./AnnotatableImagesUpdater";
+import AnnotatableImagesUpdater from "./AnnotatableInspectImages/AnnotatableImagesUpdater";
 
 const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
@@ -352,7 +352,7 @@ const QuestionInspectMainContent = forwardRef(
               )}
             >
               <ScrollArea
-                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-2!"
                 type="always"
                 viewportRef={questionScrollAreaRef}
               >
@@ -379,7 +379,7 @@ const QuestionInspectMainContent = forwardRef(
               )}
             >
               <ScrollArea
-                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 !pr-2"
+                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-2!"
                 type="always"
                 viewportRef={answerScrollAreaRef}
               >

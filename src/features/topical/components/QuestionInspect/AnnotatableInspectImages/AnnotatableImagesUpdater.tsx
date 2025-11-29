@@ -1,10 +1,10 @@
 import { memo, useEffect, useMemo, useCallback } from "react";
-import { AnnotatableInspectImages } from "./AnnotatableInspectImages/AnnotatableInspectImages";
+import { AnnotatableInspectImages } from "./AnnotatableInspectImages";
 import {
   AnnotatableImagesUpdaterProps,
   SavedActivitiesResponse,
   SelectedAnnotation,
-} from "../../constants/types";
+} from "../../../constants/types";
 import { saveAnnotationsAction } from "@/features/topical/server/actions";
 import { useAuth } from "@/context/AuthContext";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
@@ -21,12 +21,12 @@ import {
   handleCreateListOptimisticUpdate,
   handleToggleBookmarkOptimisticUpdate,
   toggleBookmarkMutationFn,
-} from "../../utils/bookmarkUtils";
+} from "../../../utils/bookmarkUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
   MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
-} from "../../constants/constants";
+} from "../../../constants/constants";
 
 const AnnotatableImagesUpdater = memo(
   ({
@@ -51,7 +51,7 @@ const AnnotatableImagesUpdater = memo(
       annotationsData,
       bookmarksData,
     } = useTopicalApp();
-    const { isSessionFetching, user } = useAuth();
+    const { isSessionFetching, user, isAuthenticated } = useAuth();
     const queryClient = useQueryClient();
     const isMobileDevice = useIsMobile();
 
@@ -286,6 +286,7 @@ const AnnotatableImagesUpdater = memo(
             onSaveAnnotations={onSaveAnnotations}
             isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
             isSavingAnnotations={isSavingAnnotations}
+            isAuthenticated={isAuthenticated}
           />
         );
       }
@@ -310,6 +311,7 @@ const AnnotatableImagesUpdater = memo(
       setIsAnnotationGuardDialogOpen,
       isAnnotationGuardDialogOpen,
       isSavingAnnotations,
+      isAuthenticated,
     ]);
 
     return null;

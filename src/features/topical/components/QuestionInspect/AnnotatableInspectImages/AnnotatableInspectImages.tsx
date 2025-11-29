@@ -20,7 +20,6 @@ import {
   Calculator,
   Download,
   TriangleAlert,
-  Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -56,6 +55,8 @@ import {
   AnnotatableInspectImagesHandle,
 } from "@/features/topical/constants/types";
 import Loader from "../../Loader/Loader";
+import SaveAnnotationsButton from "./SaveAnnotationsButton";
+import { toast } from "sonner";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -144,44 +145,6 @@ const DownloadQuestionButton = memo(
 
 DownloadQuestionButton.displayName = "DownloadQuestionButton";
 
-const SaveAnnotationsButton = memo(
-  ({
-    onSave,
-    isSaving,
-    hasUnsavedChanges,
-    isDisabled,
-  }: {
-    onSave: () => void;
-    isSaving: boolean;
-    hasUnsavedChanges: boolean;
-    isDisabled: boolean;
-  }) => {
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        variant={hasUnsavedChanges ? "default" : "outline"}
-        onClick={onSave}
-        disabled={isDisabled || isSaving || !hasUnsavedChanges}
-        title={hasUnsavedChanges ? "Save annotations" : "No unsaved changes"}
-      >
-        {isSaving ? (
-          <>
-            <span className="hidden sm:block">Saving</span>
-            <Loader2 className="h-4 w-4 animate-spin" />
-          </>
-        ) : (
-          <>
-            <span className="hidden sm:block">Save</span>
-            <Save className="h-4 w-4" />
-          </>
-        )}
-      </Button>
-    );
-  }
-);
-
-SaveAnnotationsButton.displayName = "SaveAnnotationsButton";
-
 const AnnotatableInspectImagesComponent = memo(
   forwardRef<AnnotatableInspectImagesHandle, AnnotatableInspectImageProps>(
     (
@@ -201,6 +164,7 @@ const AnnotatableInspectImagesComponent = memo(
         isHavingUnsafeChangesRef,
         isAnnotationGuardDialogOpen,
         isSavingAnnotations,
+        isAuthenticated,
       },
       ref
     ) => {
@@ -219,15 +183,16 @@ const AnnotatableInspectImagesComponent = memo(
       const [key, setKey] = useState(0);
       const [isMounted, setIsMounted] = useState(false);
       const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
+
       const latestXfdfRef = useRef(currentXfdf);
       latestXfdfRef.current = currentXfdf;
-
       const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
       const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
       const pdfViewerRootRef = useRef<Root | null>(null);
       const normalContainerRef = useRef<HTMLDivElement | null>(null);
       const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
       const ultilityBarRef = useRef<HTMLDivElement | null>(null);
+      const isAuthenticatedRef = useRef(isAuthenticated);
 
       // Auto-save state
       const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -276,6 +241,10 @@ const AnnotatableInspectImagesComponent = memo(
           ultilityBarRef.current?.scrollIntoView({ behavior: "smooth" });
         }
       }, [isEditMode]);
+
+      useEffect(() => {
+        isAuthenticatedRef.current = isAuthenticated;
+      }, [isAuthenticated]);
 
       const toggleFullscreen = useCallback(() => {
         setIsFullscreen((prev) => !prev);
@@ -346,13 +315,20 @@ const AnnotatableInspectImagesComponent = memo(
       // Handle annotations changed callback
       const handleAnnotationsChanged = useCallback(
         (xfdf: string) => {
-          isHavingUnsafeChangesRef.current[typeOfView] = true;
+          if (isAuthenticatedRef.current) {
+            isHavingUnsafeChangesRef.current[typeOfView] = true;
+          }
           setCurrentXfdf(xfdf);
         },
         [isHavingUnsafeChangesRef, typeOfView]
       );
 
       const handleSave = useCallback(() => {
+        if (!isAuthenticatedRef.current) {
+          toast.error("Please login to save annotations!");
+          return;
+        }
+
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
@@ -390,7 +366,9 @@ const AnnotatableInspectImagesComponent = memo(
           !currentQuestionId ||
           !isEditMode ||
           !isMounted ||
-          !isPdfViewerLoaded
+          !isPdfViewerLoaded ||
+          !isAuthenticatedRef.current ||
+          isSessionFetching
         )
           return;
 
@@ -418,6 +396,7 @@ const AnnotatableInspectImagesComponent = memo(
         typeOfView,
         handleSave,
         isHavingUnsafeChangesRef,
+        isSessionFetching,
       ]);
 
       useEffect(() => {
@@ -427,7 +406,9 @@ const AnnotatableInspectImagesComponent = memo(
           !isEditMode ||
           !isMounted ||
           !isAnnotationGuardDialogOpen ||
-          isSavingAnnotations
+          isSavingAnnotations ||
+          !isAuthenticatedRef.current ||
+          isSessionFetching
         ) {
           return;
         }
@@ -442,6 +423,7 @@ const AnnotatableInspectImagesComponent = memo(
         isEditMode,
         isMounted,
         handleSave,
+        isSessionFetching,
       ]);
 
       useEffect(() => {
@@ -571,6 +553,9 @@ const AnnotatableInspectImagesComponent = memo(
                       isHavingUnsafeChangesRef.current[typeOfView]
                     }
                     isDisabled={isSessionFetching || !isPdfViewerLoaded}
+                    isUserNotAuthenticated={
+                      !isAuthenticated && !isSessionFetching
+                    }
                   />
                   <ClearAllButton
                     pdfViewerRef={pdfViewerRef}
@@ -627,7 +612,7 @@ const AnnotatableInspectImagesComponent = memo(
                 {createPortal(
                   <div
                     className={cn(
-                      "fixed inset-0 z-[999998] bg-white flex flex-col h-[100dvh] w-[100vw]",
+                      "fixed inset-0 z-999998 bg-white flex flex-col h-dvh w-screen",
                       isFullscreen ? "block" : "hidden"
                     )}
                   >
@@ -641,6 +626,9 @@ const AnnotatableInspectImagesComponent = memo(
                           isSaving={isSavingAnnotations}
                           hasUnsavedChanges={
                             isHavingUnsafeChangesRef.current[typeOfView]
+                          }
+                          isUserNotAuthenticated={
+                            !isAuthenticated && !isSessionFetching
                           }
                           isDisabled={isSessionFetching || !isPdfViewerLoaded}
                         />
@@ -657,7 +645,7 @@ const AnnotatableInspectImagesComponent = memo(
                           isSessionFetching={isSessionFetching}
                         />
                         <Button
-                          className="relative z-[99998] dark:text-white text-white !hover:text-black cursor-pointer"
+                          className="relative z-99998 dark:text-white text-white !hover:text-black cursor-pointer"
                           variant="ghost"
                           size="icon"
                           onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
@@ -667,7 +655,7 @@ const AnnotatableInspectImagesComponent = memo(
                         </Button>
 
                         <Button
-                          className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                          className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
                           variant="ghost"
                           size="icon"
                           onClick={toggleFullscreen}
@@ -706,8 +694,8 @@ const AnnotatableInspectImagesComponent = memo(
                     >
                       <img
                         className={cn(
-                          "w-full h-full object-contain relative z-2 !max-w-[750px] cursor-pointer",
-                          imageTheme === "dark" && "!invert"
+                          "w-full h-full object-contain relative z-2 max-w-[750px]! cursor-pointer",
+                          imageTheme === "dark" && "invert!"
                         )}
                         src={item}
                         alt="Question image"
@@ -784,7 +772,7 @@ const DownloadPdfButton = memo(
             <Download className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="z-[999998] flex flex-col dark:bg-accent p-2 gap-2">
+        <DropdownMenuContent className="z-999998 flex flex-col dark:bg-accent p-2 gap-2">
           <DownloadOrginalButton
             pdfBlob={pdfBlob}
             fileName={fileName}

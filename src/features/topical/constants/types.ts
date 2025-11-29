@@ -644,6 +644,7 @@ export interface AnnotatableInspectImageProps {
   imageSource: string[] | undefined;
   currentQuestionId: string | undefined;
   isSessionFetching: boolean;
+  isAuthenticated: boolean;
   userName: string | undefined;
   setIsCalculatorOpen: (isOpen: boolean) => void;
   isCalculatorOpen: boolean;
