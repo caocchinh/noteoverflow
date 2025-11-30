@@ -9,6 +9,7 @@ import {
   useCallback,
   forwardRef,
   useImperativeHandle,
+  RefObject,
 } from "react";
 import {
   Loader2,
@@ -89,6 +90,35 @@ const initPdfElement = ({
     );
   }
 };
+
+const PdfPortalContent = memo(
+  ({
+    portalKey,
+    pdfViewerElementRef,
+  }: {
+    portalKey: number;
+    pdfViewerElementRef: RefObject<HTMLDivElement | null>;
+  }) => {
+    const attachPdfViewer = useCallback(
+      (node: HTMLDivElement | null) => {
+        if (
+          node &&
+          pdfViewerElementRef.current &&
+          pdfViewerElementRef.current.parentNode !== node
+        ) {
+          node.appendChild(pdfViewerElementRef.current);
+        }
+      },
+      [pdfViewerElementRef]
+    );
+
+    return (
+      <div key={portalKey} ref={attachPdfViewer} className="w-full h-full" />
+    );
+  }
+);
+
+PdfPortalContent.displayName = "PdfPortalContent";
 
 const AnnotatableInspectImagesComponent = memo(
   forwardRef<AnnotatableInspectImagesHandle, AnnotatableInspectImageProps>(
@@ -590,17 +620,10 @@ const AnnotatableInspectImagesComponent = memo(
                   "w-full h-full"
                 )}
               >
-                <div
-                  ref={normalContainerRef}
-                  className="w-full relative h-[72dvh]"
-                >
-                  {!pdfBlob && (
-                    <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
-                      <span className="ml-2">Generating PDF</span>
-                      <Loader />
-                    </div>
-                  )}
-                </div>
+                <NotFullScreenContainer
+                  normalContainerRef={normalContainerRef}
+                  pdfBlob={pdfBlob}
+                />
                 {createPortal(
                   <div
                     className={cn(
@@ -712,18 +735,9 @@ const AnnotatableInspectImagesComponent = memo(
           {fullscreenContainerRef.current &&
             normalContainerRef.current &&
             createPortal(
-              <div
-                key={key}
-                ref={(node) => {
-                  if (
-                    node &&
-                    pdfViewerElementRef.current &&
-                    pdfViewerElementRef.current.parentNode !== node
-                  ) {
-                    node.appendChild(pdfViewerElementRef.current);
-                  }
-                }}
-                className="w-full h-full"
+              <PdfPortalContent
+                portalKey={key}
+                pdfViewerElementRef={pdfViewerElementRef}
               />,
               isFullscreen
                 ? fullscreenContainerRef.current
@@ -739,3 +753,26 @@ AnnotatableInspectImagesComponent.displayName =
   "AnnotatableInspectImagesComponent";
 
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
+
+const NotFullScreenContainer = memo(
+  ({
+    normalContainerRef,
+    pdfBlob,
+  }: {
+    normalContainerRef: RefObject<HTMLDivElement | null>;
+    pdfBlob: Blob | null;
+  }) => {
+    return (
+      <div ref={normalContainerRef} className="w-full relative h-[72dvh]">
+        {!pdfBlob && (
+          <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
+            <span className="ml-2">Generating PDF</span>
+            <Loader />
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+NotFullScreenContainer.displayName = "NotFullScreenContainer";

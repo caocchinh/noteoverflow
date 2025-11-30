@@ -113,9 +113,7 @@ const AnnotatableImagesUpdater = memo(
             ["user_saved_activities"],
             (prev) => {
               if (!prev) return prev;
-              const nextAnnotations = prev.annotations
-                ? [...prev.annotations]
-                : [];
+              const nextAnnotations = prev.annotations ?? [];
               const existingIndex = nextAnnotations.findIndex(
                 (a) => a.questionId === variables.questionId
               );

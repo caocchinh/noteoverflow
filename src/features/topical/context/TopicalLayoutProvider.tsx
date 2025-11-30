@@ -150,6 +150,18 @@ export default function TopicalLayoutProvider({
   useEffect(() => {
     if (isMounted.current) return;
     setUiPreferences(getInitialUiPreferences());
+    const webViewerKeys = Object.keys(localStorage).filter(
+      (key) =>
+        key.startsWith("wc--") ||
+        key.includes("webviewer") ||
+        key.includes("pdftron")
+    );
+
+    if (webViewerKeys.length > 0) {
+      webViewerKeys.forEach((key) => {
+        localStorage.removeItem(key);
+      });
+    }
     setTimeout(() => {
       isMounted.current = true;
     }, 0);
