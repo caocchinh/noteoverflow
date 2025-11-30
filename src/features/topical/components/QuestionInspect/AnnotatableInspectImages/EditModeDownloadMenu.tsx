@@ -6,9 +6,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 import { Download } from "lucide-react";
-import { memo, RefObject } from "react";
-import DownloadOrginalButton from "./DownloadOrginalButton";
+import { memo, RefObject, useCallback } from "react";
 import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
+import DownloadButton from "./DownloadButton";
 
 const EditModeDownloadMenu = memo(
   ({
@@ -17,12 +17,20 @@ const EditModeDownloadMenu = memo(
     pdfViewerRef,
     isPdfViewerLoaded,
     isSessionFetching,
+    generatePdfBlob,
+    pdfBaseFileName,
   }: {
     pdfBlob: Blob | null;
     fileName: string;
     pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
     isPdfViewerLoaded: boolean;
     isSessionFetching: boolean;
+    generatePdfBlob: ({
+      typeOfContent,
+    }: {
+      typeOfContent: "question" | "answer" | "question-with-answers";
+    }) => Promise<Blob | null>;
+    pdfBaseFileName: string;
   }) => {
     return (
       <DropdownMenu>
@@ -37,10 +45,29 @@ const EditModeDownloadMenu = memo(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="z-999998 flex flex-col dark:bg-accent p-2 gap-2">
-          <DownloadOrginalButton
-            pdfBlob={pdfBlob}
-            fileName={fileName}
-            isSessionFetching={isSessionFetching}
+          <DownloadButton
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "question" }),
+              [generatePdfBlob]
+            )}
+            pdfBaseFileName={pdfBaseFileName}
+            typeOfDownload="question"
+          />
+          <DownloadButton
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "answer" }),
+              [generatePdfBlob]
+            )}
+            pdfBaseFileName={pdfBaseFileName}
+            typeOfDownload="answer"
+          />
+          <DownloadButton
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "question-with-answers" }),
+              [generatePdfBlob]
+            )}
+            pdfBaseFileName={pdfBaseFileName}
+            typeOfDownload="question-with-answers"
           />
           <DownloadWithAnnotationsButton
             fileName={fileName}

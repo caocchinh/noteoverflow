@@ -4,66 +4,9 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, Loader2 } from "lucide-react";
-import { memo, useCallback, useMemo, useState } from "react";
-import { handleDownloadPdf } from "@/features/topical/lib/utils";
-
-const DownloadButton = memo(
-  ({
-    onGeneratePdf,
-    pdfBaseFileName,
-    typeOfDownload,
-  }: {
-    onGeneratePdf: () => Promise<Blob | null>;
-    pdfBaseFileName: string;
-    typeOfDownload: "question" | "answer" | "question-with-answers";
-  }) => {
-    const [isGenerating, setIsGenerating] = useState(false);
-
-    const label = useMemo(() => {
-      switch (typeOfDownload) {
-        case "question":
-          return "Question only";
-        case "answer":
-          return "Answer only";
-        case "question-with-answers":
-          return "Question with answer";
-      }
-    }, [typeOfDownload]);
-
-    const handleDownload = useCallback(async () => {
-      setIsGenerating(true);
-      try {
-        const blob = await onGeneratePdf();
-        handleDownloadPdf(blob, `${pdfBaseFileName} - ${label}.pdf`);
-      } finally {
-        setIsGenerating(false);
-      }
-    }, [onGeneratePdf, pdfBaseFileName, label]);
-
-    return (
-      <Button
-        className="cursor-pointer h-[26px]"
-        variant="outline"
-        onClick={handleDownload}
-        disabled={isGenerating}
-      >
-        {isGenerating ? (
-          <>
-            <span className="hidden sm:block">Generating</span>
-            <Loader2 className="h-4 w-4 animate-spin" />
-          </>
-        ) : (
-          <>
-            <span className="hidden sm:block">{label}</span>
-          </>
-        )}
-      </Button>
-    );
-  }
-);
-
-DownloadButton.displayName = "DownloadButton";
+import { Download } from "lucide-react";
+import { memo, useCallback } from "react";
+import DownloadButton from "./DownloadButton";
 
 const NonEditModeDownloadMenu = memo(
   ({

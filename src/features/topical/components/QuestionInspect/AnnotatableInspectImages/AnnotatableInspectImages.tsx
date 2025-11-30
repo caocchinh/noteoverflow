@@ -561,6 +561,8 @@ const AnnotatableInspectImagesComponent = memo(
                     pdfViewerRef={pdfViewerRef}
                     isPdfViewerLoaded={isPdfViewerLoaded}
                     isSessionFetching={isSessionFetching}
+                    generatePdfBlob={generatePdfBlob}
+                    pdfBaseFileName={pdfBaseFileName}
                   />
                   <Button
                     className="cursor-pointer h-[26px]"
@@ -636,6 +638,8 @@ const AnnotatableInspectImagesComponent = memo(
                           pdfViewerRef={pdfViewerRef}
                           isPdfViewerLoaded={isPdfViewerLoaded}
                           isSessionFetching={isSessionFetching}
+                          generatePdfBlob={generatePdfBlob}
+                          pdfBaseFileName={pdfBaseFileName}
                         />
                         <Button
                           className="relative z-99998 dark:text-white text-white !hover:text-black cursor-pointer"
