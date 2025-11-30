@@ -4,6 +4,7 @@ export const ERROR_CODES = {
   FORBIDDEN: "forbidden",
   NOT_FOUND: "not-found",
   BOOKMARK_LIST_NOT_FOUND: "bookmark-list-not-found",
+  PRIVATE_LIST: "private-list",
   INTERNAL_SERVER_ERROR: "internal-server-error",
   UNKNOWN_ERROR: "unknown-error",
 } as const;
@@ -12,7 +13,8 @@ export const ERROR_CODES = {
 export const ERROR_MESSAGES = {
   [ERROR_CODES.BAD_REQUEST]: "Bad Request",
   [ERROR_CODES.UNAUTHORIZED]: "Unauthorized",
-  [ERROR_CODES.FORBIDDEN]: "This list is private",
+  [ERROR_CODES.FORBIDDEN]: "You can't access this resource",
+  [ERROR_CODES.PRIVATE_LIST]: "This list is private",
   [ERROR_CODES.NOT_FOUND]: "Not Found",
   [ERROR_CODES.BOOKMARK_LIST_NOT_FOUND]: "Bookmark list not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "An error occurred",
