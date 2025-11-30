@@ -404,7 +404,7 @@ const LegacyUploadPage = () => {
                     key={index}
                   >
                     <div className="flex items-center">
-                      <div className="mr-3 flex-shrink-0">
+                      <div className="mr-3 shrink-0">
                         <File className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -453,7 +453,7 @@ const LegacyUploadPage = () => {
                     key={index}
                   >
                     <div className="flex items-center">
-                      <div className="mr-3 flex-shrink-0">
+                      <div className="mr-3 shrink-0">
                         <File className="h-6 w-6 text-red-400" />
                       </div>
                       <div className="min-w-0 flex-1">

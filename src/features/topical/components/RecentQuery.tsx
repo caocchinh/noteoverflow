@@ -233,7 +233,7 @@ export const RecentQuery = forwardRef(
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
-          className="dark:bg-accent h-[95dvh] z-[100008]"
+          className="dark:bg-accent h-[95dvh] z-100008"
           overlayClassName="z-[100007]"
         >
           <DialogHeader className="flex justify-between flex-row text-left gap-2">
@@ -250,7 +250,7 @@ export const RecentQuery = forwardRef(
                   Settings <Wrench />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="z-[100009] dark:bg-accent !w-max flex flex-col items-center justify-center">
+              <PopoverContent className="z-100009 dark:bg-accent w-max! flex flex-col items-center justify-center">
                 <p className="text-sm mb-1">Sort by date</p>
                 <Sort
                   sortParameters={{
@@ -431,7 +431,7 @@ const RecentQueryItem = ({
             className={cn(
               "flex flex-col items-start justify-center",
               accordionValue === index.toString() && "text-logo-main",
-              isThisItemDeleting && "!text-red-500"
+              isThisItemDeleting && "text-red-500!"
             )}
           >
             <p>
@@ -498,8 +498,8 @@ const RecentQueryItem = ({
         </div>
         <Button
           className={cn(
-            "w-full mt-2 bg-logo-main !text-white cursor-pointer hover:bg-logo-main",
-            isThisItemDeleting && "!bg-red-500"
+            "w-full mt-2 bg-logo-main text-white! cursor-pointer hover:bg-logo-main",
+            isThisItemDeleting && "bg-red-500!"
           )}
           onClick={() => {
             if (isThisItemDeleting || isSessionPending || !isAuthenticated) {

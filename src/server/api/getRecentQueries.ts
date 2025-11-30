@@ -4,11 +4,12 @@ import { getDbAsync } from "@/drizzle/db.server";
 import { recentQuery } from "@/drizzle/schema";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
 
 export const getRecentQueries = async ({
   status,
 }: {
-  status: (code: number, body: { error: string; code: string }) => void;
+  status: typeof elysiaStatus;
 }) => {
   const session = await verifySession();
   if (!session) {

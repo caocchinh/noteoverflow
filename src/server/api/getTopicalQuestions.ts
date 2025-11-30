@@ -15,6 +15,7 @@ import {
 } from "@/features/topical/constants/types";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
+import { status as elysiaStatus } from "elysia";
 
 interface TopicalQuery {
   curriculumId: string;
@@ -30,7 +31,7 @@ export const getTopicalQuestions = async ({
   status,
 }: {
   query: TopicalQuery;
-  status: (code: number, body: { error: string; code: string }) => void;
+  status: typeof elysiaStatus;
 }) => {
   const curriculumId = decodeURIComponent(query.curriculumId);
   const subjectId = decodeURIComponent(query.subjectId);

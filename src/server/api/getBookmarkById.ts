@@ -5,13 +5,14 @@ import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
 import { SelectedPublickBookmark } from "@/features/topical/constants/types";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
 
 export const getBookmarkById = async ({
   params,
   status,
 }: {
   params: { bookmarkId: string };
-  status: (code: number, body: { error: string; code: string }) => void;
+  status: typeof elysiaStatus;
 }) => {
   const { bookmarkId } = params;
   const session = await verifySession();

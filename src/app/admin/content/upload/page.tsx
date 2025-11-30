@@ -83,7 +83,7 @@ import {
   getSubjectByCurriculumAction,
   getSubjectInfoAction,
   isQuestionExistsAction,
-} from "@/server/actions";
+} from "@/features/admin/server/actions";
 
 const UploadPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<
@@ -545,7 +545,7 @@ const UploadPage = () => {
             <DialogTitle className="sr-only">Upload Image</DialogTitle>
             <Image
               alt="Upload Image"
-              className="h-max w-[100%] border-2 border-transparent object-contain hover:border-red-500"
+              className="h-max w-full border-2 border-transparent object-contain hover:border-red-500"
               height={100}
               src={imageDialogImage ?? ""}
               width={100}
@@ -618,7 +618,7 @@ const UploadPage = () => {
                 Error loading subject information: {subjectInfoError?.message}
               </p>
               <Button
-                className="!bg-white !text-red-700 mt-1 cursor-pointer"
+                className="bg-white! text-red-700! mt-1 cursor-pointer"
                 onClick={() => refetchSubjectInfo()}
                 size="sm"
                 variant="outline"

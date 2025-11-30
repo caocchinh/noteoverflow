@@ -159,7 +159,7 @@ const TopicalClient = ({
 
   return (
     <>
-      <div className="pt-12 h-screen !overflow-hidden">
+      <div className="pt-12 h-screen overflow-hidden!">
         <SidebarProvider
           onOpenChange={setIsAppSidebarOpen}
           onOpenChangeMobile={setIsAppSidebarOpen}
