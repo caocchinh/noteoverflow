@@ -20,16 +20,6 @@ const DownloadButton = memo(
   }) => {
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const handleDownload = useCallback(async () => {
-      setIsGenerating(true);
-      try {
-        const blob = await onGeneratePdf();
-        handleDownloadPdf(blob, pdfBaseFileName);
-      } finally {
-        setIsGenerating(false);
-      }
-    }, [onGeneratePdf, pdfBaseFileName]);
-
     const label = useMemo(() => {
       switch (typeOfDownload) {
         case "question":
@@ -40,6 +30,16 @@ const DownloadButton = memo(
           return "Question with answer";
       }
     }, [typeOfDownload]);
+
+    const handleDownload = useCallback(async () => {
+      setIsGenerating(true);
+      try {
+        const blob = await onGeneratePdf();
+        handleDownloadPdf(blob, `${pdfBaseFileName} - ${label}.pdf`);
+      } finally {
+        setIsGenerating(false);
+      }
+    }, [onGeneratePdf, pdfBaseFileName, label]);
 
     return (
       <Button
@@ -67,10 +67,14 @@ DownloadButton.displayName = "DownloadButton";
 
 const NonEditModeDownloadMenu = memo(
   ({
-    onGeneratePdf,
+    generatePdfBlob,
     pdfBaseFileName,
   }: {
-    onGeneratePdf: () => Promise<Blob | null>;
+    generatePdfBlob: ({
+      typeOfContent,
+    }: {
+      typeOfContent: "question" | "answer" | "question-with-answers";
+    }) => Promise<Blob | null>;
     pdfBaseFileName: string;
   }) => {
     return (
@@ -83,17 +87,26 @@ const NonEditModeDownloadMenu = memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent className="z-999998 flex flex-col dark:bg-accent p-2 gap-2">
           <DownloadButton
-            onGeneratePdf={onGeneratePdf}
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "question" }),
+              [generatePdfBlob]
+            )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question"
           />
           <DownloadButton
-            onGeneratePdf={onGeneratePdf}
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "answer" }),
+              [generatePdfBlob]
+            )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="answer"
           />
           <DownloadButton
-            onGeneratePdf={onGeneratePdf}
+            onGeneratePdf={useCallback(
+              () => generatePdfBlob({ typeOfContent: "question-with-answers" }),
+              [generatePdfBlob]
+            )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question-with-answers"
           />

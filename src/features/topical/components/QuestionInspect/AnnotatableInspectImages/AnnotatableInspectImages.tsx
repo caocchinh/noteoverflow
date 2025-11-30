@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   useCallback,
-  RefObject,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -18,7 +17,6 @@ import {
   Maximize,
   Shrink,
   Calculator,
-  Download,
   TriangleAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,9 +24,8 @@ import {
   convertImageToPngBase64,
   extractPaperCode,
   extractQuestionNumber,
-  extractSeasonFromPaperCode,
-  extractYearFromPaperCode,
-  parsePastPaperUrl,
+  generatePastPaperLinks,
+  splitContent,
 } from "@/features/topical/lib/utils";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
@@ -38,14 +35,6 @@ import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import QuestionPdfTemplate from "./QuestionPdfTemplate";
-import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
-import DownloadOrginalButton from "./DownloadOrginalButton";
 import ClearAllButton from "./ClearAllButton";
 import {
   PdfViewerWrapperHandle,
@@ -57,6 +46,8 @@ import Loader from "../../Loader/Loader";
 import SaveAnnotationsButton from "./SaveAnnotationsButton";
 import { toast } from "sonner";
 import NonEditModeDownloadMenu from "./NonEditModeDownloadMenu";
+import SingleQuestionPdfTemplate from "./SingleQuestionPdfTemplate";
+import EditModeDownloadMenu from "./EditModeDownloadMenu";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -164,21 +155,19 @@ const AnnotatableInspectImagesComponent = memo(
         });
       }, [question]);
 
-      const questionLink = useMemo(() => {
-        if (!question || !paperCode) return "";
+      const pastPaperLinks = useMemo(() => {
+        if (!question || !paperCode) {
+          return { questionLink: "", answerLink: "" };
+        }
 
-        const season = extractSeasonFromPaperCode({ paperCode });
-        const year = extractYearFromPaperCode({ paperCode });
-
-        if (!season || !year) return "";
-
-        return parsePastPaperUrl({
+        return generatePastPaperLinks({
           questionId: question.id,
-          year,
-          season,
-          type: "qp", // question paper
+          paperCode,
         });
       }, [question, paperCode]);
+
+      const questionLink = pastPaperLinks.questionLink;
+      const answerLink = pastPaperLinks.answerLink;
 
       const pdfBaseFileName = useMemo(() => {
         const sanitizedPaperCode = (paperCode || "").replace("/", "_");
@@ -202,29 +191,54 @@ const AnnotatableInspectImagesComponent = memo(
       }, []);
 
       // Filter only image URLs
-      const imageUrls = useMemo(() => {
-        if (!question) return [];
-        if (typeOfView === "question") {
-          return question.questionImages.filter((item) =>
-            item.includes("http")
-          );
-        } else {
-          return question.answers.filter((item) => item.includes("http"));
-        }
-      }, [question, typeOfView]);
-      const textItems = useMemo(() => {
-        if (!question) return [];
-        if (typeOfView === "question") {
-          return question.questionImages.filter(
-            (item) => !item.includes("http")
-          );
-        } else {
-          return question.answers.filter((item) => !item.includes("http"));
-        }
+      const { images: imageUrls, text: textItems } = useMemo(() => {
+        if (!question) return { images: [], text: [] };
+        const items =
+          typeOfView === "question"
+            ? question.questionImages
+            : question.answers;
+        return splitContent(items);
       }, [question, typeOfView]);
 
-      const generatePdfBlob = useCallback(async () => {
-        if (imageUrls.length > 0) {
+      const generatePdfBlob = useCallback(
+        async ({
+          typeOfContent,
+        }: {
+          typeOfContent: "question" | "answer" | "question-with-answers";
+        }) => {
+          if (!question) return null;
+          const questionItem: {
+            images: string[];
+            text: string[];
+          } = {
+            images: [],
+            text: [],
+          };
+          const answerItem: {
+            images: string[];
+            text: string[];
+          } = {
+            images: [],
+            text: [],
+          };
+
+          if (
+            typeOfContent === "question" ||
+            typeOfContent === "question-with-answers"
+          ) {
+            const { images, text } = splitContent(question.questionImages);
+            questionItem.images.push(...images);
+            questionItem.text.push(...text);
+          }
+          if (
+            typeOfContent === "answer" ||
+            typeOfContent === "question-with-answers"
+          ) {
+            const { images, text } = splitContent(question.answers);
+            answerItem.images.push(...images);
+            answerItem.text.push(...text);
+          }
+
           try {
             const headerLogoPromise = convertImageToPngBase64(
               PDF_HEADER_LOGO_SRC
@@ -233,16 +247,30 @@ const AnnotatableInspectImagesComponent = memo(
               return null;
             });
 
-            const [convertedImages, headerLogo] = await Promise.all([
-              Promise.all(
-                imageUrls.map((imgUrl) => convertImageToPngBase64(imgUrl))
-              ),
-              headerLogoPromise,
-            ]);
+            const [convertedQuestionImages, convertedAnswerImages, headerLogo] =
+              await Promise.all([
+                Promise.all(
+                  questionItem.images.map((imgUrl) =>
+                    convertImageToPngBase64(imgUrl)
+                  )
+                ),
+                Promise.all(
+                  answerItem.images.map((imgUrl) =>
+                    convertImageToPngBase64(imgUrl)
+                  )
+                ),
+                headerLogoPromise,
+              ]);
+
+            // Update the items with converted images
+            questionItem.images = convertedQuestionImages;
+            answerItem.images = convertedAnswerImages;
 
             return await pdf(
-              <QuestionPdfTemplate
-                images={convertedImages}
+              <SingleQuestionPdfTemplate
+                answerLink={answerLink}
+                questionItem={questionItem}
+                answerItem={answerItem}
                 headerLogo={headerLogo || ""}
                 paperCode={paperCode}
                 questionLink={questionLink}
@@ -252,18 +280,17 @@ const AnnotatableInspectImagesComponent = memo(
           } catch (error) {
             console.error("Error generating PDF:", error);
           }
-        } else {
           return null;
-        }
-        return null;
-      }, [imageUrls, paperCode, questionNumber, questionLink]);
+        },
+        [answerLink, paperCode, question, questionLink, questionNumber]
+      );
 
       useEffect(() => {
         let isActive = true;
 
         const generate = async () => {
           if (isActive && !pdfBlob && isEditMode) {
-            const blob = await generatePdfBlob();
+            const blob = await generatePdfBlob({ typeOfContent: typeOfView });
             setPdfBlob(blob);
           }
         };
@@ -273,7 +300,7 @@ const AnnotatableInspectImagesComponent = memo(
         return () => {
           isActive = false;
         };
-      }, [generatePdfBlob, isEditMode, pdfBlob]);
+      }, [generatePdfBlob, isEditMode, pdfBlob, typeOfView]);
 
       // Handle annotations changed callback
       const handleAnnotationsChanged = useCallback(
@@ -466,8 +493,8 @@ const AnnotatableInspectImagesComponent = memo(
             >
               {!isEditMode && (
                 <NonEditModeDownloadMenu
-                  onGeneratePdf={generatePdfBlob}
                   pdfBaseFileName={pdfBaseFileName}
+                  generatePdfBlob={generatePdfBlob}
                 />
               )}
               {imageUrls.length > 0 && (
@@ -528,7 +555,7 @@ const AnnotatableInspectImagesComponent = memo(
                     isPdfViewerLoaded={isPdfViewerLoaded}
                     isSessionFetching={isSessionFetching}
                   />
-                  <DownloadPdfButton
+                  <EditModeDownloadMenu
                     pdfBlob={pdfBlob}
                     fileName={downloadFileName}
                     pdfViewerRef={pdfViewerRef}
@@ -603,7 +630,7 @@ const AnnotatableInspectImagesComponent = memo(
                           isPdfViewerLoaded={isPdfViewerLoaded}
                           isSessionFetching={isSessionFetching}
                         />
-                        <DownloadPdfButton
+                        <EditModeDownloadMenu
                           pdfBlob={pdfBlob}
                           fileName={downloadFileName}
                           pdfViewerRef={pdfViewerRef}
@@ -709,51 +736,4 @@ const AnnotatableInspectImagesComponent = memo(
 AnnotatableInspectImagesComponent.displayName =
   "AnnotatableInspectImagesComponent";
 
-// Export with memo and forwardRef
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
-
-const DownloadPdfButton = memo(
-  ({
-    pdfBlob,
-    fileName,
-    pdfViewerRef,
-    isPdfViewerLoaded,
-    isSessionFetching,
-  }: {
-    pdfBlob: Blob | null;
-    fileName: string;
-    pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
-    isPdfViewerLoaded: boolean;
-    isSessionFetching: boolean;
-  }) => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="cursor-pointer h-[26px]"
-            disabled={!pdfBlob || isSessionFetching}
-            variant="outline"
-          >
-            <span className="hidden sm:block">Download</span>
-            <Download className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="z-999998 flex flex-col dark:bg-accent p-2 gap-2">
-          <DownloadOrginalButton
-            pdfBlob={pdfBlob}
-            fileName={fileName}
-            isSessionFetching={isSessionFetching}
-          />
-          <DownloadWithAnnotationsButton
-            fileName={fileName}
-            isPdfViewerLoaded={isPdfViewerLoaded}
-            pdfViewerRef={pdfViewerRef}
-            isSessionFetching={isSessionFetching}
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }
-);
-
-DownloadPdfButton.displayName = "DownloadPdfButton";

@@ -400,6 +400,44 @@ export const parsePastPaperUrl = ({
   }
 };
 
+export const generatePastPaperLinks = ({
+  questionId,
+  paperCode,
+}: {
+  questionId: string;
+  paperCode: string;
+}): {
+  questionLink: string;
+  answerLink: string;
+} => {
+  if (!questionId || !paperCode) {
+    return { questionLink: "", answerLink: "" };
+  }
+
+  const season = extractSeasonFromPaperCode({ paperCode });
+  const year = extractYearFromPaperCode({ paperCode });
+
+  if (!season || !year) {
+    return { questionLink: "", answerLink: "" };
+  }
+
+  const questionLink = parsePastPaperUrl({
+    questionId,
+    year,
+    season,
+    type: "qp", // question paper
+  });
+
+  const answerLink = parsePastPaperUrl({
+    questionId,
+    year,
+    season,
+    type: "ms", // mark scheme
+  });
+
+  return { questionLink, answerLink };
+};
+
 export const isOverScrolling = ({
   child,
   parent,
@@ -1015,3 +1053,9 @@ export async function hashUltil(inputString: string): Promise<string> {
     .join("");
   return hashHex;
 }
+
+export const splitContent = (items: string[]) => {
+  const images = items.filter((item) => item.includes("http"));
+  const text = items.filter((item) => !item.includes("http"));
+  return { images, text };
+};

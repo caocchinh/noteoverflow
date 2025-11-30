@@ -45,15 +45,25 @@ const SaveAnnotationsButton = memo(
                 </>
               ) : (
                 <>
-                  {hasUnsavedChanges ? (
+                  {" "}
+                  {!isUserNotAuthenticated ? (
                     <>
-                      <span className="hidden sm:block">Save</span>
-                      <Save className="h-4 w-4" />
+                      {hasUnsavedChanges ? (
+                        <>
+                          <span className="hidden sm:block">Save</span>
+                          <Save className="h-4 w-4" />
+                        </>
+                      ) : (
+                        <>
+                          <span className="hidden sm:block">Saved</span>
+                          <CloudCheck className="h-4 w-4" />
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
-                      <span className="hidden sm:block">Saved</span>
-                      <CloudCheck className="h-4 w-4" />
+                      <p>Login to save</p>
+                      <Save className="h-4 w-4" />
                     </>
                   )}
                 </>

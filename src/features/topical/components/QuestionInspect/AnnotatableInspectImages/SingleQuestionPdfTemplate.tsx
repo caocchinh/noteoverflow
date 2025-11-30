@@ -103,17 +103,27 @@ const styles = StyleSheet.create({
   },
 });
 
-const QuestionPdfTemplate = ({
-  images,
+const SingleQuestionPdfTemplate = ({
+  questionItem,
+  answerItem,
   headerLogo,
   paperCode,
   questionLink,
+  answerLink,
   questionNumber,
 }: {
-  images: string[];
+  questionItem: {
+    images: string[];
+    text: string[];
+  };
+  answerItem: {
+    images: string[];
+    text: string[];
+  };
   headerLogo: string;
   paperCode: string;
   questionLink: string;
+  answerLink: string;
   questionNumber: string;
 }) => (
   <Document>
@@ -138,11 +148,15 @@ const QuestionPdfTemplate = ({
           {paperCode} Q{questionNumber}
         </Link>
       </View>
-      <View>
-        {images.map((src, index) => (
-          <PdfImage key={index} src={src} style={styles.image} />
-        ))}
-      </View>
+      <MainContent images={questionItem.images} text={questionItem.text} />
+      {(answerItem.images.length > 0 || answerItem.text.length > 0) && (
+        <View style={{ marginTop: 10 }}>
+          <Link href={answerLink} style={styles.bigPaperCode}>
+            Answer
+          </Link>
+          <MainContent images={answerItem.images} text={answerItem.text} />
+        </View>
+      )}
       <Text
         style={styles.pageNumber}
         render={({ pageNumber, totalPages }) =>
@@ -151,10 +165,27 @@ const QuestionPdfTemplate = ({
         fixed
       />
       <Text style={styles.paperCode} fixed>
-        {paperCode}
+        {paperCode} Q{questionNumber}
       </Text>
     </Page>
   </Document>
 );
 
-export default QuestionPdfTemplate;
+const MainContent = ({
+  images,
+  text,
+}: {
+  images: string[];
+  text: string[];
+}) => (
+  <View>
+    {images.map((src, index) => (
+      <PdfImage key={index} src={src} style={styles.image} />
+    ))}
+    {text.map((text, index) => (
+      <Text key={index}>{text}</Text>
+    ))}
+  </View>
+);
+
+export default SingleQuestionPdfTemplate;
