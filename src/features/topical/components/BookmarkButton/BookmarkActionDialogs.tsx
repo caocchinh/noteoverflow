@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,6 +40,9 @@ export const BookmarkActionDialogs = memo(
     listId,
     searchInputRef,
     chosenBookmarkList,
+    isHavingUnsafeChangesRef,
+    isAnnotationGuardDialogOpen,
+    setIsAnnotationGuardDialogOpen,
   }: BookmarkActionDialogsProps) => {
     const [visibility, setVisibility] = useState<"public" | "private">(
       "public"
@@ -56,7 +59,8 @@ export const BookmarkActionDialogs = memo(
       useIsMutating({
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
-
+    const [isPendingRemoveFromList, setIsPendingRemoveFromList] =
+      useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
     const { bookmarksData } = useTopicalApp();
@@ -65,7 +69,6 @@ export const BookmarkActionDialogs = memo(
       "user_saved_activities",
       "bookmarks",
       question.id,
-
       "create_list",
     ];
 
@@ -166,30 +169,70 @@ export const BookmarkActionDialogs = memo(
       }, 0);
     };
 
-    const removeFromList = ({ listId }: { listId: string }) => {
-      const list = bookmarksData?.find((bookmark) => bookmark.id === listId);
-      if (!list) {
-        toast.error("List not found, please refresh the page!", {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
+    const removeFromList = useCallback(
+      ({ listId }: { listId: string }) => {
+        if (isHavingUnsafeChangesRef) {
+          if (
+            isHavingUnsafeChangesRef.current.question ||
+            isHavingUnsafeChangesRef.current.answer
+          ) {
+            if (
+              question.id === isHavingUnsafeChangesRef.current.questionId &&
+              !isAnnotationGuardDialogOpen
+            ) {
+              setIsPendingRemoveFromList(true);
+              setIsAnnotationGuardDialogOpen?.(true);
+              return;
+            }
+          }
+        }
+
+        const list = bookmarksData?.find((bookmark) => bookmark.id === listId);
+        if (!list) {
+          toast.error("List not found, please refresh the page!", {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          });
+          return;
+        }
+        if (!chosenBookmarkList.has(listId)) {
+          toast.error("The question is not in this list already!", {
+            duration: 2000,
+            position: isMobileDevice ? "top-center" : "bottom-right",
+          });
+          setIsRemoveFromListDialogOpen(false);
+          return;
+        }
+        removeFromListMutate({
+          question,
+          listId,
+          bookmarkListName: list.listName,
+          isBookmarked: true,
         });
-        return;
-      }
-      if (!chosenBookmarkList.has(listId)) {
-        toast.error("The question is not in this list already!", {
-          duration: 2000,
-          position: isMobileDevice ? "top-center" : "bottom-right",
-        });
-        setIsRemoveFromListDialogOpen(false);
-        return;
-      }
-      removeFromListMutate({
+      },
+      [
+        bookmarksData,
+        chosenBookmarkList,
+        isAnnotationGuardDialogOpen,
+        isHavingUnsafeChangesRef,
+        isMobileDevice,
         question,
-        listId,
-        bookmarkListName: list.listName,
-        isBookmarked: true,
-      });
-    };
+        removeFromListMutate,
+        setIsAnnotationGuardDialogOpen,
+      ]
+    );
+
+    useEffect(() => {
+      if (isPendingRemoveFromList && !isAnnotationGuardDialogOpen && listId) {
+        setIsPendingRemoveFromList(false);
+        removeFromList({ listId });
+      }
+    }, [
+      isAnnotationGuardDialogOpen,
+      isPendingRemoveFromList,
+      listId,
+      removeFromList,
+    ]);
 
     return (
       <div className="flex w-full items-center justify-center gap-2 px-2">
@@ -356,6 +399,7 @@ export const BookmarkActionDialogs = memo(
                     <Button
                       className="w-1/2 mt-2 cursor-pointer"
                       variant="outline"
+                      disabled={isMutatingThisQuestion}
                     >
                       Back
                     </Button>

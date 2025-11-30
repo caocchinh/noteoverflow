@@ -35,7 +35,17 @@ import { useMutationState } from "@tanstack/react-query";
 
 export const BookmarkList = memo(
   forwardRef<BookmarkListRef, BookmarkListProps>(
-    ({ setOpen, question, listId }, ref) => {
+    (
+      {
+        setOpen,
+        question,
+        listId,
+        isAnnotationGuardDialogOpen,
+        setIsAnnotationGuardDialogOpen,
+        isHavingUnsafeChangesRef,
+      },
+      ref
+    ) => {
       const { bookmarksData } = useTopicalApp();
       const [searchInput, setSearchInput] = useState("");
       const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -134,6 +144,9 @@ export const BookmarkList = memo(
             listId={listId}
             searchInputRef={searchInputRef}
             chosenBookmarkList={chosenBookmarkList}
+            isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+            setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+            isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
           />
         </div>
       );

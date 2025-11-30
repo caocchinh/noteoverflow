@@ -55,7 +55,12 @@ const MemoizedQuestionItem = memo(
         nextProps.isThisTheCurrentQuestion &&
       prevProps.isInspectSidebarOpen === nextProps.isInspectSidebarOpen &&
       prevProps.isMobileDevice === nextProps.isMobileDevice &&
-      prevProps.listId === nextProps.listId
+      prevProps.listId === nextProps.listId &&
+      prevProps.isAnnotationGuardDialogOpen ===
+        nextProps.isAnnotationGuardDialogOpen &&
+      prevProps.setIsAnnotationGuardDialogOpen ===
+        nextProps.setIsAnnotationGuardDialogOpen &&
+      prevProps.isHavingUnsafeChangesRef === nextProps.isHavingUnsafeChangesRef
     );
   }
 );
@@ -618,11 +623,11 @@ const InspectSidebar = memo(
       return (
         <>
           <Sidebar
-            className="top-0 !h-full"
+            className="top-0 h-full!"
             onTransitionEnd={handleTransitionEnd}
           >
             <SidebarHeader className="sr-only">Search questions</SidebarHeader>
-            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 !overflow-hidden">
+            <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 overflow-hidden!">
               <FinishedTracker
                 allQuestions={allQuestions}
                 navigateToQuestion={navigateToQuestion}
@@ -663,7 +668,7 @@ const InspectSidebar = memo(
                 <div
                   className={cn(
                     "relative w-full",
-                    searchInput.length > 0 && "!hidden"
+                    searchInput.length > 0 && "hidden!"
                   )}
                   style={{
                     height: displayVirtualizer.getTotalSize(),
@@ -703,6 +708,13 @@ const InspectSidebar = memo(
                           listId={listId}
                           isInspectSidebarOpen={isInspectSidebarOpen}
                           isMobileDevice={isMobile}
+                          isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+                          setIsAnnotationGuardDialogOpen={
+                            setIsAnnotationGuardDialogOpen
+                          }
+                          isAnnotationGuardDialogOpen={
+                            isAnnotationGuardDialogOpen
+                          }
                         />
                       )}
                     </div>
@@ -736,6 +748,13 @@ const InspectSidebar = memo(
                         setCurrentQuestionId={setCurrentQuestionId}
                         isInspectSidebarOpen={isInspectSidebarOpen}
                         isMobileDevice={isMobile}
+                        isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+                        setIsAnnotationGuardDialogOpen={
+                          setIsAnnotationGuardDialogOpen
+                        }
+                        isAnnotationGuardDialogOpen={
+                          isAnnotationGuardDialogOpen
+                        }
                       />
                     </div>
                   ))}

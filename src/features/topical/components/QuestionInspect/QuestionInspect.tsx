@@ -57,6 +57,7 @@ const QuestionInspect = memo(
       const isHavingUnsafeChangesRef = useRef({
         answer: false,
         question: false,
+        questionId: "",
       });
       const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
         useState(false);
@@ -176,7 +177,6 @@ const QuestionInspect = memo(
             return;
           }
           const targetElement = e.target as Element;
-          console.log(targetElement);
           if (
             targetElement?.closest("[data-pdf-viewer]") ||
             targetElement?.closest(".PhotoView-Portal") ||

@@ -7,7 +7,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { BookmarkButtonProps, BookmarkListRef } from "../../constants/types";
+import {
+  BookmarkButtonProps,
+  BookmarkButtonSharedProps,
+  BookmarkListRef,
+} from "../../constants/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
@@ -23,22 +27,6 @@ import { BookmarkTrigger } from "./BookmarkTrigger";
 import { BookmarkList } from "./BookmarkList";
 import BookmarkContent from "./BookmarkContent";
 
-// Shared props interface for mobile and desktop components
-interface BookmarkButtonSharedProps {
-  question: BookmarkButtonProps["question"];
-  isBookmarkDisabled: boolean;
-  badgeClassName?: string;
-  triggerButtonClassName?: string;
-  popOverTriggerClassName?: string;
-  popOverAlign?: "start" | "center" | "end";
-  listId: string | undefined;
-  open: boolean;
-  handleOpenChange: (value: boolean | ((prev: boolean) => boolean)) => void;
-  setIsHovering?: (value: boolean) => void;
-  setShouldOpen?: (value: boolean) => void;
-  openUI: (e: React.MouseEvent) => void;
-}
-
 export const BookmarkButton = memo(
   ({
     question,
@@ -53,6 +41,9 @@ export const BookmarkButton = memo(
     popOverTriggerClassName,
     triggerButtonClassName,
     isInView,
+    isAnnotationGuardDialogOpen,
+    setIsAnnotationGuardDialogOpen,
+    isHavingUnsafeChangesRef,
   }: BookmarkButtonProps) => {
     const [_open, _setOpen] = useState(false);
     const open = openProp ?? _open;
@@ -130,6 +121,9 @@ export const BookmarkButton = memo(
       setIsHovering,
       setShouldOpen,
       openUI,
+      isAnnotationGuardDialogOpen,
+      setIsAnnotationGuardDialogOpen,
+      isHavingUnsafeChangesRef,
     };
 
     return (
@@ -158,6 +152,9 @@ const MobileBookmarkButton = memo(
     setShouldOpen,
     openUI,
     listId,
+    isAnnotationGuardDialogOpen,
+    setIsAnnotationGuardDialogOpen,
+    isHavingUnsafeChangesRef,
   }: BookmarkButtonSharedProps) => {
     const bookmarkListRef = useRef<BookmarkListRef | null>(null);
     return (
@@ -224,6 +221,9 @@ const MobileBookmarkButton = memo(
               question={question}
               listId={listId}
               ref={bookmarkListRef}
+              isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+              isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+              setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
             />
           </DrawerContent>
         </Drawer>
@@ -248,6 +248,9 @@ const DesktopBookmarkButton = memo(
     setShouldOpen,
     openUI,
     listId,
+    isAnnotationGuardDialogOpen,
+    setIsAnnotationGuardDialogOpen,
+    isHavingUnsafeChangesRef,
   }: BookmarkButtonSharedProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const bookmarkListRef = useRef<BookmarkListRef | null>(null);
@@ -298,6 +301,9 @@ const DesktopBookmarkButton = memo(
               setOpen={handleOpenChange}
               question={question}
               listId={listId}
+              isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+              setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+              isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
               ref={bookmarkListRef}
             />
             <div className="w-full px-2 mt-2 flex items-center justify-center">

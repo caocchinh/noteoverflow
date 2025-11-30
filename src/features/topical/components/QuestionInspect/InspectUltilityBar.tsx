@@ -43,6 +43,8 @@ const InspectUltilityBar = memo(
   forwardRef(
     (
       {
+        isAnnotationGuardDialogOpen,
+        setIsAnnotationGuardDialogOpen,
         currentView,
         setCurrentView,
         currentQuestionData,
@@ -54,6 +56,7 @@ const InspectUltilityBar = memo(
         setIsInspectSidebarOpen,
         BETTER_AUTH_URL,
         sideBarInsetRef,
+        isHavingUnsafeChangesRef,
       }: InspectUltilityBarProps,
       ref
     ) => {
@@ -105,7 +108,7 @@ const InspectUltilityBar = memo(
         <>
           {isUltilityOverflowingRight && (
             <Button
-              className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-[200]"
+              className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-200"
               title="Move right"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -121,7 +124,7 @@ const InspectUltilityBar = memo(
           )}
           {isUltilityOverflowingLeft && (
             <Button
-              className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+              className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
               title="Move left"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -183,7 +186,7 @@ const InspectUltilityBar = memo(
                   className={cn(
                     "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
                     isCalculatorOpen &&
-                      "!border-logo-main !bg-logo-main !text-white hover:!bg-logo-main/80"
+                      "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!"
                   )}
                 >
                   Calculator
@@ -201,6 +204,10 @@ const InspectUltilityBar = memo(
               )}
               {currentQuestionData && (
                 <BookmarkButton
+                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+                  setIsAnnotationGuardDialogOpen={
+                    setIsAnnotationGuardDialogOpen
+                  }
                   triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
                   badgeClassName="h-[35px] min-h-[35px] !static"
                   question={currentQuestionData}
@@ -208,6 +215,7 @@ const InspectUltilityBar = memo(
                   listId={listId}
                   popOverAlign="start"
                   isInView={true}
+                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
                 />
               )}
               <ToggleInspectSidebarButton

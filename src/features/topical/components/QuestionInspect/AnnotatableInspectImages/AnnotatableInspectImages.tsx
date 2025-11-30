@@ -307,10 +307,11 @@ const AnnotatableInspectImagesComponent = memo(
         (xfdf: string) => {
           if (isAuthenticatedRef.current) {
             isHavingUnsafeChangesRef.current[typeOfView] = true;
+            isHavingUnsafeChangesRef.current.questionId = question?.id || "";
           }
           setCurrentXfdf(xfdf);
         },
-        [isHavingUnsafeChangesRef, typeOfView]
+        [isHavingUnsafeChangesRef, question, typeOfView]
       );
 
       const handleSave = useCallback(() => {

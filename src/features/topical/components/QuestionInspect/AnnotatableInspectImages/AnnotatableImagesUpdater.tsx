@@ -230,6 +230,7 @@ const AnnotatableImagesUpdater = memo(
         !isHavingUnsafeChangesRef.current["question"]
       ) {
         setIsAnnotationGuardDialogOpen(false);
+        isHavingUnsafeChangesRef.current.questionId = "";
       }
     }, [
       annotationsMutationState,

@@ -339,6 +339,9 @@ export interface QuestionHoverCardProps {
   listId?: string;
   isMobileDevice: boolean;
   resetScrollPositions: () => void;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface BrowseMoreQuestionsProps {
@@ -507,7 +510,7 @@ export interface InspectSidebarProps {
   overflowScrollHandler?: () => void;
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
-  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   isAnnotationGuardDialogOpen: boolean;
 }
@@ -521,6 +524,9 @@ export interface InspectSidebarRef {
 }
 
 export interface InspectUltilityBarProps {
+  isAnnotationGuardDialogOpen: boolean;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
+  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   currentView: QuestionInspectViewMode;
   setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
   currentQuestionData: SelectedQuestion | undefined;
@@ -560,7 +566,7 @@ export interface QuestionInspectMainContentProps {
   setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isCoolDownRef: RefObject<boolean>;
   isInputFocusedRef: RefObject<boolean>;
-  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   isAnnotationGuardDialogOpen: boolean;
 }
@@ -632,10 +638,16 @@ export interface AnnotatableImagesUpdaterProps {
   question: SelectedQuestion | undefined;
   typeOfView: "question" | "answer";
   componentRef: RefObject<AnnotatableInspectImagesHandle | null>;
-  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
   setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
   isAnnotationGuardDialogOpen: boolean;
 }
+
+type IsHavingUnsafeChangesRef = RefObject<{
+  answer: boolean;
+  question: boolean;
+  questionId: string;
+}>;
 
 export interface AnnotatableInspectImageProps {
   typeOfView: "question" | "answer";
@@ -661,7 +673,7 @@ export interface AnnotatableInspectImageProps {
       onSuccess?: () => void;
     }
   ) => void;
-  isHavingUnsafeChangesRef: RefObject<{ answer: boolean; question: boolean }>;
+  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
 }
 
 export interface AnnotatableInspectImagesHandle {
@@ -686,6 +698,9 @@ export interface BookmarkListProps {
   setOpen: (value: boolean) => void;
   question: SelectedQuestion;
   listId?: string;
+  isAnnotationGuardDialogOpen?: boolean;
+  setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
+  isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
 }
 
 export interface BookmarkListRef {
@@ -706,9 +721,14 @@ export interface BookmarkActionDialogsProps {
   listId?: string;
   searchInputRef: RefObject<HTMLInputElement | null>;
   chosenBookmarkList: Set<string>;
+  isAnnotationGuardDialogOpen?: boolean;
+  setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
+  isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
 }
 
 export interface BookmarkButtonProps {
+  isAnnotationGuardDialogOpen?: boolean;
+  setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
   question: SelectedQuestion;
   isBookmarkDisabled: boolean;
   isPopoverOpen?: boolean;
@@ -721,6 +741,25 @@ export interface BookmarkButtonProps {
   popOverTriggerClassName?: string;
   triggerButtonClassName?: string;
   isInView: boolean;
+  isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
+}
+
+export interface BookmarkButtonSharedProps {
+  question: BookmarkButtonProps["question"];
+  isBookmarkDisabled: boolean;
+  badgeClassName?: string;
+  triggerButtonClassName?: string;
+  popOverTriggerClassName?: string;
+  popOverAlign?: "start" | "center" | "end";
+  listId: string | undefined;
+  open: boolean;
+  handleOpenChange: (value: boolean | ((prev: boolean) => boolean)) => void;
+  setIsHovering?: (value: boolean) => void;
+  setShouldOpen?: (value: boolean) => void;
+  openUI: (e: React.MouseEvent) => void;
+  isAnnotationGuardDialogOpen?: boolean;
+  setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
+  isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
 }
 
 export interface CreateListMutationVariables {

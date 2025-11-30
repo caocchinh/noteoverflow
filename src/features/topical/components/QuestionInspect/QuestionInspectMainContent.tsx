@@ -326,6 +326,9 @@ const QuestionInspectMainContent = forwardRef(
             ref={sideBarInsetRef}
           >
             <InspectUltilityBar
+              isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+              isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
+              setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
               ref={inspectUltilityBarRef}
               currentView={currentView}
               setCurrentView={setCurrentView}

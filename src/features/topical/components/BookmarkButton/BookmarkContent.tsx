@@ -50,7 +50,7 @@ const BookmarkContent = memo(
       <Command
         shouldFilter={false}
         onKeyDown={handleKeyDown}
-        className="!h-max bg-transparent overflow-visible !w-max"
+        className="h-max! bg-transparent overflow-visible w-max!"
       >
         {children}
       </Command>

@@ -27,6 +27,9 @@ const QuestionHoverCard = memo(
     listId,
     isInspectSidebarOpen,
     resetScrollPositions,
+    isHavingUnsafeChangesRef,
+    setIsAnnotationGuardDialogOpen,
+    isAnnotationGuardDialogOpen,
   }: QuestionHoverCardProps) => {
     const [isImageLoaded, setIsImageLoaded] = useState(false);
     const [isImageError, setIsImageError] = useState(false);
@@ -143,6 +146,9 @@ const QuestionHoverCard = memo(
               setIsPopoverOpen={setIsPopoverOpen}
               isPopoverOpen={isPopoverOpen}
               listId={listId}
+              isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+              setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+              isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
               isInView={true}
             />
             {isMutatingBookmarkOfThisQuestion && (
