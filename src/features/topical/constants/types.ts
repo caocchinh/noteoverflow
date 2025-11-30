@@ -687,6 +687,7 @@ export interface BookmarkTriggerProps {
   isBookmarkDisabled: boolean;
   badgeClassName?: string;
   triggerButtonClassName?: string;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 export interface BookmarkSearchInputProps {

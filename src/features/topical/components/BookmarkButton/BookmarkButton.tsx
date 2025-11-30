@@ -74,6 +74,7 @@ export const BookmarkButton = memo(
     const openUI = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
+        e.preventDefault();
         if (isBookmarkDisabled || savedActivitiesIsLoading) {
           return;
         }
@@ -172,17 +173,15 @@ const MobileBookmarkButton = memo(
           }}
           open={open}
         >
-          <DrawerTrigger
-            asChild
-            onClick={(e) => {
-              openUI(e);
-            }}
-          >
+          <DrawerTrigger asChild>
             <BookmarkTrigger
               question={question}
               isBookmarkDisabled={isBookmarkDisabled}
               badgeClassName={badgeClassName}
               triggerButtonClassName={triggerButtonClassName}
+              onClick={(e) => {
+                openUI(e);
+              }}
             />
           </DrawerTrigger>
           <DrawerContent
@@ -264,19 +263,16 @@ const DesktopBookmarkButton = memo(
         setShouldOpen={setShouldOpen}
       >
         <Popover modal={true} open={open}>
-          <PopoverTrigger
-            onClick={(e) => {
-              openUI(e);
-            }}
-            ref={triggerRef}
-            asChild
-          >
+          <PopoverTrigger ref={triggerRef} asChild>
             <div className={popOverTriggerClassName}>
               <BookmarkTrigger
                 question={question}
                 isBookmarkDisabled={isBookmarkDisabled}
                 badgeClassName={badgeClassName}
                 triggerButtonClassName={triggerButtonClassName}
+                onClick={(e) => {
+                  openUI(e);
+                }}
               />
             </div>
           </PopoverTrigger>

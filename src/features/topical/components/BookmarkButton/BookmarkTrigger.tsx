@@ -13,6 +13,7 @@ export const BookmarkTrigger = memo(
     isBookmarkDisabled,
     badgeClassName,
     triggerButtonClassName,
+    onClick,
   }: BookmarkTriggerProps) => {
     const isMutatingThisQuestion =
       useIsMutating({
@@ -48,6 +49,7 @@ export const BookmarkTrigger = memo(
         )}
         tabIndex={-1}
         title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+        onClick={onClick}
       >
         {savedActivitiesIsFetching ? (
           <Loader2 className="animate-spin" />
