@@ -602,7 +602,9 @@ const AnnotatableInspectImagesComponent = memo(
             <div className="flex flex-col w-full items-center relative">
               {!isPdfViewerLoaded && pdfBlob && (
                 <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
-                  <p className="w-full">Initalizing PDF inspector</p>
+                  <p className="w-full text-center">
+                    Initializing PDF inspector
+                  </p>
                   <Loader />
                 </div>
               )}
@@ -760,7 +762,7 @@ const NotFullScreenContainer = memo(
       <div ref={normalContainerRef} className="w-full relative h-[67dvh]">
         {!pdfBlob && (
           <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
-            <span className="ml-2">Generating PDF</span>
+            <span className="ml-2 text-center">Generating PDF</span>
             <Loader />
           </div>
         )}
