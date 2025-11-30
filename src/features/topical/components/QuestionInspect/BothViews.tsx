@@ -47,7 +47,7 @@ const InspectPanel = ({
       <ScrollArea
         className={cn(
           "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
-          isMobile && "!h-full",
+          isMobile && "h-full!",
           isHiding && "blur-sm",
           scrollAreaClassName
         )}
@@ -82,7 +82,7 @@ const BothViews = ({
       direction={isMobile ? "vertical" : "horizontal"}
       className={cn(
         "rounded-lg border w-full",
-        isMobile ? "!h-[65dvh]" : "!h-[70dvh]"
+        isMobile ? "h-[65dvh]!" : "h-[70dvh]!"
       )}
     >
       <InspectPanel

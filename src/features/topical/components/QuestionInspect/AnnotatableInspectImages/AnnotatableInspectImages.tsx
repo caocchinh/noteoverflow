@@ -207,12 +207,6 @@ const AnnotatableInspectImagesComponent = memo(
       const downloadFileName = `${pdfBaseFileName}.pdf`;
 
       useEffect(() => {
-        if (isEditMode) {
-          ultilityBarRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-      }, [isEditMode]);
-
-      useEffect(() => {
         isAuthenticatedRef.current = isAuthenticated;
       }, [isAuthenticated]);
 
@@ -633,7 +627,7 @@ const AnnotatableInspectImagesComponent = memo(
                     data-pdf-viewer
                   >
                     <div className="flex items-center h-[40px] justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 shrink-0">
-                      <span className="text-sm font-medium text-gray-300">
+                      <span className="text-[13px] font-medium text-gray-300 p-1">
                         NoteOverflow Inspector
                       </span>
                       <div className="flex items-center gap-2">
@@ -763,7 +757,7 @@ const NotFullScreenContainer = memo(
     pdfBlob: Blob | null;
   }) => {
     return (
-      <div ref={normalContainerRef} className="w-full relative h-[72dvh]">
+      <div ref={normalContainerRef} className="w-full relative h-[67dvh]">
         {!pdfBlob && (
           <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
             <span className="ml-2">Generating PDF</span>
