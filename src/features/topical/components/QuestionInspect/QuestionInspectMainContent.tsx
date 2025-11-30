@@ -351,7 +351,7 @@ const QuestionInspectMainContent = forwardRef(
               )}
             >
               <ScrollArea
-                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-2!"
+                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-4!"
                 type="always"
                 viewportRef={questionScrollAreaRef}
               >
@@ -378,7 +378,7 @@ const QuestionInspectMainContent = forwardRef(
               )}
             >
               <ScrollArea
-                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-2!"
+                className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-4!"
                 type="always"
                 viewportRef={answerScrollAreaRef}
               >

@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 11,
     color: "#0084ff",
     textAlign: "left",
-    paddingLeft: 2,
+    marginLeft: 2,
     fontWeight: "bold",
   },
 });
@@ -183,7 +183,9 @@ const MainContent = ({
       <PdfImage key={index} src={src} style={styles.image} />
     ))}
     {text.map((text, index) => (
-      <Text key={index}>{text}</Text>
+      <Text key={index} style={{ marginLeft: 2 }}>
+        {text}
+      </Text>
     ))}
   </View>
 );
