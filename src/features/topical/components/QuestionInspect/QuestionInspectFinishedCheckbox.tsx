@@ -13,23 +13,41 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import {
+  IsHavingUnsafeChangesRef,
   SavedActivitiesResponse,
   SelectedQuestion,
 } from "../../constants/types";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
-import { memo } from "react";
+import {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { usePathname } from "next/navigation";
 
 export const QuestionInspectFinishedCheckbox = memo(
   ({
     question,
     className,
+    isHavingUnsafeChangesRef,
+    setIsAnnotationGuardDialogOpen,
+    isAnnotationGuardDialogOpen,
   }: {
     question: SelectedQuestion;
     className?: string;
+    isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
+    setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
+    isAnnotationGuardDialogOpen?: boolean;
   }) => {
+    const pathname = usePathname();
     const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
     const { isSessionPending, isAuthenticated } = useAuth();
+    const [isPendingToggle, setIsPendingToggle] = useState(false);
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: [
@@ -39,9 +57,14 @@ export const QuestionInspectFinishedCheckbox = memo(
         ],
       }) > 0;
 
-    const isFinished =
-      userFinishedQuestions?.some((item) => item.question.id === question.id) ??
-      false;
+    const isFinished = useMemo(() => {
+      return (
+        userFinishedQuestions?.some(
+          (item) => item.question.id === question.id
+        ) ?? false
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userFinishedQuestions, question.id, isMutatingThisQuestion]);
 
     const queryClient = useQueryClient();
     const { savedActivitiesIsFetching, savedActivitiesIsError } =
@@ -139,6 +162,78 @@ export const QuestionInspectFinishedCheckbox = memo(
       retry: false,
     });
 
+    const toggleFinishedQuestion = useCallback(
+      (e: React.MouseEvent) => {
+        if (pathname == "/topical/finished" && isHavingUnsafeChangesRef) {
+          if (
+            isHavingUnsafeChangesRef.current.answer ||
+            isHavingUnsafeChangesRef.current.question
+          ) {
+            if (isHavingUnsafeChangesRef.current.questionId === question.id) {
+              setIsAnnotationGuardDialogOpen?.(true);
+              setIsPendingToggle(true);
+              return;
+            }
+          }
+        }
+
+        if ((e.target as HTMLElement).tagName === "LABEL") {
+          return;
+        }
+        if (
+          isMutatingThisQuestion ||
+          isSessionPending ||
+          savedActivitiesIsFetching
+        ) {
+          return;
+        }
+        if (!isAuthenticated) {
+          toast.error("Please sign in to save finished questions.");
+          return;
+        }
+        if (savedActivitiesIsError) {
+          toast.error(
+            "Failed to update finished questions list. Please refresh the page."
+          );
+          return;
+        }
+        mutate({
+          currentQuestionId: question.id,
+          isCurrentlyFinished: isFinished,
+        });
+      },
+      [
+        pathname,
+        isMutatingThisQuestion,
+        isSessionPending,
+        savedActivitiesIsFetching,
+        isAuthenticated,
+        savedActivitiesIsError,
+        mutate,
+        question.id,
+        isFinished,
+        isHavingUnsafeChangesRef,
+        setIsAnnotationGuardDialogOpen,
+      ]
+    );
+
+    useEffect(() => {
+      if (!isAnnotationGuardDialogOpen && isPendingToggle) {
+        mutate({
+          currentQuestionId: question.id,
+          isCurrentlyFinished: isFinished,
+        });
+        setIsPendingToggle(false);
+      }
+    }, [
+      isAnnotationGuardDialogOpen,
+      isFinished,
+      isPendingToggle,
+      mutate,
+      question.id,
+      toggleFinishedQuestion,
+    ]);
+
     if (!question.id) {
       return null;
     }
@@ -155,32 +250,7 @@ export const QuestionInspectFinishedCheckbox = memo(
           className
         )}
         title="Add to finished question"
-        onClick={(e) => {
-          if ((e.target as HTMLElement).tagName === "LABEL") {
-            return;
-          }
-          if (
-            isMutatingThisQuestion ||
-            isSessionPending ||
-            savedActivitiesIsFetching
-          ) {
-            return;
-          }
-          if (!isAuthenticated) {
-            toast.error("Please sign in to save finished questions.");
-            return;
-          }
-          if (savedActivitiesIsError) {
-            toast.error(
-              "Failed to update finished questions list. Please refresh the page."
-            );
-            return;
-          }
-          mutate({
-            currentQuestionId: question.id,
-            isCurrentlyFinished: isFinished,
-          });
-        }}
+        onClick={toggleFinishedQuestion}
       >
         {savedActivitiesIsFetching ? (
           <Loader2 className="animate-spin w-4 h-4" />

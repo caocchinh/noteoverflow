@@ -200,6 +200,11 @@ const InspectUltilityBar = memo(
               {currentQuestionData && (
                 <QuestionInspectFinishedCheckbox
                   question={currentQuestionData}
+                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
+                  setIsAnnotationGuardDialogOpen={
+                    setIsAnnotationGuardDialogOpen
+                  }
+                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                 />
               )}
               {currentQuestionData && (

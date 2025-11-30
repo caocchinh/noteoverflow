@@ -643,11 +643,13 @@ export interface AnnotatableImagesUpdaterProps {
   isAnnotationGuardDialogOpen: boolean;
 }
 
-type IsHavingUnsafeChangesRef = RefObject<{
+export interface UnsafeChangesState {
   answer: boolean;
   question: boolean;
   questionId: string;
-}>;
+}
+
+export type IsHavingUnsafeChangesRef = RefObject<UnsafeChangesState>;
 
 export interface AnnotatableInspectImageProps {
   typeOfView: "question" | "answer";

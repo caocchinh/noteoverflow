@@ -2,6 +2,7 @@
 import {
   SelectedQuestion,
   AnnotatableInspectImagesHandle,
+  UnsafeChangesState,
 } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -55,10 +56,11 @@ export const QuestionView = ({
     useRef<AnnotatableInspectImagesHandle | null>(null);
 
   const [isMounted, setIsMounted] = useState(false);
-  const isHavingUnsafeChangesRef = useRef<{
-    question: boolean;
-    answer: boolean;
-  }>({ question: false, answer: false });
+  const isHavingUnsafeChangesRef = useRef<UnsafeChangesState>({
+    question: false,
+    answer: false,
+    questionId: "",
+  });
   const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
     useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
