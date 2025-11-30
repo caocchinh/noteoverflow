@@ -8,9 +8,9 @@ import Loader from "../Loader/Loader";
 const QuestionAnnotationGuardDialog = ({ isOpen }: { isOpen: boolean }) => {
   return (
     <AlertDialog open={isOpen}>
-      {isOpen && <div className="fixed inset-0 z-[100006] bg-black/50" />}
+      {isOpen && <div className="fixed inset-0 z-100006 bg-black/50" />}
 
-      <AlertDialogContent className="flex flex-col items-center justify-center gap-6 w-full max-w-[320px] p-8 rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-sm z-[100007]">
+      <AlertDialogContent className="flex flex-col items-center justify-center gap-6 w-full max-w-[320px] p-8 rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-sm z-100007">
         <AlertDialogTitle className="sr-only">
           Saving annotations
         </AlertDialogTitle>
