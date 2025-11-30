@@ -9,13 +9,28 @@ import type {
 } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
 import { isValidQuestionId } from "@/lib/utils";
-import { createCurriculum, isCurriculumExists } from "@/server/main/curriculum";
-import { createPaperType, isPaperTypeExists } from "@/server/main/paperType";
-import { createQuestion, isQuestionExists } from "@/server/main/question";
-import { createSeason, isSeasonExists } from "@/server/main/season";
-import { createSubject, isSubjectExists } from "@/server/main/subject";
-import { createTopic, isTopicExists } from "@/server/main/topic";
-import { createYear, isYearExists } from "@/server/main/year";
+import {
+  createCurriculum,
+  isCurriculumExists,
+} from "@/features/admin/server/main/curriculum";
+import {
+  createPaperType,
+  isPaperTypeExists,
+} from "@/features/admin/server/main/paperType";
+import {
+  createQuestion,
+  isQuestionExists,
+} from "@/features/admin/server/main/question";
+import {
+  createSeason,
+  isSeasonExists,
+} from "@/features/admin/server/main/season";
+import {
+  createSubject,
+  isSubjectExists,
+} from "@/features/admin/server/main/subject";
+import { createTopic, isTopicExists } from "@/features/admin/server/main/topic";
+import { createYear, isYearExists } from "@/features/admin/server/main/year";
 import {
   validateCurriculum,
   validatePaperType,

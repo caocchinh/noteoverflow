@@ -3,7 +3,7 @@ import {
   validateCurriculum,
   validateSubject,
   validateFilterData,
-  hashQuery,
+  hashUltil,
 } from "@/features/topical/lib/utils";
 import { question } from "@/drizzle/schema";
 import { and, eq, inArray, like, or } from "drizzle-orm";
@@ -91,7 +91,7 @@ export const getTopicalQuestions = async ({
   };
 
   const queryString = JSON.stringify(currentQuery);
-  const hashedKey = await hashQuery(queryString);
+  const hashedKey = await hashUltil(queryString);
   const result = await env.TOPICAL_CACHE.get(hashedKey);
 
   if (result === null) {
@@ -187,10 +187,10 @@ export const getTopicalQuestions = async ({
       season,
     };
 
-    const rateLimitedHash = await hashQuery(
+    const rateLimitedHash = await hashUltil(
       JSON.stringify({ ...baseQuery, isRateLimited: true })
     );
-    const nonRateLimitedHash = await hashQuery(
+    const nonRateLimitedHash = await hashUltil(
       JSON.stringify({ ...baseQuery, isRateLimited: false })
     );
 

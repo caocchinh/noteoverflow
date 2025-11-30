@@ -11,6 +11,23 @@ import { ServerActionResponse } from "@/constants/types";
 import { MAX_FILE_SIZE } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { isValidQuestionId } from "@/lib/utils";
+import { getCurriculum } from "./main/curriculum";
+import { getPaperType } from "./main/paperType";
+import { isQuestionExists } from "./main/question";
+import { getSeason } from "./main/season";
+import { getSubjectByCurriculum } from "./main/subject";
+import { getTopic } from "./main/topic";
+import { getYear } from "./main/year";
+import type {
+  CurriculumType,
+  SubjectType,
+} from "@/features/admin/content/constants/types";
+import {
+  validateCurriculum,
+  validateSubject,
+} from "@/features/admin/content/lib/utils";
+import { redirect } from "next/navigation";
 
 export const uploadToR2 = async ({
   formData,
@@ -167,3 +184,153 @@ export const uploadToR2 = async ({
 //     };
 //   }
 // };
+
+export const getCurriculumAction = async (): Promise<
+  ServerActionResponse<CurriculumType[]>
+> => {
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return redirect("/authentication");
+    }
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    const data = await getCurriculum();
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error("Error getting curriculum data:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+export const isQuestionExistsAction = async (
+  questionId: string
+): Promise<ServerActionResponse<boolean>> => {
+  if (
+    typeof questionId !== "string" ||
+    !questionId ||
+    !isValidQuestionId(questionId)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return redirect("/authentication");
+    }
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    const data = await isQuestionExists(questionId);
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error("Error checking if question exists:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+export const getSubjectByCurriculumAction = async (
+  curriculumName: string
+): Promise<ServerActionResponse<SubjectType[]>> => {
+  if (
+    typeof curriculumName !== "string" ||
+    validateCurriculum(curriculumName)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return redirect("/authentication");
+    }
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    const data = await getSubjectByCurriculum(curriculumName);
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error("Error getting subject data:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};
+
+export const getSubjectInfoAction = async (
+  subjectId: string,
+  curriculumName: string
+): Promise<
+  ServerActionResponse<{
+    topicData: string[];
+    paperTypeData: number[];
+    seasonData: string[];
+    yearData: number[];
+  }>
+> => {
+  if (
+    typeof subjectId !== "string" ||
+    !subjectId ||
+    !curriculumName ||
+    validateSubject(subjectId) ||
+    validateCurriculum(curriculumName)
+  ) {
+    return {
+      success: false,
+      error: BAD_REQUEST,
+    };
+  }
+  try {
+    const session = await verifySession();
+    if (!session) {
+      return redirect("/authentication");
+    }
+    if (session.user.role !== "admin" && session.user.role !== "owner") {
+      redirect("/app");
+    }
+    const data = await Promise.all([
+      getTopic(subjectId ?? "", curriculumName ?? ""),
+      getPaperType(subjectId ?? "", curriculumName ?? ""),
+      getSeason(subjectId ?? "", curriculumName ?? ""),
+      getYear(subjectId ?? "", curriculumName ?? ""),
+    ]);
+    const [topicData, paperTypeData, seasonData, yearData] = data;
+    return {
+      success: true,
+      data: {
+        topicData,
+        paperTypeData,
+        seasonData,
+        yearData,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting subject info:", error);
+    return {
+      success: false,
+      error: INTERNAL_SERVER_ERROR,
+    };
+  }
+};

@@ -33,6 +33,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
       });
     }
   })
+
   .all("/auth/*", authHandler)
 
   // GET /api/topical - Query questions with filters

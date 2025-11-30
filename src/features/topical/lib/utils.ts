@@ -1005,9 +1005,9 @@ export const handleDownloadPdf = (pdfBlob: Blob | null, fileName: string) => {
 };
 
 // Function to hash the query string
-export async function hashQuery(queryString: string): Promise<string> {
+export async function hashUltil(inputString: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(queryString);
+  const data = encoder.encode(inputString);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray
