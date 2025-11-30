@@ -6,24 +6,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 import { Download } from "lucide-react";
-import { memo, RefObject, useCallback } from "react";
+import { memo, RefObject, useCallback, useMemo } from "react";
 import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 import DownloadButton from "./DownloadButton";
 
 const EditModeDownloadMenu = memo(
   ({
     pdfBlob,
-    fileName,
     pdfViewerRef,
     isPdfViewerLoaded,
     isSessionFetching,
     generatePdfBlob,
     pdfBaseFileName,
+    typeOfView,
   }: {
     pdfBlob: Blob | null;
-    fileName: string;
     pdfViewerRef: RefObject<PdfViewerWrapperHandle | null>;
     isPdfViewerLoaded: boolean;
+    typeOfView: "question" | "answer";
     isSessionFetching: boolean;
     generatePdfBlob: ({
       typeOfContent,
@@ -32,6 +32,15 @@ const EditModeDownloadMenu = memo(
     }) => Promise<Blob | null>;
     pdfBaseFileName: string;
   }) => {
+    const fileNameWithLabel = useMemo(() => {
+      if (typeOfView === "question") {
+        return `${pdfBaseFileName} - Annotated question`;
+      } else if (typeOfView === "answer") {
+        return `${pdfBaseFileName} - Annotated answer`;
+      }
+      return `${pdfBaseFileName}`;
+    }, [pdfBaseFileName, typeOfView]);
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -73,7 +82,7 @@ const EditModeDownloadMenu = memo(
             typeOfDownload="question-with-answers"
           />
           <DownloadWithAnnotationsButton
-            fileName={fileName}
+            fileName={fileNameWithLabel}
             isPdfViewerLoaded={isPdfViewerLoaded}
             pdfViewerRef={pdfViewerRef}
             isSessionFetching={isSessionFetching}

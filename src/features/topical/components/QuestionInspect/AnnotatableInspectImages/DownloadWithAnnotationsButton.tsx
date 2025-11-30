@@ -2,6 +2,7 @@ import { memo, RefObject, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 import { Loader2 } from "lucide-react";
+import { handleDownloadPdf } from "@/features/topical/lib/utils";
 
 const DownloadWithAnnotationsButton = memo(
   ({
@@ -30,14 +31,7 @@ const DownloadWithAnnotationsButton = memo(
           return;
         }
 
-        const url = URL.createObjectURL(pdfWithAnnotations);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        handleDownloadPdf(pdfWithAnnotations, fileName);
       } catch (error) {
         console.error("Error downloading PDF with annotations:", error);
       } finally {

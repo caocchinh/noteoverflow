@@ -204,8 +204,6 @@ const AnnotatableInspectImagesComponent = memo(
         return `NoteOverflow_${sanitizedPaperCode}_Q${questionNumber || ""}`;
       }, [paperCode, questionNumber]);
 
-      const downloadFileName = `${pdfBaseFileName}.pdf`;
-
       useEffect(() => {
         isAuthenticatedRef.current = isAuthenticated;
       }, [isAuthenticated]);
@@ -578,12 +576,12 @@ const AnnotatableInspectImagesComponent = memo(
                   />
                   <EditModeDownloadMenu
                     pdfBlob={pdfBlob}
-                    fileName={downloadFileName}
                     pdfViewerRef={pdfViewerRef}
                     isPdfViewerLoaded={isPdfViewerLoaded}
                     isSessionFetching={isSessionFetching}
                     generatePdfBlob={generatePdfBlob}
                     pdfBaseFileName={pdfBaseFileName}
+                    typeOfView={typeOfView}
                   />
                   <Button
                     className="cursor-pointer h-[26px]"
@@ -651,12 +649,12 @@ const AnnotatableInspectImagesComponent = memo(
                         />
                         <EditModeDownloadMenu
                           pdfBlob={pdfBlob}
-                          fileName={downloadFileName}
                           pdfViewerRef={pdfViewerRef}
                           isPdfViewerLoaded={isPdfViewerLoaded}
                           isSessionFetching={isSessionFetching}
                           generatePdfBlob={generatePdfBlob}
                           pdfBaseFileName={pdfBaseFileName}
+                          typeOfView={typeOfView}
                         />
                         <Button
                           className="relative z-99998 dark:text-white text-white !hover:text-black cursor-pointer"
