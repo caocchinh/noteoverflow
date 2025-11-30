@@ -186,6 +186,10 @@ const MobileBookmarkButton = memo(
           </DrawerTrigger>
           <DrawerContent
             className="z-100009 h-[95vh] max-h-[95vh] dark:bg-accent"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}

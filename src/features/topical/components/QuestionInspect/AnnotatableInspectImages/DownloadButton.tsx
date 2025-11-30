@@ -45,12 +45,12 @@ const DownloadButton = memo(
       >
         {isGenerating ? (
           <>
-            <span className="hidden sm:block">Generating</span>
+            <span>Generating</span>
             <Loader2 className="h-4 w-4 animate-spin" />
           </>
         ) : (
           <>
-            <span className="hidden sm:block">{label}</span>
+            <span>{label}</span>
           </>
         )}
       </Button>
