@@ -355,7 +355,6 @@ const AnnotatableInspectImagesComponent = memo(
           !isHavingUnsafeChangesRef.current[typeOfView] ||
           !currentXfdf ||
           !question ||
-          !isEditMode ||
           !isMounted ||
           !isPdfViewerLoaded ||
           !isAuthenticatedRef.current ||
@@ -380,7 +379,6 @@ const AnnotatableInspectImagesComponent = memo(
         };
       }, [
         currentXfdf,
-        isEditMode,
         isMounted,
         isPdfViewerLoaded,
         typeOfView,
@@ -394,7 +392,6 @@ const AnnotatableInspectImagesComponent = memo(
         if (
           !isHavingUnsafeChangesRef.current[typeOfView] ||
           !question ||
-          !isEditMode ||
           !isMounted ||
           !isAnnotationGuardDialogOpen ||
           isSavingAnnotations ||
@@ -410,7 +407,6 @@ const AnnotatableInspectImagesComponent = memo(
         isHavingUnsafeChangesRef,
         typeOfView,
         isSavingAnnotations,
-        isEditMode,
         isMounted,
         handleSave,
         isSessionFetching,
@@ -610,6 +606,7 @@ const AnnotatableInspectImagesComponent = memo(
                       "fixed inset-0 z-999998 bg-white flex flex-col h-dvh w-screen",
                       isFullscreen ? "block" : "hidden"
                     )}
+                    data-pdf-viewer
                   >
                     <div className="flex items-center h-[40px] justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 shrink-0">
                       <span className="text-sm font-medium text-gray-300">

@@ -105,7 +105,9 @@ const PdfViewerWrapper = memo(
 
         WebViewer(
           {
-            path: "http://localhost:3000/lib/webviewer",
+            path: `${
+              typeof window === "undefined" ? "" : window.location.origin
+            }/lib/webviewer`,
             licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
           },
           viewerRef.current

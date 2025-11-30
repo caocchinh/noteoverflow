@@ -28,7 +28,10 @@ const NonEditModeDownloadMenu = memo(
             <Download className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="z-999998 flex flex-col dark:bg-accent p-2 gap-2">
+        <DropdownMenuContent
+          className="z-999998 flex flex-col dark:bg-accent p-2 gap-2"
+          data-annotatable-download-menu
+        >
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "question" }),

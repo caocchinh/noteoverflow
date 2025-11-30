@@ -189,7 +189,7 @@ const MobileBookmarkButton = memo(
             />
           </DrawerTrigger>
           <DrawerContent
-            className="z-[100009] h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="z-100009 h-[95vh] max-h-[95vh] dark:bg-accent"
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}
@@ -278,7 +278,7 @@ const DesktopBookmarkButton = memo(
             </div>
           </PopoverTrigger>
           <PopoverContent
-            className="flex flex-col z-[100010] w-[270px] !px-0 dark:bg-accent"
+            className="flex flex-col z-100010 w-[270px] px-0! dark:bg-accent"
             onClick={(e) => e.stopPropagation()}
             align={popOverAlign}
             onOpenAutoFocus={(e) => {

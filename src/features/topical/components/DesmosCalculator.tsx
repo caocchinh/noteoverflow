@@ -137,7 +137,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
         {/* Fullscreen container */}
         <div
           className={cn(
-            "fixed inset-0 z-[999999] border border-gray-300 bg-gray-800",
+            "fixed inset-0 z-999999 border border-gray-300 bg-gray-800",
             isFullscreen ? "block" : "hidden"
           )}
           style={{ width: "100vw", height: "100vh", top: 0, left: 0 }}
@@ -150,7 +150,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
               </span>
               <div className="flex items-center gap-1">
                 <Button
-                  className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                  className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
                   variant="ghost"
                   size="icon"
                   onClick={toggleFullscreen}
@@ -159,8 +159,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                   <Shrink />
                 </Button>
                 <Button
-                  data-calculator-close
-                  className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                  className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
                   variant="ghost"
                   size="icon"
                   onClick={onClose}
@@ -182,7 +181,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
             minWidth={rndMinWidth}
             minHeight={rndMinHeight}
             bounds="window"
-            className="z-[999999] border border-gray-300 rounded-t-lg shadow-2xl bg-gray-800"
+            className="z-999999 border border-gray-300 rounded-t-lg shadow-2xl bg-gray-800"
             dragHandleClassName="calculator-drag-handle"
             onDragStop={(e, d) => {
               setRndPosition({ x: d.x, y: d.y });
@@ -203,7 +202,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
-                    className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                    className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
                     variant="ghost"
                     size="icon"
                     onClick={toggleFullscreen}
@@ -212,12 +211,11 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                     <Maximize />
                   </Button>
                   <Button
-                    className="relative z-[999999] dark:text-white text-white !hover:text-black cursor-pointer"
+                    className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
                     variant="ghost"
                     size="icon"
                     onClick={onClose}
                     title="Close Calculator"
-                    data-calculator-close
                   >
                     <X />
                   </Button>

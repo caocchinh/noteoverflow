@@ -30,6 +30,7 @@ import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
 import { usePathname } from "next/navigation";
 import QuestionAnnotationGuardDialog from "./QuestionAnnotationGuardDialog";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 
 const sidebarProviderStyle = {
   "--sidebar-width": "299.6px",
@@ -52,6 +53,7 @@ const QuestionInspect = memo(
     ) => {
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
+      const { isCalculatorOpen } = useTopicalApp();
       const isHavingUnsafeChangesRef = useRef({
         answer: false,
         question: false,
@@ -154,6 +156,7 @@ const QuestionInspect = memo(
       const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
       const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
       const isCoolDownRef = useRef(false);
+      const [isPendingClose, setIsPendingClose] = useState(false);
 
       const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -166,20 +169,25 @@ const QuestionInspect = memo(
         isCoolDownRef.current = false;
       }, []);
 
-      const handleInteractOutside = useCallback((e: Event) => {
-        e.preventDefault();
-
-        // const targetElement = e.target as Element;
-        // if (targetElement?.closest("[data-calculator-close]")) {
-        //   e.preventDefault();
-        //   return;
-        // }
-
-        // if (isInspectOpen.isOpen && isCalculatorOpen) {
-        //   e.preventDefault();
-        //   return;
-        // }
-      }, []);
+      const handleInteractOutside = useCallback(
+        (e: Event) => {
+          if (isInspectOpen.isOpen && isCalculatorOpen) {
+            e.preventDefault();
+            return;
+          }
+          const targetElement = e.target as Element;
+          console.log(targetElement);
+          if (
+            targetElement?.closest("[data-pdf-viewer]") ||
+            targetElement?.closest(".PhotoView-Portal") ||
+            targetElement?.closest("[data-annotatable-download-menu]")
+          ) {
+            e.preventDefault();
+            return;
+          }
+        },
+        [isCalculatorOpen, isInspectOpen.isOpen]
+      );
 
       useEffect(() => {
         if (pathNameRef.current !== "/topical") {
@@ -223,8 +231,12 @@ const QuestionInspect = memo(
             if (
               isHavingUnsafeChangesRef.current["answer"] ||
               isHavingUnsafeChangesRef.current["question"] ||
-              !isAnnotationGuardDialogOpen
+              isAnnotationGuardDialogOpen
             ) {
+              if (!isAnnotationGuardDialogOpen) {
+                setIsAnnotationGuardDialogOpen(true);
+              }
+              setIsPendingClose(true);
               return;
             }
           }
@@ -245,6 +257,14 @@ const QuestionInspect = memo(
         ]
       );
 
+      useEffect(() => {
+        if (!isPendingClose || isAnnotationGuardDialogOpen) {
+          return;
+        }
+        setIsPendingClose(false);
+        handleOpenChange(false);
+      }, [isPendingClose, isAnnotationGuardDialogOpen, handleOpenChange]);
+
       return (
         <>
           <QuestionAnnotationGuardDialog isOpen={isAnnotationGuardDialogOpen} />
@@ -254,10 +274,10 @@ const QuestionInspect = memo(
             modal={false}
           >
             {isInspectOpen.isOpen && (
-              <div className="fixed inset-0 z-[100003] bg-black/50" />
+              <div className="fixed inset-0 z-100003 bg-black/50" />
             )}
             <DialogContent
-              className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center !max-w-screen dark:bg-accent overflow-hidden p-0"
+              className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center max-w-screen! dark:bg-accent overflow-hidden p-0"
               showCloseButton={false}
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
@@ -274,7 +294,7 @@ const QuestionInspect = memo(
                 openMobile={isInspectSidebarOpen}
                 onOpenChangeMobile={setIsInspectSidebarOpen}
                 open={isInspectSidebarOpen}
-                className="!min-h-[inherit]"
+                className="min-h-[inherit]!"
                 style={sidebarProviderStyle}
               >
                 <InspectSidebar
