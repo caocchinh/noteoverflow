@@ -6,16 +6,13 @@ import { getDbAsync } from "@/drizzle/db.server";
 import { user } from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
 
-export const updateUserAvatarAction = async (
-  userId: string,
-  avatar: string
-) => {
-  if (!(userId && avatar)) {
-    throw new Error("User ID and avatar are required");
+export const updateUserAvatarAction = async (avatar: string) => {
+  if (!avatar) {
+    throw new Error("Avatar is required");
   }
 
-  if (typeof userId !== "string" || typeof avatar !== "string") {
-    throw new Error("User ID and avatar must be strings");
+  if (typeof avatar !== "string") {
+    throw new Error("Avatar must be a string");
   }
   const authInstance = await auth(getDbAsync);
   const session = await authInstance.api.getSession({
@@ -29,7 +26,7 @@ export const updateUserAvatarAction = async (
   const response = await db
     .update(user)
     .set({ selectedImage: avatar })
-    .where(eq(user.id, userId));
+    .where(eq(user.id, session.user.id));
   if (response.error) {
     throw new Error("User not found");
   }

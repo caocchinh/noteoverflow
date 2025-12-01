@@ -15,7 +15,7 @@ const NavBar = () => {
   const pathname = usePathname();
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-[100000] flex min-w-screen items-center justify-between border-[var(--navbar-border)] border-b bg-[var(--navbar-bg)] px-1 py-[7px] sm:px-10 lg:px-20">
+    <header className="fixed top-0 right-0 left-0 z-100000 flex min-w-screen items-center justify-between border-(--navbar-border) border-b bg-(--navbar-bg) px-1 py-[7px] sm:px-10 lg:px-20">
       <nav className="flex w-full items-center justify-center gap-3 sm:justify-between sm:gap-8">
         {pathname !== "/" ? (
           <>
@@ -69,7 +69,7 @@ const NavBar = () => {
           </Button> */}
           <Button
             asChild
-            className="group relative rounded-lg border border-[var(--navbar-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] hover:bg-[var(--navbar-bg)] "
+            className="group relative rounded-lg border border-(--navbar-border) bg-(--navbar-bg) text-(--navbar-text) hover:bg-(--navbar-bg) "
           >
             <Link className="relative" href={TOPICAL_QUESTION_APP_ROUTE}>
               <GlowEffect

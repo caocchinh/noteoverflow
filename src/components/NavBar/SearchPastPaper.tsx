@@ -329,24 +329,24 @@ const SearchPastPaper = () => {
         onClick={() => setIsDialogOpen(true)}
       >
         <Input
-          className="h-full w-full max-w-md rounded-xl rounded-r-none border border-[var(--navbar-input-border)] bg-[var(--navbar-bg)] text-[var(--navbar-text)] placeholder:text-white/50 dark:bg-[var(--navbar-bg)]"
+          className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
           placeholder={breakpoint ? "Search" : "Search past papers"}
           value=""
           readOnly={true}
         />
-        <Button className="h-full w-10 rounded-xl rounded-l-none border border-[var(--navbar-input-border)] bg-[var(--navbar-button-bg)] hover:cursor-pointer hover:bg-[var(--navbar-border)] lg:w-14">
-          <SearchIcon className="text-[var(--navbar-text)]" />
+        <Button className="h-full w-10 rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
+          <SearchIcon className="text-(--navbar-text)" />
         </Button>
       </div>
       <Button
-        className="flex h-full w-9 items-center justify-center border border-[var(--navbar-border)] bg-transparent p-2 text-[var(--navbar-text)] hover:cursor-pointer hover:bg-[var(--navbar-border)] sm:hidden"
+        className="flex h-full w-9 items-center justify-center border border-(--navbar-border) bg-transparent p-2 text-(--navbar-text) hover:cursor-pointer hover:bg-(--navbar-border) sm:hidden"
         onClick={() => setIsDialogOpen(true)}
       >
         <SearchIcon />
       </Button>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="dark:bg-muted max-w-2xl">
-          <DialogHeader className="space-y-3 !pb-0">
+          <DialogHeader className="space-y-3 pb-0!">
             <div className="relative">
               <DialogTitle className="relative text-center text-xl font-bold">
                 AS & A-Level Past Papers Navigator
@@ -358,10 +358,10 @@ const SearchPastPaper = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-[calc(100dvh-150px)] pr-4" type="always">
-            <div className="relative overflow-hidden bg-gradient-to-br from-background via-accent/20 to-accent/40 rounded-xl border border-border/50shadow-md">
+            <div className="relative overflow-hidden bg-linear-to-br from-background via-accent/20 to-accent/40 rounded-xl border border-border/50shadow-md">
               <div className="relative z-10 ">
                 <div className="flex items-center gap-2 px-4 pt-2 pb-0 ">
-                  <div className="absolute inset-0 bg-gradient-to-r from-logo-main/5 via-transparent to-logo-main/5" />
+                  <div className="absolute inset-0 bg-linear-to-r from-logo-main/5 via-transparent to-logo-main/5" />
                   <h4 className="text-base font-semibold text-logo-main">
                     ⚡ Quick Paper Code
                   </h4>
@@ -644,7 +644,7 @@ const SearchPastPaper = () => {
                     <SelectValue placeholder="Select exam season" />
                   </SelectTrigger>
                   <SelectContent
-                    className="z-[99999999] dark:bg-accent w-[var(--radix-select-trigger-width)]"
+                    className="z-99999999 dark:bg-accent w-(--radix-select-trigger-width)"
                     side="bottom"
                   >
                     <SelectItem value="Spring">
@@ -781,7 +781,7 @@ const SearchPastPaper = () => {
       </Dialog>
       <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
         <DialogContent
-          className="dark:bg-muted z-[9999999] !max-w-[475px] w-[85%] !px-2"
+          className="dark:bg-muted z-9999999 max-w-[475px]! w-[85%] px-2!"
           overlayClassName="z-[999999]"
         >
           <DialogHeader>
@@ -791,7 +791,7 @@ const SearchPastPaper = () => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="w-full h-[83dvh] px-4" type="always">
-            <div className="relative rounded-xl border border-border bg-gradient-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
+            <div className="relative rounded-xl border border-border bg-linear-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-1">

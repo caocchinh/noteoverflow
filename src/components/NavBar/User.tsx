@@ -93,7 +93,7 @@ const User = () => {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="relative z-[100001] flex flex-col bg-background px-0 text-foreground">
+        <DropdownMenuContent className="relative z-100001 flex flex-col bg-background px-0 text-foreground">
           <DropdownMenuItem asChild>
             <Button
               className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
@@ -115,7 +115,7 @@ const User = () => {
   }
 
   if (isSessionPending) {
-    return <Skeleton className="!bg-navbar-skelenton h-8 w-8 rounded-full" />;
+    return <Skeleton className="bg-navbar-skelenton! h-8 w-8 rounded-full" />;
   }
   if (!isAuthenticated || !user) {
     return (
@@ -130,7 +130,7 @@ const User = () => {
         >
           <Button
             asChild
-            className="rounded-lg bg-[var(--navbar-text)] text-[var(--navbar-bg)] hover:bg-[var(--navbar-text)] hover:text-[var(--navbar-bg)] hover:opacity-90"
+            className="rounded-lg bg-(--navbar-text) text-(--navbar-bg) hover:bg-(--navbar-text) hover:text-(--navbar-bg) hover:opacity-90"
             title="Sign in to access all features"
           >
             <Link href="/authentication">
@@ -148,7 +148,6 @@ const User = () => {
         currentAvatar={user.selectedImage || "/assets/avatar/blue.webp"}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
-        userId={user.id}
         defaultAvatar={user.image}
       />
 
@@ -192,7 +191,7 @@ const User = () => {
 
         <DropdownMenuContent
           align="end"
-          className="relative z-[100001] flex w-[200px] flex-col border-white/50 bg-background px-1 text-foreground"
+          className="relative z-100001 flex w-[200px] flex-col border-white/50 bg-background px-1 text-foreground"
         >
           <DropdownMenuSub
             defaultOpen={false}
@@ -200,7 +199,7 @@ const User = () => {
             open={isSubMenuOpen}
           >
             <Button
-              className="!p-0 flex h-full w-full cursor-pointer items-center justify-start"
+              className="p-0! flex h-full w-full cursor-pointer items-center justify-start"
               onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
               variant="ghost"
             >
@@ -226,7 +225,7 @@ const User = () => {
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 alignOffset={isMobile ? 50 : undefined}
-                className="z-[100002] border-white/60"
+                className="z-100002 border-white/60"
                 sideOffset={isMobile ? -95 : undefined}
               >
                 <DropdownMenuItem asChild title="Change avatar">
@@ -247,7 +246,7 @@ const User = () => {
 
           {(user.role === "admin" || user.role === "owner") && (
             <>
-              <DropdownMenuSeparator className="!mx-0 !my-0" />
+              <DropdownMenuSeparator className="mx-0! my-0!" />
               <DropdownMenuItem asChild title="Admin Panel">
                 <Button
                   asChild
@@ -266,12 +265,12 @@ const User = () => {
             </>
           )}
 
-          <DropdownMenuSeparator className="!mx-0 !my-0" />
+          <DropdownMenuSeparator className="mx-0! my-0!" />
 
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                className="flex w-full cursor-pointer items-center justify-start px-3 py-2 hover:bg-muted data-[variant=destructive]:*:[svg]:!text-destructive relative  select-none  gap-2 rounded-sm text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                className="flex w-full cursor-pointer items-center justify-start px-3 py-2 hover:bg-muted data-[variant=destructive]:*:[svg]:text-destructive! relative  select-none  gap-2 rounded-sm text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-inset:pl-8 data-[variant=destructive]:text-destructive data-disabled:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
                 size="icon"
                 variant="ghost"
               >
@@ -288,7 +287,7 @@ const User = () => {
                 email.
               </DialogDescription>
               <Button
-                className="text-sm !text-background dark:hover:bg-white hover:bg-foreground-secondary bg-foreground w-max cursor-pointer rounded-md px-2 py-1"
+                className="text-sm text-background! dark:hover:bg-white hover:bg-foreground-secondary bg-foreground w-max cursor-pointer rounded-md px-2 py-1"
                 variant="ghost"
                 onClick={() => {
                   navigator.clipboard.writeText("founder@noteoverflow.com");
@@ -301,7 +300,7 @@ const User = () => {
             </DialogContent>
           </Dialog>
 
-          <DropdownMenuSeparator className="!mx-0 !my-0" />
+          <DropdownMenuSeparator className="mx-0! my-0!" />
 
           <DropdownMenuItem
             asChild

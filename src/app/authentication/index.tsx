@@ -226,7 +226,7 @@ const AuthPageClient = ({
   return (
     <>
       <AlertDialog open={isEmbededBrowser}>
-        <AlertDialogContent className="flex flex-col items-center justify-center gap-3 !py-4 border border-red-500">
+        <AlertDialogContent className="flex flex-col items-center justify-center gap-3 py-4! border border-red-500">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600 text-4xl font-bold">
               Warning
@@ -237,7 +237,7 @@ const AuthPageClient = ({
             Due to security reasons, sign in within an embedded browser is
             prohibited. Please open the link in an external browser.
           </AlertDialogDescription>
-          <AlertDialogFooter className="flex !flex-col items-center justify-center gap-3 w-full">
+          <AlertDialogFooter className="flex flex-col! items-center justify-center gap-3 w-full">
             <Button
               className="flex items-center justify-center gap-2 cursor-pointer w-full"
               onClick={(e) => {
@@ -377,7 +377,7 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="!w-[200px] !h-[40px] !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] flex items-center justify-center border-1 border-[#747775] text-[#1F1F1F] hover:cursor-pointer dark:border-[#8E918F] dark:text-[#E3E3E3]"
+                    className="w-[200px]! h-[40px]! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! flex items-center justify-center border border-[#747775] text-[#1F1F1F] hover:cursor-pointer dark:border-[#8E918F] dark:text-[#E3E3E3]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("google")}
                     variant="outline"
@@ -400,7 +400,7 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="!w-[200px] !h-[41px] !font-medium !font !rounded-[4px] !gap-[10px] !px-[12px] flex items-center justify-center border-1 border-[#8C8C8C] bg-white text-[#5E5E5E] hover:cursor-pointer dark:border-[#8E918F] dark:bg-[#2F2F2F] dark:text-white"
+                    className="w-[200px]! h-[41px]! font-medium! font! rounded-[4px]! gap-[10px]! px-[12px]! flex items-center justify-center border border-[#8C8C8C] bg-white text-[#5E5E5E] hover:cursor-pointer dark:border-[#8E918F] dark:bg-[#2F2F2F] dark:text-white"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("microsoft")}
                     variant="outline"
@@ -423,7 +423,7 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="!w-[200px] !h-[40px] !text-white !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] !bg-[#ff4500] flex items-center justify-center border-1 border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
+                    className="w-[200px]! h-[40px]! text-white! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! bg-[#ff4500]! flex items-center justify-center border border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("reddit")}
                     variant="outline"
@@ -446,7 +446,7 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="!w-[200px] !h-[40px] !text-white !font-medium !font-roboto !rounded-[4px] !gap-[10px] !px-[12px] !bg-[#5865F2] flex items-center justify-center border-1 border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
+                    className="w-[200px]! h-[40px]! text-white! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! bg-[#5865F2]! flex items-center justify-center border border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("discord")}
                     variant="outline"

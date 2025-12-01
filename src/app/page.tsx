@@ -35,7 +35,7 @@ const items = Array.from({ length: 22 }, (_, i) => {
   return (
     <Image
       alt="NoteOverflow"
-      className="!h-full w-full rounded-lg object-contain object-left"
+      className="h-full! w-full rounded-lg object-contain object-left"
       height={65}
       key={`logo${num}`}
       src={`/assets/demo/${num}.webp`}
@@ -48,7 +48,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <Dna /> Biology (9700)
         </div>
       </div>
@@ -57,7 +57,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <FlaskConical /> Chemistry (9701)
         </div>
       </div>
@@ -66,7 +66,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <Atom /> Physics (9702)
         </div>
       </div>
@@ -75,7 +75,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <Code /> Computer Science (9618)
         </div>
       </div>
@@ -84,7 +84,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <Pi /> Further Mathematics (9231)
         </div>
       </div>
@@ -93,7 +93,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <ChartLine /> Economics (9708)
         </div>
       </div>
@@ -102,7 +102,7 @@ const InfiniteScrollItems = [
   {
     content: (
       <div className="flex flex-col items-center justify-center">
-        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-[var(--home-page-border)] p-6 text-2xl text-[var(--home-page-text)] transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-[var(--home-page-hover-bg)]">
+        <div className="flex w-max items-center justify-center gap-2 rounded-lg border border-(--home-page-border) p-6 text-2xl text-(--home-page-text) transition-all duration-300 ease-in-out hover:cursor-pointer hover:bg-(--home-page-hover-bg)">
           <RectangleEllipsis /> Many more...
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--home-page-bg)] overflow-hidden">
+    <div className="min-h-screen bg-(--home-page-bg) overflow-hidden">
       <ClickSpark
         duration={400}
         sparkColor="#fff"
@@ -184,10 +184,10 @@ export default function HomePage() {
               />
               <span className="font-bold text-5xl text-logo-main">+</span>
             </div>
-            <h1 className="w-full fo1t-bold text-4xl text-[var(--home-page-text)]">
+            <h1 className="w-full fo1t-bold text-4xl text-(--home-page-text)">
               Convenient topical past paper questions
             </h1>
-            <p className="mt-2 w-full text-[var(--home-page-text-muted)] text-lg">
+            <p className="mt-2 w-full text-(--home-page-text-muted) text-lg">
               from 2009 of the most popular AS & A-level subjects
             </p>
           </div>
@@ -209,7 +209,7 @@ export default function HomePage() {
           showGradient={false}
         />
         <section
-          className="relative z-[1000] flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
+          className="relative z-1000 flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
           ref={containerRef}
         >
           <Crosshair
@@ -235,7 +235,7 @@ export default function HomePage() {
           >
             <TextScramble
               as="span"
-              className="-mt-24 relative z-10 text-center font-semibold text-6xl text-[var(--home-page-text)] sm:text-7xl"
+              className="-mt-24 relative z-10 text-center font-semibold text-6xl text-(--home-page-text) sm:text-7xl"
               delay={270}
               duration={1.4}
               trigger={isTrigger}
@@ -244,26 +244,26 @@ export default function HomePage() {
             </TextScramble>
           </div>
           <PixelCard
-            className="!absolute -translate-x-1/2 top-[54%] left-1/2 h-[80px] w-[300px] cursor-none"
+            className="absolute! -translate-x-1/2 top-[54%] left-1/2 h-[80px] w-[300px] cursor-none"
             variant="blue"
           >
             <Button
               asChild
-              className="absolute top-0 left-0 h-full w-full border-2 border-white/70 bg-transparent text-[var(--home-page-text)] text-xl hover:cursor-none hover:bg-transparent active:scale-[0.98]"
+              className="absolute top-0 left-0 h-full w-full border-2 border-white/70 bg-transparent text-(--home-page-text) text-xl hover:cursor-none hover:bg-transparent active:scale-[0.98]"
             >
               <Link href={TOPICAL_QUESTION_APP_ROUTE}>
                 Learn with zero cost
-                <HandCoins className="!w-6 !h-6" />
+                <HandCoins className="w-6! h-6!" />
               </Link>
             </Button>
           </PixelCard>
         </section>
-        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-[var(--home-page-bg)] z-[1000]">
+        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-(--home-page-bg) z-1000">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/35 via-black/70 to-gray-950 blur-3xl"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-indigo-900/35 via-black/70 to-gray-950 blur-3xl"></div>
 
             <div className="absolute inset-0 opacity-10">
-              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.40)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.40)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.40)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.40)_1px,transparent_1px)] bg-size-[4rem_4rem]"></div>
             </div>
 
             <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>
@@ -309,7 +309,7 @@ export default function HomePage() {
               name="Mr. Cao Cự Chính"
               title="Founder & Developer"
             />
-            <p className="w-[350px] text-left text-[var(--home-page-text-muted)] text-xs">
+            <p className="w-[350px] text-left text-(--home-page-text-muted) text-xs">
               *This project is purely 100% created with pride by a 12th grader
               Vietnamese student at Vinschool Central Park.{" "}
               <span>
@@ -342,11 +342,11 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-20 flex w-[90%] flex-col items-center justify-center md:w-[450px]">
-            <p className="text-left text-[32px] text-[var(--home-page-text)]">
+            <p className="text-left text-[32px] text-(--home-page-text)">
               &quot;Be kind whenever possible. It is{" "}
               <span className="text-rose-700">always</span> possible.&quot;
             </p>
-            <p className="after:-translate-y-1/2 relative self-end text-left text-[var(--home-page-text-muted)] text-md after:absolute after:top-1/2 after:left-[-38px] after:z-[10] after:h-[1px] after:w-[35px] after:bg-[var(--home-page-text-muted)] after:content-['']">
+            <p className="after:-translate-y-1/2 relative self-end text-left text-(--home-page-text-muted) text-md after:absolute after:top-1/2 after:left-[-38px] after:z-10 after:h-px after:w-[35px] after:bg-(--home-page-text-muted) after:content-['']">
               14th Dalai Lama (Tenzin Gyatso)
             </p>
           </div>

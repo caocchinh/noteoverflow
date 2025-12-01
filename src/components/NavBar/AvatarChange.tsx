@@ -28,13 +28,11 @@ const AvatarChange = ({
   isDialogOpen,
   setIsDialogOpen,
   currentAvatar,
-  userId,
   defaultAvatar,
 }: {
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   currentAvatar: string;
-  userId: string;
   defaultAvatar?: string | null;
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatar);
@@ -51,7 +49,7 @@ const AvatarChange = ({
   };
 
   const updateAvatarMutation = useMutation({
-    mutationFn: () => updateUserAvatarAction(userId, selectedAvatar),
+    mutationFn: () => updateUserAvatarAction(selectedAvatar),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["user"] });
       // Get the previous data so we can roll back to it if the mutation fails
@@ -105,9 +103,9 @@ const AvatarChange = ({
 
   return (
     <AlertDialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-      <AlertDialogContent className="sm:!max-w-[600px] max-w-[90vw] !max-h-[90vh] overflow-y-auto border-foreground/50 bg-white dark:bg-[#222222]">
+      <AlertDialogContent className="sm:max-w-[600px]! max-w-[90vw] max-h-[90vh]! overflow-y-auto border-foreground/50 bg-white dark:bg-[#222222]">
         <Button
-          className="!bg-transparent absolute top-0 right-0 cursor-pointer p-0"
+          className="bg-transparent! absolute top-0 right-0 cursor-pointer p-0"
           disabled={updateAvatarMutation.isPending}
           onClick={() => {
             setIsDialogOpen(false);
@@ -115,7 +113,7 @@ const AvatarChange = ({
           }}
           title="Cancel"
         >
-          <X className="!w-[20px] !h-[20px] text-red-500 hover:text-red-600" />
+          <X className="w-[20px]! h-[20px]! text-red-500 hover:text-red-600" />
         </Button>
         <AlertDialogHeader className="flex flex-row flex-wrap items-center justify-center gap-2">
           <AlertDialogTitle className="text-center font-semibold text-2xl">
@@ -158,7 +156,7 @@ const AvatarChange = ({
             className={cn(
               "cursor-pointer",
               selectedAvatar === defaultAvatar &&
-                "border-2 border-red-500 !bg-logo-main !text-white"
+                "border-2 border-red-500 bg-logo-main! text-white!"
             )}
           >
             Default

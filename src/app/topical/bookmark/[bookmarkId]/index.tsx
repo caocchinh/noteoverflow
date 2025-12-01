@@ -261,7 +261,7 @@ export const BookmarkView = ({
                   width={182}
                   height={80}
                   loading="lazy"
-                  className="!h-20 object-cover border border-foreground p-2 rounded-sm bg-white "
+                  className="h-20! object-cover border border-foreground p-2 rounded-sm bg-white "
                   alt="Curriculum cover image"
                   src={
                     CURRICULUM_COVER_IMAGE[
@@ -323,7 +323,7 @@ export const BookmarkView = ({
                       height={200}
                       loading="lazy"
                       title={subject}
-                      className="!h-[200px] w-40 object-cover rounded-[3px] "
+                      className="h-[200px]! w-40 object-cover rounded-[3px] "
                       alt="Curriculum cover image"
                       src={
                         SUBJECT_COVER_IMAGE[
