@@ -598,14 +598,6 @@ const AnnotatableInspectImagesComponent = memo(
             </div>
 
             <div className="flex flex-col w-full items-center relative">
-              {!isPdfViewerLoaded && pdfBlob && (
-                <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
-                  <p className="w-full text-center">
-                    Initializing PDF inspector
-                  </p>
-                  <Loader />
-                </div>
-              )}
               <div
                 className={cn(
                   !isEditMode
@@ -617,6 +609,7 @@ const AnnotatableInspectImagesComponent = memo(
                 <NotFullScreenContainer
                   normalContainerRef={normalContainerRef}
                   pdfBlob={pdfBlob}
+                  isPdfViewerLoaded={isPdfViewerLoaded}
                 />
                 {createPortal(
                   <div
@@ -679,15 +672,25 @@ const AnnotatableInspectImagesComponent = memo(
                     </div>
                     <div
                       ref={fullscreenContainerRef}
-                      className="h-[calc(100dvh-30px)] w-full"
-                    ></div>
+                      className="h-[calc(100dvh-30px)] w-full relative"
+                    >
+                      {!isPdfViewerLoaded && (
+                        <LoadingMessage
+                          message={
+                            !pdfBlob
+                              ? "Generating PDF"
+                              : "Initializing PDF viewer"
+                          }
+                        />
+                      )}
+                    </div>
                   </div>,
                   document.body
                 )}
               </div>
               <div
                 className={cn(
-                  "w-full h-full flex items-center justify-center flex-col",
+                  "w-full h-full flex items-center relative justify-center flex-col",
                   !isEditMode
                     ? ""
                     : "absolute top-[999999px] left-[999999px] z-[-999999]"
@@ -748,21 +751,33 @@ AnnotatableInspectImagesComponent.displayName =
 
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
 
+const LoadingMessage = memo(({ message }: { message: string }) => {
+  return (
+    <div className="flex items-center justify-center flex-col gap-1 absolute top-2 left-1/2 -translate-x-1/2 text-logo-main!">
+      <span className="ml-2 text-center">{message}</span>
+      <Loader />
+    </div>
+  );
+});
+
+LoadingMessage.displayName = "LoadingMessage";
+
 const NotFullScreenContainer = memo(
   ({
     normalContainerRef,
     pdfBlob,
+    isPdfViewerLoaded,
   }: {
     normalContainerRef: RefObject<HTMLDivElement | null>;
     pdfBlob: Blob | null;
+    isPdfViewerLoaded: boolean;
   }) => {
     return (
       <div ref={normalContainerRef} className="w-full relative h-[67dvh]">
-        {!pdfBlob && (
-          <div className="flex items-center justify-center flex-col gap-1 absolute top-0 left-1/2 -translate-x-1/2">
-            <span className="ml-2 text-center">Generating PDF</span>
-            <Loader />
-          </div>
+        {!isPdfViewerLoaded && (
+          <LoadingMessage
+            message={pdfBlob ? "Initializing PDF viewer" : "Generating PDF"}
+          />
         )}
       </div>
     );

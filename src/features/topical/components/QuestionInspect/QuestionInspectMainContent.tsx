@@ -415,15 +415,15 @@ const QuestionInspectMainContent = forwardRef(
           </div>
           <CloseButton onClick={handleCloseClick} />
         </SidebarInset>
-        {bothViewsQuestionContainer.current &&
-          questionViewContainer.current &&
-          (currentView === "question" || currentView === "both") &&
+        {questionViewContainer.current &&
+          bothViewsQuestionContainer.current &&
           createPortal(
             <div
               ref={(node) => {
                 if (
                   node &&
-                  annotatableQuestionInspectImagesElementRef.current
+                  annotatableQuestionInspectImagesElementRef.current &&
+                  currentView !== "both"
                 ) {
                   node.appendChild(
                     annotatableQuestionInspectImagesElementRef.current
@@ -432,17 +432,37 @@ const QuestionInspectMainContent = forwardRef(
               }}
               className="w-full h-full"
             />,
-            currentView === "both"
-              ? bothViewsQuestionContainer.current
-              : questionViewContainer.current
+            questionViewContainer.current
           )}
-        {bothViewsAnswerContainer.current &&
-          answerViewContainer.current &&
-          (currentView === "answer" || currentView === "both") &&
+        {bothViewsQuestionContainer.current &&
+          questionViewContainer.current &&
           createPortal(
             <div
               ref={(node) => {
-                if (node && annotatableAnswerInspectImagesElementRef.current) {
+                if (
+                  node &&
+                  annotatableQuestionInspectImagesElementRef.current &&
+                  currentView === "both"
+                ) {
+                  node.appendChild(
+                    annotatableQuestionInspectImagesElementRef.current
+                  );
+                }
+              }}
+              className="w-full h-full"
+            />,
+            bothViewsQuestionContainer.current
+          )}
+        {answerViewContainer.current &&
+          bothViewsAnswerContainer.current &&
+          createPortal(
+            <div
+              ref={(node) => {
+                if (
+                  node &&
+                  annotatableAnswerInspectImagesElementRef.current &&
+                  currentView !== "both"
+                ) {
                   node.appendChild(
                     annotatableAnswerInspectImagesElementRef.current
                   );
@@ -450,9 +470,26 @@ const QuestionInspectMainContent = forwardRef(
               }}
               className="w-full h-full"
             />,
-            currentView === "both"
-              ? bothViewsAnswerContainer.current
-              : answerViewContainer.current
+            answerViewContainer.current
+          )}
+        {bothViewsAnswerContainer.current &&
+          answerViewContainer.current &&
+          createPortal(
+            <div
+              ref={(node) => {
+                if (
+                  node &&
+                  annotatableAnswerInspectImagesElementRef.current &&
+                  currentView === "both"
+                ) {
+                  node.appendChild(
+                    annotatableAnswerInspectImagesElementRef.current
+                  );
+                }
+              }}
+              className="w-full h-full"
+            />,
+            bothViewsAnswerContainer.current
           )}
       </>
     );
