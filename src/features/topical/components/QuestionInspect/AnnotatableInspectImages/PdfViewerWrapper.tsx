@@ -103,6 +103,8 @@ const PdfViewerWrapper = memo(
 
         let isMounted = true;
 
+        let viewerInstance: WebViewerInstance | null = null;
+
         WebViewer(
           {
             path: `${
@@ -114,6 +116,7 @@ const PdfViewerWrapper = memo(
         ).then((inst) => {
           if (!isMounted) return;
 
+          viewerInstance = inst;
           setInstance(inst);
 
           const { documentViewer, Tools } = inst.Core;
@@ -152,6 +155,9 @@ const PdfViewerWrapper = memo(
           setInstance(null);
           callbacksRef.current.onUnmount?.();
           isInitalXfdfLoaded.current = false;
+          if (viewerInstance) {
+            viewerInstance.UI.dispose();
+          }
         };
       }, []);
 
