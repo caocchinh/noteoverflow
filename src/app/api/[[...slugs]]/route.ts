@@ -4,10 +4,10 @@ import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
-import { authHandler } from "@/server/api/authHandler";
 
 const app = new Elysia({ prefix: "/api", aot: false })
-  .onError(({ code, status }) => {
+  .onError(({ code, status, error }) => {
+    console.error(error);
     if (code === "VALIDATION") {
       return status(HTTP_STATUS.BAD_REQUEST, {
         error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
@@ -33,8 +33,6 @@ const app = new Elysia({ prefix: "/api", aot: false })
       });
     }
   })
-
-  .all("/auth/*", authHandler)
 
   // GET /api/topical - Query questions with filters
   .get("/topical", getTopicalQuestions, {
