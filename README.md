@@ -1,5 +1,3 @@
-# NoteOverflow
-
 <div align="center">
   <!-- Add your logo here -->
   <!-- <img src="path/to/logo.png" alt="NoteOverflow Logo" width="120" /> -->
@@ -7,7 +5,7 @@
   <h1>NoteOverflow</h1>
   
   <p>
-    <strong>The open-source platform for sharing, annotating, and organizing knowledge.</strong>
+    <strong>The open-source platform for Cambridge AS & A-Level students to annotate, organize, and master past papers questions.</strong>
   </p>
 
   <p>
@@ -17,27 +15,49 @@
     <a href="#contributing">Contributing</a>
   </p>
 
-  <!-- Add badges here -->
-  <!-- ![License](https://img.shields.io/badge/license-MIT-blue.svg) -->
+  <p>
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+    <img src="https://img.shields.io/github/stars/caocchinh/noteoverflow?style=social" alt="GitHub stars" />
+    <img src="https://img.shields.io/github/forks/caocchinh/noteoverflow?style=social" alt="GitHub forks" />
+  </p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js&logoColor=white" alt="Next.js 15" />
+    <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" alt="Cloudflare" />
+    <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?logo=tailwind-css&logoColor=white" alt="Tailwind CSS 4" />
+    <img src="https://img.shields.io/badge/Drizzle-ORM-C5F74F?logo=drizzle&logoColor=black" alt="Drizzle ORM" />
+
+  </p>
+  
+  <p>
+    <img src="https://img.shields.io/github/issues/caocchinh/noteoverflow" alt="GitHub issues" />
+    <img src="https://img.shields.io/github/issues-pr/caocchinh/noteoverflow" alt="GitHub pull requests" />
+    <img src="https://img.shields.io/github/last-commit/caocchinh/noteoverflow" alt="Last commit" />
+    <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintained" />
+  </p>
 </div>
 
 ---
 
 ## 📖 Introduction
 
-**NoteOverflow** is a modern, feature-rich application designed to help students and professionals organize their study materials, ask questions, and collaborate effectively. With powerful annotation tools and a seamless user experience, NoteOverflow bridges the gap between static notes and interactive learning.
+**NoteOverflow** is a specialized platform built exclusively for **Cambridge International Examinations (CIE) AS and A-Level students**. Designed to streamline exam preparation, NoteOverflow helps students organize topical questions by subject, year, paper type, and season. With powerful PDF annotation tools and a collaborative Q&A system, it transforms how students prepare for their Cambridge exams by making past papers interactive and accessible.
 
 ## ✨ Features
 
-NoteOverflow comes packed with features to enhance your learning and productivity:
+NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam preparation:
 
-- **📚 Topic Management**: Organize your questions, notes, and resources into structured topics for easy access.
-- **🖍️ Interactive Annotations**: Annotate images and PDFs directly within the browser using advanced tools (powered by PDFTron). Highlight, draw, and add comments to your study materials.
-- **❓ Q&A Platform**: Ask questions, provide answers, and engage with the community to solve problems collaboratively.
-- **🔖 Bookmarking**: Save important questions and notes for quick reference later.
-- **🔐 Secure Authentication**: Robust user authentication system to keep your data secure.
-- **📱 Responsive Design**: A fully responsive interface that works seamlessly on desktops, tablets, and mobile devices.
-- **⚡ High Performance**: Built with Next.js and Cloudflare for lightning-fast performance and edge delivery.
+- **📚 Topical Question Browser**: Filter and browse past paper questions by curriculum (IGCSE/A-Level), subject, topic, year, paper type (P1, P2, P3, etc.), and season (Summer/Winter/Spring).
+- **🎯 AS & A-Level Support**: Seamlessly switch between AS-Level and A-Level content with intelligent filtering for curriculum subdivisions.
+- **🖍️ PDF Annotation Tools**: Annotate question papers and mark schemes directly in your browser using PDFTron WebViewer. Highlight, draw, and add comments to your practice papers.
+- **💾 Save & Sync**: Your annotations are automatically saved and synced across devices, so you can pick up right where you left off.
+- **🔖 Smart Bookmarking**: Create custom bookmark lists to organize questions by topic, difficulty, or revision priority.
+- **✅ Progress Tracking**: Mark questions as completed and track your progress through past papers.
+- **❓ Collaborative Q&A**: Ask questions and get help from fellow Cambridge students on challenging problems.
+- **📤 Export with Annotations**: Download annotated PDFs with your notes for offline study or printing.
+- **🔐 Secure Authentication**: Keep your study progress, annotations, and bookmarks private and secure.
+- **📱 Responsive Design**: Study anywhere with a fully responsive interface optimized for desktop, tablet, and mobile devices.
 
 ## 📸 Screenshots
 
