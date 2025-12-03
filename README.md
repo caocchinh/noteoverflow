@@ -12,6 +12,7 @@
 
   <p>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+    <img src="https://img.shields.io/badge/status-beta-orange.svg" alt="Beta" />
     <img src="https://img.shields.io/github/stars/caocchinh/noteoverflow" alt="GitHub stars" />
     <img src="https://img.shields.io/github/forks/caocchinh/noteoverflow" alt="GitHub forks" />
   </p>
@@ -75,67 +76,13 @@ NoteOverflow is built using cutting-edge technologies to ensure scalability, per
 - **PDF/Annotations**: [PDFTron WebViewer](https://www.pdftron.com/)
 - **Deployment**: [Cloudflare Workers/Pages](https://workers.cloudflare.com/) via OpenNext
 
-## 🚀 Getting Started
-
-Follow these steps to set up the project locally on your machine.
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [npm](https://www.npmjs.com/), [pnpm](https://pnpm.io/), or [bun](https://bun.sh/)
-
-### Installation
-
-1.  **Clone the repository**
-
-    ```bash
-    git clone https://github.com/yourusername/noteoverflow.git
-    cd noteoverflow
-    ```
-
-2.  **Install dependencies**
-
-    ```bash
-    npm install
-    # or
-    pnpm install
-    # or
-    bun install
-    ```
-
-3.  **Set up environment variables**
-
-    Copy the example environment file and update it with your credentials.
-
-    ```bash
-    cp .env.example .env.local
-    ```
-
-    > **Note**: You will need to configure your database connection and authentication providers in the `.env.local` file.
-
-4.  **Generate Database Client**
-
-    ```bash
-    npm run db:generate
-    ```
-
-5.  **Run the development server**
-
-    ```bash
-    npm run dev
-    ```
-
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
 ## 🤝 Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+> **⚠️ Note**: NoteOverflow is currently in **beta development** and is not yet open for external contributions.
+>
+> I am actively working on stabilizing the platform and will open contributions to the community once we reach a stable release. Thank you for your interest and patience!
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+Stay tuned for updates on when we'll be accepting contributions. In the meantime, feel free to star ⭐ the repository to show your support and stay notified of future releases!
 
 ## 📄 License
 
@@ -144,5 +91,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  Made with ❤️ by the NoteOverflow Team
+  Made with ❤️ by Cao Cự Chính
 </div>
