@@ -248,10 +248,10 @@ const SupportDialog = memo(() => {
             Support <span className="text-logo-main!">NoteOverflow</span>
           </DialogTitle>
           <DialogDescription>
-            This project is free and open source. If you find it useful, please
-            consider starring it on GitHub to support the founder he can
-            releases more features and add more curriculumns. I love you
-            ❤️🥰🤗🤗
+            This project is completely free and open source. If you find it
+            useful, please consider starring it on GitHub to support the founder
+            to help him releases more features and add more curriculums. I love
+            you ❤️🫦🥰🤗
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center">
