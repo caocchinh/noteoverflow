@@ -1,14 +1,9 @@
 <div align="center">
-  <!-- Add your logo here -->
-  <!-- <img src="path/to/logo.png" alt="NoteOverflow Logo" width="120" /> -->
-  
-  <h1>NoteOverflow</h1>
-  
-  <p>
+ <img src="https://github.com/caocchinh/noteoverflow/blob/master/.raw/logo-full-colorised.webp?raw=true" alt="NoteOverflow Logo" width="400"/>
+  <p
     <strong>The open-source platform for Cambridge AS & A-Level students to annotate, organize, and master past papers questions.</strong>
   </p>
-
-  <p>
+  <p style="margin-top: 10px;">
     <a href="#features">Features</a> •
     <a href="#tech-stack">Tech Stack</a> •
     <a href="#getting-started">Getting Started</a> •
@@ -17,8 +12,8 @@
 
   <p>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
-    <img src="https://img.shields.io/github/stars/caocchinh/noteoverflow?style=social" alt="GitHub stars" />
-    <img src="https://img.shields.io/github/forks/caocchinh/noteoverflow?style=social" alt="GitHub forks" />
+    <img src="https://img.shields.io/github/stars/caocchinh/noteoverflow" alt="GitHub stars" />
+    <img src="https://img.shields.io/github/forks/caocchinh/noteoverflow" alt="GitHub forks" />
   </p>
   
   <p>
