@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Monitor,
   SlidersHorizontal,
 } from "lucide-react";
@@ -49,7 +50,6 @@ const AppUltilityBar = memo(
       {
         finishedQuestionsFilteredPartitionedData,
         isExportModeEnabled,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setIsExportModeEnabled,
         ultilityRef,
         isQuestionViewDisabled,
@@ -122,7 +122,7 @@ const AppUltilityBar = memo(
         <>
           {isUltilityOverflowingRight && (
             <Button
-              className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"
+              className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-200"
               title="Move right"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -138,7 +138,7 @@ const AppUltilityBar = memo(
           )}
           {isUltilityOverflowingLeft && (
             <Button
-              className="absolute left-0 top-5 rounded-full cursor-pointer w-7 h-7 z-[200]"
+              className="absolute left-0 top-5 rounded-full cursor-pointer w-7 h-7 z-200"
               title="Move left"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -177,7 +177,7 @@ const AppUltilityBar = memo(
                 !isQuestionViewDisabled && (
                   <>
                     {!isExportModeEnabled && (
-                      <Separator orientation="vertical" className="!h-[30px]" />
+                      <Separator orientation="vertical" className="h-[30px]!" />
                     )}
                     <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
                       <FirstPageButton
@@ -259,7 +259,7 @@ const AppUltilityBar = memo(
                     </div>
                   </>
                 )}
-              <Separator orientation="vertical" className="!h-[30px]" />
+              <Separator orientation="vertical" className="h-[30px]!" />
               <Sort
                 sortParameters={sortParameters}
                 setSortParameters={setSortParameters}
@@ -279,7 +279,7 @@ const AppUltilityBar = memo(
                     <TooltipTrigger asChild>
                       <div
                         className={cn(
-                          "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                          "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
                           uiPreferences.isStrictModeEnabled
                             ? "border-logo-main"
                             : "border-muted-foreground"
@@ -314,14 +314,14 @@ const AppUltilityBar = memo(
                   <LayoutSetting triggerClassName="flex w-max cursor-pointer items-center justify-start gap-2 bg-white dark:bg-black border border-black dark:border-white" />
                 </>
               )}
-              {/* 
+
               {!isExportModeEnabled && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       className={cn(
-                        "flex cursor-pointer items-center gap-2 !bg-logo-main !text-white",
-                        isQuestionViewDisabled && "opacity-50 !cursor-default"
+                        "flex cursor-pointer items-center gap-2 bg-logo-main! text-white!",
+                        isQuestionViewDisabled && "opacity-50 cursor-default!"
                       )}
                       onClick={() => {
                         if (isQuestionViewDisabled) {
@@ -337,7 +337,7 @@ const AppUltilityBar = memo(
                   </TooltipTrigger>
                   <TooltipContent
                     side="bottom"
-                    className="!bg-logo-main !text-white z-[99999999] flex justify-center items-center gap-2"
+                    className="bg-logo-main! text-white! z-99999999 flex justify-center items-center gap-2"
                     arrowClassName="!bg-logo-main !fill-logo-main"
                   >
                     {isQuestionViewDisabled
@@ -345,7 +345,7 @@ const AppUltilityBar = memo(
                       : "Export questions & answers to PDF."}
                   </TooltipContent>
                 </Tooltip>
-              )} */}
+              )}
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
                 url={filterUrl}
@@ -382,8 +382,8 @@ const ShowFinishedToggle = memo(
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "border-1 h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-              isQuestionViewDisabled && "opacity-50 !cursor-default",
+              "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+              isQuestionViewDisabled && "opacity-50 cursor-default!",
               showFinishedQuestion
                 ? "border-green-600"
                 : "border-muted-foreground"
@@ -398,7 +398,7 @@ const ShowFinishedToggle = memo(
             <Switch
               className={cn(
                 "border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid ",
-                isQuestionViewDisabled && "!cursor-default"
+                isQuestionViewDisabled && "cursor-default!"
               )}
               id="show-finished-question"
               checked={showFinishedQuestion ?? false}
@@ -409,7 +409,7 @@ const ShowFinishedToggle = memo(
                   ? "text-green-600"
                   : "text-muted-foreground",
                 "cursor-pointer text-sm",
-                isQuestionViewDisabled && "!cursor-default"
+                isQuestionViewDisabled && "cursor-default!"
               )}
             >
               {showFinishedQuestion ? "Show" : "Hide"} finished
@@ -419,7 +419,7 @@ const ShowFinishedToggle = memo(
         <TooltipContent
           side="bottom"
           className={cn(
-            !isQuestionViewDisabled && "!hidden",
+            !isQuestionViewDisabled && "hidden!",
             "flex justify-center items-center gap-2"
           )}
         >
@@ -441,7 +441,7 @@ const FilterToggleButton = memo(
   }) => {
     return (
       <Button
-        className="!bg-background flex cursor-pointer items-center gap-2 border"
+        className="bg-background! flex cursor-pointer items-center gap-2 border"
         onClick={useCallback(() => {
           setIsAppSidebarOpen(!isAppSidebarOpen);
         }, [isAppSidebarOpen, setIsAppSidebarOpen])}
@@ -490,7 +490,7 @@ const InspectTriggerButton = memo(
         <TooltipContent
           side="bottom"
           className={cn(
-            !isQuestionViewDisabled && "!hidden",
+            !isQuestionViewDisabled && "hidden!",
             "flex justify-center items-center gap-2"
           )}
         >

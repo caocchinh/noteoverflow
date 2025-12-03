@@ -10,10 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { SelectedQuestion } from "../constants/types";
-import { Eraser, WandSparkles } from "lucide-react";
+import { ArrowRightFromLine, Eraser, WandSparkles } from "lucide-react";
 
 const ExportBar = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   questionsForExport,
   allQuestions,
   setIsExportModeEnabled,
@@ -34,7 +33,7 @@ const ExportBar = ({
   }, [setQuestionsForExport]);
 
   return (
-    <div className="fixed w-max z-[1000] h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2 flex flex-row gap-2">
+    <div className="fixed w-max z-1000 h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2 flex flex-row gap-2">
       <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="destructive" className="cursor-pointer">
@@ -87,17 +86,13 @@ const ExportBar = ({
         Deselect all
         <Eraser />
       </Button>
+
       <Button
-        className="cursor-pointer !bg-logo-main !text-white"
+        className="cursor-pointer bg-logo-main! text-white!"
         variant="outline"
       >
-        Export questions
-      </Button>
-      <Button
-        className="cursor-pointer !bg-logo-main !text-white"
-        variant="outline"
-      >
-        Export answers
+        Preview export
+        <ArrowRightFromLine />
       </Button>
     </div>
   );
