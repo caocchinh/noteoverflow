@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -15,9 +15,20 @@ import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCache, setCache } from "@/lib/client-cache";
 import { INITIAL_QUERY } from "@/constants/constants";
-import AppSidebar from "@/features/topical/components/AppSidebar";
 import AppMainContent from "@/features/topical/components/AppMainContent";
+import AppSidebar from "@/features/topical/components/AppSidebar";
 import { api } from "@/lib/eden";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Github } from "lucide-react";
+import Link from "next/link";
 
 const TopicalClient = ({
   searchParams,
@@ -39,6 +50,7 @@ const TopicalClient = ({
   const ultilityRef = useRef<HTMLDivElement | null>(null);
   const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
   const recentQueryRef = useRef<RecentQueryRef | null>(null);
+
   const filterUrl = useMemo(() => {
     if (typeof window === "undefined") {
       return "";
@@ -200,8 +212,72 @@ const TopicalClient = ({
           />
         </SidebarProvider>
       </div>
+      <SupportDialog />
     </>
   );
 };
 
 export default TopicalClient;
+
+const SupportDialog = memo(() => {
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeenSupportDialog = localStorage.getItem("hasSeenSupportDialog");
+    if (!hasSeenSupportDialog) {
+      // Small delay to not overwhelm the user immediately
+      const timer = setTimeout(() => {
+        setIsSupportDialogOpen(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseSupportDialog = (open: boolean) => {
+    if (!open) {
+      setIsSupportDialogOpen(false);
+      localStorage.setItem("hasSeenSupportDialog", "true");
+    }
+  };
+
+  return (
+    <Dialog open={isSupportDialogOpen} onOpenChange={handleCloseSupportDialog}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-center">
+            Support <span className="text-logo-main!">NoteOverflow</span>
+          </DialogTitle>
+          <DialogDescription>
+            This project is free and open source. If you find it useful, please
+            consider starring it on GitHub to support the founder he can
+            releases more features and add more curriculumns. I love you
+            ❤️🥰🤗🤗
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center">
+          <Button asChild className="w-full gap-2">
+            <Link
+              href="https://github.com/caocchinh/noteoverflow"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github className="h-4 w-4" />
+              Star on GitHub
+            </Link>
+          </Button>
+        </div>
+        <DialogFooter className="w-full -mt-2">
+          <Button
+            variant="outline"
+            onClick={() => handleCloseSupportDialog(false)}
+            className="w-full"
+          >
+            Maybe later
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+SupportDialog.displayName = "SupportDialog";

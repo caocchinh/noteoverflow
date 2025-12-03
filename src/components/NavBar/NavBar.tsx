@@ -1,10 +1,15 @@
 "use client";
-import { Layers } from "lucide-react";
+import { Github, Layers } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ShinyText from "@/components/ShinyText";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
 import SearchPastPaper from "./SearchPastPaper";
@@ -92,6 +97,23 @@ const NavBar = () => {
             </Link>
           </Button>
           <User />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" asChild>
+                <Link
+                  href="https://github.com/caocchinh/noteoverflow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-[1.2rem] w-[1.2rem]" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="z-100000">
+              <p>Star on GitHub</p>
+            </TooltipContent>
+          </Tooltip>
           <ModeToggle />
         </div>
       </nav>

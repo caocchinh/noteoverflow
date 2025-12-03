@@ -12,6 +12,7 @@
   <p>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
     <img src="https://img.shields.io/badge/status-beta-orange.svg" alt="Beta" />
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fnoteoverflow.com&label=noteoverflow.com&color=0084ff" alt="Website" />
     <img src="https://img.shields.io/github/stars/caocchinh/noteoverflow" alt="GitHub stars" />
     <img src="https://img.shields.io/github/forks/caocchinh/noteoverflow" alt="GitHub forks" />
   </p>
