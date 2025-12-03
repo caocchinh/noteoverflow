@@ -4,10 +4,9 @@
     <strong>The open-source platform for Cambridge AS & A-Level students to annotate, organize, and master past papers questions.</strong>
   </p>
   <p style="margin-top: 10px;">
-    <a href="#features">Features</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#getting-started">Getting Started</a> •
-    <a href="#contributing">Contributing</a>
+    <a href="#-features">Features</a> •
+    <a href="#️-tech-stack">Tech Stack</a> •
+    <a href="#-contributing">Contributing</a>
   </p>
 
   <p>
@@ -55,23 +54,16 @@ NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam 
 - **🔐 Secure Authentication**: Keep your study progress, annotations, and bookmarks private and secure.
 - **📱 Responsive Design**: Study anywhere with a fully responsive interface optimized for desktop, tablet, and mobile devices.
 
-## 📸 Screenshots
-
-<div align="center">
-  <!-- Add screenshots here -->
-  <!-- <img src="path/to/screenshot1.png" alt="Dashboard" width="800" /> -->
-  <br/>
-  <!-- <img src="path/to/screenshot2.png" alt="Annotation Tool" width="800" /> -->
-</div>
-
 ## 🛠️ Tech Stack
 
 NoteOverflow is built using cutting-edge technologies to ensure scalability, performance, and developer experience:
 
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) & [Radix UI](https://www.radix-ui.com/)
-- **Database**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/) with [Drizzle ORM](https://orm.drizzle.team/)
+- **Caching**: [Cloudflare KV](https://developers.cloudflare.com/kv/)
+- **Object Storage**: [Cloudflare R2](https://developers.cloudflare.com/r2/)
 - **Authentication**: [Better Auth](https://github.com/better-auth/better-auth)
 - **PDF/Annotations**: [PDFTron WebViewer](https://www.pdftron.com/)
 - **Deployment**: [Cloudflare Workers/Pages](https://workers.cloudflare.com/) via OpenNext
