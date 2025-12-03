@@ -44,15 +44,36 @@
 NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam preparation:
 
 - **📚 Topical Question Browser**: Filter and browse past paper questions by curriculum (IGCSE/A-Level), subject, topic, year, paper type (P1, P2, P3, etc.), and season (Summer/Winter/Spring).
-- **🎯 AS & A-Level Support**: Seamlessly switch between AS-Level and A-Level content with intelligent filtering for curriculum subdivisions.
-- **🖍️ PDF Annotation Tools**: Annotate question papers and mark schemes directly in your browser using PDFTron WebViewer. Highlight, draw, and add comments to your practice papers.
-- **💾 Save & Sync**: Your annotations are automatically saved and synced across devices, so you can pick up right where you left off.
+
+![Topical Question Browser Screenshot](./screenshots/topical-browser.png)
+
+- **🔍 Past Paper Search**: Quickly find specific past papers using the intelligent search navigator. Enter a quick paper code (e.g., 9702/23/O/N/22) for instant access, or use manual filters to browse by curriculum, subject, paper type, variant, and season.
+
+![Past Paper Search Screenshot](./screenshots/past-paper-search.png)
+
+- **🖍️ PDF Annotation Tools**: Annotate question papers and mark schemes directly in your browser using PDFTron WebViewer. Highlight, draw, and add comments to your practice papers. Your annotations are automatically saved and synced across devices, so you can pick up right where you left off.
+
+![PDF Annotation Tools Screenshot](./screenshots/pdf-annotation.png)
+
 - **🔖 Smart Bookmarking**: Create custom bookmark lists to organize questions by topic, difficulty, or revision priority.
-- **✅ Progress Tracking**: Mark questions as completed and track your progress through past papers.
-- **❓ Collaborative Q&A**: Ask questions and get help from fellow Cambridge students on challenging problems.
+
+![Smart Bookmarking Screenshot](./screenshots/bookmarking.png)
+
+- **✅ Progress Tracking**: Mark questions as completed and track your progress.
+
+![Progress Tracking Screenshot](./screenshots/progress-tracking.png)
+
 - **📤 Export with Annotations**: Download annotated PDFs with your notes for offline study or printing.
-- **🔐 Secure Authentication**: Keep your study progress, annotations, and bookmarks private and secure.
-- **📱 Responsive Design**: Study anywhere with a fully responsive interface optimized for desktop, tablet, and mobile devices.
+
+![Export with Annotations Screenshot](./screenshots/export-annotations.png)
+
+- **🔗 Smart Sharing & QR Codes**: Share individual questions, custom filters, and recent search queries with classmates using shareable links or QR codes. Scan QR codes to instantly access shared questions and filters, making collaboration and study group coordination seamless.
+
+![Smart Sharing & QR Codes Screenshot](./screenshots/sharing-qr-codes.png)
+
+- **🧮 Built-in Desmos Calculator**: Access a fully-featured Desmos graphing calculator directly within the platform. Solve mathematical problems, plot functions, and visualize data without switching between applications—perfect for mathematics and science subjects.
+
+![Built-in Desmos Calculator Screenshot](./screenshots/desmos-calculator.png)
 
 ## 🛠️ Tech Stack
 
@@ -74,7 +95,7 @@ NoteOverflow is built using cutting-edge technologies to ensure scalability, per
 >
 > I am actively working on stabilizing the platform and will open contributions to the community once we reach a stable release. Thank you for your interest and patience!
 
-Stay tuned for updates on when we'll be accepting contributions. In the meantime, feel free to star ⭐ the repository to show your support and stay notified of future releases!
+Stay tuned for updates on when I'll be accepting contributions. In the meantime, feel free to star ⭐ the repository to show your support and stay notified of future releases!
 
 ## 📄 License
 
