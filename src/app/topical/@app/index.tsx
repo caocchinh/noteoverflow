@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Github } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 const TopicalClient = ({
   searchParams,
@@ -221,17 +222,18 @@ export default TopicalClient;
 
 const SupportDialog = memo(() => {
   const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     const hasSeenSupportDialog = localStorage.getItem("hasSeenSupportDialog");
     if (!hasSeenSupportDialog) {
-      // Small delay to not overwhelm the user immediately
       const timer = setTimeout(() => {
         setIsSupportDialogOpen(true);
-      }, 2000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handleCloseSupportDialog = (open: boolean) => {
     if (!open) {
