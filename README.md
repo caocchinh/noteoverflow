@@ -37,7 +37,7 @@
 
 ## 📖 Introduction
 
-**NoteOverflow** is a specialized platform built exclusively for **Cambridge International Examinations (CIE) AS and A-Level students**. Designed to streamline exam preparation, NoteOverflow helps students organize topical questions by subject, year, paper type, and season. With powerful PDF annotation tools and a collaborative Q&A system, it transforms how students prepare for their Cambridge exams by making past papers interactive and accessible.
+**NoteOverflow** is a specialized platform built exclusively for **Cambridge International Examinations (CIE) AS and A-Level students**. Designed to streamline exam preparation, NoteOverflow helps students organize topical questions by subject, year, paper type, and season. With powerful PDF annotation tools and exportable PDFs, it transforms how students prepare for their Cambridge exams by making past papers interactive and accessible.
 
 ## ✨ Features
 
@@ -45,35 +45,31 @@ NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam 
 
 - **📚 Topical Question Browser**: Filter and browse past paper questions by curriculum (IGCSE/A-Level), subject, topic, year, paper type (P1, P2, P3, etc.), and season (Summer/Winter/Spring).
 
-![Topical Question Browser Screenshot](./screenshots/topical-browser.png)
-
-- **🔍 Past Paper Search**: Quickly find specific past papers using the intelligent search navigator. Enter a quick paper code (e.g., 9702/23/O/N/22) for instant access, or use manual filters to browse by curriculum, subject, paper type, variant, and season.
-
-![Past Paper Search Screenshot](./screenshots/past-paper-search.png)
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/filter.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom: 10px; margin-top:-10px;border: 3px solid #0084ff;" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/overal.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px; border: 3px solid #0084ff;margin-bottom:10px" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/finish.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 
 - **🖍️ PDF Annotation Tools**: Annotate question papers and mark schemes directly in your browser using PDFTron WebViewer. Highlight, draw, and add comments to your practice papers. Your annotations are automatically saved and synced across devices, so you can pick up right where you left off.
 
-![PDF Annotation Tools Screenshot](./screenshots/pdf-annotation.png)
-
-- **🔖 Smart Bookmarking**: Create custom bookmark lists to organize questions by topic, difficulty, or revision priority.
-
-![Smart Bookmarking Screenshot](./screenshots/bookmarking.png)
-
-- **✅ Progress Tracking**: Mark questions as completed and track your progress.
-
-![Progress Tracking Screenshot](./screenshots/progress-tracking.png)
-
-- **📤 Export with Annotations**: Download annotated PDFs with your notes for offline study or printing.
-
-![Export with Annotations Screenshot](./screenshots/export-annotations.png)
-
-- **🔗 Smart Sharing & QR Codes**: Share individual questions, custom filters, and recent search queries with classmates using shareable links or QR codes. Scan QR codes to instantly access shared questions and filters, making collaboration and study group coordination seamless.
-
-![Smart Sharing & QR Codes Screenshot](./screenshots/sharing-qr-codes.png)
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/annotate.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 
 - **🧮 Built-in Desmos Calculator**: Access a fully-featured Desmos graphing calculator directly within the platform. Solve mathematical problems, plot functions, and visualize data without switching between applications—perfect for mathematics and science subjects.
 
-![Built-in Desmos Calculator Screenshot](./screenshots/desmos-calculator.png)
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/desmos.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px; margin-bottom:10px;border: 3px solid #0084ff;" />
+
+- **🔗 Smart Sharing & QR Codes**: Share individual questions and custom search filters with classmates using shareable links or QR codes. Scan QR codes to instantly access shared questions and filters.
+
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/qr.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;" />
+
+- **🔍 Past Paper Search**: Quickly find specific past papers using the intelligent search navigator. Enter a quick paper code (e.g., 9702/23/O/N/22) for instant access, or use manual filters to browse by curriculum, subject, paper type, variant, and season.
+
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/navigator.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px; border: 3px solid #0084ff;margin-bottom:10px" />
+
+- **🔖 Smart Bookmarking and progress tracking**: Create custom bookmark lists to organize questions by topic, difficulty, or revision priority. And mark questions as completed and track your progress.
+
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/bookmark2.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/bookmark.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/select_subject.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 
 ## 🛠️ Tech Stack
 
@@ -93,7 +89,7 @@ NoteOverflow is built using cutting-edge technologies to ensure scalability, per
 
 > **⚠️ Note**: NoteOverflow is currently in **beta development** and is not yet open for external contributions.
 >
-> I am actively working on stabilizing the platform and will open contributions to the community once we reach a stable release. Thank you for your interest and patience!
+> I am actively working on stabilizing the platform and will open contributions to the community once I reach a stable release. Thank you for your interest and patience!
 
 Stay tuned for updates on when I'll be accepting contributions. In the meantime, feel free to star ⭐ the repository to show your support and stay notified of future releases!
 
