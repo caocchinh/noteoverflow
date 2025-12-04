@@ -20,11 +20,13 @@ const QuestionPreview = memo(
     listId,
     question,
     onQuestionClick,
+    className,
   }: {
     question: SelectedQuestion;
     imageSrc: string;
     listId?: string;
     onQuestionClick: () => void;
+    className?: string;
   }) => {
     const {
       uiPreferences,
@@ -73,7 +75,8 @@ const QuestionPreview = memo(
     return (
       <div
         className={cn(
-          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent mansory-item border-black/50 relative overflow-hidden min-h-[110px] ",
+          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent mansory-item border-black/50 relative overflow-hidden min-h-[110px]",
+          className,
           uiPreferences.imageTheme === "dark" && "bg-black! dark:border-white!"
         )}
         onClick={useCallback(() => {

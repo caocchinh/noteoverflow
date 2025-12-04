@@ -25,7 +25,7 @@ import {
 } from "../../constants/types";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import InspectSidebar from "./InspectSidebar";
+import InspectSidebar from "./InspectSidebar/InspectSidebar";
 import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
 import { usePathname } from "next/navigation";

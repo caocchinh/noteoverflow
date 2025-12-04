@@ -1,13 +1,10 @@
-import { Input } from "@/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { FinishedTracker } from "./FinishedTracker";
-import { ChevronDown, ChevronUp, FastForward, Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FinishedTracker } from "../FinishedTracker";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
@@ -20,24 +17,25 @@ import {
   useState,
   forwardRef,
   useImperativeHandle,
-  RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import QuestionHoverCard from "./QuestionHoverCard";
+import QuestionHoverCard from "../QuestionHoverCard";
 import { SelectSeparator } from "@/components/ui/select";
-import TabNavigationButtons from "./TabNavigationButtons";
+import TabNavigationButtons from "../TabNavigationButtons";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   extractPaperCode,
   extractQuestionNumber,
   fuzzySearch,
-} from "../../lib/utils";
+} from "../../../lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   InspectSidebarProps,
-  SelectedQuestion,
   QuestionHoverCardProps,
-} from "../../constants/types";
+} from "../../../constants/types";
+import NavigationButtons from "./NavigationButtons";
+import GoToCurrentButton from "./GoToCurrentButton";
+import SearchInputSection from "./SearchInputSection";
 
 // Memoized wrapper with custom comparison to prevent unnecessary re-renders
 const MemoizedQuestionItem = memo(
@@ -803,190 +801,3 @@ const InspectSidebar = memo(
 InspectSidebar.displayName = "InspectSidebar";
 
 export default InspectSidebar;
-
-const SearchInputSection = memo(
-  ({
-    searchInput,
-    setSearchInput,
-    isInputFocusedRef,
-    currentQuestionId,
-    currentTabThatContainsQuestion,
-    setCurrentTab,
-    scrollToQuestion,
-    listScrollAreaRef,
-  }: {
-    searchInput: string;
-    setSearchInput: (value: string) => void;
-    isInputFocusedRef: RefObject<boolean>;
-    currentQuestionId?: string;
-    currentTabThatContainsQuestion: number;
-    setCurrentTab: (tab: number) => void;
-    scrollToQuestion: ({
-      questionId,
-      tab,
-    }: {
-      questionId: string;
-      tab: number;
-    }) => void;
-    listScrollAreaRef: RefObject<HTMLDivElement | null>;
-  }) => {
-    return (
-      <div className="flex items-center gap-2 border-b border-border">
-        <Search />
-        <Input
-          onFocus={() => {
-            isInputFocusedRef.current = true;
-          }}
-          onBlur={() => {
-            isInputFocusedRef.current = false;
-          }}
-          className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
-          placeholder="Search questions"
-          value={searchInput}
-          tabIndex={-1}
-          onChange={(e) => {
-            if (searchInput == "") {
-              listScrollAreaRef.current?.scrollTo({
-                top: 0,
-              });
-            }
-            setSearchInput(e.target.value);
-            if (e.target.value.length === 0 && currentQuestionId) {
-              setCurrentTab(currentTabThatContainsQuestion);
-              setTimeout(() => {
-                scrollToQuestion({
-                  questionId: currentQuestionId,
-                  tab: currentTabThatContainsQuestion,
-                });
-              }, 0);
-            }
-          }}
-        />
-        {searchInput.length > 0 && (
-          <X
-            className="text-red-600 hover:text-red-600/80 cursor-pointer"
-            onClick={() => {
-              setSearchInput("");
-              setCurrentTab(currentTabThatContainsQuestion);
-              if (currentQuestionId) {
-                setTimeout(() => {
-                  scrollToQuestion({
-                    questionId: currentQuestionId,
-                    tab: currentTabThatContainsQuestion,
-                  });
-                }, 0);
-              }
-            }}
-          />
-        )}
-      </div>
-    );
-  }
-);
-
-SearchInputSection.displayName = "SearchInputSection";
-
-const GoToCurrentButton = memo(
-  ({
-    searchInput,
-    currentTabThatContainsQuestion,
-    setCurrentTab,
-    currentQuestionId,
-    scrollToQuestion,
-    searchResults,
-    searchVirtualizer,
-  }: {
-    searchInput: string;
-    currentTabThatContainsQuestion: number;
-    setCurrentTab: (tab: number) => void;
-    currentQuestionId?: string;
-    scrollToQuestion: ({
-      questionId,
-      tab,
-    }: {
-      questionId: string;
-      tab: number;
-    }) => void;
-    searchResults: SelectedQuestion[];
-    searchVirtualizer: {
-      scrollToIndex: (index: number) => void;
-    };
-  }) => {
-    return (
-      <Button
-        variant="default"
-        className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
-        title="Go to current question"
-        onClick={() => {
-          if (searchInput === "") {
-            setCurrentTab(currentTabThatContainsQuestion);
-            if (currentQuestionId) {
-              setTimeout(() => {
-                scrollToQuestion({
-                  questionId: currentQuestionId,
-                  tab: currentTabThatContainsQuestion,
-                });
-              }, 0);
-            }
-          } else {
-            const currentQuestionIndexInSearchResult = searchResults.findIndex(
-              (question) => question.id === currentQuestionId
-            );
-            if (currentQuestionIndexInSearchResult === -1) {
-              return;
-            }
-            setTimeout(() => {
-              searchVirtualizer.scrollToIndex(
-                currentQuestionIndexInSearchResult
-              );
-            }, 0);
-          }
-        }}
-      >
-        <FastForward />
-        Current
-      </Button>
-    );
-  }
-);
-
-GoToCurrentButton.displayName = "GoToCurrentButton";
-
-const NavigationButtons = memo(
-  ({
-    handleNextQuestion,
-    handlePreviousQuestion,
-    isHandleNextQuestionDisabled,
-    isHandlePreviousQuestionDisabled,
-  }: {
-    handleNextQuestion: () => void;
-    handlePreviousQuestion: () => void;
-    isHandleNextQuestionDisabled: boolean;
-    isHandlePreviousQuestionDisabled: boolean;
-  }) => {
-    return (
-      <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="outline"
-          className="w-9 rounded-sm cursor-pointer"
-          onClick={handleNextQuestion}
-          disabled={isHandleNextQuestionDisabled}
-          title="Next question"
-        >
-          <ChevronDown />
-        </Button>
-        <Button
-          variant="outline"
-          className="w-9 rounded-sm cursor-pointer"
-          onClick={handlePreviousQuestion}
-          disabled={isHandlePreviousQuestionDisabled}
-          title="Previous question"
-        >
-          <ChevronUp />
-        </Button>
-      </div>
-    );
-  }
-);
-
-NavigationButtons.displayName = "NavigationButtons";

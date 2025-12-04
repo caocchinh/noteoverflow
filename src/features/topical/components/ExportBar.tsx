@@ -26,25 +26,29 @@ import {
   X,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ExportReviewDialog from "./ExportReviewDialog";
 
 interface ExportBarButtonsProps {
-  isExitDialogOpen: boolean;
-  setIsExitDialogOpen: Dispatch<SetStateAction<boolean>>;
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
   setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
+  questionsForExport: Set<string>;
+  allQuestions: SelectedQuestion[];
   useAllQuestions: () => void;
   useNoQuestions: () => void;
 }
 
 const ExportBarButtons = memo(
   ({
-    isExitDialogOpen,
-    setIsExitDialogOpen,
     setIsExportModeEnabled,
     setQuestionsForExport,
+    questionsForExport,
+    allQuestions,
     useAllQuestions,
     useNoQuestions,
   }: ExportBarButtonsProps) => {
+    const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
+    const [isExportReviewOpen, setIsExportReviewOpen] = useState(false);
+
     return (
       <>
         <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
@@ -107,10 +111,19 @@ const ExportBarButtons = memo(
         <Button
           className="cursor-pointer bg-logo-main! text-white! flex-1"
           variant="outline"
+          onClick={() => setIsExportReviewOpen(true)}
         >
           Preview export
           <ArrowRightFromLine />
         </Button>
+
+        <ExportReviewDialog
+          isOpen={isExportReviewOpen}
+          setIsOpen={setIsExportReviewOpen}
+          questionsForExport={questionsForExport}
+          setQuestionsForExport={setQuestionsForExport}
+          allQuestions={allQuestions}
+        />
       </>
     );
   }
@@ -119,7 +132,6 @@ const ExportBarButtons = memo(
 ExportBarButtons.displayName = "ExportBarButtons";
 
 const ExportBar = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   questionsForExport,
   allQuestions,
   setIsExportModeEnabled,
@@ -131,7 +143,6 @@ const ExportBar = ({
   setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
 }) => {
   const isMobile = useIsMobile({ breakpoint: 505 });
-  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
   const useAllQuestions = useCallback(() => {
     setQuestionsForExport(new Set(allQuestions.map((question) => question.id)));
   }, [allQuestions, setQuestionsForExport]);
@@ -150,12 +161,12 @@ const ExportBar = ({
               className="cursor-pointer w-[80vw] h-full"
             >
               <Menu />
-              Actions
+              Export tool bar
             </Button>
           </DrawerTrigger>
           <DrawerContent className="z-100007">
             <DrawerHeader className="relative">
-              <DrawerTitle>Export Actions</DrawerTitle>
+              <DrawerTitle>Tool bar</DrawerTitle>
               <DrawerClose asChild>
                 <Button
                   variant="ghost"
@@ -168,10 +179,10 @@ const ExportBar = ({
             </DrawerHeader>
             <div className="flex flex-col gap-3 mt-4 px-4 pb-4">
               <ExportBarButtons
-                isExitDialogOpen={isExitDialogOpen}
-                setIsExitDialogOpen={setIsExitDialogOpen}
                 setIsExportModeEnabled={setIsExportModeEnabled}
                 setQuestionsForExport={setQuestionsForExport}
+                questionsForExport={questionsForExport}
+                allQuestions={allQuestions}
                 useAllQuestions={useAllQuestions}
                 useNoQuestions={useNoQuestions}
               />
@@ -185,10 +196,10 @@ const ExportBar = ({
   return (
     <div className="fixed w-max z-1000 h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2 flex flex-row gap-2">
       <ExportBarButtons
-        isExitDialogOpen={isExitDialogOpen}
-        setIsExitDialogOpen={setIsExitDialogOpen}
         setIsExportModeEnabled={setIsExportModeEnabled}
         setQuestionsForExport={setQuestionsForExport}
+        questionsForExport={questionsForExport}
+        allQuestions={allQuestions}
         useAllQuestions={useAllQuestions}
         useNoQuestions={useNoQuestions}
       />

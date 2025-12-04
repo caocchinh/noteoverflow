@@ -602,7 +602,7 @@ const AppMainContent = ({
       />
       {isExportModeEnabled && (
         <ExportBar
-          allQuestions={topicalData?.data ?? []}
+          allQuestions={filteredProcessedData?.sortedData ?? []}
           questionsForExport={questionsForExport}
           setIsExportModeEnabled={setIsExportModeEnabled}
           setQuestionsForExport={setQuestionsForExport}
@@ -689,9 +689,9 @@ const QuestionViewItem = memo(
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
-          "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full",
+          "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full mb-[10px]",
           isQuestionForExport &&
-            "transform-[scale(0.975)]  border-logo-main rounded-md"
+            "transform-[scale(0.975)] border-logo-main rounded-md"
         )}
       >
         {isExportModeEnabled && (
@@ -709,6 +709,7 @@ const QuestionViewItem = memo(
           question={question}
           onQuestionClick={() => handleQuestionClick(question.id)}
           imageSrc={imageSrc}
+          className="mb-0!"
         />
       </div>
     );

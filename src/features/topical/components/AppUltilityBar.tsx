@@ -19,7 +19,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Monitor,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Download,
   SlidersHorizontal,
 } from "lucide-react";
@@ -51,7 +50,6 @@ const AppUltilityBar = memo(
       {
         finishedQuestionsFilteredPartitionedData,
         isExportModeEnabled,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setIsExportModeEnabled,
         ultilityRef,
         isQuestionViewDisabled,
@@ -317,7 +315,7 @@ const AppUltilityBar = memo(
                 </>
               )}
 
-              {/* {!isExportModeEnabled && (
+              {!isExportModeEnabled && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -347,7 +345,7 @@ const AppUltilityBar = memo(
                       : "Export questions & answers to PDF."}
                   </TooltipContent>
                 </Tooltip>
-              )} */}
+              )}
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
                 url={filterUrl}
