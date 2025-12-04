@@ -720,7 +720,7 @@ const AnnotatableInspectImagesComponent = memo(
                   ))}
                 </PhotoProvider>
                 {!isEditMode && imageUrls.length > 0 && (
-                  <Loader2 className="animate-spin text-red absolute left-1/2 -translate-x-1/2 z-10 top-0" />
+                  <Loader2 className="animate-spin text-red absolute left-1/2 -translate-x-1/2 z-1 top-0" />
                 )}
               </div>
 
