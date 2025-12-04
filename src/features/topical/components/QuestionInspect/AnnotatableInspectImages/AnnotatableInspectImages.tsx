@@ -690,7 +690,7 @@ const AnnotatableInspectImagesComponent = memo(
               </div>
               <div
                 className={cn(
-                  "w-full h-full flex items-center relative justify-center flex-col",
+                  "w-full h-full flex items-center relative justify-center flex-col min-h-[100px]",
                   !isEditMode
                     ? ""
                     : "absolute top-[999999px] left-[999999px] z-[-999999]"
@@ -720,7 +720,7 @@ const AnnotatableInspectImagesComponent = memo(
                   ))}
                 </PhotoProvider>
                 {!isEditMode && imageUrls.length > 0 && (
-                  <Loader2 className="animate-spin absolute left-1/2 -translate-x-1/2 z-0 top-0" />
+                  <Loader2 className="animate-spin text-red absolute left-1/2 -translate-x-1/2 z-10 top-0" />
                 )}
               </div>
 

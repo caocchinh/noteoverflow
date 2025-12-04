@@ -18,7 +18,7 @@ export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   season: false,
 };
 
-export const DEFAULT_NUMBER_OF_COLUMNS = 4;
+export const DEFAULT_NUMBER_OF_COLUMNS = 3;
 export const INFINITE_SCROLL_CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
 

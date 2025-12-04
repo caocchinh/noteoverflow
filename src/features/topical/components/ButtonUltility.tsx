@@ -50,7 +50,7 @@ const ButtonUltility = memo(
             </Button>
           </DialogTrigger>
           <DialogContent
-            className="max-w-md z-[100007]"
+            className="max-w-md z-100007"
             overlayClassName="!z-[100006]"
             showCloseButton={false}
           >
@@ -86,7 +86,7 @@ const ButtonUltility = memo(
         >
           <DialogTrigger asChild>
             <Button
-              className="w-full cursor-pointer !bg-[#fd8231] !text-white"
+              className="w-full cursor-pointer bg-[#fd8231]! text-white!"
               disabled={!isMounted}
               variant="outline"
             >
@@ -96,7 +96,7 @@ const ButtonUltility = memo(
           </DialogTrigger>
           <DialogContent
             showCloseButton={false}
-            className="z-[100008]"
+            className="z-100008"
             overlayClassName="z-[100008]"
           >
             <DialogHeader>

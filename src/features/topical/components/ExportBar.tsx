@@ -119,6 +119,7 @@ const ExportBarButtons = memo(
 ExportBarButtons.displayName = "ExportBarButtons";
 
 const ExportBar = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   questionsForExport,
   allQuestions,
   setIsExportModeEnabled,

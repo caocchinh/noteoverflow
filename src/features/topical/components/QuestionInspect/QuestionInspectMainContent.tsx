@@ -423,7 +423,9 @@ const QuestionInspectMainContent = forwardRef(
                 if (
                   node &&
                   annotatableQuestionInspectImagesElementRef.current &&
-                  currentView !== "both"
+                  currentView !== "both" &&
+                  annotatableQuestionInspectImagesElementRef.current
+                    .parentNode !== node
                 ) {
                   node.appendChild(
                     annotatableQuestionInspectImagesElementRef.current
@@ -442,7 +444,9 @@ const QuestionInspectMainContent = forwardRef(
                 if (
                   node &&
                   annotatableQuestionInspectImagesElementRef.current &&
-                  currentView === "both"
+                  currentView === "both" &&
+                  annotatableQuestionInspectImagesElementRef.current
+                    .parentNode !== node
                 ) {
                   node.appendChild(
                     annotatableQuestionInspectImagesElementRef.current
@@ -461,7 +465,9 @@ const QuestionInspectMainContent = forwardRef(
                 if (
                   node &&
                   annotatableAnswerInspectImagesElementRef.current &&
-                  currentView !== "both"
+                  currentView !== "both" &&
+                  annotatableAnswerInspectImagesElementRef.current
+                    .parentNode !== node
                 ) {
                   node.appendChild(
                     annotatableAnswerInspectImagesElementRef.current
@@ -480,7 +486,9 @@ const QuestionInspectMainContent = forwardRef(
                 if (
                   node &&
                   annotatableAnswerInspectImagesElementRef.current &&
-                  currentView === "both"
+                  currentView === "both" &&
+                  annotatableAnswerInspectImagesElementRef.current
+                    .parentNode !== node
                 ) {
                   node.appendChild(
                     annotatableAnswerInspectImagesElementRef.current

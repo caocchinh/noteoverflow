@@ -30,7 +30,7 @@ export const FirstPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer !p-[8px] rounded-[2px]"
+        className="cursor-pointer p-[8px]! rounded-[2px]"
         title="First page"
         disabled={currentChunkIndex === 0}
         onClick={() => {
@@ -73,7 +73,7 @@ export const PreviousPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer !p-[8px] rounded-[2px]"
+        className="cursor-pointer p-[8px]! rounded-[2px]"
         title="Previous page"
         disabled={currentChunkIndex === 0}
         onClick={() => {
@@ -116,7 +116,7 @@ export const NextPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer !p-[8px] rounded-[2px]"
+        className="cursor-pointer p-[8px]! rounded-[2px]"
         title="Next page"
         disabled={
           currentChunkIndex === fullPartitionedData!.length - 1 ||
@@ -162,7 +162,7 @@ export const LastPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer !p-[8px] rounded-[2px]"
+        className="cursor-pointer p-[8px]! rounded-[2px]"
         title="Last page"
         disabled={
           currentChunkIndex === fullPartitionedData!.length - 1 ||
