@@ -66,7 +66,11 @@ const AppMainContent = ({
   const pathname = usePathname();
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
-  const [questionsForExport, setQuestionsForExport] = useState<string[]>([]);
+  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
+    new Set()
+  );
+  const questionsForExportRef = useRef(questionsForExport);
+  questionsForExportRef.current = questionsForExport;
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
@@ -135,7 +139,7 @@ const AppMainContent = ({
     }
   }, [isExportModeEnabled, setIsAppSidebarOpen]);
 
-  const processedData = useMemo(() => {
+  const chunkedData = useMemo(() => {
     if (!topicalData?.data) return null;
 
     const chunkSize =
@@ -143,36 +147,11 @@ const AppMainContent = ({
         ? uiPreferences.numberOfQuestionsPerPage
         : INFINITE_SCROLL_CHUNK_SIZE;
 
-    const filteredStrictModeData = uiPreferences.isStrictModeEnabled
-      ? topicalData.data.filter((item) => {
-          return isSubset(item.topics, currentQuery.topic);
-        })
-      : topicalData.data;
-
-    const sortedData = filteredStrictModeData.toSorted(
-      (a: SelectedQuestion, b: SelectedQuestion) => {
-        if (sortParameters.sortBy === "ascending") {
-          return a.year - b.year;
-        } else {
-          // Default to year-desc
-          return b.year - a.year;
-        }
-      }
-    );
-
-    const chunkedData = chunkQuestionsData(sortedData, chunkSize);
-
-    return {
-      sortedData,
-      chunkedData,
-    };
+    return chunkQuestionsData(topicalData.data, chunkSize);
   }, [
-    topicalData?.data,
+    topicalData,
     uiPreferences.layoutStyle,
     uiPreferences.numberOfQuestionsPerPage,
-    uiPreferences.isStrictModeEnabled,
-    currentQuery.topic,
-    sortParameters.sortBy,
   ]);
 
   const filteredProcessedData = useMemo(() => {
@@ -233,13 +212,15 @@ const AppMainContent = ({
   const handleQuestionClick = useCallback(
     (questionId: string) => {
       if (isExportModeEnabled) {
-        if (questionsForExport.includes(questionId)) {
-          setQuestionsForExport((prev) =>
-            prev.filter((id) => id !== questionId)
-          );
-          return;
-        }
-        setQuestionsForExport((prev) => [...prev, questionId]);
+        setQuestionsForExport((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(questionId)) {
+            newSet.delete(questionId);
+          } else {
+            newSet.add(questionId);
+          }
+          return newSet;
+        });
         return;
       }
       questionInspectRef.current?.setIsInspectOpen({
@@ -247,7 +228,7 @@ const AppMainContent = ({
         questionId,
       });
     },
-    [isExportModeEnabled, questionsForExport]
+    [isExportModeEnabled]
   );
 
   const handleScrollEnd = useCallback(() => {
@@ -278,8 +259,8 @@ const AppMainContent = ({
   ]);
 
   useEffect(() => {
-    if (processedData && filteredProcessedData) {
-      setFullPartitionedData(processedData.chunkedData);
+    if (chunkedData && filteredProcessedData) {
+      setFullPartitionedData(chunkedData);
       setFinishedQuestionsFilteredPartitionedData(
         filteredProcessedData.chunkedData
       );
@@ -292,7 +273,7 @@ const AppMainContent = ({
         behavior: "instant",
       });
     }
-  }, [processedData, filteredProcessedData]);
+  }, [chunkedData, filteredProcessedData]);
 
   useEffect(() => {
     if (topicalData) {
@@ -623,7 +604,7 @@ const AppMainContent = ({
       />
       {isExportModeEnabled && (
         <ExportBar
-          allQuestions={processedData?.sortedData ?? []}
+          allQuestions={topicalData?.data ?? []}
           questionsForExport={questionsForExport}
           setIsExportModeEnabled={setIsExportModeEnabled}
           setQuestionsForExport={setQuestionsForExport}
@@ -647,7 +628,7 @@ export const MainContent = memo(
   }: {
     doesSearchYieldAnyQuestions: boolean;
     filteredDisplayData: SelectedQuestion[];
-    questionsForExport: string[];
+    questionsForExport: Set<string>;
     isExportModeEnabled: boolean;
     handleQuestionClick: (questionId: string) => void;
     handleInfiniteScrollNext: () => void;
@@ -672,11 +653,11 @@ export const MainContent = memo(
               question?.questionImages.map((imageSrc: string) => (
                 <QuestionViewItem
                   key={`${question.id}-${imageSrc}`}
+                  isQuestionForExport={questionsForExport.has(question.id)}
                   question={question}
                   handleQuestionClick={handleQuestionClick}
                   imageSrc={imageSrc}
                   isExportModeEnabled={isExportModeEnabled}
-                  questionsForExport={questionsForExport}
                 />
               ))
             )}
@@ -701,27 +682,27 @@ export const MainContent = memo(
 
 MainContent.displayName = "MainContent";
 
+// Memoized wrapper with custom comparison to prevent unnecessary re-renders
 const QuestionViewItem = memo(
   ({
     question,
     imageSrc,
     handleQuestionClick,
     isExportModeEnabled,
-    questionsForExport,
+    isQuestionForExport,
   }: {
     question: SelectedQuestion;
     imageSrc: string;
     handleQuestionClick: (questionId: string) => void;
     isExportModeEnabled: boolean;
-    questionsForExport: string[];
+    isQuestionForExport: boolean;
   }) => {
-    const isQuestionChecked = questionsForExport.includes(question.id);
     return (
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
           "relative transition-all duration-200 border-2 border-transparent ease-in-out w-full ",
-          isQuestionChecked &&
+          isQuestionForExport &&
             "transform-[scale(0.975)]  border-logo-main rounded-md"
         )}
       >
@@ -732,7 +713,7 @@ const QuestionViewItem = memo(
           >
             <Checkbox
               className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full  cursor-pointer"
-              checked={isQuestionChecked}
+              checked={isQuestionForExport}
             />
           </div>
         )}
@@ -742,6 +723,15 @@ const QuestionViewItem = memo(
           imageSrc={imageSrc}
         />
       </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.question.id === nextProps.question.id &&
+      prevProps.imageSrc === nextProps.imageSrc &&
+      prevProps.handleQuestionClick === nextProps.handleQuestionClick &&
+      prevProps.isExportModeEnabled === nextProps.isExportModeEnabled &&
+      prevProps.isQuestionForExport === nextProps.isQuestionForExport
     );
   }
 );
