@@ -73,8 +73,8 @@ const QuestionPreview = memo(
     return (
       <div
         className={cn(
-          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent border-black/50 relative overflow-hidden min-h-[110px]",
-          uiPreferences.imageTheme === "dark" && "!bg-black dark:!border-white"
+          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent mansory-item border-black/50 relative overflow-hidden min-h-[110px] ",
+          uiPreferences.imageTheme === "dark" && "bg-black! dark:border-white!"
         )}
         onClick={useCallback(() => {
           onQuestionClick();
@@ -96,7 +96,7 @@ const QuestionPreview = memo(
       >
         <div
           className={cn(
-            "absolute inset-0 rounded-[10px] bg-gradient-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-[12]",
+            "absolute inset-0 rounded-[10px] bg-linear-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-12",
             doesThisQuestionFinished && uiPreferences.showFinishedQuestionTint
               ? "opacity-100"
               : " opacity-0"
@@ -105,38 +105,38 @@ const QuestionPreview = memo(
 
         <div
           className={cn(
-            "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-[37%] z-[10]",
-            uiPreferences.imageTheme === "dark" && "!bg-white"
+            "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-37 z-10",
+            uiPreferences.imageTheme === "dark" && "bg-white!"
           )}
         ></div>
         {loading && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
             <Loader />
           </div>
         )}
         {error && (
-          <div className="absolute top-0 left-0 w-full h-full z-[99] bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
             <p className="text-red-500 text-sm">Image failed to load</p>
           </div>
         )}
 
-        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-[100%] flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-[11]">
+        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-100 flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-11">
           <div className="flex flex-wrap gap-2 items-center justify-center content-start">
             {question?.topics?.map((topic) => (
               <Badge
                 key={topic}
-                className="h-max bg-white !text-black text-center max-w-full whitespace-pre-wrap"
+                className="h-max bg-white text-black! text-center max-w-full whitespace-pre-wrap"
               >
                 {topic}
               </Badge>
             ))}
-            <Badge className="h-max bg-white !text-black text-center">
+            <Badge className="h-max bg-white text-black! text-center">
               {question?.year}
             </Badge>
-            <Badge className="h-max bg-white !text-black text-center">
+            <Badge className="h-max bg-white text-black! text-center">
               Paper {question?.paperType}
             </Badge>
-            <Badge className="h-max bg-white !text-black text-center">
+            <Badge className="h-max bg-white text-black! text-center">
               {question?.season}
             </Badge>
           </div>
@@ -163,7 +163,7 @@ const QuestionPreview = memo(
         />
         {isMutatingThisBookmarkQuestion && (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] !w-max flex items-center justify-center cursor-pointer bg-black rounded-[3px] !min-h-[28px] z-[31]"
+            className="absolute bottom-1 right-1 text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]! z-31"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -206,7 +206,7 @@ const QuestionPreview = memo(
           <Button
             className={cn(
               "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
-              "rounded-[3px] z-[30]",
+              "rounded-[3px] z-30",
               (() => {
                 for (const bookmark of bookmarks ?? []) {
                   if (
@@ -218,7 +218,7 @@ const QuestionPreview = memo(
                   }
                 }
                 return false;
-              })() && "!bg-logo-main !text-white",
+              })() && "bg-logo-main! text-white!",
               (savedActivitiesIsLoading || savedActivitiesIsFetching) &&
                 "opacity-50"
             )}
@@ -263,7 +263,7 @@ const QuestionPreview = memo(
         <img
           className={cn(
             "w-full h-full object-contain",
-            uiPreferences.imageTheme === "dark" && "!invert"
+            uiPreferences.imageTheme === "dark" && "invert!"
           )}
           src={imageSrc}
           alt="Question preview"

@@ -18,16 +18,7 @@ export const INVALID_INPUTS_DEFAULT: InvalidInputs = {
   season: false,
 };
 
-export const DEFAULT_NUMBER_OF_COLUMNS = 3;
-
-export const COLUMN_BREAKPOINTS = {
-  1: { 0: 1 },
-  2: { 0: 1, 1: 2 },
-  3: { 0: 1, 1: 2, 500: 3 },
-  4: { 0: 1, 1: 2, 500: 3, 790: 4 },
-  5: { 0: 1, 1: 2, 500: 3, 790: 4, 900: 5 },
-};
-
+export const DEFAULT_NUMBER_OF_COLUMNS = 4;
 export const INFINITE_SCROLL_CHUNK_SIZE = 35;
 export const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 3;
 
@@ -60,9 +51,7 @@ export const DEFAULT_CACHE: FiltersCache = {
   lastSessionSubject: "",
   filters: {},
 };
-
 export const LIST_NAME_MAX_LENGTH = 100;
-export const MANSONRY_GUTTER_BREAKPOINTS = { 0: "10px" };
 
 export const PDF_HEADER_LOGO_SRC = "/assets/logo-bg-colorised-modified.webp";
 export const MY_ANNOTATIONS_BOOKMARK_LIST_NAME = "My annotations";

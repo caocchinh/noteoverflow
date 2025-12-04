@@ -1,50 +1,48 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, memo } from "react";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
-  DialogClose,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/context/AuthContext";
 import {
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-  COLUMN_BREAKPOINTS,
-  MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import {
-  SelectedQuestion,
   FinishedTrackerProps,
+  SelectedQuestion,
   SortParameters,
 } from "@/features/topical/constants/types";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { Button } from "@/components/ui/button";
 import { useMutationState } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import Sort from "../Sort";
-import QuestionPreview from "../QuestionPreview";
+import { JumpToTabButton } from "../JumpToTabButton";
 import {
   FirstPageButton,
   LastPageButton,
   NextPageButton,
   PreviousPageButton,
 } from "../PaginationButtons";
-import { JumpToTabButton } from "../JumpToTabButton";
+import QuestionPreview from "../QuestionPreview";
+import Sort from "../Sort";
+import Masonry from "../Masonry";
 
 export const FinishedTracker = memo(
   ({ allQuestions, navigateToQuestion }: FinishedTrackerProps) => {
@@ -133,9 +131,7 @@ export const FinishedTracker = memo(
 
     return (
       <>
-        {isDialogOpen && (
-          <div className="fixed inset-0 z-[100010] bg-black/67" />
-        )}
+        {isDialogOpen && <div className="fixed inset-0 z-100010 bg-black/67" />}
 
         <Dialog
           open={isDialogOpen}
@@ -180,12 +176,12 @@ export const FinishedTracker = memo(
                 </div>
               </DialogTrigger>
             </TooltipTrigger>
-            <TooltipContent side="right" className="z-[1000000]">
+            <TooltipContent side="right" className="z-1000000">
               Click to view your finished questions
             </TooltipContent>
           </Tooltip>
           <DialogContent
-            className="!max-w-5xl h-[95dvh] z-[100008] dark:bg-accent gap-2"
+            className="max-w-5xl! h-[95dvh] z-100008 dark:bg-accent gap-2"
             showCloseButton={false}
           >
             {(isSessionPending || savedActivitiesIsFetching) && (
@@ -229,33 +225,23 @@ export const FinishedTracker = memo(
                       viewportRef={scrollAreaRef}
                       type="always"
                     >
-                      <ResponsiveMasonry
-                        columnsCountBreakPoints={
-                          COLUMN_BREAKPOINTS[
-                            2 as keyof typeof COLUMN_BREAKPOINTS
-                          ]
-                        }
-                        // @ts-expect-error - gutterBreakPoints is not typed by the library
-                        gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-                      >
-                        <Masonry>
-                          {displayedData?.map((question) =>
-                            question?.questionImages.map((imageSrc: string) => (
-                              <QuestionPreview
-                                question={question}
-                                key={`${question.id}-${imageSrc}`}
-                                imageSrc={imageSrc}
-                                onQuestionClick={() => {
-                                  setIsDialogOpen(false);
-                                  navigateToQuestion({
-                                    questionId: question?.id,
-                                  });
-                                }}
-                              />
-                            ))
-                          )}
-                        </Masonry>
-                      </ResponsiveMasonry>
+                      <Masonry>
+                        {displayedData?.map((question) =>
+                          question?.questionImages.map((imageSrc: string) => (
+                            <QuestionPreview
+                              question={question}
+                              key={`${question.id}-${imageSrc}`}
+                              imageSrc={imageSrc}
+                              onQuestionClick={() => {
+                                setIsDialogOpen(false);
+                                navigateToQuestion({
+                                  questionId: question?.id,
+                                });
+                              }}
+                            />
+                          ))
+                        )}
+                      </Masonry>
                       {/* Pagination Controls */}
                       <div className="flex flex-row items-center justify-center gap-2 mt-6 w-full">
                         <FirstPageButton

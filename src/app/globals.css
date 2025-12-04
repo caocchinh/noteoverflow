@@ -198,9 +198,8 @@ html body[data-scroll-locked] {
   margin-right: 0px !important;
 }
 
-div#container_highlightContainer,
-div#container_underlineContainer,
-div#container_strikethroughContainer,
-div#container_squigglyContainer {
-  display: none !important;
+.mansory-item {
+  break-inside: avoid;
+  margin-bottom: 10px;
+  box-sizing: border-box;
 }

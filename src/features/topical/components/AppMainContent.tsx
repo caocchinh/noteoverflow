@@ -14,9 +14,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { usePathname } from "next/navigation";
 import {
-  COLUMN_BREAKPOINTS,
   INFINITE_SCROLL_CHUNK_SIZE,
-  MANSONRY_GUTTER_BREAKPOINTS,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
 import type {
@@ -31,7 +29,6 @@ import {
   chunkQuestionsData,
 } from "@/features/topical/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
@@ -43,6 +40,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import ExportBar from "./ExportBar";
 import IntergrationTips from "./IntergrationTips";
+import Masonry from "./Masonry";
 
 const AppMainContent = ({
   mountedRef,
@@ -639,30 +637,20 @@ export const MainContent = memo(
 
     return (
       <>
-        <ResponsiveMasonry
-          columnsCountBreakPoints={
-            COLUMN_BREAKPOINTS[
-              uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
-            ]
-          }
-          // @ts-expect-error - gutterBreakPoints is not typed by the library
-          gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-        >
-          <Masonry>
-            {filteredDisplayData?.map((question) =>
-              question?.questionImages.map((imageSrc: string) => (
-                <QuestionViewItem
-                  key={`${question.id}-${imageSrc}`}
-                  isQuestionForExport={questionsForExport.has(question.id)}
-                  question={question}
-                  handleQuestionClick={handleQuestionClick}
-                  imageSrc={imageSrc}
-                  isExportModeEnabled={isExportModeEnabled}
-                />
-              ))
-            )}
-          </Masonry>
-        </ResponsiveMasonry>
+        <Masonry>
+          {filteredDisplayData?.map((question) =>
+            question?.questionImages.map((imageSrc: string) => (
+              <QuestionViewItem
+                key={`${question.id}-${imageSrc}`}
+                isQuestionForExport={questionsForExport.has(question.id)}
+                question={question}
+                handleQuestionClick={handleQuestionClick}
+                imageSrc={imageSrc}
+                isExportModeEnabled={isExportModeEnabled}
+              />
+            ))
+          )}
+        </Masonry>
 
         {uiPreferences.layoutStyle === "infinite" && (
           <InfiniteScroll
@@ -701,7 +689,7 @@ const QuestionViewItem = memo(
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
-          "relative transition-all duration-200 border-2 border-transparent ease-in-out w-full ",
+          "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full",
           isQuestionForExport &&
             "transform-[scale(0.975)]  border-logo-main rounded-md"
         )}

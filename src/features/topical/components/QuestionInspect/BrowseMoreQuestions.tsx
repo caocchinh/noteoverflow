@@ -1,22 +1,20 @@
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import QuestionPreview from "../QuestionPreview";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import {
-  COLUMN_BREAKPOINTS,
-  MANSONRY_GUTTER_BREAKPOINTS,
-} from "../../constants/constants";
-import { BrowseMoreQuestionsProps } from "../../constants/types";
 import { Button } from "@/components/ui/button";
-import { memo, useRef, useState, useEffect } from "react";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { SelectedQuestion } from "../../constants/types";
+import { memo, useEffect, useRef, useState } from "react";
+import {
+  BrowseMoreQuestionsProps,
+  SelectedQuestion,
+} from "../../constants/types";
+import { JumpToTabButton } from "../JumpToTabButton";
 import {
   FirstPageButton,
   LastPageButton,
   NextPageButton,
   PreviousPageButton,
 } from "../PaginationButtons";
-import { JumpToTabButton } from "../JumpToTabButton";
+import QuestionPreview from "../QuestionPreview";
+import Masonry from "../Masonry";
 
 const BrowseMoreQuestions = memo(
   ({
@@ -131,28 +129,20 @@ const BrowseMoreQuestions = memo(
           ref={expandedContentRef}
           className="relative z-0 pt-10"
         >
-          <ResponsiveMasonry
-            columnsCountBreakPoints={
-              COLUMN_BREAKPOINTS[2 as keyof typeof COLUMN_BREAKPOINTS]
-            }
-            // @ts-expect-error - gutterBreakPoints is not typed by the library
-            gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-          >
-            <Masonry>
-              {displayedData?.map((question) =>
-                question?.questionImages.map((imageSrc: string) => (
-                  <QuestionPreview
-                    question={question}
-                    key={`${question.id}-${imageSrc}`}
-                    imageSrc={imageSrc}
-                    onQuestionClick={() => {
-                      onQuestionClick(question?.id);
-                    }}
-                  />
-                ))
-              )}
-            </Masonry>
-          </ResponsiveMasonry>
+          <Masonry>
+            {displayedData?.map((question) =>
+              question?.questionImages.map((imageSrc: string) => (
+                <QuestionPreview
+                  question={question}
+                  key={`${question.id}-${imageSrc}`}
+                  imageSrc={imageSrc}
+                  onQuestionClick={() => {
+                    onQuestionClick(question?.id);
+                  }}
+                />
+              ))
+            )}
+          </Masonry>
         </CollapsibleContent>
       </Collapsible>
     );

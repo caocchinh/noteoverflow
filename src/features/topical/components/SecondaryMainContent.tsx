@@ -1,16 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
+import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
-import {
-  COLUMN_BREAKPOINTS,
-  MANSONRY_GUTTER_BREAKPOINTS,
-} from "@/features/topical/constants/constants";
 import type {
   SecondaryMainContentProps,
   SelectedQuestion,
@@ -18,6 +12,8 @@ import type {
   SortParameters,
 } from "@/features/topical/constants/types";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { useEffect, useRef, useState } from "react";
+import Masonry from "./Masonry";
 
 const SecondaryMainContent = ({
   topicalData,
@@ -133,29 +129,20 @@ const SecondaryMainContent = ({
             }}
           >
             <p>{topicalData?.length} items</p>
-            <ResponsiveMasonry
-              columnsCountBreakPoints={
-                COLUMN_BREAKPOINTS[
-                  uiPreferences.numberOfColumns as keyof typeof COLUMN_BREAKPOINTS
-                ]
-              }
-              // @ts-expect-error - gutterBreakPoints is not typed by the library
-              gutterBreakPoints={MANSONRY_GUTTER_BREAKPOINTS}
-            >
-              <Masonry>
-                {displayedData?.map((question) =>
-                  question?.questionImages.map((imageSrc: string) => (
-                    <QuestionPreview
-                      question={question}
-                      onQuestionClick={() => handleQuestionClick(question.id)}
-                      key={`${question.id}-${imageSrc}`}
-                      imageSrc={imageSrc}
-                      listId={listId}
-                    />
-                  ))
-                )}
-              </Masonry>
-            </ResponsiveMasonry>
+
+            <Masonry>
+              {displayedData?.map((question) =>
+                question?.questionImages.map((imageSrc: string) => (
+                  <QuestionPreview
+                    question={question}
+                    onQuestionClick={() => handleQuestionClick(question.id)}
+                    key={`${question.id}-${imageSrc}`}
+                    imageSrc={imageSrc}
+                    listId={listId}
+                  />
+                ))
+              )}
+            </Masonry>
 
             {uiPreferences.layoutStyle === "infinite" && (
               <InfiniteScroll
