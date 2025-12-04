@@ -98,7 +98,7 @@ const SecondaryMainContent = ({
 
   return (
     <>
-      <div className="pt-16 relative z-[10] flex flex-col w-full items-center justify-start p-4 overflow-hidden h-screen">
+      <div className="pt-16 relative z-10 flex flex-col w-full items-center justify-start p-4 overflow-hidden h-screen">
         {breadcrumbContent({
           setSortParameters,
           sortParameters,

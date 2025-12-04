@@ -108,6 +108,8 @@ const AppMainContent = ({
   });
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const previousSidebarOpenRef = useRef(isAppSidebarOpen);
+  const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const doesSearchYieldAnyQuestions = (topicalData?.data?.length ?? 0) > 0;
 
   const onSettledFinishedQuestion = useMutationState({
     filters: {
@@ -132,21 +134,6 @@ const AppMainContent = ({
       setIsAppSidebarOpen(previousSidebarOpenRef.current);
     }
   }, [isExportModeEnabled, setIsAppSidebarOpen]);
-
-  const shouldIncludeQuestion = useCallback(
-    (question: SelectedQuestion) => {
-      if (!finishedQuestionsData) return true;
-      if (
-        !showFinishedQuestion &&
-        finishedQuestionsData.some((item) => item.question.id === question.id)
-      ) {
-        return false;
-      }
-      return true;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [finishedQuestionsData, showFinishedQuestion, onSettledFinishedQuestion]
-  );
 
   const processedData = useMemo(() => {
     if (!topicalData?.data) return null;
@@ -202,8 +189,15 @@ const AppMainContent = ({
         })
       : topicalData.data;
 
-    const filteredFinishedData = filteredStrictModeData.filter((item) => {
-      return shouldIncludeQuestion(item);
+    const filteredFinishedData = filteredStrictModeData.filter((question) => {
+      if (!finishedQuestionsData) return true;
+      if (
+        !showFinishedQuestion &&
+        finishedQuestionsData.some((item) => item.question.id === question.id)
+      ) {
+        return false;
+      }
+      return true;
     });
 
     const sortedData = filteredFinishedData.toSorted(
@@ -223,17 +217,19 @@ const AppMainContent = ({
       sortedData,
       chunkedData,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    topicalData?.data,
+    topicalData,
     uiPreferences.layoutStyle,
     uiPreferences.numberOfQuestionsPerPage,
     uiPreferences.isStrictModeEnabled,
     currentQuery.topic,
-    shouldIncludeQuestion,
+    finishedQuestionsData,
+    showFinishedQuestion,
+    onSettledFinishedQuestion,
     sortParameters.sortBy,
   ]);
 
-  // Memoized callbacks to prevent child re-renders
   const handleQuestionClick = useCallback(
     (questionId: string) => {
       if (isExportModeEnabled) {
@@ -350,8 +346,6 @@ const AppMainContent = ({
     });
   }, [currentQuery]);
 
-  const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const doesSearchYieldAnyQuestions = (topicalData?.data?.length ?? 0) > 0;
   const isQuestionViewDisabled = useMemo(() => {
     return (
       !isSearchEnabled ||
@@ -392,7 +386,7 @@ const AppMainContent = ({
   return (
     <>
       <SidebarInset
-        className="!relative flex flex-col items-center justify-start !px-0 gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
+        className="relative! flex flex-col items-center justify-start px-0! gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
         ref={sideBarInsetRef}
       >
         <ScrollToTopButton
@@ -460,7 +454,7 @@ const AppMainContent = ({
                 </div>
 
                 <div className="flex flex-row flex-wrap w-full  gap-4 items-stretch justify-center">
-                  <div className="w-full md:w-[377px] flex items-center justify-center flex-col gap-2  !max-w-full h-[inherit]  p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm ">
+                  <div className="w-full md:w-[377px] flex items-center justify-center flex-col gap-2 max-w-full! h-[inherit]  p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm ">
                     <h3 className="text-lg font-semibold text-center mb-3 text-orange-700 dark:text-orange-400">
                       Inspect Mode Keyboard Navigation
                     </h3>
@@ -488,7 +482,7 @@ const AppMainContent = ({
                     </ul>
                   </div>
 
-                  <div className="w-full md:w-[377px] !max-w-full h-[inherit] p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg shadow-sm ">
+                  <div className="w-full md:w-[377px] max-w-full! h-[inherit] p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg shadow-sm ">
                     <h3 className="text-lg font-semibold text-center mb-2 text-gray-700 dark:text-gray-300">
                       Customize Your Experience
                     </h3>
@@ -499,7 +493,7 @@ const AppMainContent = ({
                     </p>
                   </div>
 
-                  <div className="w-full md:w-[377px]  !max-w-full h-[inherit] p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
+                  <div className="w-full md:w-[377px] max-w-full! h-[inherit] p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
                     <h3 className="text-lg font-semibold text-center mb-2 text-blue-700 dark:text-blue-400">
                       Track Your Progress
                     </h3>
@@ -572,11 +566,9 @@ const AppMainContent = ({
             )}
           {doesSearchYieldAnyQuestions && (
             <p className="text-sm text-left mb-1">
-              {filteredProcessedData?.sortedData.length ?? 0} question
-              {filteredProcessedData?.sortedData.length ?? 0 > 1
-                ? "s"
-                : ""}{" "}
-              found
+              {topicalData?.data.length ?? 0} question
+              {topicalData?.data.length ?? 0 > 1 ? "s" : ""} found,{" "}
+              {filteredProcessedData?.sortedData.length ?? 0} displayed
             </p>
           )}
           {currentChunkIndex === 0 &&

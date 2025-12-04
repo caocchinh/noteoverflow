@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -39,7 +39,6 @@ const TopicalClient = ({
   BETTER_AUTH_URL: string;
 }) => {
   const isMobileDevice = useIsMobile();
-  const mountedRef = useRef(false);
   const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
     useTopicalApp();
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
@@ -47,10 +46,12 @@ const TopicalClient = ({
     ...INITIAL_QUERY,
   });
   const [isValidSearchParams, setIsValidSearchParams] = useState(true);
+  const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const ultilityRef = useRef<HTMLDivElement | null>(null);
-  const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
   const recentQueryRef = useRef<RecentQueryRef | null>(null);
+  const appUltilityBarRef = useRef<AppUltilityBarRef | null>(null);
+  const mountedRef = useRef(false);
 
   const filterUrl = useMemo(() => {
     if (typeof window === "undefined") {
@@ -74,7 +75,7 @@ const TopicalClient = ({
     }
   }, [currentQuery, uiPreferences.isStrictModeEnabled]);
 
-  const search = async () => {
+  const search = useCallback(async () => {
     const { data, error } = await api.topical.get({
       query: {
         curriculumId: encodeURIComponent(currentQuery.curriculumId),
@@ -92,7 +93,7 @@ const TopicalClient = ({
     }
 
     return data;
-  };
+  }, [currentQuery]);
 
   const {
     data: topicalData,
@@ -167,8 +168,6 @@ const TopicalClient = ({
       setIsAppSidebarOpen(false);
     }
   }, [currentQuery, isMobileDevice, setIsAppSidebarOpen]);
-
-  const appUltilityBarRef = useRef<AppUltilityBarRef | null>(null);
 
   return (
     <>
