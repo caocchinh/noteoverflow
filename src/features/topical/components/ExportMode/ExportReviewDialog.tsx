@@ -29,14 +29,21 @@ const ExportReviewDialog = memo(
       "selected"
     );
 
-    const unselectedQuestions = useMemo(() => {
+    const filteredQuestions = useMemo(() => {
+      let baseQuestions = allQuestions;
       if (filterMode === "not selected") {
-        return allQuestions.filter((q) => !questionsForExport.has(q.id));
+        baseQuestions = allQuestions.filter(
+          (q) => !questionsForExport.has(q.id)
+        );
+      } else {
+        baseQuestions = allQuestions.filter((q) =>
+          questionsForExport.has(q.id)
+        );
       }
 
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        return allQuestions.filter(
+        return baseQuestions.filter(
           (q) =>
             q.id.toLowerCase().includes(query) ||
             q.topics?.some((t) => t.toLowerCase().includes(query)) ||
@@ -45,7 +52,7 @@ const ExportReviewDialog = memo(
         );
       }
 
-      return allQuestions;
+      return baseQuestions;
     }, [allQuestions, questionsForExport, searchQuery, filterMode]);
 
     const canReorder = useMemo(
@@ -178,10 +185,11 @@ const ExportReviewDialog = memo(
           </div>
 
           <SelectList
+            isOpen={isOpen}
             canReorder={canReorder}
             questionsForExportArray={questionsForExportArray}
             setQuestionsForExportArray={setQuestionsForExportArray}
-            unselectedQuestions={unselectedQuestions}
+            filteredQuestions={filteredQuestions}
             toggleQuestion={toggleQuestion}
             allQuestions={allQuestions}
             questionsForExport={questionsForExport}

@@ -792,8 +792,9 @@ export interface ExportSelectListProps {
   canReorder: boolean;
   questionsForExportArray: string[];
   setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
-  unselectedQuestions: SelectedQuestion[];
+  filteredQuestions: SelectedQuestion[];
   toggleQuestion: (questionId: string) => void;
   allQuestions: SelectedQuestion[];
   questionsForExport: Set<string>;
+  isOpen: boolean;
 }
