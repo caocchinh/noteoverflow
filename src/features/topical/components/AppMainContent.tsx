@@ -38,7 +38,7 @@ import { useMutationState } from "@tanstack/react-query";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import ExportBar from "./ExportBar";
+import ExportBar from "./ExportMode/ExportBar";
 import IntergrationTips from "./IntergrationTips";
 import Masonry from "./Masonry";
 
@@ -67,6 +67,9 @@ const AppMainContent = ({
   const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
     new Set()
   );
+  const [questionsForExportArray, setQuestionsForExportArray] = useState<
+    string[]
+  >([]);
   const questionsForExportRef = useRef(questionsForExport);
   questionsForExportRef.current = questionsForExport;
   const [
@@ -218,6 +221,13 @@ const AppMainContent = ({
             newSet.add(questionId);
           }
           return newSet;
+        });
+        setQuestionsForExportArray((prev) => {
+          if (prev.includes(questionId)) {
+            return prev.filter((id) => id !== questionId);
+          } else {
+            return [...prev, questionId];
+          }
         });
         return;
       }
@@ -604,7 +614,9 @@ const AppMainContent = ({
         <ExportBar
           allQuestions={filteredProcessedData?.sortedData ?? []}
           questionsForExport={questionsForExport}
+          questionsForExportArray={questionsForExportArray}
           setIsExportModeEnabled={setIsExportModeEnabled}
+          setQuestionsForExportArray={setQuestionsForExportArray}
           setQuestionsForExport={setQuestionsForExport}
         />
       )}

@@ -17,7 +17,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Dispatch, memo, SetStateAction, useCallback, useState } from "react";
-import { SelectedQuestion } from "../constants/types";
+import { SelectedQuestion } from "../../constants/types";
 import {
   ArrowRightFromLine,
   Eraser,
@@ -31,7 +31,9 @@ import ExportReviewDialog from "./ExportReviewDialog";
 interface ExportBarButtonsProps {
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
   setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
+  setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
   questionsForExport: Set<string>;
+  questionsForExportArray: string[];
   allQuestions: SelectedQuestion[];
   useAllQuestions: () => void;
   useNoQuestions: () => void;
@@ -41,7 +43,9 @@ const ExportBarButtons = memo(
   ({
     setIsExportModeEnabled,
     setQuestionsForExport,
+    setQuestionsForExportArray,
     questionsForExport,
+    questionsForExportArray,
     allQuestions,
     useAllQuestions,
     useNoQuestions,
@@ -83,6 +87,7 @@ const ExportBarButtons = memo(
                 onClick={() => {
                   setIsExportModeEnabled(false);
                   setQuestionsForExport(new Set());
+                  setQuestionsForExportArray([]);
                   setIsExitDialogOpen(false);
                 }}
               >
@@ -121,7 +126,9 @@ const ExportBarButtons = memo(
           isOpen={isExportReviewOpen}
           setIsOpen={setIsExportReviewOpen}
           questionsForExport={questionsForExport}
+          questionsForExportArray={questionsForExportArray}
           setQuestionsForExport={setQuestionsForExport}
+          setQuestionsForExportArray={setQuestionsForExportArray}
           allQuestions={allQuestions}
         />
       </>
@@ -133,23 +140,30 @@ ExportBarButtons.displayName = "ExportBarButtons";
 
 const ExportBar = ({
   questionsForExport,
+  questionsForExportArray,
   allQuestions,
   setIsExportModeEnabled,
+  setQuestionsForExportArray,
   setQuestionsForExport,
 }: {
   questionsForExport: Set<string>;
+  questionsForExportArray: string[];
   allQuestions: SelectedQuestion[];
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
+  setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
   setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
 }) => {
   const isMobile = useIsMobile({ breakpoint: 505 });
   const useAllQuestions = useCallback(() => {
-    setQuestionsForExport(new Set(allQuestions.map((question) => question.id)));
-  }, [allQuestions, setQuestionsForExport]);
+    const ids = allQuestions.map((question) => question.id);
+    setQuestionsForExport(new Set(ids));
+    setQuestionsForExportArray(ids);
+  }, [allQuestions, setQuestionsForExport, setQuestionsForExportArray]);
 
   const useNoQuestions = useCallback(() => {
     setQuestionsForExport(new Set());
-  }, [setQuestionsForExport]);
+    setQuestionsForExportArray([]);
+  }, [setQuestionsForExport, setQuestionsForExportArray]);
 
   if (isMobile) {
     return (
@@ -181,7 +195,9 @@ const ExportBar = ({
               <ExportBarButtons
                 setIsExportModeEnabled={setIsExportModeEnabled}
                 setQuestionsForExport={setQuestionsForExport}
+                setQuestionsForExportArray={setQuestionsForExportArray}
                 questionsForExport={questionsForExport}
+                questionsForExportArray={questionsForExportArray}
                 allQuestions={allQuestions}
                 useAllQuestions={useAllQuestions}
                 useNoQuestions={useNoQuestions}
@@ -198,7 +214,9 @@ const ExportBar = ({
       <ExportBarButtons
         setIsExportModeEnabled={setIsExportModeEnabled}
         setQuestionsForExport={setQuestionsForExport}
+        setQuestionsForExportArray={setQuestionsForExportArray}
         questionsForExport={questionsForExport}
+        questionsForExportArray={questionsForExportArray}
         allQuestions={allQuestions}
         useAllQuestions={useAllQuestions}
         useNoQuestions={useNoQuestions}

@@ -777,3 +777,13 @@ export interface ToggleBookmarkMutationVariables {
   isBookmarked: boolean;
   bookmarkListName: string;
 }
+
+export interface ExportReviewDialogProps {
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+  questionsForExport: Set<string>;
+  questionsForExportArray: string[];
+  setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
+  setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
+  allQuestions: SelectedQuestion[];
+}
