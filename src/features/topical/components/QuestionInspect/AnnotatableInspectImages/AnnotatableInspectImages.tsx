@@ -690,7 +690,7 @@ const AnnotatableInspectImagesComponent = memo(
               </div>
               <div
                 className={cn(
-                  "w-full h-full flex items-center relative justify-center flex-col min-h-[100px]",
+                  "w-full h-full flex items-center relative justify-start flex-col min-h-[100px]",
                   !isEditMode
                     ? ""
                     : "absolute top-[999999px] left-[999999px] z-[-999999]"

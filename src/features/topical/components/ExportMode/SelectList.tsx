@@ -26,6 +26,8 @@ import {
 } from "@dnd-kit/modifiers";
 import type { Modifier } from "@dnd-kit/core";
 import OrderableQuestionItem from "./OrderableQuestionItem";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const createAdjustOverlayOffset = (
   containerRef: React.RefObject<HTMLDivElement | null>
@@ -59,7 +61,7 @@ const SelectList = memo(
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const listScrollAreaRef = useRef<HTMLDivElement | null>(null);
-
+    const isMobile = useIsMobile({ breakpoint: 494 });
     const listVirtualizer = useVirtualizer({
       count: canReorder
         ? questionsForExportArray.length
@@ -129,13 +131,13 @@ const SelectList = memo(
 
     const virtualItems = listVirtualizer.getVirtualItems();
 
-    const activeQuestion = activeId
-      ? allQuestions.find((q) => q.id === activeId)
-      : null;
+    const activeQuestion = useMemo(() => {
+      return activeId ? allQuestions.find((q) => q.id === activeId) : null;
+    }, [activeId, allQuestions]);
 
     return (
       <ScrollArea
-        className="h-[60dvh] pr-4"
+        className={cn(" pr-4", isMobile ? "h-[50dvh]" : "h-[64dvh]")}
         type="always"
         viewportRef={listScrollAreaRef}
       >

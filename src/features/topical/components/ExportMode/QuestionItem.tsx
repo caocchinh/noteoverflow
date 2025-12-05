@@ -1,9 +1,11 @@
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useMemo } from "react";
 import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, X } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { useMutationState } from "@tanstack/react-query";
 
 export interface QuestionItemProps {
   question: SelectedQuestion;
@@ -18,15 +20,41 @@ const QuestionItem = memo(
     question,
     isSelected,
     onToggle,
-
     dragHandle,
     className,
   }: QuestionItemProps) => {
+    const { finishedQuestionsData: userFinishedQuestions } = useTopicalApp();
+
+    const isThisFinishedQuestionSettled = useMutationState({
+      filters: {
+        mutationKey: [
+          "user_saved_activities",
+          "finished_questions",
+          question.id,
+        ],
+        predicate: (mutation) =>
+          mutation.state.status === "success" ||
+          mutation.state.status === "error",
+      },
+    });
+
+    const isThisQuestionFinished = useMemo(
+      () =>
+        userFinishedQuestions?.some(
+          (item) => item.question.id === question?.id
+        ) ?? false,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled]
+    );
+
     return (
       <div
         className={cn(
-          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6] border-b border-border/50",
-          className
+          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between  border-b border-border/50",
+          className,
+          isThisQuestionFinished
+            ? "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+            : "hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6]"
         )}
       >
         {dragHandle}
@@ -36,7 +64,7 @@ const QuestionItem = memo(
               {extractPaperCode({ questionId: question.id })} Q
               {extractQuestionNumber({ questionId: question.id })}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs">
               {question.season} {question.year} • Paper {question.paperType}
             </p>
           </div>

@@ -278,8 +278,6 @@ const QuestionPreview = memo(
             setLoading(false);
             setError(true);
           }}
-          width={1}
-          height={1}
         />
       </div>
     );

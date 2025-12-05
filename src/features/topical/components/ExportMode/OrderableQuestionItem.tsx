@@ -55,8 +55,11 @@ const OrderableQuestionItem = memo(
         {...attributes}
         {...listeners}
       >
-        {index !== undefined && <span> {index + 1}</span>}
-        <Grip className="h-4 w-4 opacity-50" />
+        {index !== undefined && <span> {index + 1}. </span>}
+        <div className="flex flex-row gap-0 items-center justify-center">
+          <Grip className="h-4 w-4 opacity-50" />
+          <Grip className="h-4 w-4 ml-[-2px] opacity-50" />
+        </div>
       </div>
     );
 

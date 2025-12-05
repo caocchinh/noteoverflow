@@ -13,6 +13,7 @@ import { Download, CheckCircle2, XCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportReviewDialogProps } from "../../constants/types";
 import SelectList from "./SelectList";
+import SortUtil from "./SortUtil";
 
 const ExportReviewDialog = memo(
   ({
@@ -24,11 +25,13 @@ const ExportReviewDialog = memo(
     setQuestionsForExportArray,
     allQuestions,
   }: ExportReviewDialogProps) => {
+    const [currentlyPreviewQuestion, setCurrentlyPreviewQuestion] = useState<
+      string | null
+    >(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"selected" | "not selected">(
       "selected"
     );
-
     const filteredQuestions = useMemo(() => {
       let baseQuestions = allQuestions;
       if (filterMode === "not selected") {
@@ -54,7 +57,6 @@ const ExportReviewDialog = memo(
 
       return baseQuestions;
     }, [allQuestions, questionsForExport, searchQuery, filterMode]);
-
     const canReorder = useMemo(
       () => searchQuery.trim() === "" && filterMode === "selected",
       [searchQuery, filterMode]
@@ -93,6 +95,25 @@ const ExportReviewDialog = memo(
       setQuestionsForExportArray([]);
     }, [setQuestionsForExport, setQuestionsForExportArray]);
 
+    const sortByYear = useCallback(
+      (order: "ascending" | "descending") => {
+        // Create a map for quick lookup of question years
+        const questionYearMap = new Map(
+          allQuestions.map((q) => [q.id, q.year])
+        );
+
+        setQuestionsForExportArray((prev) => {
+          const sorted = [...prev].sort((a, b) => {
+            const yearA = questionYearMap.get(a) ?? 0;
+            const yearB = questionYearMap.get(b) ?? 0;
+            return order === "ascending" ? yearA - yearB : yearB - yearA;
+          });
+          return sorted;
+        });
+      },
+      [allQuestions, setQuestionsForExportArray]
+    );
+
     const handleExport = useCallback(() => {
       console.log("Exporting:", questionsForExportArray);
     }, [questionsForExportArray]);
@@ -113,7 +134,7 @@ const ExportReviewDialog = memo(
               <DialogTitle>
                 {questionsForExport.size} questions selected for export
               </DialogTitle>
-              <DialogDescription className="text-md">
+              <DialogDescription className="text-md sr-only">
                 Review and customize your selection before exporting
               </DialogDescription>
             </div>
@@ -162,26 +183,25 @@ const ExportReviewDialog = memo(
               ))}
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={selectAll}
-                className="cursor-pointer"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                Select all
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={deselectAll}
-                className="cursor-pointer"
-              >
-                <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                Clear
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={selectAll}
+              className="cursor-pointer"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+              Select all
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={deselectAll}
+              className="cursor-pointer"
+            >
+              <XCircle className="h-3.5 w-3.5 mr-1.5" />
+              Clear selection
+            </Button>
+            <SortUtil sortByYear={sortByYear} />
           </div>
 
           <SelectList
