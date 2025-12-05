@@ -97,7 +97,6 @@ const QuestionInspect = memo(
         string | undefined
       >(undefined);
       const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
-
       const isMobile = useIsMobile();
       const currentQuestionIndex = useMemo(() => {
         return (

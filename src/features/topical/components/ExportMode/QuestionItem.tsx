@@ -1,20 +1,21 @@
-import { memo } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { memo, ReactNode } from "react";
 import { SelectedQuestion } from "../../constants/types";
-import {
-  AnimatePresence,
-  motion,
-  Reorder,
-  useDragControls,
-} from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  GripVertical,
-} from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
+
+export interface QuestionItemProps {
+  question: SelectedQuestion;
+  isSelected: boolean;
+  onToggle: () => void;
+  isExpanded: boolean;
+  onExpandToggle: () => void;
+  dragHandle?: ReactNode;
+  className?: string;
+}
 
 const QuestionItem = memo(
   ({
@@ -23,39 +24,19 @@ const QuestionItem = memo(
     onToggle,
     isExpanded,
     onExpandToggle,
-  }: {
-    question: SelectedQuestion;
-    isSelected: boolean;
-    onToggle: () => void;
-    isExpanded: boolean;
-    onExpandToggle: () => void;
-  }) => {
-    const dragControls = useDragControls();
-
+    dragHandle,
+    className,
+  }: QuestionItemProps) => {
     return (
-      <Reorder.Item
-        value={question}
-        dragListener={false}
-        dragControls={dragControls}
+      <div
         className={cn(
-          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10 border-b border-border/50 list-none",
-          isSelected && "bg-logo-main! text-white"
+          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10 border-b border-border/50",
+          isSelected && "bg-logo-main! text-white",
+          className
         )}
         onClick={onToggle}
       >
-        {/* Drag handle */}
-        <div
-          className={cn(
-            "cursor-grab active:cursor-grabbing p-1 -ml-1 mr-1 rounded hover:bg-foreground/10",
-            isSelected && "hover:bg-white/20"
-          )}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            dragControls.start(e);
-          }}
-        >
-          <GripVertical className="h-4 w-4 opacity-50" />
-        </div>
+        {dragHandle}
         <div className="flex items-center gap-3 flex-1">
           {/* Checkbox indicator */}
           <div
@@ -105,7 +86,6 @@ const QuestionItem = memo(
           )}
         </Button>
 
-        {/* Expandable preview */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -128,21 +108,24 @@ const QuestionItem = memo(
                     </span>
                   ))}
                 </div>
-                {question.questionImages?.[0] && (
-                  <div className="mt-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={question.questionImages[0]}
-                      alt="Question preview"
-                      className="max-h-[200px] w-auto rounded border object-contain"
-                    />
-                  </div>
-                )}
+                {question.questionImages &&
+                  question.questionImages.length > 0 && (
+                    <div className="mt-2">
+                      {question.questionImages.map((image) => (
+                        <img
+                          key={image}
+                          src={image}
+                          alt="Question preview"
+                          className="max-h-[200px] w-auto rounded border object-contain"
+                        />
+                      ))}
+                    </div>
+                  )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </Reorder.Item>
+      </div>
     );
   }
 );

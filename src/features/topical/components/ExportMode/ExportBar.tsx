@@ -56,11 +56,7 @@ const ExportBarButtons = memo(
     return (
       <>
         <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="destructive" className="cursor-pointer flex-1">
-              Exit
-            </Button>
-          </DialogTrigger>
+          <ExitButton />
           <DialogContent
             showCloseButton={false}
             className="z-100009"
@@ -96,32 +92,12 @@ const ExportBarButtons = memo(
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <Button
-          className="cursor-pointer flex-1"
-          variant="outline"
-          onClick={useAllQuestions}
-        >
-          Select all
-          <WandSparkles />
-        </Button>
-        <Button
-          className="cursor-pointer flex-1"
-          variant="outline"
-          onClick={useNoQuestions}
-        >
-          Deselect all
-          <Eraser />
-        </Button>
+        <SelectAllButton useAllQuestions={useAllQuestions} />
+        <DeselectAllButton useNoQuestions={useNoQuestions} />
 
-        <Button
-          className="cursor-pointer bg-logo-main! text-white! flex-1"
-          variant="outline"
-          onClick={() => setIsExportReviewOpen(true)}
-        >
-          Preview export
-          <ArrowRightFromLine />
-        </Button>
-
+        <PreviewExportButton
+          onClick={useCallback(() => setIsExportReviewOpen(true), [])}
+        />
         <ExportReviewDialog
           isOpen={isExportReviewOpen}
           setIsOpen={setIsExportReviewOpen}
@@ -137,6 +113,58 @@ const ExportBarButtons = memo(
 );
 
 ExportBarButtons.displayName = "ExportBarButtons";
+
+const SelectAllButton = memo(
+  ({ useAllQuestions }: { useAllQuestions: () => void }) => (
+    <Button
+      className="cursor-pointer flex-1"
+      variant="outline"
+      onClick={useAllQuestions}
+    >
+      Select all
+      <WandSparkles />
+    </Button>
+  )
+);
+SelectAllButton.displayName = "SelectAllButton";
+
+const DeselectAllButton = memo(
+  ({ useNoQuestions }: { useNoQuestions: () => void }) => (
+    <Button
+      className="cursor-pointer flex-1"
+      variant="outline"
+      onClick={useNoQuestions}
+    >
+      Deselect all
+      <Eraser />
+    </Button>
+  )
+);
+DeselectAllButton.displayName = "DeselectAllButton";
+
+const PreviewExportButton = memo(({ onClick }: { onClick: () => void }) => (
+  <Button
+    className="cursor-pointer bg-logo-main! text-white! flex-1"
+    variant="outline"
+    onClick={onClick}
+  >
+    Preview export
+    <ArrowRightFromLine />
+  </Button>
+));
+PreviewExportButton.displayName = "PreviewExportButton";
+
+const ExitButton = memo(() => {
+  return (
+    <DialogTrigger asChild>
+      <Button variant="destructive" className="cursor-pointer flex-1">
+        Exit
+      </Button>
+    </DialogTrigger>
+  );
+});
+
+ExitButton.displayName = "ExitButton";
 
 const ExportBar = ({
   questionsForExport,

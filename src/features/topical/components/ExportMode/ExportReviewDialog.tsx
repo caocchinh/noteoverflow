@@ -9,14 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Download, CheckCircle2, XCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reorder } from "motion/react";
-import {
-  ExportReviewDialogProps,
-  SelectedQuestion,
-} from "../../constants/types";
+import { ExportReviewDialogProps } from "../../constants/types";
+import OrderableQuestionItem from "./OrderableQuestionItem";
 import QuestionItem from "./QuestionItem";
 
 const ExportReviewDialog = memo(
@@ -31,49 +29,18 @@ const ExportReviewDialog = memo(
   }: ExportReviewDialogProps) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-    const [filterMode, setFilterMode] = useState<
-      "all" | "selected" | "unselected"
-    >("all");
-    const [orderedQuestions, setOrderedQuestions] = useState<
-      SelectedQuestion[]
-    >([]);
+    const [filterMode, setFilterMode] = useState<"selected" | "unselected">(
+      "selected"
+    );
 
-    // Sync ordered questions when allQuestions changes
-    useEffect(() => {
-      if (orderedQuestions.length === 0 && allQuestions.length > 0) {
-        setOrderedQuestions(allQuestions);
-      } else {
-        // Keep existing order but add new questions and remove deleted ones
-        const existingIds = new Set(orderedQuestions.map((q) => q.id));
-        const newQuestionIds = new Set(allQuestions.map((q) => q.id));
-
-        const updated = orderedQuestions.filter((q) =>
-          newQuestionIds.has(q.id)
-        );
-        const newQuestions = allQuestions.filter((q) => !existingIds.has(q.id));
-
-        if (
-          newQuestions.length > 0 ||
-          updated.length !== orderedQuestions.length
-        ) {
-          setOrderedQuestions([...updated, ...newQuestions]);
-        }
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [allQuestions]);
-
-    const filteredQuestions = useMemo(() => {
-      let filtered = orderedQuestions;
-
-      if (filterMode === "selected") {
-        filtered = filtered.filter((q) => questionsForExport.has(q.id));
-      } else if (filterMode === "unselected") {
-        filtered = filtered.filter((q) => !questionsForExport.has(q.id));
+    const unselectedQuestions = useMemo(() => {
+      if (filterMode === "unselected") {
+        return allQuestions.filter((q) => !questionsForExport.has(q.id));
       }
 
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
+        return allQuestions.filter(
           (q) =>
             q.id.toLowerCase().includes(query) ||
             q.topics?.some((t) => t.toLowerCase().includes(query)) ||
@@ -82,10 +49,13 @@ const ExportReviewDialog = memo(
         );
       }
 
-      return filtered;
-    }, [orderedQuestions, questionsForExport, searchQuery, filterMode]);
+      return allQuestions;
+    }, [allQuestions, questionsForExport, searchQuery, filterMode]);
 
-    const canReorder = filterMode === "all" && searchQuery.trim() === "";
+    const canReorder = useMemo(
+      () => searchQuery.trim() === "" && filterMode === "selected",
+      [searchQuery, filterMode]
+    );
 
     const toggleQuestion = useCallback(
       (questionId: string) => {
@@ -122,10 +92,10 @@ const ExportReviewDialog = memo(
     }, []);
 
     const selectAll = useCallback(() => {
-      const ids = filteredQuestions.map((q) => q.id);
+      const ids = allQuestions.map((q) => q.id);
       setQuestionsForExport(new Set(ids));
       setQuestionsForExportArray(ids);
-    }, [filteredQuestions, setQuestionsForExport, setQuestionsForExportArray]);
+    }, [allQuestions, setQuestionsForExport, setQuestionsForExportArray]);
 
     const deselectAll = useCallback(() => {
       setQuestionsForExport(new Set());
@@ -188,7 +158,7 @@ const ExportReviewDialog = memo(
             </div>
 
             <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
-              {(["all", "selected", "unselected"] as const).map((mode) => (
+              {(["selected", "unselected"] as const).map((mode) => (
                 <Button
                   key={mode}
                   onClick={() => setFilterMode(mode)}
@@ -225,29 +195,27 @@ const ExportReviewDialog = memo(
             </div>
           </div>
 
-          {/* Questions list */}
-          <ScrollArea className="flex-1 pr-4" type="always">
+          <ScrollArea className="h-[60dvh] pr-4" type="always">
             {canReorder ? (
               <Reorder.Group
                 axis="y"
-                values={filteredQuestions}
-                onReorder={setOrderedQuestions}
-                className="space-y-0"
+                values={questionsForExportArray}
+                onReorder={setQuestionsForExportArray}
               >
-                {filteredQuestions.map((question) => (
-                  <QuestionItem
-                    key={question.id}
-                    question={question}
-                    isSelected={questionsForExport.has(question.id)}
-                    onToggle={() => toggleQuestion(question.id)}
-                    isExpanded={expandedCards.has(question.id)}
-                    onExpandToggle={() => toggleExpand(question.id)}
+                {questionsForExportArray.map((questionId) => (
+                  <OrderableQuestionItem
+                    key={questionId}
+                    question={allQuestions.find((q) => q.id === questionId)!}
+                    isSelected={questionsForExport.has(questionId)}
+                    onToggle={() => toggleQuestion(questionId)}
+                    isExpanded={expandedCards.has(questionId)}
+                    onExpandToggle={() => toggleExpand(questionId)}
                   />
                 ))}
               </Reorder.Group>
             ) : (
               <div className="space-y-0">
-                {filteredQuestions.map((question) => (
+                {unselectedQuestions.map((question) => (
                   <QuestionItem
                     key={question.id}
                     question={question}
@@ -260,7 +228,7 @@ const ExportReviewDialog = memo(
               </div>
             )}
 
-            {filteredQuestions.length === 0 && (
+            {unselectedQuestions.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
                   <Search className="h-8 w-8 text-muted-foreground" />
