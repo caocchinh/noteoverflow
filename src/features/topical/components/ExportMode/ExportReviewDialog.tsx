@@ -7,15 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Download, CheckCircle2, XCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Reorder } from "motion/react";
 import { ExportReviewDialogProps } from "../../constants/types";
-import OrderableQuestionItem from "./OrderableQuestionItem";
-import QuestionItem from "./QuestionItem";
+import SelectList from "./SelectList";
 
 const ExportReviewDialog = memo(
   ({
@@ -28,13 +25,12 @@ const ExportReviewDialog = memo(
     allQuestions,
   }: ExportReviewDialogProps) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-    const [filterMode, setFilterMode] = useState<"selected" | "unselected">(
+    const [filterMode, setFilterMode] = useState<"selected" | "not selected">(
       "selected"
     );
 
     const unselectedQuestions = useMemo(() => {
-      if (filterMode === "unselected") {
+      if (filterMode === "not selected") {
         return allQuestions.filter((q) => !questionsForExport.has(q.id));
       }
 
@@ -79,18 +75,6 @@ const ExportReviewDialog = memo(
       [setQuestionsForExport, setQuestionsForExportArray]
     );
 
-    const toggleExpand = useCallback((questionId: string) => {
-      setExpandedCards((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(questionId)) {
-          newSet.delete(questionId);
-        } else {
-          newSet.add(questionId);
-        }
-        return newSet;
-      });
-    }, []);
-
     const selectAll = useCallback(() => {
       const ids = allQuestions.map((q) => q.id);
       setQuestionsForExport(new Set(ids));
@@ -117,7 +101,6 @@ const ExportReviewDialog = memo(
           className="max-w-5xl! h-[95dvh] z-100008 dark:bg-accent gap-2"
           showCloseButton={false}
         >
-          {/* Header - matches FinishedTracker */}
           <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
             <div className="flex flex-col items-start justify-start flex-wrap gap-0">
               <DialogTitle>
@@ -129,7 +112,6 @@ const ExportReviewDialog = memo(
             </div>
           </DialogHeader>
 
-          {/* Progress bar - matches FinishedTracker style */}
           <div className="flex items-center gap-3 p-2 bg-logo-main rounded-md">
             <div className="flex-1">
               <Progress
@@ -158,7 +140,7 @@ const ExportReviewDialog = memo(
             </div>
 
             <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
-              {(["selected", "unselected"] as const).map((mode) => (
+              {(["selected", "not selected"] as const).map((mode) => (
                 <Button
                   key={mode}
                   onClick={() => setFilterMode(mode)}
@@ -195,51 +177,15 @@ const ExportReviewDialog = memo(
             </div>
           </div>
 
-          <ScrollArea className="h-[60dvh] pr-4" type="always">
-            {canReorder ? (
-              <Reorder.Group
-                axis="y"
-                values={questionsForExportArray}
-                onReorder={setQuestionsForExportArray}
-              >
-                {questionsForExportArray.map((questionId) => (
-                  <OrderableQuestionItem
-                    key={questionId}
-                    question={allQuestions.find((q) => q.id === questionId)!}
-                    isSelected={questionsForExport.has(questionId)}
-                    onToggle={() => toggleQuestion(questionId)}
-                    isExpanded={expandedCards.has(questionId)}
-                    onExpandToggle={() => toggleExpand(questionId)}
-                  />
-                ))}
-              </Reorder.Group>
-            ) : (
-              <div className="space-y-0">
-                {unselectedQuestions.map((question) => (
-                  <QuestionItem
-                    key={question.id}
-                    question={question}
-                    isSelected={questionsForExport.has(question.id)}
-                    onToggle={() => toggleQuestion(question.id)}
-                    isExpanded={expandedCards.has(question.id)}
-                    onExpandToggle={() => toggleExpand(question.id)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {unselectedQuestions.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <Search className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="text-lg font-medium">No questions found</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Try adjusting your search or filter criteria
-                </p>
-              </div>
-            )}
-          </ScrollArea>
+          <SelectList
+            canReorder={canReorder}
+            questionsForExportArray={questionsForExportArray}
+            setQuestionsForExportArray={setQuestionsForExportArray}
+            unselectedQuestions={unselectedQuestions}
+            toggleQuestion={toggleQuestion}
+            allQuestions={allQuestions}
+            questionsForExport={questionsForExport}
+          />
 
           <DialogFooter className="w-full flex-row! gap-2">
             <Button

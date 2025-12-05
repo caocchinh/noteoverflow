@@ -787,3 +787,13 @@ export interface ExportReviewDialogProps {
   setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
   allQuestions: SelectedQuestion[];
 }
+
+export interface ExportSelectListProps {
+  canReorder: boolean;
+  questionsForExportArray: string[];
+  setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
+  unselectedQuestions: SelectedQuestion[];
+  toggleQuestion: (questionId: string) => void;
+  allQuestions: SelectedQuestion[];
+  questionsForExport: Set<string>;
+}
