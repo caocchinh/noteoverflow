@@ -1,9 +1,8 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import OrderableQuestionItem from "./OrderableQuestionItem";
 import QuestionItem from "./QuestionItem";
 import { Search } from "lucide-react";
 import { ExportSelectListProps } from "../../constants/types";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   DndContext,
@@ -26,11 +25,23 @@ import {
   restrictToWindowEdges,
 } from "@dnd-kit/modifiers";
 import type { Modifier } from "@dnd-kit/core";
+import OrderableQuestionItem from "./OrderableQuestionItem";
 
-const adjustOverlayOffset: Modifier = ({ transform }) => {
-  return {
-    ...transform,
-    x: transform.x - 130, // Adjust for container padding offset
+const createAdjustOverlayOffset = (
+  containerRef: React.RefObject<HTMLDivElement | null>
+): Modifier => {
+  return ({ transform, draggingNodeRect }) => {
+    if (!containerRef.current || !draggingNodeRect) {
+      return transform;
+    }
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const xOffset = containerRect.left - draggingNodeRect.left;
+
+    return {
+      ...transform,
+      x: xOffset,
+    };
   };
 };
 
@@ -71,6 +82,11 @@ const SelectList = memo(
       useSensor(KeyboardSensor, {
         coordinateGetter: sortableKeyboardCoordinates,
       })
+    );
+
+    const adjustOverlayOffset = useMemo(
+      () => createAdjustOverlayOffset(listScrollAreaRef),
+      []
     );
 
     useEffect(() => {
@@ -162,6 +178,7 @@ const SelectList = memo(
                       }}
                     >
                       <OrderableQuestionItem
+                        index={virtualItem.index}
                         question={question}
                         isSelected={questionsForExport.has(questionId)}
                         onToggle={() => toggleQuestion(questionId)}
@@ -179,7 +196,7 @@ const SelectList = memo(
                   question={activeQuestion}
                   isSelected={questionsForExport.has(activeQuestion.id)}
                   onToggle={() => {}}
-                  isDragOverlay
+                  isDragOverlay={true}
                 />
               ) : null}
             </DragOverlay>

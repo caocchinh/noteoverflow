@@ -11,6 +11,7 @@ export interface OrderableQuestionItemProps {
   isSelected: boolean;
   onToggle: () => void;
   isDragOverlay?: boolean;
+  index?: number;
 }
 
 const OrderableQuestionItem = memo(
@@ -18,6 +19,7 @@ const OrderableQuestionItem = memo(
     question,
     isSelected,
     onToggle,
+    index,
     isDragOverlay = false,
   }: OrderableQuestionItemProps) => {
     const {
@@ -46,19 +48,24 @@ const OrderableQuestionItem = memo(
     const dragHandle = (
       <div
         className={cn(
-          "cursor-grab active:cursor-grabbing p-1 -ml-1 mr-2 rounded hover:bg-foreground/10 touch-none",
+          "cursor-grab flex flex-row gap-1 items-center justify-center active:cursor-grabbing p-1 -ml-1 mr-2 rounded hover:bg-foreground/10 touch-none",
           isSelected && "hover:bg-white/20",
           isDragOverlay && "cursor-grabbing"
         )}
         {...attributes}
         {...listeners}
       >
+        {index !== undefined && <span> {index + 1}</span>}
         <Grip className="h-4 w-4 opacity-50" />
       </div>
     );
 
     return (
-      <div ref={setNodeRef} style={style} className="list-none">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={cn("list-none", isDragOverlay && "")}
+      >
         <QuestionItem
           question={question}
           isSelected={isSelected}

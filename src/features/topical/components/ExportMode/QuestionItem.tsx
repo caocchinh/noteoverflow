@@ -18,13 +18,14 @@ const QuestionItem = memo(
     question,
     isSelected,
     onToggle,
+
     dragHandle,
     className,
   }: QuestionItemProps) => {
     return (
       <div
         className={cn(
-          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10 border-b border-border/50",
+          "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6] border-b border-border/50",
           className
         )}
       >
@@ -35,19 +36,14 @@ const QuestionItem = memo(
               {extractPaperCode({ questionId: question.id })} Q
               {extractQuestionNumber({ questionId: question.id })}
             </p>
-            <p
-              className={cn(
-                "text-xs",
-                isSelected ? "text-white/80" : "text-muted-foreground"
-              )}
-            >
+            <p className="text-xs text-muted-foreground">
               {question.season} {question.year} • Paper {question.paperType}
             </p>
           </div>
         </div>
 
         <Button
-          className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-white bg-white"
+          className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!"
           onClick={onToggle}
         >
           {isSelected ? (
