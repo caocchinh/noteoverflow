@@ -1,4 +1,4 @@
-import { memo, ReactNode, useMemo } from "react";
+import { Dispatch, memo, ReactNode, SetStateAction, useMemo } from "react";
 import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, X } from "lucide-react";
@@ -12,6 +12,8 @@ export interface QuestionItemProps {
   isSelected: boolean;
   onToggle: () => void;
   dragHandle?: ReactNode;
+  currentlyPreviewQuestion: string | null;
+  setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
   className?: string;
 }
 
@@ -19,6 +21,8 @@ const QuestionItem = memo(
   ({
     question,
     isSelected,
+    currentlyPreviewQuestion,
+    setCurrentlyPreviewQuestion,
     onToggle,
     dragHandle,
     className,
@@ -52,10 +56,13 @@ const QuestionItem = memo(
         className={cn(
           "cursor-pointer relative p-2 rounded-sm flex items-center justify-between  border-b border-border/50",
           className,
+          currentlyPreviewQuestion === question.id &&
+            "bg-logo-main! text-white!",
           isThisQuestionFinished
             ? "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
             : "hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6]"
         )}
+        onClick={() => setCurrentlyPreviewQuestion(question.id)}
       >
         {dragHandle}
         <div className="flex items-center gap-3 flex-1">

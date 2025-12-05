@@ -1,4 +1,4 @@
-import { CSSProperties, memo } from "react";
+import { CSSProperties, Dispatch, memo, SetStateAction } from "react";
 import { SelectedQuestion } from "../../constants/types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -12,6 +12,8 @@ export interface OrderableQuestionItemProps {
   onToggle: () => void;
   isDragOverlay?: boolean;
   index?: number;
+  currentlyPreviewQuestion: string | null;
+  setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
 }
 
 const OrderableQuestionItem = memo(
@@ -19,8 +21,10 @@ const OrderableQuestionItem = memo(
     question,
     isSelected,
     onToggle,
+    setCurrentlyPreviewQuestion,
     index,
     isDragOverlay = false,
+    currentlyPreviewQuestion,
   }: OrderableQuestionItemProps) => {
     const {
       attributes,
@@ -71,8 +75,10 @@ const OrderableQuestionItem = memo(
       >
         <QuestionItem
           question={question}
+          currentlyPreviewQuestion={currentlyPreviewQuestion}
           isSelected={isSelected}
           onToggle={onToggle}
+          setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
           dragHandle={dragHandle}
         />
       </div>

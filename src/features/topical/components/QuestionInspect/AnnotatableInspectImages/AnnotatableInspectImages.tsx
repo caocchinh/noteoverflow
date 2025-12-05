@@ -29,7 +29,7 @@ import {
   splitContent,
 } from "@/features/topical/lib/utils";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/react-photo-view.css";
+import "@/features/topical/components/react-photo-view.css";
 import { Button } from "@/components/ui/button";
 import { pdf } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";

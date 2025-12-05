@@ -55,13 +55,16 @@ const SelectList = memo(
     setQuestionsForExportArray,
     filteredQuestions,
     toggleQuestion,
+    currentlyPreviewQuestion,
+    setCurrentlyPreviewQuestion,
     allQuestions,
     questionsForExport,
   }: ExportSelectListProps) => {
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
     const listScrollAreaRef = useRef<HTMLDivElement | null>(null);
-    const isMobile = useIsMobile({ breakpoint: 494 });
+    const isMobile = useIsMobile({ breakpoint: 886 });
+    const secondMobileBreakPoint = useIsMobile({ breakpoint: 400 });
     const listVirtualizer = useVirtualizer({
       count: canReorder
         ? questionsForExportArray.length
@@ -74,6 +77,7 @@ const SelectList = memo(
           ? questionsForExportArray[index]
           : filteredQuestions[index]?.id,
     });
+    const isMountedRef = useRef(false);
 
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -95,11 +99,44 @@ const SelectList = memo(
       if (isOpen) {
         setTimeout(() => {
           setIsVirtualizationReady(true);
+          if (!isMountedRef.current) {
+            isMountedRef.current = true;
+          } else {
+            return;
+          }
+          const predicate = canReorder
+            ? questionsForExportArray
+            : filteredQuestions.map((q) => q.id);
+          const itemIndex =
+            predicate.findIndex(
+              (question) => question === currentlyPreviewQuestion
+            ) ?? 0;
+
+          if (itemIndex === -1) {
+            return;
+          }
+          setTimeout(() => {
+            listVirtualizer.scrollToIndex(itemIndex);
+          }, 67);
         }, 0);
       } else {
+        isMountedRef.current = false;
         setIsVirtualizationReady(false);
       }
-    }, [isOpen]);
+    }, [
+      canReorder,
+      currentlyPreviewQuestion,
+      filteredQuestions,
+      isOpen,
+      listVirtualizer,
+      questionsForExportArray,
+    ]);
+
+    useEffect(() => {
+      return () => {
+        isMountedRef.current = false;
+      };
+    }, [canReorder]);
 
     const handleDragStart = useCallback((event: DragStartEvent) => {
       setActiveId(event.active.id as string);
@@ -137,7 +174,11 @@ const SelectList = memo(
 
     return (
       <ScrollArea
-        className={cn(" pr-4", isMobile ? "h-[50dvh]" : "h-[64dvh]")}
+        className={cn(
+          "flex-1 pr-4",
+          isMobile ? "h-[50dvh]" : "h-[64dvh]",
+          secondMobileBreakPoint && "h-[42dvh]!"
+        )}
         type="always"
         viewportRef={listScrollAreaRef}
       >
@@ -182,8 +223,12 @@ const SelectList = memo(
                       <OrderableQuestionItem
                         index={virtualItem.index}
                         question={question}
+                        currentlyPreviewQuestion={currentlyPreviewQuestion}
                         isSelected={questionsForExport.has(questionId)}
                         onToggle={() => toggleQuestion(questionId)}
+                        setCurrentlyPreviewQuestion={
+                          setCurrentlyPreviewQuestion
+                        }
                       />
                     </div>
                   );
@@ -196,9 +241,11 @@ const SelectList = memo(
               {activeQuestion ? (
                 <OrderableQuestionItem
                   question={activeQuestion}
+                  currentlyPreviewQuestion={currentlyPreviewQuestion}
                   isSelected={questionsForExport.has(activeQuestion.id)}
                   onToggle={() => {}}
                   isDragOverlay={true}
+                  setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                 />
               ) : null}
             </DragOverlay>
@@ -227,7 +274,9 @@ const SelectList = memo(
                 >
                   <QuestionItem
                     question={question}
+                    currentlyPreviewQuestion={currentlyPreviewQuestion}
                     isSelected={questionsForExport.has(question.id)}
+                    setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                     onToggle={() => toggleQuestion(question.id)}
                   />
                 </div>

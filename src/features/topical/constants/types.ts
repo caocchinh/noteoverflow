@@ -796,5 +796,7 @@ export interface ExportSelectListProps {
   toggleQuestion: (questionId: string) => void;
   allQuestions: SelectedQuestion[];
   questionsForExport: Set<string>;
+  currentlyPreviewQuestion: string | null;
   isOpen: boolean;
+  setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
 }

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { ExportReviewDialogProps } from "../../constants/types";
 import SelectList from "./SelectList";
 import SortUtil from "./SortUtil";
+import Preview from "./Preview";
 
 const ExportReviewDialog = memo(
   ({
@@ -28,6 +29,11 @@ const ExportReviewDialog = memo(
     const [currentlyPreviewQuestion, setCurrentlyPreviewQuestion] = useState<
       string | null
     >(null);
+    const previewQuestionData = useMemo(() => {
+      return currentlyPreviewQuestion
+        ? allQuestions.find((q) => q.id === currentlyPreviewQuestion)
+        : undefined;
+    }, [allQuestions, currentlyPreviewQuestion]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"selected" | "not selected">(
       "selected"
@@ -203,18 +209,21 @@ const ExportReviewDialog = memo(
             </Button>
             <SortUtil sortByYear={sortByYear} />
           </div>
-
-          <SelectList
-            isOpen={isOpen}
-            canReorder={canReorder}
-            questionsForExportArray={questionsForExportArray}
-            setQuestionsForExportArray={setQuestionsForExportArray}
-            filteredQuestions={filteredQuestions}
-            toggleQuestion={toggleQuestion}
-            allQuestions={allQuestions}
-            questionsForExport={questionsForExport}
-          />
-
+          <div className="flex flex-row gap-2 w-full">
+            <SelectList
+              isOpen={isOpen}
+              currentlyPreviewQuestion={currentlyPreviewQuestion}
+              canReorder={canReorder}
+              questionsForExportArray={questionsForExportArray}
+              setQuestionsForExportArray={setQuestionsForExportArray}
+              filteredQuestions={filteredQuestions}
+              toggleQuestion={toggleQuestion}
+              allQuestions={allQuestions}
+              setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
+              questionsForExport={questionsForExport}
+            />
+            <Preview previewQuestionData={previewQuestionData} />
+          </div>
           <DialogFooter className="w-full flex-row! gap-2">
             <Button
               className="cursor-pointer flex-1"
