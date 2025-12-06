@@ -72,6 +72,12 @@ NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam 
 <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/bookmark.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/select_subject.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 
+- **📄 Mass PDF Export**: Select specific questions, topics, or years to compile into a single PDF file. Preview your selection and generate custom exam papers for offline practice or printing.
+
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export1.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export2.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export3.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
+
 ## 🛠️ Tech Stack
 
 NoteOverflow is built using cutting-edge technologies to ensure scalability, performance, and developer experience:

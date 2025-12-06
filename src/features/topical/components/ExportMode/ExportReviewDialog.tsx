@@ -278,7 +278,11 @@ const ExportReviewDialog = memo(
           return;
         }
         const targetElement = e.target as Element;
-        if (targetElement?.closest(".PhotoView-Portal")) {
+        if (
+          targetElement?.closest(".PhotoView-Portal") ||
+          targetElement?.closest(".export-mode-content") ||
+          targetElement?.closest(".mobile-preview-content")
+        ) {
           e.preventDefault();
           return;
         }
@@ -430,7 +434,7 @@ const ExportReviewDialog = memo(
               )}
             </>
           )}
-          <DialogContent className="w-[300px] z-1000015 gap-4">
+          <DialogContent className="w-[300px] z-1000015 gap-4 export-mode-content">
             <DialogHeader>
               <DialogTitle>Select Export Mode</DialogTitle>
               <DialogDescription>
@@ -479,7 +483,7 @@ const ExportReviewDialog = memo(
           onOpenChange={setIsMobilePreviewOpen}
           modal={false}
         >
-          <DialogContent className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2">
+          <DialogContent className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2 mobile-preview-content">
             <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
               <DialogTitle>Preview</DialogTitle>
             </DialogHeader>
