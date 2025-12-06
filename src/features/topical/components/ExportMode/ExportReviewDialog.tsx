@@ -68,6 +68,7 @@ const ExportReviewDialog = memo(
       () => searchQuery.trim() === "" && filterMode === "selected",
       [searchQuery, filterMode]
     );
+    const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
     const toggleQuestion = useCallback(
       (questionId: string) => {
@@ -137,13 +138,20 @@ const ExportReviewDialog = memo(
       return (questionsForExport.size / allQuestions.length) * 100;
     }, [questionsForExport.size, allQuestions.length]);
 
-    const handleInteractOutside = useCallback((e: Event) => {
-      const targetElement = e.target as Element;
-      if (targetElement?.closest(".PhotoView-Portal")) {
-        e.preventDefault();
-        return;
-      }
-    }, []);
+    const handleInteractOutside = useCallback(
+      (e: Event) => {
+        if (isMobilePreviewOpen) {
+          e.preventDefault();
+          return;
+        }
+        const targetElement = e.target as Element;
+        if (targetElement?.closest(".PhotoView-Portal")) {
+          e.preventDefault();
+          return;
+        }
+      },
+      [isMobilePreviewOpen]
+    );
 
     return (
       <>
@@ -160,6 +168,7 @@ const ExportReviewDialog = memo(
             className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2"
             showCloseButton={false}
             onInteractOutside={handleInteractOutside}
+            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
               <div className="flex flex-col items-start justify-start flex-wrap gap-0">
@@ -247,8 +256,11 @@ const ExportReviewDialog = memo(
                 allQuestions={allQuestions}
                 setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                 questionsForExport={questionsForExport}
+                setIsMobilePreviewOpen={setIsMobilePreviewOpen}
               />
-              <Preview previewQuestionData={previewQuestionData} />
+              <div className="hidden lg:block w-[60%]">
+                <Preview previewQuestionData={previewQuestionData} />
+              </div>
             </div>
             <DialogFooter className="w-full flex-row! gap-2">
               <Button
@@ -266,6 +278,27 @@ const ExportReviewDialog = memo(
                 <Download className="h-4 w-4" />
                 Export {questionsForExport.size} question
                 {questionsForExport.size !== 1 && "s"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          open={isMobilePreviewOpen}
+          onOpenChange={setIsMobilePreviewOpen}
+          modal={false}
+        >
+          <DialogContent className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2">
+            <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
+              <DialogTitle>Preview</DialogTitle>
+            </DialogHeader>
+            <Preview previewQuestionData={previewQuestionData} />
+            <DialogFooter className="w-full flex-row! gap-2">
+              <Button
+                className="cursor-pointer flex-1"
+                variant="outline"
+                onClick={() => setIsMobilePreviewOpen(false)}
+              >
+                Close preview
               </Button>
             </DialogFooter>
           </DialogContent>

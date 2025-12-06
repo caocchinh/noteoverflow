@@ -255,8 +255,8 @@ export const BookmarkActionDialogs = memo(
             </div>
           </AlertDialogTrigger>
           <AlertDialogContent
-            className="z-100011 dark:bg-accent"
-            overlayClassName="z-[100010] "
+            className="z-100014 dark:bg-accent"
+            overlayClassName="z-[100013] "
           >
             <AlertDialogHeader>
               <AlertDialogTitle>New list</AlertDialogTitle>

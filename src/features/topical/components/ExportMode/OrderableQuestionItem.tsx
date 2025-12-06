@@ -15,6 +15,7 @@ export interface OrderableQuestionItemProps {
   index?: number;
   currentlyPreviewQuestion: string | null;
   setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
+  setIsMobilePreviewOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const OrderableQuestionItem = memo(
@@ -23,6 +24,7 @@ const OrderableQuestionItem = memo(
     isSelected,
     onToggle,
     setCurrentlyPreviewQuestion,
+    setIsMobilePreviewOpen,
     index,
     isDragOverlay = false,
     currentlyPreviewQuestion,
@@ -38,7 +40,7 @@ const OrderableQuestionItem = memo(
       id: question.id,
       disabled: isDragOverlay,
     });
-    const mobileBreakpoint = useIsMobile({ breakpoint: 410 });
+    const mobileBreakpoint = useIsMobile({ breakpoint: 440 });
 
     const style: CSSProperties = isDragOverlay
       ? {
@@ -85,6 +87,7 @@ const OrderableQuestionItem = memo(
           currentlyPreviewQuestion={currentlyPreviewQuestion}
           isSelected={isSelected}
           onToggle={onToggle}
+          setIsMobilePreviewOpen={setIsMobilePreviewOpen}
           setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
           dragHandle={dragHandle}
         />

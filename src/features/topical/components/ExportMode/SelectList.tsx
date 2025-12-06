@@ -59,6 +59,7 @@ const SelectList = memo(
     setCurrentlyPreviewQuestion,
     allQuestions,
     questionsForExport,
+    setIsMobilePreviewOpen,
   }: ExportSelectListProps) => {
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
     const [activeId, setActiveId] = useState<string | null>(null);
@@ -223,6 +224,7 @@ const SelectList = memo(
                       <OrderableQuestionItem
                         index={virtualItem.index}
                         question={question}
+                        setIsMobilePreviewOpen={setIsMobilePreviewOpen}
                         currentlyPreviewQuestion={currentlyPreviewQuestion}
                         isSelected={questionsForExport.has(questionId)}
                         onToggle={() => toggleQuestion(questionId)}
@@ -244,6 +246,7 @@ const SelectList = memo(
                   currentlyPreviewQuestion={currentlyPreviewQuestion}
                   isSelected={questionsForExport.has(activeQuestion.id)}
                   onToggle={() => {}}
+                  setIsMobilePreviewOpen={setIsMobilePreviewOpen}
                   isDragOverlay={true}
                   setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                 />
@@ -275,6 +278,7 @@ const SelectList = memo(
                   <QuestionItem
                     question={question}
                     currentlyPreviewQuestion={currentlyPreviewQuestion}
+                    setIsMobilePreviewOpen={setIsMobilePreviewOpen}
                     isSelected={questionsForExport.has(question.id)}
                     setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                     onToggle={() => toggleQuestion(question.id)}

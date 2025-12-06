@@ -176,15 +176,15 @@ const Preview = ({
 
   if (!previewQuestionData) {
     return (
-      <div className="w-[60%] h-full items-center justify-center border-l border-border pl-4 hidden lg:flex">
+      <div className="w-full h-full items-center justify-center border-l border-border pl-4 flex">
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className="w-[60%] h-full  flex-col border-l border-border pl-4 overflow-hidden hidden lg:flex">
-      <ScrollArea className="h-[62dvh] pr-4">
+    <div className="w-full h-full  flex-col border-l border-border pl-4 overflow-hidden flex">
+      <ScrollArea className="h-[75dvh] lg:h-[62dvh] pr-4">
         <PreviewUtilityBar
           question={previewQuestionData}
           currentView={currentView}

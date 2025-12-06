@@ -12,6 +12,7 @@ export interface QuestionItemProps {
   isSelected: boolean;
   onToggle: () => void;
   dragHandle?: ReactNode;
+  setIsMobilePreviewOpen: Dispatch<SetStateAction<boolean>>;
   currentlyPreviewQuestion: string | null;
   setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
   className?: string;
@@ -23,6 +24,7 @@ const QuestionItem = memo(
     isSelected,
     currentlyPreviewQuestion,
     setCurrentlyPreviewQuestion,
+    setIsMobilePreviewOpen,
     onToggle,
     dragHandle,
     className,
@@ -77,7 +79,14 @@ const QuestionItem = memo(
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!  sm:hidden">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentlyPreviewQuestion(question.id);
+              setIsMobilePreviewOpen(true);
+            }}
+            className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white! lg:hidden"
+          >
             <Eye />
             <span className="sm:block hidden">Preview</span>
           </Button>

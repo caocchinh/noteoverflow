@@ -799,4 +799,5 @@ export interface ExportSelectListProps {
   currentlyPreviewQuestion: string | null;
   isOpen: boolean;
   setCurrentlyPreviewQuestion: Dispatch<SetStateAction<string | null>>;
+  setIsMobilePreviewOpen: Dispatch<SetStateAction<boolean>>;
 }

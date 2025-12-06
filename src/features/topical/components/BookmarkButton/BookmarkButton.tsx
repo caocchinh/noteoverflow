@@ -185,7 +185,7 @@ const MobileBookmarkButton = memo(
             />
           </DrawerTrigger>
           <DrawerContent
-            className="z-100009 h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="z-100012 h-[95vh] max-h-[95vh] dark:bg-accent"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
