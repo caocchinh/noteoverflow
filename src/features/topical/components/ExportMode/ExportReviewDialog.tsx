@@ -247,7 +247,7 @@ const ExportReviewDialog = memo(
           if (blob) {
             handleDownloadPdf(
               blob,
-              `NoteOverflow_Export_${orderedQuestions.length}_questions.pdf`
+              `NoteOverflow_Export_${orderedQuestions.length}.pdf`
             );
           }
         } catch (error) {
