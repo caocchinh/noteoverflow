@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { Grip } from "lucide-react";
 import QuestionItem from "./QuestionItem";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface OrderableQuestionItemProps {
   question: SelectedQuestion;
@@ -37,6 +38,7 @@ const OrderableQuestionItem = memo(
       id: question.id,
       disabled: isDragOverlay,
     });
+    const mobileBreakpoint = useIsMobile({ breakpoint: 410 });
 
     const style: CSSProperties = isDragOverlay
       ? {
@@ -62,7 +64,12 @@ const OrderableQuestionItem = memo(
         {index !== undefined && <span> {index + 1}. </span>}
         <div className="flex flex-row gap-0 items-center justify-center">
           <Grip className="h-4 w-4 opacity-50" />
-          <Grip className="h-4 w-4 ml-[-2px] opacity-50" />
+          <Grip
+            className={cn(
+              "h-4 w-4 ml-[-2px] opacity-50",
+              mobileBreakpoint && "hidden!"
+            )}
+          />
         </div>
       </div>
     );

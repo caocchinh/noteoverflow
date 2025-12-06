@@ -82,7 +82,7 @@ const PreviewUtilityBar = memo(
     const { isSessionPending } = useAuth();
 
     return (
-      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap ">
         <ViewModeToggle
           currentView={currentView}
           setCurrentView={setCurrentView}
@@ -176,14 +176,14 @@ const Preview = ({
 
   if (!previewQuestionData) {
     return (
-      <div className="w-[50%] h-full flex items-center justify-center border-l border-border pl-4">
+      <div className="w-[60%] h-full items-center justify-center border-l border-border pl-4 hidden lg:flex">
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className="w-[60%] h-full flex flex-col border-l border-border pl-4 overflow-hidden">
+    <div className="w-[60%] h-full  flex-col border-l border-border pl-4 overflow-hidden hidden lg:flex">
       <ScrollArea className="h-[62dvh] pr-4">
         <PreviewUtilityBar
           question={previewQuestionData}

@@ -64,13 +64,13 @@ const SelectList = memo(
     const [activeId, setActiveId] = useState<string | null>(null);
     const listScrollAreaRef = useRef<HTMLDivElement | null>(null);
     const isMobile = useIsMobile({ breakpoint: 886 });
-    const secondMobileBreakPoint = useIsMobile({ breakpoint: 400 });
+    const secondMobileBreakPoint = useIsMobile({ breakpoint: 410 });
     const listVirtualizer = useVirtualizer({
       count: canReorder
         ? questionsForExportArray.length
         : filteredQuestions.length,
       getScrollElement: () => listScrollAreaRef.current,
-      estimateSize: () => 65,
+      estimateSize: () => (secondMobileBreakPoint ? 100 : 65),
       enabled: isVirtualizationReady,
       getItemKey: (index) =>
         canReorder
@@ -176,7 +176,7 @@ const SelectList = memo(
       <ScrollArea
         className={cn(
           "flex-1 pr-4",
-          isMobile ? "h-[50dvh]" : "h-[64dvh]",
+          isMobile ? "h-[49dvh]" : "h-[64dvh]",
           secondMobileBreakPoint && "h-[42dvh]!"
         )}
         type="always"

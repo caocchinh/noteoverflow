@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ExportReviewDialog from "./ExportReviewDialog";
+import { createPortal } from "react-dom";
 
 interface ExportBarButtonsProps {
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
@@ -192,11 +193,27 @@ const ExportBar = ({
     setQuestionsForExport(new Set());
     setQuestionsForExportArray([]);
   }, [setQuestionsForExport, setQuestionsForExportArray]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   if (isMobile) {
     return (
       <div className="fixed w-max z-1000 h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2">
-        <Drawer>
+        <>
+          {isDrawerOpen && (
+            <>
+              {" "}
+              {createPortal(
+                <div className="fixed inset-0 z-100007 bg-black/50" />,
+                document.body
+              )}
+            </>
+          )}
+        </>
+        <Drawer
+          modal={false}
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+        >
           <DrawerTrigger asChild>
             <Button
               variant="outline"
@@ -206,7 +223,10 @@ const ExportBar = ({
               Export tool bar
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="z-100007">
+          <DrawerContent
+            className="z-100008"
+            onInteractOutside={() => setIsDrawerOpen(false)}
+          >
             <DrawerHeader className="relative">
               <DrawerTitle>Tool bar</DrawerTitle>
               <DrawerClose asChild>

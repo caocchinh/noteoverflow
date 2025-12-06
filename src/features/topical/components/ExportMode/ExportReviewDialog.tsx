@@ -15,6 +15,7 @@ import { ExportReviewDialogProps } from "../../constants/types";
 import SelectList from "./SelectList";
 import SortUtil from "./SortUtil";
 import Preview from "./Preview";
+import { createPortal } from "react-dom";
 
 const ExportReviewDialog = memo(
   ({
@@ -145,121 +146,131 @@ const ExportReviewDialog = memo(
     }, []);
 
     return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
-        <DialogContent
-          className="w-[95vw] h-[94dvh] max-w-screen! z-100008 dark:bg-accent gap-2"
-          showCloseButton={false}
-          onInteractOutside={handleInteractOutside}
-        >
-          <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
-            <div className="flex flex-col items-start justify-start flex-wrap gap-0">
-              <DialogTitle>
-                {questionsForExport.size} questions selected for export
-              </DialogTitle>
-              <DialogDescription className="text-md sr-only">
-                Review and customize your selection before exporting
-              </DialogDescription>
-            </div>
-          </DialogHeader>
+      <>
+        {isOpen && (
+          <>
+            {createPortal(
+              <div className="fixed inset-0 z-100009 bg-black/50" />,
+              document.body
+            )}
+          </>
+        )}
+        <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
+          <DialogContent
+            className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2"
+            showCloseButton={false}
+            onInteractOutside={handleInteractOutside}
+          >
+            <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
+              <div className="flex flex-col items-start justify-start flex-wrap gap-0">
+                <DialogTitle>
+                  {questionsForExport.size} questions selected for export
+                </DialogTitle>
+                <DialogDescription className="text-md sr-only">
+                  Review and customize your selection before exporting
+                </DialogDescription>
+              </div>
+            </DialogHeader>
 
-          <div className="flex items-center gap-3 p-2 bg-logo-main rounded-md">
-            <div className="flex-1">
-              <Progress
-                value={progressPercentage}
-                className="h-3 bg-gray-200 [&>div]:bg-[#0084ff] [&>div]:bg-[repeating-linear-gradient(45deg,#0084ff,#0084ff_4px,#0066cc_4px,#0066cc_8px)]"
-              />
-            </div>
-            <span className="text-sm font-medium text-white whitespace-nowrap">
-              {questionsForExport.size} / {allQuestions.length} selected
-              <span className="text-xs text-white/80 ml-1">
-                ({Math.round(progressPercentage)}%)
+            <div className="flex items-center gap-3 p-2 bg-logo-main rounded-md">
+              <div className="flex-1">
+                <Progress
+                  value={progressPercentage}
+                  className="h-3 bg-gray-200 [&>div]:bg-[#0084ff] [&>div]:bg-[repeating-linear-gradient(45deg,#0084ff,#0084ff_4px,#0066cc_4px,#0066cc_8px)]"
+                />
+              </div>
+              <span className="text-sm font-medium text-white whitespace-nowrap">
+                {questionsForExport.size} / {allQuestions.length} selected
+                <span className="text-xs text-white/80 ml-1">
+                  ({Math.round(progressPercentage)}%)
+                </span>
               </span>
-            </span>
-          </div>
+            </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by topic, year, or ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-10 pr-4 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search by topic, year, or ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-9 pl-10 pr-4 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                />
+              </div>
+
+              <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
+                {(["selected", "not selected"] as const).map((mode) => (
+                  <Button
+                    key={mode}
+                    onClick={() => setFilterMode(mode)}
+                    className={cn(
+                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-3 bg-input text-black hover:bg-input dark:bg-transparent capitalize",
+                      filterMode === mode &&
+                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
+                    )}
+                  >
+                    {mode}
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAll}
+                className="cursor-pointer"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                Select all
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={deselectAll}
+                className="cursor-pointer"
+              >
+                <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                Clear selection
+              </Button>
+              <SortUtil sortByYear={sortByYear} />
+            </div>
+            <div className="flex flex-row gap-2 w-full">
+              <SelectList
+                isOpen={isOpen}
+                currentlyPreviewQuestion={currentlyPreviewQuestion}
+                canReorder={canReorder}
+                questionsForExportArray={questionsForExportArray}
+                setQuestionsForExportArray={setQuestionsForExportArray}
+                filteredQuestions={filteredQuestions}
+                toggleQuestion={toggleQuestion}
+                allQuestions={allQuestions}
+                setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
+                questionsForExport={questionsForExport}
               />
+              <Preview previewQuestionData={previewQuestionData} />
             </div>
-
-            <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
-              {(["selected", "not selected"] as const).map((mode) => (
-                <Button
-                  key={mode}
-                  onClick={() => setFilterMode(mode)}
-                  className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-3 bg-input text-black hover:bg-input dark:bg-transparent capitalize",
-                    filterMode === mode &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
-                  )}
-                >
-                  {mode}
-                </Button>
-              ))}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={selectAll}
-              className="cursor-pointer"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-              Select all
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={deselectAll}
-              className="cursor-pointer"
-            >
-              <XCircle className="h-3.5 w-3.5 mr-1.5" />
-              Clear selection
-            </Button>
-            <SortUtil sortByYear={sortByYear} />
-          </div>
-          <div className="flex flex-row gap-2 w-full">
-            <SelectList
-              isOpen={isOpen}
-              currentlyPreviewQuestion={currentlyPreviewQuestion}
-              canReorder={canReorder}
-              questionsForExportArray={questionsForExportArray}
-              setQuestionsForExportArray={setQuestionsForExportArray}
-              filteredQuestions={filteredQuestions}
-              toggleQuestion={toggleQuestion}
-              allQuestions={allQuestions}
-              setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
-              questionsForExport={questionsForExport}
-            />
-            <Preview previewQuestionData={previewQuestionData} />
-          </div>
-          <DialogFooter className="w-full flex-row! gap-2">
-            <Button
-              className="cursor-pointer flex-1"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-            >
-              Close
-            </Button>
-            <Button
-              onClick={handleExport}
-              disabled={questionsForExport.size === 0}
-              className="cursor-pointer flex-1 bg-logo-main hover:bg-logo-main/90 text-white gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export {questionsForExport.size} question
-              {questionsForExport.size !== 1 && "s"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="w-full flex-row! gap-2">
+              <Button
+                className="cursor-pointer flex-1"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
+                Close
+              </Button>
+              <Button
+                onClick={handleExport}
+                disabled={questionsForExport.size === 0}
+                className="cursor-pointer flex-1 bg-logo-main hover:bg-logo-main/90 text-white gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export {questionsForExport.size} question
+                {questionsForExport.size !== 1 && "s"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 );

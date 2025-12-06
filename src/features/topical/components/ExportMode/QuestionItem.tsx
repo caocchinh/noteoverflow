@@ -1,7 +1,7 @@
 import { Dispatch, memo, ReactNode, SetStateAction, useMemo } from "react";
 import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, Eye, X } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
@@ -76,31 +76,36 @@ const QuestionItem = memo(
             </p>
           </div>
         </div>
-
-        <Button
-          className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-        >
-          {isSelected ? (
-            <>
-              <CheckCircle2 className="h-3.5 w-3.5 text-logo-main group-hover:hidden" />
-              <X className="h-3.5 w-3.5 text-red-500 hidden group-hover:block" />
-              <span className="text-xs text-black group-hover:hidden">
-                Selected
-              </span>
-              <span className="text-xs text-black hidden group-hover:block">
-                Deselect
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-xs text-black px-2">Select</span>
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!  sm:hidden">
+            <Eye />
+            <span className="sm:block hidden">Preview</span>
+          </Button>
+          <Button
+            className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+          >
+            {isSelected ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5 text-logo-main group-hover:hidden" />
+                <X className="h-3.5 w-3.5 text-red-500 hidden group-hover:block" />
+                <span className="text-xs text-black group-hover:hidden hidden sm:block">
+                  Selected
+                </span>
+                <span className="text-xs text-black group-hover:hidden sm:group-hover:block hidden">
+                  Deselect
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-black px-2">Select</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     );
   }
