@@ -38,6 +38,7 @@ const SecondaryAppUltilityBar = ({
   scrollAreaRef,
   isFilteredDisabled,
   sortParameters,
+  isExportModeEnabled,
   setSortParameters,
   setIsQuestionInspectOpen,
   isSidebarOpen,
@@ -81,7 +82,7 @@ const SecondaryAppUltilityBar = ({
     >
       {isUltilityOverflowingRight && (
         <Button
-          className="absolute right-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+          className="absolute right-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
           title="Move right"
           onClick={() => {
             if (ultilityHorizontalScrollBarRef.current) {
@@ -97,7 +98,7 @@ const SecondaryAppUltilityBar = ({
       )}
       {isUltilityOverflowingLeft && (
         <Button
-          className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-[200]"
+          className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
           title="Move left"
           onClick={() => {
             if (ultilityHorizontalScrollBarRef.current) {
@@ -120,7 +121,7 @@ const SecondaryAppUltilityBar = ({
             <div>
               <Button
                 className="flex cursor-pointer items-center gap-2 border"
-                disabled={isQuestionViewDisabled}
+                disabled={isQuestionViewDisabled || isExportModeEnabled}
                 onClick={() => {
                   if (setIsQuestionInspectOpen) {
                     setIsQuestionInspectOpen((prev) => ({
@@ -139,7 +140,7 @@ const SecondaryAppUltilityBar = ({
           <TooltipContent
             side="bottom"
             className={cn(
-              !isQuestionViewDisabled && "!hidden",
+              !isQuestionViewDisabled && "hidden!",
               "flex justify-center items-center gap-2"
             )}
           >
@@ -150,11 +151,11 @@ const SecondaryAppUltilityBar = ({
           <TooltipTrigger asChild>
             <div>
               <Button
-                className="!bg-background flex cursor-pointer items-center gap-2 border"
+                className="bg-background! flex cursor-pointer items-center gap-2 border"
                 onClick={() => {
                   setIsSidebarOpen(!isSidebarOpen);
                 }}
-                disabled={isFilteredDisabled}
+                disabled={isFilteredDisabled || isExportModeEnabled}
                 variant="outline"
               >
                 Filters
@@ -165,7 +166,7 @@ const SecondaryAppUltilityBar = ({
           <TooltipContent
             side="bottom"
             className={cn(
-              !isFilteredDisabled && "!hidden",
+              !isFilteredDisabled && "hidden!",
               "flex justify-center items-center gap-2"
             )}
           >
@@ -181,7 +182,7 @@ const SecondaryAppUltilityBar = ({
           setDisplayedData &&
           scrollAreaRef && (
             <>
-              <Separator orientation="vertical" className="!h-[30px]" />
+              <Separator orientation="vertical" className="h-[30px]!" />
               <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
                 <FirstPageButton
                   currentChunkIndex={currentChunkIndex}
@@ -234,7 +235,7 @@ const SecondaryAppUltilityBar = ({
               </div>
             </>
           )}
-        <Separator orientation="vertical" className="!h-[30px]" />
+        <Separator orientation="vertical" className="h-[30px]!" />
         <Sort
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}

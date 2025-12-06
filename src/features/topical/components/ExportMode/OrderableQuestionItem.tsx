@@ -60,6 +60,7 @@ const OrderableQuestionItem = memo(
           isSelected && "hover:bg-white/20",
           isDragOverlay && "cursor-grabbing"
         )}
+        title="Drag to reorder"
         {...attributes}
         {...listeners}
       >

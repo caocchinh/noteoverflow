@@ -183,6 +183,7 @@ export const BookmarkView = ({
     setCurrentChunkIndex,
     setDisplayedData,
     scrollAreaRef,
+    isExportModeEnabled,
   }: BreadcrumbContentProps) => (
     <div
       className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
@@ -229,6 +230,7 @@ export const BookmarkView = ({
         isQuestionViewDisabled={isQuestionViewDisabled}
         sideBarInsetRef={sideBarInsetRef}
         isSidebarOpen={isSidebarOpen}
+        isExportModeEnabled={isExportModeEnabled}
         sortParameters={sortParameters}
         setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
         setSortParameters={setSortParameters}

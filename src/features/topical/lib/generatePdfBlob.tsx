@@ -184,7 +184,7 @@ export async function generateMultipleQuestionsPdfBlob({
 
   // Batch size for PDF generation (how many questions per temporary PDF)
   // 25 is safe enough to avoid memory crashes while keeping overhead manageable
-  const PDF_GENERATION_CHUNK_SIZE = 25;
+  const PDF_GENERATION_CHUNK_SIZE = 12;
 
   // Concurrency for processing images within a chunk
   const IMAGE_PROCESSING_CONCURRENCY = 3;

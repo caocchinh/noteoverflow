@@ -156,6 +156,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     setCurrentChunkIndex,
     setDisplayedData,
     scrollAreaRef,
+    isExportModeEnabled,
   }: BreadcrumbContentProps) =>
     chosenList ? (
       <div
@@ -234,6 +235,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           setIsQuestionInspectOpen={
             questionInspectRef.current?.setIsInspectOpen
           }
+          isExportModeEnabled={isExportModeEnabled}
           fullPartitionedData={fullPartitionedData}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}

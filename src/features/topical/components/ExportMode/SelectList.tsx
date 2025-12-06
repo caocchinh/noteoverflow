@@ -177,7 +177,7 @@ const SelectList = memo(
       <ScrollArea
         className={cn(
           "flex-1 pr-4",
-          isMobile ? "h-[49dvh]" : "h-[64dvh]",
+          isMobile ? "h-[49dvh]" : "h-[63dvh]",
           secondMobileBreakPoint && "h-[42dvh]!"
         )}
         type="always"

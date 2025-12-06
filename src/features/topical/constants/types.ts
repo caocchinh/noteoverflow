@@ -428,8 +428,8 @@ export interface SecondaryAppUltilityBarProps {
   setIsSidebarOpen: Dispatch<SetStateAction<boolean>>;
   isQuestionViewDisabled: boolean;
   sideBarInsetRef: RefObject<HTMLDivElement | null>;
-  // Optional props for inspect and pagination functionality
   fullPartitionedData?: SelectedQuestion[][] | undefined;
+  isExportModeEnabled: boolean;
   isFilteredDisabled: boolean;
   currentChunkIndex?: number;
   setCurrentChunkIndex?: Dispatch<SetStateAction<number>>;
@@ -479,6 +479,7 @@ export interface BreadcrumbContentProps {
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
   setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
+  isExportModeEnabled: boolean;
 }
 
 export interface SecondaryMainContentProps {

@@ -135,6 +135,7 @@ const FinishedQuestionsClient = ({
     fullPartitionedData,
     currentChunkIndex,
     setCurrentChunkIndex,
+    isExportModeEnabled,
     setDisplayedData,
     scrollAreaRef,
   }: BreadcrumbContentProps) => (
@@ -189,6 +190,7 @@ const FinishedQuestionsClient = ({
         setSortParameters={setSortParameters}
         fullPartitionedData={fullPartitionedData}
         currentChunkIndex={currentChunkIndex}
+        isExportModeEnabled={isExportModeEnabled}
         setCurrentChunkIndex={setCurrentChunkIndex}
         setDisplayedData={setDisplayedData}
         scrollAreaRef={scrollAreaRef}
