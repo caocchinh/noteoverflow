@@ -74,13 +74,7 @@ const styles = StyleSheet.create({
     maxHeight: "750px",
     alignSelf: "center",
   },
-  pageNumber: {
-    position: "absolute",
-    bottom: 12,
-    right: 14,
-    fontSize: 8,
-    color: "black",
-  },
+
   paperCode: {
     position: "absolute",
     bottom: 12,
@@ -103,71 +97,71 @@ const styles = StyleSheet.create({
   },
 });
 
-const SingleQuestionPdfTemplate = ({
-  questionItem,
-  answerItem,
+const ExportPdfTemplate = ({
   headerLogo,
-  paperCode,
-  questionLink,
-  answerLink,
-  questionNumber,
+  questions,
 }: {
-  questionItem: {
-    images: string[];
-    text: string[];
-  };
-  answerItem: {
-    images: string[];
-    text: string[];
-  };
+  questions: {
+    questionItem: {
+      images: string[];
+      text: string[];
+    };
+    answerItem: {
+      images: string[];
+      text: string[];
+    };
+    paperCode: string;
+    questionLink: string;
+    answerLink: string;
+    questionNumber: string;
+  }[];
   headerLogo: string;
-  paperCode: string;
-  questionLink: string;
-  answerLink: string;
-  questionNumber: string;
 }) => (
   <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header} fixed>
-        <View style={styles.headerContent}>
-          <View style={styles.branding}>
-            <PdfImage src={headerLogo} style={styles.headerLogo} />
-            <View style={styles.headerText}>
-              <Text style={styles.headerTitle}>NoteOverflow</Text>
-              <Link href="https://noteoverflow.com" style={styles.subtitle}>
-                noteoverflow.com
-              </Link>
+    {questions.map((question, index) => (
+      <Page size="A4" key={index} style={styles.page}>
+        <View style={styles.header} fixed>
+          <View style={styles.headerContent}>
+            <View style={styles.branding}>
+              <PdfImage src={headerLogo} style={styles.headerLogo} />
+              <View style={styles.headerText}>
+                <Text style={styles.headerTitle}>NoteOverflow</Text>
+                <Link href="https://noteoverflow.com" style={styles.subtitle}>
+                  noteoverflow.com
+                </Link>
+              </View>
             </View>
-          </View>
 
-          <Text style={styles.headerTagline}>AS & A-Level resources</Text>
+            <Text style={styles.headerTagline}>AS & A-Level resources</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.bigPaperCodeContainer}>
-        <Link href={questionLink} style={styles.bigPaperCode}>
-          {paperCode} Q{questionNumber}
-        </Link>
-      </View>
-      <MainContent images={questionItem.images} text={questionItem.text} />
-      {(answerItem.images.length > 0 || answerItem.text.length > 0) && (
-        <View style={{ marginTop: 10 }}>
-          <Link href={answerLink} style={styles.bigPaperCode}>
-            Answer
+        <View style={styles.bigPaperCodeContainer}>
+          <Link href={question.questionLink} style={styles.bigPaperCode}>
+            {question.paperCode} Q{question.questionNumber}
           </Link>
-          <MainContent images={answerItem.images} text={answerItem.text} />
         </View>
-      )}
-      <Text
-        style={styles.pageNumber}
-        render={({ pageNumber, totalPages }) =>
-          `Page ${pageNumber} of ${totalPages}`
-        }
-        fixed
-      />
-      <Text style={styles.paperCode} fixed>
-        {paperCode} Q{questionNumber}
-      </Text>
-    </Page>
+        <MainContent
+          images={question.questionItem.images}
+          text={question.questionItem.text}
+        />
+        {(question.answerItem.images.length > 0 ||
+          question.answerItem.text.length > 0) && (
+          <View style={{ marginTop: 10 }}>
+            <Link href={question.answerLink} style={styles.bigPaperCode}>
+              Answer
+            </Link>
+            <MainContent
+              images={question.answerItem.images}
+              text={question.answerItem.text}
+            />
+          </View>
+        )}
+
+        <Text style={styles.paperCode} fixed>
+          {question.paperCode} Q{question.questionNumber}
+        </Text>
+      </Page>
+    ))}
   </Document>
 );
 
@@ -190,4 +184,4 @@ const MainContent = ({
   </View>
 );
 
-export default SingleQuestionPdfTemplate;
+export default ExportPdfTemplate;

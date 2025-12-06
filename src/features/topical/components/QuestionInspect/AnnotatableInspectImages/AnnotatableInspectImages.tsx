@@ -22,20 +22,17 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  convertImageToPngBase64,
   extractPaperCode,
   extractQuestionNumber,
-  generatePastPaperLinks,
   splitContent,
 } from "@/features/topical/lib/utils";
+import { generateSingleQuestionPdfBlob } from "@/features/topical/lib/generatePdfBlob";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "@/features/topical/components/react-photo-view.css";
 import { Button } from "@/components/ui/button";
-import { pdf } from "@react-pdf/renderer";
 import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
-import { PDF_HEADER_LOGO_SRC } from "@/features/topical/constants/constants";
 import ClearAllButton from "./ClearAllButton";
 import {
   PdfViewerWrapperHandle,
@@ -47,7 +44,6 @@ import Loader from "../../Loader/Loader";
 import SaveAnnotationsButton from "./SaveAnnotationsButton";
 import { toast } from "sonner";
 import NonEditModeDownloadMenu from "./NonEditModeDownloadMenu";
-import SingleQuestionPdfTemplate from "./SingleQuestionPdfTemplate";
 import EditModeDownloadMenu from "./EditModeDownloadMenu";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
@@ -185,20 +181,6 @@ const AnnotatableInspectImagesComponent = memo(
         });
       }, [question]);
 
-      const pastPaperLinks = useMemo(() => {
-        if (!question || !paperCode) {
-          return { questionLink: "", answerLink: "" };
-        }
-
-        return generatePastPaperLinks({
-          questionId: question.id,
-          paperCode,
-        });
-      }, [question, paperCode]);
-
-      const questionLink = pastPaperLinks.questionLink;
-      const answerLink = pastPaperLinks.answerLink;
-
       const pdfBaseFileName = useMemo(() => {
         const sanitizedPaperCode = (paperCode || "").replace("/", "_");
         return `NoteOverflow_${sanitizedPaperCode}_Q${questionNumber || ""}`;
@@ -229,82 +211,12 @@ const AnnotatableInspectImagesComponent = memo(
           typeOfContent: "question" | "answer" | "question-with-answers";
         }) => {
           if (!question) return null;
-          const questionItem: {
-            images: string[];
-            text: string[];
-          } = {
-            images: [],
-            text: [],
-          };
-          const answerItem: {
-            images: string[];
-            text: string[];
-          } = {
-            images: [],
-            text: [],
-          };
-
-          if (
-            typeOfContent === "question" ||
-            typeOfContent === "question-with-answers"
-          ) {
-            const { images, text } = splitContent(question.questionImages);
-            questionItem.images.push(...images);
-            questionItem.text.push(...text);
-          }
-          if (
-            typeOfContent === "answer" ||
-            typeOfContent === "question-with-answers"
-          ) {
-            const { images, text } = splitContent(question.answers);
-            answerItem.images.push(...images);
-            answerItem.text.push(...text);
-          }
-
-          try {
-            const headerLogoPromise = convertImageToPngBase64(
-              PDF_HEADER_LOGO_SRC
-            ).catch((error) => {
-              console.error("Failed to load header logo", error);
-              return null;
-            });
-
-            const [convertedQuestionImages, convertedAnswerImages, headerLogo] =
-              await Promise.all([
-                Promise.all(
-                  questionItem.images.map((imgUrl) =>
-                    convertImageToPngBase64(imgUrl)
-                  )
-                ),
-                Promise.all(
-                  answerItem.images.map((imgUrl) =>
-                    convertImageToPngBase64(imgUrl)
-                  )
-                ),
-                headerLogoPromise,
-              ]);
-
-            // Update the items with converted images
-            questionItem.images = convertedQuestionImages;
-            answerItem.images = convertedAnswerImages;
-
-            return await pdf(
-              <SingleQuestionPdfTemplate
-                answerLink={answerLink}
-                questionItem={questionItem}
-                answerItem={answerItem}
-                headerLogo={headerLogo || ""}
-                paperCode={paperCode}
-                questionLink={questionLink}
-                questionNumber={questionNumber.toString()}
-              />
-            ).toBlob();
-          } catch (error) {
-            console.error("Error generating PDF:", error);
-          }
-          return null;
+          return generateSingleQuestionPdfBlob({
+            question,
+            typeOfContent,
+          });
         },
-        [answerLink, paperCode, question, questionLink, questionNumber]
+        [question]
       );
 
       useEffect(() => {

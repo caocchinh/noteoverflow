@@ -60,6 +60,7 @@
     "next": "^15.5.7",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
+    "pdf-lib": "^1.17.1",
     "posthog-js": "^1.298.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
