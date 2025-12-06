@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { Loader2, MousePointerClick } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { QuestionInformation } from "../QuestionInformation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type PreviewViewMode = "question" | "answer";
 
@@ -96,6 +98,11 @@ const PreviewUtilityBar = memo(
             isInView={true}
           />
         </div>
+        <QuestionInformation
+          question={question}
+          showCurriculumn={false}
+          showSubject={false}
+        />
       </div>
     );
   }
@@ -148,7 +155,7 @@ const PreviewImages = memo(
           ))}
         </PhotoProvider>
         {imageUrls.length > 0 && (
-          <Loader2 className="animate-spin text-red absolute left-1/2 -translate-x-1/2 z-1 top-0" />
+          <Loader2 className="animate-spin text-red absolute h-4 w-4 left-1/2 -translate-x-1/2 z-1 top-0" />
         )}
         {text.map((item, index) => (
           <p key={`text-${index}`}>{item}</p>
@@ -176,18 +183,20 @@ const Preview = ({
   }
 
   return (
-    <div className="w-[50%] h-full flex flex-col border-l border-border pl-4 overflow-hidden">
-      <PreviewUtilityBar
-        question={previewQuestionData}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-      />
-      <div className="flex-1 overflow-y-auto">
-        <PreviewImages
+    <div className="w-[60%] h-full flex flex-col border-l border-border pl-4 overflow-hidden">
+      <ScrollArea className="h-[62dvh] pr-4">
+        <PreviewUtilityBar
           question={previewQuestionData}
           currentView={currentView}
+          setCurrentView={setCurrentView}
         />
-      </div>
+        <div className="flex-1 overflow-y-auto">
+          <PreviewImages
+            question={previewQuestionData}
+            currentView={currentView}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 };

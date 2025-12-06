@@ -79,7 +79,10 @@ const QuestionItem = memo(
 
         <Button
           className="group flex h-7 p-1 w-max items-center justify-center rounded gap-2 border-2 transition-all duration-200 shrink-0 cursor-pointer border-black bg-white!"
-          onClick={onToggle}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
         >
           {isSelected ? (
             <>

@@ -70,6 +70,9 @@ const ExportReviewDialog = memo(
 
     const toggleQuestion = useCallback(
       (questionId: string) => {
+        if (currentlyPreviewQuestion === questionId) {
+          setCurrentlyPreviewQuestion(null);
+        }
         setQuestionsForExport((prev) => {
           const newSet = new Set(prev);
           if (newSet.has(questionId)) {
@@ -87,7 +90,11 @@ const ExportReviewDialog = memo(
           }
         });
       },
-      [setQuestionsForExport, setQuestionsForExportArray]
+      [
+        currentlyPreviewQuestion,
+        setQuestionsForExport,
+        setQuestionsForExportArray,
+      ]
     );
 
     const selectAll = useCallback(() => {
@@ -129,11 +136,20 @@ const ExportReviewDialog = memo(
       return (questionsForExport.size / allQuestions.length) * 100;
     }, [questionsForExport.size, allQuestions.length]);
 
+    const handleInteractOutside = useCallback((e: Event) => {
+      const targetElement = e.target as Element;
+      if (targetElement?.closest(".PhotoView-Portal")) {
+        e.preventDefault();
+        return;
+      }
+    }, []);
+
     return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
         <DialogContent
-          className="max-w-5xl! h-[95dvh] z-100008 dark:bg-accent gap-2"
+          className="w-[95vw] h-[94dvh] max-w-screen! z-100008 dark:bg-accent gap-2"
           showCloseButton={false}
+          onInteractOutside={handleInteractOutside}
         >
           <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
             <div className="flex flex-col items-start justify-start flex-wrap gap-0">
