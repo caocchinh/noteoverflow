@@ -145,12 +145,16 @@ async function processInBatches<T, R>(
   items: T[],
   batchSize: number,
   processor: (item: T) => Promise<R>,
-  onProgress?: (completed: number, total: number) => void
+  onProgress?: (completed: number, total: number) => void,
+  signal?: AbortSignal
 ): Promise<R[]> {
   const results: R[] = [];
   const total = items.length;
 
   for (let i = 0; i < items.length; i += batchSize) {
+    if (signal?.aborted) {
+      throw new DOMException("Aborted", "AbortError");
+    }
     const batch = items.slice(i, i + batchSize);
     const batchResults = await Promise.all(batch.map(processor));
     results.push(...batchResults);
@@ -167,10 +171,12 @@ export async function generateMultipleQuestionsPdfBlob({
   questions,
   typeOfContent,
   onProgress,
+  signal,
 }: {
   questions: SelectedQuestion[];
   typeOfContent: PdfContentType;
   onProgress?: ExportProgressCallback;
+  signal?: AbortSignal;
 }): Promise<Blob | null> {
   if (questions.length === 0) {
     return null;
@@ -196,6 +202,10 @@ export async function generateMultipleQuestionsPdfBlob({
 
     // Process questions in chunks
     for (let i = 0; i < totalQuestions; i += PDF_GENERATION_CHUNK_SIZE) {
+      if (signal?.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
+
       const chunkQuestions = questions.slice(i, i + PDF_GENERATION_CHUNK_SIZE);
 
       // Prepare data for this chunk
@@ -208,7 +218,8 @@ export async function generateMultipleQuestionsPdfBlob({
           if (onProgress) {
             onProgress(processedCount + batchCompleted, totalQuestions);
           }
-        }
+        },
+        signal
       );
 
       // Generate PDF blob for this chunk

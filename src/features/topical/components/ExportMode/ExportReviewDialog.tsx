@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Progress } from "@/components/ui/progress";
 import { memo, useCallback, useMemo, useRef, useState, useEffect } from "react";
 import {
@@ -131,11 +132,10 @@ const ExportReviewDialog = memo(
       [searchQuery, filterMode]
     );
     const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
-    const [exportMode, setExportMode] = useState<PdfContentType>(
-      "question-with-answers"
-    );
+    const [isExportModeOpen, setIsExportModeOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const exportProgressDialogRef = useRef<ExportProgressDialogHandle>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -212,46 +212,59 @@ const ExportReviewDialog = memo(
       [allQuestions, setQuestionsForExportArray]
     );
 
-    const handleExport = useCallback(async () => {
-      if (questionsForExportArray.length === 0) return;
+    const handleExport = useCallback(
+      async (mode: PdfContentType) => {
+        if (questionsForExportArray.length === 0) return;
+        setIsExportModeOpen(false);
 
-      setIsExporting(true);
-      exportProgressDialogRef.current?.setProgress(
-        0,
-        questionsForExportArray.length
-      );
+        setIsExporting(true);
+        abortControllerRef.current = new AbortController();
 
-      try {
-        const questionMap = new Map(allQuestions.map((q) => [q.id, q]));
-        const orderedQuestions: SelectedQuestion[] = [];
-        for (const id of questionsForExportArray) {
-          const question = questionMap.get(id);
-          if (question) {
-            orderedQuestions.push(question);
+        exportProgressDialogRef.current?.start(
+          questionsForExportArray.length,
+          mode
+        );
+
+        try {
+          const questionMap = new Map(allQuestions.map((q) => [q.id, q]));
+          const orderedQuestions: SelectedQuestion[] = [];
+          for (const id of questionsForExportArray) {
+            const question = questionMap.get(id);
+            if (question) {
+              orderedQuestions.push(question);
+            }
           }
-        }
 
-        const blob = await generateMultipleQuestionsPdfBlob({
-          questions: orderedQuestions,
-          typeOfContent: exportMode,
-          onProgress: (current, total) => {
-            exportProgressDialogRef.current?.setProgress(current, total);
-          },
-        });
+          const blob = await generateMultipleQuestionsPdfBlob({
+            questions: orderedQuestions,
+            typeOfContent: mode,
+            onProgress: (current) => {
+              exportProgressDialogRef.current?.setProgress(current);
+            },
+            signal: abortControllerRef.current.signal,
+          });
 
-        if (blob) {
-          handleDownloadPdf(
-            blob,
-            `NoteOverflow_Export_${orderedQuestions.length}_questions.pdf`
-          );
+          if (blob) {
+            handleDownloadPdf(
+              blob,
+              `NoteOverflow_Export_${orderedQuestions.length}_questions.pdf`
+            );
+          }
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            console.log("Export cancelled");
+          } else {
+            console.error("Error exporting PDF:", error);
+          }
+        } finally {
+          setIsExporting(false);
+          setIsExportModeOpen(false);
+          exportProgressDialogRef.current?.close();
+          abortControllerRef.current = null;
         }
-      } catch (error) {
-        console.error("Error exporting PDF:", error);
-      } finally {
-        setIsExporting(false);
-        exportProgressDialogRef.current?.close();
-      }
-    }, [questionsForExportArray, allQuestions, exportMode]);
+      },
+      [questionsForExportArray, allQuestions]
+    );
 
     const progressPercentage = useMemo(() => {
       if (allQuestions.length === 0) return 0;
@@ -260,7 +273,7 @@ const ExportReviewDialog = memo(
 
     const handleInteractOutside = useCallback(
       (e: Event) => {
-        if (isMobilePreviewOpen) {
+        if (isMobilePreviewOpen || isExportModeOpen || isExporting) {
           e.preventDefault();
           return;
         }
@@ -270,7 +283,7 @@ const ExportReviewDialog = memo(
           return;
         }
       },
-      [isMobilePreviewOpen]
+      [isExportModeOpen, isExporting, isMobilePreviewOpen]
     );
 
     return (
@@ -374,35 +387,6 @@ const ExportReviewDialog = memo(
               </div>
             </div>
             <DialogFooter className="w-full flex-row! gap-2 flex-wrap">
-              <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
-                {(
-                  [
-                    { value: "question", label: "Q" },
-                    { value: "answer", label: "A" },
-                    { value: "question-with-answers", label: "Q+A" },
-                  ] as const
-                ).map((mode) => (
-                  <Button
-                    key={mode.value}
-                    onClick={() => setExportMode(mode.value)}
-                    disabled={isExporting}
-                    className={cn(
-                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-3 bg-input text-black hover:bg-input dark:bg-transparent",
-                      exportMode === mode.value &&
-                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
-                    )}
-                    title={
-                      mode.value === "question"
-                        ? "Questions only"
-                        : mode.value === "answer"
-                        ? "Answers only"
-                        : "Questions with answers"
-                    }
-                  >
-                    {mode.label}
-                  </Button>
-                ))}
-              </div>
               <Button
                 className="cursor-pointer flex-1"
                 variant="outline"
@@ -412,7 +396,7 @@ const ExportReviewDialog = memo(
                 Close
               </Button>
               <Button
-                onClick={handleExport}
+                onClick={() => setIsExportModeOpen(true)}
                 disabled={questionsForExport.size === 0 || isExporting}
                 className="cursor-pointer flex-1 bg-logo-main hover:bg-logo-main/90 text-white gap-2"
               >
@@ -432,7 +416,64 @@ const ExportReviewDialog = memo(
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <ExportProgressDialog ref={exportProgressDialogRef} />
+
+        <Dialog
+          open={isExportModeOpen}
+          onOpenChange={setIsExportModeOpen}
+          modal={false}
+        >
+          {isExportModeOpen && (
+            <>
+              {createPortal(
+                <div className="fixed inset-0 z-1000014 bg-black/50" />,
+                document.body
+              )}
+            </>
+          )}
+          <DialogContent className="w-[300px] z-1000015 gap-4">
+            <DialogHeader>
+              <DialogTitle>Select Export Mode</DialogTitle>
+              <DialogDescription>
+                Choose what content you want to include in the PDF.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2">
+              {(
+                [
+                  { value: "question", label: "Questions Only" },
+                  { value: "answer", label: "Answers Only" },
+                  {
+                    value: "question-with-answers",
+                    label: "Questions and answers",
+                  },
+                ] as const
+              ).map((mode) => (
+                <Button
+                  key={mode.value}
+                  variant="outline"
+                  className="justify-start w-full cursor-pointer hover:bg-accent"
+                  onClick={() => handleExport(mode.value)}
+                  disabled={isExporting}
+                >
+                  {mode.label}
+                </Button>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="destructive"
+                onClick={() => setIsExportModeOpen(false)}
+                className="w-full cursor-pointer"
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <ExportProgressDialog
+          ref={exportProgressDialogRef}
+          onCancel={() => abortControllerRef.current?.abort()}
+        />
         <Dialog
           open={isMobilePreviewOpen}
           onOpenChange={setIsMobilePreviewOpen}
