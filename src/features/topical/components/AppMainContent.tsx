@@ -140,34 +140,46 @@ const AppMainContent = ({
     }
   }, [isExportModeEnabled, setIsAppSidebarOpen]);
 
+  const sortedData = useMemo(() => {
+    if (!topicalData?.data) return [];
+    return topicalData.data.toSorted(
+      (a: SelectedQuestion, b: SelectedQuestion) => {
+        if (sortParameters.sortBy === "ascending") {
+          return a.year - b.year;
+        } else {
+          // Default to year-desc
+          return b.year - a.year;
+        }
+      }
+    );
+  }, [sortParameters.sortBy, topicalData]);
+
   const chunkedData = useMemo(() => {
-    if (!topicalData?.data) return null;
+    if (!sortedData) return null;
 
     const chunkSize =
       uiPreferences.layoutStyle === "pagination"
         ? uiPreferences.numberOfQuestionsPerPage
         : INFINITE_SCROLL_CHUNK_SIZE;
 
-    return chunkQuestionsData(topicalData.data, chunkSize);
+    return chunkQuestionsData(sortedData, chunkSize);
   }, [
-    topicalData,
+    sortedData,
     uiPreferences.layoutStyle,
     uiPreferences.numberOfQuestionsPerPage,
   ]);
 
   const filteredProcessedData = useMemo(() => {
-    if (!topicalData?.data) return null;
-
     const chunkSize =
       uiPreferences.layoutStyle === "pagination"
         ? uiPreferences.numberOfQuestionsPerPage
         : INFINITE_SCROLL_CHUNK_SIZE;
 
     const filteredStrictModeData = uiPreferences.isStrictModeEnabled
-      ? topicalData.data.filter((item) => {
+      ? sortedData.filter((item) => {
           return isSubset(item.topics, currentQuery.topic);
         })
-      : topicalData.data;
+      : sortedData;
 
     const filteredFinishedData = filteredStrictModeData.filter((question) => {
       if (!finishedQuestionsData) return true;
@@ -180,34 +192,22 @@ const AppMainContent = ({
       return true;
     });
 
-    const sortedData = filteredFinishedData.toSorted(
-      (a: SelectedQuestion, b: SelectedQuestion) => {
-        if (sortParameters.sortBy === "ascending") {
-          return a.year - b.year;
-        } else {
-          // Default to year-desc
-          return b.year - a.year;
-        }
-      }
-    );
-
-    const chunkedData = chunkQuestionsData(sortedData, chunkSize);
+    const chunkData = chunkQuestionsData(filteredFinishedData, chunkSize);
 
     return {
-      sortedData,
-      chunkedData,
+      chunkData,
+      filteredFinishedData,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    topicalData,
+    onSettledFinishedQuestion,
     uiPreferences.layoutStyle,
     uiPreferences.numberOfQuestionsPerPage,
     uiPreferences.isStrictModeEnabled,
+    sortedData,
     currentQuery.topic,
     finishedQuestionsData,
     showFinishedQuestion,
-    onSettledFinishedQuestion,
-    sortParameters.sortBy,
   ]);
 
   const handleQuestionClick = useCallback(
@@ -270,10 +270,10 @@ const AppMainContent = ({
     if (chunkedData && filteredProcessedData) {
       setFullPartitionedData(chunkedData);
       setFinishedQuestionsFilteredPartitionedData(
-        filteredProcessedData.chunkedData
+        filteredProcessedData.chunkData
       );
       setFinishedQuestionsFilteredDisplayData(
-        filteredProcessedData.chunkedData[0] ?? []
+        filteredProcessedData.chunkData[0] ?? []
       );
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
@@ -557,7 +557,8 @@ const AppMainContent = ({
             <p className="text-sm text-left mb-1">
               {topicalData?.data.length ?? 0} question
               {topicalData?.data.length ?? 0 > 1 ? "s" : ""} found,{" "}
-              {filteredProcessedData?.sortedData.length ?? 0} displayed
+              {filteredProcessedData?.filteredFinishedData.length ?? 0}{" "}
+              displayed
             </p>
           )}
           {currentChunkIndex === 0 &&
@@ -612,7 +613,7 @@ const AppMainContent = ({
       />
       {isExportModeEnabled && (
         <ExportBar
-          allQuestions={filteredProcessedData?.sortedData ?? []}
+          allQuestions={filteredProcessedData?.filteredFinishedData ?? []}
           questionsForExport={questionsForExport}
           questionsForExportArray={questionsForExportArray}
           setIsExportModeEnabled={setIsExportModeEnabled}

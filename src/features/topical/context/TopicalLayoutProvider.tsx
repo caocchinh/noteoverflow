@@ -162,6 +162,7 @@ export default function TopicalLayoutProvider({
         localStorage.removeItem(key);
       });
     }
+    localStorage.removeItem("init_timestamp");
     setTimeout(() => {
       isMounted.current = true;
     }, 0);
