@@ -41,6 +41,10 @@ import { Input } from "@/components/ui/input";
 import ExportProgressDialog, {
   ExportProgressDialogHandle,
 } from "./ExportProgressDialog";
+import { generateMultipleQuestionsDocxBlob } from "../../lib/generateDocxBlob";
+import ExportFormatSelector, {
+  ExportFormatSelectorHandle,
+} from "./ExportFormatSelector";
 
 interface SearchInputProps {
   value: string;
@@ -135,6 +139,7 @@ const ExportReviewDialog = memo(
     const [isExportModeOpen, setIsExportModeOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const exportProgressDialogRef = useRef<ExportProgressDialogHandle>(null);
+    const exportFormatSelectorRef = useRef<ExportFormatSelectorHandle>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
@@ -235,20 +240,36 @@ const ExportReviewDialog = memo(
             }
           }
 
-          const blob = await generateMultipleQuestionsPdfBlob({
-            questions: orderedQuestions,
-            typeOfContent: mode,
-            onProgress: (current) => {
-              exportProgressDialogRef.current?.setProgress(current);
-            },
-            signal: abortControllerRef.current.signal,
-          });
+          let blob: Blob | null = null;
+          let fileName = "";
+
+          const currentFormat =
+            exportFormatSelectorRef.current?.getFormat() || "pdf";
+
+          if (currentFormat === "pdf") {
+            blob = await generateMultipleQuestionsPdfBlob({
+              questions: orderedQuestions,
+              typeOfContent: mode,
+              onProgress: (current) => {
+                exportProgressDialogRef.current?.setProgress(current);
+              },
+              signal: abortControllerRef.current.signal,
+            });
+            fileName = `NoteOverflow_Export_${orderedQuestions.length}.pdf`;
+          } else {
+            blob = await generateMultipleQuestionsDocxBlob({
+              questions: orderedQuestions,
+              typeOfContent: mode,
+              onProgress: (current) => {
+                exportProgressDialogRef.current?.setProgress(current);
+              },
+              signal: abortControllerRef.current.signal,
+            });
+            fileName = `NoteOverflow_Export_${orderedQuestions.length}.docx`;
+          }
 
           if (blob) {
-            handleDownloadPdf(
-              blob,
-              `NoteOverflow_Export_${orderedQuestions.length}.pdf`
-            );
+            handleDownloadPdf(blob, fileName);
           }
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") {
@@ -438,9 +459,12 @@ const ExportReviewDialog = memo(
             <DialogHeader>
               <DialogTitle>Select Export Mode</DialogTitle>
               <DialogDescription>
-                Choose what content you want to include in the PDF.
+                Choose what content you want to include in the exported file.
               </DialogDescription>
             </DialogHeader>
+
+            <ExportFormatSelector ref={exportFormatSelectorRef} />
+
             <div className="flex flex-col gap-2">
               {(
                 [

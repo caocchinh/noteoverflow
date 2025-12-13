@@ -1030,6 +1030,32 @@ export const convertImageToPngBase64 = (url: string): Promise<string> => {
   });
 };
 
+export const convertImageToPngBase64WithDimensions = (
+  url: string
+): Promise<{ base64: string; width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL("image/png");
+      resolve({ base64: dataURL, width: img.width, height: img.height });
+    };
+    img.onerror = (error) => {
+      reject(error);
+    };
+    img.src = url;
+  });
+};
+
 export const handleDownloadPdf = (pdfBlob: Blob | null, fileName: string) => {
   if (!pdfBlob) return;
   const url = URL.createObjectURL(pdfBlob);
