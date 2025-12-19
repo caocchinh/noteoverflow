@@ -132,7 +132,7 @@ const MobileMultiSelector = memo(
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}
-            className="z-[100007] h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="z-100011 h-[95vh] max-h-[95vh] dark:bg-accent"
           >
             <DrawerHeader className="sr-only">
               <DrawerTitle>Select</DrawerTitle>
@@ -223,7 +223,7 @@ const DesktopMultiSelector = memo(
             e.preventDefault();
           }}
           autoFocus={false}
-          className="z-[100007] m-0 border-1 p-0 shadow-none dark:bg-accent"
+          className="z-100007 m-0 border p-0 shadow-none dark:bg-accent"
           side="right"
           onInteractOutside={(e) => {
             if (popoverTriggerRef?.current?.contains(e.target as Node)) {

@@ -48,7 +48,7 @@ const MultiSelectorContent = memo(
     return (
       <Command
         shouldFilter={false}
-        className="!h-max relative flex flex-col space-y-2 overflow-visible bg-transparent"
+        className="h-max! relative flex flex-col space-y-2 overflow-visible bg-transparent"
         onKeyDown={handleKeyDown}
       >
         {children}
