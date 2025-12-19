@@ -23,14 +23,18 @@ const ExportFormatSelector = memo(
         onValueChange={(v) => setExportFormat(v as ExportFormat)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="flex flex-wrap w-full">
           <TabsTrigger value="pdf" className="cursor-pointer">
             <FileText className="w-4 h-4 mr-2" />
             PDF
           </TabsTrigger>
-          <TabsTrigger value="docx" className="cursor-pointer">
+          <TabsTrigger
+            value="docx"
+            className="cursor-not-allowed opacity-50"
+            disabled
+          >
             <Copy className="w-4 h-4 mr-2" />
-            Word
+            Word (Coming Soon)
           </TabsTrigger>
         </TabsList>
       </Tabs>

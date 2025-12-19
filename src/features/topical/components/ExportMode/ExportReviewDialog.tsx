@@ -455,7 +455,7 @@ const ExportReviewDialog = memo(
               )}
             </>
           )}
-          <DialogContent className="w-[300px] z-1000015 gap-4 export-mode-content">
+          <DialogContent className="max-w-[430px]! z-1000015 gap-4 export-mode-content">
             <DialogHeader>
               <DialogTitle>Select Export Mode</DialogTitle>
               <DialogDescription>
