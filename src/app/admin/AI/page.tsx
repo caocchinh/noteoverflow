@@ -27,6 +27,10 @@ export default function VisualSearchTestPage() {
   // Text Search State
   const [textQuery, setTextQuery] = useState("");
 
+  // Filter State
+  const [filterSubject, setFilterSubject] = useState("");
+  const [filterCurriculum, setFilterCurriculum] = useState("");
+
   // Indexing State
   const [indexing, setIndexing] = useState(false);
   const [indexParams, setIndexParams] = useState({ offset: 0, limit: 10 });
@@ -47,6 +51,13 @@ export default function VisualSearchTestPage() {
     }
   };
 
+  const getFilters = () => {
+    const filters: { subject?: string; curriculum?: string } = {};
+    if (filterSubject.trim()) filters.subject = filterSubject.trim();
+    if (filterCurriculum.trim()) filters.curriculum = filterCurriculum.trim();
+    return Object.keys(filters).length > 0 ? filters : undefined;
+  };
+
   const handleImageSearch = async () => {
     if (!selectedImage) return;
     setLoading(true);
@@ -58,7 +69,10 @@ export default function VisualSearchTestPage() {
       const res = await fetch("/api/visual-search/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: selectedImage }),
+        body: JSON.stringify({
+          imageBase64: selectedImage,
+          filter: getFilters(),
+        }),
       });
 
       const data = await res.json();
@@ -84,7 +98,10 @@ export default function VisualSearchTestPage() {
       const res = await fetch("/api/visual-search/text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: textQuery }),
+        body: JSON.stringify({
+          query: textQuery,
+          filter: getFilters(),
+        }),
       });
 
       const data = await res.json();
@@ -165,6 +182,41 @@ export default function VisualSearchTestPage() {
 
       {/* Content */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8 max-w-lg">
+        {/* Common Filters (Only for Search Tabs) */}
+        {activeTab !== "index" && (
+          <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+            <h3 className="text-sm font-semibold mb-3 text-gray-700">
+              Filters (Optional)
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium mb-1 text-gray-500">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={filterSubject}
+                  onChange={(e) => setFilterSubject(e.target.value)}
+                  placeholder="e.g. Math"
+                  className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1 text-gray-500">
+                  Curriculum
+                </label>
+                <input
+                  type="text"
+                  value={filterCurriculum}
+                  onChange={(e) => setFilterCurriculum(e.target.value)}
+                  placeholder="e.g. Cambridge"
+                  className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "image" ? (
           <div className="space-y-4">
             <div>

@@ -9,13 +9,25 @@ import { verifySession } from "@/dal/verifySession";
 import { processImage, embedText, imageUrlToBase64 } from "@/lib/cloudflareAI";
 import { upsertVectorize, queryVectorize } from "@/lib/cloudflareVectorize";
 
+// Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
+async function generateShortId(input: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // Types for Vectorize metadata
 interface VectorMetadata {
   questionId: string;
   type: "question" | "answer";
   imageIndex: number;
   imagePath: string;
-  extractedText?: string;
+  extractedText: string;
+  subject: string;
+  curriculum: string;
+  [key: string]: string | number | boolean;
 }
 
 // Response types
@@ -72,11 +84,15 @@ export async function indexQuestions({
       id: true,
       questionImages: true,
       answers: true,
+      subjectId: true,
+      curriculumName: true,
     },
     limit,
     offset,
     where: (q, { eq }) => eq(q.isQuestionImageIndexed, 0),
   });
+
+  console.log("questions", questions);
 
   const progress: IndexProgress = {
     indexed: 0,
@@ -85,16 +101,17 @@ export async function indexQuestions({
     total: questions.length,
   };
 
-  const vectorsToUpsert: Array<{
-    id: string;
-    values: number[];
-    metadata: VectorMetadata;
-  }> = [];
-
   // Process each question
   for (const q of questions) {
     const questionImages: string[] = JSON.parse(q.questionImages ?? "[]");
     const answerImages: string[] = JSON.parse(q.answers ?? "[]");
+    console.log("current question", q);
+
+    const vectorsToUpsert: Array<{
+      id: string;
+      values: number[];
+      metadata: VectorMetadata;
+    }> = [];
 
     // Process question images
     for (let i = 0; i < questionImages.length; i++) {
@@ -103,10 +120,10 @@ export async function indexQuestions({
         if (!imagePath) continue;
 
         const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64);
+        const { text, embedding } = await processImage(imageBase64, env.AI);
 
         vectorsToUpsert.push({
-          id: `${q.id}_question_${i}`,
+          id: await generateShortId(`${q.id}_question_${i}`),
           values: embedding,
           metadata: {
             questionId: q.id,
@@ -114,6 +131,8 @@ export async function indexQuestions({
             imageIndex: i,
             imagePath: imagePath,
             extractedText: text.slice(0, 500), // Store truncated text for debugging
+            subject: q.subjectId ?? "",
+            curriculum: q.curriculumName ?? "",
           },
         });
         progress.indexed++;
@@ -121,6 +140,8 @@ export async function indexQuestions({
         console.error(`Failed to index question image ${q.id}_${i}:`, error);
         progress.failed++;
       }
+      // Add small delay to prevent rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     // Process answer images (skip text-only answers)
@@ -142,10 +163,10 @@ export async function indexQuestions({
         }
 
         const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64);
+        const { text, embedding } = await processImage(imageBase64, env.AI);
 
         vectorsToUpsert.push({
-          id: `${q.id}_answer_${i}`,
+          id: await generateShortId(`${q.id}_answer_${i}`),
           values: embedding,
           metadata: {
             questionId: q.id,
@@ -153,6 +174,8 @@ export async function indexQuestions({
             imageIndex: i,
             imagePath: imagePath,
             extractedText: text.slice(0, 500),
+            subject: q.subjectId ?? "",
+            curriculum: q.curriculumName ?? "",
           },
         });
         progress.indexed++;
@@ -160,34 +183,37 @@ export async function indexQuestions({
         console.error(`Failed to index answer image ${q.id}_${i}:`, error);
         progress.failed++;
       }
+      // Add small delay to prevent rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
+    // Upsert vectors for this question immediately
+    if (vectorsToUpsert.length > 0) {
+      try {
+        // Vectorize has a limit of 1000 vectors per upsert, but we are doing per question so it should be fine
+        await upsertVectorize(
+          "question-visual-search",
+          vectorsToUpsert,
+          env.QUESTION_SEARCH
+        );
+
+        // Only mark as indexed if upsert succeeded
+        await db
+          .update(question)
+          .set({
+            isQuestionImageIndexed: 1,
+          })
+          .where(eq(question.id, q.id));
+      } catch (error) {
+        console.error(`Failed to upsert vectors for question ${q.id}:`, error);
+      }
+    }
     await db
       .update(question)
       .set({
         isQuestionImageIndexed: 1,
       })
       .where(eq(question.id, q.id));
-  }
-
-  // Upsert vectors to Vectorize in batches
-  if (vectorsToUpsert.length > 0) {
-    try {
-      // Vectorize has a limit of 1000 vectors per upsert
-      const batchSize = 100;
-      for (let i = 0; i < vectorsToUpsert.length; i += batchSize) {
-        const batch = vectorsToUpsert.slice(i, i + batchSize);
-        // Cast to VectorizeVector[] compatible type and upsert via REST API
-        await upsertVectorize("question-visual-search", batch);
-      }
-    } catch (error) {
-      console.error("Failed to upsert vectors:", error);
-      return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
-        error: "Failed to store vectors in database",
-        code: ERROR_CODES.INTERNAL_SERVER_ERROR,
-        progress,
-      });
-    }
   }
 
   return {
@@ -205,17 +231,21 @@ export async function searchByImage({
   body,
   status,
 }: {
-  body: { imageBase64: string; topK?: number };
+  body: {
+    imageBase64: string;
+    topK?: number;
+    filter?: { subject?: string; curriculum?: string };
+  };
   status: typeof elysiaStatus;
 }) {
-  const { imageBase64, topK = 5 } = body;
+  const { imageBase64, topK = 5, filter } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   // Extract text from uploaded image using OCR, then embed
   let queryEmbedding: number[];
   let extractedText: string;
   try {
-    const result = await processImage(imageBase64);
+    const result = await processImage(imageBase64, env.AI);
     queryEmbedding = result.embedding;
     extractedText = result.text;
   } catch (error) {
@@ -230,10 +260,21 @@ export async function searchByImage({
   // Query Vectorize for nearest neighbors
   let matches;
   try {
-    matches = await queryVectorize("question-visual-search", queryEmbedding, {
-      topK,
-      returnMetadata: "all",
-    });
+    const vectorizeFilter: Record<string, string> = {};
+    if (filter?.subject) vectorizeFilter.subject = filter.subject;
+    if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
+
+    matches = await queryVectorize(
+      "question-visual-search",
+      queryEmbedding,
+      {
+        topK,
+        returnMetadata: "all",
+        filter:
+          Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
+      },
+      env.QUESTION_SEARCH
+    );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
@@ -312,10 +353,14 @@ export async function searchByText({
   body,
   status,
 }: {
-  body: { query: string; topK?: number };
+  body: {
+    query: string;
+    topK?: number;
+    filter?: { subject?: string; curriculum?: string };
+  };
   status: typeof elysiaStatus;
 }) {
-  const { query, topK = 5 } = body;
+  const { query, topK = 5, filter } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   if (!query || query.trim().length === 0) {
@@ -328,7 +373,7 @@ export async function searchByText({
   // Generate embedding for the text query
   let queryEmbedding: number[];
   try {
-    queryEmbedding = await embedText(query);
+    queryEmbedding = await embedText(query, env.AI);
   } catch (error) {
     console.error("Failed to generate embedding:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
@@ -340,10 +385,21 @@ export async function searchByText({
   // Query Vectorize for nearest neighbors
   let matches;
   try {
-    matches = await queryVectorize("question-visual-search", queryEmbedding, {
-      topK,
-      returnMetadata: "all",
-    });
+    const vectorizeFilter: Record<string, string> = {};
+    if (filter?.subject) vectorizeFilter.subject = filter.subject;
+    if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
+
+    matches = await queryVectorize(
+      "question-visual-search",
+      queryEmbedding,
+      {
+        topK,
+        returnMetadata: "all",
+        filter:
+          Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
+      },
+      env.QUESTION_SEARCH
+    );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {

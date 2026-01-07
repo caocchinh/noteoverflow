@@ -8,41 +8,18 @@ const CLOUDFLARE_API_TOKEN =
 
 const CLOUDFLARE_API_BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/vectorize/v2/indexes`;
 
-export interface VectorizeVector {
-  id: string;
-  values: number[];
-  metadata?: Record<string, unknown>;
-}
-
-export interface VectorizeQueryOptions {
-  topK?: number;
-  returnMetadata?: "all" | "indexed" | "none";
-  filter?: unknown;
-}
-
-export interface VectorizeMatch {
-  id: string;
-  score: number;
-  values: number[];
-  metadata?: Record<string, unknown>;
-}
-
-export interface VectorizeQueryResponse {
-  matches: VectorizeMatch[];
-  count: number;
-}
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [1000, 2000, 4000];
 
 /**
  * Call Cloudflare Vectorize REST API
  */
-const MAX_RETRIES = 3;
-const RETRY_DELAYS = [1000, 2000, 4000];
-
 async function callVectorizeAPI<T>(
   indexName: string,
   endpoint: string,
   method: "POST" | "GET" | "DELETE",
-  body?: unknown
+  body?: unknown,
+  contentType: string = "application/json"
 ): Promise<T> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
     throw new Error(
@@ -55,13 +32,21 @@ async function callVectorizeAPI<T>(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
+      const isNdJson = contentType === "application/x-ndjson";
+      const requestBody =
+        body && isNdJson
+          ? (body as string)
+          : body
+          ? JSON.stringify(body)
+          : undefined;
+
       const response = await fetch(url, {
         method,
         headers: {
           Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-          "Content-Type": "application/json",
+          "Content-Type": contentType,
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: requestBody,
       });
 
       if (!response.ok) {
@@ -154,15 +139,24 @@ async function callVectorizeAPI<T>(
  */
 export async function upsertVectorize(
   indexName: string,
-  vectors: VectorizeVector[]
+  vectors: VectorizeVector[],
+  vectorizeBinding?: VectorizeIndex
 ): Promise<{ count: number; ids: string[] }> {
-  // Use 'insert' endpoint. Vectorize inserts naturally handle upserts (replacing by ID if exists).
-  // Note: Standard endpoint is /insert. ndjson is also supported but JSON array is easier for small batches.
+  if (vectorizeBinding) {
+    console.log(`Using Vectorize Binding for upsert`);
+    return vectorizeBinding.upsert(vectors);
+  }
+
+  // Use NDJSON for inserts as it is more robust for Cloudflare Vectorize
+  // Each line must be a valid JSON object representing a vector
+  const ndjson = vectors.map((v) => JSON.stringify(v)).join("\n");
+
   return callVectorizeAPI<{ count: number; ids: string[] }>(
     indexName,
     "insert",
     "POST",
-    vectors
+    ndjson,
+    "application/x-ndjson"
   );
 }
 
@@ -175,8 +169,14 @@ export async function upsertVectorize(
 export async function queryVectorize(
   indexName: string,
   vector: number[],
-  options?: VectorizeQueryOptions
-): Promise<VectorizeQueryResponse> {
+  options?: VectorizeQueryOptions,
+  vectorizeBinding?: VectorizeIndex
+): Promise<VectorizeMatches> {
+  if (vectorizeBinding) {
+    // console.log(`Using Vectorize Binding for query`);
+    return vectorizeBinding.query(vector, options);
+  }
+
   const payload = {
     vector,
     topK: options?.topK ?? 5,
@@ -184,7 +184,7 @@ export async function queryVectorize(
     filter: options?.filter,
   };
 
-  return callVectorizeAPI<VectorizeQueryResponse>(
+  return callVectorizeAPI<VectorizeMatches>(
     indexName,
     "query",
     "POST",

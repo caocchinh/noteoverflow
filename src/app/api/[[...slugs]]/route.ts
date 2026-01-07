@@ -79,6 +79,12 @@ const app = new Elysia({ prefix: "/api", aot: false })
     body: t.Object({
       imageBase64: t.String(),
       topK: t.Optional(t.Number({ default: 5 })),
+      filter: t.Optional(
+        t.Object({
+          subject: t.Optional(t.String()),
+          curriculum: t.Optional(t.String()),
+        })
+      ),
     }),
   })
 
@@ -87,6 +93,12 @@ const app = new Elysia({ prefix: "/api", aot: false })
     body: t.Object({
       query: t.String(),
       topK: t.Optional(t.Number({ default: 5 })),
+      filter: t.Optional(
+        t.Object({
+          subject: t.Optional(t.String()),
+          curriculum: t.Optional(t.String()),
+        })
+      ),
     }),
   });
 

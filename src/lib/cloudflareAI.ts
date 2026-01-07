@@ -16,22 +16,63 @@ const CLOUDFLARE_AI_BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff in ms
 
+type VisionModelInput = {
+  image: number[];
+  prompt: string;
+  max_tokens: number;
+};
+
+type EmbeddingModelInput = {
+  text: string[];
+};
+
 async function callCloudflareAI<T>(
-  model: string,
-  inputs: Record<string, unknown>
+  model:
+    | "@cf/meta/llama-3.2-11b-vision-instruct"
+    | "@cf/baai/bge-large-en-v1.5",
+  inputs: VisionModelInput | EmbeddingModelInput,
+  aiBinding?: Ai
 ): Promise<T> {
+  if (aiBinding) {
+    console.log(`Using Cloudflare AI Binding for ${model}`);
+    try {
+      const result = await aiBinding.run(model, inputs);
+      return result as T;
+    } catch (error) {
+      console.error("Cloudflare AI Binding error:", error);
+
+      throw error;
+    }
+  }
+
   let lastError: Error | null = null;
+  const TIMEOUT_MS = 60000; // 60 seconds timeout per request
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     try {
+      // Log approximate payload size for debugging
+      const payload = JSON.stringify(inputs);
+      const payloadSize = new TextEncoder().encode(payload).length;
+      console.log(
+        `Cloudflare AI request to ${model} (attempt ${
+          attempt + 1
+        }/${MAX_RETRIES}) - Payload size: ${(payloadSize / 1024).toFixed(2)} KB`
+      );
+
       const response = await fetch(`${CLOUDFLARE_AI_BASE_URL}/${model}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${CLOUDFLARE_AI_API_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(inputs),
+        body: payload,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.text();
@@ -74,17 +115,24 @@ async function callCloudflareAI<T>(
 
       return data.result as T;
     } catch (err) {
+      clearTimeout(timeoutId); // Ensure timeout is cleared on error too
       lastError = err instanceof Error ? err : new Error(String(err));
 
-      // Only retry on network errors or specific retryable errors
+      // Handle abort errors specifically
+      if (lastError.name === "AbortError") {
+        lastError = new Error(`Request timed out after ${TIMEOUT_MS}ms`);
+      }
+
+      // Only retry on network errors, timeouts, or specific retryable errors
       if (
         attempt < MAX_RETRIES - 1 &&
         (lastError.message.includes("408") ||
           lastError.message.includes("timeout") ||
+          lastError.message.includes("timed out") ||
           lastError.message.includes("ECONNRESET"))
       ) {
         console.log(
-          `Cloudflare AI error, retrying in ${
+          `Cloudflare AI error (${lastError.message}), retrying in ${
             RETRY_DELAYS[attempt]
           }ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
         );
@@ -106,20 +154,29 @@ async function callCloudflareAI<T>(
  * @returns Extracted text from the image
  */
 export async function extractTextFromImage(
-  imageBase64: string
+  imageBase64: string,
+  aiBinding?: Ai
 ): Promise<string> {
+  console.log("Extracting text from image...");
   const response = await callCloudflareAI<{
     response?: string;
     description?: string;
-  }>("@cf/llava-hf/llava-1.5-7b-hf", {
-    image: Array.from(
-      Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))
-    ),
-    prompt:
-      "Extract all text from this image verbatim. Include all equations, numbers, formulas, and formatting. If this is an exam question or answer, preserve the structure. Only output the extracted text, nothing else.",
-    max_tokens: 6700,
-  });
-
+  }>(
+    "@cf/meta/llama-3.2-11b-vision-instruct",
+    {
+      image: Array.from(
+        Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))
+      ),
+      prompt:
+        "Extract all text from this image verbatim. Include all equations, numbers, formulas, and any other text in diagrams. Do not attempt to solve the question, or add any additional reasoning. Only output the extracted text, nothing else.",
+      max_tokens: 6700,
+    },
+    aiBinding
+  );
+  console.log(
+    "Extracted text from image:",
+    response.response || response.description || ""
+  );
   return response.response || response.description || "";
 }
 
@@ -128,10 +185,14 @@ export async function extractTextFromImage(
  * @param text - Text to embed
  * @returns 1024-dimensional embedding vector
  */
-export async function embedText(text: string): Promise<number[]> {
+export async function embedText(
+  text: string,
+  aiBinding?: Ai
+): Promise<number[]> {
   const response = await callCloudflareAI<{ data: number[][] }>(
     "@cf/baai/bge-large-en-v1.5",
-    { text: [text] }
+    { text: [text] },
+    aiBinding
   );
 
   return response.data[0];
@@ -143,15 +204,16 @@ export async function embedText(text: string): Promise<number[]> {
  * @returns Object with extracted text and embedding
  */
 export async function processImage(
-  imageBase64: string
+  imageBase64: string,
+  aiBinding?: Ai
 ): Promise<{ text: string; embedding: number[] }> {
-  const text = await extractTextFromImage(imageBase64);
+  const text = await extractTextFromImage(imageBase64, aiBinding);
 
   if (!text || text.trim().length === 0) {
     throw new Error("No text could be extracted from the image");
   }
 
-  const embedding = await embedText(text);
+  const embedding = await embedText(text, aiBinding);
   return { text, embedding };
 }
 
