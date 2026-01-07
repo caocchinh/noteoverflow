@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // Extra env variables type definitions
 
 namespace NodeJS {
@@ -26,24 +25,10 @@ namespace NodeJS {
     NEXT_PUBLIC_TURNSTILE_SITE_KEY_FORCE_INTERACTIVE: string; //Development
     MAIN_R2_BUCKET_NAME: string;
     CLOUDFLARE_ACCOUNT_ID: string;
+    CLOUDFLARE_AI_API_TOKEN: string;
     MAIN_R2_BUCKET_ACCESS_KEY_ID: string;
     MAIN_R2_BUCKET_SECRET_ACCESS_KEY: string;
     MAIN_R2_BUCKET_PUBLIC_URL: string;
-    JINA_API_KEY: string;
+    CLOUDFLARE_AI_API_TOKEN: string;
   }
 }
-
-// Extend CloudflareEnv with additional bindings
-declare global {
-  interface CloudflareEnv {
-    QUESTION_SEARCH: import("@cloudflare/workers-types").VectorizeIndex;
-    AI: {
-      run<T = unknown>(
-        model: string,
-        inputs: Record<string, unknown>
-      ): Promise<T>;
-    };
-  }
-}
-
-export {};

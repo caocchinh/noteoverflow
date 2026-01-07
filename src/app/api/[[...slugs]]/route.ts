@@ -4,7 +4,11 @@ import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
-import { indexQuestions, searchByImage } from "@/server/api/visualSearch";
+import {
+  indexQuestions,
+  searchByImage,
+  searchByText,
+} from "@/server/api/visualSearch";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -74,6 +78,14 @@ const app = new Elysia({ prefix: "/api", aot: false })
   .post("/visual-search/search", searchByImage, {
     body: t.Object({
       imageBase64: t.String(),
+      topK: t.Optional(t.Number({ default: 5 })),
+    }),
+  })
+
+  // POST /api/visual-search/text - Search by text
+  .post("/visual-search/text", searchByText, {
+    body: t.Object({
+      query: t.String(),
       topK: t.Optional(t.Number({ default: 5 })),
     }),
   });

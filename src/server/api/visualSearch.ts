@@ -1,10 +1,13 @@
 import "server-only";
 import { getDbAsync } from "@/drizzle/db.server";
+import { question } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
 import { verifySession } from "@/dal/verifySession";
 import { processImage, embedText, imageUrlToBase64 } from "@/lib/cloudflareAI";
+import { upsertVectorize, queryVectorize } from "@/lib/cloudflareVectorize";
 
 // Types for Vectorize metadata
 interface VectorMetadata {
@@ -72,6 +75,7 @@ export async function indexQuestions({
     },
     limit,
     offset,
+    where: (q, { eq }) => eq(q.isQuestionImageIndexed, 0),
   });
 
   const progress: IndexProgress = {
@@ -99,7 +103,7 @@ export async function indexQuestions({
         if (!imagePath) continue;
 
         const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64, env.AI);
+        const { text, embedding } = await processImage(imageBase64);
 
         vectorsToUpsert.push({
           id: `${q.id}_question_${i}`,
@@ -138,7 +142,7 @@ export async function indexQuestions({
         }
 
         const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64, env.AI);
+        const { text, embedding } = await processImage(imageBase64);
 
         vectorsToUpsert.push({
           id: `${q.id}_answer_${i}`,
@@ -157,6 +161,13 @@ export async function indexQuestions({
         progress.failed++;
       }
     }
+
+    await db
+      .update(question)
+      .set({
+        isQuestionImageIndexed: 1,
+      })
+      .where(eq(question.id, q.id));
   }
 
   // Upsert vectors to Vectorize in batches
@@ -166,8 +177,8 @@ export async function indexQuestions({
       const batchSize = 100;
       for (let i = 0; i < vectorsToUpsert.length; i += batchSize) {
         const batch = vectorsToUpsert.slice(i, i + batchSize);
-        // Cast to VectorizeVector[] for type compatibility
-        await env.QUESTION_SEARCH.upsert(batch as unknown as VectorizeVector[]);
+        // Cast to VectorizeVector[] compatible type and upsert via REST API
+        await upsertVectorize("question-visual-search", batch);
       }
     } catch (error) {
       console.error("Failed to upsert vectors:", error);
@@ -204,7 +215,7 @@ export async function searchByImage({
   let queryEmbedding: number[];
   let extractedText: string;
   try {
-    const result = await processImage(imageBase64, env.AI);
+    const result = await processImage(imageBase64);
     queryEmbedding = result.embedding;
     extractedText = result.text;
   } catch (error) {
@@ -219,7 +230,7 @@ export async function searchByImage({
   // Query Vectorize for nearest neighbors
   let matches;
   try {
-    matches = await env.QUESTION_SEARCH.query(queryEmbedding, {
+    matches = await queryVectorize("question-visual-search", queryEmbedding, {
       topK,
       returnMetadata: "all",
     });
@@ -317,7 +328,7 @@ export async function searchByText({
   // Generate embedding for the text query
   let queryEmbedding: number[];
   try {
-    queryEmbedding = await embedText(query, env.AI);
+    queryEmbedding = await embedText(query);
   } catch (error) {
     console.error("Failed to generate embedding:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
@@ -329,7 +340,7 @@ export async function searchByText({
   // Query Vectorize for nearest neighbors
   let matches;
   try {
-    matches = await env.QUESTION_SEARCH.query(queryEmbedding, {
+    matches = await queryVectorize("question-visual-search", queryEmbedding, {
       topK,
       returnMetadata: "all",
     });

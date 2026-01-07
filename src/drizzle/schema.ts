@@ -206,6 +206,9 @@ export const question = sqliteTable(
     curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),
     topics: text("topics"),
+    isQuestionImageIndexed: integer("is_question_image_indexed")
+      .notNull()
+      .default(0),
   },
   (table) => [
     index("idx_question_filter").on(
