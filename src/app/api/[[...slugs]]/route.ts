@@ -65,16 +65,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
   // GET /api/admin/visual-search/index?offset=0 - Index 1 question at a time
   .get("/admin/visual-search/index", indexQuestions, {
     query: t.Object({
-      offset: t.Optional(t.String({ default: "0" })),
+      offset: t.Numeric({ default: 0 }),
+      limit: t.Numeric({ default: 1 }),
     }),
-    transform({ query }) {
-      // Parse offset to number, default limit to 1
-      (query as Record<string, unknown>).offset = parseInt(
-        query.offset ?? "0",
-        10
-      );
-      (query as Record<string, unknown>).limit = 1;
-    },
   })
 
   // POST /api/visual-search/search - Search by image

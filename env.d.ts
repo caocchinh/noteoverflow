@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Extra env variables type definitions
 
 namespace NodeJS {
@@ -35,7 +36,14 @@ namespace NodeJS {
 // Extend CloudflareEnv with additional bindings
 declare global {
   interface CloudflareEnv {
-    JINA_API_KEY: string;
     QUESTION_SEARCH: import("@cloudflare/workers-types").VectorizeIndex;
+    AI: {
+      run<T = unknown>(
+        model: string,
+        inputs: Record<string, unknown>
+      ): Promise<T>;
+    };
   }
 }
+
+export {};
