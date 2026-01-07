@@ -4,6 +4,28 @@
 
 Cloudflare Vectorize requires **metadata indexes** to be created before you can filter search results by metadata fields. This document explains how to create and manage metadata indexes.
 
+## Setting Up the Vector Database
+
+```bash
+# Create the Vectorize index
+wrangler vectorize create question-semantic-search --dimensions=768 --metric=cosine
+
+# Verify it was created
+wrangler vectorize list
+```
+
+### Erasing Everything in the Vector Database
+
+```bash
+# Delete the entire index (this erases all vectors)
+wrangler vectorize delete question-semantic-search
+
+# Recreate the index
+wrangler vectorize create question-semantic-search --dimensions=768 --metric=cosine
+```
+
+---
+
 ## Creating Metadata Indexes
 
 ### Using Wrangler CLI
@@ -21,14 +43,14 @@ wrangler vectorize create-metadata-index <INDEX_NAME> --property-name=<FIELD_NAM
 
 ### Example: Current Implementation
 
-For our `question-visual-search` index, we use two metadata fields:
+For our `question-semantic-search` index, we use two metadata fields:
 
 ```bash
 # Create index for 'subject' field
-wrangler vectorize create-metadata-index question-visual-search --property-name=subject --type=string
+wrangler vectorize create-metadata-index question-semantic-search --property-name=subject --type=string
 
 # Create index for 'curriculum' field
-wrangler vectorize create-metadata-index question-visual-search --property-name=curriculum --type=string
+wrangler vectorize create-metadata-index question-semantic-search --property-name=curriculum --type=string
 ```
 
 ### Using PowerShell Script
@@ -42,7 +64,7 @@ We've provided a convenience script that creates all necessary metadata indexes:
 ## Listing Existing Metadata Indexes
 
 ```bash
-wrangler vectorize get question-visual-search
+wrangler vectorize get question-semantic-search
 ```
 
 This will show you all metadata indexes currently configured on the index.
@@ -50,7 +72,7 @@ This will show you all metadata indexes currently configured on the index.
 ## Deleting Metadata Indexes
 
 ```bash
-wrangler vectorize delete-metadata-index question-visual-search --property-name=<FIELD_NAME>
+wrangler vectorize delete-metadata-index question-semantic-search --property-name=<FIELD_NAME>
 ```
 
 ## Important Notes
@@ -68,10 +90,10 @@ wrangler vectorize delete-metadata-index question-visual-search --property-name=
 
 ```bash
 # Delete the entire index
-wrangler vectorize delete-index question-visual-search --force
+wrangler vectorize delete-index question-semantic-search --force
 
 # Recreate the index
-wrangler vectorize create question-visual-search --dimensions=768 --metric=cosine
+wrangler vectorize create question-semantic-search --dimensions=1024 --metric=cosine
 
 # Create metadata indexes
 .\scripts\create-vectorize-metadata-indexes.ps1
@@ -112,11 +134,15 @@ const filter = {
 //   curriculum: { $eq: 'CIE A-LEVEL' }
 // }
 
-const matches = await queryVectorize("question-visual-search", queryEmbedding, {
-  topK: 5,
-  returnMetadata: "all",
-  filter: filter,
-});
+const matches = await queryVectorize(
+  "question-semantic-search",
+  queryEmbedding,
+  {
+    topK: 5,
+    returnMetadata: "all",
+    filter: filter,
+  }
+);
 ```
 
 ### Available Filter Operators
@@ -150,7 +176,7 @@ const filter = {
 
 **Solution**:
 
-1. Verify indexes exist: `wrangler vectorize get question-visual-search`
+1. Verify indexes exist: `wrangler vectorize get question-semantic-search`
 2. Create missing indexes using the script above
 3. Re-index all vectors
 
@@ -164,7 +190,7 @@ const filter = {
 
 If you need to add new filterable fields in the future:
 
-1. **Update the metadata in your indexing code** (e.g., in `visualSearch.ts`):
+1. **Update the metadata in your indexing code** (e.g., in `semanticSearch.ts`):
 
    ```typescript
    metadata: {
@@ -180,7 +206,7 @@ If you need to add new filterable fields in the future:
 2. **Create the metadata index** via Wrangler:
 
    ```bash
-   wrangler vectorize create-metadata-index question-visual-search --property-name=newField --type=string
+   wrangler vectorize create-metadata-index question-semantic-search --property-name=newField --type=string
    ```
 
 3. **Re-index all vectors** to populate the new metadata field

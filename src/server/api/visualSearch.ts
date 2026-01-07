@@ -194,7 +194,7 @@ export async function indexQuestions({
         await upsertVectorize(
           "question-visual-search",
           vectorsToUpsert,
-          env.QUESTION_SEARCH
+          env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
         );
 
         // Only mark as indexed if upsert succeeded
@@ -273,7 +273,7 @@ export async function searchByImage({
         filter:
           Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
       },
-      env.QUESTION_SEARCH
+      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
     );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
@@ -399,7 +399,7 @@ export async function searchByText({
         filter:
           Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
       },
-      env.QUESTION_SEARCH
+      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
     );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);

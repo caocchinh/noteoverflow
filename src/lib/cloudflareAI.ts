@@ -50,7 +50,7 @@ async function callCloudflareAI<T>(
   }
 
   let lastError: Error | null = null;
-  const TIMEOUT_MS = 120000; // 120 seconds timeout per request
+  const TIMEOUT_MS = 122222; // 120 seconds timeout per request
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const controller = new AbortController();

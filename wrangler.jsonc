@@ -69,8 +69,8 @@
   },
   "vectorize": [
     {
-      "binding": "QUESTION_SEARCH",
-      "index_name": "question-visual-search"
+      "binding": "QUESTION_SEMANTIC_SEARCH_VECTORIZE",
+      "index_name": "question-semantic-search"
     }
   ],
   "ai": {
