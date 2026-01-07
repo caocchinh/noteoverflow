@@ -384,6 +384,7 @@ export async function searchByText({
 
   // Query Vectorize for nearest neighbors
   let matches;
+
   try {
     const vectorizeFilter: Record<string, string> = {};
     if (filter?.subject) vectorizeFilter.subject = filter.subject;
@@ -414,6 +415,8 @@ export async function searchByText({
     score: number;
     type: string;
   }> = [];
+
+  console.log("Matches:", matches.matches[0].metadata);
 
   for (const match of matches.matches) {
     const metadata = match.metadata as unknown as VectorMetadata;

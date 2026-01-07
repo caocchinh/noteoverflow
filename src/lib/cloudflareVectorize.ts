@@ -142,13 +142,11 @@ export async function upsertVectorize(
   vectors: VectorizeVector[],
   vectorizeBinding?: VectorizeIndex
 ): Promise<{ count: number; ids: string[] }> {
-  if (vectorizeBinding) {
+  if (vectorizeBinding && process.env.NODE_ENV === "production") {
     console.log(`Using Vectorize Binding for upsert`);
     return vectorizeBinding.upsert(vectors);
   }
 
-  // Use NDJSON for inserts as it is more robust for Cloudflare Vectorize
-  // Each line must be a valid JSON object representing a vector
   const ndjson = vectors.map((v) => JSON.stringify(v)).join("\n");
 
   return callVectorizeAPI<{ count: number; ids: string[] }>(
@@ -158,6 +156,25 @@ export async function upsertVectorize(
     ndjson,
     "application/x-ndjson"
   );
+}
+
+/**
+ * Transform simple filters into Cloudflare Vectorize operator format
+ * @param filter Simple key-value filter object
+ * @returns Filter with Cloudflare operators (e.g., { subject: { $eq: 'Physics' } })
+ */
+function transformFilter(
+  filter?: Record<string, string | number | boolean>
+): Record<string, { $eq: string | number | boolean }> | undefined {
+  if (!filter || Object.keys(filter).length === 0) {
+    return undefined;
+  }
+
+  const transformed: Record<string, { $eq: string | number | boolean }> = {};
+  for (const [key, value] of Object.entries(filter)) {
+    transformed[key] = { $eq: value };
+  }
+  return transformed;
 }
 
 /**
@@ -172,16 +189,20 @@ export async function queryVectorize(
   options?: VectorizeQueryOptions,
   vectorizeBinding?: VectorizeIndex
 ): Promise<VectorizeMatches> {
-  if (vectorizeBinding) {
+  if (vectorizeBinding && process.env.NODE_ENV === "production") {
     // console.log(`Using Vectorize Binding for query`);
     return vectorizeBinding.query(vector, options);
   }
+
+  const transformedFilter = transformFilter(
+    options?.filter as Record<string, string>
+  );
 
   const payload = {
     vector,
     topK: options?.topK ?? 5,
     returnMetadata: options?.returnMetadata ?? "all",
-    filter: options?.filter,
+    filter: transformedFilter,
   };
 
   return callVectorizeAPI<VectorizeMatches>(

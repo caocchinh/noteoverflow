@@ -17,8 +17,13 @@ const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff in ms
 
 type VisionModelInput = {
-  image: number[];
-  prompt: string;
+  messages: Array<{
+    role: string;
+    content: Array<
+      | { type: "image_url"; image_url: { url: string } }
+      | { type: "text"; text: string }
+    >;
+  }>;
   max_tokens: number;
 };
 
@@ -28,25 +33,24 @@ type EmbeddingModelInput = {
 
 async function callCloudflareAI<T>(
   model:
-    | "@cf/meta/llama-3.2-11b-vision-instruct"
+    | "@cf/meta/llama-4-scout-17b-16e-instruct"
     | "@cf/baai/bge-large-en-v1.5",
   inputs: VisionModelInput | EmbeddingModelInput,
   aiBinding?: Ai
 ): Promise<T> {
-  if (aiBinding) {
+  if (process.env.NODE_ENV === "production" && aiBinding) {
     console.log(`Using Cloudflare AI Binding for ${model}`);
     try {
       const result = await aiBinding.run(model, inputs);
       return result as T;
     } catch (error) {
       console.error("Cloudflare AI Binding error:", error);
-
       throw error;
     }
   }
 
   let lastError: Error | null = null;
-  const TIMEOUT_MS = 60000; // 60 seconds timeout per request
+  const TIMEOUT_MS = 120000; // 120 seconds timeout per request
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const controller = new AbortController();
@@ -148,6 +152,23 @@ async function callCloudflareAI<T>(
   throw lastError || new Error("Cloudflare AI request failed after retries");
 }
 
+const fewShotMessages = [
+  {
+    role: "system",
+    content:
+      "You are a strict OCR engine. Output only raw text. Flatten vertical fractions to (a)/(b). Use 'ms^-1' for units. Remove all dotted lines and LaTeX formatting.",
+  },
+  {
+    role: "user",
+    content:
+      "Extract this text: Calculate the acceleration. acceleration = ........................ ms^(-2) [2]",
+  },
+  {
+    role: "assistant",
+    content: "Calculate the acceleration.\nacceleration = ms^(-2)",
+  },
+];
+
 /**
  * Extract text from an image using LLaVA vision model
  * @param imageBase64 - Base64 encoded image (without data URL prefix)
@@ -162,15 +183,28 @@ export async function extractTextFromImage(
     response?: string;
     description?: string;
   }>(
-    "@cf/meta/llama-3.2-11b-vision-instruct",
+    "@cf/meta/llama-4-scout-17b-16e-instruct",
     {
-      image: Array.from(
-        Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))
-      ),
-      prompt:
-        "Extract all text from this image verbatim. Include all equations, numbers, formulas, and any other text in diagrams. Do not attempt to solve the question, or add any additional reasoning. Only output the extracted text, nothing else.",
+      messages: [
+        ...fewShotMessages,
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${imageBase64}`,
+              },
+            },
+            {
+              type: "text",
+              text: 'Act as a raw text transcription engine, not an AI assistant. Output only the exact text physically visible in the image verbatim, strictly preserving the original order. Do not add organizational headers (like "Objective", "Question", "Answer"), do not use Markdown formatting (no bold ** or headers ##), and do not include any meta-comments (like "The answer is not provided"). Strictly do not use LaTeX formatting, dollar signs $, backslashes , or commands like \frac. Instead, flatten all vertical fractions into horizontal plain text using parentheses and a forward slash (e.g., transcribe a vertical fraction as (numerator)/(denominator)). Represent variables and formulas using standard plain text. Transcribe Greek symbols as full English words (e.g., "theta") and use standard text (e.g., "sqrt(x+1)" for roots, "x^2" for exponents, and "(a+b)/c" for fractions). Ignore answer dotted lines. If and only if a visual diagram is present, append a description at the very end starting with "Diagrams explanation: " describing it objectively without context; otherwise, stop immediately after the last extracted word.',
+            },
+          ],
+        },
+      ],
       max_tokens: 6700,
-    },
+    } as VisionModelInput,
     aiBinding
   );
   console.log(
