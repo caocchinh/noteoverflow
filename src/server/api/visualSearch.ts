@@ -8,6 +8,7 @@ import { status as elysiaStatus } from "elysia";
 import { verifySession } from "@/dal/verifySession";
 import { processImage, embedText, imageUrlToBase64 } from "@/lib/cloudflareAI";
 import { upsertVectorize, queryVectorize } from "@/lib/cloudflareVectorize";
+import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 
 // Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
 async function generateShortId(input: string): Promise<string> {
@@ -151,9 +152,9 @@ export async function indexQuestions({
         if (!imagePath) continue;
 
         // Skip if not an image URL (text answers)
-        const isImageUrl = /\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(
-          imagePath
-        );
+        // Images are hosted on notestack.online, text answers are plain strings
+        const isImageUrl = imagePath.includes("https://notestack.online");
+        console.log("imagePath", imagePath, "isImageUrl", isImageUrl);
         if (!isImageUrl) {
           console.log(
             `Skipping non-image answer: ${imagePath.slice(0, 50)}...`
@@ -192,7 +193,7 @@ export async function indexQuestions({
       try {
         // Vectorize has a limit of 1000 vectors per upsert, but we are doing per question so it should be fine
         await upsertVectorize(
-          "question-visual-search",
+          QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
           vectorsToUpsert,
           env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
         );
@@ -265,7 +266,7 @@ export async function searchByImage({
     if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
 
     matches = await queryVectorize(
-      "question-visual-search",
+      QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
       queryEmbedding,
       {
         topK,
@@ -391,7 +392,7 @@ export async function searchByText({
     if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
 
     matches = await queryVectorize(
-      "question-visual-search",
+      QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
       queryEmbedding,
       {
         topK,

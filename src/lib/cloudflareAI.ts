@@ -161,11 +161,22 @@ const fewShotMessages = [
   {
     role: "user",
     content:
-      "Extract this text: Calculate the acceleration. acceleration = ........................ ms^(-2) [2]",
+      "Extract this text: Calculate the acceleration. acceleration =  ms^(-2) [2]",
   },
   {
     role: "assistant",
     content: "Calculate the acceleration.\nacceleration = ms^(-2)",
+  },
+  // EXAMPLE 2: Chemistry (Teaching formulas and arrows)
+  // We show it an equation like "Mg(s) + 2HCl(aq) -> MgCl2(aq) + H2(g)"
+  {
+    role: "user",
+    content: "Extract this text: Mg(s) + 2HCl(aq) ⟶ MgCl2(aq) + H2(g)",
+  },
+  {
+    role: "assistant",
+    // Notice: No LaTeX, just plain text. Arrow becomes "->". Ions like Cu2+ become "Cu^2+".
+    content: "Mg(s) + 2HCl(aq) -> MgCl2(aq) + H2(g)",
   },
 ];
 

@@ -56,3 +56,6 @@ export const LIST_NAME_MAX_LENGTH = 100;
 export const PDF_HEADER_LOGO_SRC = "/assets/logo-bg-colorised-modified.webp";
 export const MY_ANNOTATIONS_BOOKMARK_LIST_NAME = "My annotations";
 export const MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY = "private";
+
+export const QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME =
+  "question-semantic-search";
