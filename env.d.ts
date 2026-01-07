@@ -28,5 +28,14 @@ namespace NodeJS {
     MAIN_R2_BUCKET_ACCESS_KEY_ID: string;
     MAIN_R2_BUCKET_SECRET_ACCESS_KEY: string;
     MAIN_R2_BUCKET_PUBLIC_URL: string;
+    JINA_API_KEY: string;
+  }
+}
+
+// Extend CloudflareEnv with additional bindings
+declare global {
+  interface CloudflareEnv {
+    JINA_API_KEY: string;
+    QUESTION_SEARCH: import("@cloudflare/workers-types").VectorizeIndex;
   }
 }

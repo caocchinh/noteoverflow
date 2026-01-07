@@ -4,6 +4,7 @@ import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
+import { indexQuestions, searchByImage } from "@/server/api/visualSearch";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -57,7 +58,32 @@ const app = new Elysia({ prefix: "/api", aot: false })
   .get("/topical/recent-query", getRecentQueries)
 
   // GET /api/topical/saved-activities - Get all user saved data
-  .get("/topical/saved-activities", getSavedActivities);
+  .get("/topical/saved-activities", getSavedActivities)
+
+  // ========== VISUAL SEARCH ADMIN ROUTES ==========
+
+  // GET /api/admin/visual-search/index?offset=0 - Index 1 question at a time
+  .get("/admin/visual-search/index", indexQuestions, {
+    query: t.Object({
+      offset: t.Optional(t.String({ default: "0" })),
+    }),
+    transform({ query }) {
+      // Parse offset to number, default limit to 1
+      (query as Record<string, unknown>).offset = parseInt(
+        query.offset ?? "0",
+        10
+      );
+      (query as Record<string, unknown>).limit = 1;
+    },
+  })
+
+  // POST /api/visual-search/search - Search by image
+  .post("/visual-search/search", searchByImage, {
+    body: t.Object({
+      imageBase64: t.String(),
+      topK: t.Optional(t.Number({ default: 5 })),
+    }),
+  });
 
 // Export type for Eden Treaty client
 export type App = typeof app;

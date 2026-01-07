@@ -1,67 +1,79 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "noteoverflow",
-  "main": ".open-next/worker.js",
-  "compatibility_date": "2025-03-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "preview_urls": true,
-  "workers_dev": true,
-  "assets": {
-    "binding": "ASSETS",
-    "directory": ".open-next/assets"
-  },
-  "observability": {
-    "logs": { "enabled": true }
-  },
-  "d1_databases": [
-    {
-      "binding": "MAIN_DB",
-      "database_name": "noteoverflow",
-      "database_id": "0c4c1b6d-e9fa-4191-b87f-72fb7dd3fbfa"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "MAIN_BUCKET",
-      "bucket_name": "noteoverflow"
-    }
-  ],
-  "kv_namespaces": [
-    {
-      "binding": "NEXT_INC_CACHE_KV",
-      "id": "966d0d6109f7487c819d70f64e72d4fd"
-    },
-    {
-      "binding": "TOPICAL_CACHE",
-      "id": "83f710e2d64c48e09b4606f6bd30cddb"
-    }
-  ],
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "NEXT_CACHE_DO_QUEUE",
-        "class_name": "DOQueueHandler"
-      },
-      {
-        "name": "NEXT_TAG_CACHE_DO_SHARDED",
-        "class_name": "DOShardedTagCache"
-      },
-      {
-        "name": "NEXT_CACHE_DO_PURGE",
-        "class_name": "BucketCachePurge"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_sqlite_classes": [
-        "DOQueueHandler",
-        "DOShardedTagCache",
-        "BucketCachePurge"
-      ]
-    }
-  ],
-
-  "placement": { "mode": "off" }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "noteoverflow",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-03-01",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"preview_urls": true,
+	"workers_dev": true,
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".open-next/assets"
+	},
+	"observability": {
+		"logs": {
+			"enabled": true
+		}
+	},
+	"d1_databases": [
+		{
+			"binding": "MAIN_DB",
+			"database_name": "noteoverflow",
+			"database_id": "0c4c1b6d-e9fa-4191-b87f-72fb7dd3fbfa"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MAIN_BUCKET",
+			"bucket_name": "noteoverflow"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "NEXT_INC_CACHE_KV",
+			"id": "966d0d6109f7487c819d70f64e72d4fd"
+		},
+		{
+			"binding": "TOPICAL_CACHE",
+			"id": "83f710e2d64c48e09b4606f6bd30cddb"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "NEXT_CACHE_DO_QUEUE",
+				"class_name": "DOQueueHandler"
+			},
+			{
+				"name": "NEXT_TAG_CACHE_DO_SHARDED",
+				"class_name": "DOShardedTagCache"
+			},
+			{
+				"name": "NEXT_CACHE_DO_PURGE",
+				"class_name": "BucketCachePurge"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"DOQueueHandler",
+				"DOShardedTagCache",
+				"BucketCachePurge"
+			]
+		}
+	],
+	"placement": {
+		"mode": "off"
+	},
+	"vectorize": [
+		{
+			"binding": "QUESTION_SEARCH",
+			"index_name": "question-visual-search"
+		}
+	]
 }
