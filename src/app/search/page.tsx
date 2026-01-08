@@ -1,274 +1,508 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { TOPICAL_DATA } from "@/constants/constants";
-import type {
-  CIE_A_LEVEL_SUBDIVISION,
-  ValidCurriculum,
-} from "@/constants/types";
-import CoursebookCover from "@/features/topical/components/CoursebookCover";
-import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
-import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
-import EnhancedMultiSelector from "@/features/topical/components/MultiSelector/EnhancedMultiSelector";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { validateSubcurriculumnDivision } from "@/features/topical/lib/utils";
+import { getRandomPhrase } from "@/constants/motivationalPhrases";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/eden";
+import { SelectedQuestion } from "@/features/topical/constants/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ImageIcon, Search, Type, Upload, X } from "lucide-react";
+import OptionalFilters, {
+  OptionalSearchFilter,
+} from "@/features/search/OptionalFilters";
 
-const PAPER_TYPE_FILTER_SEARCH_PAGE_KEY = "currentPaperTypeFilterSearchPage";
-
-type PaperTypeFilterSearchPageCache = {
-  [curriculum: string]: {
-    [subject: string]: CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined;
-  };
-};
+import { cn } from "@/lib/utils";
 
 const SearchPage = () => {
-  const [isMounted, setIsMounted] = useState(false);
-  const [selectedCurriculum, setSelectedCurriculum] =
-    useState<ValidCurriculum>("CIE A-LEVEL");
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<string[]>([]);
-  const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
-  const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
-    CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-  >(undefined);
+  const [activeTab, setActiveTab] = useState<"image" | "text">("text");
+  const [currentFilter, setCurrentFilter] =
+    useState<OptionalSearchFilter | null>(null);
 
-  const curriculumRef = useRef<HTMLDivElement | null>(null);
-  const subjectRef = useRef<HTMLDivElement | null>(null);
-  const yearRef = useRef<HTMLDivElement | null>(null);
-  const paperTypeRef = useRef<HTMLDivElement | null>(null);
-  const seasonRef = useRef<HTMLDivElement | null>(null);
+  // Image Search State
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const availableCurriculum = useMemo(() => {
-    return TOPICAL_DATA.map((item) => ({
-      code: item.curriculum,
-      coverImage: item.coverImage,
-    }));
-  }, []);
+  // Text Search State
+  const [textQuery, setTextQuery] = useState("");
 
-  const availableSubjects = useMemo(() => {
-    return TOPICAL_DATA[
-      TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-    ]?.subject;
-  }, [selectedCurriculum]);
+  const randomPhrase = useMemo(() => getRandomPhrase(), []);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const searchButtonPortalRef = useRef<HTMLDivElement | null>(null);
 
-  const availableYears = useMemo(() => {
-    return availableSubjects
-      ?.find((item) => item.code === selectedSubject)
-      ?.year.map(String);
-  }, [availableSubjects, selectedSubject]);
+  const getFilters = useCallback(() => {
+    if (!currentFilter) return undefined;
 
-  const availablePaperTypeFullInfo = useMemo(() => {
-    return availableSubjects
-      ?.find((item) => item.code === selectedSubject)
-      ?.paperType.map((item) => {
-        return {
-          value: item.paperType.toString(),
-          curriculumnSubdivision: item.paperTypeCurriculumnSubdivision,
-          isUpToDate: true,
-        };
+    const filters: {
+      subject?: string;
+      curriculum?: string;
+      year?: string[];
+      season?: string[];
+      paperType?: string[];
+    } = {};
+
+    if (currentFilter.subject?.trim())
+      filters.subject = currentFilter.subject.trim();
+    if (currentFilter.curriculum?.trim())
+      filters.curriculum = currentFilter.curriculum.trim();
+    if (currentFilter.year && currentFilter.year.length > 0)
+      filters.year = currentFilter.year;
+    if (currentFilter.season && currentFilter.season.length > 0)
+      filters.season = currentFilter.season;
+    if (currentFilter.paperType && currentFilter.paperType.length > 0)
+      filters.paperType = currentFilter.paperType;
+
+    return Object.keys(filters).length > 0 ? filters : undefined;
+  }, [currentFilter]);
+
+  // Image Search Mutation
+  const imageSearchMutation = useMutation({
+    mutationFn: async (imageBase64: string) => {
+      const { data, error } = await api["visual-search"].search.post({
+        imageBase64,
+        filter: getFilters(),
       });
-  }, [availableSubjects, selectedSubject]);
 
-  const availableSeasons = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.season;
-  }, [availableSubjects, selectedSubject]);
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error || "Search failed");
+      }
 
-  const subjectSyllabus = useMemo(
-    () =>
-      TOPICAL_DATA.find(
-        (item) => item.curriculum === selectedCurriculum
-      )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink,
-    [selectedCurriculum, selectedSubject]
+      return data.data as SelectedQuestion[];
+    },
+  });
+
+  // Text Search Mutation
+  const textSearchMutation = useMutation({
+    mutationFn: async (query: string) => {
+      const { data, error } = await api["visual-search"].text.post({
+        query,
+        filter: getFilters(),
+      });
+
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error || "Search failed");
+      }
+
+      return data.data as SelectedQuestion[];
+    },
+  });
+
+  // Derived state from mutations
+  const loading = imageSearchMutation.isPending || textSearchMutation.isPending;
+  const error =
+    imageSearchMutation.error?.message ||
+    textSearchMutation.error?.message ||
+    null;
+  const results = imageSearchMutation.data || textSearchMutation.data || null;
+
+  // Visual Search Handlers
+  const handleImageSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          // Remove data URL prefix for API
+          const base64Content = base64String.split(",")[1];
+          setSelectedImage(base64Content);
+          setPreviewUrl(base64String);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    []
   );
 
-  const subjectPrerequisite = useMemo(() => {
-    return selectedCurriculum ? "" : "Curriculum";
-  }, [selectedCurriculum]);
-
-  // Load paper type filter from localStorage on mount
-  useEffect(() => {
-    setIsMounted(true);
+  const clearImage = useCallback(() => {
+    setSelectedImage(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }, []);
 
-  // Load paper type filter preference when subject changes
-  useEffect(() => {
-    if (!isMounted || !selectedCurriculum || !selectedSubject) {
-      return;
-    }
+  const handleImageSearch = useCallback(() => {
+    if (!selectedImage) return;
+    textSearchMutation.reset();
+    imageSearchMutation.mutate(selectedImage);
+  }, [selectedImage, imageSearchMutation, textSearchMutation]);
 
-    try {
-      const savedCache = localStorage.getItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY
-      );
-      if (savedCache) {
-        const parsedCache: PaperTypeFilterSearchPageCache =
-          JSON.parse(savedCache);
-        const savedFilter = parsedCache[selectedCurriculum]?.[selectedSubject];
+  const handleTextSearch = useCallback(() => {
+    if (!textQuery.trim()) return;
+    imageSearchMutation.reset();
+    textSearchMutation.mutate(textQuery);
+  }, [textQuery, textSearchMutation, imageSearchMutation]);
 
-        if (
-          savedFilter &&
-          validateSubcurriculumnDivision({
-            value: savedFilter,
-            type: "paperType",
-            curriculum: selectedCurriculum,
-            subject: selectedSubject,
-          })
-        ) {
-          setCurrentPaperTypeFilter(savedFilter);
-        } else {
-          setCurrentPaperTypeFilter(undefined);
-        }
-      } else {
-        setCurrentPaperTypeFilter(undefined);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && textQuery.trim()) {
+        handleTextSearch();
       }
-    } catch {
-      setCurrentPaperTypeFilter(undefined);
+    },
+    [handleTextSearch, textQuery]
+  );
+
+  // Combined search handler for use with OptionalFilters
+  const handleSearch = useCallback(() => {
+    if (activeTab === "text") {
+      handleTextSearch();
+    } else {
+      handleImageSearch();
     }
-  }, [isMounted, selectedCurriculum, selectedSubject]);
-
-  // Save paper type filter preference to localStorage when it changes
-  useEffect(() => {
-    if (!isMounted || !selectedCurriculum || !selectedSubject) {
-      return;
-    }
-
-    try {
-      const existingCache = localStorage.getItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY
-      );
-      const parsedCache: PaperTypeFilterSearchPageCache = existingCache
-        ? JSON.parse(existingCache)
-        : {};
-
-      if (!parsedCache[selectedCurriculum]) {
-        parsedCache[selectedCurriculum] = {};
-      }
-
-      parsedCache[selectedCurriculum][selectedSubject] = currentPaperTypeFilter;
-
-      localStorage.setItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-        JSON.stringify(parsedCache)
-      );
-    } catch (error) {
-      console.error("Failed to save paper type filter to localStorage:", error);
-    }
-  }, [isMounted, selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
-
-  // Reset selections when curriculum changes
-  useEffect(() => {
-    if (!isMounted) return;
-    setSelectedSubject("");
-    setSelectedYear([]);
-    setSelectedPaperType([]);
-    setSelectedSeason([]);
-    setCurrentPaperTypeFilter(undefined);
-  }, [selectedCurriculum, isMounted]);
-
-  // Reset filter selections when subject changes
-  useEffect(() => {
-    if (!isMounted) return;
-    setSelectedYear([]);
-    setSelectedPaperType([]);
-    setSelectedSeason([]);
-  }, [selectedSubject, isMounted]);
+  }, [activeTab, handleTextSearch, handleImageSearch]);
 
   return (
-    <div className="mt-20">
-      <CoursebookCover
-        selectedSubject={selectedSubject}
-        selectedCurriculum={selectedCurriculum}
-        availableSubjects={availableSubjects}
-        subjectSyllabus={subjectSyllabus}
-      />
-      <div className="flex flex-col items-start justify-start gap-6">
-        {/* Curriculum Selection */}
+    <div className="min-h-screen pt-20 pb-12 bg-linear-to-b from-background via-muted/10 to-muted/30">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className="flex flex-col items-start justify-start gap-1"
-          ref={curriculumRef}
+          className={cn(
+            "mx-auto transition-all duration-700 ease-out",
+            !results ? "max-w-3xl" : "max-w-full pb-8"
+          )}
         >
-          <h3 className="w-max font-medium text-sm">Curriculum</h3>
-          <EnhancedSelect
-            data={availableCurriculum}
-            label="Curriculum"
-            prerequisite=""
-            selectedValue={selectedCurriculum}
-            setSelectedValue={useCallback((value) => {
-              setSelectedCurriculum(value as ValidCurriculum);
-            }, [])}
-          />
-        </div>
-
-        {/* Subject Selection */}
-        <div
-          className="flex flex-col items-start justify-start gap-1"
-          ref={subjectRef}
-        >
-          <h3 className="w-max font-medium text-sm">Subject</h3>
-          <EnhancedSelect
-            data={availableSubjects}
-            label="Subject"
-            prerequisite={subjectPrerequisite}
-            selectedValue={selectedSubject}
-            setSelectedValue={useCallback(setSelectedSubject, [
-              setSelectedSubject,
-            ])}
-          />
-        </div>
-
-        {/* Year Selection */}
-        <div
-          className="flex flex-col items-start justify-start gap-1"
-          ref={yearRef}
-        >
-          <h3 className="w-max font-medium text-sm">Year</h3>
-          <MultiSelector
-            allAvailableOptions={availableYears ?? []}
-            label="Year"
-            onValuesChange={useCallback(
-              (values) => setSelectedYear(values as string[]),
-              []
+          <div className="flex flex-col gap-3">
+            {!results && (
+              <div className="text-center">
+                <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-foreground to-foreground/60 bg-clip-text text-transparent sm:text-5xl">
+                  {randomPhrase}
+                </h1>
+                <p className="text-lg text-muted-foreground mx-auto -mt-2">
+                  Search through thousands of past paper questions and answers.
+                </p>
+              </div>
             )}
-            selectedValues={selectedYear}
-          />
+
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as "image" | "text")}
+              className="w-full"
+            >
+              <div
+                className={cn(
+                  "flex flex-col gap-6",
+                  !results && "items-center"
+                )}
+              >
+                <TabsList
+                  className={cn(
+                    "grid grid-cols-2 p-1 bg-muted/40 backdrop-blur-sm border shadow-sm",
+                    results ? "w-48" : "w-64"
+                  )}
+                >
+                  <TabsTrigger
+                    value="text"
+                    className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                  >
+                    <Type className="w-4 h-4 mr-2" />
+                    Text
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="image"
+                    className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Image
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="text" className="mt-0 w-full space-y-4">
+                  <div
+                    className={cn(
+                      "relative group transition-all duration-300",
+                      !results ? "max-w-2xl mx-auto" : "max-w-full"
+                    )}
+                  >
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    </div>
+                    <Input
+                      id="search-query"
+                      value={textQuery}
+                      onChange={(e) => setTextQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Search for questions (e.g. 'a ball is thrown up with velocity of 10m/s')..."
+                      className="h-14 pl-14 pr-4 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 transition-all"
+                    />
+                    {textQuery && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setTextQuery("")}
+                        className="absolute inset-y-0 cursor-pointer right-3 my-auto h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full"
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
+                  <div
+                    className={cn(
+                      "flex gap-3",
+                      results ? "justify-start" : "justify-center"
+                    )}
+                  >
+                    <OptionalFilters
+                      currentFilter={currentFilter}
+                      setCurrentFilter={setCurrentFilter}
+                      searchButtonPortalRef={searchButtonPortalRef}
+                      onSearch={handleSearch}
+                      loading={loading}
+                      hasResults={!!results}
+                    />
+                    <div ref={searchButtonPortalRef} className="flex-1" />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="image" className="mt-0 w-full space-y-4">
+                  <div
+                    className={cn(
+                      "relative border-2 border-dashed rounded-3xl transition-all overflow-hidden",
+                      previewUrl
+                        ? "border-primary/50 bg-primary/5"
+                        : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20",
+                      !results ? "h-48 sm:h-64" : "h-48"
+                    )}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    {previewUrl ? (
+                      <div className="absolute z-20 inset-0 flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearImage();
+                          }}
+                          title="Clear Image"
+                          className="absolute top-4 right-4 cursor-pointer z-20 h-10 w-10 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
+                        >
+                          <X className="w-5 h-5" />
+                        </Button>
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="max-w-full max-h-full rounded-xl object-contain shadow-lg"
+                        />
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                        <div className="w-16 h-16 rounded-full bg-muted/50 mb-4 flex items-center justify-center transition-transform group-hover:scale-110">
+                          <Upload className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <p className="text-lg font-medium text-foreground">
+                          Drop an image here
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          or click to upload screenshot
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={cn(
+                      "flex gap-3",
+                      results ? "justify-start" : "justify-center"
+                    )}
+                  >
+                    <Button
+                      onClick={handleImageSearch}
+                      disabled={!selectedImage || loading}
+                      size="lg"
+                      className="rounded-full px-8 flex-1 h-12 gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-base"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      {loading ? "Searching..." : "Search by Image"}
+                    </Button>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
         </div>
 
-        {/* Season Selection */}
-        <div
-          className="flex flex-col items-start justify-start gap-1"
-          ref={seasonRef}
-        >
-          <h3 className="w-max font-medium text-sm">Season</h3>
-          <MultiSelector
-            allAvailableOptions={availableSeasons ?? []}
-            label="Season"
-            onValuesChange={useCallback(
-              (values) => setSelectedSeason(values as string[]),
-              []
-            )}
-            selectedValues={selectedSeason}
-          />
-        </div>
+        {/* Status Messages */}
+        <div className="max-w-6xl mx-auto mt-8">
+          {error && (
+            <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+              <div className="p-2 bg-destructive/10 rounded-full">
+                <X className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-semibold">Search failed</p>
+                <p className="text-sm opacity-90">{error}</p>
+              </div>
+            </div>
+          )}
 
-        {/* Paper Type Selection */}
-        <div
-          className="flex flex-col items-start justify-start gap-1"
-          ref={paperTypeRef}
-        >
-          <h3 className="w-max font-medium text-sm">Paper</h3>
-          <EnhancedMultiSelector
-            isMounted={isMounted}
-            currentFilter={currentPaperTypeFilter}
-            setCurrentFilter={setCurrentPaperTypeFilter}
-            allAvailableOptions={availablePaperTypeFullInfo ?? []}
-            label="Paper"
-            onValuesChange={useCallback(
-              (values) => setSelectedPaperType(values as string[]),
-              []
-            )}
-            selectedValues={selectedPaperType}
-          />
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-24 animate-in fade-in zoom-in-95 duration-500">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Search className="w-6 h-6 text-primary/40 animate-pulse" />
+                </div>
+              </div>
+              <p className="text-muted-foreground mt-6 font-medium tracking-tight">
+                Searching questions...
+              </p>
+            </div>
+          )}
+
+          {/* Results Grid */}
+          {results && !loading && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <div className="flex items-center justify-between px-2">
+                <p className="text-sm text-muted-foreground font-medium">
+                  Found{" "}
+                  <span className="text-foreground font-bold">
+                    {results.length}
+                  </span>{" "}
+                  matches
+                </p>
+              </div>
+
+              {results.length === 0 ? (
+                <div className="text-center py-24 bg-muted/20 rounded-3xl border border-dashed border-muted-foreground/20">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-background flex items-center justify-center shadow-sm">
+                    <Search className="w-10 h-10 text-muted-foreground/30" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground">
+                    No matches found
+                  </h3>
+                  <p className="text-muted-foreground mt-1">
+                    Try adjusting your filters or search terms
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
+                  {results.map((result, idx) => (
+                    <Card
+                      key={result.id}
+                      className="overflow-hidden border-border/40 hover:border-primary/30 transition-all duration-300 bg-card/60 hover:bg-card/90 hover:shadow-xl hover:shadow-primary/5 group rounded-2xl"
+                      style={{ animationDelay: `${idx * 100}ms` }}
+                    >
+                      <div className="flex flex-col lg:flex-row">
+                        {/* Question Side */}
+                        <div className="lg:w-7/12 p-6 flex flex-col gap-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex flex-wrap gap-2 items-center">
+                              <Badge
+                                variant="secondary"
+                                className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent rounded-md px-2.5 py-1"
+                              >
+                                {result.season} {result.year}
+                              </Badge>
+                              <Badge
+                                variant="outline"
+                                className="text-muted-foreground border-border/60"
+                              >
+                                Paper {result.paperType}
+                              </Badge>
+                            </div>
+                            <span className="text-[10px] font-mono text-muted-foreground/50 bg-muted/30 px-2 py-1 rounded">
+                              {result.id.slice(0, 20)}...
+                            </span>
+                          </div>
+
+                          {result.topics && result.topics.length > 0 && (
+                            <div className="flex gap-1.5 flex-wrap">
+                              {result.topics.map((topic, i) => (
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className="text-xs border-primary/10 text-muted-foreground bg-background/50"
+                                >
+                                  {topic}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="space-y-6 mt-2">
+                            {result.questionImages?.map(
+                              (img: string, idx: number) => (
+                                <div
+                                  key={`q-${idx}`}
+                                  className="relative group/image"
+                                >
+                                  <div className="absolute -top-3 -left-2 z-10">
+                                    <Badge className="bg-foreground text-background shadow-lg shadow-black/10 hover:bg-foreground">
+                                      Q{idx + 1}
+                                    </Badge>
+                                  </div>
+                                  <div className="rounded-xl overflow-hidden border border-border/50 bg-white/50 dark:bg-black/20 p-1">
+                                    <img
+                                      src={img}
+                                      alt={`Question ${idx + 1}`}
+                                      className="w-full rounded-lg bg-white object-contain"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Answer Side */}
+                        <div className="lg:w-5/12 bg-muted/10 border-t lg:border-t-0 lg:border-l border-border/40 p-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="p-1.5 bg-emerald-500/10 rounded-md">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            </div>
+                            <span className="font-semibold text-sm tracking-tight text-muted-foreground uppercase">
+                              Suggested Answers
+                            </span>
+                          </div>
+
+                          <div className="space-y-4">
+                            {result.answers?.map((img: string, idx: number) => (
+                              <div key={`a-${idx}`} className="relative">
+                                <div className="absolute top-2 left-2 z-10">
+                                  <Badge className="bg-emerald-600/90 text-white border-0 shadow-sm backdrop-blur-md">
+                                    Ans {idx + 1}
+                                  </Badge>
+                                </div>
+
+                                {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(
+                                  img
+                                ) ? (
+                                  <div className="rounded-xl overflow-hidden border border-border/40 bg-white/50 dark:bg-black/20 p-1 shadow-sm">
+                                    <img
+                                      src={img}
+                                      alt={`Answer ${idx + 1}`}
+                                      className="w-full rounded-lg bg-white object-contain"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="p-4 text-sm bg-background border border-border/50 rounded-xl font-mono text-muted-foreground shadow-sm">
+                                    {img}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

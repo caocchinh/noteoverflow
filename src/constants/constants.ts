@@ -1598,3 +1598,6 @@ export const INITIAL_QUERY = {
   year: [],
   season: [],
 };
+
+export const PAPER_TYPE_FILTER_SEARCH_PAGE_KEY =
+  "noteoverflow-paper-type-filter-search-page";

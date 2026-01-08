@@ -112,7 +112,7 @@ const EnhancedSelect = memo(
             }}
             align="center"
             className={cn(
-              "z-[1000000000000000] w-[300px] p-0 sm:w-max",
+              "z-1000000000000000 w-[300px] p-0 sm:w-max",
               popoverContentClassName
             )}
             side={side || (isMobileDevice ? "bottom" : "right")}
@@ -177,7 +177,7 @@ const EnhancedSelectItem = ({
         avoidCollisions={true}
         className={cn(
           "relative z-[999999999999999999999999999999] hidden w-[100px] cursor-pointer border-none bg-transparent shadow-none lg:block",
-          !isOpen && "!hidden"
+          !isOpen && "hidden!"
         )}
         onClick={() => {
           setIsOpen(false);
@@ -267,7 +267,7 @@ const EnhancedSelectContent = forwardRef(
             }}
           />
           <XIcon
-            className="!bg-transparent cursor-pointer mr-2 text-destructive"
+            className="bg-transparent! cursor-pointer mr-2 text-destructive"
             size={20}
             onClick={() => {
               if (inputValue) {
