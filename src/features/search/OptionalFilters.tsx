@@ -273,7 +273,7 @@ const OptionalFilters = ({
             )}
           >
             <Filter className="w-4 h-4" />
-            <span>Config Filters</span>
+            <span>Optional Filters</span>
             {activeFilterCount > 0 && (
               <Badge
                 variant="secondary"
@@ -284,14 +284,14 @@ const OptionalFilters = ({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent>
           <SheetHeader>
             <SheetTitle>Search Filters</SheetTitle>
             <SheetDescription>
-              Configure your search parameters to find specific questions.
+              Configure your search parameters for better results.
             </SheetDescription>
           </SheetHeader>
-          <ScrollArea className="h-[calc(100vh-8rem)] pr-4 mt-6">
+          <ScrollArea className="h-[calc(100vh-8rem)] p-4">
             <div className="flex flex-col gap-6 pb-6">
               <div className="space-y-2" ref={curriculumRef}>
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
@@ -331,54 +331,48 @@ const OptionalFilters = ({
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
                   Year
                 </Label>
-                <div className="w-full [&_button]:w-full [&_button]:h-11 [&_button]:bg-background/60 [&_button]:hover:bg-background [&_button]:hover:border-primary/50 [&_button]:rounded-xl [&_button]:transition-all">
-                  <MultiSelector
-                    allAvailableOptions={availableYears ?? []}
-                    label="Year"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedYear(values as string[]),
-                      []
-                    )}
-                    selectedValues={selectedYear}
-                  />
-                </div>
+                <MultiSelector
+                  allAvailableOptions={availableYears ?? []}
+                  label="Year"
+                  onValuesChange={useCallback(
+                    (values) => setSelectedYear(values as string[]),
+                    []
+                  )}
+                  selectedValues={selectedYear}
+                />
               </div>
 
               <div className="space-y-2" ref={seasonRef}>
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
                   Season
                 </Label>
-                <div className="w-full [&_button]:w-full [&_button]:h-11 [&_button]:bg-background/60 [&_button]:hover:bg-background [&_button]:hover:border-primary/50 [&_button]:rounded-xl [&_button]:transition-all">
-                  <MultiSelector
-                    allAvailableOptions={availableSeasons ?? []}
-                    label="Season"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedSeason(values as string[]),
-                      []
-                    )}
-                    selectedValues={selectedSeason}
-                  />
-                </div>
+                <MultiSelector
+                  allAvailableOptions={availableSeasons ?? []}
+                  label="Season"
+                  onValuesChange={useCallback(
+                    (values) => setSelectedSeason(values as string[]),
+                    []
+                  )}
+                  selectedValues={selectedSeason}
+                />
               </div>
 
               <div className="space-y-2" ref={paperTypeRef}>
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
                   Paper
                 </Label>
-                <div className="w-full [&_button]:w-full [&_button]:h-11 [&_button]:bg-background/60 [&_button]:hover:bg-background [&_button]:hover:border-primary/50 [&_button]:rounded-xl [&_button]:transition-all">
-                  <EnhancedMultiSelector
-                    isMounted={isMounted}
-                    currentFilter={currentPaperTypeFilter}
-                    setCurrentFilter={setCurrentPaperTypeFilter}
-                    allAvailableOptions={availablePaperTypeFullInfo ?? []}
-                    label="Paper"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedPaperType(values as string[]),
-                      []
-                    )}
-                    selectedValues={selectedPaperType}
-                  />
-                </div>
+                <EnhancedMultiSelector
+                  isMounted={isMounted}
+                  currentFilter={currentPaperTypeFilter}
+                  setCurrentFilter={setCurrentPaperTypeFilter}
+                  allAvailableOptions={availablePaperTypeFullInfo ?? []}
+                  label="Paper"
+                  onValuesChange={useCallback(
+                    (values) => setSelectedPaperType(values as string[]),
+                    []
+                  )}
+                  selectedValues={selectedPaperType}
+                />
               </div>
             </div>
           </ScrollArea>

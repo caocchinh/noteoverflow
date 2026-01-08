@@ -15,56 +15,26 @@ import { ImageIcon, Search, Type, Upload, X } from "lucide-react";
 import OptionalFilters, {
   OptionalSearchFilter,
 } from "@/features/search/OptionalFilters";
-
 import { cn } from "@/lib/utils";
 
 const SearchPage = () => {
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
   const [currentFilter, setCurrentFilter] =
     useState<OptionalSearchFilter | null>(null);
-
-  // Image Search State
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // Text Search State
   const [textQuery, setTextQuery] = useState("");
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const searchButtonPortalRef = useRef<HTMLDivElement | null>(null);
 
-  const getFilters = useCallback(() => {
-    if (!currentFilter) return undefined;
-
-    const filters: {
-      subject?: string;
-      curriculum?: string;
-      year?: string[];
-      season?: string[];
-      paperType?: string[];
-    } = {};
-
-    if (currentFilter.subject?.trim())
-      filters.subject = currentFilter.subject.trim();
-    if (currentFilter.curriculum?.trim())
-      filters.curriculum = currentFilter.curriculum.trim();
-    if (currentFilter.year && currentFilter.year.length > 0)
-      filters.year = currentFilter.year;
-    if (currentFilter.season && currentFilter.season.length > 0)
-      filters.season = currentFilter.season;
-    if (currentFilter.paperType && currentFilter.paperType.length > 0)
-      filters.paperType = currentFilter.paperType;
-
-    return Object.keys(filters).length > 0 ? filters : undefined;
-  }, [currentFilter]);
-
   // Image Search Mutation
   const imageSearchMutation = useMutation({
     mutationFn: async (imageBase64: string) => {
       const { data, error } = await api["visual-search"].search.post({
         imageBase64,
-        filter: getFilters(),
+        filter: currentFilter ?? undefined,
       });
 
       if (error) {
@@ -81,7 +51,7 @@ const SearchPage = () => {
     mutationFn: async (query: string) => {
       const { data, error } = await api["visual-search"].text.post({
         query,
-        filter: getFilters(),
+        filter: currentFilter ?? undefined,
       });
 
       if (error) {
@@ -149,7 +119,6 @@ const SearchPage = () => {
     [handleTextSearch, textQuery]
   );
 
-  // Combined search handler for use with OptionalFilters
   const handleSearch = useCallback(() => {
     if (activeTab === "text") {
       handleTextSearch();
@@ -456,7 +425,6 @@ const SearchPage = () => {
                           </div>
                         </div>
 
-                        {/* Answer Side */}
                         <div className="lg:w-5/12 bg-muted/10 border-t lg:border-t-0 lg:border-l border-border/40 p-6">
                           <div className="flex items-center gap-2 mb-4">
                             <div className="p-1.5 bg-emerald-500/10 rounded-md">
