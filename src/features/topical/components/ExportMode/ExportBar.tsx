@@ -54,6 +54,10 @@ const ExportBarButtons = memo(
     const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
     const [isExportReviewOpen, setIsExportReviewOpen] = useState(false);
 
+    const handlePreviewExport = useCallback(() => {
+      setIsExportReviewOpen(true);
+    }, []);
+
     return (
       <>
         <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
@@ -96,9 +100,7 @@ const ExportBarButtons = memo(
         <SelectAllButton useAllQuestions={useAllQuestions} />
         <DeselectAllButton useNoQuestions={useNoQuestions} />
 
-        <PreviewExportButton
-          onClick={useCallback(() => setIsExportReviewOpen(true), [])}
-        />
+        <PreviewExportButton onClick={handlePreviewExport} />
         <ExportReviewDialog
           isOpen={isExportReviewOpen}
           setIsOpen={setIsExportReviewOpen}

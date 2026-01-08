@@ -3,6 +3,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/lib/eden";
 
 interface SearchResult {
   questionId: string;
@@ -66,17 +67,15 @@ export default function VisualSearchTestPage() {
     setExtractedText(null);
 
     try {
-      const res = await fetch("/api/visual-search/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64: selectedImage,
-          filter: getFilters(),
-        }),
+      const { data, error } = await api["visual-search"].search.post({
+        imageBase64: selectedImage,
+        filter: getFilters(),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Search failed");
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error || "Search failed");
+      }
 
       setResults(data.results);
       if (data.extractedText) setExtractedText(data.extractedText);
@@ -95,17 +94,15 @@ export default function VisualSearchTestPage() {
     setExtractedText(null);
 
     try {
-      const res = await fetch("/api/visual-search/text", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: textQuery,
-          filter: getFilters(),
-        }),
+      const { data, error } = await api["visual-search"].text.post({
+        query: textQuery,
+        filter: getFilters(),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Search failed");
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error || "Search failed");
+      }
 
       setResults(data.results);
     } catch (err: any) {
@@ -121,18 +118,17 @@ export default function VisualSearchTestPage() {
     setIndexResult(null);
 
     try {
-      const params = new URLSearchParams({
-        offset: indexParams.offset.toString(),
-        limit: indexParams.limit.toString(),
+      const { data, error } = await api.admin["visual-search"].index.get({
+        query: {
+          offset: indexParams.offset,
+          limit: indexParams.limit,
+        },
       });
-      const res = await fetch(`/api/admin/visual-search/index?${params}`);
 
-      const data = (await res.json()) as {
-        error?: string;
-        message?: string;
-        progress?: { indexed: number; skipped: number; failed: number };
-      };
-      if (!res.ok) throw new Error(data.error || "Indexing failed");
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error || "Indexing failed");
+      }
 
       setIndexResult(data);
     } catch (err: any) {

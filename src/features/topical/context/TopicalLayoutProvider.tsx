@@ -263,24 +263,41 @@ export default function TopicalLayoutProvider({
     [userSavedActivitiesQuery.isError]
   );
 
+  const contextValue = useMemo(
+    () => ({
+      isAppSidebarOpen,
+      setIsAppSidebarOpen,
+      isCalculatorOpen,
+      setIsCalculatorOpen,
+      uiPreferences,
+      setUiPreference,
+      bookmarksData,
+      annotationsData,
+      finishedQuestionsData,
+      savedActivitiesError,
+      savedActivitiesIsLoading,
+      savedActivitiesIsFetching,
+      savedActivitiesIsError,
+    }),
+    [
+      isAppSidebarOpen,
+      setIsAppSidebarOpen,
+      isCalculatorOpen,
+      setIsCalculatorOpen,
+      uiPreferences,
+      setUiPreference,
+      bookmarksData,
+      annotationsData,
+      finishedQuestionsData,
+      savedActivitiesError,
+      savedActivitiesIsLoading,
+      savedActivitiesIsFetching,
+      savedActivitiesIsError,
+    ]
+  );
+
   return (
-    <TopicalContext.Provider
-      value={{
-        isAppSidebarOpen,
-        setIsAppSidebarOpen,
-        isCalculatorOpen,
-        setIsCalculatorOpen,
-        uiPreferences,
-        setUiPreference,
-        bookmarksData,
-        annotationsData,
-        finishedQuestionsData,
-        savedActivitiesError,
-        savedActivitiesIsLoading,
-        savedActivitiesIsFetching,
-        savedActivitiesIsError,
-      }}
-    >
+    <TopicalContext.Provider value={contextValue}>
       <DesmosCalculator isOpen={isCalculatorOpen} />
       <div>
         <div className="absolute left-0 w-full">
