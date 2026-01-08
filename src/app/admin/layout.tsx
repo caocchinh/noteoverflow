@@ -32,7 +32,7 @@ const AdminContent = async ({ children }: { children: React.ReactNode }) => {
             </h3>
           </div>
         </div>
-        <div className="hidden h-[35px] w-[1px] border-gray-500 border-l md:block" />
+        <div className="hidden h-[35px] w-px border-gray-500 border-l md:block" />
         {session && (
           <Navigation
             isOwner={session.user.role === "owner"}

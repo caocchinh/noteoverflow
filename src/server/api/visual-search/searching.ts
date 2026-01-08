@@ -9,6 +9,7 @@ import {
   SearchFilter,
   validateSearchFilters,
 } from "./utils";
+import { NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE } from "@/features/topical/constants/constants";
 
 /**
  * Search for matching questions by uploading an image
@@ -25,7 +26,11 @@ export async function searchByImage({
   };
   status: typeof elysiaStatus;
 }) {
-  const { imageBase64, topK = 5, filter } = body;
+  const {
+    imageBase64,
+    topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE,
+    filter,
+  } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   // Validate filters using the same validation as getTopicalQuestions
@@ -87,7 +92,11 @@ export async function searchByText({
   };
   status: typeof elysiaStatus;
 }) {
-  const { query, topK = 5, filter } = body;
+  const {
+    query,
+    topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE,
+    filter,
+  } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   // Validate filters using the same validation as getTopicalQuestions

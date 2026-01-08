@@ -46,7 +46,6 @@ export default function VisualSearchTestPage() {
   const queryClient = useQueryClient();
 
   // Indexing State
-  // const [indexing, setIndexing] = useState(false); // Replaced by mutation.isPending
   const [indexParams, setIndexParams] = useState({ offset: 0, limit: 10 });
   const [indexResult, setIndexResult] = useState<any>(null);
 
@@ -58,7 +57,6 @@ export default function VisualSearchTestPage() {
       if (error) throw error;
       return data;
     },
-    // Only fetch when index tab is active
     enabled: activeTab === "index",
   });
 
@@ -77,8 +75,6 @@ export default function VisualSearchTestPage() {
     onSuccess: (data) => {
       setIndexResult(data);
       setError(null);
-
-      // Optimistically update the stats cache
       queryClient.setQueryData(["visual-search-stats"], (oldStats: any) => {
         if (!oldStats) return oldStats;
 
