@@ -31,6 +31,9 @@ export default function VisualSearchTestPage() {
   // Filter State
   const [filterSubject, setFilterSubject] = useState("");
   const [filterCurriculum, setFilterCurriculum] = useState("");
+  const [filterYear, setFilterYear] = useState("");
+  const [filterSeason, setFilterSeason] = useState("");
+  const [filterPaperType, setFilterPaperType] = useState("");
 
   // Indexing State
   const [indexing, setIndexing] = useState(false);
@@ -53,9 +56,38 @@ export default function VisualSearchTestPage() {
   };
 
   const getFilters = () => {
-    const filters: { subject?: string; curriculum?: string } = {};
+    const filters: {
+      subject?: string;
+      curriculum?: string;
+      year?: number[];
+      season?: string[];
+      paperType?: number[];
+    } = {};
+
     if (filterSubject.trim()) filters.subject = filterSubject.trim();
     if (filterCurriculum.trim()) filters.curriculum = filterCurriculum.trim();
+
+    if (filterYear.trim()) {
+      filters.year = filterYear
+        .split(",")
+        .map((s) => parseInt(s.trim()))
+        .filter((n) => !isNaN(n));
+    }
+
+    if (filterSeason.trim()) {
+      filters.season = filterSeason
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    }
+
+    if (filterPaperType.trim()) {
+      filters.paperType = filterPaperType
+        .split(",")
+        .map((s) => parseInt(s.trim()))
+        .filter((n) => !isNaN(n));
+    }
+
     return Object.keys(filters).length > 0 ? filters : undefined;
   };
 
@@ -118,7 +150,7 @@ export default function VisualSearchTestPage() {
     setIndexResult(null);
 
     try {
-      const { data, error } = await api.admin["visual-search"].index.get({
+      const { data, error } = await api.admin["visual-search"].get({
         query: {
           offset: indexParams.offset,
           limit: indexParams.limit,
@@ -197,18 +229,54 @@ export default function VisualSearchTestPage() {
                   className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium mb-1 text-gray-500">
-                  Curriculum
-                </label>
-                <input
-                  type="text"
-                  value={filterCurriculum}
-                  onChange={(e) => setFilterCurriculum(e.target.value)}
-                  placeholder="e.g. Cambridge"
-                  className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-                />
-              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-500">
+                Curriculum
+              </label>
+              <input
+                type="text"
+                value={filterCurriculum}
+                onChange={(e) => setFilterCurriculum(e.target.value)}
+                placeholder="e.g. Cambridge"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-500">
+                Year (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                placeholder="e.g. 2023, 2024"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-500">
+                Season (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={filterSeason}
+                onChange={(e) => setFilterSeason(e.target.value)}
+                placeholder="e.g. m, s, w"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1 text-gray-500">
+                Paper Type (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={filterPaperType}
+                onChange={(e) => setFilterPaperType(e.target.value)}
+                placeholder="e.g. 1, 2"
+                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+              />
             </div>
           </div>
         )}

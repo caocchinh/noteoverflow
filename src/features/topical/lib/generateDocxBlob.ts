@@ -9,7 +9,7 @@ import {
   BorderStyle,
 } from "docx";
 import {
-  convertImageToPngBase64WithDimensions,
+  convertImageToPngBase64,
   splitContent,
   extractPaperCode,
   extractQuestionNumber,
@@ -65,12 +65,12 @@ async function prepareQuestionForDocx(
   const [questionImagesData, answerImagesData] = await Promise.all([
     Promise.all(
       customQuestionItem.images.map((imgUrl) =>
-        convertImageToPngBase64WithDimensions(imgUrl)
+        convertImageToPngBase64({ url: imgUrl, includeDimensions: true })
       )
     ),
     Promise.all(
       customAnswerItem.images.map((imgUrl) =>
-        convertImageToPngBase64WithDimensions(imgUrl)
+        convertImageToPngBase64({ url: imgUrl, includeDimensions: true })
       )
     ),
   ]);
@@ -117,9 +117,10 @@ export async function generateMultipleQuestionsDocxBlob({
 
     // Add Logo
     try {
-      const logoData = await convertImageToPngBase64WithDimensions(
-        PDF_HEADER_LOGO_SRC
-      );
+      const logoData = await convertImageToPngBase64({
+        url: PDF_HEADER_LOGO_SRC,
+        includeDimensions: true,
+      });
       children.push(
         new Paragraph({
           children: [

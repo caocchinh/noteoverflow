@@ -12,6 +12,7 @@ import {
   ROLE_USER,
   UserRole,
 } from "./permission";
+import { MY_ANNOTATIONS_BOOKMARK_LIST_NAME } from "@/features/topical/constants/constants";
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 
@@ -73,6 +74,16 @@ export const auth = async (database: any) =>
                 .values({
                   userId: user.id,
                   listName: "My bookmarks",
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  id: crypto.randomUUID(),
+                })
+                .onConflictDoNothing();
+              await db
+                .insert(schema.userBookmarkList)
+                .values({
+                  userId: user.id,
+                  listName: MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   id: crypto.randomUUID(),

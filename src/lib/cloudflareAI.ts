@@ -1,4 +1,5 @@
 import "server-only";
+import { retryAI } from "@/dal/retry";
 
 /**
  * Cloudflare Workers AI helper functions for OCR and text embedding
@@ -10,11 +11,7 @@ const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
 const CLOUDFLARE_AI_API_TOKEN = process.env.CLOUDFLARE_AI_API_TOKEN;
 const CLOUDFLARE_AI_BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run`;
 
-/**
- * Call Cloudflare AI REST API
- */
-const MAX_RETRIES = 3;
-const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff in ms
+const REQUEST_TIMEOUT_MS = 122222; // ~120 seconds timeout per request
 
 type VisionModelInput = {
   messages: Array<{
@@ -31,6 +28,9 @@ type EmbeddingModelInput = {
   text: string[];
 };
 
+/**
+ * Call Cloudflare AI REST API with automatic retries
+ */
 async function callCloudflareAI<T>(
   model:
     | "@cf/meta/llama-4-scout-17b-16e-instruct"
@@ -49,21 +49,18 @@ async function callCloudflareAI<T>(
     }
   }
 
-  let lastError: Error | null = null;
-  const TIMEOUT_MS = 122222; // 120 seconds timeout per request
-
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+  return retryAI(async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
       // Log approximate payload size for debugging
       const payload = JSON.stringify(inputs);
       const payloadSize = new TextEncoder().encode(payload).length;
       console.log(
-        `Cloudflare AI request to ${model} (attempt ${
-          attempt + 1
-        }/${MAX_RETRIES}) - Payload size: ${(payloadSize / 1024).toFixed(2)} KB`
+        `Cloudflare AI request to ${model} - Payload size: ${(
+          payloadSize / 1024
+        ).toFixed(2)} KB`
       );
 
       const response = await fetch(`${CLOUDFLARE_AI_BASE_URL}/${model}`, {
@@ -80,27 +77,6 @@ async function callCloudflareAI<T>(
 
       if (!response.ok) {
         const error = await response.text();
-        const statusCode = response.status;
-
-        // Retry on timeout (408) or server errors (5xx)
-        if (statusCode === 408 || statusCode >= 500) {
-          lastError = new Error(
-            `Cloudflare AI API error: ${statusCode} - ${error}`
-          );
-          if (attempt < MAX_RETRIES - 1) {
-            console.log(
-              `Cloudflare AI timeout/error, retrying in ${
-                RETRY_DELAYS[attempt]
-              }ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
-            );
-            await new Promise((resolve) =>
-              setTimeout(resolve, RETRY_DELAYS[attempt])
-            );
-            continue;
-          }
-          throw lastError;
-        }
-
         throw new Error(
           `Cloudflare AI API error: ${response.status} - ${error}`
         );
@@ -120,36 +96,16 @@ async function callCloudflareAI<T>(
       return data.result as T;
     } catch (err) {
       clearTimeout(timeoutId); // Ensure timeout is cleared on error too
-      lastError = err instanceof Error ? err : new Error(String(err));
+      const error = err instanceof Error ? err : new Error(String(err));
 
-      // Handle abort errors specifically
-      if (lastError.name === "AbortError") {
-        lastError = new Error(`Request timed out after ${TIMEOUT_MS}ms`);
+      // Convert abort errors to a more descriptive message
+      if (error.name === "AbortError") {
+        throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS}ms`);
       }
 
-      // Only retry on network errors, timeouts, or specific retryable errors
-      if (
-        attempt < MAX_RETRIES - 1 &&
-        (lastError.message.includes("408") ||
-          lastError.message.includes("timeout") ||
-          lastError.message.includes("timed out") ||
-          lastError.message.includes("ECONNRESET"))
-      ) {
-        console.log(
-          `Cloudflare AI error (${lastError.message}), retrying in ${
-            RETRY_DELAYS[attempt]
-          }ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
-        );
-        await new Promise((resolve) =>
-          setTimeout(resolve, RETRY_DELAYS[attempt])
-        );
-        continue;
-      }
-      throw lastError;
+      throw error;
     }
-  }
-
-  throw lastError || new Error("Cloudflare AI request failed after retries");
+  }, `Cloudflare AI ${model}`);
 }
 
 const fewShotMessages = [
@@ -260,24 +216,4 @@ export async function processImage(
 
   const embedding = await embedText(text, aiBinding);
   return { text, embedding };
-}
-
-/**
- * Fetch image from URL and convert to base64
- */
-export async function imageUrlToBase64(imageUrl: string): Promise<string> {
-  const response = await fetch(imageUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.status}`);
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-
-  // Convert to base64
-  let binary = "";
-  for (let i = 0; i < uint8Array.length; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
-  }
-  return btoa(binary);
 }

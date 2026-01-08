@@ -66,8 +66,8 @@ const app = new Elysia({ prefix: "/api", aot: false })
 
   // ========== VISUAL SEARCH ADMIN ROUTES ==========
 
-  // GET /api/admin/visual-search/index?offset=0 - Index 1 question at a time
-  .get("/admin/visual-search/index", indexQuestions, {
+  // GET /api/admin/visual-search?offset=0 - Index 1 question at a time
+  .get("/admin/visual-search", indexQuestions, {
     query: t.Object({
       offset: t.Numeric({ default: 0 }),
       limit: t.Numeric({ default: 1 }),
@@ -83,6 +83,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
         t.Object({
           subject: t.Optional(t.String()),
           curriculum: t.Optional(t.String()),
+          year: t.Optional(t.Array(t.Numeric())),
+          season: t.Optional(t.Array(t.String())),
+          paperType: t.Optional(t.Array(t.Numeric())),
         })
       ),
     }),

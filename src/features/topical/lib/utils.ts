@@ -1000,13 +1000,26 @@ export function extractUniqueTopicCurriculumnSubdivisions(
   return [...new Set(allSubdivisions)];
 }
 
+type ConvertImageToPngBase64Params =
+  | { url: string; includeDimensions?: false }
+  | { url: string; includeDimensions: true };
+
+type ConvertImageToPngBase64Result<T extends ConvertImageToPngBase64Params> =
+  T extends { includeDimensions: true }
+    ? { base64: string; width: number; height: number }
+    : string;
+
 /**
  * Converts an image from a URL to a PNG Base64 string.
  * This is useful for rendering WebP images in libraries that don't support them (like @react-pdf/renderer).
- * @param url The URL of the image to convert.
- * @returns A Promise that resolves to the Base64 string of the PNG image.
+ * @param params.url The URL of the image to convert.
+ * @param params.includeDimensions If true, returns an object with base64, width, and height.
+ * @returns A Promise that resolves to the Base64 string or an object with base64 and dimensions.
  */
-export const convertImageToPngBase64 = (url: string): Promise<string> => {
+export function convertImageToPngBase64<
+  T extends ConvertImageToPngBase64Params
+>(params: T): Promise<ConvertImageToPngBase64Result<T>> {
+  const { url, includeDimensions } = params;
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "Anonymous"; // Enable CORS to prevent tainted canvas
@@ -1021,40 +1034,22 @@ export const convertImageToPngBase64 = (url: string): Promise<string> => {
       }
       ctx.drawImage(img, 0, 0);
       const dataURL = canvas.toDataURL("image/png");
-      resolve(dataURL);
-    };
-    img.onerror = (error) => {
-      reject(error);
-    };
-    img.src = url;
-  });
-};
-
-export const convertImageToPngBase64WithDimensions = (
-  url: string
-): Promise<{ base64: string; width: number; height: number }> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        reject(new Error("Failed to get canvas context"));
-        return;
+      if (includeDimensions) {
+        resolve({
+          base64: dataURL,
+          width: img.width,
+          height: img.height,
+        } as ConvertImageToPngBase64Result<T>);
+      } else {
+        resolve(dataURL as ConvertImageToPngBase64Result<T>);
       }
-      ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/png");
-      resolve({ base64: dataURL, width: img.width, height: img.height });
     };
     img.onerror = (error) => {
       reject(error);
     };
     img.src = url;
   });
-};
+}
 
 export const handleDownloadPdf = (pdfBlob: Blob | null, fileName: string) => {
   if (!pdfBlob) return;

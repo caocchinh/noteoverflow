@@ -64,10 +64,14 @@ async function prepareQuestionForPdf(
   // Convert images to base64
   const [convertedQuestionImages, convertedAnswerImages] = await Promise.all([
     Promise.all(
-      questionItem.images.map((imgUrl) => convertImageToPngBase64(imgUrl))
+      questionItem.images.map((imgUrl) =>
+        convertImageToPngBase64({ url: imgUrl })
+      )
     ),
     Promise.all(
-      answerItem.images.map((imgUrl) => convertImageToPngBase64(imgUrl))
+      answerItem.images.map((imgUrl) =>
+        convertImageToPngBase64({ url: imgUrl })
+      )
     ),
   ]);
 
@@ -97,7 +101,7 @@ async function prepareQuestionForPdf(
  */
 async function loadHeaderLogo(): Promise<string | null> {
   try {
-    return await convertImageToPngBase64(PDF_HEADER_LOGO_SRC);
+    return await convertImageToPngBase64({ url: PDF_HEADER_LOGO_SRC });
   } catch (error) {
     console.error("Failed to load header logo", error);
     return null;

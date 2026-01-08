@@ -6,9 +6,10 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
 import { verifySession } from "@/dal/verifySession";
-import { processImage, embedText, imageUrlToBase64 } from "@/lib/cloudflareAI";
+import { processImage, embedText } from "@/lib/cloudflareAI";
 import { upsertVectorize, queryVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
+import { imageUrlToBase64 } from "@/lib/utils";
 
 // Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
 async function generateShortId(input: string): Promise<string> {
@@ -182,7 +183,6 @@ export async function indexQuestions({
   query: { limit: number; offset: number };
 }) {
   const { limit, offset } = query;
-
   // Verify admin session
   const session = await verifySession();
   if (!session?.session || session.user.role !== "admin") {
@@ -191,6 +191,7 @@ export async function indexQuestions({
       code: ERROR_CODES.UNAUTHORIZED,
     });
   }
+  console.log("indexing questions");
 
   const { env } = await getCloudflareContext({ async: true });
 
