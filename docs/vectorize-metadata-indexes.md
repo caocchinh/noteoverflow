@@ -21,7 +21,7 @@ wrangler vectorize list
 wrangler vectorize delete question-semantic-search
 
 # Recreate the index
-wrangler vectorize create question-semantic-search --dimensions=768 --metric=cosine
+wrangler vectorize create question-semantic-search --dimensions=1024 --metric=cosine
 ```
 
 ---
@@ -31,14 +31,13 @@ wrangler vectorize create question-semantic-search --dimensions=768 --metric=cos
 ### Using Wrangler CLI
 
 ```bash
-# Create a metadata index for a string field
-wrangler vectorize create-metadata-index <INDEX_NAME> --property-name=<FIELD_NAME> --type=string
-
-# Create a metadata index for a number field
-wrangler vectorize create-metadata-index <INDEX_NAME> --property-name=<FIELD_NAME> --type=number
-
-# Create a metadata index for a boolean field
-wrangler vectorize create-metadata-index <INDEX_NAME> --property-name=<FIELD_NAME> --type=boolean
+# Create metadata indexes for filter fields
+wrangler vectorize create-metadata-index question-semantic-search --property-name=subject --type=string
+wrangler vectorize create-metadata-index question-semantic-search --property-name=curriculum --type=string
+wrangler vectorize create-metadata-index question-semantic-search --property-name=year --type=number
+wrangler vectorize create-metadata-index question-semantic-search --property-name=season --type=string
+wrangler vectorize create-metadata-index question-semantic-search --property-name=paperType --type=number
+wrangler vectorize create-metadata-index question-semantic-search --property-name=type --type=string
 ```
 
 ### Example: Current Implementation
@@ -126,12 +125,18 @@ When you create metadata indexes, you can filter by those fields in your queries
 const filter = {
   subject: "Physics (9702)",
   curriculum: "CIE A-LEVEL",
+  year: [2024],
+  season: ["Spring"],
+  paperType: [1],
 };
 
 // This gets transformed to Cloudflare format:
 // {
 //   subject: { $eq: 'Physics (9702)' },
 //   curriculum: { $eq: 'CIE A-LEVEL' }
+//   year: { $in: [2024] },
+//   season: { $in: ['Spring'] },
+//   paperType: { $in: [1] },
 // }
 
 const matches = await queryVectorize(

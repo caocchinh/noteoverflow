@@ -28,6 +28,10 @@ interface VectorMetadata {
   extractedText: string;
   subject: string;
   curriculum: string;
+  year: number;
+  season: string;
+  paperType: number;
+
   [key: string]: string | number | boolean;
 }
 
@@ -51,6 +55,119 @@ interface IndexProgress {
   failed: number;
   skipped: number;
   total: number;
+}
+
+// Search filter type used by both searchByText and searchByImage
+interface SearchFilter {
+  subject?: string;
+  curriculum?: string;
+  year?: number[];
+  season?: string[];
+  paperType?: number[];
+}
+
+/**
+ * Build Vectorize filter object from search filter
+ */
+function buildVectorizeFilter(
+  filter?: SearchFilter
+): Record<string, { $eq: string } | { $in: (string | number)[] }> | undefined {
+  if (!filter) return undefined;
+
+  const vectorizeFilter: Record<
+    string,
+    { $eq: string } | { $in: (string | number)[] }
+  > = {};
+  if (filter.subject) vectorizeFilter.subject = { $eq: filter.subject };
+  if (filter.curriculum)
+    vectorizeFilter.curriculum = { $eq: filter.curriculum };
+  if (filter.year && filter.year.length > 0)
+    vectorizeFilter.year = { $in: filter.year };
+  if (filter.season && filter.season.length > 0)
+    vectorizeFilter.season = { $in: filter.season };
+  if (filter.paperType && filter.paperType.length > 0)
+    vectorizeFilter.paperType = { $in: filter.paperType };
+
+  return Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined;
+}
+
+/**
+ * Execute vector search against Vectorize
+ */
+async function executeVectorSearch(
+  queryEmbedding: number[],
+  topK: number,
+  filter: SearchFilter | undefined,
+  vectorizeBinding: VectorizeIndex
+): Promise<VectorizeMatches> {
+  return queryVectorize(
+    QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
+    queryEmbedding,
+    {
+      topK,
+      returnMetadata: "all",
+      filter: buildVectorizeFilter(filter),
+    },
+    vectorizeBinding
+  );
+}
+
+/**
+ * Process Vectorize matches and fetch full question data from D1
+ */
+async function fetchQuestionResults(
+  matches: VectorizeMatches
+): Promise<SearchResult[]> {
+  const matchDetails: Array<{
+    questionId: string;
+    score: number;
+    type: string;
+  }> = [];
+
+  for (const match of matches.matches) {
+    const metadata = match.metadata as unknown as VectorMetadata;
+    if (metadata?.questionId) {
+      matchDetails.push({
+        questionId: metadata.questionId,
+        score: match.score,
+        type: metadata.type,
+      });
+    }
+  }
+
+  const db = await getDbAsync();
+  const results: SearchResult[] = [];
+
+  for (const detail of matchDetails) {
+    if (results.some((r) => r.questionId === detail.questionId)) continue;
+
+    const questionData = await db.query.question.findFirst({
+      where: (q, { eq }) => eq(q.id, detail.questionId),
+      columns: {
+        id: true,
+        year: true,
+        season: true,
+        paperType: true,
+        questionImages: true,
+        answers: true,
+      },
+    });
+
+    results.push({
+      questionId: detail.questionId,
+      score: detail.score,
+      type: detail.type as "question" | "answer",
+      question: questionData
+        ? {
+            ...questionData,
+            questionImages: JSON.parse(questionData.questionImages ?? "[]"),
+            answers: JSON.parse(questionData.answers ?? "[]"),
+          }
+        : null,
+    });
+  }
+
+  return results;
 }
 
 /**
@@ -87,6 +204,9 @@ export async function indexQuestions({
       answers: true,
       subjectId: true,
       curriculumName: true,
+      year: true,
+      season: true,
+      paperType: true,
     },
     limit,
     offset,
@@ -134,6 +254,9 @@ export async function indexQuestions({
             extractedText: text.slice(0, 500), // Store truncated text for debugging
             subject: q.subjectId ?? "",
             curriculum: q.curriculumName ?? "",
+            year: q.year ?? 0,
+            season: q.season ?? "",
+            paperType: q.paperType ?? 0,
           },
         });
         progress.indexed++;
@@ -177,6 +300,9 @@ export async function indexQuestions({
             extractedText: text.slice(0, 500),
             subject: q.subjectId ?? "",
             curriculum: q.curriculumName ?? "",
+            year: q.year ?? 0,
+            season: q.season ?? "",
+            paperType: q.paperType ?? 0,
           },
         });
         progress.indexed++;
@@ -235,7 +361,7 @@ export async function searchByImage({
   body: {
     imageBase64: string;
     topK?: number;
-    filter?: { subject?: string; curriculum?: string };
+    filter?: SearchFilter;
   };
   status: typeof elysiaStatus;
 }) {
@@ -261,19 +387,10 @@ export async function searchByImage({
   // Query Vectorize for nearest neighbors
   let matches;
   try {
-    const vectorizeFilter: Record<string, string> = {};
-    if (filter?.subject) vectorizeFilter.subject = filter.subject;
-    if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
-
-    matches = await queryVectorize(
-      QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
+    matches = await executeVectorSearch(
       queryEmbedding,
-      {
-        topK,
-        returnMetadata: "all",
-        filter:
-          Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
-      },
+      topK,
+      filter,
       env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
     );
   } catch (error) {
@@ -284,59 +401,8 @@ export async function searchByImage({
     });
   }
 
-  // Extract unique question IDs from matches
-  const questionIds = new Set<string>();
-  const matchDetails: Array<{
-    questionId: string;
-    score: number;
-    type: string;
-  }> = [];
-
-  for (const match of matches.matches) {
-    const metadata = match.metadata as unknown as VectorMetadata;
-    if (metadata?.questionId) {
-      questionIds.add(metadata.questionId);
-      matchDetails.push({
-        questionId: metadata.questionId,
-        score: match.score,
-        type: metadata.type,
-      });
-    }
-  }
-
   // Fetch full question data from D1
-  const db = await getDbAsync();
-  const results: SearchResult[] = [];
-
-  for (const detail of matchDetails) {
-    // Skip if we already have this question in results
-    if (results.some((r) => r.questionId === detail.questionId)) continue;
-
-    const questionData = await db.query.question.findFirst({
-      where: (q, { eq }) => eq(q.id, detail.questionId),
-      columns: {
-        id: true,
-        year: true,
-        season: true,
-        paperType: true,
-        questionImages: true,
-        answers: true,
-      },
-    });
-
-    results.push({
-      questionId: detail.questionId,
-      score: detail.score,
-      type: detail.type as "question" | "answer",
-      question: questionData
-        ? {
-            ...questionData,
-            questionImages: JSON.parse(questionData.questionImages ?? "[]"),
-            answers: JSON.parse(questionData.answers ?? "[]"),
-          }
-        : null,
-    });
-  }
+  const results = await fetchQuestionResults(matches);
 
   return {
     success: true,
@@ -357,7 +423,7 @@ export async function searchByText({
   body: {
     query: string;
     topK?: number;
-    filter?: { subject?: string; curriculum?: string };
+    filter?: SearchFilter;
   };
   status: typeof elysiaStatus;
 }) {
@@ -385,21 +451,11 @@ export async function searchByText({
 
   // Query Vectorize for nearest neighbors
   let matches;
-
   try {
-    const vectorizeFilter: Record<string, string> = {};
-    if (filter?.subject) vectorizeFilter.subject = filter.subject;
-    if (filter?.curriculum) vectorizeFilter.curriculum = filter.curriculum;
-
-    matches = await queryVectorize(
-      QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
+    matches = await executeVectorSearch(
       queryEmbedding,
-      {
-        topK,
-        returnMetadata: "all",
-        filter:
-          Object.keys(vectorizeFilter).length > 0 ? vectorizeFilter : undefined,
-      },
+      topK,
+      filter,
       env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
     );
   } catch (error) {
@@ -410,58 +466,8 @@ export async function searchByText({
     });
   }
 
-  // Extract unique question IDs from matches
-  const matchDetails: Array<{
-    questionId: string;
-    score: number;
-    type: string;
-  }> = [];
-
-  console.log("Matches:", matches.matches[0].metadata);
-
-  for (const match of matches.matches) {
-    const metadata = match.metadata as unknown as VectorMetadata;
-    if (metadata?.questionId) {
-      matchDetails.push({
-        questionId: metadata.questionId,
-        score: match.score,
-        type: metadata.type,
-      });
-    }
-  }
-
   // Fetch full question data from D1
-  const db = await getDbAsync();
-  const results: SearchResult[] = [];
-
-  for (const detail of matchDetails) {
-    if (results.some((r) => r.questionId === detail.questionId)) continue;
-
-    const questionData = await db.query.question.findFirst({
-      where: (q, { eq }) => eq(q.id, detail.questionId),
-      columns: {
-        id: true,
-        year: true,
-        season: true,
-        paperType: true,
-        questionImages: true,
-        answers: true,
-      },
-    });
-
-    results.push({
-      questionId: detail.questionId,
-      score: detail.score,
-      type: detail.type as "question" | "answer",
-      question: questionData
-        ? {
-            ...questionData,
-            questionImages: JSON.parse(questionData.questionImages ?? "[]"),
-            answers: JSON.parse(questionData.answers ?? "[]"),
-          }
-        : null,
-    });
-  }
+  const results = await fetchQuestionResults(matches);
 
   return {
     success: true,

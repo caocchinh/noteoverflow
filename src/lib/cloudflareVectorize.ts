@@ -159,25 +159,6 @@ export async function upsertVectorize(
 }
 
 /**
- * Transform simple filters into Cloudflare Vectorize operator format
- * @param filter Simple key-value filter object
- * @returns Filter with Cloudflare operators (e.g., { subject: { $eq: 'Physics' } })
- */
-function transformFilter(
-  filter?: Record<string, string | number | boolean>
-): Record<string, { $eq: string | number | boolean }> | undefined {
-  if (!filter || Object.keys(filter).length === 0) {
-    return undefined;
-  }
-
-  const transformed: Record<string, { $eq: string | number | boolean }> = {};
-  for (const [key, value] of Object.entries(filter)) {
-    transformed[key] = { $eq: value };
-  }
-  return transformed;
-}
-
-/**
  * Query a Vectorize index
  * @param indexName Name of the index
  * @param vector Query vector
@@ -194,15 +175,11 @@ export async function queryVectorize(
     return vectorizeBinding.query(vector, options);
   }
 
-  const transformedFilter = transformFilter(
-    options?.filter as Record<string, string>
-  );
-
   const payload = {
     vector,
     topK: options?.topK ?? 5,
     returnMetadata: options?.returnMetadata ?? "all",
-    filter: transformedFilter,
+    filter: options?.filter,
   };
 
   return callVectorizeAPI<VectorizeMatches>(
