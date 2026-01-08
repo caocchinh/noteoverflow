@@ -3,9 +3,17 @@ import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
 import { count, eq } from "drizzle-orm";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
+import { verifySession } from "@/dal/verifySession";
 
 export async function getQuestionStats({ status }: Context) {
   try {
+    const session = await verifySession();
+    if (!session?.session || session.user.role !== "admin") {
+      return status(HTTP_STATUS.FORBIDDEN, {
+        error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
+        code: ERROR_CODES.FORBIDDEN,
+      });
+    }
     const db = await getDbAsync();
 
     // Count indexed questions

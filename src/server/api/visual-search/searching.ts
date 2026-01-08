@@ -34,17 +34,14 @@ export async function searchByImage({
 
   // Extract text from uploaded image using OCR, then embed
   let queryEmbedding: number[];
-  let extractedText: string;
   try {
     const result = await processImage(imageBase64, env.AI);
     queryEmbedding = result.embedding;
-    extractedText = result.text;
   } catch (error) {
     console.error("Failed to process image:", error);
-    return status(HTTP_STATUS.BAD_REQUEST, {
-      error:
-        "Failed to extract text from image. The image may not contain readable text.",
-      code: ERROR_CODES.BAD_REQUEST,
+    return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+      error: "Failed to process image.",
+      code: ERROR_CODES.INTERNAL_SERVER_ERROR,
     });
   }
 
@@ -60,7 +57,7 @@ export async function searchByImage({
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
-      error: "Failed to search vector database",
+      error: "Database unavailable.",
       code: ERROR_CODES.INTERNAL_SERVER_ERROR,
     });
   }
@@ -72,7 +69,6 @@ export async function searchByImage({
     success: true,
     data: results,
     totalMatches: matches.matches.length,
-    extractedText: extractedText.slice(0, 200), // Return preview of extracted text
   };
 }
 
@@ -129,7 +125,7 @@ export async function searchByText({
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
     return status(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
-      error: "Failed to search vector database",
+      error: "Database unavailable.",
       code: ERROR_CODES.INTERNAL_SERVER_ERROR,
     });
   }

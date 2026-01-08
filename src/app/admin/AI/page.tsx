@@ -2,11 +2,23 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
-
 import { SelectedQuestion } from "@/features/topical/constants/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function VisualSearchTestPage() {
   const [activeTab, setActiveTab] = useState<"image" | "text" | "index">(
@@ -86,22 +98,25 @@ export default function VisualSearchTestPage() {
     },
   });
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        // Remove data URL prefix for API
-        const base64Content = base64String.split(",")[1];
-        setSelectedImage(base64Content);
-        setPreviewUrl(base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleImageSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          // Remove data URL prefix for API
+          const base64Content = base64String.split(",")[1];
+          setSelectedImage(base64Content);
+          setPreviewUrl(base64String);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    []
+  );
 
-  const getFilters = () => {
+  const getFilters = useCallback(() => {
     const filters: {
       subject?: string;
       curriculum?: string;
@@ -135,9 +150,15 @@ export default function VisualSearchTestPage() {
     }
 
     return Object.keys(filters).length > 0 ? filters : undefined;
-  };
+  }, [
+    filterSubject,
+    filterCurriculum,
+    filterYear,
+    filterSeason,
+    filterPaperType,
+  ]);
 
-  const handleImageSearch = async () => {
+  const handleImageSearch = useCallback(async () => {
     if (!selectedImage) return;
     setLoading(true);
     setError(null);
@@ -156,15 +177,14 @@ export default function VisualSearchTestPage() {
       }
 
       setResults(data.data);
-      if (data.extractedText) setExtractedText(data.extractedText);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedImage, getFilters]);
 
-  const handleTextSearch = async () => {
+  const handleTextSearch = useCallback(async () => {
     if (!textQuery.trim()) return;
     setLoading(true);
     setError(null);
@@ -188,370 +208,410 @@ export default function VisualSearchTestPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [textQuery, getFilters]);
 
-  const handleIndexQuestions = () => {
+  const handleIndexQuestions = useCallback(() => {
     setIndexResult(null);
     indexMutation.mutate(indexParams);
-  };
+  }, [indexMutation, indexParams]);
+
+  // Common Filters Component to avoid duplication
+  const CommonFilters = () => (
+    <Card className="mb-6">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Filters (Optional)</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="subject">Subject</Label>
+            <Input
+              id="subject"
+              value={filterSubject}
+              onChange={(e) => setFilterSubject(e.target.value)}
+              placeholder="e.g. Math"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="curriculum">Curriculum</Label>
+            <Input
+              id="curriculum"
+              value={filterCurriculum}
+              onChange={(e) => setFilterCurriculum(e.target.value)}
+              placeholder="e.g. Cambridge"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="year">Year (comma-separated)</Label>
+            <Input
+              id="year"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              placeholder="e.g. 2023, 2024"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="season">Season (comma-separated)</Label>
+            <Input
+              id="season"
+              value={filterSeason}
+              onChange={(e) => setFilterSeason(e.target.value)}
+              placeholder="e.g. m, s, w"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="paperType">Paper Type (comma-separated)</Label>
+            <Input
+              id="paperType"
+              value={filterPaperType}
+              onChange={(e) => setFilterPaperType(e.target.value)}
+              placeholder="e.g. 1, 2"
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <div className="p-8 max-w-4xl mx-auto font-sans">
-      <h1 className="text-3xl font-bold mb-8">Visual Search Admin Test</h1>
-
-      {/* Tabs */}
-      <div className="flex gap-4 mb-8 border-b border-gray-200">
-        <button
-          onClick={() => setActiveTab("image")}
-          className={`pb-2 px-4 transition-colors ${
-            activeTab === "image"
-              ? "border-b-2 border-blue-500 font-semibold"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          Image Search
-        </button>
-        <button
-          onClick={() => setActiveTab("text")}
-          className={`pb-2 px-4 transition-colors ${
-            activeTab === "text"
-              ? "border-b-2 border-blue-500 font-semibold"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          Text Search
-        </button>
-        <button
-          onClick={() => setActiveTab("index")}
-          className={`pb-2 px-4 transition-colors ${
-            activeTab === "index"
-              ? "border-b-2 border-blue-500 font-semibold"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          Indexing
-        </button>
+    <div className="container mx-auto py-8 max-w-5xl">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Visual Search Admin Test</h1>
       </div>
 
-      {/* Content */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8 max-w-lg">
-        {/* Common Filters (Only for Search Tabs) */}
-        {activeTab !== "index" && (
-          <div className="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
-            <h3 className="text-sm font-semibold mb-3 text-gray-700">
-              Filters (Optional)
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium mb-1 text-gray-500">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={filterSubject}
-                  onChange={(e) => setFilterSubject(e.target.value)}
-                  placeholder="e.g. Math"
-                  className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+      <Tabs
+        defaultValue="image"
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as any)}
+        className="w-full space-y-6"
+      >
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="image" className="cursor-pointer">
+            Image Search
+          </TabsTrigger>
+          <TabsTrigger value="text" className="cursor-pointer">
+            Text Search
+          </TabsTrigger>
+          <TabsTrigger value="index" className="cursor-pointer">
+            Indexing
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Filters - Visible for Search Tabs */}
+        {activeTab !== "index" && <CommonFilters />}
+
+        <TabsContent value="image" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Search by Image</CardTitle>
+              <CardDescription>
+                Upload an image to search for similar questions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="image-upload">Upload Image</Label>
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="cursor-pointer"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-500">
-                Curriculum
-              </label>
-              <input
-                type="text"
-                value={filterCurriculum}
-                onChange={(e) => setFilterCurriculum(e.target.value)}
-                placeholder="e.g. Cambridge"
-                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-500">
-                Year (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-                placeholder="e.g. 2023, 2024"
-                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-500">
-                Season (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={filterSeason}
-                onChange={(e) => setFilterSeason(e.target.value)}
-                placeholder="e.g. m, s, w"
-                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-500">
-                Paper Type (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={filterPaperType}
-                onChange={(e) => setFilterPaperType(e.target.value)}
-                placeholder="e.g. 1, 2"
-                className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-            </div>
-          </div>
-        )}
 
-        {activeTab === "image" ? (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Upload Image
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
+              {previewUrl && (
+                <div className="mt-4 border rounded-lg overflow-hidden w-fit bg-slate-50">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="max-h-64 object-contain"
+                  />
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={handleImageSearch}
+                disabled={!selectedImage || loading}
+                className="w-full sm:w-auto"
+              >
+                {loading ? "Searching..." : "Search by Image"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
 
-            {previewUrl && (
-              <div className="mt-4">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="max-h-64 rounded border border-gray-200"
+        <TabsContent value="text" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Search by Text</CardTitle>
+              <CardDescription>
+                Enter a text query to search for questions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="text-query">Search Query</Label>
+                <Input
+                  id="text-query"
+                  value={textQuery}
+                  onChange={(e) => setTextQuery(e.target.value)}
+                  placeholder="Enter specific question text..."
                 />
               </div>
-            )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={handleTextSearch}
+                disabled={!textQuery.trim() || loading}
+                className="w-full sm:w-auto"
+              >
+                {loading ? "Searching..." : "Search by Text"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
 
-            <button
-              onClick={handleImageSearch}
-              disabled={!selectedImage || loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Searching..." : "Search by Image"}
-            </button>
-          </div>
-        ) : activeTab === "text" ? (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Search Query
-              </label>
-              <input
-                type="text"
-                value={textQuery}
-                onChange={(e) => setTextQuery(e.target.value)}
-                placeholder="Enter text here..."
-                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-
-            <button
-              onClick={handleTextSearch}
-              disabled={!textQuery.trim() || loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Searching..." : "Search by Text"}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {stats && (
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-blue-50 rounded border border-blue-100 text-center">
-                  <div className="text-2xl font-bold text-blue-700">
+        <TabsContent value="index" className="space-y-6">
+          {stats && (
+            <div className="grid grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="py-4">
+                  <CardTitle className="text-2xl text-blue-600 text-center">
                     {stats.indexed}
-                  </div>
-                  <div className="text-xs text-blue-600 font-medium">
+                  </CardTitle>
+                  <CardDescription className="text-center">
                     Indexed
-                  </div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded border border-gray-200 text-center">
-                  <div className="text-2xl font-bold text-gray-700">
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="py-4">
+                  <CardTitle className="text-2xl text-gray-600 text-center">
                     {stats.notIndexed}
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
+                  </CardTitle>
+                  <CardDescription className="text-center">
                     Not Indexed
-                  </div>
-                </div>
-                <div className="p-4 bg-purple-50 rounded border border-purple-100 text-center">
-                  <div className="text-2xl font-bold text-purple-700">
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="py-4">
+                  <CardTitle className="text-2xl text-purple-600 text-center">
                     {stats.total}
-                  </div>
-                  <div className="text-xs text-purple-600 font-medium">
+                  </CardTitle>
+                  <CardDescription className="text-center">
                     Total
-                  </div>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Bulk Indexing</CardTitle>
+              <CardDescription>
+                Index questions into the vector database.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="offset">Offset</Label>
+                  <Input
+                    id="offset"
+                    type="number"
+                    value={indexParams.offset}
+                    onChange={(e) =>
+                      setIndexParams((p) => ({
+                        ...p,
+                        offset: parseInt(e.target.value) || 0,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="limit">Limit</Label>
+                  <Input
+                    id="limit"
+                    type="number"
+                    value={indexParams.limit}
+                    onChange={(e) =>
+                      setIndexParams((p) => ({
+                        ...p,
+                        limit: parseInt(e.target.value) || 1,
+                      }))
+                    }
+                  />
                 </div>
               </div>
-            )}
+            </CardContent>
+            <CardFooter className="flex-col items-stretch gap-4">
+              <Button
+                onClick={handleIndexQuestions}
+                disabled={indexMutation.isPending}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+              >
+                {indexMutation.isPending ? "Indexing..." : "Start Indexing"}
+              </Button>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Offset</label>
-                <input
-                  type="number"
-                  value={indexParams.offset}
-                  onChange={(e) =>
-                    setIndexParams((p) => ({
-                      ...p,
-                      offset: parseInt(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Limit</label>
-                <input
-                  type="number"
-                  value={indexParams.limit}
-                  onChange={(e) =>
-                    setIndexParams((p) => ({
-                      ...p,
-                      limit: parseInt(e.target.value) || 1,
-                    }))
-                  }
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleIndexQuestions}
-              disabled={indexMutation.isPending}
-              className="w-full bg-emerald-600 text-white py-2 px-4 rounded hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {indexMutation.isPending ? "Indexing..." : "Start Indexing"}
-            </button>
-
-            {indexResult && (
-              <div className="mt-4 p-4 bg-gray-50 rounded border border-gray-200 text-sm">
-                <p className="font-semibold mb-2">{indexResult.message}</p>
-                {indexResult.progress && (
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-green-100 p-2 rounded">
-                      <div className="text-xl font-bold text-green-700">
-                        {indexResult.progress.indexed}
+              {indexResult && (
+                <div className="p-4 bg-muted rounded-md text-sm border">
+                  <p className="font-semibold mb-2">{indexResult.message}</p>
+                  {indexResult.progress && (
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                        <div className="text-xl font-bold text-green-700 dark:text-green-400">
+                          {indexResult.progress.indexed}
+                        </div>
+                        <div className="text-xs text-green-800 dark:text-green-500">
+                          Indexed
+                        </div>
                       </div>
-                      <div className="text-xs text-green-800">Indexed</div>
-                    </div>
-                    <div className="bg-yellow-100 p-2 rounded">
-                      <div className="text-xl font-bold text-yellow-700">
-                        {indexResult.progress.skipped}
+                      <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                        <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
+                          {indexResult.progress.skipped}
+                        </div>
+                        <div className="text-xs text-yellow-800 dark:text-yellow-500">
+                          Skipped
+                        </div>
                       </div>
-                      <div className="text-xs text-yellow-800">Skipped</div>
-                    </div>
-                    <div className="bg-red-100 p-2 rounded">
-                      <div className="text-xl font-bold text-red-700">
-                        {indexResult.progress.failed}
+                      <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                        <div className="text-xl font-bold text-red-700 dark:text-red-400">
+                          {indexResult.progress.failed}
+                        </div>
+                        <div className="text-xs text-red-800 dark:text-red-500">
+                          Failed
+                        </div>
                       </div>
-                      <div className="text-xs text-red-800">Failed</div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                  )}
+                </div>
+              )}
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 text-red-700 rounded mb-8 border border-red-200">
+        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded border border-red-200">
           {error}
         </div>
       )}
 
       {/* Extracted Text Debug */}
       {extractedText && (
-        <div className="mb-8">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">
-            OCR Extracted Text
-          </h3>
-          <div className="bg-gray-50 p-4 rounded text-sm font-mono whitespace-pre-wrap border border-gray-200">
-            {extractedText}
-          </div>
-        </div>
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-lg text-muted-foreground uppercase tracking-wider">
+              OCR Extracted Text
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted p-4 rounded text-sm font-mono whitespace-pre-wrap border">
+              {extractedText}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Results */}
       {results && (
-        <div>
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            Results
-            <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+        <div className="mt-8 space-y-6">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold">Results</h2>
+            <Badge variant="secondary" className="px-3 py-1">
               {results.length} found
-            </span>
-          </h2>
+            </Badge>
+          </div>
+
           {results.length === 0 ? (
-            <p className="text-gray-500 italic">No matches found.</p>
+            <p className="text-muted-foreground italic">No matches found.</p>
           ) : (
             <div className="grid gap-6">
               {results.map((result) => (
-                <div
-                  key={result.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm text-gray-500 font-mono">
-                          ID: {result.id}
-                        </span>
-                      </div>
-                      <h3 className="font-medium">
-                        {result.season} {result.year} - paper {result.paperType}
-                      </h3>
-                      {result.topics && result.topics.length > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Topics: {result.topics.join(", ")}
+                <Card key={result.id} className="overflow-hidden">
+                  <CardHeader className="bg-muted/30 pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs text-muted-foreground font-mono">
+                            ID: {result.id}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 overflow-x-auto pb-2">
-                    {/* Display Question Images */}
-                    {result.questionImages?.map((img: string, idx: number) => (
-                      <div key={`q-${idx}`} className="shrink-0 relative group">
-                        <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
-                          Q
-                        </div>
-                        <img
-                          src={img}
-                          alt={`Question ${idx + 1}`}
-                          className="h-32 rounded border border-gray-200"
-                        />
-                      </div>
-                    ))}
-                    {/* Display Answer Images */}
-                    {result.answers?.map((img: string, idx: number) => (
-                      <div key={`a-${idx}`} className="shrink-0 relative group">
-                        <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
-                          A
-                        </div>
-                        {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(img) ? (
-                          <img
-                            src={img}
-                            alt={`Answer ${idx + 1}`}
-                            className="h-32 rounded border border-gray-200 opacity-90"
-                          />
-                        ) : (
-                          <div className="h-32 w-48 p-2 text-xs overflow-y-auto bg-gray-50 border border-gray-200 rounded">
-                            {img}
+                        <CardTitle className="text-lg">
+                          {result.season} {result.year} - paper{" "}
+                          {result.paperType}
+                        </CardTitle>
+                        {result.topics && result.topics.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mt-2">
+                            {result.topics.map((topic, i) => (
+                              <Badge
+                                key={i}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {topic}
+                              </Badge>
+                            ))}
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="p-4 pt-4">
+                    <div className="gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 flex flex-col">
+                      {result.questionImages?.map(
+                        (img: string, idx: number) => (
+                          <div
+                            key={`q-${idx}`}
+                            className="shrink-0 relative group w-full "
+                          >
+                            <Badge className="absolute top-0 left-0 rounded-tl-none rounded-br-md rounded-tr-none rounded-bl-none z-10 pointer-events-none">
+                              Q
+                            </Badge>
+                            <img
+                              src={img}
+                              alt={`Question ${idx + 1}`}
+                              className="w-full rounded-md border bg-white object-contain"
+                            />
+                          </div>
+                        )
+                      )}
+                      {/* Display Answer Images */}
+                      {result.answers?.map((img: string, idx: number) => (
+                        <div
+                          key={`a-${idx}`}
+                          className="shrink-0 relative group"
+                        >
+                          <Badge
+                            variant="default"
+                            className="absolute top-0 left-0 rounded-tl-none rounded-br-md rounded-tr-none rounded-bl-none z-10 pointer-events-none bg-emerald-600 hover:bg-emerald-600"
+                          >
+                            A
+                          </Badge>
+                          {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(img) ? (
+                            <img
+                              src={img}
+                              alt={`Answer ${idx + 1}`}
+                              className="h-40 rounded-md border bg-white object-contain"
+                            />
+                          ) : (
+                            <div className="h-40 w-48 p-3 text-xs overflow-y-auto bg-muted border rounded-md font-mono">
+                              {img}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

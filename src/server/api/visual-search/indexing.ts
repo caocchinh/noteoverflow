@@ -28,9 +28,9 @@ export async function indexQuestions({
   // Verify admin session
   const session = await verifySession();
   if (!session?.session || session.user.role !== "admin") {
-    return status(HTTP_STATUS.UNAUTHORIZED, {
-      error: ERROR_MESSAGES[ERROR_CODES.UNAUTHORIZED],
-      code: ERROR_CODES.UNAUTHORIZED,
+    return status(HTTP_STATUS.FORBIDDEN, {
+      error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
+      code: ERROR_CODES.FORBIDDEN,
     });
   }
 

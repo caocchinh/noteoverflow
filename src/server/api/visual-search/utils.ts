@@ -34,11 +34,9 @@ export interface VectorMetadata {
   year: string;
   season: string;
   paperType: string;
-
+  // Index signature for Cloudflare Vectorize compatibility
   [key: string]: string;
 }
-
-// Response types
 
 export interface IndexProgress {
   indexed: number;
@@ -51,7 +49,6 @@ export interface IndexProgress {
 export interface SearchFilter {
   curriculum?: string;
   subject?: string;
-  topic?: string[];
   year?: string[];
   season?: string[];
   paperType?: string[];
@@ -65,6 +62,19 @@ export function validateSearchFilters(
   status: typeof elysiaStatus
 ) {
   if (!filter) return null;
+
+  // Require curriculum and subject when year, season, or paperType filters are used
+  const hasDetailFilters =
+    (filter.year && filter.year.length > 0) ||
+    (filter.season && filter.season.length > 0) ||
+    (filter.paperType && filter.paperType.length > 0);
+
+  if (hasDetailFilters && (!filter.curriculum || !filter.subject)) {
+    return status(HTTP_STATUS.BAD_REQUEST, {
+      error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
+      code: ERROR_CODES.BAD_REQUEST,
+    });
+  }
 
   // Validate curriculum if provided
   if (filter.curriculum && !validateCurriculum(filter.curriculum)) {
@@ -91,7 +101,6 @@ export function validateSearchFilters(
     if (
       !validatePartialFilterData({
         data: {
-          topic: filter.topic,
           paperType: filter.paperType,
           year: filter.year,
           season: filter.season,
@@ -123,6 +132,7 @@ export function buildVectorizeFilter(
   if (filter.year && filter.year.length > 0) {
     vectorizeFilter.year = { $in: filter.year };
   }
+
   if (filter.season && filter.season.length > 0)
     vectorizeFilter.season = { $in: filter.season };
   if (filter.paperType && filter.paperType.length > 0) {
