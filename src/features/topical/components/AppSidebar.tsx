@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
@@ -7,7 +6,6 @@ import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
 import { TOPICAL_DATA } from "@/constants/constants";
-import { default as NextImage } from "next/image";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +13,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { BookMarked, CalendarOff, ScanText, Send } from "lucide-react";
+import { ScanText, Send } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiltersCache,
@@ -31,7 +29,6 @@ import {
 } from "../constants/constants";
 import type {
   CIE_A_LEVEL_SUBDIVISION,
-  TopicalSubject,
   ValidCurriculum,
 } from "@/constants/types";
 import {
@@ -50,6 +47,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
+import CoursebookCover from "./CoursebookCover";
 
 const AppSidebar = memo(
   ({
@@ -109,9 +107,13 @@ const AppSidebar = memo(
       ]?.subject;
     }, [selectedCurriculum]);
 
-    const subjectSyllabus = TOPICAL_DATA.find(
-      (item) => item.curriculum === selectedCurriculum
-    )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink;
+    const subjectSyllabus = useMemo(
+      () =>
+        TOPICAL_DATA.find(
+          (item) => item.curriculum === selectedCurriculum
+        )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink,
+      [selectedCurriculum, selectedSubject]
+    );
 
     const availableTopicsFullInfo = useMemo(() => {
       return availableSubjects
@@ -126,8 +128,9 @@ const AppSidebar = memo(
     }, [availableSubjects, selectedSubject]);
 
     const availableYears = useMemo(() => {
-      return availableSubjects?.find((item) => item.code === selectedSubject)
-        ?.year;
+      return availableSubjects
+        ?.find((item) => item.code === selectedSubject)
+        ?.year.map(String);
     }, [availableSubjects, selectedSubject]);
 
     const availablePaperTypeFullInfo = useMemo(() => {
@@ -147,8 +150,7 @@ const AppSidebar = memo(
         ?.season;
     }, [availableSubjects, selectedSubject]);
 
-    // Memoized props to prevent unnecessary re-renders
-    const curriculumData = useMemo(() => {
+    const availableCurriculum = useMemo(() => {
       return TOPICAL_DATA.map((item) => ({
         code: item.curriculum,
         coverImage: item.coverImage,
@@ -159,11 +161,7 @@ const AppSidebar = memo(
       return selectedCurriculum ? "" : "Curriculum";
     }, [selectedCurriculum]);
 
-    const yearData = useMemo(() => {
-      return availableYears?.map((item) => item.toString());
-    }, [availableYears]);
-
-    const revert = () => {
+    const revert = useCallback(() => {
       if (!currentQuery.curriculumId || !currentQuery.subjectId) {
         return;
       }
@@ -177,9 +175,9 @@ const AppSidebar = memo(
       setTimeout(() => {
         isOverwriting.current = false;
       }, 0);
-    };
+    }, [currentQuery]);
 
-    const resetEverything = () => {
+    const resetEverything = useCallback(() => {
       isOverwriting.current = true;
       try {
         const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
@@ -223,7 +221,7 @@ const AppSidebar = memo(
       setTimeout(() => {
         isOverwriting.current = false;
       }, 0);
-    };
+    }, [selectedCurriculum, selectedSubject, isMobileDevice]);
 
     const isValidInputs = useCallback(
       ({ scrollOnError = true }: { scrollOnError?: boolean }) => {
@@ -685,9 +683,7 @@ const AppSidebar = memo(
               setSelectedSeason={setSelectedSeason}
               isOverwriting={isOverwriting}
             />
-
             <StrictModeToggle />
-
             <SidebarSeparator />
 
             <div className="flex w-full flex-col items-center justify-start gap-4">
@@ -713,7 +709,7 @@ const AppSidebar = memo(
                         Curriculum
                       </h3>
                       <EnhancedSelect
-                        data={curriculumData}
+                        data={availableCurriculum}
                         label="Curriculum"
                         prerequisite=""
                         selectedValue={selectedCurriculum}
@@ -832,7 +828,7 @@ const AppSidebar = memo(
                     Year
                   </h3>
                   <MultiSelector
-                    allAvailableOptions={yearData ?? []}
+                    allAvailableOptions={availableYears ?? []}
                     label="Year"
                     onValuesChange={useCallback(
                       (values) => setSelectedYear(values as string[]),
@@ -909,86 +905,6 @@ const AppSidebar = memo(
 AppSidebar.displayName = "AppSidebar";
 
 export default AppSidebar;
-
-const CoursebookCover = memo(
-  ({
-    selectedSubject,
-    selectedCurriculum,
-    availableSubjects,
-    subjectSyllabus,
-  }: {
-    selectedSubject: string;
-    selectedCurriculum: ValidCurriculum;
-    availableSubjects: TopicalSubject[];
-    subjectSyllabus: string | undefined;
-  }) => {
-    return (
-      <AnimatePresence mode="wait">
-        {selectedSubject && selectedCurriculum ? (
-          <motion.div
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            key={selectedSubject}
-            transition={{
-              duration: 0.15,
-              ease: "easeInOut",
-            }}
-            className="flex flex-col gap-2"
-          >
-            <NextImage
-              alt="cover"
-              className="self-center rounded-[2px]"
-              height={126}
-              src={
-                availableSubjects.find((item) => item.code === selectedSubject)
-                  ?.coverImage ?? ""
-              }
-              width={100}
-            />
-            {subjectSyllabus ? (
-              <a
-                className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row"
-                href={subjectSyllabus}
-                target="_blank"
-                title="Open syllabus"
-                rel="noreferrer"
-              >
-                Syllabus
-                <BookMarked size={15} />
-              </a>
-            ) : (
-              <div className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row">
-                Outdated
-                <CalendarOff size={15} />
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            key={selectedSubject}
-            transition={{
-              duration: 0.15,
-              ease: "easeInOut",
-            }}
-          >
-            <NextImage
-              alt="default subject"
-              className="self-center"
-              height={100}
-              src="/assets/pointing.webp"
-              width={100}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }
-);
-CoursebookCover.displayName = "CoursebookCover";
 
 const StrictModeToggle = memo(() => {
   const { uiPreferences, setUiPreference } = useTopicalApp();

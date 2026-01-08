@@ -126,11 +126,7 @@ export default function RootLayout({
               disableTransitionOnChange
               enableSystem={false}
             >
-              <NextTopLoader
-                color={LOGO_MAIN_COLOR}
-                showSpinner={false}
-                zIndex={99_999_999}
-              />
+              <NextTopLoader color={LOGO_MAIN_COLOR} zIndex={99_999_999} />
               <NavBar />
               {children}
             </ThemeProvider>

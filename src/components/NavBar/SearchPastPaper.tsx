@@ -330,7 +330,7 @@ const SearchPastPaper = () => {
       >
         <Input
           className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
-          placeholder={breakpoint ? "Search" : "Search past papers"}
+          placeholder={breakpoint ? "Search" : "Search past paper question"}
           value=""
           readOnly={true}
         />

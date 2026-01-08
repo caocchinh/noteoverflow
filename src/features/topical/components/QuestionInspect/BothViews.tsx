@@ -93,7 +93,7 @@ const BothViews = ({
         scrollAreaRef={questionScrollAreaRef}
         annotableContainerRef={annotableQuestionContainerRef}
       />
-      <ResizableHandle withHandle />
+      <ResizableHandle withHandle className={cn(isMobile && "w-full")} />
       <InspectPanel
         key={`answer-${currentQuestionData?.id}`}
         title="Answer"

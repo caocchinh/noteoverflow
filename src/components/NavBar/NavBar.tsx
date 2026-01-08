@@ -1,5 +1,5 @@
 "use client";
-import { Github, Layers } from "lucide-react";
+import { Github, Layers, SearchIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/tooltip";
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
-import SearchPastPaper from "./SearchPastPaper";
 import { ModeToggle } from "./ThemeToggle";
 import User from "./User";
+import { Input } from "../ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const NavBar = () => {
   const pathname = usePathname();
+  const breakpoint = useIsMobile({ breakpoint: 735 });
 
   return (
     <header className="fixed top-0 right-0 left-0 z-100000 flex min-w-screen items-center justify-between border-(--navbar-border) border-b bg-(--navbar-bg) px-1 py-[7px] sm:px-10 lg:px-20">
@@ -61,8 +63,20 @@ const NavBar = () => {
             </a>
           </>
         )}
-        <SearchPastPaper />
-
+        <Link
+          href="/search"
+          className="hidden h-10 w-full max-w-md items-center sm:flex"
+        >
+          <Input
+            className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
+            placeholder={breakpoint ? "Search" : "Search past paper question"}
+            value=""
+            readOnly={true}
+          />
+          <Button className="h-full w-10 rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
+            <SearchIcon className="text-(--navbar-text)" />
+          </Button>
+        </Link>
         <div className="header-content-group flex items-center gap-2">
           {/* <Button className="flex items-center gap-2" asChild>
             <Link
