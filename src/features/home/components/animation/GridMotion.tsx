@@ -1,5 +1,5 @@
-import { gsap } from 'gsap';
-import { type FC, type ReactNode, useEffect, useRef } from 'react';
+import { gsap } from "gsap";
+import { type FC, type ReactNode, useEffect, useRef } from "react";
 
 interface GridMotionProps {
   items?: (string | ReactNode)[];
@@ -8,7 +8,7 @@ interface GridMotionProps {
 
 const GridMotion: FC<GridMotionProps> = ({
   items = [],
-  gradientColor = 'black',
+  gradientColor = "black",
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -50,18 +50,18 @@ const GridMotion: FC<GridMotionProps> = ({
             x: moveAmount,
             duration:
               baseDuration + inertiaFactors[index % inertiaFactors.length],
-            ease: 'power3.out',
-            overwrite: 'auto',
+            ease: "power3.out",
+            overwrite: "auto",
           });
         }
       });
     };
 
     const removeAnimationLoop = gsap.ticker.add(updateMotion);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       removeAnimationLoop();
     };
   }, []);
@@ -74,7 +74,7 @@ const GridMotion: FC<GridMotionProps> = ({
           background: `radial-gradient(circle, ${gradientColor} 0%, transparent 100%)`,
         }}
       >
-        <div className="relative z-[2] grid h-[1000px] w-[2000px] flex-none origin-center rotate-[-15deg] grid-cols-1 grid-rows-4 gap-4">
+        <div className="relative z-2 grid h-[1000px] w-[2000px] flex-none origin-center rotate-[-15deg] grid-cols-1 grid-rows-4 gap-4">
           {Array.from({ length: 4 }, (_, rowIndex) => (
             <div
               className="grid grid-cols-7 gap-4"
@@ -82,7 +82,7 @@ const GridMotion: FC<GridMotionProps> = ({
               ref={(el) => {
                 rowRefs.current[rowIndex] = el;
               }}
-              style={{ willChange: 'transform, filter' }}
+              style={{ willChange: "transform, filter" }}
             >
               {Array.from({ length: 7 }, (__, itemIndex) => {
                 const content = combinedItems[rowIndex * 7 + itemIndex];

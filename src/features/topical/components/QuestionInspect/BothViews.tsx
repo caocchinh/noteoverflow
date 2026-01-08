@@ -79,7 +79,7 @@ const BothViews = ({
 
   return (
     <ResizablePanelGroup
-      direction={isMobile ? "vertical" : "horizontal"}
+      orientation={isMobile ? "vertical" : "horizontal"}
       className={cn(
         "rounded-lg border w-full",
         isMobile ? "h-[65dvh]!" : "h-[70dvh]!"
