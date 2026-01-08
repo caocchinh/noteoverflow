@@ -4,11 +4,8 @@ import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
-import {
-  indexQuestions,
-  searchByImage,
-  searchByText,
-} from "@/server/api/visualSearch";
+import { indexQuestions } from "@/server/api/visual-search/indexing";
+import { searchByImage, searchByText } from "@/server/api/visual-search/searching";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -83,9 +80,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
         t.Object({
           subject: t.Optional(t.String()),
           curriculum: t.Optional(t.String()),
-          year: t.Optional(t.Array(t.Numeric())),
+          year: t.Optional(t.Array(t.String())),
           season: t.Optional(t.Array(t.String())),
-          paperType: t.Optional(t.Array(t.Numeric())),
+          paperType: t.Optional(t.Array(t.String())),
         })
       ),
     }),
@@ -100,6 +97,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
         t.Object({
           subject: t.Optional(t.String()),
           curriculum: t.Optional(t.String()),
+          year: t.Optional(t.Array(t.String())),
+          season: t.Optional(t.Array(t.String())),
+          paperType: t.Optional(t.Array(t.String())),
         })
       ),
     }),

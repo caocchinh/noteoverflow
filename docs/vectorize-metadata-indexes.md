@@ -34,9 +34,9 @@ wrangler vectorize create question-semantic-search --dimensions=1024 --metric=co
 # Create metadata indexes for filter fields
 wrangler vectorize create-metadata-index question-semantic-search --property-name=subject --type=string
 wrangler vectorize create-metadata-index question-semantic-search --property-name=curriculum --type=string
-wrangler vectorize create-metadata-index question-semantic-search --property-name=year --type=number
+wrangler vectorize create-metadata-index question-semantic-search --property-name=year --type=string
 wrangler vectorize create-metadata-index question-semantic-search --property-name=season --type=string
-wrangler vectorize create-metadata-index question-semantic-search --property-name=paperType --type=number
+wrangler vectorize create-metadata-index question-semantic-search --property-name=paperType --type=string
 wrangler vectorize create-metadata-index question-semantic-search --property-name=type --type=string
 ```
 

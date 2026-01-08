@@ -83,6 +83,93 @@ export const validateSubject = (
   return currentCurriculumData.subject.some((sub) => sub.code === subject);
 };
 
+/**
+ * Helper to get subject data from TOPICAL_DATA
+ * Returns null if curriculum or subject not found
+ */
+export const getSubjectData = (
+  curriculum: string,
+  subject: string
+): TopicalSubject | null => {
+  const currentCurriculumData = TOPICAL_DATA.find(
+    (item) => item.curriculum === curriculum
+  );
+  if (!currentCurriculumData) {
+    return null;
+  }
+
+  const currentSubjectData = currentCurriculumData.subject.find(
+    (_subject) => _subject.code === subject
+  );
+
+  return currentSubjectData ?? null;
+};
+
+/**
+ * Validate topics array against subject data
+ */
+export const validateTopics = (
+  topics: string[] | undefined,
+  subjectData: TopicalSubject
+): boolean => {
+  if (!topics || topics.length === 0) {
+    return false;
+  }
+  return isSubset(
+    topics,
+    subjectData.topic.map((topic) => topic.topicName)
+  );
+};
+
+/**
+ * Validate paper types array against subject data
+ */
+export const validatePaperTypes = (
+  paperTypes: string[] | undefined,
+  subjectData: TopicalSubject
+): boolean => {
+  if (!paperTypes || paperTypes.length === 0) {
+    return false;
+  }
+  return isSubset(
+    paperTypes,
+    subjectData.paperType.map((paperType) => paperType.paperType.toString())
+  );
+};
+
+/**
+ * Validate years array against subject data
+ */
+export const validateYears = (
+  years: string[] | undefined,
+  subjectData: TopicalSubject
+): boolean => {
+  if (!years || years.length === 0) {
+    return false;
+  }
+  return isSubset(
+    years,
+    subjectData.year.map((year) => year.toString())
+  );
+};
+
+/**
+ * Validate seasons array against subject data
+ */
+export const validateSeasons = (
+  seasons: string[] | undefined,
+  subjectData: TopicalSubject
+): boolean => {
+  if (!seasons || seasons.length === 0) {
+    return false;
+  }
+  return isSubset(seasons, subjectData.season);
+};
+
+/**
+ * Validate filter data - all fields are required
+ * Used by getTopicalQuestions.ts
+ */
 export const validateFilterData = ({
   data,
   curriculumn,
@@ -93,61 +180,83 @@ export const validateFilterData = ({
   subject: string;
 }): boolean => {
   try {
-    const currentCurriculumData = TOPICAL_DATA.find(
-      (item) => item.curriculum === curriculumn
-    );
-    if (!currentCurriculumData) {
+    const subjectData = getSubjectData(curriculumn, subject);
+    if (!subjectData) {
       return false;
     }
 
-    const currentSubjectData = currentCurriculumData.subject.find(
-      (_subject) => _subject.code === subject
-    );
-    if (!currentSubjectData) {
+    if (!validateTopics(data.topic, subjectData)) {
+      return false;
+    }
+    if (!validatePaperTypes(data.paperType, subjectData)) {
+      return false;
+    }
+    if (!validateYears(data.year, subjectData)) {
+      return false;
+    }
+    if (!validateSeasons(data.season, subjectData)) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Validate partial filter data - only validates fields that are provided
+ * Used by visualSearch.ts where filters are optional
+ */
+export const validatePartialFilterData = ({
+  data,
+  curriculum,
+  subject,
+}: {
+  data: Partial<FilterData>;
+  curriculum: string;
+  subject: string;
+}): boolean => {
+  try {
+    const subjectData = getSubjectData(curriculum, subject);
+    if (!subjectData) {
       return false;
     }
 
-    if (!data.topic) {
-      return false;
-    }
-
-    if (
-      !isSubset(
-        data.topic,
-        currentSubjectData.topic.map((topic) => topic.topicName)
-      )
-    ) {
-      return false;
-    }
-    if (!data.paperType) {
-      return false;
-    }
-    if (
-      !isSubset(
-        data.paperType,
-        currentSubjectData.paperType.map((paperType) =>
-          paperType.paperType.toString()
+    // Only validate fields that are provided and have values
+    if (data.topic && data.topic.length > 0) {
+      if (
+        !isSubset(
+          data.topic,
+          subjectData.topic.map((t) => t.topicName)
         )
-      )
-    ) {
-      return false;
+      ) {
+        return false;
+      }
     }
-    if (!data.year) {
-      return false;
+    if (data.paperType && data.paperType.length > 0) {
+      if (
+        !isSubset(
+          data.paperType,
+          subjectData.paperType.map((p) => p.paperType.toString())
+        )
+      ) {
+        return false;
+      }
     }
-    if (
-      !isSubset(
-        data.year,
-        currentSubjectData.year.map((year) => year.toString())
-      )
-    ) {
-      return false;
+    if (data.year && data.year.length > 0) {
+      if (
+        !isSubset(
+          data.year,
+          subjectData.year.map((y) => y.toString())
+        )
+      ) {
+        return false;
+      }
     }
-    if (!data.season) {
-      return false;
-    }
-    if (!isSubset(data.season, currentSubjectData.season)) {
-      return false;
+    if (data.season && data.season.length > 0) {
+      if (!isSubset(data.season, subjectData.season)) {
+        return false;
+      }
     }
     return true;
   } catch {

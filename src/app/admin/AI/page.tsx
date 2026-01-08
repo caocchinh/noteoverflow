@@ -5,18 +5,13 @@
 import { useState } from "react";
 import { api } from "@/lib/eden";
 
-interface SearchResult {
-  questionId: string;
-  score: number;
-  type: string;
-  question: any;
-}
+import { SelectedQuestion } from "@/features/topical/constants/types";
 
 export default function VisualSearchTestPage() {
   const [activeTab, setActiveTab] = useState<"image" | "text" | "index">(
     "image"
   );
-  const [results, setResults] = useState<SearchResult[] | null>(null);
+  const [results, setResults] = useState<SelectedQuestion[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string | null>(null);
@@ -59,9 +54,9 @@ export default function VisualSearchTestPage() {
     const filters: {
       subject?: string;
       curriculum?: string;
-      year?: number[];
+      year?: string[];
       season?: string[];
-      paperType?: number[];
+      paperType?: string[];
     } = {};
 
     if (filterSubject.trim()) filters.subject = filterSubject.trim();
@@ -70,8 +65,8 @@ export default function VisualSearchTestPage() {
     if (filterYear.trim()) {
       filters.year = filterYear
         .split(",")
-        .map((s) => parseInt(s.trim()))
-        .filter((n) => !isNaN(n));
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
     }
 
     if (filterSeason.trim()) {
@@ -84,8 +79,8 @@ export default function VisualSearchTestPage() {
     if (filterPaperType.trim()) {
       filters.paperType = filterPaperType
         .split(",")
-        .map((s) => parseInt(s.trim()))
-        .filter((n) => !isNaN(n));
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
     }
 
     return Object.keys(filters).length > 0 ? filters : undefined;
@@ -109,7 +104,7 @@ export default function VisualSearchTestPage() {
         throw new Error(error.value.error || "Search failed");
       }
 
-      setResults(data.results);
+      setResults(data.data);
       if (data.extractedText) setExtractedText(data.extractedText);
     } catch (err: any) {
       setError(err.message);
@@ -136,7 +131,7 @@ export default function VisualSearchTestPage() {
         throw new Error(error.value.error || "Search failed");
       }
 
-      setResults(data.results);
+      setResults(data.data);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -442,81 +437,60 @@ export default function VisualSearchTestPage() {
             <div className="grid gap-6">
               {results.map((result) => (
                 <div
-                  key={result.questionId}
+                  key={result.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
-                            result.type === "question"
-                              ? "bg-indigo-100 text-indigo-700"
-                              : "bg-emerald-100 text-emerald-700"
-                          }`}
-                        >
-                          {result.type} match
-                        </span>
                         <span className="text-sm text-gray-500 font-mono">
-                          ID: {result.questionId}
+                          ID: {result.id}
                         </span>
                       </div>
                       <h3 className="font-medium">
-                        {result.question?.season} {result.question?.year} -
-                        paper {result.question?.paperType}
+                        {result.season} {result.year} - paper {result.paperType}
                       </h3>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-500">Score</div>
-                      <div className="font-mono font-bold text-lg text-blue-600">
-                        {result.score.toFixed(4)}
-                      </div>
+                      {result.topics && result.topics.length > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Topics: {result.topics.join(", ")}
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {/* Display Question Images */}
-                    {result.question?.questionImages?.map(
-                      (img: string, idx: number) => (
-                        <div
-                          key={`q-${idx}`}
-                          className="shrink-0 relative group"
-                        >
-                          <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
-                            Q
-                          </div>
+                    {result.questionImages?.map((img: string, idx: number) => (
+                      <div key={`q-${idx}`} className="shrink-0 relative group">
+                        <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
+                          Q
+                        </div>
+                        <img
+                          src={img}
+                          alt={`Question ${idx + 1}`}
+                          className="h-32 rounded border border-gray-200"
+                        />
+                      </div>
+                    ))}
+                    {/* Display Answer Images */}
+                    {result.answers?.map((img: string, idx: number) => (
+                      <div key={`a-${idx}`} className="shrink-0 relative group">
+                        <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
+                          A
+                        </div>
+                        {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(img) ? (
                           <img
                             src={img}
-                            alt={`Question ${idx + 1}`}
-                            className="h-32 rounded border border-gray-200"
+                            alt={`Answer ${idx + 1}`}
+                            className="h-32 rounded border border-gray-200 opacity-90"
                           />
-                        </div>
-                      )
-                    )}
-                    {/* Display Answer Images */}
-                    {result.question?.answers?.map(
-                      (img: string, idx: number) => (
-                        <div
-                          key={`a-${idx}`}
-                          className="shrink-0 relative group"
-                        >
-                          <div className="absolute top-0 left-0 bg-black/50 text-white text-xs px-1 rounded-br">
-                            A
+                        ) : (
+                          <div className="h-32 w-48 p-2 text-xs overflow-y-auto bg-gray-50 border border-gray-200 rounded">
+                            {img}
                           </div>
-                          {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(img) ? (
-                            <img
-                              src={img}
-                              alt={`Answer ${idx + 1}`}
-                              className="h-32 rounded border border-gray-200 opacity-90"
-                            />
-                          ) : (
-                            <div className="h-32 w-48 p-2 text-xs overflow-y-auto bg-gray-50 border border-gray-200 rounded">
-                              {img}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    )}
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
