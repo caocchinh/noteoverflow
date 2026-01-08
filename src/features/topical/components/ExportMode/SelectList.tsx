@@ -66,17 +66,25 @@ const SelectList = memo(
     const listScrollAreaRef = useRef<HTMLDivElement | null>(null);
     const isMobile = useIsMobile({ breakpoint: 886 });
     const secondMobileBreakPoint = useIsMobile({ breakpoint: 410 });
+
+    const getItemKey = useCallback(
+      (index: number) =>
+        canReorder
+          ? questionsForExportArray[index]
+          : filteredQuestions[index]?.id,
+      [canReorder, questionsForExportArray, filteredQuestions]
+    );
+
+    const estimatedSize = secondMobileBreakPoint ? 100 : 65;
+
     const listVirtualizer = useVirtualizer({
       count: canReorder
         ? questionsForExportArray.length
         : filteredQuestions.length,
       getScrollElement: () => listScrollAreaRef.current,
-      estimateSize: () => (secondMobileBreakPoint ? 100 : 65),
+      estimateSize: () => estimatedSize,
       enabled: isVirtualizationReady,
-      getItemKey: (index) =>
-        canReorder
-          ? questionsForExportArray[index]
-          : filteredQuestions[index]?.id,
+      getItemKey,
     });
     const isMountedRef = useRef(false);
 

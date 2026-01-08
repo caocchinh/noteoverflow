@@ -167,38 +167,42 @@ const PreviewImages = memo(
 
 PreviewImages.displayName = "PreviewImages";
 
-const Preview = ({
-  previewQuestionData,
-}: {
-  previewQuestionData: SelectedQuestion | undefined;
-}) => {
-  const [currentView, setCurrentView] = useState<PreviewViewMode>("question");
+const Preview = memo(
+  ({
+    previewQuestionData,
+  }: {
+    previewQuestionData: SelectedQuestion | undefined;
+  }) => {
+    const [currentView, setCurrentView] = useState<PreviewViewMode>("question");
 
-  if (!previewQuestionData) {
+    if (!previewQuestionData) {
+      return (
+        <div className="w-full h-full items-center justify-center border-l border-border pl-4 flex">
+          <EmptyState />
+        </div>
+      );
+    }
+
     return (
-      <div className="w-full h-full items-center justify-center border-l border-border pl-4 flex">
-        <EmptyState />
+      <div className="w-full h-full  flex-col border-l border-border pl-4 overflow-hidden flex">
+        <ScrollArea className="h-[75dvh] lg:h-[62dvh] pr-4">
+          <PreviewUtilityBar
+            question={previewQuestionData}
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+          />
+          <div className="flex-1 overflow-y-auto">
+            <PreviewImages
+              question={previewQuestionData}
+              currentView={currentView}
+            />
+          </div>
+        </ScrollArea>
       </div>
     );
   }
+);
 
-  return (
-    <div className="w-full h-full  flex-col border-l border-border pl-4 overflow-hidden flex">
-      <ScrollArea className="h-[75dvh] lg:h-[62dvh] pr-4">
-        <PreviewUtilityBar
-          question={previewQuestionData}
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-        />
-        <div className="flex-1 overflow-y-auto">
-          <PreviewImages
-            question={previewQuestionData}
-            currentView={currentView}
-          />
-        </div>
-      </ScrollArea>
-    </div>
-  );
-};
+Preview.displayName = "Preview";
 
-export default memo(Preview);
+export default Preview;

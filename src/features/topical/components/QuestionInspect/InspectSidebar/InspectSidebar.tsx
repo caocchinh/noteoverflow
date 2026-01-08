@@ -117,11 +117,23 @@ const InspectSidebar = memo(
           : [];
       }, [searchInput, allQuestions]);
 
+      const getSearchItemKey = useCallback(
+        (index: number) => searchResults[index]?.id ?? index,
+        [searchResults]
+      );
+
+      const getDisplayItemKey = useCallback(
+        (index: number) =>
+          partitionedTopicalData?.[currentTab]?.[index]?.id ?? index,
+        [partitionedTopicalData, currentTab]
+      );
+
       const searchVirtualizer = useVirtualizer({
         count: searchResults.length,
         getScrollElement: () => listScrollAreaRef.current,
         estimateSize: () => 65,
         enabled: isVirtualizationReady,
+        getItemKey: getSearchItemKey,
       });
 
       const displayVirtualizer = useVirtualizer({
@@ -129,6 +141,7 @@ const InspectSidebar = memo(
         getScrollElement: () => listScrollAreaRef.current,
         estimateSize: () => 65,
         enabled: isVirtualizationReady,
+        getItemKey: getDisplayItemKey,
       });
 
       const virtualSearchItems = searchVirtualizer.getVirtualItems();
