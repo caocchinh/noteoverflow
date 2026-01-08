@@ -5,7 +5,11 @@ import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
 import { indexQuestions } from "@/server/api/visual-search/indexing";
-import { searchByImage, searchByText } from "@/server/api/visual-search/searching";
+import {
+  searchByImage,
+  searchByText,
+} from "@/server/api/visual-search/searching";
+import { getQuestionStats } from "@/server/api/visual-search/stats";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -62,6 +66,9 @@ const app = new Elysia({ prefix: "/api", aot: false })
   .get("/topical/saved-activities", getSavedActivities)
 
   // ========== VISUAL SEARCH ADMIN ROUTES ==========
+
+  // GET /api/admin/visual-search/stats - Get indexing stats
+  .get("/admin/visual-search/stats", getQuestionStats)
 
   // GET /api/admin/visual-search?offset=0 - Index 1 question at a time
   .get("/admin/visual-search", indexQuestions, {

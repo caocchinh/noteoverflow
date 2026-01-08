@@ -9,6 +9,9 @@ import { queryVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { getDbAsync } from "@/drizzle/db.server";
 import { SelectedQuestion } from "@/features/topical/constants/types";
+import { retryDatabase } from "@/dal/retry";
+import { inArray } from "drizzle-orm";
+import { question } from "@/drizzle/schema";
 
 // Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
 export async function generateShortId(input: string): Promise<string> {
@@ -152,59 +155,66 @@ export async function executeVectorSearch(
 
 /**
  * Process Vectorize matches and fetch full question data from D1
- * Returns SelectedQuestion[] matching the topical questions format
+ * Returns SelectedQuestion[] matching the topical questions format, sorted by highest score first
  */
 export async function fetchQuestionResults(
   matches: VectorizeMatches
 ): Promise<SelectedQuestion[]> {
-  const matchDetails: Array<{
-    questionId: string;
-    score: number;
-    type: string;
-  }> = [];
+  // Build a map of questionId -> highest score (for sorting)
+  const scoreMap = new Map<string, number>();
 
   for (const match of matches.matches) {
     const metadata = match.metadata as unknown as VectorMetadata;
     if (metadata?.questionId) {
-      matchDetails.push({
-        questionId: metadata.questionId,
-        score: match.score,
-        type: metadata.type,
-      });
+      const existingScore = scoreMap.get(metadata.questionId);
+      // Keep the highest score for each questionId
+      if (existingScore === undefined || match.score > existingScore) {
+        scoreMap.set(metadata.questionId, match.score);
+      }
     }
   }
 
-  const db = await getDbAsync();
-  const results: SelectedQuestion[] = [];
-
-  for (const detail of matchDetails) {
-    if (results.some((r) => r.id === detail.questionId)) continue;
-
-    const questionData = await db.query.question.findFirst({
-      where: (q, { eq }) => eq(q.id, detail.questionId),
-      columns: {
-        id: true,
-        year: true,
-        season: true,
-        paperType: true,
-        questionImages: true,
-        answers: true,
-        topics: true,
-      },
-    });
-
-    if (!questionData) continue;
-
-    results.push({
-      id: questionData.id,
-      year: questionData.year ?? 0,
-      season: questionData.season ?? "",
-      paperType: questionData.paperType ?? 0,
-      questionImages: JSON.parse(questionData.questionImages ?? "[]"),
-      answers: JSON.parse(questionData.answers ?? "[]"),
-      topics: JSON.parse(questionData.topics ?? "[]"),
-    });
+  const questionIds = Array.from(scoreMap.keys());
+  if (questionIds.length === 0) {
+    return [];
   }
+
+  const db = await getDbAsync();
+
+  const questionsData = await retryDatabase(
+    () =>
+      db
+        .select({
+          id: question.id,
+          year: question.year,
+          season: question.season,
+          paperType: question.paperType,
+          questionImages: question.questionImages,
+          answers: question.answers,
+          topics: question.topics,
+        })
+        .from(question)
+        .where(inArray(question.id, questionIds)),
+    "fetch questions by ids"
+  );
+
+  // Map results and sort by score descending
+  const results: SelectedQuestion[] = questionsData.map((q) => ({
+    id: q.id,
+    year: q.year ?? 0,
+    season: q.season ?? "",
+    paperType: q.paperType ?? 0,
+    questionImages: JSON.parse(q.questionImages ?? "[]"),
+    answers: JSON.parse(q.answers ?? "[]"),
+    topics: JSON.parse(q.topics ?? "[]"),
+  }));
+
+  // Sort by score descending (highest first)
+  results.sort((a, b) => {
+    const scoreA = scoreMap.get(a.id) ?? 0;
+    const scoreB = scoreMap.get(b.id) ?? 0;
+    return scoreB - scoreA;
+  });
 
   return results;
 }

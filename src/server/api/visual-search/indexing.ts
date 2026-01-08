@@ -2,6 +2,7 @@ import "server-only";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { retryDatabase } from "@/dal/retry";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
@@ -10,11 +11,7 @@ import { processImage } from "@/lib/cloudflareAI";
 import { upsertVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { imageUrlToBase64 } from "@/lib/utils";
-import {
-  generateShortId,
-  IndexProgress,
-  VectorMetadata,
-} from "./utils";
+import { generateShortId, IndexProgress, VectorMetadata } from "./utils";
 
 /**
  * Index all questions into the vector database
@@ -71,7 +68,9 @@ export async function indexQuestions({
   for (const q of questions) {
     const questionImages: string[] = JSON.parse(q.questionImages ?? "[]");
     const answerImages: string[] = JSON.parse(q.answers ?? "[]");
-    console.log("current question", q);
+    let sucessfulCount = 0;
+    let failedCount = 0;
+    let skippedCount = 0;
 
     const vectorsToUpsert: Array<{
       id: string;
@@ -96,7 +95,7 @@ export async function indexQuestions({
             type: "question",
             imageIndex: i.toString(),
             imagePath: imagePath,
-            extractedText: text.slice(0, 500), // Store truncated text for debugging
+            extractedText: text,
             subject: q.subjectId ?? "",
             curriculum: q.curriculumName ?? "",
             year: q.year?.toString() ?? "0",
@@ -104,10 +103,11 @@ export async function indexQuestions({
             paperType: q.paperType?.toString() ?? "0",
           },
         });
-        progress.indexed++;
+        sucessfulCount++;
       } catch (error) {
         console.error(`Failed to index question image ${q.id}_${i}:`, error);
-        progress.failed++;
+        failedCount++;
+        break;
       }
       // Add small delay to prevent rate limiting
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -122,12 +122,8 @@ export async function indexQuestions({
         // Skip if not an image URL (text answers)
         // Images are hosted on notestack.online, text answers are plain strings
         const isImageUrl = imagePath.includes("https://notestack.online");
-        console.log("imagePath", imagePath, "isImageUrl", isImageUrl);
         if (!isImageUrl) {
-          console.log(
-            `Skipping non-image answer: ${imagePath.slice(0, 50)}...`
-          );
-          progress.skipped++;
+          skippedCount++;
           continue;
         }
 
@@ -142,7 +138,7 @@ export async function indexQuestions({
             type: "answer",
             imageIndex: i.toString(),
             imagePath: imagePath,
-            extractedText: text.slice(0, 500),
+            extractedText: text,
             subject: q.subjectId ?? "",
             curriculum: q.curriculumName ?? "",
             year: q.year?.toString() ?? "0",
@@ -150,19 +146,19 @@ export async function indexQuestions({
             paperType: q.paperType?.toString() ?? "0",
           },
         });
-        progress.indexed++;
+        sucessfulCount++;
       } catch (error) {
         console.error(`Failed to index answer image ${q.id}_${i}:`, error);
-        progress.failed++;
+        failedCount++;
+        break;
       }
       // Add small delay to prevent rate limiting
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     // Upsert vectors for this question immediately
-    if (vectorsToUpsert.length > 0) {
+    if (vectorsToUpsert.length > 0 && failedCount === 0) {
       try {
-        // Vectorize has a limit of 1000 vectors per upsert, but we are doing per question so it should be fine
         await upsertVectorize(
           QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
           vectorsToUpsert,
@@ -170,22 +166,24 @@ export async function indexQuestions({
         );
 
         // Only mark as indexed if upsert succeeded
-        await db
-          .update(question)
-          .set({
-            isQuestionImageIndexed: 1,
-          })
-          .where(eq(question.id, q.id));
+        await retryDatabase(
+          () =>
+            db
+              .update(question)
+              .set({
+                isQuestionImageIndexed: 1,
+              })
+              .where(eq(question.id, q.id)),
+          `update question ${q.id} isQuestionImageIndexed`
+        );
+        progress.indexed += sucessfulCount;
+        progress.skipped += skippedCount;
       } catch (error) {
         console.error(`Failed to upsert vectors for question ${q.id}:`, error);
+        progress.failed += failedCount + sucessfulCount;
       }
     } else {
-      await db
-        .update(question)
-        .set({
-          isQuestionImageIndexed: 1,
-        })
-        .where(eq(question.id, q.id));
+      progress.failed += failedCount;
     }
   }
 

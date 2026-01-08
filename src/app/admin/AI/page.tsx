@@ -3,6 +3,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 
 import { SelectedQuestion } from "@/features/topical/constants/types";
@@ -30,10 +31,60 @@ export default function VisualSearchTestPage() {
   const [filterSeason, setFilterSeason] = useState("");
   const [filterPaperType, setFilterPaperType] = useState("");
 
+  const queryClient = useQueryClient();
+
   // Indexing State
-  const [indexing, setIndexing] = useState(false);
+  // const [indexing, setIndexing] = useState(false); // Replaced by mutation.isPending
   const [indexParams, setIndexParams] = useState({ offset: 0, limit: 10 });
   const [indexResult, setIndexResult] = useState<any>(null);
+
+  // Stats Query
+  const { data: stats } = useQuery({
+    queryKey: ["visual-search-stats"],
+    queryFn: async () => {
+      const { data, error } = await api.admin["visual-search"].stats.get();
+      if (error) throw error;
+      return data;
+    },
+    // Only fetch when index tab is active
+    enabled: activeTab === "index",
+  });
+
+  // Indexing Mutation
+  const indexMutation = useMutation({
+    mutationFn: async (params: { offset: number; limit: number }) => {
+      const { data, error } = await api.admin["visual-search"].get({
+        query: params,
+      });
+      if (error) {
+        // @ts-expect-error type inference issue
+        throw new Error(error.value.error || "Indexing failed");
+      }
+      return data;
+    },
+    onSuccess: (data) => {
+      setIndexResult(data);
+      setError(null);
+
+      // Optimistically update the stats cache
+      queryClient.setQueryData(["visual-search-stats"], (oldStats: any) => {
+        if (!oldStats) return oldStats;
+
+        const indexedCount = data.progress?.indexed || 0;
+
+        return {
+          ...oldStats,
+          indexed: oldStats.indexed + indexedCount,
+          notIndexed: Math.max(0, oldStats.notIndexed - indexedCount),
+          // total remains the same
+          total: oldStats.total,
+        };
+      });
+    },
+    onError: (err: any) => {
+      setError(err.message);
+    },
+  });
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -139,30 +190,9 @@ export default function VisualSearchTestPage() {
     }
   };
 
-  const handleIndexQuestions = async () => {
-    setIndexing(true);
-    setError(null);
+  const handleIndexQuestions = () => {
     setIndexResult(null);
-
-    try {
-      const { data, error } = await api.admin["visual-search"].get({
-        query: {
-          offset: indexParams.offset,
-          limit: indexParams.limit,
-        },
-      });
-
-      if (error) {
-        // @ts-expect-error Wait for the library to fix the type inference
-        throw new Error(error.value.error || "Indexing failed");
-      }
-
-      setIndexResult(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIndexing(false);
-    }
+    indexMutation.mutate(indexParams);
   };
 
   return (
@@ -333,6 +363,35 @@ export default function VisualSearchTestPage() {
           </div>
         ) : (
           <div className="space-y-4">
+            {stats && (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-blue-50 rounded border border-blue-100 text-center">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {stats.indexed}
+                  </div>
+                  <div className="text-xs text-blue-600 font-medium">
+                    Indexed
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 rounded border border-gray-200 text-center">
+                  <div className="text-2xl font-bold text-gray-700">
+                    {stats.notIndexed}
+                  </div>
+                  <div className="text-xs text-gray-600 font-medium">
+                    Not Indexed
+                  </div>
+                </div>
+                <div className="p-4 bg-purple-50 rounded border border-purple-100 text-center">
+                  <div className="text-2xl font-bold text-purple-700">
+                    {stats.total}
+                  </div>
+                  <div className="text-xs text-purple-600 font-medium">
+                    Total
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Offset</label>
@@ -366,10 +425,10 @@ export default function VisualSearchTestPage() {
 
             <button
               onClick={handleIndexQuestions}
-              disabled={indexing}
+              disabled={indexMutation.isPending}
               className="w-full bg-emerald-600 text-white py-2 px-4 rounded hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {indexing ? "Indexing..." : "Start Indexing"}
+              {indexMutation.isPending ? "Indexing..." : "Start Indexing"}
             </button>
 
             {indexResult && (

@@ -134,6 +134,17 @@ const fewShotMessages = [
     // Notice: No LaTeX, just plain text. Arrow becomes "->". Ions like Cu2+ become "Cu^2+".
     content: "Mg(s) + 2HCl(aq) -> MgCl2(aq) + H2(g)",
   },
+  // EXAMPLE 3: Graph/Grid Handling (The Fix for your issue)
+  // We show it an empty graph paper. Notice the Assistant DOES NOT try to draw it with lines.
+  {
+    role: "user",
+    content: "Extract text and describe diagram: ",
+  },
+  {
+    role: "assistant",
+    content:
+      "Time / s\nDistance / m\nDiagrams explanation: An empty grid with a vertical y-axis and horizontal x-axis. No data points are plotted.",
+  },
 ];
 
 /**
@@ -165,7 +176,7 @@ export async function extractTextFromImage(
             },
             {
               type: "text",
-              text: 'Act as a raw text transcription engine, not an AI assistant. Output only the exact text physically visible in the image verbatim, strictly preserving the original order. Do not add organizational headers (like "Objective", "Question", "Answer"), do not use Markdown formatting (no bold ** or headers ##), and do not include any meta-comments (like "The answer is not provided"). Strictly do not use LaTeX formatting, dollar signs $, backslashes , or commands like \frac. Instead, flatten all vertical fractions into horizontal plain text using parentheses and a forward slash (e.g., transcribe a vertical fraction as (numerator)/(denominator)). Represent variables and formulas using standard plain text. Transcribe Greek symbols as full English words (e.g., "theta") and use standard text (e.g., "sqrt(x+1)" for roots, "x^2" for exponents, and "(a+b)/c" for fractions). Ignore answer dotted lines. If and only if a visual diagram is present, append a description at the very end starting with "Diagrams explanation: " describing it objectively without context; otherwise, stop immediately after the last extracted word.',
+              text: 'Act as a raw text transcription engine, not an AI assistant. Output only the exact text physically visible in the image verbatim, strictly preserving the original order. Do not add organizational headers (like "Objective", "Question", "Answer"), do not use Markdown formatting (no bold ** or headers ##), and do not include any meta-comments (like "The answer is not provided"). Strictly do not use LaTeX formatting, dollar signs $, backslashes , or commands like \frac. Instead, flatten all vertical fractions into horizontal plain text using parentheses and a forward slash (e.g., transcribe a vertical fraction as (numerator)/(denominator)). For graphs, describe the axes and lines, but DO NOT try to draw the grid. Represent variables and formulas using standard plain text. Transcribe Greek symbols as full English words (e.g., "theta") and use standard text (e.g., "sqrt(x+1)" for roots, "x^2" for exponents, and "(a+b)/c" for fractions). Ignore answer dotted lines. If and only if a visual diagram is present, append a description at the very end starting with "Diagrams explanation: " describing it objectively without context; otherwise, stop immediately after the last extracted word.',
             },
           ],
         },
