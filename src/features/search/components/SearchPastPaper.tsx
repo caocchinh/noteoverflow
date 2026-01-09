@@ -8,7 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -45,7 +45,7 @@ import { INVALID_INPUTS_DEFAULT } from "@/features/topical/constants/constants";
 import { InvalidInputs } from "@/features/topical/constants/types";
 import { cn, getShortSeason } from "@/lib/utils";
 
-const SearchPastPaper = ({ children }: { children?: React.ReactNode }) => {
+const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
   const breakpoint = useIsMobile({ breakpoint: 735 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quickCodeError, setQuickCodeError] = useState<string | null>(null);
@@ -953,6 +953,8 @@ const SearchPastPaper = ({ children }: { children?: React.ReactNode }) => {
       </Dialog>
     </>
   );
-};
+});
+
+SearchPastPaper.displayName = "SearchPastPaper";
 
 export default SearchPastPaper;

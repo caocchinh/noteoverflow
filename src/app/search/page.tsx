@@ -3,7 +3,6 @@
 
 import "@/features/topical/components/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-
 import { getRandomPhrase } from "@/constants/motivationalPhrases";
 import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -15,11 +14,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ImageIcon, Search, Type, Upload, X, FileText } from "lucide-react";
-import OptionalFilters, {
-  OptionalSearchFilter,
-} from "@/features/search/components/OptionalFilters";
+import OptionalFilters from "@/features/search/components/OptionalFilters";
 import { cn } from "@/lib/utils";
 import SearchPastPaper from "@/features/search/components/SearchPastPaper";
+import { OptionalSearchFilter } from "@/features/search/constants/type";
 
 const MAX_QUERY_LENGTH = 1000;
 
@@ -72,7 +70,8 @@ const SearchPage = () => {
   });
 
   // Derived state from mutations
-  const loading = imageSearchMutation.isPending || textSearchMutation.isPending;
+  const isSearching =
+    imageSearchMutation.isPending || textSearchMutation.isPending;
   const error =
     imageSearchMutation.error?.message ||
     textSearchMutation.error?.message ||
@@ -223,8 +222,7 @@ const SearchPage = () => {
                     setCurrentFilter={setCurrentFilter}
                     searchButtonPortalRef={searchButtonPortalRef}
                     onSearch={handleSearch}
-                    loading={loading}
-                    hasResults={!!results}
+                    isSearching={isSearching}
                     isInputValid={isInputValid}
                   />
                   <SearchPastPaper>
@@ -250,7 +248,7 @@ const SearchPage = () => {
                       <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     </div>
                     <Textarea
-                      id="search-query"
+                      disabled={isSearching}
                       value={textQuery}
                       onChange={(e) => setTextQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -280,6 +278,7 @@ const SearchPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        disabled={isSearching}
                         onClick={() => setTextQuery("")}
                         className="absolute inset-y-0 cursor-pointer right-3 mt-2 h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full"
                       >
@@ -316,6 +315,7 @@ const SearchPage = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            disabled={isSearching}
                             onClick={(e) => {
                               e.stopPropagation();
                               fileInputRef.current?.click();
@@ -329,6 +329,7 @@ const SearchPage = () => {
                           <Button
                             variant="ghost"
                             size="icon"
+                            disabled={isSearching}
                             onClick={(e) => {
                               e.stopPropagation();
                               clearImage();
@@ -400,7 +401,7 @@ const SearchPage = () => {
             </div>
           )}
 
-          {loading && (
+          {isSearching && (
             <div className="flex flex-col items-center justify-center py-6 animate-in fade-in zoom-in-95 duration-500">
               <div className="relative">
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -440,7 +441,7 @@ const SearchPage = () => {
             </div>
           )}
 
-          {results && !loading && (
+          {results && !isSearching && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between px-2">
                 <p className="text-sm text-muted-foreground font-medium">
