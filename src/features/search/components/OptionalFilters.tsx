@@ -15,15 +15,15 @@ import {
   PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
   TOPICAL_DATA,
 } from "@/constants/constants";
-import { validateSubcurriculumnDivision } from "../topical/lib/utils";
+import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Filter, Save, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import EnhancedSelect from "../topical/components/EnhancedSelect";
-import MultiSelector from "../topical/components/MultiSelector/MultiSelector";
-import EnhancedMultiSelector from "../topical/components/MultiSelector/EnhancedMultiSelector";
+import EnhancedSelect from "../../topical/components/EnhancedSelect";
+import MultiSelector from "../../topical/components/MultiSelector/MultiSelector";
+import EnhancedMultiSelector from "../../topical/components/MultiSelector/EnhancedMultiSelector";
 import {
   ContextMenu,
   ContextMenuContent,

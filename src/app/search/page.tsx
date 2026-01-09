@@ -1,6 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import "@/features/topical/components/react-photo-view.css";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+
 import { getRandomPhrase } from "@/constants/motivationalPhrases";
 import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -10,13 +13,13 @@ import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ImageIcon, Search, Type, Upload, X } from "lucide-react";
+import { ImageIcon, Search, Type, Upload, X, FileText } from "lucide-react";
 import OptionalFilters, {
   OptionalSearchFilter,
-} from "@/features/search/OptionalFilters";
+} from "@/features/search/components/OptionalFilters";
 import { cn } from "@/lib/utils";
+import SearchPastPaper from "@/features/search/components/SearchPastPaper";
 
 const MAX_QUERY_LENGTH = 1000;
 
@@ -75,6 +78,7 @@ const SearchPage = () => {
     textSearchMutation.error?.message ||
     null;
   const results = imageSearchMutation.data || textSearchMutation.data || null;
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Character limit validation
   const excessCharacters = textQuery.length - MAX_QUERY_LENGTH;
@@ -127,12 +131,14 @@ const SearchPage = () => {
 
   const handleImageSearch = useCallback(() => {
     if (!selectedImage) return;
+    setHasSearched(true);
     textSearchMutation.reset();
     imageSearchMutation.mutate(selectedImage);
   }, [selectedImage, imageSearchMutation, textSearchMutation]);
 
   const handleTextSearch = useCallback(() => {
     if (!textQuery.trim()) return;
+    setHasSearched(true);
     imageSearchMutation.reset();
     textSearchMutation.mutate(textQuery);
   }, [textQuery, textSearchMutation, imageSearchMutation]);
@@ -167,7 +173,7 @@ const SearchPage = () => {
           )}
         >
           <div className="flex flex-col gap-3 items-center justify-center">
-            {!results && (
+            {!hasSearched && (
               <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-logo-main dark:to-white  to-logo-main/60 bg-clip-text text-transparent sm:text-5xl">
                   {randomPhrase}
@@ -221,6 +227,19 @@ const SearchPage = () => {
                     hasResults={!!results}
                     isInputValid={isInputValid}
                   />
+                  <SearchPastPaper>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground hover:text-foreground",
+                        !results && "w-[180px] bg-muted/40"
+                      )}
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Past Paper Navigator</span>
+                    </Button>
+                  </SearchPastPaper>
                 </div>
 
                 <TabsContent value="text" className="mt-0 w-full mb-2">
@@ -293,23 +312,42 @@ const SearchPage = () => {
                     />
                     {previewUrl ? (
                       <div className="absolute z-20 inset-0 flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearImage();
-                          }}
-                          title="Clear Image"
-                          className="absolute top-2 right-2 cursor-pointer z-20 h-8 w-8 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
-                        >
-                          <X className="w-5 h-5" />
-                        </Button>
-                        <img
-                          src={previewUrl}
-                          alt="Preview"
-                          className="max-w-full max-h-full rounded-xl object-contain shadow-lg"
-                        />
+                        <div className="absolute top-2 right-2 z-20 flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fileInputRef.current?.click();
+                            }}
+                            title="Choose Another Image"
+                            className="cursor-pointer h-8 px-3 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md text-xs"
+                          >
+                            <Upload className="w-4 h-4 mr-1" />
+                            Change
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearImage();
+                            }}
+                            title="Clear Image"
+                            className="cursor-pointer h-8 w-8 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
+                          >
+                            <X className="w-5 h-5" />
+                          </Button>
+                        </div>
+                        <PhotoProvider>
+                          <PhotoView src={previewUrl}>
+                            <img
+                              src={previewUrl}
+                              alt="Preview"
+                              className="max-w-full max-h-full rounded-xl object-contain shadow-lg cursor-pointer"
+                            />
+                          </PhotoView>
+                        </PhotoProvider>
                       </div>
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
@@ -349,7 +387,7 @@ const SearchPage = () => {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto mt-8">
+        <div className="max-w-7xl mx-auto mt-4">
           {error && (
             <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
               <div className="p-2 bg-destructive/10 rounded-full">
@@ -363,21 +401,47 @@ const SearchPage = () => {
           )}
 
           {loading && (
-            <div className="flex flex-col items-center justify-center py-24 animate-in fade-in zoom-in-95 duration-500">
+            <div className="flex flex-col items-center justify-center py-6 animate-in fade-in zoom-in-95 duration-500">
               <div className="relative">
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Search className="w-6 h-6 text-primary/40 animate-pulse" />
                 </div>
               </div>
-              <p className="text-muted-foreground mt-6 font-medium tracking-tight">
-                Searching questions...
+              <p className="text-muted-foreground mt-2 font-medium tracking-tight">
+                Searching
+                <span className="inline-flex w-6">
+                  <span className="animate-[dot_1.4s_ease-in-out_infinite]">
+                    .
+                  </span>
+                  <span className="animate-[dot_1.4s_ease-in-out_0.2s_infinite]">
+                    .
+                  </span>
+                  <span className="animate-[dot_1.4s_ease-in-out_0.4s_infinite]">
+                    .
+                  </span>
+                </span>
               </p>
+              <style jsx>{`
+                @keyframes dot {
+                  0%,
+                  20% {
+                    opacity: 0;
+                  }
+                  40% {
+                    opacity: 1;
+                  }
+                  60%,
+                  100% {
+                    opacity: 0;
+                  }
+                }
+              `}</style>
             </div>
           )}
 
           {results && !loading && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between px-2">
                 <p className="text-sm text-muted-foreground font-medium">
                   Found{" "}
@@ -389,8 +453,8 @@ const SearchPage = () => {
               </div>
 
               {results.length === 0 ? (
-                <div className="text-center py-24 bg-muted/20 rounded-3xl border border-dashed border-muted-foreground/20">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-background flex items-center justify-center shadow-sm">
+                <div className="text-center py-4 rounded-3xl">
+                  <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
                     <Search className="w-10 h-10 text-muted-foreground/30" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground">
@@ -403,13 +467,12 @@ const SearchPage = () => {
               ) : (
                 <div className="grid grid-cols-1 gap-6">
                   {results.map((result, idx) => (
-                    <Card
+                    <div
                       key={result.id}
                       className="overflow-hidden border-border/40 hover:border-primary/30 transition-all duration-300 bg-card/60 hover:bg-card/90 hover:shadow-xl hover:shadow-primary/5 group rounded-2xl"
                       style={{ animationDelay: `${idx * 100}ms` }}
                     >
                       <div className="flex flex-col lg:flex-row">
-                        {/* Question Side */}
                         <div className="lg:w-7/12 p-6 flex flex-col gap-4">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex flex-wrap gap-2 items-center">
@@ -511,7 +574,7 @@ const SearchPage = () => {
                           </div>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               )}

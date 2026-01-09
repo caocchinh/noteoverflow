@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -18,7 +18,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
+} from "../../../components/ui/dialog";
 import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
@@ -26,7 +26,7 @@ import {
   PAST_PAPER_NAVIGATOR_CACHE_KEY,
   TOPICAL_DATA,
 } from "@/constants/constants";
-import { GlowEffect } from "../ui/glow-effect";
+import { GlowEffect } from "../../../components/ui/glow-effect";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import {
   PastPaperNavigatorCache,
@@ -39,13 +39,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { ScrollArea } from "../ui/scroll-area";
+} from "../../../components/ui/select";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 import { INVALID_INPUTS_DEFAULT } from "@/features/topical/constants/constants";
 import { InvalidInputs } from "@/features/topical/constants/types";
 import { cn, getShortSeason } from "@/lib/utils";
 
-const SearchPastPaper = () => {
+const SearchPastPaper = ({ children }: { children?: React.ReactNode }) => {
   const breakpoint = useIsMobile({ breakpoint: 735 });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quickCodeError, setQuickCodeError] = useState<string | null>(null);
@@ -322,28 +322,42 @@ const SearchPastPaper = () => {
     quickCodeInput,
   ]);
 
+  const [isMount, setIsMount] = useState(false);
+
+  useEffect(() => {
+    setIsMount(true);
+  }, []);
+
+  if (!isMount) return null;
+
   return (
     <>
-      <div
-        className="hidden h-10 w-full max-w-md items-center sm:flex"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        <Input
-          className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
-          placeholder={breakpoint ? "Search" : "Search past paper question"}
-          value=""
-          readOnly={true}
-        />
-        <Button className="h-full w-10 rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
-          <SearchIcon className="text-(--navbar-text)" />
-        </Button>
-      </div>
-      <Button
-        className="flex h-full w-9 items-center justify-center border border-(--navbar-border) bg-transparent p-2 text-(--navbar-text) hover:cursor-pointer hover:bg-(--navbar-border) sm:hidden"
-        onClick={() => setIsDialogOpen(true)}
-      >
-        <SearchIcon />
-      </Button>
+      {children ? (
+        <div onClick={() => setIsDialogOpen(true)}>{children}</div>
+      ) : (
+        <>
+          <div
+            className="hidden h-10 w-full max-w-md items-center sm:flex"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <Input
+              className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
+              placeholder={breakpoint ? "Search" : "Search past paper question"}
+              value=""
+              readOnly={true}
+            />
+            <Button className="h-full w-10 rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
+              <SearchIcon className="text-(--navbar-text)" />
+            </Button>
+          </div>
+          <Button
+            className="flex h-full w-9 items-center justify-center border border-(--navbar-border) bg-transparent p-2 text-(--navbar-text) hover:cursor-pointer hover:bg-(--navbar-border) sm:hidden"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <SearchIcon />
+          </Button>
+        </>
+      )}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="dark:bg-muted max-w-2xl">
           <DialogHeader className="space-y-3 pb-0!">
