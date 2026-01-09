@@ -6,8 +6,8 @@ import Sort from "@/features/topical/components/Sort";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import {
   QuestionInspectRef,
-  SelectedQuestion,
   SortParameters,
+  VectorizeSelectedQuestion,
 } from "@/features/topical/constants/types";
 import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvider";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
@@ -20,7 +20,7 @@ const MainContent = memo(
     isSearching,
     enableSavedActivitiesQuery = true,
   }: {
-    results: SelectedQuestion[] | null;
+    results: VectorizeSelectedQuestion[] | null;
     isSearching: boolean;
     enableSavedActivitiesQuery?: boolean;
   }) => {
@@ -29,27 +29,37 @@ const MainContent = memo(
       sortBy: DEFAULT_SORT_OPTIONS,
     });
     const [fullPartitionedData, setFullPartitionedData] = useState<
-      SelectedQuestion[][] | undefined
+      VectorizeSelectedQuestion[][] | undefined
     >(undefined);
 
     const sortedData = useMemo(() => {
       if (!results) return [];
-      return results.toSorted((a: SelectedQuestion, b: SelectedQuestion) => {
-        if (sortParameters.sortBy === "ascending") {
-          return a.year - b.year;
-        } else {
-          // Default to year-desc
-          return b.year - a.year;
+      return results.toSorted(
+        (a: VectorizeSelectedQuestion, b: VectorizeSelectedQuestion) => {
+          if (sortParameters.sortBy === "ascending") {
+            return a.score - b.score;
+          } else {
+            // Default to year-desc
+            return b.score - a.score;
+          }
         }
-      });
+      );
     }, [sortParameters.sortBy, results]);
+
+    const highestScore = useMemo(() => {
+      if (!results || results.length === 0) return null;
+      return Math.max(...results.map((q) => q.score));
+    }, [results]);
 
     const chunkedData = useMemo(() => {
       if (!sortedData || sortedData.length === 0) return null;
 
       const chunkSize = 25;
 
-      return chunkQuestionsData(sortedData, chunkSize);
+      return chunkQuestionsData(
+        sortedData,
+        chunkSize
+      ) as VectorizeSelectedQuestion[][];
     }, [sortedData]);
 
     useEffect(() => {
@@ -92,8 +102,8 @@ const MainContent = memo(
                     setSortParameters={setSortParameters}
                     isDisabled={false}
                     disabledMessage="Please run a search first"
-                    descendingSortText="Newest year first"
-                    ascendingSortText="Oldest year first"
+                    descendingSortText="Best match first"
+                    ascendingSortText="Worst match first"
                   />
                 </div>
               </div>
@@ -113,9 +123,9 @@ const MainContent = memo(
               ) : (
                 <>
                   <Masonry>
-                    {results.map((question, index) =>
+                    {sortedData.map((question, index) =>
                       question?.questionImages.map((imageSrc: string) => {
-                        const isBestMatch = index === 0;
+                        const isBestMatch = question.score === highestScore;
 
                         if (isBestMatch) {
                           return (

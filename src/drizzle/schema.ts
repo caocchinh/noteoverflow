@@ -202,6 +202,8 @@ export const question = sqliteTable(
       .notNull(),
     questionImages: text("question_images"),
     answers: text("answers"),
+    questionImagesDimensions: text("question_images_dimensions"),
+    answersImagesDimensions: text("answers_images_dimensions"),
     subjectId: text("subject_id").notNull(),
     curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),

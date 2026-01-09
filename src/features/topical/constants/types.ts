@@ -221,6 +221,10 @@ export interface SelectedQuestion {
   topics: string[];
 }
 
+export interface VectorizeSelectedQuestion extends SelectedQuestion {
+  score: number;
+}
+
 export interface SelectedBookmark {
   id: string;
   createdAt: Date;

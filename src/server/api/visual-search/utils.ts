@@ -8,7 +8,7 @@ import {
 import { queryVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { getDbAsync } from "@/drizzle/db.server";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
 import { retryDatabase } from "@/dal/retry";
 import { inArray } from "drizzle-orm";
 import { question } from "@/drizzle/schema";
@@ -165,11 +165,11 @@ export async function executeVectorSearch(
 
 /**
  * Process Vectorize matches and fetch full question data from D1
- * Returns SelectedQuestion[] matching the topical questions format, sorted by highest score first
+ * Returns VectorizeSelectedQuestion[] matching the topical questions format
  */
 export async function fetchQuestionResults(
   matches: VectorizeMatches
-): Promise<SelectedQuestion[]> {
+): Promise<VectorizeSelectedQuestion[]> {
   // Build a map of questionId -> highest score (for sorting)
   const scoreMap = new Map<string, number>();
 
@@ -208,8 +208,8 @@ export async function fetchQuestionResults(
     "fetch questions by ids"
   );
 
-  // Map results and sort by score descending
-  const results: SelectedQuestion[] = questionsData.map((q) => ({
+  // Map results
+  const results: VectorizeSelectedQuestion[] = questionsData.map((q) => ({
     id: q.id,
     year: q.year ?? 0,
     season: q.season ?? "",
@@ -217,14 +217,8 @@ export async function fetchQuestionResults(
     questionImages: JSON.parse(q.questionImages ?? "[]"),
     answers: JSON.parse(q.answers ?? "[]"),
     topics: JSON.parse(q.topics ?? "[]"),
+    score: scoreMap.get(q.id) ?? 0,
   }));
-
-  // Sort by score descending (highest first)
-  results.sort((a, b) => {
-    const scoreA = scoreMap.get(a.id) ?? 0;
-    const scoreB = scoreMap.get(b.id) ?? 0;
-    return scoreB - scoreA;
-  });
 
   return results;
 }

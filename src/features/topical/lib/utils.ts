@@ -19,6 +19,7 @@ import type {
   SelectedBookmark,
   SelectedQuestion,
   SubjectMetadata,
+  VectorizeSelectedQuestion,
 } from "../constants/types";
 import type {
   OUTDATED,
@@ -1069,17 +1070,19 @@ export function filterQuestionsByCriteria<
 export function chunkQuestionsData<T>(
   items: T[],
   chunkSize: number,
-  selector?: (item: T) => SelectedQuestion
-): SelectedQuestion[][] {
-  const chunkedData: SelectedQuestion[][] = [];
-  let currentChunks: SelectedQuestion[] = [];
+  selector?: (item: T) => SelectedQuestion | VectorizeSelectedQuestion
+): SelectedQuestion[][] | VectorizeSelectedQuestion[][] {
+  const chunkedData: (SelectedQuestion | VectorizeSelectedQuestion)[][] = [];
+  let currentChunks: (SelectedQuestion | VectorizeSelectedQuestion)[] = [];
 
   items.forEach((item) => {
     if (currentChunks.length === chunkSize) {
       chunkedData.push(currentChunks);
       currentChunks = [];
     }
-    const question = selector ? selector(item) : (item as SelectedQuestion);
+    const question = selector
+      ? selector(item)
+      : (item as SelectedQuestion | VectorizeSelectedQuestion);
     currentChunks.push(question);
   });
 
