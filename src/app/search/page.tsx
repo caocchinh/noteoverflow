@@ -7,7 +7,7 @@ import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,7 +47,7 @@ const SearchPage = () => {
         throw new Error(error.value.error || "Search failed");
       }
 
-      return data.data as SelectedQuestion[];
+      return data.data as VectorizeSelectedQuestion[];
     },
   });
 
@@ -64,7 +64,7 @@ const SearchPage = () => {
         throw new Error(error.value.error || "Search failed");
       }
 
-      return data.data as SelectedQuestion[];
+      return data.data as VectorizeSelectedQuestion[];
     },
   });
 
