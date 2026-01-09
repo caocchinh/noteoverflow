@@ -208,6 +208,9 @@ export const question = sqliteTable(
     curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),
     topics: text("topics"),
+    isQuestionHasImageDimensions: integer("is_question_has_image_dimensions")
+      .notNull()
+      .default(0),
     isQuestionImageIndexed: integer("is_question_image_indexed")
       .notNull()
       .default(0),

@@ -227,19 +227,31 @@ export const FinishedTracker = memo(
                     >
                       <Masonry>
                         {displayedData?.map((question) =>
-                          question?.questionImages.map((imageSrc: string) => (
-                            <QuestionPreview
-                              question={question}
-                              key={`${question.id}-${imageSrc}`}
-                              imageSrc={imageSrc}
-                              onQuestionClick={() => {
-                                setIsDialogOpen(false);
-                                navigateToQuestion({
-                                  questionId: question?.id,
-                                });
-                              }}
-                            />
-                          ))
+                          question?.questionImages.map(
+                            (imageSrc: string, imageIndex: number) => (
+                              <QuestionPreview
+                                question={question}
+                                key={`${question.id}-${imageSrc}`}
+                                imageSrc={imageSrc}
+                                onQuestionClick={() => {
+                                  setIsDialogOpen(false);
+                                  navigateToQuestion({
+                                    questionId: question?.id,
+                                  });
+                                }}
+                                imageWidth={
+                                  question.questionImagesDimensions?.[
+                                    imageIndex
+                                  ]?.width
+                                }
+                                imageHeight={
+                                  question.questionImagesDimensions?.[
+                                    imageIndex
+                                  ]?.height
+                                }
+                              />
+                            )
+                          )
                         )}
                       </Masonry>
                       {/* Pagination Controls */}

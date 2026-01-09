@@ -217,6 +217,8 @@ export interface SelectedQuestion {
   id: string;
   paperType: number;
   questionImages: string[];
+  questionImagesDimensions: { width: number; height: number }[] | null;
+  answersImagesDimensions: { width: number; height: number }[] | null;
   answers: string[];
   topics: string[];
 }

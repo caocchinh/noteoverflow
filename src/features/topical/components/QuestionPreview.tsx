@@ -17,11 +17,15 @@ import { useAuth } from "@/context/AuthContext";
 const QuestionPreview = memo(
   ({
     imageSrc,
+    imageWidth,
+    imageHeight,
     listId,
     question,
     onQuestionClick,
     className,
   }: {
+    imageWidth: number | undefined;
+    imageHeight: number | undefined;
     question: SelectedQuestion;
     imageSrc: string;
     listId?: string;
@@ -271,6 +275,8 @@ const QuestionPreview = memo(
           src={imageSrc}
           alt="Question preview"
           loading="lazy"
+          width={imageWidth}
+          height={imageHeight}
           onLoad={() => {
             setLoading(false);
           }}

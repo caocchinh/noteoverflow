@@ -652,16 +652,24 @@ export const MainContent = memo(
       <>
         <Masonry>
           {filteredDisplayData?.map((question) =>
-            question?.questionImages.map((imageSrc: string) => (
-              <QuestionViewItem
-                key={`${question.id}-${imageSrc}`}
-                isQuestionForExport={questionsForExport.has(question.id)}
-                question={question}
-                handleQuestionClick={handleQuestionClick}
-                imageSrc={imageSrc}
-                isExportModeEnabled={isExportModeEnabled}
-              />
-            ))
+            question?.questionImages.map(
+              (imageSrc: string, imageIndex: number) => (
+                <QuestionViewItem
+                  key={`${question.id}-${imageSrc}`}
+                  isQuestionForExport={questionsForExport.has(question.id)}
+                  question={question}
+                  handleQuestionClick={handleQuestionClick}
+                  imageSrc={imageSrc}
+                  isExportModeEnabled={isExportModeEnabled}
+                  imageWidth={
+                    question.questionImagesDimensions?.[imageIndex]?.width
+                  }
+                  imageHeight={
+                    question.questionImagesDimensions?.[imageIndex]?.height
+                  }
+                />
+              )
+            )
           )}
         </Masonry>
 
@@ -688,6 +696,8 @@ const QuestionViewItem = memo(
   ({
     question,
     imageSrc,
+    imageWidth,
+    imageHeight,
     handleQuestionClick,
     isExportModeEnabled,
     isQuestionForExport,
@@ -697,6 +707,8 @@ const QuestionViewItem = memo(
     handleQuestionClick: (questionId: string) => void;
     isExportModeEnabled: boolean;
     isQuestionForExport: boolean;
+    imageWidth: number | undefined;
+    imageHeight: number | undefined;
   }) => {
     return (
       <div
@@ -722,6 +734,8 @@ const QuestionViewItem = memo(
           question={question}
           onQuestionClick={() => handleQuestionClick(question.id)}
           imageSrc={imageSrc}
+          imageWidth={imageWidth}
+          imageHeight={imageHeight}
           className="mb-0!"
         />
       </div>
