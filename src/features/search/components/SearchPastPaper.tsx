@@ -372,6 +372,29 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-[calc(100dvh-150px)] pr-4" type="always">
+            <div className="mb-4 overflow-hidden rounded-xl border-2 border-logo-main/30 bg-linear-to-r from-logo-main/5 via-logo-main/5 to-logo-main/5">
+              <a
+                href="https://chromewebstore.google.com/detail/caie-paper-navigator/fbeddcmganoeefjijeddmlldchaidgbf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-4 transition-all duration-200"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 text-2xl">🚀</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-logo-main">
+                      Get the Chrome Extension!
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Install CAIE Paper Navigator for quick access to past
+                      papers
+                    </p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-logo-main" />
+                </div>
+              </a>
+            </div>
+
             <div className="relative overflow-hidden bg-linear-to-br from-background via-accent/20 to-accent/40 rounded-xl border border-border/50shadow-md">
               <div className="relative z-10 ">
                 <div className="flex items-center gap-2 px-4 pt-2 pb-0 ">

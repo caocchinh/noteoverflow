@@ -10,6 +10,7 @@ import {
   useEffect,
   useRef,
   useMemo,
+  ReactNode,
 } from "react";
 import {
   Sidebar,
@@ -32,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
+import { cn } from "@/lib/utils";
 
 type UiPreferencesKey = keyof UiPreferences;
 
@@ -132,8 +134,10 @@ export const useTopicalApp = () => {
 
 export default function TopicalLayoutProvider({
   children,
+  enableSavedActivitiesQuery = true,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
+  enableSavedActivitiesQuery?: boolean;
 }) {
   const [isAppSidebarOpen, setIsAppSidebarOpen] = useState(true);
   const isMobileDevice = useIsMobile();
@@ -224,7 +228,7 @@ export default function TopicalLayoutProvider({
       // Type is now properly narrowed to SavedActivitiesResponse
       return data;
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && enableSavedActivitiesQuery,
   });
 
   // Memoize individual query states to prevent context re-renders
@@ -304,11 +308,17 @@ export default function TopicalLayoutProvider({
           <SidebarProvider
             onOpenChange={setIsAppSidebarOpen}
             open={isAppSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
+            className={cn("h-0!", pathname === "/search" && "h-0! min-h-0!")}
           >
             {!isMobileDevice && (
               <Sidebar className="bg-background! border-none! z-[-1]!" />
             )}
-            <SidebarInset className="relative w-full">
+            <SidebarInset
+              className={cn(
+                "relative w-full",
+                pathname === "/search" && "h-0!"
+              )}
+            >
               <div className="absolute left-0 z-1000 flex w-full items-start justify-center">
                 <div className="fixed bottom-1">
                   <DockWrapper />

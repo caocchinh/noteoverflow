@@ -455,7 +455,7 @@ const FilterToggleButton = memo(
 );
 FilterToggleButton.displayName = "FilterToggleButton";
 
-const InspectTriggerButton = memo(
+export const InspectTriggerButton = memo(
   ({
     isQuestionViewDisabled,
     setIsQuestionInspectOpen,

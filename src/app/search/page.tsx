@@ -3,22 +3,21 @@
 
 import "@/features/topical/components/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import { getRandomPhrase } from "@/constants/motivationalPhrases";
 import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { ImageIcon, Search, Type, Upload, X, FileText } from "lucide-react";
 import OptionalFilters from "@/features/search/components/OptionalFilters";
 import { cn } from "@/lib/utils";
 import SearchPastPaper from "@/features/search/components/SearchPastPaper";
 import { OptionalSearchFilter } from "@/features/search/constants/type";
-
+import { getRandomPhrase } from "@/features/search/constants/constants";
+import MainContent from "@/features/search/components/MainContent";
 const MAX_QUERY_LENGTH = 1000;
 
 const SearchPage = () => {
@@ -86,6 +85,20 @@ const SearchPage = () => {
     activeTab === "image"
       ? !!selectedImage
       : textQuery.trim().length > 0 && !isQueryTooLong;
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isSearching) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isSearching]);
 
   // Visual Search Handlers
   const handleImageSelect = useCallback(
@@ -440,147 +453,11 @@ const SearchPage = () => {
               `}</style>
             </div>
           )}
-
-          {results && !isSearching && (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="flex items-center justify-between px-2">
-                <p className="text-sm text-muted-foreground font-medium">
-                  Found{" "}
-                  <span className="text-foreground font-bold">
-                    {results.length}
-                  </span>{" "}
-                  matches
-                </p>
-              </div>
-
-              {results.length === 0 ? (
-                <div className="text-center py-4 rounded-3xl">
-                  <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
-                    <Search className="w-10 h-10 text-muted-foreground/30" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground">
-                    No matches found
-                  </h3>
-                  <p className="text-muted-foreground mt-1">
-                    Try adjusting your filters or search terms
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6">
-                  {results.map((result, idx) => (
-                    <div
-                      key={result.id}
-                      className="overflow-hidden border-border/40 hover:border-primary/30 transition-all duration-300 bg-card/60 hover:bg-card/90 hover:shadow-xl hover:shadow-primary/5 group rounded-2xl"
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                      <div className="flex flex-col lg:flex-row">
-                        <div className="lg:w-7/12 p-6 flex flex-col gap-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex flex-wrap gap-2 items-center">
-                              <Badge
-                                variant="secondary"
-                                className="bg-primary/10 text-primary hover:bg-primary/20 border-transparent rounded-md px-2.5 py-1"
-                              >
-                                {result.season} {result.year}
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                className="text-muted-foreground border-border/60"
-                              >
-                                Paper {result.paperType}
-                              </Badge>
-                            </div>
-                            <span className="text-[10px] font-mono text-muted-foreground/50 bg-muted/30 px-2 py-1 rounded">
-                              {result.id.slice(0, 20)}...
-                            </span>
-                          </div>
-
-                          {result.topics && result.topics.length > 0 && (
-                            <div className="flex gap-1.5 flex-wrap">
-                              {result.topics.map((topic, i) => (
-                                <Badge
-                                  key={i}
-                                  variant="outline"
-                                  className="text-xs border-primary/10 text-muted-foreground bg-background/50"
-                                >
-                                  {topic}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-
-                          <div className="space-y-6 mt-2">
-                            {result.questionImages?.map(
-                              (img: string, idx: number) => (
-                                <div
-                                  key={`q-${idx}`}
-                                  className="relative group/image"
-                                >
-                                  <div className="absolute -top-3 -left-2 z-10">
-                                    <Badge className="bg-foreground text-background shadow-lg shadow-black/10 hover:bg-foreground">
-                                      Q{idx + 1}
-                                    </Badge>
-                                  </div>
-                                  <div className="rounded-xl overflow-hidden border border-border/50 bg-white/50 dark:bg-black/20 p-1">
-                                    <img
-                                      src={img}
-                                      alt={`Question ${idx + 1}`}
-                                      className="w-full rounded-lg bg-white object-contain"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="lg:w-5/12 bg-muted/10 border-t lg:border-t-0 lg:border-l border-border/40 p-6">
-                          <div className="flex items-center gap-2 mb-4">
-                            <div className="p-1.5 bg-emerald-500/10 rounded-md">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            </div>
-                            <span className="font-semibold text-sm tracking-tight text-muted-foreground uppercase">
-                              Suggested Answers
-                            </span>
-                          </div>
-
-                          <div className="space-y-4">
-                            {result.answers?.map((img: string, idx: number) => (
-                              <div key={`a-${idx}`} className="relative">
-                                <div className="absolute top-2 left-2 z-10">
-                                  <Badge className="bg-emerald-600/90 text-white border-0 shadow-sm backdrop-blur-md">
-                                    Ans {idx + 1}
-                                  </Badge>
-                                </div>
-
-                                {/\.(webp|png|jpg|jpeg|gif|bmp|svg)$/i.test(
-                                  img
-                                ) ? (
-                                  <div className="rounded-xl overflow-hidden border border-border/40 bg-white/50 dark:bg-black/20 p-1 shadow-sm">
-                                    <img
-                                      src={img}
-                                      alt={`Answer ${idx + 1}`}
-                                      className="w-full rounded-lg bg-white object-contain"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="p-4 text-sm bg-background border border-border/50 rounded-xl font-mono text-muted-foreground shadow-sm">
-                                    {img}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <MainContent
+            results={results}
+            isSearching={isSearching}
+            enableSavedActivitiesQuery={hasSearched}
+          />
         </div>
       </div>
     </div>
