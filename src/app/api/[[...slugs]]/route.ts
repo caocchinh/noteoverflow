@@ -10,6 +10,8 @@ import {
   searchByText,
 } from "@/server/api/visual-search/searching";
 import { getQuestionStats } from "@/server/api/visual-search/stats";
+import { getDimensionStats } from "@/server/api/dimensions/stats";
+import { processDimensions } from "@/server/api/dimensions/dimensions";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -75,6 +77,19 @@ const app = new Elysia({ prefix: "/api", aot: false })
     query: t.Object({
       offset: t.Numeric({ default: 0 }),
       limit: t.Numeric({ default: 1 }),
+    }),
+  })
+
+  // ========== IMAGE DIMENSIONS ADMIN ROUTES ==========
+
+  // GET /api/admin/dimensions/stats - Get dimension processing stats
+  .get("/admin/dimensions/stats", getDimensionStats)
+
+  // GET /api/admin/dimensions - Process image dimensions
+  .get("/admin/dimensions", processDimensions, {
+    query: t.Object({
+      offset: t.Numeric({ default: 0 }),
+      limit: t.Numeric({ default: 10 }),
     }),
   })
 

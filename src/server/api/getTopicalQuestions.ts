@@ -160,6 +160,8 @@ export const getTopicalQuestions = async ({
         questionImages: true,
         topics: true,
         answers: true,
+        questionImagesDimensions: true,
+        answersImagesDimensions: true,
       },
     });
 
@@ -172,6 +174,12 @@ export const getTopicalQuestions = async ({
         questionImages: JSON.parse(item.questionImages ?? "[]"),
         answers: JSON.parse(item.answers ?? "[]"),
         topics: JSON.parse(item.topics ?? "[]"),
+        questionImagesDimensions: JSON.parse(
+          item.questionImagesDimensions ?? "[]"
+        ),
+        answersImagesDimensions: JSON.parse(
+          item.answersImagesDimensions ?? "[]"
+        ),
       };
     });
 

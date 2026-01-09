@@ -13,6 +13,9 @@ import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvi
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { Search } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+type DisplayMode = "questions" | "answers";
 
 const MainContent = memo(
   ({
@@ -31,10 +34,22 @@ const MainContent = memo(
     const [fullPartitionedData, setFullPartitionedData] = useState<
       VectorizeSelectedQuestion[][] | undefined
     >(undefined);
+    const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
+
+    // Helper to check if a string is an image URL
+    const isImageUrl = (str: string) => str.startsWith("http");
+
+    const filteredResults = useMemo(() => {
+      if (!results) return null;
+      if (displayMode === "questions") return results;
+      return results.filter((q) =>
+        q.answers.some((answer) => isImageUrl(answer))
+      );
+    }, [results, displayMode]);
 
     const sortedData = useMemo(() => {
-      if (!results) return [];
-      return results.toSorted(
+      if (!filteredResults) return [];
+      return filteredResults.toSorted(
         (a: VectorizeSelectedQuestion, b: VectorizeSelectedQuestion) => {
           if (sortParameters.sortBy === "ascending") {
             return a.score - b.score;
@@ -44,7 +59,7 @@ const MainContent = memo(
           }
         }
       );
-    }, [sortParameters.sortBy, results]);
+    }, [sortParameters.sortBy, filteredResults]);
 
     const highestScore = useMemo(() => {
       if (!results || results.length === 0) return null;
@@ -78,14 +93,38 @@ const MainContent = memo(
           {results && !isSearching && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between px-2 mb-1 gap-2">
-                <div className="flex items-center justify-between px-2 mb-1">
+                <div className="flex items-center gap-4 px-2 mb-1">
                   <p className="text-sm text-muted-foreground font-medium">
                     Found{" "}
                     <span className="text-foreground font-bold">
-                      {results?.length ?? 0}
+                      {sortedData.length}
                     </span>{" "}
-                    question{(results?.length ?? 0) !== 1 ? "s" : ""}
+                    {displayMode === "questions" ? "question" : "answer"}
+                    {sortedData.length !== 1 ? "s" : ""}
                   </p>
+                  <ToggleGroup
+                    type="single"
+                    value={displayMode}
+                    onValueChange={(value) => {
+                      if (value) setDisplayMode(value as DisplayMode);
+                    }}
+                    className="bg-muted/50 rounded-lg p-0.5"
+                  >
+                    <ToggleGroupItem
+                      value="questions"
+                      size="sm"
+                      className="text-xs px-3 py-1 data-[state=on]:bg-background data-[state=on]:shadow-sm rounded-md"
+                    >
+                      Questions
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="answers"
+                      size="sm"
+                      className="text-xs px-3 py-1 data-[state=on]:bg-background data-[state=on]:shadow-sm rounded-md"
+                    >
+                      Answers
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </div>
                 <div className="flex items-center justify-between mb-1 gap-2">
                   <InspectTriggerButton
@@ -108,23 +147,40 @@ const MainContent = memo(
                 </div>
               </div>
 
-              {results.length === 0 ? (
+              {sortedData.length === 0 ? (
                 <div className="text-center py-4 rounded-3xl">
                   <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
                     <Search className="w-10 h-10 text-muted-foreground/30" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground">
-                    No matches found
+                    {displayMode === "answers"
+                      ? "No answers found"
+                      : "No questions found"}
                   </h3>
                   <p className="text-muted-foreground mt-1">
-                    Try adjusting your filters or search terms
+                    {displayMode === "answers"
+                      ? "Try switching to questions mode or adjust your search (note: multiple choice answers are not searchable)"
+                      : "Try adjusting your filters or search terms"}
                   </p>
                 </div>
               ) : (
                 <>
                   <Masonry>
-                    {sortedData.map((question, index) =>
-                      question?.questionImages.map(
+                    {sortedData.map((question, index) => {
+                      // Determine which images to display based on mode
+                      const imagesToShow =
+                        displayMode === "questions"
+                          ? question.questionImages
+                          : question.answers.filter((answer) =>
+                              isImageUrl(answer)
+                            );
+
+                      const dimensionsToUse =
+                        displayMode === "questions"
+                          ? question.questionImagesDimensions
+                          : question.answersImagesDimensions;
+
+                      return imagesToShow.map(
                         (imageSrc: string, imageIndex: number) => {
                           const isBestMatch = question.score === highestScore;
 
@@ -150,14 +206,10 @@ const MainContent = memo(
                                     }}
                                     imageSrc={imageSrc}
                                     imageWidth={
-                                      question.questionImagesDimensions?.[
-                                        imageIndex
-                                      ]?.width
+                                      dimensionsToUse?.[imageIndex]?.width
                                     }
                                     imageHeight={
-                                      question.questionImagesDimensions?.[
-                                        imageIndex
-                                      ]?.height
+                                      dimensionsToUse?.[imageIndex]?.height
                                     }
                                     className="border-logo-main/20 shadow-lg"
                                   />
@@ -175,20 +227,16 @@ const MainContent = memo(
                                 });
                               }}
                               imageSrc={imageSrc}
-                              imageWidth={
-                                question.questionImagesDimensions?.[imageIndex]
-                                  ?.width
-                              }
+                              imageWidth={dimensionsToUse?.[imageIndex]?.width}
                               imageHeight={
-                                question.questionImagesDimensions?.[imageIndex]
-                                  ?.height
+                                dimensionsToUse?.[imageIndex]?.height
                               }
                               key={`${question.id}-${imageSrc}-${index}`}
                             />
                           );
                         }
-                      )
-                    )}
+                      );
+                    })}
                   </Masonry>
                 </>
               )}
