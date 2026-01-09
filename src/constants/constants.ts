@@ -18,6 +18,7 @@ export const UNAUTHORIZED = "Unauthorized";
 export const FAILED_TO_UPLOAD_IMAGE = "Failed to upload image";
 export const BAD_REQUEST = "Bad Request";
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+export const MAX_IMAGE_UPLOAD_SIZE = 2 * 1024 * 1024; // 2MB limit for image uploads
 export const FILE_SIZE_EXCEEDS_LIMIT = "File size exceeds the 3MiB limit";
 export const ONLY_WEBP_FILES_ALLOWED = "Only .webp files are allowed";
 export const LIMIT_EXCEEDED = "Limit exceeded";

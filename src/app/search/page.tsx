@@ -2,6 +2,7 @@
 "use client";
 
 import { getRandomPhrase } from "@/constants/motivationalPhrases";
+import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
@@ -27,6 +28,7 @@ const SearchPage = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [textQuery, setTextQuery] = useState("");
   const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -87,6 +89,19 @@ const SearchPage = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
+        // Validate file size (max 2MB)
+        if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
+          setImageError(
+            `Image size exceeds 2MB limit. Please upload a smaller image.`
+          );
+          // Clear the file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+          return;
+        }
+
+        setImageError(null);
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64String = reader.result as string;
@@ -104,6 +119,7 @@ const SearchPage = () => {
   const clearImage = useCallback(() => {
     setSelectedImage(null);
     setPreviewUrl(null);
+    setImageError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -263,6 +279,8 @@ const SearchPage = () => {
                       "relative border-2 border-dashed rounded-3xl transition-all overflow-hidden w-full h-48 sm:h-64  max-w-lg ",
                       previewUrl
                         ? "border-primary/50 bg-primary/5"
+                        : imageError
+                        ? "border-destructive/50 bg-destructive/5 hover:border-destructive/60"
                         : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20"
                     )}
                   >
@@ -283,7 +301,7 @@ const SearchPage = () => {
                             clearImage();
                           }}
                           title="Clear Image"
-                          className="absolute top-4 right-4 cursor-pointer z-20 h-10 w-10 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
+                          className="absolute top-2 right-2 cursor-pointer z-20 h-8 w-8 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
                         >
                           <X className="w-5 h-5" />
                         </Button>
@@ -295,18 +313,33 @@ const SearchPage = () => {
                       </div>
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                        <div className="w-16 h-16 rounded-full bg-muted/50 mb-4 flex items-center justify-center transition-transform group-hover:scale-110">
-                          <Upload className="w-8 h-8 text-muted-foreground" />
+                        <div
+                          className={cn(
+                            "w-16 h-16 rounded-full bg-muted/50 mb-4 flex items-center justify-center transition-transform group-hover:scale-110",
+                            imageError && "bg-destructive/5"
+                          )}
+                        >
+                          <Upload
+                            className={cn(
+                              "w-8 h-8 text-muted-foreground",
+                              imageError && "text-destructive"
+                            )}
+                          />
                         </div>
                         <p className="text-lg font-medium text-foreground">
                           Drop an image here
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          or click to upload screenshot
+                          or click to upload screenshot (max 2MB)
                         </p>
                       </div>
                     )}
                   </div>
+                  {imageError && (
+                    <p className="text-sm text-destructive mt-2">
+                      {imageError}
+                    </p>
+                  )}
                 </TabsContent>
               </div>
             </Tabs>

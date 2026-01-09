@@ -24,6 +24,12 @@ import { Label } from "@/components/ui/label";
 import EnhancedSelect from "../topical/components/EnhancedSelect";
 import MultiSelector from "../topical/components/MultiSelector/MultiSelector";
 import EnhancedMultiSelector from "../topical/components/MultiSelector/EnhancedMultiSelector";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 export type OptionalSearchFilter = {
   subject?: string;
@@ -274,27 +280,39 @@ const OptionalFilters = ({
     <>
       {searchButton}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all",
-              !hasResults && "w-[180px]"
-            )}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Optional Filters</span>
-            {activeFilterCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="ml-1 h-5 min-w-5 px-1 rounded-full text-[10px] font-bold"
+        <ContextMenu>
+          <ContextMenuTrigger>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all",
+                  !hasResults && "w-[180px]"
+                )}
               >
-                {activeFilterCount}
-              </Badge>
-            )}
-          </Button>
-        </SheetTrigger>
+                <Filter className="w-4 h-4" />
+                <span>Optional Filters</span>
+                {activeFilterCount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 h-5 min-w-5 px-1 rounded-full text-[10px] font-bold"
+                  >
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={handleClearAll}
+              className="cursor-pointer"
+            >
+              Clear all filter
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
         <SheetContent
           onOpenAutoFocus={(event) => event.preventDefault()}
           className="gap-0"
