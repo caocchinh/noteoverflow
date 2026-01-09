@@ -17,6 +17,8 @@ import OptionalFilters, {
 } from "@/features/search/OptionalFilters";
 import { cn } from "@/lib/utils";
 
+const MAX_QUERY_LENGTH = 1000;
+
 const SearchPage = () => {
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
   const [currentFilter, setCurrentFilter] =
@@ -24,6 +26,7 @@ const SearchPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [textQuery, setTextQuery] = useState("");
+  const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -70,6 +73,14 @@ const SearchPage = () => {
     textSearchMutation.error?.message ||
     null;
   const results = imageSearchMutation.data || textSearchMutation.data || null;
+
+  // Character limit validation
+  const excessCharacters = textQuery.length - MAX_QUERY_LENGTH;
+  const isQueryTooLong = excessCharacters > 0;
+  const isInputValid =
+    activeTab === "image"
+      ? !!selectedImage
+      : textQuery.trim().length > 0 && !isQueryTooLong;
 
   // Visual Search Handlers
   const handleImageSelect = useCallback(
@@ -131,7 +142,7 @@ const SearchPage = () => {
   }, [activeTab, handleTextSearch, handleImageSearch]);
 
   return (
-    <div className="min-h-screen pt-20 pb-12 bg-linear-to-b from-background via-muted/10 to-muted/30">
+    <div className="min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
@@ -142,11 +153,12 @@ const SearchPage = () => {
           <div className="flex flex-col gap-3 items-center justify-center">
             {!results && (
               <div className="text-center">
-                <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-foreground to-foreground/60 bg-clip-text text-transparent sm:text-5xl">
+                <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-logo-main dark:to-white  to-logo-main/60 bg-clip-text text-transparent sm:text-5xl">
                   {randomPhrase}
                 </h1>
                 <p className="text-lg text-muted-foreground mx-auto -mt-2">
-                  Search through thousands of past paper questions and answers.
+                  Search through thousands of AS & A-level past paper questions
+                  and answers.
                 </p>
               </div>
             )}
@@ -162,33 +174,44 @@ const SearchPage = () => {
                   !results && "items-center"
                 )}
               >
-                <TabsList
-                  className={cn(
-                    "grid grid-cols-2 p-1 bg-muted/40 backdrop-blur-sm border shadow-sm",
-                    results ? "w-48" : "w-64"
-                  )}
-                >
-                  <TabsTrigger
-                    value="text"
-                    className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                <div className="w-full flex items-center gap-4 justify-center flex-wrap">
+                  <TabsList
+                    className={cn(
+                      "grid grid-cols-2 p-1 bg-muted/40 backdrop-blur-sm border shadow-sm",
+                      results ? "w-48" : "w-64"
+                    )}
                   >
-                    <Type className="w-4 h-4 mr-2" />
-                    Text
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="image"
-                    className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
-                  >
-                    <ImageIcon className="w-4 h-4 mr-2" />
-                    Image
-                  </TabsTrigger>
-                </TabsList>
+                    <TabsTrigger
+                      value="text"
+                      className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                    >
+                      <Type className="w-4 h-4 mr-2" />
+                      Text
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="image"
+                      className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Image
+                    </TabsTrigger>
+                  </TabsList>
+                  <OptionalFilters
+                    currentFilter={currentFilter}
+                    setCurrentFilter={setCurrentFilter}
+                    searchButtonPortalRef={searchButtonPortalRef}
+                    onSearch={handleSearch}
+                    loading={loading}
+                    hasResults={!!results}
+                    isInputValid={isInputValid}
+                  />
+                </div>
 
                 <TabsContent value="text" className="mt-0 w-full mb-2">
                   <div
                     className={cn("relative group transition-all duration-300")}
                   >
-                    <div className="flex items-center pointer-events-none absolute inset-y-0 left-0 pl-5 z-10">
+                    <div className="flex items-start pt-4 pointer-events-none absolute inset-y-0 pl-5 z-10">
                       <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     </div>
                     <Textarea
@@ -196,46 +219,51 @@ const SearchPage = () => {
                       value={textQuery}
                       onChange={(e) => setTextQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
+                      onMouseUp={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        setTextareaHeight(target.offsetHeight);
+                      }}
                       placeholder="Search for questions (e.g. 'a ball is thrown up with velocity of 10m/s')..."
-                      className="min-h-14 h-auto pl-14 pr-4 py-3 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y"
+                      style={
+                        textareaHeight
+                          ? { height: `${textareaHeight}px` }
+                          : undefined
+                      }
+                      className={cn(
+                        "min-h-14 h-auto px-14 py-3 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y max-h-[500px]",
+                        isQueryTooLong &&
+                          "border-destructive focus:border-destructive focus:ring-destructive/10"
+                      )}
                     />
+                    {isQueryTooLong && (
+                      <p className="text-sm text-destructive mt-2 ml-1">
+                        Query is too long. Please reduce by {excessCharacters}{" "}
+                        character{excessCharacters > 1 ? "s" : ""}.
+                      </p>
+                    )}
                     {textQuery && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setTextQuery("")}
-                        className="absolute inset-y-0 cursor-pointer right-3 my-auto h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full"
+                        className="absolute inset-y-0 cursor-pointer right-3 mt-2 h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full"
                       >
                         <X className="h-5 w-5" />
                       </Button>
                     )}
                   </div>
-                  <div
-                    className={cn(
-                      "flex gap-3",
-                      results ? "justify-start" : "justify-center"
-                    )}
-                  >
-                    <OptionalFilters
-                      currentFilter={currentFilter}
-                      setCurrentFilter={setCurrentFilter}
-                      searchButtonPortalRef={searchButtonPortalRef}
-                      onSearch={handleSearch}
-                      loading={loading}
-                      hasResults={!!results}
-                    />
-                    <div ref={searchButtonPortalRef} className="flex-1" />
-                  </div>
                 </TabsContent>
 
-                <TabsContent value="image" className="mt-0 w-full space-y-4">
+                <TabsContent
+                  value="image"
+                  className="mt-0 w-full flex items-center justify-center flex-col mb-2"
+                >
                   <div
                     className={cn(
-                      "relative border-2 border-dashed rounded-3xl transition-all overflow-hidden",
+                      "relative border-2 border-dashed rounded-3xl transition-all overflow-hidden w-full h-48 sm:h-64  max-w-lg ",
                       previewUrl
                         ? "border-primary/50 bg-primary/5"
-                        : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20",
-                      !results ? "h-48 sm:h-64" : "h-48"
+                        : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20"
                     )}
                   >
                     <input
@@ -279,25 +307,12 @@ const SearchPage = () => {
                       </div>
                     )}
                   </div>
-                  <div
-                    className={cn(
-                      "flex gap-3",
-                      results ? "justify-start" : "justify-center"
-                    )}
-                  >
-                    <Button
-                      onClick={handleImageSearch}
-                      disabled={!selectedImage || loading}
-                      size="lg"
-                      className="rounded-full px-8 flex-1 h-12 gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all text-base"
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                      {loading ? "Searching..." : "Search by Image"}
-                    </Button>
-                  </div>
                 </TabsContent>
               </div>
             </Tabs>
+            <div className="flex gap-3 w-full max-w-3xl justify-center">
+              <div ref={searchButtonPortalRef} className="w-full" />
+            </div>
           </div>
         </div>
 

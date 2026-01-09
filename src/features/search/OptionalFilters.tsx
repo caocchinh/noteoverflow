@@ -2,6 +2,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -17,7 +18,7 @@ import {
 import { validateSubcurriculumnDivision } from "../topical/lib/utils";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Filter, Search } from "lucide-react";
+import { Filter, Save, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import EnhancedSelect from "../topical/components/EnhancedSelect";
@@ -41,6 +42,7 @@ interface OptionalFiltersProps {
   onSearch: () => void;
   loading: boolean;
   hasResults: boolean;
+  isInputValid: boolean;
 }
 
 type PaperTypeFilterSearchPageCache = {
@@ -56,6 +58,7 @@ const OptionalFilters = ({
   onSearch,
   loading,
   hasResults,
+  isInputValid,
 }: OptionalFiltersProps) => {
   const [selectedCurriculum, setSelectedCurriculum] = useState<ValidCurriculum>(
     (currentFilter?.curriculum as ValidCurriculum) || "CIE A-LEVEL"
@@ -76,7 +79,7 @@ const OptionalFilters = ({
     CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
   >(undefined);
   const [isMounted, setIsMounted] = useState(false);
-
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const curriculumRef = useRef<HTMLDivElement | null>(null);
   const subjectRef = useRef<HTMLDivElement | null>(null);
   const yearRef = useRef<HTMLDivElement | null>(null);
@@ -221,6 +224,14 @@ const OptionalFilters = ({
     }
   }, [isMounted, selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
 
+  const handleClearAll = useCallback(() => {
+    setSelectedSubject("");
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+    setCurrentPaperTypeFilter(undefined);
+  }, []);
+
   const handleApplyFilters = useCallback(() => {
     const newFilter: OptionalSearchFilter = {};
 
@@ -248,7 +259,7 @@ const OptionalFilters = ({
       ? createPortal(
           <Button
             onClick={handleApplyFilters}
-            disabled={loading}
+            disabled={loading || !isInputValid}
             size="lg"
             className="rounded-full px-8 w-full bg-logo-main! cursor-pointer text-white! h-12 gap-2 transition-all text-base"
           >
@@ -262,13 +273,13 @@ const OptionalFilters = ({
   return (
     <>
       {searchButton}
-      <Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
           <Button
             variant="outline"
             size="sm"
             className={cn(
-              "gap-2 h-10 px-4 rounded-full border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all",
+              "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all",
               !hasResults && "w-[180px]"
             )}
           >
@@ -284,17 +295,20 @@ const OptionalFilters = ({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent onOpenAutoFocus={(event) => event.preventDefault()}>
-          <SheetHeader>
+        <SheetContent
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          className="gap-0"
+        >
+          <SheetHeader className="pb-0">
             <SheetTitle>Search Filters</SheetTitle>
             <SheetDescription>
               Configure your search parameters for better results.
             </SheetDescription>
           </SheetHeader>
-          <ScrollArea className="h-[calc(100vh-8rem)] p-4">
-            <div className="flex flex-col gap-6 pb-6">
+          <ScrollArea className="h-[calc(100dvh-9rem)] p-4">
+            <div className="flex flex-col gap-4">
               <div className="" ref={curriculumRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
                   Curriculum
                 </Label>
                 <EnhancedSelect
@@ -310,8 +324,8 @@ const OptionalFilters = ({
                 />
               </div>
 
-              <div className="space-y-2" ref={subjectRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+              <div className="py-2" ref={subjectRef}>
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
                   Subject
                 </Label>
                 <EnhancedSelect
@@ -328,7 +342,7 @@ const OptionalFilters = ({
               </div>
 
               <div className="py-2" ref={paperTypeRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
                   Paper
                 </Label>
                 <EnhancedMultiSelector
@@ -346,7 +360,7 @@ const OptionalFilters = ({
               </div>
 
               <div className="py-2" ref={yearRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
                   Year
                 </Label>
                 <MultiSelector
@@ -361,7 +375,7 @@ const OptionalFilters = ({
               </div>
 
               <div className="py-2" ref={seasonRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
                   Season
                 </Label>
                 <MultiSelector
@@ -376,6 +390,27 @@ const OptionalFilters = ({
               </div>
             </div>
           </ScrollArea>
+          <SheetFooter className="flex flex-row gap-3 px-4 py-4 border-t">
+            <Button
+              onClick={useCallback(() => {
+                setIsSheetOpen(false);
+              }, [])}
+              className="flex-1 gap-2 bg-logo-main hover:bg-logo-main/90 cursor-pointer"
+              disabled={loading}
+            >
+              <Save className="w-4 h-4" />
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleClearAll}
+              className="flex-1 gap-2 cursor-pointer"
+              disabled={activeFilterCount === 0}
+            >
+              <X className="w-4 h-4" />
+              Clear All
+            </Button>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
     </>
