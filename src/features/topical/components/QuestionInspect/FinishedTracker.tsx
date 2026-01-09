@@ -225,35 +225,43 @@ export const FinishedTracker = memo(
                       viewportRef={scrollAreaRef}
                       type="always"
                     >
-                      <Masonry>
-                        {displayedData?.map((question) =>
+                      <Masonry
+                        items={displayedData?.flatMap((question) =>
                           question?.questionImages.map(
-                            (imageSrc: string, imageIndex: number) => (
-                              <QuestionPreview
-                                question={question}
-                                key={`${question.id}-${imageSrc}`}
-                                imageSrc={imageSrc}
-                                onQuestionClick={() => {
-                                  setIsDialogOpen(false);
-                                  navigateToQuestion({
-                                    questionId: question?.id,
-                                  });
-                                }}
-                                imageWidth={
-                                  question.questionImagesDimensions?.[
-                                    imageIndex
-                                  ]?.width
-                                }
-                                imageHeight={
-                                  question.questionImagesDimensions?.[
-                                    imageIndex
-                                  ]?.height
-                                }
-                              />
-                            )
+                            (imageSrc: string, imageIndex: number) => ({
+                              element: (
+                                <QuestionPreview
+                                  question={question}
+                                  key={`${question.id}-${imageSrc}`}
+                                  imageSrc={imageSrc}
+                                  onQuestionClick={() => {
+                                    setIsDialogOpen(false);
+                                    navigateToQuestion({
+                                      questionId: question?.id,
+                                    });
+                                  }}
+                                  imageWidth={
+                                    question.questionImagesDimensions?.[
+                                      imageIndex
+                                    ]?.width
+                                  }
+                                  imageHeight={
+                                    question.questionImagesDimensions?.[
+                                      imageIndex
+                                    ]?.height
+                                  }
+                                />
+                              ),
+                              width:
+                                question.questionImagesDimensions?.[imageIndex]
+                                  ?.width,
+                              height:
+                                question.questionImagesDimensions?.[imageIndex]
+                                  ?.height,
+                            })
                           )
                         )}
-                      </Masonry>
+                      />
                       {/* Pagination Controls */}
                       <div className="flex flex-row items-center justify-center gap-2 mt-6 w-full">
                         <FirstPageButton

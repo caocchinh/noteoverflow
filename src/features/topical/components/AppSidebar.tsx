@@ -754,7 +754,7 @@ const AppSidebar = memo(
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex flex-col items-center justify-center gap-4 w-full">
                 <div
                   className="flex flex-col items-start justify-start gap-1 w-full"
                   ref={topicRef}

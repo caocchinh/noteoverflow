@@ -129,28 +129,33 @@ const BrowseMoreQuestions = memo(
           ref={expandedContentRef}
           className="relative z-0 pt-10"
         >
-          <Masonry>
-            {displayedData?.map((question) =>
+          <Masonry
+            items={displayedData?.flatMap((question) =>
               question?.questionImages.map(
-                (imageSrc: string, imageIndex: number) => (
-                  <QuestionPreview
-                    question={question}
-                    key={`${question.id}-${imageSrc}`}
-                    imageSrc={imageSrc}
-                    onQuestionClick={() => {
-                      onQuestionClick(question?.id);
-                    }}
-                    imageWidth={
-                      question.questionImagesDimensions?.[imageIndex]?.width
-                    }
-                    imageHeight={
-                      question.questionImagesDimensions?.[imageIndex]?.height
-                    }
-                  />
-                )
+                (imageSrc: string, imageIndex: number) => ({
+                  element: (
+                    <QuestionPreview
+                      question={question}
+                      key={`${question.id}-${imageSrc}`}
+                      imageSrc={imageSrc}
+                      onQuestionClick={() => {
+                        onQuestionClick(question?.id);
+                      }}
+                      imageWidth={
+                        question.questionImagesDimensions?.[imageIndex]?.width
+                      }
+                      imageHeight={
+                        question.questionImagesDimensions?.[imageIndex]?.height
+                      }
+                    />
+                  ),
+                  width: question.questionImagesDimensions?.[imageIndex]?.width,
+                  height:
+                    question.questionImagesDimensions?.[imageIndex]?.height,
+                })
               )
             )}
-          </Masonry>
+          />
         </CollapsibleContent>
       </Collapsible>
     );

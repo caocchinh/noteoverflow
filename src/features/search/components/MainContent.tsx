@@ -165,9 +165,8 @@ const MainContent = memo(
                 </div>
               ) : (
                 <>
-                  <Masonry>
-                    {sortedData.map((question, index) => {
-                      // Determine which images to display based on mode
+                  <Masonry
+                    items={sortedData.flatMap((question, index) => {
                       const imagesToShow =
                         displayMode === "questions"
                           ? question.questionImages
@@ -183,41 +182,36 @@ const MainContent = memo(
                       return imagesToShow.map(
                         (imageSrc: string, imageIndex: number) => {
                           const isBestMatch = question.score === highestScore;
+                          const width = dimensionsToUse?.[imageIndex]?.width;
+                          const height = dimensionsToUse?.[imageIndex]?.height;
 
-                          if (isBestMatch) {
-                            return (
-                              <div
-                                key={`${question.id}-${imageSrc}-${index}`}
-                                className="w-full [column-span:3] mb-6 p-1 rounded-xl bg-logo-main relative"
-                              >
-                                <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
-                                  <span>✨</span> Best Match
-                                </div>
-                                <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
-                                  <QuestionPreview
-                                    question={question}
-                                    onQuestionClick={() => {
-                                      questionInspectRef.current?.setIsInspectOpen(
-                                        {
-                                          isOpen: true,
-                                          questionId: question.id,
-                                        }
-                                      );
-                                    }}
-                                    imageSrc={imageSrc}
-                                    imageWidth={
-                                      dimensionsToUse?.[imageIndex]?.width
-                                    }
-                                    imageHeight={
-                                      dimensionsToUse?.[imageIndex]?.height
-                                    }
-                                    className="border-logo-main/20 shadow-lg"
-                                  />
-                                </div>
+                          const element = isBestMatch ? (
+                            <div
+                              key={`${question.id}-${imageSrc}-${index}`}
+                              className="w-full [column-span:3] mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
+                            >
+                              <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
+                                <span>✨</span> Best Match
                               </div>
-                            );
-                          }
-                          return (
+                              <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
+                                <QuestionPreview
+                                  question={question}
+                                  onQuestionClick={() => {
+                                    questionInspectRef.current?.setIsInspectOpen(
+                                      {
+                                        isOpen: true,
+                                        questionId: question.id,
+                                      }
+                                    );
+                                  }}
+                                  imageSrc={imageSrc}
+                                  imageWidth={width}
+                                  imageHeight={height}
+                                  className="border-logo-main/20 shadow-lg"
+                                />
+                              </div>
+                            </div>
+                          ) : (
                             <QuestionPreview
                               question={question}
                               onQuestionClick={() => {
@@ -227,17 +221,17 @@ const MainContent = memo(
                                 });
                               }}
                               imageSrc={imageSrc}
-                              imageWidth={dimensionsToUse?.[imageIndex]?.width}
-                              imageHeight={
-                                dimensionsToUse?.[imageIndex]?.height
-                              }
+                              imageWidth={width}
+                              imageHeight={height}
                               key={`${question.id}-${imageSrc}-${index}`}
                             />
                           );
+
+                          return { element, width, height };
                         }
                       );
                     })}
-                  </Masonry>
+                  />
                 </>
               )}
             </div>

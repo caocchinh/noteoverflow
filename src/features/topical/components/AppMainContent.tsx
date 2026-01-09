@@ -650,28 +650,32 @@ export const MainContent = memo(
 
     return (
       <>
-        <Masonry>
-          {filteredDisplayData?.map((question) =>
+        <Masonry
+          items={filteredDisplayData?.flatMap((question) =>
             question?.questionImages.map(
-              (imageSrc: string, imageIndex: number) => (
-                <QuestionViewItem
-                  key={`${question.id}-${imageSrc}`}
-                  isQuestionForExport={questionsForExport.has(question.id)}
-                  question={question}
-                  handleQuestionClick={handleQuestionClick}
-                  imageSrc={imageSrc}
-                  isExportModeEnabled={isExportModeEnabled}
-                  imageWidth={
-                    question.questionImagesDimensions?.[imageIndex]?.width
-                  }
-                  imageHeight={
-                    question.questionImagesDimensions?.[imageIndex]?.height
-                  }
-                />
-              )
+              (imageSrc: string, imageIndex: number) => ({
+                element: (
+                  <QuestionViewItem
+                    key={`${question.id}-${imageSrc}`}
+                    isQuestionForExport={questionsForExport.has(question.id)}
+                    question={question}
+                    handleQuestionClick={handleQuestionClick}
+                    imageSrc={imageSrc}
+                    isExportModeEnabled={isExportModeEnabled}
+                    imageWidth={
+                      question.questionImagesDimensions?.[imageIndex]?.width
+                    }
+                    imageHeight={
+                      question.questionImagesDimensions?.[imageIndex]?.height
+                    }
+                  />
+                ),
+                width: question.questionImagesDimensions?.[imageIndex]?.width,
+                height: question.questionImagesDimensions?.[imageIndex]?.height,
+              })
             )
           )}
-        </Masonry>
+        />
 
         {uiPreferences.layoutStyle === "infinite" && (
           <InfiniteScroll
