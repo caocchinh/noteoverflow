@@ -195,12 +195,13 @@ const DesktopMultiSelector = memo(
     inputRef,
   }: MultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
+    const popoverContentRef = useRef<HTMLDivElement | null>(null);
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
-
     const [open, setOpen] = useState<boolean>(false);
+
     return (
       <Popover modal={false} open={open}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild className="w-full">
           <div ref={popoverTriggerRef}>
             <MultiSelectorTrigger
               selectedValues={selectedValues}
@@ -219,12 +220,14 @@ const DesktopMultiSelector = memo(
         </PopoverTrigger>
         <PopoverContent
           align="center"
+          ref={popoverContentRef}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
           }}
           autoFocus={false}
           className="z-100007 m-0 border p-0 shadow-none dark:bg-accent"
           side="right"
+          onWheel={(e) => e.stopPropagation()}
           onInteractOutside={(e) => {
             if (popoverTriggerRef?.current?.contains(e.target as Node)) {
               return;

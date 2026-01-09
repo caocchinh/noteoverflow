@@ -299,7 +299,7 @@ const EnhancedDesktopMultiSelector = memo(
 
     return (
       <Popover modal={false} open={open}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild className="w-full">
           <div ref={popoverTriggerRef}>
             <MultiSelectorTrigger
               selectedValues={selectedValues}
@@ -326,6 +326,7 @@ const EnhancedDesktopMultiSelector = memo(
           autoFocus={false}
           className="z-100007 m-0 border p-0 shadow-none dark:bg-accent"
           side="right"
+          onWheel={(e) => e.stopPropagation()}
           onInteractOutside={(e) => {
             if (popoverTriggerRef?.current?.contains(e.target as Node)) {
               return;

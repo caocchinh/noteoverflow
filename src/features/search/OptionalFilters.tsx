@@ -284,7 +284,7 @@ const OptionalFilters = ({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent onOpenAutoFocus={(event) => event.preventDefault()}>
           <SheetHeader>
             <SheetTitle>Search Filters</SheetTitle>
             <SheetDescription>
@@ -293,22 +293,21 @@ const OptionalFilters = ({
           </SheetHeader>
           <ScrollArea className="h-[calc(100vh-8rem)] p-4">
             <div className="flex flex-col gap-6 pb-6">
-              <div className="space-y-2" ref={curriculumRef}>
+              <div className="" ref={curriculumRef}>
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
                   Curriculum
                 </Label>
-                <div className="relative">
-                  <EnhancedSelect
-                    data={availableCurriculum}
-                    label="Curriculum"
-                    prerequisite=""
-                    selectedValue={selectedCurriculum}
-                    setSelectedValue={useCallback((value) => {
-                      setSelectedCurriculum(value as ValidCurriculum);
-                    }, [])}
-                    triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
-                  />
-                </div>
+                <EnhancedSelect
+                  data={availableCurriculum}
+                  label="Curriculum"
+                  prerequisite=""
+                  selectedValue={selectedCurriculum}
+                  setSelectedValue={useCallback((value) => {
+                    setSelectedCurriculum(value as ValidCurriculum);
+                  }, [])}
+                  triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
+                  modal={true}
+                />
               </div>
 
               <div className="space-y-2" ref={subjectRef}>
@@ -324,40 +323,11 @@ const OptionalFilters = ({
                     setSelectedSubject,
                   ])}
                   triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
+                  modal={true}
                 />
               </div>
 
-              <div className="space-y-2" ref={yearRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
-                  Year
-                </Label>
-                <MultiSelector
-                  allAvailableOptions={availableYears ?? []}
-                  label="Year"
-                  onValuesChange={useCallback(
-                    (values) => setSelectedYear(values as string[]),
-                    []
-                  )}
-                  selectedValues={selectedYear}
-                />
-              </div>
-
-              <div className="space-y-2" ref={seasonRef}>
-                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
-                  Season
-                </Label>
-                <MultiSelector
-                  allAvailableOptions={availableSeasons ?? []}
-                  label="Season"
-                  onValuesChange={useCallback(
-                    (values) => setSelectedSeason(values as string[]),
-                    []
-                  )}
-                  selectedValues={selectedSeason}
-                />
-              </div>
-
-              <div className="space-y-2" ref={paperTypeRef}>
+              <div className="py-2" ref={paperTypeRef}>
                 <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
                   Paper
                 </Label>
@@ -372,6 +342,36 @@ const OptionalFilters = ({
                     []
                   )}
                   selectedValues={selectedPaperType}
+                />
+              </div>
+
+              <div className="py-2" ref={yearRef}>
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                  Year
+                </Label>
+                <MultiSelector
+                  allAvailableOptions={availableYears ?? []}
+                  label="Year"
+                  onValuesChange={useCallback(
+                    (values) => setSelectedYear(values as string[]),
+                    []
+                  )}
+                  selectedValues={selectedYear}
+                />
+              </div>
+
+              <div className="py-2" ref={seasonRef}>
+                <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1">
+                  Season
+                </Label>
+                <MultiSelector
+                  allAvailableOptions={availableSeasons ?? []}
+                  label="Season"
+                  onValuesChange={useCallback(
+                    (values) => setSelectedSeason(values as string[]),
+                    []
+                  )}
+                  selectedValues={selectedSeason}
                 />
               </div>
             </div>

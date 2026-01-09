@@ -69,7 +69,7 @@ const MultiSelectorTrigger = memo(
     return (
       <div
         className={cn(
-          "relative mb-0 flex w-[300px] flex-col flex-wrap gap-1 rounded-lg bg-background p-1 py-2 ring-1 ring-muted dark:bg-secondary",
+          "relative mb-0 flex w-full flex-col flex-wrap gap-1 rounded-lg bg-background p-1 py-2 ring-1 ring-muted dark:bg-secondary",
           {
             "opacity-50": !allAvailableOptions,
           },
@@ -131,7 +131,7 @@ const MultiSelectorTrigger = memo(
             <div className="flex w-full flex-wrap gap-2 p-1" ref={contentRef}>
               {selectedValues.map((item) => (
                 <Badge
-                  className="wrap-anywhere dark:!border-white/25 flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left"
+                  className="wrap-anywhere dark:border-white/25! flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left"
                   key={item}
                   variant={"secondary"}
                 >
@@ -217,7 +217,7 @@ const MultiSelectorTriggerButtonUltility = memo(
                 <Trash2 className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
+            <TooltipContent className="z-100000000000">
               Remove all
             </TooltipContent>
           </Tooltip>
@@ -249,7 +249,7 @@ const MultiSelectorTriggerButtonUltility = memo(
                 <Sparkles className="h-4 w-4 " />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="z-[100000000000]">
+            <TooltipContent className="z-100000000000">
               Select all
             </TooltipContent>
           </Tooltip>

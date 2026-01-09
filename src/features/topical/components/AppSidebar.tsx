@@ -756,7 +756,7 @@ const AppSidebar = memo(
               </div>
               <div className="flex flex-col items-center justify-center gap-4">
                 <div
-                  className="flex flex-col items-start justify-start gap-1"
+                  className="flex flex-col items-start justify-start gap-1 w-full"
                   ref={topicRef}
                 >
                   <h3
@@ -786,7 +786,7 @@ const AppSidebar = memo(
                   )}
                 </div>
                 <div
-                  className="flex flex-col items-start justify-start gap-1"
+                  className="flex flex-col items-start justify-start gap-1 w-full"
                   ref={paperTypeRef}
                 >
                   <h3
@@ -816,7 +816,7 @@ const AppSidebar = memo(
                   )}
                 </div>
                 <div
-                  className="flex flex-col items-start justify-start gap-1"
+                  className="flex flex-col items-start justify-start gap-1 w-full"
                   ref={yearRef}
                 >
                   <h3
@@ -841,7 +841,7 @@ const AppSidebar = memo(
                   )}
                 </div>
                 <div
-                  className="flex flex-col items-start justify-start gap-1"
+                  className="flex flex-col items-start justify-start gap-1 w-full"
                   ref={seasonRef}
                 >
                   <h3

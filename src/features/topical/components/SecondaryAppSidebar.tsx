@@ -286,16 +286,16 @@ const SecondaryAppSidebar = ({
   return (
     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
       <SheetContent
-        className="z-[100006] overflow-hidden  py-2"
+        className="z-100006 overflow-hidden  py-2"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <ScrollArea className="h-full" type="always">
           <SheetHeader className="sr-only">
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>
-          <div className="flex w-full flex-col items-center justify-start gap-4">
+          <div className="flex w-full flex-col items-center justify-start gap-4 px-4 py-2">
             <div
-              className="flex flex-col items-start justify-start gap-1"
+              className="flex flex-col items-start justify-start gap-1 w-full"
               ref={topicRef}
             >
               <h3
@@ -320,7 +320,7 @@ const SecondaryAppSidebar = ({
               )}
             </div>
             <div
-              className="flex flex-col items-start justify-start gap-1"
+              className="flex flex-col items-start justify-start gap-1 w-full"
               ref={paperTypeRef}
             >
               <h3
@@ -345,7 +345,7 @@ const SecondaryAppSidebar = ({
               )}
             </div>
             <div
-              className="flex flex-col items-start justify-start gap-1"
+              className="flex flex-col items-start justify-start gap-1 w-full"
               ref={yearRef}
             >
               <h3
@@ -370,7 +370,7 @@ const SecondaryAppSidebar = ({
               )}
             </div>
             <div
-              className="flex flex-col items-start justify-start gap-1"
+              className="flex flex-col items-start justify-start gap-1 w-full"
               ref={seasonRef}
             >
               <h3

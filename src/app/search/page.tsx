@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -111,9 +111,12 @@ const SearchPage = () => {
   }, [textQuery, textSearchMutation, imageSearchMutation]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && textQuery.trim()) {
-        handleTextSearch();
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (textQuery.trim()) {
+          handleTextSearch();
+        }
       }
     },
     [handleTextSearch, textQuery]
@@ -133,10 +136,10 @@ const SearchPage = () => {
         <div
           className={cn(
             "mx-auto transition-all duration-700 ease-out",
-            !results ? "max-w-3xl" : "max-w-full pb-8"
+            !results ? "w-full" : "max-w-full pb-8"
           )}
         >
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 items-center justify-center">
             {!results && (
               <div className="text-center">
                 <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-foreground to-foreground/60 bg-clip-text text-transparent sm:text-5xl">
@@ -151,7 +154,7 @@ const SearchPage = () => {
             <Tabs
               value={activeTab}
               onValueChange={(v) => setActiveTab(v as "image" | "text")}
-              className="w-full"
+              className="w-full max-w-3xl"
             >
               <div
                 className={cn(
@@ -181,23 +184,20 @@ const SearchPage = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="text" className="mt-0 w-full space-y-4">
+                <TabsContent value="text" className="mt-0 w-full mb-2">
                   <div
-                    className={cn(
-                      "relative group transition-all duration-300",
-                      !results ? "max-w-2xl mx-auto" : "max-w-full"
-                    )}
+                    className={cn("relative group transition-all duration-300")}
                   >
-                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <div className="flex items-center pointer-events-none absolute inset-y-0 left-0 pl-5 z-10">
                       <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     </div>
-                    <Input
+                    <Textarea
                       id="search-query"
                       value={textQuery}
                       onChange={(e) => setTextQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Search for questions (e.g. 'a ball is thrown up with velocity of 10m/s')..."
-                      className="h-14 pl-14 pr-4 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 transition-all"
+                      className="min-h-14 h-auto pl-14 pr-4 py-3 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y"
                     />
                     {textQuery && (
                       <Button
@@ -301,8 +301,7 @@ const SearchPage = () => {
           </div>
         </div>
 
-        {/* Status Messages */}
-        <div className="max-w-6xl mx-auto mt-8">
+        <div className="max-w-7xl mx-auto mt-8">
           {error && (
             <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
               <div className="p-2 bg-destructive/10 rounded-full">
@@ -329,7 +328,6 @@ const SearchPage = () => {
             </div>
           )}
 
-          {/* Results Grid */}
           {results && !loading && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between px-2">
