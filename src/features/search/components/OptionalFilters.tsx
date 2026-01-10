@@ -400,7 +400,7 @@ const OptionalFilters = memo(
                 onClick={useCallback(() => {
                   setIsSheetOpen(false);
                 }, [])}
-                className="flex-1 gap-2 bg-logo-main hover:bg-logo-main/90 cursor-pointer"
+                className="flex-1 gap-2 bg-logo-main text-white! hover:bg-logo-main/90 cursor-pointer"
                 disabled={isSearching}
               >
                 <Save className="w-4 h-4" />

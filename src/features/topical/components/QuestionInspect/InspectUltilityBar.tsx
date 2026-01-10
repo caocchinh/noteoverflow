@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../../lib/utils";
+import { usePathname } from "next/navigation";
 
 const ToggleInspectSidebarButton = memo(
   ({
@@ -71,6 +72,7 @@ const InspectUltilityBar = memo(
         null
       );
       const isMobile = useIsMobile();
+      const pathname = usePathname();
 
       const overflowScrollHandler = useCallback(() => {
         const isOverScrollingResult = isOverScrolling({
@@ -236,8 +238,16 @@ const InspectUltilityBar = memo(
                   isDisabled={false}
                   disabledMessage=""
                   showSortTextTrigger={false}
-                  descendingSortText="Newest year first"
-                  ascendingSortText="Oldest year first"
+                  descendingSortText={
+                    pathname == "/search"
+                      ? "Best match first"
+                      : "Newest year first"
+                  }
+                  ascendingSortText={
+                    pathname == "/search"
+                      ? "Worst match first"
+                      : "Oldest year first"
+                  }
                 />
               )}
               <ShareFilter

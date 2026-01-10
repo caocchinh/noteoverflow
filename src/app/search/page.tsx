@@ -176,12 +176,17 @@ const SearchPage = () => {
   }, [activeTab, handleTextSearch, handleImageSearch]);
 
   return (
-    <div className="min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30">
+    <div
+      className={cn(
+        "min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30",
+        !isSearching && hasSearched ? "pb-18" : ""
+      )}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
             "mx-auto transition-all duration-700 ease-out",
-            !results ? "w-full" : "max-w-full pb-8"
+            !results ? "w-full" : "max-w-full"
           )}
         >
           <div className="flex flex-col gap-3 items-center justify-center">

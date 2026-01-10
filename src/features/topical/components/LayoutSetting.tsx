@@ -36,7 +36,7 @@ export default function LayoutSetting({
           Layout settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+      <PopoverContent className="z-100006 flex flex-col items-center justify-center gap-3">
         <X
           className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}
@@ -65,10 +65,10 @@ export default function LayoutSetting({
               setUiPreference("layoutStyle", value as LayoutStyle)
             }
           >
-            <SelectTrigger className="w-[90%] !h-max">
+            <SelectTrigger className="w-[90%] h-max!">
               <SelectValue placeholder="Select a layout style" />
             </SelectTrigger>
-            <SelectContent className="z-[9999999]">
+            <SelectContent className="z-9999999">
               <SelectItem value="pagination">
                 <div className="flex items-center justify-start cursor-pointer flex-row gap-3 w-full">
                   <FileStack className="w-4 h-4" />

@@ -57,21 +57,22 @@ const Sort = memo(
                 <Button
                   variant="outline"
                   disabled={isDisabled}
-                  className="cursor-pointer !px-[10px]"
+                  className="cursor-pointer px-[10px]!"
                 >
                   <ArrowDownWideNarrow className="w-4 h-4" />
                   {showSortTextTrigger && "Sort"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[180px] z-[999999] !p-1">
+              <PopoverContent className="w-[180px] z-999999 p-1!">
                 <div className="flex flex-col gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={() => {
                       if (sortParameters?.sortBy === "ascending") {
                         setSortParameters({ sortBy: "descending" });
                       }
                     }}
-                    className="flex items-center cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm px-2 py-1.5 text-sm outline-hidden"
+                    className="flex items-center justify-start cursor-pointer h-auto px-2 py-1.5 text-sm font-normal"
                   >
                     <Check
                       className={cn(
@@ -82,14 +83,15 @@ const Sort = memo(
                       )}
                     />
                     {descendingSortText}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onClick={() => {
                       if (sortParameters?.sortBy === "descending") {
                         setSortParameters({ sortBy: "ascending" });
                       }
                     }}
-                    className="flex items-center cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm px-2 py-1.5 text-sm outline-hidden"
+                    className="flex items-center justify-start cursor-pointer h-auto px-2 py-1.5 text-sm font-normal"
                   >
                     <Check
                       className={cn(
@@ -100,13 +102,13 @@ const Sort = memo(
                       )}
                     />
                     {ascendingSortText}
-                  </button>
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-[1000000]">
+        <TooltipContent side="bottom" className="z-1000000">
           <div className="flex items-center gap-2 justify-center">
             {showSortTextTrigger && disabledMessage}
             {!showSortTextTrigger && "Sort by"}

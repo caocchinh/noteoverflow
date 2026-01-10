@@ -2,7 +2,6 @@ import { InspectTriggerButton } from "@/features/topical/components/AppUltilityB
 import Masonry from "@/features/topical/components/Masonry";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
-import Sort from "@/features/topical/components/Sort";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import {
   QuestionInspectRef,
@@ -14,6 +13,7 @@ import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { Search } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import Ultility from "./Ultility";
 
 type DisplayMode = "questions" | "answers";
 
@@ -40,7 +40,7 @@ const MainContent = memo(
     const isImageUrl = (str: string) => str.startsWith("http");
 
     const filteredResults = useMemo(() => {
-      if (!results) return null;
+      if (!results) return [];
       if (displayMode === "questions") return results;
       return results.filter((q) =>
         q.answers.some((answer) => isImageUrl(answer))
@@ -92,7 +92,7 @@ const MainContent = memo(
         <div className="relative">
           {results && !isSearching && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="flex items-center justify-between px-2 mb-1 gap-2">
+              <div className="flex items-center justify-between px-2 mb-6 gap-2">
                 <div className="flex items-center gap-4 px-2 mb-1">
                   <p className="text-sm text-muted-foreground font-medium">
                     Found{" "}
@@ -108,43 +108,43 @@ const MainContent = memo(
                     onValueChange={(value) => {
                       if (value) setDisplayMode(value as DisplayMode);
                     }}
-                    className="bg-muted/50 rounded-lg p-0.5"
+                    className="bg-muted/50 rounded-lg p-0.5 border"
                   >
                     <ToggleGroupItem
                       value="questions"
                       size="sm"
-                      className="text-xs px-3 py-1 data-[state=on]:bg-background data-[state=on]:shadow-sm rounded-md"
+                      className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
                     >
                       Questions
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="answers"
                       size="sm"
-                      className="text-xs px-3 py-1 data-[state=on]:bg-background data-[state=on]:shadow-sm rounded-md"
+                      className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
                     >
                       Answers
                     </ToggleGroupItem>
                   </ToggleGroup>
                 </div>
-                <div className="flex items-center justify-between mb-1 gap-2">
-                  <InspectTriggerButton
-                    isQuestionViewDisabled={false}
-                    setIsQuestionInspectOpen={() => {
-                      questionInspectRef.current?.setIsInspectOpen((prev) => ({
-                        ...prev,
-                        isOpen: true,
-                      }));
-                    }}
-                  />
-                  <Sort
-                    sortParameters={sortParameters}
-                    setSortParameters={setSortParameters}
-                    isDisabled={false}
-                    disabledMessage="Please run a search first"
-                    descendingSortText="Best match first"
-                    ascendingSortText="Worst match first"
-                  />
-                </div>
+                {sortedData.length > 0 && (
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <InspectTriggerButton
+                      isQuestionViewDisabled={false}
+                      setIsQuestionInspectOpen={() => {
+                        questionInspectRef.current?.setIsInspectOpen(
+                          (prev) => ({
+                            ...prev,
+                            isOpen: true,
+                          })
+                        );
+                      }}
+                    />
+                    <Ultility
+                      sortParameters={sortParameters}
+                      setSortParameters={setSortParameters}
+                    />
+                  </div>
+                )}
               </div>
 
               {sortedData.length === 0 ? (
@@ -188,7 +188,7 @@ const MainContent = memo(
                           const element = isBestMatch ? (
                             <div
                               key={`${question.id}-${imageSrc}-${index}`}
-                              className="w-full [column-span:3] mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
+                              className="w-full mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
                             >
                               <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
                                 <span>✨</span> Best Match
@@ -209,7 +209,7 @@ const MainContent = memo(
                                   showCurriculumBadge={true}
                                   showSubjectBadge={true}
                                   imageHeight={height}
-                                  className="border-logo-main/20 shadow-lg"
+                                  className="border-logo-main/20 shadow-lg mb-0!"
                                 />
                               </div>
                             </div>

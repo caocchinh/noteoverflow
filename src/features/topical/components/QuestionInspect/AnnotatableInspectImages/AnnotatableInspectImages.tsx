@@ -634,11 +634,13 @@ const AnnotatableInspectImagesComponent = memo(
                 {!isEditMode && imageUrls.length > 0 && (
                   <Loader2 className="animate-spin text-red absolute left-1/2 h-4 w-4 -translate-x-1/2 z-1 top-0" />
                 )}
+                {textItems.map((item, index) => (
+                  <p key={`text-${index}`}>{item}</p>
+                ))}
+                {textItems.length === 0 && imageUrls.length === 0 && (
+                  <p className="text-red-500">Error fetching resources</p>
+                )}
               </div>
-
-              {textItems.map((item, index) => (
-                <p key={`text-${index}`}>{item}</p>
-              ))}
             </div>
           </div>
           {fullscreenContainerRef.current &&
