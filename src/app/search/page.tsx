@@ -164,13 +164,15 @@ const SearchPage = () => {
     imageSearchMutation.mutate(selectedImage, {
       onSuccess: () => {
         setLastImageQuery(selectedImage);
-        setLastTextQuery(null);
         // Save to search history
         addSearchHistory({
           type: "image",
           query: selectedImage,
           previewUrl: previewUrl ?? undefined,
         });
+      },
+      onSettled: () => {
+        setLastTextQuery(null);
       },
     });
   }, [
@@ -190,12 +192,14 @@ const SearchPage = () => {
     textSearchMutation.mutate(textQuery.trim(), {
       onSuccess: () => {
         setLastTextQuery(textQuery.trim());
-        setLastImageQuery(null);
         // Save to search history
         addSearchHistory({
           type: "text",
           query: textQuery.trim(),
         });
+      },
+      onSettled: () => {
+        setLastImageQuery(null);
       },
     });
   }, [textQuery, lastTextQuery, textSearchMutation, imageSearchMutation]);
@@ -225,14 +229,16 @@ const SearchPage = () => {
       if (item.type === "text") {
         setActiveTab("text");
         setTextQuery(item.query);
-        // Trigger search after state update
         setTimeout(() => {
           textSearchMutation.reset();
+          imageSearchMutation.reset();
           textSearchMutation.mutate(item.query, {
             onSuccess: () => {
               setLastTextQuery(item.query);
-              setLastImageQuery(null);
               setHasSearched(true);
+            },
+            onSettled: () => {
+              setLastImageQuery(null);
             },
           });
         }, 0);
@@ -240,14 +246,16 @@ const SearchPage = () => {
         setActiveTab("image");
         setSelectedImage(item.query);
         setPreviewUrl(item.previewUrl || null);
-        // Trigger search after state update
         setTimeout(() => {
           imageSearchMutation.reset();
+          textSearchMutation.reset();
           imageSearchMutation.mutate(item.query, {
             onSuccess: () => {
               setLastImageQuery(item.query);
-              setLastTextQuery(null);
               setHasSearched(true);
+            },
+            onSettled: () => {
+              setLastTextQuery(null);
             },
           });
         }, 0);

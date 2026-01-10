@@ -28,5 +28,8 @@ export const getRandomPhrase = (): string => {
   ];
 };
 
-export const MAX_QUERY_LENGTH = 1000;
+export const MAX_QUERY_LENGTH = 500;
 export const MAX_IMAGE_UPLOAD_SIZE = 2 * 1024 * 1024; // 2MB limit for image uploads
+
+export const DAILY_IMAGE_SEARCH_LIMIT = 30;
+export const DAILY_TEXT_SEARCH_LIMIT = 300;

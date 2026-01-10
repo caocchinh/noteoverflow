@@ -341,3 +341,12 @@ export const userAnnotations = sqliteTable(
     return [primaryKey({ columns: [table.userId, table.questionId] })];
   }
 );
+
+export const globalSearchRateLimit = sqliteTable("global_search_rate_limit", {
+  date: text("date").primaryKey(), // Format: YYYY-MM-DD
+  imageSearchCount: integer("image_search_count").notNull().default(0),
+  textSearchCount: integer("text_search_count").notNull().default(0),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});

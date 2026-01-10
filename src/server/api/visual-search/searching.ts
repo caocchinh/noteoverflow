@@ -16,6 +16,7 @@ import {
 } from "@/features/search/constants/constants";
 import { PhotonImage } from "@cf-wasm/photon";
 import { hashUltil } from "@/features/topical/lib/utils";
+import { checkRateLimit, incrementSearchCount } from "./rate-limit";
 
 /**
  * Search for matching questions by uploading an image
@@ -102,6 +103,10 @@ export async function searchByImage({
     };
   }
 
+  // Check global rate limit
+  const rateLimitError = await checkRateLimit("image", status);
+  if (rateLimitError) return rateLimitError;
+
   // Extract text from uploaded image using OCR, then embed
   let queryEmbedding: number[];
   try {
@@ -140,10 +145,12 @@ export async function searchByImage({
     data: results,
   };
 
-  // Cache the results
-  await env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
-    expirationTtl: 60 * 60 * 24 * 1, // 1 day
-  });
+  await Promise.all([
+    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+      expirationTtl: 60 * 60 * 24 * 3, // 3 day
+    }),
+    incrementSearchCount("image"),
+  ]);
 
   return responseData;
 }
@@ -209,6 +216,10 @@ export async function searchByText({
     };
   }
 
+  // Check global rate limit
+  const rateLimitError = await checkRateLimit("text", status);
+  if (rateLimitError) return rateLimitError;
+
   // Generate embedding for the text query
   let queryEmbedding: number[];
   try {
@@ -246,10 +257,13 @@ export async function searchByText({
     data: results,
   };
 
-  // Cache the results
-  await env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
-    expirationTtl: 60 * 60 * 24 * 1, // 1 day
-  });
+  // Cache the results and increment search count in parallel
+  await Promise.all([
+    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+      expirationTtl: 60 * 60 * 24 * 3, // 3 day
+    }),
+    incrementSearchCount("text"),
+  ]);
 
   return responseData;
 }

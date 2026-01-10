@@ -7,6 +7,7 @@ export const ERROR_CODES = {
   PRIVATE_LIST: "private-list",
   INTERNAL_SERVER_ERROR: "internal-server-error",
   UNKNOWN_ERROR: "unknown-error",
+  RATE_LIMIT_EXCEEDED: "rate-limit-exceeded",
 } as const;
 
 // User-friendly error messages
@@ -19,6 +20,8 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.BOOKMARK_LIST_NOT_FOUND]: "Bookmark list not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "An error occurred",
   [ERROR_CODES.UNKNOWN_ERROR]: "An unknown error occurred",
+  [ERROR_CODES.RATE_LIMIT_EXCEEDED]:
+    "Rate limit exceeded. Please try again tomorrow.",
 } as const;
 
 // HTTP status codes for API responses
@@ -28,5 +31,6 @@ export const HTTP_STATUS = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  TOO_MANY_REQUESTS: 429,
   INTERNAL_SERVER_ERROR: 500,
 } as const;
