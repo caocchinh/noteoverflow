@@ -25,7 +25,12 @@ export const ADMIN_NAVIGATION_ITEMS = [
   {
     label: "AI Search Indexing",
     path: "/admin/AI",
-    isOwnerNeeded: false,
+    isOwnerNeeded: true,
+  },
+  {
+    label: "Dimension Processing",
+    path: "/admin/dimensions",
+    isOwnerNeeded: true,
   },
   {
     label: "Legacy Upload",
