@@ -60,7 +60,7 @@ const Ultility = ({
               Layout settings
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md dark:bg-accent">
             <DialogTitle className="sr-only">Layout settings</DialogTitle>
             <X
               className="w-4 h-4 absolute top-4 right-4 cursor-pointer"

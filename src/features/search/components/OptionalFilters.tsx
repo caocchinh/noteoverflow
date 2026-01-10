@@ -303,7 +303,7 @@ const OptionalFilters = memo(
           </ContextMenu>
           <SheetContent
             onOpenAutoFocus={(event) => event.preventDefault()}
-            className="gap-0"
+            className="gap-0 dark:bg-accent"
           >
             <SheetHeader className="pb-0">
               <SheetTitle>Search Filters</SheetTitle>

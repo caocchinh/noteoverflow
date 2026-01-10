@@ -7,12 +7,12 @@ import { verifySession } from "@/dal/verifySession";
 
 /**
  * Get statistics for image dimension processing
- * Admin-only endpoint
+ * Owner-only endpoint
  */
 export async function getDimensionStats({ status }: Context) {
   try {
     const session = await verifySession();
-    if (!session?.session || session.user.role !== "admin") {
+    if (!session?.session || session.user.role !== "owner") {
       return status(HTTP_STATUS.FORBIDDEN, {
         error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
         code: ERROR_CODES.FORBIDDEN,

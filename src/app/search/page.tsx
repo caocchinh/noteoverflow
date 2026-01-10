@@ -21,6 +21,8 @@ import {
   MAX_QUERY_LENGTH,
 } from "@/features/search/constants/constants";
 import MainContent from "@/features/search/components/MainContent";
+import SearchHistory from "@/features/search/components/SearchHistory";
+import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
 
 const SearchPage = () => {
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
@@ -163,9 +165,21 @@ const SearchPage = () => {
       onSuccess: () => {
         setLastImageQuery(selectedImage);
         setLastTextQuery(null);
+        // Save to search history
+        addSearchHistory({
+          type: "image",
+          query: selectedImage,
+          previewUrl: previewUrl ?? undefined,
+        });
       },
     });
-  }, [selectedImage, lastImageQuery, imageSearchMutation, textSearchMutation]);
+  }, [
+    selectedImage,
+    lastImageQuery,
+    previewUrl,
+    imageSearchMutation,
+    textSearchMutation,
+  ]);
 
   const handleTextSearch = useCallback(() => {
     if (!textQuery.trim()) return;
@@ -173,10 +187,15 @@ const SearchPage = () => {
 
     setHasSearched(true);
     imageSearchMutation.reset();
-    textSearchMutation.mutate(textQuery, {
+    textSearchMutation.mutate(textQuery.trim(), {
       onSuccess: () => {
         setLastTextQuery(textQuery.trim());
         setLastImageQuery(null);
+        // Save to search history
+        addSearchHistory({
+          type: "text",
+          query: textQuery.trim(),
+        });
       },
     });
   }, [textQuery, lastTextQuery, textSearchMutation, imageSearchMutation]);
@@ -200,6 +219,42 @@ const SearchPage = () => {
       handleImageSearch();
     }
   }, [activeTab, handleTextSearch, handleImageSearch]);
+
+  const handleHistorySelect = useCallback(
+    (item: SearchHistoryItem) => {
+      if (item.type === "text") {
+        setActiveTab("text");
+        setTextQuery(item.query);
+        // Trigger search after state update
+        setTimeout(() => {
+          textSearchMutation.reset();
+          textSearchMutation.mutate(item.query, {
+            onSuccess: () => {
+              setLastTextQuery(item.query);
+              setLastImageQuery(null);
+              setHasSearched(true);
+            },
+          });
+        }, 0);
+      } else {
+        setActiveTab("image");
+        setSelectedImage(item.query);
+        setPreviewUrl(item.previewUrl || null);
+        // Trigger search after state update
+        setTimeout(() => {
+          imageSearchMutation.reset();
+          imageSearchMutation.mutate(item.query, {
+            onSuccess: () => {
+              setLastImageQuery(item.query);
+              setLastTextQuery(null);
+              setHasSearched(true);
+            },
+          });
+        }, 0);
+      }
+    },
+    [textSearchMutation, imageSearchMutation]
+  );
 
   return (
     <div
@@ -269,6 +324,10 @@ const SearchPage = () => {
                     isSearching={isSearching}
                     isInputValid={isInputValid}
                     isDuplicateQuery={isDuplicateQuery}
+                  />
+                  <SearchHistory
+                    onSelectHistory={handleHistorySelect}
+                    className={!results ? "bg-muted/40" : ""}
                   />
                   <SearchPastPaper>
                     <Button

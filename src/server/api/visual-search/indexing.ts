@@ -15,7 +15,7 @@ import { generateShortId, IndexProgress, VectorMetadata } from "./utils";
 
 /**
  * Index all questions into the vector database
- * Admin-only endpoint that processes question/answer images using OCR + text embedding
+ * Owner-only endpoint that processes question/answer images using OCR + text embedding
  */
 export async function indexQuestions({
   status,
@@ -27,7 +27,7 @@ export async function indexQuestions({
   const { limit, offset } = query;
   // Verify admin session
   const session = await verifySession();
-  if (!session?.session || session.user.role !== "admin") {
+  if (!session?.session || session.user.role !== "owner") {
     return status(HTTP_STATUS.FORBIDDEN, {
       error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
       code: ERROR_CODES.FORBIDDEN,

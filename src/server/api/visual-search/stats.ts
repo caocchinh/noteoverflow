@@ -8,7 +8,7 @@ import { verifySession } from "@/dal/verifySession";
 export async function getQuestionStats({ status }: Context) {
   try {
     const session = await verifySession();
-    if (!session?.session || session.user.role !== "admin") {
+    if (!session?.session || session.user.role !== "owner") {
       return status(HTTP_STATUS.FORBIDDEN, {
         error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
         code: ERROR_CODES.FORBIDDEN,

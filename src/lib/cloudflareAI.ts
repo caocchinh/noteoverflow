@@ -185,10 +185,7 @@ export async function extractTextFromImage(
     } as VisionModelInput,
     aiBinding
   );
-  console.log(
-    "Extracted text from image:",
-    response.response || response.description || ""
-  );
+
   return response.response || response.description || "";
 }
 

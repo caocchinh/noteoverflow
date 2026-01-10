@@ -73,7 +73,7 @@ function isImageUrl(url: string): boolean {
 
 /**
  * Process image dimensions for questions in batch
- * Admin-only endpoint
+ * Owner-only endpoint
  */
 export async function processDimensions({
   status,
@@ -84,9 +84,9 @@ export async function processDimensions({
 }) {
   const { limit, offset } = query;
 
-  // Verify admin session
+  // Verify owner session
   const session = await verifySession();
-  if (!session?.session || session.user.role !== "admin") {
+  if (!session?.session || session.user.role !== "owner") {
     return status(HTTP_STATUS.FORBIDDEN, {
       error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
       code: ERROR_CODES.FORBIDDEN,
