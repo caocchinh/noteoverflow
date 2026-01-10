@@ -6,7 +6,7 @@ import { retryDatabase } from "@/dal/retry";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
 import { verifySession } from "@/dal/verifySession";
-import { PhotonImage } from "@cf-wasm/photon";
+import { getImageDimensionsFromUrl } from "@/lib/image-utils";
 
 interface ImageDimension {
   width: number;
@@ -21,36 +21,13 @@ interface ProcessProgress {
 }
 
 /**
- * Fetch image dimensions from a URL using @cf-wasm/photon
+ * Fetch image dimensions from a URL using native Web APIs
  * Works in Cloudflare Workers environment
  */
 async function getImageDimensions(
   imageUrl: string
 ): Promise<ImageDimension | null> {
-  try {
-    // Fetch the image as bytes
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      console.error(`Failed to fetch image: ${imageUrl} - ${response.status}`);
-      return null;
-    }
-
-    const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-
-    // Create PhotonImage from bytes
-    const image = PhotonImage.new_from_byteslice(bytes);
-    const width = image.get_width();
-    const height = image.get_height();
-
-    // Free memory
-    image.free();
-
-    return { width, height };
-  } catch (error) {
-    console.error(`Error fetching image dimensions for ${imageUrl}:`, error);
-    return null;
-  }
+  return await getImageDimensionsFromUrl(imageUrl);
 }
 
 /**

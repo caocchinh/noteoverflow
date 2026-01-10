@@ -14,7 +14,7 @@ import {
   MAX_IMAGE_UPLOAD_SIZE,
   MAX_QUERY_LENGTH,
 } from "@/features/search/constants/constants";
-import { PhotonImage } from "@cf-wasm/photon";
+import { validateImageFormat, base64ToBytes } from "@/lib/image-utils";
 import { hashUltil } from "@/features/topical/lib/utils";
 import { checkRateLimit, incrementSearchCount } from "./rate-limit";
 
@@ -48,15 +48,11 @@ export async function searchByImage({
     });
   }
 
-  // Decode base64 to bytes and validate using PhotonImage
+  // Decode base64 to bytes and validate using magic numbers
   let imageBytes: Uint8Array;
   try {
     // Decode base64 string to binary
-    const binaryString = atob(imageBase64);
-    imageBytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      imageBytes[i] = binaryString.charCodeAt(i);
-    }
+    imageBytes = base64ToBytes(imageBase64);
 
     // Validate actual image size
     if (imageBytes.byteLength > MAX_IMAGE_UPLOAD_SIZE) {
@@ -68,9 +64,13 @@ export async function searchByImage({
       });
     }
 
-    // Validate that it's a valid image by trying to decode it with PhotonImage
-    const photonImage = PhotonImage.new_from_byteslice(imageBytes);
-    photonImage.free();
+    // Validate that it's a valid image format using magic numbers
+    if (!validateImageFormat(imageBytes)) {
+      return status(HTTP_STATUS.BAD_REQUEST, {
+        error: "Invalid image format. Supported: JPEG, PNG, GIF, WebP, BMP",
+        code: ERROR_CODES.BAD_REQUEST,
+      });
+    }
   } catch (error) {
     console.error("Failed to validate image:", error);
     return status(HTTP_STATUS.BAD_REQUEST, {
