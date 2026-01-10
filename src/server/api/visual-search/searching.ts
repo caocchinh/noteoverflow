@@ -10,6 +10,12 @@ import {
   validateSearchFilters,
 } from "./utils";
 import { NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE } from "@/features/topical/constants/constants";
+import {
+  MAX_IMAGE_UPLOAD_SIZE,
+  MAX_QUERY_LENGTH,
+} from "@/features/search/constants/constants";
+import { PhotonImage } from "@cf-wasm/photon";
+import { hashUltil } from "@/features/topical/lib/utils";
 
 /**
  * Search for matching questions by uploading an image
@@ -33,9 +39,68 @@ export async function searchByImage({
   } = body;
   const { env } = await getCloudflareContext({ async: true });
 
+  // Validate image data exists
+  if (!imageBase64 || imageBase64.trim().length === 0) {
+    return status(HTTP_STATUS.BAD_REQUEST, {
+      error: "Image data is required",
+      code: ERROR_CODES.BAD_REQUEST,
+    });
+  }
+
+  // Decode base64 to bytes and validate using PhotonImage
+  let imageBytes: Uint8Array;
+  try {
+    // Decode base64 string to binary
+    const binaryString = atob(imageBase64);
+    imageBytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      imageBytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Validate actual image size
+    if (imageBytes.byteLength > MAX_IMAGE_UPLOAD_SIZE) {
+      return status(HTTP_STATUS.BAD_REQUEST, {
+        error: `Image size exceeds ${
+          MAX_IMAGE_UPLOAD_SIZE / (1024 * 1024)
+        }MB limit`,
+        code: ERROR_CODES.BAD_REQUEST,
+      });
+    }
+
+    // Validate that it's a valid image by trying to decode it with PhotonImage
+    const photonImage = PhotonImage.new_from_byteslice(imageBytes);
+    photonImage.free();
+  } catch (error) {
+    console.error("Failed to validate image:", error);
+    return status(HTTP_STATUS.BAD_REQUEST, {
+      error: "Invalid image format or corrupted image data",
+      code: ERROR_CODES.BAD_REQUEST,
+    });
+  }
+
   // Validate filters using the same validation as getTopicalQuestions
   const validationError = validateSearchFilters(filter, status);
   if (validationError) return validationError;
+
+  // Create cache key from query parameters
+  const currentQuery = {
+    imageBase64,
+    topK,
+    filter,
+  };
+  const queryString = JSON.stringify(currentQuery);
+  const hashedKey = await hashUltil(queryString);
+
+  // Check cache for existing results
+  const cachedResult = await env.SEMANTIC_SEARCH_CACHE.get(hashedKey);
+
+  if (cachedResult !== null) {
+    const parsedResult = JSON.parse(cachedResult);
+    return {
+      success: true,
+      data: parsedResult.data,
+    };
+  }
 
   // Extract text from uploaded image using OCR, then embed
   let queryEmbedding: number[];
@@ -70,11 +135,17 @@ export async function searchByImage({
   // Fetch full question data from D1
   const results = await fetchQuestionResults(matches);
 
-  return {
+  const responseData = {
     success: true,
     data: results,
-    totalMatches: matches.matches.length,
   };
+
+  // Cache the results
+  await env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+    expirationTtl: 60 * 60 * 24 * 1, // 1 day
+  });
+
+  return responseData;
 }
 
 /**
@@ -103,11 +174,39 @@ export async function searchByText({
   const validationError = validateSearchFilters(filter, status);
   if (validationError) return validationError;
 
+  // Validate query text
   if (!query || query.trim().length === 0) {
     return status(HTTP_STATUS.BAD_REQUEST, {
       error: "Query text is required",
       code: ERROR_CODES.BAD_REQUEST,
     });
+  }
+
+  if (query.length > MAX_QUERY_LENGTH) {
+    return status(HTTP_STATUS.BAD_REQUEST, {
+      error: `Query text exceeds maximum length of ${MAX_QUERY_LENGTH} characters`,
+      code: ERROR_CODES.BAD_REQUEST,
+    });
+  }
+
+  // Create cache key from query parameters
+  const currentQuery = {
+    query,
+    topK,
+    filter,
+  };
+  const queryString = JSON.stringify(currentQuery);
+  const hashedKey = await hashUltil(queryString);
+
+  // Check cache for existing results
+  const cachedResult = await env.SEMANTIC_SEARCH_CACHE.get(hashedKey);
+
+  if (cachedResult !== null) {
+    const parsedResult = JSON.parse(cachedResult);
+    return {
+      success: true,
+      data: parsedResult.data,
+    };
   }
 
   // Generate embedding for the text query
@@ -142,9 +241,15 @@ export async function searchByText({
   // Fetch full question data from D1
   const results = await fetchQuestionResults(matches);
 
-  return {
+  const responseData = {
     success: true,
     data: results,
-    totalMatches: matches.matches.length,
   };
+
+  // Cache the results
+  await env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+    expirationTtl: 60 * 60 * 24 * 1, // 1 day
+  });
+
+  return responseData;
 }

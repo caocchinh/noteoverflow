@@ -27,3 +27,6 @@ export const getRandomPhrase = (): string => {
     Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)
   ];
 };
+
+export const MAX_QUERY_LENGTH = 1000;
+export const MAX_IMAGE_UPLOAD_SIZE = 2 * 1024 * 1024; // 2MB limit for image uploads

@@ -36,6 +36,10 @@
     {
       "binding": "TOPICAL_CACHE",
       "id": "83f710e2d64c48e09b4606f6bd30cddb"
+    },
+    {
+      "binding": "SEMANTIC_SEARCH_CACHE",
+      "id": "df3bf5cd8d8c47d2bddba6cadeddb899"
     }
   ],
   "durable_objects": {

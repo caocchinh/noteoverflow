@@ -5,6 +5,7 @@ declare namespace Cloudflare {
   interface Env {
     NEXT_INC_CACHE_KV: KVNamespace;
     TOPICAL_CACHE: KVNamespace;
+    SEMANTIC_SEARCH_CACHE: KVNamespace;
     NEXTJS_ENV: string;
     BETTER_AUTH_SECRET: string;
     BETTER_AUTH_URL: string;

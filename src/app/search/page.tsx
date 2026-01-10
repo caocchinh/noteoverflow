@@ -3,7 +3,6 @@
 
 import "@/features/topical/components/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import { MAX_IMAGE_UPLOAD_SIZE } from "@/constants/constants";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
@@ -16,9 +15,12 @@ import OptionalFilters from "@/features/search/components/OptionalFilters";
 import { cn } from "@/lib/utils";
 import SearchPastPaper from "@/features/search/components/SearchPastPaper";
 import { OptionalSearchFilter } from "@/features/search/constants/type";
-import { getRandomPhrase } from "@/features/search/constants/constants";
+import {
+  getRandomPhrase,
+  MAX_IMAGE_UPLOAD_SIZE,
+  MAX_QUERY_LENGTH,
+} from "@/features/search/constants/constants";
 import MainContent from "@/features/search/components/MainContent";
-const MAX_QUERY_LENGTH = 1000;
 
 const SearchPage = () => {
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
@@ -160,6 +162,7 @@ const SearchPage = () => {
     imageSearchMutation.mutate(selectedImage, {
       onSuccess: () => {
         setLastImageQuery(selectedImage);
+        setLastTextQuery(null);
       },
     });
   }, [selectedImage, lastImageQuery, imageSearchMutation, textSearchMutation]);
@@ -173,6 +176,7 @@ const SearchPage = () => {
     textSearchMutation.mutate(textQuery, {
       onSuccess: () => {
         setLastTextQuery(textQuery.trim());
+        setLastImageQuery(null);
       },
     });
   }, [textQuery, lastTextQuery, textSearchMutation, imageSearchMutation]);
