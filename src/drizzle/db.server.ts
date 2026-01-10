@@ -6,6 +6,8 @@ import * as relations from "./relations";
 //  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --> Local development
 //  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --remote --> Remote development
 
+// Please please always remember to migrate to database after adding new table or column, Unexpected token 'q', \"question_i\"... is not valid JSON" hapens when you forget to migrate
+
 export const getDb = cache(() => {
   const { env } = getCloudflareContext();
   return drizzle(env.MAIN_DB, { schema: { ...schema, ...relations } });
