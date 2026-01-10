@@ -109,26 +109,25 @@ const SearchClient = ({
     const rawQuery = searchParams.q;
     const queryParam = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery;
 
-    if (
-      queryParam &&
-      queryParam.trim().length > 0 &&
-      queryParam.length <= MAX_QUERY_LENGTH
-    ) {
+    if (queryParam && queryParam.trim().length > 0) {
       setTextQuery(queryParam);
       setActiveTab("text");
-      // Trigger search after a short delay to ensure state is set
-      setTimeout(() => {
-        textSearchMutation.mutate(queryParam.trim(), {
-          onSuccess: () => {
-            setLastTextQuery(queryParam.trim());
-            setHasSearched(true);
-            addSearchHistory({
-              type: "text",
-              query: queryParam.trim(),
-            });
-          },
-        });
-      }, 0);
+
+      if (queryParam.length <= MAX_QUERY_LENGTH) {
+        // Trigger search after a short delay to ensure state is set
+        setTimeout(() => {
+          textSearchMutation.mutate(queryParam.trim(), {
+            onSuccess: () => {
+              setLastTextQuery(queryParam.trim());
+              setHasSearched(true);
+              addSearchHistory({
+                type: "text",
+                query: queryParam.trim(),
+              });
+            },
+          });
+        }, 0);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -304,9 +303,8 @@ const SearchClient = ({
   return (
     <div
       className={cn(
-        "min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30",
-        !isSearching && hasSearched ? "pb-18" : "",
-        isSearching && activeTab === "image" ? "pb-10" : ""
+        "min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30 pb-12",
+        !isSearching && hasSearched ? "pb-18" : ""
       )}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
