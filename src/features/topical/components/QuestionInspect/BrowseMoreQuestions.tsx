@@ -15,6 +15,7 @@ import {
 } from "../PaginationButtons";
 import QuestionPreview from "../QuestionPreview";
 import Masonry from "../Masonry";
+import { usePathname } from "next/navigation";
 
 const BrowseMoreQuestions = memo(
   ({
@@ -27,6 +28,7 @@ const BrowseMoreQuestions = memo(
     const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
     const expandedContentRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
 
     // Update displayed data when partitionedTopicalData changes
     useEffect(() => {
@@ -147,6 +149,8 @@ const BrowseMoreQuestions = memo(
                       imageHeight={
                         question.questionImagesDimensions?.[imageIndex]?.height
                       }
+                      showCurriculumBadge={pathname == "/search"}
+                      showSubjectBadge={pathname == "/search"}
                     />
                   ),
                   width: question.questionImagesDimensions?.[imageIndex]?.width,

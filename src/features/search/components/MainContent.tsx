@@ -206,6 +206,8 @@ const MainContent = memo(
                                   }}
                                   imageSrc={imageSrc}
                                   imageWidth={width}
+                                  showCurriculumBadge={true}
+                                  showSubjectBadge={true}
                                   imageHeight={height}
                                   className="border-logo-main/20 shadow-lg"
                                 />
@@ -222,6 +224,8 @@ const MainContent = memo(
                               }}
                               imageSrc={imageSrc}
                               imageWidth={width}
+                              showCurriculumBadge={true}
+                              showSubjectBadge={true}
                               imageHeight={height}
                               key={`${question.id}-${imageSrc}-${index}`}
                             />

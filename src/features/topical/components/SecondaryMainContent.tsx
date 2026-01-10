@@ -320,6 +320,8 @@ const QuestionViewItem = memo(
           imageWidth={imageWidth}
           imageHeight={imageHeight}
           className="mb-0!"
+          showCurriculumBadge={false}
+          showSubjectBadge={false}
         />
       </div>
     );

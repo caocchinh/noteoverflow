@@ -269,14 +269,14 @@ const SearchPage = () => {
                         const target = e.target as HTMLTextAreaElement;
                         setTextareaHeight(target.offsetHeight);
                       }}
-                      placeholder="Search for questions (e.g. 'a ball is thrown up with velocity of 10m/s')..."
+                      placeholder="Search for questions (e.g. 'Two particles P and Q of masses 0.2kg')..."
                       style={
                         textareaHeight
                           ? { height: `${textareaHeight}px` }
                           : undefined
                       }
                       className={cn(
-                        "min-h-14 h-auto px-14 py-3 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y max-h-[500px]",
+                        "min-h-14 h-auto px-14 pt-4 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y max-h-[500px]",
                         isQueryTooLong &&
                           "border-destructive focus:border-destructive focus:ring-destructive/10"
                       )}

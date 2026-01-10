@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
+import { extractCurriculumCode, extractSubjectCode } from "../lib/utils";
 
 const QuestionPreview = memo(
   ({
@@ -23,6 +24,8 @@ const QuestionPreview = memo(
     question,
     onQuestionClick,
     className,
+    showCurriculumBadge,
+    showSubjectBadge,
   }: {
     imageWidth: number | undefined;
     imageHeight: number | undefined;
@@ -31,6 +34,8 @@ const QuestionPreview = memo(
     listId?: string;
     onQuestionClick: () => void;
     className?: string;
+    showCurriculumBadge: boolean;
+    showSubjectBadge: boolean;
   }) => {
     const {
       uiPreferences,
@@ -129,6 +134,16 @@ const QuestionPreview = memo(
 
         <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-100 flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-11">
           <div className="flex flex-wrap gap-2 items-center justify-center content-start">
+            {showCurriculumBadge && (
+              <Badge className="h-max bg-green-600 text-white! text-center">
+                {extractCurriculumCode({ questionId: question.id })}
+              </Badge>
+            )}
+            {showSubjectBadge && (
+              <Badge className="h-max bg-logo-main text-white! text-center">
+                {extractSubjectCode({ questionId: question.id })}
+              </Badge>
+            )}
             {question?.topics?.map((topic) => (
               <Badge
                 key={topic}

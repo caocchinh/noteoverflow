@@ -24,6 +24,7 @@ import BothViews from "./BothViews";
 import { Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import AnnotatableImagesUpdater from "./AnnotatableInspectImages/AnnotatableImagesUpdater";
+import { usePathname } from "next/navigation";
 
 const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
@@ -71,6 +72,7 @@ const QuestionInspectMainContent = forwardRef(
     const [currentView, setCurrentView] =
       useState<QuestionInspectViewMode>("question");
     const questionViewContainer = useRef<HTMLDivElement | null>(null);
+    const pathname = usePathname();
     const answerViewContainer = useRef<HTMLDivElement | null>(null);
     const bothViewsQuestionContainer = useRef<HTMLDivElement | null>(null);
     const bothViewsAnswerContainer = useRef<HTMLDivElement | null>(null);
@@ -358,8 +360,8 @@ const QuestionInspectMainContent = forwardRef(
                 <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
                   <QuestionInformation
                     question={currentQuestionData}
-                    showCurriculumn={false}
-                    showSubject={false}
+                    showCurriculumn={pathname == "/search"}
+                    showSubject={pathname == "/search"}
                   />
                 </div>
                 <div ref={questionViewContainer}></div>
@@ -385,8 +387,8 @@ const QuestionInspectMainContent = forwardRef(
                 <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
                   <QuestionInformation
                     question={currentQuestionData}
-                    showCurriculumn={false}
-                    showSubject={false}
+                    showCurriculumn={pathname == "/search"}
+                    showSubject={pathname == "/search"}
                   />
                 </div>
                 <div ref={answerViewContainer}></div>
@@ -400,8 +402,8 @@ const QuestionInspectMainContent = forwardRef(
               <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
                 <QuestionInformation
                   question={currentQuestionData}
-                  showCurriculumn={false}
-                  showSubject={false}
+                  showCurriculumn={pathname == "/search"}
+                  showSubject={pathname == "/search"}
                 />
               </div>
               <BothViews

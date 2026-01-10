@@ -43,6 +43,7 @@ import {
 import QuestionPreview from "../QuestionPreview";
 import Sort from "../Sort";
 import Masonry from "../Masonry";
+import { usePathname } from "next/navigation";
 
 export const FinishedTracker = memo(
   ({ allQuestions, navigateToQuestion }: FinishedTrackerProps) => {
@@ -52,6 +53,7 @@ export const FinishedTracker = memo(
     const [sortParameters, setSortParameters] = useState<SortParameters>({
       sortBy: DEFAULT_SORT_OPTIONS,
     });
+    const pathname = usePathname();
     const {
       setIsCalculatorOpen,
       savedActivitiesIsFetching,
@@ -250,6 +252,8 @@ export const FinishedTracker = memo(
                                       imageIndex
                                     ]?.height
                                   }
+                                  showCurriculumBadge={pathname == "/search"}
+                                  showSubjectBadge={pathname == "/search"}
                                 />
                               ),
                               width:
