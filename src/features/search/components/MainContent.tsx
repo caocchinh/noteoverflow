@@ -2,6 +2,7 @@ import { InspectTriggerButton } from "@/features/topical/components/AppUltilityB
 import Masonry from "@/features/topical/components/Masonry";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import {
   QuestionInspectRef,
@@ -93,7 +94,7 @@ const MainContent = memo(
           {results && !isSearching && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="flex items-center justify-between px-2 mb-6 gap-2 flex-wrap">
-                <div className="flex items-center gap-4 px-2 mb-1">
+                <div className="flex items-center gap-3 px-2 mb-1">
                   <p className="text-sm text-muted-foreground font-medium">
                     Found{" "}
                     <span className="text-foreground font-bold">
@@ -125,6 +126,13 @@ const MainContent = memo(
                       Answers
                     </ToggleGroupItem>
                   </ToggleGroup>
+                  <ShareFilter
+                    isDisabled={false}
+                    url={
+                      typeof window !== "undefined" ? window.location.href : ""
+                    }
+                    type="search result"
+                  />
                 </div>
                 {sortedData.length > 0 && (
                   <div className="flex items-center justify-between mb-1 gap-2">

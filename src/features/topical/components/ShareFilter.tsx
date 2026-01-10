@@ -17,7 +17,7 @@ export const ShareFilter = memo(
   }: {
     isDisabled: boolean;
     url: string;
-    type?: "filter" | "bookmark" | "question";
+    type?: "filter" | "bookmark" | "question" | "search result";
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -26,8 +26,8 @@ export const ShareFilter = memo(
           <TooltipTrigger asChild>
             <Button
               className={cn(
-                "rounded-sm w-9 cursor-pointer !bg-logo-main !text-white",
-                isDisabled && "opacity-50 !cursor-default"
+                "rounded-sm w-9 cursor-pointer bg-logo-main! text-white!",
+                isDisabled && "opacity-50 cursor-default!"
               )}
               onClick={() => {
                 if (isDisabled) {
@@ -42,7 +42,7 @@ export const ShareFilter = memo(
           </TooltipTrigger>
           <TooltipContent
             side="bottom"
-            className="!bg-logo-main !text-white z-[99999999] flex justify-center items-center gap-2"
+            className="bg-logo-main! text-white! z-99999999 flex justify-center items-center gap-2"
             arrowClassName="!bg-logo-main !fill-logo-main"
           >
             {isDisabled ? (

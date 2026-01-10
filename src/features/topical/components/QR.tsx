@@ -20,7 +20,7 @@ export const QR = ({
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   url: string;
-  type?: "filter" | "bookmark" | "question";
+  type?: "filter" | "bookmark" | "question" | "search result";
 }) => {
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -41,7 +41,7 @@ export const QR = ({
       }}
     >
       <DialogContent
-        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-[9999999]"
+        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-9999999"
         overlayClassName="z-[999998]"
       >
         <DialogTitle className="sr-only">QR Code</DialogTitle>
@@ -84,7 +84,7 @@ export const QR = ({
           <Download />
         </Button>
         <Button
-          className="flex items-center w-full gap-2 !bg-logo-main !text-white rounded-sm cursor-pointer active:opacity-80"
+          className="flex items-center w-full gap-2 bg-logo-main! text-white! rounded-sm cursor-pointer active:opacity-80"
           onClick={() => {
             navigator.clipboard.writeText(url);
             setCopied(true);

@@ -4,6 +4,7 @@
 import "@/features/topical/components/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
@@ -23,8 +24,10 @@ import {
 import MainContent from "@/features/search/components/MainContent";
 import SearchHistory from "@/features/search/components/SearchHistory";
 import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
+import { updateSearchQueryParam } from "@/features/search/lib/lib";
 
 const SearchPage = () => {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
   const [currentFilter, setCurrentFilter] =
     useState<OptionalSearchFilter | null>(null);
@@ -98,6 +101,28 @@ const SearchPage = () => {
     activeTab === "text"
       ? textQuery.trim() === lastTextQuery
       : selectedImage === lastImageQuery;
+
+  useEffect(() => {
+    const query = searchParams.get("q");
+    if (query && query.trim().length > 0 && query.length <= MAX_QUERY_LENGTH) {
+      setTextQuery(query);
+      setActiveTab("text");
+      // Trigger search after a short delay to ensure state is set
+      setTimeout(() => {
+        textSearchMutation.mutate(query.trim(), {
+          onSuccess: () => {
+            setLastTextQuery(query.trim());
+            setHasSearched(true);
+            addSearchHistory({
+              type: "text",
+              query: query.trim(),
+            });
+          },
+        });
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -175,6 +200,7 @@ const SearchPage = () => {
         setLastTextQuery(null);
       },
     });
+    // Note: We keep the text query in URL when performing image search
   }, [
     selectedImage,
     lastImageQuery,
@@ -186,6 +212,8 @@ const SearchPage = () => {
   const handleTextSearch = useCallback(() => {
     if (!textQuery.trim()) return;
     if (textQuery.trim() === lastTextQuery) return;
+
+    updateSearchQueryParam(textQuery.trim());
 
     setHasSearched(true);
     imageSearchMutation.reset();
