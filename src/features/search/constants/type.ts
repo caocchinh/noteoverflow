@@ -1,5 +1,5 @@
 import { CIE_A_LEVEL_SUBDIVISION } from "@/constants/types";
-import { RefObject, SetStateAction } from "react";
+import { Dispatch, RefObject, SetStateAction } from "react";
 
 export type OptionalSearchFilter = {
   subject?: string;
@@ -11,11 +11,12 @@ export type OptionalSearchFilter = {
 
 export interface OptionalFiltersProps {
   currentFilter: OptionalSearchFilter | null;
-  setCurrentFilter: React.Dispatch<SetStateAction<OptionalSearchFilter | null>>;
+  setCurrentFilter: Dispatch<SetStateAction<OptionalSearchFilter | null>>;
   searchButtonPortalRef: RefObject<HTMLDivElement | null>;
   onSearch: () => void;
   isSearching: boolean;
   isInputValid: boolean;
+  isDuplicateQuery: boolean;
 }
 
 export type PaperTypeFilterSearchPageCache = {

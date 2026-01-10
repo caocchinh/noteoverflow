@@ -28,6 +28,7 @@ export default function LayoutSetting({
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { uiPreferences, setUiPreference } = useTopicalApp();
+
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>

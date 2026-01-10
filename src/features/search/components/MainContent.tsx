@@ -92,7 +92,7 @@ const MainContent = memo(
         <div className="relative">
           {results && !isSearching && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="flex items-center justify-between px-2 mb-6 gap-2">
+              <div className="flex items-center justify-between px-2 mb-6 gap-2 flex-wrap">
                 <div className="flex items-center gap-4 px-2 mb-1">
                   <p className="text-sm text-muted-foreground font-medium">
                     Found{" "}

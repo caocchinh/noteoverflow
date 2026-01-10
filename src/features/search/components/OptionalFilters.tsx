@@ -43,6 +43,7 @@ const OptionalFilters = memo(
     onSearch,
     isSearching,
     isInputValid,
+    isDuplicateQuery,
   }: OptionalFiltersProps) => {
     const [selectedCurriculum, setSelectedCurriculum] =
       useState<ValidCurriculum>(
@@ -254,7 +255,7 @@ const OptionalFilters = memo(
         ? createPortal(
             <Button
               onClick={handleApplyFilters}
-              disabled={isSearching || !isInputValid}
+              disabled={isSearching || !isInputValid || isDuplicateQuery}
               size="lg"
               className="rounded-full px-8 w-full bg-logo-main! cursor-pointer text-white! h-12 gap-2 transition-all text-base"
             >

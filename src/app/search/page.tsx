@@ -29,6 +29,8 @@ const SearchPage = () => {
   const [textQuery, setTextQuery] = useState("");
   const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [lastTextQuery, setLastTextQuery] = useState<string | null>(null);
+  const [lastImageQuery, setLastImageQuery] = useState<string | null>(null);
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -36,7 +38,9 @@ const SearchPage = () => {
 
   // Image Search Mutation
   const imageSearchMutation = useMutation({
-    mutationFn: async (imageBase64: string) => {
+    mutationFn: async (
+      imageBase64: string
+    ): Promise<VectorizeSelectedQuestion[]> => {
       const { data, error } = await api["visual-search"].search.post({
         imageBase64,
         filter: currentFilter ?? undefined,
@@ -53,7 +57,7 @@ const SearchPage = () => {
 
   // Text Search Mutation
   const textSearchMutation = useMutation({
-    mutationFn: async (query: string) => {
+    mutationFn: async (query: string): Promise<VectorizeSelectedQuestion[]> => {
       const { data, error } = await api["visual-search"].text.post({
         query,
         filter: currentFilter ?? undefined,
@@ -85,6 +89,11 @@ const SearchPage = () => {
     activeTab === "image"
       ? !!selectedImage
       : textQuery.trim().length > 0 && !isQueryTooLong;
+
+  const isDuplicateQuery =
+    activeTab === "text"
+      ? textQuery.trim() === lastTextQuery
+      : selectedImage === lastImageQuery;
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -143,17 +152,30 @@ const SearchPage = () => {
 
   const handleImageSearch = useCallback(() => {
     if (!selectedImage) return;
+    // Prevent searching with the same image
+    if (selectedImage === lastImageQuery) return;
+
     setHasSearched(true);
     textSearchMutation.reset();
-    imageSearchMutation.mutate(selectedImage);
-  }, [selectedImage, imageSearchMutation, textSearchMutation]);
+    imageSearchMutation.mutate(selectedImage, {
+      onSuccess: () => {
+        setLastImageQuery(selectedImage);
+      },
+    });
+  }, [selectedImage, lastImageQuery, imageSearchMutation, textSearchMutation]);
 
   const handleTextSearch = useCallback(() => {
     if (!textQuery.trim()) return;
+    if (textQuery.trim() === lastTextQuery) return;
+
     setHasSearched(true);
     imageSearchMutation.reset();
-    textSearchMutation.mutate(textQuery);
-  }, [textQuery, textSearchMutation, imageSearchMutation]);
+    textSearchMutation.mutate(textQuery, {
+      onSuccess: () => {
+        setLastTextQuery(textQuery.trim());
+      },
+    });
+  }, [textQuery, lastTextQuery, textSearchMutation, imageSearchMutation]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -242,6 +264,7 @@ const SearchPage = () => {
                     onSearch={handleSearch}
                     isSearching={isSearching}
                     isInputValid={isInputValid}
+                    isDuplicateQuery={isDuplicateQuery}
                   />
                   <SearchPastPaper>
                     <Button

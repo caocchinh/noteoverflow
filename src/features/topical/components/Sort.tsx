@@ -22,6 +22,7 @@ const Sort = memo(
     isDisabled,
     disabledMessage,
     showSortTextTrigger = true,
+    triggerClassName,
     descendingSortText = "Newest first",
     ascendingSortText = "Oldest first",
   }: {
@@ -29,6 +30,7 @@ const Sort = memo(
     setSortParameters: Dispatch<SetStateAction<SortParameters>>;
     isDisabled: boolean;
     disabledMessage: string;
+    triggerClassName?: string;
     showSortTextTrigger?: boolean;
     descendingSortText?: string;
     ascendingSortText?: string;
@@ -57,7 +59,7 @@ const Sort = memo(
                 <Button
                   variant="outline"
                   disabled={isDisabled}
-                  className="cursor-pointer px-[10px]!"
+                  className={cn(triggerClassName, "cursor-pointer px-[10px]!")}
                 >
                   <ArrowDownWideNarrow className="w-4 h-4" />
                   {showSortTextTrigger && "Sort"}
