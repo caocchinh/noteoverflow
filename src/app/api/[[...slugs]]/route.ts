@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { CloudflareAdapter } from "elysia/adapter/cloudflare-worker";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
@@ -13,7 +14,11 @@ import { getQuestionStats } from "@/server/api/visual-search/stats";
 import { getDimensionStats } from "@/server/api/dimensions/stats";
 import { processDimensions } from "@/server/api/dimensions/dimensions";
 
-const app = new Elysia({ prefix: "/api", aot: false })
+const app = new Elysia({
+  prefix: "/api",
+  aot: false,
+  adapter: CloudflareAdapter,
+})
   .onError(({ code, status, error }) => {
     console.error(error);
     if (code === "VALIDATION") {
@@ -125,7 +130,8 @@ const app = new Elysia({ prefix: "/api", aot: false })
         })
       ),
     }),
-  });
+  })
+  .compile();
 
 // Export type for Eden Treaty client
 export type App = typeof app;
