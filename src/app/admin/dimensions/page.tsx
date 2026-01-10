@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { verifySession } from "@/dal/verifySession";
-import ImageDimensionsIndex from ".";
+import ImageDimensionsClient from ".";
 
 const ImageDimensionsPage = async () => {
   const session = await verifySession();
@@ -16,7 +16,7 @@ const ImageDimensionsPage = async () => {
     return redirect("/app");
   }
 
-  return <ImageDimensionsIndex />;
+  return <ImageDimensionsClient />;
 };
 
 export default ImageDimensionsPage;

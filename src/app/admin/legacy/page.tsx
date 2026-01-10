@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { verifySession } from "@/dal/verifySession";
-import LegacyUploadIndex from ".";
+import LegacyUploadClient from ".";
 
 const LegacyUploadPage = async () => {
   const session = await verifySession();
@@ -16,7 +16,7 @@ const LegacyUploadPage = async () => {
     return redirect("/app");
   }
 
-  return <LegacyUploadIndex />;
+  return <LegacyUploadClient />;
 };
 
 export default LegacyUploadPage;

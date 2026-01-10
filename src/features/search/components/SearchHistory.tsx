@@ -104,7 +104,7 @@ const SearchHistory = ({ onSelectHistory, className }: SearchHistoryProps) => {
       >
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
-            <DialogTitle>Search History</DialogTitle>
+            <DialogTitle>Local Search History</DialogTitle>
             {history.length > 0 && (
               <Button
                 variant="destructive"

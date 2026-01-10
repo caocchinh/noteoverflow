@@ -38,7 +38,7 @@ declare module "react" {
   }
 }
 
-const LegacyUploadIndex = () => {
+const LegacyUploadClient = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [failedUploads, setFailedUploads] = useState<File[]>([]);
@@ -476,4 +476,4 @@ const LegacyUploadIndex = () => {
   );
 };
 
-export default LegacyUploadIndex;
+export default LegacyUploadClient;

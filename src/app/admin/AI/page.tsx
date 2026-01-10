@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { verifySession } from "@/dal/verifySession";
-import VisualSearchIndex from ".";
+import VisualSearchIndexClient from ".";
 
 const VisualSearchIndexPage = async () => {
   const session = await verifySession();
@@ -16,7 +16,7 @@ const VisualSearchIndexPage = async () => {
     return redirect("/app");
   }
 
-  return <VisualSearchIndex />;
+  return <VisualSearchIndexClient />;
 };
 
 export default VisualSearchIndexPage;

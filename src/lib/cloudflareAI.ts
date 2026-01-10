@@ -218,6 +218,10 @@ export async function processImage(
 ): Promise<{ text: string; embedding: number[] }> {
   const text = await extractTextFromImage(imageBase64, aiBinding);
 
+  if (typeof text !== "string") {
+    throw new Error("Extracted text is not a string");
+  }
+
   if (!text || text.trim().length === 0) {
     throw new Error("No text could be extracted from the image");
   }

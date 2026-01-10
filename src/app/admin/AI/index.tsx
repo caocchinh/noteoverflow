@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export default function VisualSearchIndex() {
+export default function VisualSearchIndexClient() {
   const [activeTab, setActiveTab] = useState<"image" | "text" | "index">(
     "image"
   );

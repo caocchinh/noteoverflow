@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function ImageDimensionsIndex() {
+export default function ImageDimensionsClient() {
   const queryClient = useQueryClient();
 
   // Processing State
