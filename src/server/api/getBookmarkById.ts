@@ -68,6 +68,8 @@ export const getBookmarkById = async ({
           answers: true,
           questionImages: true,
           topics: true,
+          answersImagesDimensions: true,
+          questionImagesDimensions: true,
         },
       },
     },
@@ -83,6 +85,12 @@ export const getBookmarkById = async ({
           questionImages: JSON.parse(item.question.questionImages ?? "[]"),
           answers: JSON.parse(item.question.answers ?? "[]"),
           topics: JSON.parse(item.question.topics ?? "[]"),
+          answersImagesDimensions: JSON.parse(
+            item.question.answersImagesDimensions ?? "[]"
+          ),
+          questionImagesDimensions: JSON.parse(
+            item.question.questionImagesDimensions ?? "[]"
+          ),
         },
       };
     }

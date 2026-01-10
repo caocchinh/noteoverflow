@@ -35,6 +35,12 @@ const QuestionViewPage = async (props: { params: Params }) => {
         questionImages: JSON.parse(question.questionImages ?? "[]"),
         answers: JSON.parse(question.answers ?? "[]"),
         topics: JSON.parse(question.topics ?? "[]"),
+        answersImagesDimensions: JSON.parse(
+          question.answersImagesDimensions ?? "[]"
+        ),
+        questionImagesDimensions: JSON.parse(
+          question.questionImagesDimensions ?? "[]"
+        ),
       };
       await env.TOPICAL_CACHE.put(
         JSON.stringify(decodeURIComponent(questionId)),

@@ -202,6 +202,8 @@ export async function fetchQuestionResults(
           questionImages: question.questionImages,
           answers: question.answers,
           topics: question.topics,
+          questionImagesDimensions: question.questionImagesDimensions,
+          answersImagesDimensions: question.answersImagesDimensions,
         })
         .from(question)
         .where(inArray(question.id, questionIds)),
@@ -217,6 +219,8 @@ export async function fetchQuestionResults(
     questionImages: JSON.parse(q.questionImages ?? "[]"),
     answers: JSON.parse(q.answers ?? "[]"),
     topics: JSON.parse(q.topics ?? "[]"),
+    questionImagesDimensions: JSON.parse(q.questionImagesDimensions ?? "[]"),
+    answersImagesDimensions: JSON.parse(q.answersImagesDimensions ?? "[]"),
     score: scoreMap.get(q.id) ?? 0,
   }));
 

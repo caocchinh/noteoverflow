@@ -65,6 +65,8 @@ async function fetchFinishedQuestions(userId: string) {
           season: true,
           year: true,
           topics: true,
+          answersImagesDimensions: true,
+          questionImagesDimensions: true,
         },
       },
     },
@@ -78,6 +80,12 @@ async function fetchFinishedQuestions(userId: string) {
         questionImages: JSON.parse(item.question.questionImages ?? "[]"),
         answers: JSON.parse(item.question.answers ?? "[]"),
         topics: JSON.parse(item.question.topics ?? "[]"),
+        answersImagesDimensions: JSON.parse(
+          item.question.answersImagesDimensions ?? "[]"
+        ),
+        questionImagesDimensions: JSON.parse(
+          item.question.questionImagesDimensions ?? "[]"
+        ),
       },
     };
   });
@@ -111,6 +119,8 @@ async function fetchBookmarks(userId: string) {
               season: true,
               year: true,
               topics: true,
+              answersImagesDimensions: true,
+              questionImagesDimensions: true,
             },
           },
         },
@@ -131,6 +141,12 @@ async function fetchBookmarks(userId: string) {
             ),
             answers: JSON.parse(userBookmark.question.answers ?? "[]"),
             topics: JSON.parse(userBookmark.question.topics ?? "[]"),
+            answersImagesDimensions: JSON.parse(
+              userBookmark.question.answersImagesDimensions ?? "[]"
+            ),
+            questionImagesDimensions: JSON.parse(
+              userBookmark.question.questionImagesDimensions ?? "[]"
+            ),
           },
         };
       }),

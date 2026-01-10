@@ -121,6 +121,8 @@ export const handleCreateListOptimisticUpdate = (
               answers: question.answers,
               topics: question.topics,
               id: question.id,
+              answersImagesDimensions: question.answersImagesDimensions,
+              questionImagesDimensions: question.questionImagesDimensions,
             },
             updatedAt: new Date(),
           });
@@ -144,6 +146,8 @@ export const handleCreateListOptimisticUpdate = (
                 answers: question.answers,
                 topics: question.topics,
                 id: question.id,
+                answersImagesDimensions: question.answersImagesDimensions,
+                questionImagesDimensions: question.questionImagesDimensions,
               },
               updatedAt: new Date(),
             },
@@ -198,6 +202,8 @@ export const handleToggleBookmarkOptimisticUpdate = (
               answers: question.answers,
               topics: question.topics,
               id: question.id,
+              answersImagesDimensions: question.answersImagesDimensions,
+              questionImagesDimensions: question.questionImagesDimensions,
             },
             updatedAt: new Date(),
           });

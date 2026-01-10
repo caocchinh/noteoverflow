@@ -132,6 +132,8 @@ export const QuestionInspectFinishedCheckbox = memo(
                   questionImages: question.questionImages,
                   answers: question.answers,
                   topics: question.topics,
+                  answersImagesDimensions: question.answersImagesDimensions,
+                  questionImagesDimensions: question.questionImagesDimensions,
                 },
                 updatedAt: new Date(),
               });
