@@ -38,13 +38,6 @@ export interface VectorMetadata {
   [key: string]: string;
 }
 
-export interface IndexProgress {
-  indexed: number;
-  failed: number;
-  skipped: number;
-  total: number;
-}
-
 // Search filter type used by both searchByText and searchByImage
 export interface SearchFilter {
   curriculum?: string;

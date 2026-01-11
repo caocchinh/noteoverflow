@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { SelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,14 @@ export default function VisualSearchIndexClient() {
   // Indexing State
   const [indexParams, setIndexParams] = useState({ offset: 0, limit: 10 });
   const [indexResult, setIndexResult] = useState<any>(null);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState({
+    current: 0,
+    total: 0,
+    indexed: 0,
+    failed: 0,
+    skipped: 0,
+  });
 
   // Stats Query
   const { data: stats } = useQuery({
@@ -60,39 +68,35 @@ export default function VisualSearchIndexClient() {
     enabled: activeTab === "index",
   });
 
-  // Indexing Mutation
-  const indexMutation = useMutation({
-    mutationFn: async (params: { offset: number; limit: number }) => {
-      const { data, error } = await api.admin["visual-search"].get({
-        query: params,
-      });
-      if (error) {
-        // @ts-expect-error type inference issue
-        throw new Error(error.value.error || "Indexing failed");
-      }
-      return data;
-    },
-    onSuccess: (data) => {
-      setIndexResult(data);
-      setError(null);
-      queryClient.setQueryData(["visual-search-stats"], (oldStats: any) => {
-        if (!oldStats) return oldStats;
+  // Process a single question
+  const indexSingleQuestion = async (question: {
+    id: string;
+    questionImages: string[];
+    answers: string[];
+    subjectId: string;
+    curriculumName: string;
+    year: string;
+    season: string;
+    paperType: string;
+  }) => {
+    const { data, error } = await api.admin["visual-search"].process.post({
+      id: question.id,
+      questionImages: question.questionImages,
+      answers: question.answers,
+      subjectId: question.subjectId || "",
+      curriculumName: question.curriculumName || "",
+      year: question.year?.toString() || "0",
+      season: question.season || "",
+      paperType: question.paperType?.toString() || "0",
+    });
 
-        const indexedCount = data.progress?.indexed || 0;
+    if (error) {
+      // @ts-expect-error type inference issue
+      throw new Error(error.value.error || "Indexing failed");
+    }
 
-        return {
-          ...oldStats,
-          indexed: oldStats.indexed + indexedCount,
-          notIndexed: Math.max(0, oldStats.notIndexed - indexedCount),
-          // total remains the same
-          total: oldStats.total,
-        };
-      });
-    },
-    onError: (err: any) => {
-      setError(err.message);
-    },
-  });
+    return data;
+  };
 
   const handleImageSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,10 +210,109 @@ export default function VisualSearchIndexClient() {
     }
   }, [textQuery, getFilters]);
 
-  const handleIndexQuestions = useCallback(() => {
+  const handleIndexQuestions = useCallback(async () => {
     setIndexResult(null);
-    indexMutation.mutate(indexParams);
-  }, [indexMutation, indexParams]);
+    setError(null);
+    setIsIndexing(true);
+    setCurrentProgress({
+      current: 0,
+      total: 0,
+      indexed: 0,
+      failed: 0,
+      skipped: 0,
+    });
+
+    try {
+      // Step 1: Fetch all unindexed questions
+      const { data: questionsData, error: fetchError } = await api.admin[
+        "visual-search"
+      ].questions.get({
+        query: indexParams,
+      });
+
+      if (fetchError) {
+        // @ts-expect-error type inference issue
+        throw new Error(fetchError.value.error || "Failed to fetch questions");
+      }
+
+      const questions = questionsData.questions;
+
+      if (questions.length === 0) {
+        setIndexResult({
+          message: "No questions to index",
+          progress: { indexed: 0, failed: 0, skipped: 0 },
+        });
+        setIsIndexing(false);
+        return;
+      }
+
+      setCurrentProgress((prev) => ({ ...prev, total: questions.length }));
+
+      // Step 2: Loop through each question and index it
+      let totalIndexed = 0;
+      let totalFailed = 0;
+      let totalSkipped = 0;
+
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+
+        try {
+          setCurrentProgress((prev) => ({ ...prev, current: i + 1 }));
+
+          const result = await indexSingleQuestion(question);
+
+          totalIndexed += result.indexed || 0;
+          totalFailed += result.failed || 0;
+          totalSkipped += result.skipped || 0;
+
+          setCurrentProgress((prev) => ({
+            ...prev,
+            indexed: totalIndexed,
+            failed: totalFailed,
+            skipped: totalSkipped,
+          }));
+        } catch (err: any) {
+          console.error(`Failed to index question ${question.id}:`, err);
+          totalFailed++;
+          setCurrentProgress((prev) => ({
+            ...prev,
+            failed: totalFailed,
+          }));
+        }
+      }
+
+      // Update final result
+      const finalResult = {
+        message: `Indexed ${totalIndexed} images (${totalFailed} failed, ${totalSkipped} skipped)`,
+        progress: {
+          indexed: totalIndexed,
+          failed: totalFailed,
+          skipped: totalSkipped,
+        },
+      };
+
+      setIndexResult(finalResult);
+
+      // Update stats
+      queryClient.setQueryData(["visual-search-stats"], (oldStats: any) => {
+        if (!oldStats) return oldStats;
+
+        return {
+          ...oldStats,
+          indexed: oldStats.indexed + questions.length - totalFailed,
+          notIndexed: Math.max(
+            0,
+            oldStats.notIndexed - (questions.length - totalFailed)
+          ),
+          total: oldStats.total,
+        };
+      });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsIndexing(false);
+    }
+  }, [indexParams, queryClient]);
 
   // Common Filters Component to avoid duplication
   const CommonFilters = () => (
@@ -449,11 +552,49 @@ export default function VisualSearchIndexClient() {
             <CardFooter className="flex-col items-stretch gap-4">
               <Button
                 onClick={handleIndexQuestions}
-                disabled={indexMutation.isPending}
+                disabled={isIndexing}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
               >
-                {indexMutation.isPending ? "Indexing..." : "Start Indexing"}
+                {isIndexing
+                  ? `Indexing ${currentProgress.current}/${currentProgress.total}...`
+                  : "Start Indexing"}
               </Button>
+
+              {/* Current Progress Indicator */}
+              {isIndexing && currentProgress.total > 0 && (
+                <div className="p-4 bg-blue-50 rounded-md text-sm border border-blue-200 dark:bg-blue-900/30">
+                  <p className="font-semibold mb-2">
+                    Indexing question {currentProgress.current} of{" "}
+                    {currentProgress.total}
+                  </p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                      <div className="text-xl font-bold text-green-700 dark:text-green-400">
+                        {currentProgress.indexed}
+                      </div>
+                      <div className="text-xs text-green-800 dark:text-green-500">
+                        Indexed
+                      </div>
+                    </div>
+                    <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                      <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
+                        {currentProgress.skipped}
+                      </div>
+                      <div className="text-xs text-yellow-800 dark:text-yellow-500">
+                        Skipped
+                      </div>
+                    </div>
+                    <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                      <div className="text-xl font-bold text-red-700 dark:text-red-400">
+                        {currentProgress.failed}
+                      </div>
+                      <div className="text-xs text-red-800 dark:text-red-500">
+                        Failed
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {indexResult && (
                 <div className="p-4 bg-muted rounded-md text-sm border">

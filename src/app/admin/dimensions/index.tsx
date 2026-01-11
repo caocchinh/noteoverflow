@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SelectedQuestion } from "@/features/topical/constants/types";
+
+interface Question {
+  id: string;
+  questionImages: string[];
+  answers: string[];
+}
 
 export default function ImageDimensionsClient() {
   const queryClient = useQueryClient();
@@ -23,6 +30,14 @@ export default function ImageDimensionsClient() {
   const [processParams, setProcessParams] = useState({ offset: 0, limit: 10 });
   const [processResult, setProcessResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState({
+    current: 0,
+    total: 0,
+    processed: 0,
+    failed: 0,
+    skipped: 0,
+  });
 
   // Stats Query
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -34,44 +49,124 @@ export default function ImageDimensionsClient() {
     },
   });
 
-  // Processing Mutation
-  const processMutation = useMutation({
-    mutationFn: async (params: { offset: number; limit: number }) => {
-      const { data, error } = await api.admin.dimensions.get({
-        query: params,
-      });
-      if (error) {
+  // Process a single question
+  const processSingleQuestion = async (question: Question) => {
+    const { data, error } = await api.admin.dimensions.process.post({
+      id: question.id,
+      questionImages: question.questionImages,
+      answers: question.answers,
+    });
+
+    if (error) {
+      // @ts-expect-error type inference issue
+      throw new Error(error.value.error || "Processing failed");
+    }
+
+    return data;
+  };
+
+  const handleProcessDimensions = useCallback(async () => {
+    setProcessResult(null);
+    setError(null);
+    setIsProcessing(true);
+    setCurrentProgress({
+      current: 0,
+      total: 0,
+      processed: 0,
+      failed: 0,
+      skipped: 0,
+    });
+
+    try {
+      // Step 1: Fetch all unprocessed questions
+      const { data: questionsData, error: fetchError } =
+        await api.admin.dimensions.questions.get({
+          query: processParams,
+        });
+
+      if (fetchError) {
         // @ts-expect-error type inference issue
-        throw new Error(error.value.error || "Processing failed");
+        throw new Error(fetchError.value.error || "Failed to fetch questions");
       }
-      return data;
-    },
-    onSuccess: (data) => {
-      setProcessResult(data);
-      setError(null);
+
+      const questions = questionsData.questions as SelectedQuestion[];
+
+      if (questions.length === 0) {
+        setProcessResult({
+          message: "No questions to process",
+          progress: { processed: 0, failed: 0, skipped: 0 },
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      setCurrentProgress((prev) => ({ ...prev, total: questions.length }));
+
+      // Step 2: Loop through each question and process it
+      let totalProcessed = 0;
+      let totalFailed = 0;
+      let totalSkipped = 0;
+
+      for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+
+        try {
+          setCurrentProgress((prev) => ({ ...prev, current: i + 1 }));
+
+          const result = await processSingleQuestion(question);
+
+          totalProcessed += result.processed || 0;
+          totalFailed += result.failed || 0;
+          totalSkipped += result.skipped || 0;
+
+          setCurrentProgress((prev) => ({
+            ...prev,
+            processed: totalProcessed,
+            failed: totalFailed,
+            skipped: totalSkipped,
+          }));
+        } catch (err: any) {
+          console.error(`Failed to process question ${question.id}:`, err);
+          totalFailed++;
+          setCurrentProgress((prev) => ({
+            ...prev,
+            failed: totalFailed,
+          }));
+        }
+      }
+
+      // Update final result
+      const finalResult = {
+        message: `Processed ${totalProcessed} images (${totalFailed} failed, ${totalSkipped} skipped)`,
+        progress: {
+          processed: totalProcessed,
+          failed: totalFailed,
+          skipped: totalSkipped,
+        },
+      };
+
+      setProcessResult(finalResult);
+
+      // Update stats
       queryClient.setQueryData(["dimensions-stats"], (oldStats: any) => {
         if (!oldStats) return oldStats;
 
-        const processedCount = data.progress?.processed || 0;
-
         return {
           ...oldStats,
-          processed: oldStats.processed + processedCount,
-          notProcessed: Math.max(0, oldStats.notProcessed - processedCount),
+          processed: oldStats.processed + questions.length - totalFailed,
+          notProcessed: Math.max(
+            0,
+            oldStats.notProcessed - (questions.length - totalFailed)
+          ),
           total: oldStats.total,
         };
       });
-    },
-    onError: (err: any) => {
+    } catch (err: any) {
       setError(err.message);
-    },
-  });
-
-  const handleProcessDimensions = useCallback(() => {
-    setProcessResult(null);
-    setError(null);
-    processMutation.mutate(processParams);
-  }, [processMutation, processParams]);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [processParams, queryClient]);
 
   return (
     <div className="container mx-auto py-8 max-w-5xl">
@@ -171,11 +266,49 @@ export default function ImageDimensionsClient() {
         <CardFooter className="flex-col items-stretch gap-4">
           <Button
             onClick={handleProcessDimensions}
-            disabled={processMutation.isPending}
+            disabled={isProcessing}
             className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
           >
-            {processMutation.isPending ? "Processing..." : "Process Dimensions"}
+            {isProcessing
+              ? `Processing ${currentProgress.current}/${currentProgress.total}...`
+              : "Process Dimensions"}
           </Button>
+
+          {/* Current Progress Indicator */}
+          {isProcessing && currentProgress.total > 0 && (
+            <div className="p-4 bg-blue-50 rounded-md text-sm border border-blue-200 dark:bg-blue-900/30">
+              <p className="font-semibold mb-2">
+                Processing question {currentProgress.current} of{" "}
+                {currentProgress.total}
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                  <div className="text-xl font-bold text-green-700 dark:text-green-400">
+                    {currentProgress.processed}
+                  </div>
+                  <div className="text-xs text-green-800 dark:text-green-500">
+                    Processed
+                  </div>
+                </div>
+                <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                  <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
+                    {currentProgress.skipped}
+                  </div>
+                  <div className="text-xs text-yellow-800 dark:text-yellow-500">
+                    Skipped
+                  </div>
+                </div>
+                <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                  <div className="text-xl font-bold text-red-700 dark:text-red-400">
+                    {currentProgress.failed}
+                  </div>
+                  <div className="text-xs text-red-800 dark:text-red-500">
+                    Failed
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {processResult && (
             <div className="p-4 bg-muted rounded-md text-sm border">

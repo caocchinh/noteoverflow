@@ -4,14 +4,20 @@ import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
-import { indexQuestions } from "@/server/api/visual-search/indexing";
+import {
+  getUnindexedQuestions,
+  indexSingleQuestion,
+} from "@/server/api/visual-search/indexing";
 import {
   searchByImage,
   searchByText,
 } from "@/server/api/visual-search/searching";
 import { getQuestionStats } from "@/server/api/visual-search/stats";
 import { getDimensionStats } from "@/server/api/dimensions/stats";
-import { processDimensions } from "@/server/api/dimensions/dimensions";
+import {
+  getUnprocessedQuestions,
+  processSingleQuestion,
+} from "@/server/api/dimensions/dimensions";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -72,11 +78,25 @@ const app = new Elysia({ prefix: "/api", aot: false })
   // GET /api/admin/visual-search/stats - Get indexing stats
   .get("/admin/visual-search/stats", getQuestionStats)
 
-  // GET /api/admin/visual-search?offset=0 - Index 1 question at a time
-  .get("/admin/visual-search", indexQuestions, {
+  // GET /api/admin/visual-search/questions - Get unindexed questions
+  .get("/admin/visual-search/questions", getUnindexedQuestions, {
     query: t.Object({
       offset: t.Numeric({ default: 0 }),
       limit: t.Numeric({ default: 1 }),
+    }),
+  })
+
+  // POST /api/admin/visual-search/process - Index a single question
+  .post("/admin/visual-search/process", indexSingleQuestion, {
+    body: t.Object({
+      id: t.String(),
+      questionImages: t.Array(t.String()),
+      answers: t.Array(t.String()),
+      subjectId: t.String(),
+      curriculumName: t.String(),
+      year: t.String(),
+      season: t.String(),
+      paperType: t.String(),
     }),
   })
 
@@ -85,11 +105,20 @@ const app = new Elysia({ prefix: "/api", aot: false })
   // GET /api/admin/dimensions/stats - Get dimension processing stats
   .get("/admin/dimensions/stats", getDimensionStats)
 
-  // GET /api/admin/dimensions - Process image dimensions
-  .get("/admin/dimensions", processDimensions, {
+  // GET /api/admin/dimensions/questions - Get unprocessed questions
+  .get("/admin/dimensions/questions", getUnprocessedQuestions, {
     query: t.Object({
       offset: t.Numeric({ default: 0 }),
       limit: t.Numeric({ default: 10 }),
+    }),
+  })
+
+  // POST /api/admin/dimensions/process - Process a single question
+  .post("/admin/dimensions/process", processSingleQuestion, {
+    body: t.Object({
+      id: t.String(),
+      questionImages: t.Array(t.String()),
+      answers: t.Array(t.String()),
     }),
   })
 

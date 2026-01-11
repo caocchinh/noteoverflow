@@ -11,13 +11,13 @@ import { processImage } from "@/lib/cloudflareAI";
 import { upsertVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { imageUrlToBase64 } from "@/lib/utils";
-import { generateShortId, IndexProgress, VectorMetadata } from "./utils";
+import { generateShortId, VectorMetadata } from "./utils";
 
 /**
- * Index all questions into the vector database
- * Owner-only endpoint that processes question/answer images using OCR + text embedding
+ * Get unindexed questions
+ * Owner-only endpoint
  */
-export async function indexQuestions({
+export async function getUnindexedQuestions({
   status,
   query,
 }: {
@@ -25,6 +25,7 @@ export async function indexQuestions({
   query: { limit: number; offset: number };
 }) {
   const { limit, offset } = query;
+
   // Verify admin session
   const session = await verifySession();
   if (!session?.session || session.user.role !== "owner") {
@@ -33,8 +34,6 @@ export async function indexQuestions({
       code: ERROR_CODES.FORBIDDEN,
     });
   }
-
-  const { env } = await getCloudflareContext({ async: true });
 
   const db = await getDbAsync();
 
@@ -55,141 +54,196 @@ export async function indexQuestions({
     where: (q, { eq }) => eq(q.isQuestionImageIndexed, 0),
   });
 
-  console.log("questions", questions);
-
-  const progress: IndexProgress = {
-    indexed: 0,
-    failed: 0,
-    skipped: 0,
-    total: questions.length,
-  };
-
-  // Process each question
-  for (const q of questions) {
-    const questionImages: string[] = JSON.parse(q.questionImages ?? "[]");
-    const answerImages: string[] = JSON.parse(q.answers ?? "[]");
-    let sucessfulCount = 0;
-    let failedCount = 0;
-    let skippedCount = 0;
-
-    const vectorsToUpsert: Array<{
-      id: string;
-      values: number[];
-      metadata: VectorMetadata;
-    }> = [];
-
-    // Process question images
-    for (let i = 0; i < questionImages.length; i++) {
-      try {
-        const imagePath = questionImages[i];
-        if (!imagePath) continue;
-
-        const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64, env.AI);
-
-        vectorsToUpsert.push({
-          id: await generateShortId(`${q.id}_question_${i}`),
-          values: embedding,
-          metadata: {
-            questionId: q.id,
-            type: "question",
-            imageIndex: i.toString(),
-            imagePath: imagePath,
-            extractedText: text,
-            subject: q.subjectId ?? "",
-            curriculum: q.curriculumName ?? "",
-            year: q.year?.toString() ?? "0",
-            season: q.season ?? "",
-            paperType: q.paperType?.toString() ?? "0",
-          },
-        });
-        sucessfulCount++;
-      } catch (error) {
-        console.error(`Failed to index question image ${q.id}_${i}:`, error);
-        failedCount++;
-        break;
-      }
-      // Add small delay to prevent rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-
-    // Process answer images (skip text-only answers)
-    for (let i = 0; i < answerImages.length; i++) {
-      try {
-        const imagePath = answerImages[i];
-        if (!imagePath) continue;
-
-        // Skip if not an image URL (text answers)
-        // Images are hosted on notestack.online, text answers are plain strings
-        const isImageUrl = imagePath.includes("https://notestack.online");
-        if (!isImageUrl) {
-          skippedCount++;
-          continue;
-        }
-
-        const imageBase64 = await imageUrlToBase64(imagePath);
-        const { text, embedding } = await processImage(imageBase64, env.AI);
-
-        vectorsToUpsert.push({
-          id: await generateShortId(`${q.id}_answer_${i}`),
-          values: embedding,
-          metadata: {
-            questionId: q.id,
-            type: "answer",
-            imageIndex: i.toString(),
-            imagePath: imagePath,
-            extractedText: text,
-            subject: q.subjectId ?? "",
-            curriculum: q.curriculumName ?? "",
-            year: q.year?.toString() ?? "0",
-            season: q.season ?? "",
-            paperType: q.paperType?.toString() ?? "0",
-          },
-        });
-        sucessfulCount++;
-      } catch (error) {
-        console.error(`Failed to index answer image ${q.id}_${i}:`, error);
-        failedCount++;
-        break;
-      }
-      // Add small delay to prevent rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-
-    // Upsert vectors for this question immediately
-    if (vectorsToUpsert.length > 0 && failedCount === 0) {
-      try {
-        await upsertVectorize(
-          QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
-          vectorsToUpsert,
-          env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
-        );
-
-        // Only mark as indexed if upsert succeeded
-        await retryDatabase(
-          () =>
-            db
-              .update(question)
-              .set({
-                isQuestionImageIndexed: 1,
-              })
-              .where(eq(question.id, q.id)),
-          `update question ${q.id} isQuestionImageIndexed`
-        );
-        progress.indexed += sucessfulCount;
-        progress.skipped += skippedCount;
-      } catch (error) {
-        console.error(`Failed to upsert vectors for question ${q.id}:`, error);
-        progress.failed += failedCount + sucessfulCount;
-      }
-    } else {
-      progress.failed += failedCount;
-    }
-  }
-
   return {
     success: true,
-    progress,
-    message: `Indexed ${progress.indexed} images from ${questions.length} questions (${progress.skipped} skipped, ${progress.failed} failed)`,
+    questions: questions.map((q) => ({
+      id: q.id,
+      questionImages: JSON.parse(q.questionImages ?? "[]"),
+      answers: JSON.parse(q.answers ?? "[]"),
+      subjectId: q.subjectId ?? "",
+      curriculumName: q.curriculumName ?? "",
+      year: q.year?.toString() ?? "0",
+      season: q.season ?? "",
+      paperType: q.paperType?.toString() ?? "0",
+    })),
   };
+}
+
+/**
+ * Index a single question into the vector database
+ * Owner-only endpoint that processes question/answer images using OCR + text embedding
+ */
+export async function indexSingleQuestion({
+  status,
+  body,
+}: {
+  status: typeof elysiaStatus;
+  body: {
+    id: string;
+    questionImages: string[];
+    answers: string[];
+    subjectId: string;
+    curriculumName: string;
+    year: string;
+    season: string;
+    paperType: string;
+  };
+}) {
+  const {
+    id,
+    questionImages,
+    answers,
+    subjectId,
+    curriculumName,
+    year,
+    season,
+    paperType,
+  } = body;
+
+  // Verify admin session
+  const session = await verifySession();
+  if (!session?.session || session.user.role !== "owner") {
+    return status(HTTP_STATUS.FORBIDDEN, {
+      error: ERROR_MESSAGES[ERROR_CODES.FORBIDDEN],
+      code: ERROR_CODES.FORBIDDEN,
+    });
+  }
+
+  const { env } = await getCloudflareContext({ async: true });
+  const db = await getDbAsync();
+
+  let sucessfulCount = 0;
+  let failedCount = 0;
+  let skippedCount = 0;
+
+  const vectorsToUpsert: Array<{
+    id: string;
+    values: number[];
+    metadata: VectorMetadata;
+  }> = [];
+
+  // Process question images
+  for (let i = 0; i < questionImages.length; i++) {
+    try {
+      const imagePath = questionImages[i];
+      if (!imagePath) continue;
+
+      const imageBase64 = await imageUrlToBase64(imagePath);
+      const { text, embedding } = await processImage(imageBase64, env.AI);
+
+      vectorsToUpsert.push({
+        id: await generateShortId(`${id}_question_${i}`),
+        values: embedding,
+        metadata: {
+          questionId: id,
+          type: "question",
+          imageIndex: i.toString(),
+          imagePath: imagePath,
+          extractedText: text,
+          subject: subjectId,
+          curriculum: curriculumName,
+          year: year,
+          season: season,
+          paperType: paperType,
+        },
+      });
+      sucessfulCount++;
+    } catch (error) {
+      console.error(`Failed to index question image ${id}_${i}:`, error);
+      failedCount++;
+      break;
+    }
+    // Add small delay to prevent rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  // Process answer images (skip text-only answers)
+  for (let i = 0; i < answers.length; i++) {
+    try {
+      const imagePath = answers[i];
+      if (!imagePath) continue;
+
+      // Skip if not an image URL (text answers)
+      // Images are hosted on notestack.online, text answers are plain strings
+      const isImageUrl = imagePath.includes("https://notestack.online");
+      if (!isImageUrl) {
+        skippedCount++;
+        continue;
+      }
+
+      const imageBase64 = await imageUrlToBase64(imagePath);
+      const { text, embedding } = await processImage(imageBase64, env.AI);
+
+      vectorsToUpsert.push({
+        id: await generateShortId(`${id}_answer_${i}`),
+        values: embedding,
+        metadata: {
+          questionId: id,
+          type: "answer",
+          imageIndex: i.toString(),
+          imagePath: imagePath,
+          extractedText: text,
+          subject: subjectId,
+          curriculum: curriculumName,
+          year: year,
+          season: season,
+          paperType: paperType,
+        },
+      });
+      sucessfulCount++;
+    } catch (error) {
+      console.error(`Failed to index answer image ${id}_${i}:`, error);
+      failedCount++;
+      break;
+    }
+    // Add small delay to prevent rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  // Upsert vectors for this question
+  if (vectorsToUpsert.length > 0 && failedCount === 0) {
+    try {
+      await upsertVectorize(
+        QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
+        vectorsToUpsert,
+        env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
+      );
+
+      // Only mark as indexed if upsert succeeded
+      await retryDatabase(
+        () =>
+          db
+            .update(question)
+            .set({
+              isQuestionImageIndexed: 1,
+            })
+            .where(eq(question.id, id)),
+        `update question ${id} isQuestionImageIndexed`
+      );
+
+      return {
+        success: true,
+        indexed: sucessfulCount,
+        skipped: skippedCount,
+        failed: 0,
+      };
+    } catch (error) {
+      console.error(`Failed to upsert vectors for question ${id}:`, error);
+      return {
+        success: false,
+        indexed: 0,
+        skipped: 0,
+        failed: failedCount + sucessfulCount,
+        error: "Failed to upsert to vector database",
+      };
+    }
+  } else {
+    return {
+      success: false,
+      indexed: 0,
+      skipped: skippedCount,
+      failed: failedCount,
+      error: "Failed to process images",
+    };
+  }
 }
