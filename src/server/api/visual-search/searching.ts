@@ -96,11 +96,7 @@ export async function searchByImage({
   const cachedResult = await env.SEMANTIC_SEARCH_CACHE.get(hashedKey);
 
   if (cachedResult !== null) {
-    const parsedResult = JSON.parse(cachedResult);
-    return {
-      success: true,
-      data: parsedResult.data,
-    };
+    return JSON.parse(cachedResult);
   }
 
   // Check global rate limit
@@ -140,19 +136,14 @@ export async function searchByImage({
   // Fetch full question data from D1
   const results = await fetchQuestionResults(matches);
 
-  const responseData = {
-    success: true,
-    data: results,
-  };
-
   await Promise.all([
-    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(results), {
       expirationTtl: 60 * 60 * 24 * 3, // 3 day
     }),
     incrementSearchCount("image"),
   ]);
 
-  return responseData;
+  return results;
 }
 
 /**
@@ -209,11 +200,7 @@ export async function searchByText({
   const cachedResult = await env.SEMANTIC_SEARCH_CACHE.get(hashedKey);
 
   if (cachedResult !== null) {
-    const parsedResult = JSON.parse(cachedResult);
-    return {
-      success: true,
-      data: parsedResult.data,
-    };
+    return JSON.parse(cachedResult);
   }
 
   // Check global rate limit
@@ -252,18 +239,13 @@ export async function searchByText({
   // Fetch full question data from D1
   const results = await fetchQuestionResults(matches);
 
-  const responseData = {
-    success: true,
-    data: results,
-  };
-
   // Cache the results and increment search count in parallel
   await Promise.all([
-    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(responseData), {
+    env.SEMANTIC_SEARCH_CACHE.put(hashedKey, JSON.stringify(results), {
       expirationTtl: 60 * 60 * 24 * 3, // 3 day
     }),
     incrementSearchCount("text"),
   ]);
 
-  return responseData;
+  return results;
 }

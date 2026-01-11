@@ -81,7 +81,7 @@ const SearchClient = ({
           throw new Error(error.value.error || "Search failed");
         }
 
-        return data.data as VectorizeSelectedQuestion[];
+        return data as VectorizeSelectedQuestion[];
       } else {
         const { data, error } = await api["visual-search"].text.post({
           query: activeSearchQuery,
@@ -93,7 +93,7 @@ const SearchClient = ({
           throw new Error(error.value.error || "Search failed");
         }
 
-        return data.data as VectorizeSelectedQuestion[];
+        return data as VectorizeSelectedQuestion[];
       }
     },
     enabled: !!activeSearchQuery && !!activeSearchType && !!queryKey,
