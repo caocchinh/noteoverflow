@@ -1,10 +1,6 @@
 import { status as elysiaStatus } from "elysia";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import {
-  validateCurriculum,
-  validateSubject,
-  validatePartialFilterData,
-} from "@/features/topical/lib/utils";
+import { validateSearchFilter } from "@/features/search/lib/lib";
 import { queryVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { getDbAsync } from "@/drizzle/db.server";
@@ -48,65 +44,19 @@ export interface SearchFilter {
 }
 
 /**
- * Validate search filters using the reusable validation functions
+ * Validate search filters using the shared validation function
  */
 export function validateSearchFilters(
   filter: SearchFilter | undefined,
   status: typeof elysiaStatus
 ) {
-  if (!filter) return null;
+  const validationError = validateSearchFilter(filter);
 
-  // Require curriculum and subject when year, season, or paperType filters are used
-  const hasDetailFilters =
-    (filter.year && filter.year.length > 0) ||
-    (filter.season && filter.season.length > 0) ||
-    (filter.paperType && filter.paperType.length > 0);
-
-  if (hasDetailFilters && (!filter.curriculum || !filter.subject)) {
+  if (validationError) {
     return status(HTTP_STATUS.BAD_REQUEST, {
       error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
       code: ERROR_CODES.BAD_REQUEST,
     });
-  }
-
-  // Validate curriculum if provided
-  if (filter.curriculum && !validateCurriculum(filter.curriculum)) {
-    return status(HTTP_STATUS.BAD_REQUEST, {
-      error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
-      code: ERROR_CODES.BAD_REQUEST,
-    });
-  }
-
-  // Validate subject if curriculum and subject are provided
-  if (
-    filter.curriculum &&
-    filter.subject &&
-    !validateSubject(filter.curriculum, filter.subject)
-  ) {
-    return status(HTTP_STATUS.BAD_REQUEST, {
-      error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
-      code: ERROR_CODES.BAD_REQUEST,
-    });
-  }
-
-  // Validate filter data if curriculum and subject are provided
-  if (filter.curriculum && filter.subject) {
-    if (
-      !validatePartialFilterData({
-        data: {
-          paperType: filter.paperType,
-          year: filter.year,
-          season: filter.season,
-        },
-        curriculum: filter.curriculum,
-        subject: filter.subject,
-      })
-    ) {
-      return status(HTTP_STATUS.BAD_REQUEST, {
-        error: ERROR_MESSAGES[ERROR_CODES.BAD_REQUEST],
-        code: ERROR_CODES.BAD_REQUEST,
-      });
-    }
   }
 
   return null;

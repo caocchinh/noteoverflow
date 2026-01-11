@@ -63,6 +63,7 @@ const OptionalFilters = memo(
     const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
       CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
     >(undefined);
+    const isMountedRef = useRef(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const curriculumRef = useRef<HTMLDivElement | null>(null);
@@ -121,32 +122,28 @@ const OptionalFilters = memo(
       return count;
     }, [selectedSubject, selectedYear, selectedSeason, selectedPaperType]);
 
-    useEffect(() => {
-      setIsMounted(true);
-    }, []);
-
     // Reset selections when curriculum changes
     useEffect(() => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
       setSelectedSubject("");
       setSelectedYear([]);
       setSelectedPaperType([]);
       setSelectedSeason([]);
       setCurrentPaperTypeFilter(undefined);
-    }, [selectedCurriculum, isMounted]);
+    }, [selectedCurriculum]);
 
     // Reset filter selections when subject changes
     useEffect(() => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
       setSelectedYear([]);
       setSelectedPaperType([]);
       setSelectedSeason([]);
       setCurrentPaperTypeFilter(undefined);
-    }, [selectedSubject, isMounted]);
+    }, [selectedSubject]);
 
     // Load paper type filter preference when subject changes
     useEffect(() => {
-      if (!isMounted || !selectedCurriculum || !selectedSubject) {
+      if (!isMountedRef.current || !selectedCurriculum || !selectedSubject) {
         return;
       }
 
@@ -179,11 +176,11 @@ const OptionalFilters = memo(
       } catch {
         setCurrentPaperTypeFilter(undefined);
       }
-    }, [isMounted, selectedCurriculum, selectedSubject]);
+    }, [selectedCurriculum, selectedSubject]);
 
     // Save paper type filter preference to localStorage when it changes
     useEffect(() => {
-      if (!isMounted || !selectedCurriculum || !selectedSubject) {
+      if (!isMountedRef.current || !selectedCurriculum || !selectedSubject) {
         return;
       }
 
@@ -212,12 +209,7 @@ const OptionalFilters = memo(
           error
         );
       }
-    }, [
-      isMounted,
-      selectedCurriculum,
-      selectedSubject,
-      currentPaperTypeFilter,
-    ]);
+    }, [selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
 
     const handleClearAll = useCallback(() => {
       setSelectedSubject("");
@@ -236,8 +228,9 @@ const OptionalFilters = memo(
       if (selectedSeason.length > 0) newFilter.season = selectedSeason;
       if (selectedPaperType.length > 0) newFilter.paperType = selectedPaperType;
 
-      setCurrentFilter(Object.keys(newFilter).length > 0 ? newFilter : null);
-      onSearch();
+      const finalFilter = Object.keys(newFilter).length > 0 ? newFilter : null;
+      setCurrentFilter(finalFilter);
+      onSearch({ filter: finalFilter });
     }, [
       selectedCurriculum,
       selectedSubject,
@@ -247,6 +240,32 @@ const OptionalFilters = memo(
       setCurrentFilter,
       onSearch,
     ]);
+
+    // Sync internal state with currentFilter from URL parameters
+    useEffect(() => {
+      if (isMountedRef.current) return;
+      if (currentFilter) {
+        if (currentFilter.curriculum) {
+          setSelectedCurriculum(currentFilter.curriculum as ValidCurriculum);
+        }
+        if (currentFilter.subject) {
+          setSelectedSubject(currentFilter.subject);
+        }
+        if (currentFilter.year) {
+          setSelectedYear(currentFilter.year);
+        }
+        if (currentFilter.paperType) {
+          setSelectedPaperType(currentFilter.paperType);
+        }
+        if (currentFilter.season) {
+          setSelectedSeason(currentFilter.season);
+        }
+      }
+      setTimeout(() => {
+        isMountedRef.current = true;
+        setIsMounted(true);
+      }, 0);
+    }, [currentFilter]);
 
     // Render search button through portal
     const searchButton =
@@ -302,7 +321,7 @@ const OptionalFilters = memo(
           </ContextMenu>
           <SheetContent
             onOpenAutoFocus={(event) => event.preventDefault()}
-            className="gap-0 dark:bg-accent"
+            className="gap-0 bg-sidebar"
           >
             <SheetHeader className="pb-0">
               <SheetTitle>Search Filters</SheetTitle>

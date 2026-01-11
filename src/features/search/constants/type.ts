@@ -13,7 +13,7 @@ export interface OptionalFiltersProps {
   currentFilter: OptionalSearchFilter | null;
   setCurrentFilter: Dispatch<SetStateAction<OptionalSearchFilter | null>>;
   searchButtonPortalRef: RefObject<HTMLDivElement | null>;
-  onSearch: () => void;
+  onSearch: ({ filter }: { filter: OptionalSearchFilter | null }) => void;
   isSearching: boolean;
   isInputValid: boolean;
 }

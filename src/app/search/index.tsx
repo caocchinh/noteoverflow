@@ -23,7 +23,10 @@ import {
 import MainContent from "@/features/search/components/MainContent";
 import SearchHistory from "@/features/search/components/SearchHistory";
 import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
-import { updateSearchQueryParam } from "@/features/search/lib/lib";
+import {
+  updateSearchQueryParam,
+  validateSearchFilter,
+} from "@/features/search/lib/lib";
 import { hashUltil } from "@/features/topical/lib/utils";
 
 const SearchClient = ({
@@ -32,18 +35,14 @@ const SearchClient = ({
   searchParams: { [key: string]: string | string[] | undefined };
 }) => {
   const [activeTab, setActiveTab] = useState<"image" | "text">("text");
-  const [currentFilter, setCurrentFilter] =
-    useState<OptionalSearchFilter | null>(null);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [textQuery, setTextQuery] = useState("");
   const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [filterError, setFilterError] = useState<string | null>(null);
 
-  // Active search state
-  const [activeSearchQuery, setActiveSearchQuery] = useState<string | null>(
-    null
-  );
   const [activeSearchType, setActiveSearchType] = useState<
     "image" | "text" | null
   >(null);
@@ -53,15 +52,11 @@ const SearchClient = ({
   const searchButtonPortalRef = useRef<HTMLDivElement | null>(null);
 
   const [queryKey, setQueryKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!activeSearchQuery) {
-      setQueryKey(null);
-      return;
-    }
-
-    hashUltil(activeSearchQuery).then(setQueryKey);
-  }, [activeSearchQuery]);
+  const [activeSearchQuery, setActiveSearchQuery] = useState<string | null>(
+    null
+  );
+  const [currentFilter, setCurrentFilter] =
+    useState<OptionalSearchFilter | null>(null);
 
   const searchQuery = useQuery({
     queryKey: ["search", queryKey ?? "none"],
@@ -69,6 +64,7 @@ const SearchClient = ({
       if (!activeSearchQuery || !activeSearchType) {
         throw new Error("No search query");
       }
+      setFilterError(null);
 
       if (activeSearchType === "image") {
         const { data, error } = await api["visual-search"].search.post({
@@ -120,18 +116,44 @@ const SearchClient = ({
     const rawQuery = searchParams.q;
     const queryParam = Array.isArray(rawQuery) ? rawQuery[0] : rawQuery;
 
+    // Read filter from URL params
+    const rawFilter = searchParams.filter;
+    const filterParam = Array.isArray(rawFilter) ? rawFilter[0] : rawFilter;
+    let parsedFilter: OptionalSearchFilter | null = null;
+    let isFilterValid = false;
+
+    if (filterParam) {
+      try {
+        parsedFilter = JSON.parse(filterParam);
+
+        // Validate filter using the shared validation function
+        const validationError = validateSearchFilter(parsedFilter);
+
+        if (validationError) {
+          parsedFilter = null;
+          setFilterError(validationError);
+        } else {
+          setCurrentFilter(parsedFilter);
+          isFilterValid = true;
+          setFilterError(null);
+        }
+      } catch {
+        // Invalid filter JSON, ignore
+        setFilterError("Invalid filter format");
+      }
+    }
+
     if (queryParam && queryParam.trim().length > 0) {
       setTextQuery(queryParam);
       setActiveTab("text");
 
-      if (queryParam.length <= MAX_QUERY_LENGTH) {
-        setActiveSearchQuery(queryParam.trim());
-        setActiveSearchType("text");
-        addSearchHistory({
-          type: "text",
-          query: queryParam.trim(),
-        });
-        updateSearchQueryParam(queryParam.trim());
+      if (queryParam.length <= MAX_QUERY_LENGTH && isFilterValid) {
+        setTimeout(() => {
+          handleTextSearch({
+            filter: parsedFilter,
+            query: queryParam,
+          });
+        }, 0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,72 +214,105 @@ const SearchClient = ({
     }
   }, []);
 
-  const handleImageSearch = useCallback(() => {
-    if (!selectedImage) return;
-    // Prevent searching with the same image
-    if (selectedImage === activeSearchQuery && activeSearchType === "image")
-      return;
+  const handleImageSearch = useCallback(
+    (params: {
+      image: string;
+      filter: OptionalSearchFilter | null;
+      previewUrl?: string | null;
+    }) => {
+      const { image, filter, previewUrl: providedPreviewUrl } = params;
+      if (!image) return;
 
-    setActiveSearchQuery(selectedImage);
-    setActiveSearchType("image");
-    addSearchHistory({
-      type: "image",
-      query: selectedImage,
-      previewUrl: previewUrl ?? undefined,
-    });
-    // Note: We keep the text query in URL when performing image search
-  }, [selectedImage, activeSearchQuery, activeSearchType, previewUrl]);
+      setActiveSearchQuery(image);
+      setActiveSearchType("image");
+      addSearchHistory({
+        type: "image",
+        query: image,
+        previewUrl: providedPreviewUrl ?? undefined,
+      });
+      const hashInput = JSON.stringify({
+        query: image,
+        filter: filter,
+      });
+      setTimeout(() => {
+        hashUltil(hashInput).then(setQueryKey);
+      }, 0);
+    },
+    []
+  );
 
-  const handleTextSearch = useCallback(() => {
-    if (!textQuery.trim()) return;
-    if (textQuery.trim() === activeSearchQuery && activeSearchType === "text")
-      return;
-
-    updateSearchQueryParam(textQuery.trim());
-
-    setActiveSearchQuery(textQuery.trim());
-    setActiveSearchType("text");
-    addSearchHistory({
-      type: "text",
-      query: textQuery.trim(),
-    });
-  }, [textQuery, activeSearchQuery, activeSearchType]);
+  const handleTextSearch = useCallback(
+    (params: { query: string; filter: OptionalSearchFilter | null }) => {
+      const { query, filter } = params;
+      if (!query.trim()) return;
+      setActiveSearchQuery(query.trim());
+      updateSearchQueryParam(query.trim(), filter);
+      setActiveSearchType("text");
+      addSearchHistory({
+        type: "text",
+        query: query.trim(),
+      });
+      const hashInput = JSON.stringify({
+        query: query.trim(),
+        filter: filter,
+      });
+      setTimeout(() => {
+        hashUltil(hashInput).then(setQueryKey);
+      }, 0);
+    },
+    []
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (textQuery.trim()) {
-          handleTextSearch();
+          handleTextSearch({ query: textQuery, filter: currentFilter });
         }
       }
     },
-    [handleTextSearch, textQuery]
+    [handleTextSearch, textQuery, currentFilter]
   );
 
-  const handleSearch = useCallback(() => {
-    if (activeTab === "text") {
-      handleTextSearch();
-    } else {
-      handleImageSearch();
-    }
-  }, [activeTab, handleTextSearch, handleImageSearch]);
+  const handleSearch = useCallback(
+    ({ filter }: { filter: OptionalSearchFilter | null }) => {
+      if (activeTab === "text") {
+        handleTextSearch({ query: textQuery, filter });
+      } else {
+        handleImageSearch({
+          image: selectedImage || "",
+          filter,
+          previewUrl,
+        });
+      }
+    },
+    [
+      activeTab,
+      handleTextSearch,
+      handleImageSearch,
+      textQuery,
+      selectedImage,
+      previewUrl,
+    ]
+  );
 
-  const handleHistorySelect = useCallback((item: SearchHistoryItem) => {
-    if (item.type === "text") {
-      setActiveTab("text");
-      setTextQuery(item.query);
-      setActiveSearchQuery(item.query);
-      setActiveSearchType("text");
-      updateSearchQueryParam(item.query);
-    } else {
-      setActiveTab("image");
-      setSelectedImage(item.query);
-      setPreviewUrl(item.previewUrl || null);
-      setActiveSearchQuery(item.query);
-      setActiveSearchType("image");
-    }
-  }, []);
+  const handleHistorySelect = useCallback(
+    (item: SearchHistoryItem) => {
+      if (item.type === "text") {
+        setActiveTab("text");
+        setTextQuery(item.query);
+        setActiveSearchType("text");
+        updateSearchQueryParam(item.query, currentFilter);
+      } else {
+        setActiveTab("image");
+        setSelectedImage(item.query);
+        setPreviewUrl(item.previewUrl || null);
+        setActiveSearchType("image");
+      }
+    },
+    [currentFilter]
+  );
 
   return (
     <div
@@ -330,6 +385,7 @@ const SearchClient = ({
                   <SearchHistory
                     onSelectHistory={handleHistorySelect}
                     className={!results ? "bg-muted/40" : ""}
+                    isSearching={isSearching}
                   />
                   <SearchPastPaper>
                     <Button
@@ -495,6 +551,17 @@ const SearchClient = ({
         </div>
 
         <div className="max-w-7xl mx-auto mt-4">
+          {filterError && (
+            <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+              <div className="p-2 bg-destructive/10 rounded-full">
+                <X className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-semibold">Invalid filter</p>
+                <p className="text-sm opacity-90">{filterError}</p>
+              </div>
+            </div>
+          )}
           {error && (
             <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
               <div className="p-2 bg-destructive/10 rounded-full">

@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 interface SearchHistoryProps {
   onSelectHistory: (item: SearchHistoryItem) => void;
   className?: string;
+  isSearching: boolean;
 }
 
 const formatTimestamp = (timestamp: number) => {
@@ -46,7 +47,11 @@ const truncateQuery = (query: string, maxLength = 67) => {
   return query.substring(0, maxLength) + "...";
 };
 
-const SearchHistory = ({ onSelectHistory, className }: SearchHistoryProps) => {
+const SearchHistory = ({
+  onSelectHistory,
+  className,
+  isSearching,
+}: SearchHistoryProps) => {
   const [history, setHistory] = useState<SearchHistoryItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -132,10 +137,19 @@ const SearchHistory = ({ onSelectHistory, className }: SearchHistoryProps) => {
           ) : (
             <div className="p-4 w-full">
               {history.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => handleSelectItem(item)}
-                  className="w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer mb-2 border border-transparent hover:border-primary/20"
+                  onClick={() => {
+                    if (!isSearching) {
+                      handleSelectItem(item);
+                    }
+                  }}
+                  className={cn(
+                    "w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer mb-2 border border-transparent hover:border-primary/20",
+                    {
+                      "cursor-not-allowed opacity-50": isSearching,
+                    }
+                  )}
                 >
                   <div className="flex items-start gap-4 w-full">
                     <div className="mt-0.5">
@@ -179,7 +193,7 @@ const SearchHistory = ({ onSelectHistory, className }: SearchHistoryProps) => {
                       </Button>
                     </div>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
