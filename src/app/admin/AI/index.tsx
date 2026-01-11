@@ -5,7 +5,10 @@
 import { useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import {
+  SelectedQuestion,
+  VectorizeSelectedQuestion,
+} from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,7 +179,7 @@ export default function VisualSearchIndexClient() {
         throw new Error(error.value.error || "Search failed");
       }
 
-      setResults(data.data);
+      setResults(data as VectorizeSelectedQuestion[]);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -202,7 +205,7 @@ export default function VisualSearchIndexClient() {
         throw new Error(error.value.error || "Search failed");
       }
 
-      setResults(data.data);
+      setResults(data as VectorizeSelectedQuestion[]);
     } catch (err: any) {
       setError(err.message);
     } finally {
