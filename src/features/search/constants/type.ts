@@ -16,7 +16,6 @@ export interface OptionalFiltersProps {
   onSearch: () => void;
   isSearching: boolean;
   isInputValid: boolean;
-  isDuplicateQuery: boolean;
 }
 
 export type PaperTypeFilterSearchPageCache = {

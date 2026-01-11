@@ -4,7 +4,7 @@
 import "@/features/topical/components/react-photo-view.css";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
 import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import MainContent from "@/features/search/components/MainContent";
 import SearchHistory from "@/features/search/components/SearchHistory";
 import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
 import { updateSearchQueryParam } from "@/features/search/lib/lib";
+import { hashUltil } from "@/features/topical/lib/utils";
 
 const SearchClient = ({
   searchParams,
@@ -38,58 +39,73 @@ const SearchClient = ({
   const [textQuery, setTextQuery] = useState("");
   const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [lastTextQuery, setLastTextQuery] = useState<string | null>(null);
-  const [lastImageQuery, setLastImageQuery] = useState<string | null>(null);
+
+  // Active search state
+  const [activeSearchQuery, setActiveSearchQuery] = useState<string | null>(
+    null
+  );
+  const [activeSearchType, setActiveSearchType] = useState<
+    "image" | "text" | null
+  >(null);
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const searchButtonPortalRef = useRef<HTMLDivElement | null>(null);
 
-  // Image Search Mutation
-  const imageSearchMutation = useMutation({
-    mutationFn: async (
-      imageBase64: string
-    ): Promise<VectorizeSelectedQuestion[]> => {
-      const { data, error } = await api["visual-search"].search.post({
-        imageBase64,
-        filter: currentFilter ?? undefined,
-      });
+  const [queryKey, setQueryKey] = useState<string | null>(null);
 
-      if (error) {
-        // @ts-expect-error Wait for the library to fix the type inference
-        throw new Error(error.value.error || "Search failed");
+  useEffect(() => {
+    if (!activeSearchQuery) {
+      setQueryKey(null);
+      return;
+    }
+
+    hashUltil(activeSearchQuery).then(setQueryKey);
+  }, [activeSearchQuery]);
+
+  const searchQuery = useQuery({
+    queryKey: ["search", queryKey ?? "none"],
+    queryFn: async (): Promise<VectorizeSelectedQuestion[]> => {
+      if (!activeSearchQuery || !activeSearchType) {
+        throw new Error("No search query");
       }
 
-      return data.data as VectorizeSelectedQuestion[];
-    },
-  });
+      if (activeSearchType === "image") {
+        const { data, error } = await api["visual-search"].search.post({
+          imageBase64: activeSearchQuery,
+          filter: currentFilter ?? undefined,
+        });
 
-  // Text Search Mutation
-  const textSearchMutation = useMutation({
-    mutationFn: async (query: string): Promise<VectorizeSelectedQuestion[]> => {
-      const { data, error } = await api["visual-search"].text.post({
-        query,
-        filter: currentFilter ?? undefined,
-      });
+        if (error) {
+          // @ts-expect-error Wait for the library to fix the type inference
+          throw new Error(error.value.error || "Search failed");
+        }
 
-      if (error) {
-        // @ts-expect-error Wait for the library to fix the type inference
-        throw new Error(error.value.error || "Search failed");
+        return data.data as VectorizeSelectedQuestion[];
+      } else {
+        const { data, error } = await api["visual-search"].text.post({
+          query: activeSearchQuery,
+          filter: currentFilter ?? undefined,
+        });
+
+        if (error) {
+          // @ts-expect-error Wait for the library to fix the type inference
+          throw new Error(error.value.error || "Search failed");
+        }
+
+        return data.data as VectorizeSelectedQuestion[];
       }
-
-      return data.data as VectorizeSelectedQuestion[];
     },
+    enabled: !!activeSearchQuery && !!activeSearchType && !!queryKey,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
-  // Derived state from mutations
-  const isSearching =
-    imageSearchMutation.isPending || textSearchMutation.isPending;
-  const error =
-    imageSearchMutation.error?.message ||
-    textSearchMutation.error?.message ||
-    null;
-  const results = imageSearchMutation.data || textSearchMutation.data || null;
-  const [hasSearched, setHasSearched] = useState(false);
+  // Derived state from query
+  const isSearching = searchQuery.isFetching;
+  const error = searchQuery.error?.message || null;
+  const results = searchQuery.data || null;
+  const hasSearched = !!activeSearchQuery;
 
   // Character limit validation
   const excessCharacters = textQuery.length - MAX_QUERY_LENGTH;
@@ -98,11 +114,6 @@ const SearchClient = ({
     activeTab === "image"
       ? !!selectedImage
       : textQuery.trim().length > 0 && !isQueryTooLong;
-
-  const isDuplicateQuery =
-    activeTab === "text"
-      ? textQuery.trim() === lastTextQuery
-      : selectedImage === lastImageQuery;
 
   useEffect(() => {
     if (!searchParams) return;
@@ -114,19 +125,13 @@ const SearchClient = ({
       setActiveTab("text");
 
       if (queryParam.length <= MAX_QUERY_LENGTH) {
-        // Trigger search after a short delay to ensure state is set
-        setTimeout(() => {
-          textSearchMutation.mutate(queryParam.trim(), {
-            onSuccess: () => {
-              setLastTextQuery(queryParam.trim());
-              setHasSearched(true);
-              addSearchHistory({
-                type: "text",
-                query: queryParam.trim(),
-              });
-            },
-          });
-        }, 0);
+        setActiveSearchQuery(queryParam.trim());
+        setActiveSearchType("text");
+        addSearchHistory({
+          type: "text",
+          query: queryParam.trim(),
+        });
+        updateSearchQueryParam(queryParam.trim());
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,55 +195,33 @@ const SearchClient = ({
   const handleImageSearch = useCallback(() => {
     if (!selectedImage) return;
     // Prevent searching with the same image
-    if (selectedImage === lastImageQuery) return;
+    if (selectedImage === activeSearchQuery && activeSearchType === "image")
+      return;
 
-    setHasSearched(true);
-    textSearchMutation.reset();
-    imageSearchMutation.mutate(selectedImage, {
-      onSuccess: () => {
-        setLastImageQuery(selectedImage);
-        // Save to search history
-        addSearchHistory({
-          type: "image",
-          query: selectedImage,
-          previewUrl: previewUrl ?? undefined,
-        });
-      },
-      onSettled: () => {
-        setLastTextQuery(null);
-      },
+    setActiveSearchQuery(selectedImage);
+    setActiveSearchType("image");
+    addSearchHistory({
+      type: "image",
+      query: selectedImage,
+      previewUrl: previewUrl ?? undefined,
     });
     // Note: We keep the text query in URL when performing image search
-  }, [
-    selectedImage,
-    lastImageQuery,
-    previewUrl,
-    imageSearchMutation,
-    textSearchMutation,
-  ]);
+  }, [selectedImage, activeSearchQuery, activeSearchType, previewUrl]);
 
   const handleTextSearch = useCallback(() => {
     if (!textQuery.trim()) return;
-    if (textQuery.trim() === lastTextQuery) return;
+    if (textQuery.trim() === activeSearchQuery && activeSearchType === "text")
+      return;
 
     updateSearchQueryParam(textQuery.trim());
 
-    setHasSearched(true);
-    imageSearchMutation.reset();
-    textSearchMutation.mutate(textQuery.trim(), {
-      onSuccess: () => {
-        setLastTextQuery(textQuery.trim());
-        // Save to search history
-        addSearchHistory({
-          type: "text",
-          query: textQuery.trim(),
-        });
-      },
-      onSettled: () => {
-        setLastImageQuery(null);
-      },
+    setActiveSearchQuery(textQuery.trim());
+    setActiveSearchType("text");
+    addSearchHistory({
+      type: "text",
+      query: textQuery.trim(),
     });
-  }, [textQuery, lastTextQuery, textSearchMutation, imageSearchMutation]);
+  }, [textQuery, activeSearchQuery, activeSearchType]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -260,45 +243,21 @@ const SearchClient = ({
     }
   }, [activeTab, handleTextSearch, handleImageSearch]);
 
-  const handleHistorySelect = useCallback(
-    (item: SearchHistoryItem) => {
-      if (item.type === "text") {
-        setActiveTab("text");
-        setTextQuery(item.query);
-        setTimeout(() => {
-          textSearchMutation.reset();
-          imageSearchMutation.reset();
-          textSearchMutation.mutate(item.query, {
-            onSuccess: () => {
-              setLastTextQuery(item.query);
-              setHasSearched(true);
-            },
-            onSettled: () => {
-              setLastImageQuery(null);
-            },
-          });
-        }, 0);
-      } else {
-        setActiveTab("image");
-        setSelectedImage(item.query);
-        setPreviewUrl(item.previewUrl || null);
-        setTimeout(() => {
-          imageSearchMutation.reset();
-          textSearchMutation.reset();
-          imageSearchMutation.mutate(item.query, {
-            onSuccess: () => {
-              setLastImageQuery(item.query);
-              setHasSearched(true);
-            },
-            onSettled: () => {
-              setLastTextQuery(null);
-            },
-          });
-        }, 0);
-      }
-    },
-    [textSearchMutation, imageSearchMutation]
-  );
+  const handleHistorySelect = useCallback((item: SearchHistoryItem) => {
+    if (item.type === "text") {
+      setActiveTab("text");
+      setTextQuery(item.query);
+      setActiveSearchQuery(item.query);
+      setActiveSearchType("text");
+      updateSearchQueryParam(item.query);
+    } else {
+      setActiveTab("image");
+      setSelectedImage(item.query);
+      setPreviewUrl(item.previewUrl || null);
+      setActiveSearchQuery(item.query);
+      setActiveSearchType("image");
+    }
+  }, []);
 
   return (
     <div
@@ -367,7 +326,6 @@ const SearchClient = ({
                     onSearch={handleSearch}
                     isSearching={isSearching}
                     isInputValid={isInputValid}
-                    isDuplicateQuery={isDuplicateQuery}
                   />
                   <SearchHistory
                     onSelectHistory={handleHistorySelect}
