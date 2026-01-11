@@ -16,16 +16,20 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Ultility from "./Ultility";
 
+const isImageUrl = (str: string) => str.startsWith("http");
+
 type DisplayMode = "questions" | "answers";
 
 const MainContent = memo(
   ({
     results,
     isSearching,
+    currentTab,
     enableSavedActivitiesQuery = true,
   }: {
     results: VectorizeSelectedQuestion[] | null;
     isSearching: boolean;
+    currentTab: "text" | "image";
     enableSavedActivitiesQuery?: boolean;
   }) => {
     const questionInspectRef = useRef<QuestionInspectRef | null>(null);
@@ -38,7 +42,6 @@ const MainContent = memo(
     const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
 
     // Helper to check if a string is an image URL
-    const isImageUrl = (str: string) => str.startsWith("http");
 
     const filteredResults = useMemo(() => {
       if (!results) return [];
@@ -61,11 +64,6 @@ const MainContent = memo(
         }
       );
     }, [sortParameters.sortBy, filteredResults]);
-
-    const highestScore = useMemo(() => {
-      if (!results || results.length === 0) return null;
-      return Math.max(...results.map((q) => q.score));
-    }, [results]);
 
     const chunkedData = useMemo(() => {
       if (!sortedData || sortedData.length === 0) return null;
@@ -126,13 +124,17 @@ const MainContent = memo(
                       Answers
                     </ToggleGroupItem>
                   </ToggleGroup>
-                  <ShareFilter
-                    isDisabled={false}
-                    url={
-                      typeof window !== "undefined" ? window.location.href : ""
-                    }
-                    type="search result"
-                  />
+                  {currentTab == "text" && (
+                    <ShareFilter
+                      isDisabled={false}
+                      url={
+                        typeof window !== "undefined"
+                          ? window.location.href
+                          : ""
+                      }
+                      type="search result"
+                    />
+                  )}
                 </div>
                 {sortedData.length > 0 && (
                   <div className="flex items-center justify-between mb-1 gap-2">
@@ -172,79 +174,12 @@ const MainContent = memo(
                   </p>
                 </div>
               ) : (
-                <>
-                  <Masonry
-                    items={sortedData.flatMap((question, index) => {
-                      const imagesToShow =
-                        displayMode === "questions"
-                          ? question.questionImages
-                          : question.answers.filter((answer) =>
-                              isImageUrl(answer)
-                            );
-
-                      const dimensionsToUse =
-                        displayMode === "questions"
-                          ? question.questionImagesDimensions
-                          : question.answersImagesDimensions;
-
-                      return imagesToShow.map(
-                        (imageSrc: string, imageIndex: number) => {
-                          const isBestMatch = question.score === highestScore;
-                          const width = dimensionsToUse?.[imageIndex]?.width;
-                          const height = dimensionsToUse?.[imageIndex]?.height;
-
-                          const element = isBestMatch ? (
-                            <div
-                              key={`${question.id}-${imageSrc}-${index}`}
-                              className="w-full mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
-                            >
-                              <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
-                                <span>✨</span> Best Match
-                              </div>
-                              <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
-                                <QuestionPreview
-                                  question={question}
-                                  onQuestionClick={() => {
-                                    questionInspectRef.current?.setIsInspectOpen(
-                                      {
-                                        isOpen: true,
-                                        questionId: question.id,
-                                      }
-                                    );
-                                  }}
-                                  imageSrc={imageSrc}
-                                  imageWidth={width}
-                                  showCurriculumBadge={true}
-                                  showSubjectBadge={true}
-                                  imageHeight={height}
-                                  className="border-logo-main/20 shadow-lg mb-0!"
-                                />
-                              </div>
-                            </div>
-                          ) : (
-                            <QuestionPreview
-                              question={question}
-                              onQuestionClick={() => {
-                                questionInspectRef.current?.setIsInspectOpen({
-                                  isOpen: true,
-                                  questionId: question.id,
-                                });
-                              }}
-                              imageSrc={imageSrc}
-                              imageWidth={width}
-                              showCurriculumBadge={true}
-                              showSubjectBadge={true}
-                              imageHeight={height}
-                              key={`${question.id}-${imageSrc}-${index}`}
-                            />
-                          );
-
-                          return { element, width, height };
-                        }
-                      );
-                    })}
-                  />
-                </>
+                <MasonryContent
+                  sortedData={sortedData}
+                  results={results}
+                  displayMode={displayMode}
+                  questionInspectRef={questionInspectRef}
+                />
               )}
             </div>
           )}
@@ -261,6 +196,95 @@ const MainContent = memo(
     );
   }
 );
+
+const MasonryContent = memo(
+  ({
+    sortedData,
+    results,
+    displayMode,
+    questionInspectRef,
+  }: {
+    sortedData: VectorizeSelectedQuestion[];
+    results: VectorizeSelectedQuestion[] | null;
+    displayMode: DisplayMode;
+    questionInspectRef: React.RefObject<QuestionInspectRef | null>;
+  }) => {
+    const highestScore = useMemo(() => {
+      if (!results || results.length === 0) return null;
+      return Math.max(...results.map((q) => q.score));
+    }, [results]);
+
+    return (
+      <Masonry
+        items={sortedData.flatMap((question, index) => {
+          const imagesToShow =
+            displayMode === "questions"
+              ? question.questionImages
+              : question.answers.filter((answer) => isImageUrl(answer));
+
+          const dimensionsToUse =
+            displayMode === "questions"
+              ? question.questionImagesDimensions
+              : question.answersImagesDimensions;
+
+          return imagesToShow.map((imageSrc: string, imageIndex: number) => {
+            const isBestMatch = question.score === highestScore;
+            const width = dimensionsToUse?.[imageIndex]?.width;
+            const height = dimensionsToUse?.[imageIndex]?.height;
+
+            const element = isBestMatch ? (
+              <div
+                key={`${question.id}-${imageSrc}-${index}`}
+                className="w-full mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
+              >
+                <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
+                  <span>✨</span> Best Match
+                </div>
+                <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
+                  <QuestionPreview
+                    question={question}
+                    onQuestionClick={() => {
+                      questionInspectRef.current?.setIsInspectOpen({
+                        isOpen: true,
+                        questionId: question.id,
+                      });
+                    }}
+                    imageSrc={imageSrc}
+                    imageWidth={width}
+                    showCurriculumBadge={true}
+                    showSubjectBadge={true}
+                    imageHeight={height}
+                    className="border-logo-main/20 shadow-lg mb-0!"
+                  />
+                </div>
+              </div>
+            ) : (
+              <QuestionPreview
+                question={question}
+                onQuestionClick={() => {
+                  questionInspectRef.current?.setIsInspectOpen({
+                    isOpen: true,
+                    questionId: question.id,
+                  });
+                }}
+                imageSrc={imageSrc}
+                imageWidth={width}
+                showCurriculumBadge={true}
+                showSubjectBadge={true}
+                imageHeight={height}
+                key={`${question.id}-${imageSrc}-${index}`}
+              />
+            );
+
+            return { element, width, height };
+          });
+        })}
+      />
+    );
+  }
+);
+
+MasonryContent.displayName = "MasonryContent";
 
 MainContent.displayName = "MainContent";
 export default MainContent;

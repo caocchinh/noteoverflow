@@ -20,6 +20,7 @@ import {
 } from "@/lib/client-cache";
 import { History, Trash2, ImageIcon, Type, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface SearchHistoryProps {
   onSelectHistory: (item: SearchHistoryItem) => void;
@@ -177,9 +178,56 @@ const SearchHistory = ({
                           ? truncateQuery(item.query, 120)
                           : "Image search"}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatTimestamp(item.timestamp)}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <p className="text-xs text-muted-foreground">
+                          {formatTimestamp(item.timestamp)}
+                        </p>
+                        {item.filter && (
+                          <>
+                            {item.filter.subject && (
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px] h-4 px-1.5 rounded-sm"
+                              >
+                                {item.filter.subject}
+                              </Badge>
+                            )}
+                            {item.filter.year &&
+                              item.filter.year.length > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] h-4 px-1.5 rounded-sm"
+                                >
+                                  {item.filter.year.length === 1
+                                    ? `${item.filter.year[0]} year`
+                                    : `${item.filter.year.length} years`}
+                                </Badge>
+                              )}
+                            {item.filter.season &&
+                              item.filter.season.length > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] h-4 px-1.5 rounded-sm"
+                                >
+                                  {item.filter.season.length === 1
+                                    ? `${item.filter.season[0]} season`
+                                    : `${item.filter.season.length} seasons`}
+                                </Badge>
+                              )}
+                            {item.filter.paperType &&
+                              item.filter.paperType.length > 0 && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] h-4 px-1.5 rounded-sm"
+                                >
+                                  {item.filter.paperType.length === 1
+                                    ? `${item.filter.paperType[0]} paper`
+                                    : `${item.filter.paperType.length} papers`}
+                                </Badge>
+                              )}
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button

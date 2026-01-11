@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageIcon, Search, Type, Upload, X, FileText } from "lucide-react";
-import OptionalFilters from "@/features/search/components/OptionalFilters";
+import OptionalFilters, {
+  OptionalFiltersHandle,
+} from "@/features/search/components/OptionalFilters";
 import { cn } from "@/lib/utils";
 import SearchPastPaper from "@/features/search/components/SearchPastPaper";
 import { OptionalSearchFilter } from "@/features/search/constants/type";
@@ -50,25 +52,25 @@ const SearchClient = ({
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const searchButtonPortalRef = useRef<HTMLDivElement | null>(null);
+  const optionalFiltersRef = useRef<OptionalFiltersHandle>(null);
 
   const [queryKey, setQueryKey] = useState<string | null>(null);
-  const [activeSearchQuery, setActiveSearchQuery] = useState<string | null>(
-    null
-  );
+  const [activeTextQuery, setActiveTextQuery] = useState<string | null>(null);
+  const [activeImageQuery, setActiveImageQuery] = useState<string | null>(null);
   const [currentFilter, setCurrentFilter] =
     useState<OptionalSearchFilter | null>(null);
 
   const searchQuery = useQuery({
     queryKey: ["search", queryKey ?? "none"],
     queryFn: async (): Promise<VectorizeSelectedQuestion[]> => {
-      if (!activeSearchQuery || !activeSearchType) {
+      if (!(activeTextQuery || activeImageQuery) && !activeSearchType) {
         throw new Error("No search query");
       }
       setFilterError(null);
 
       if (activeSearchType === "image") {
         const { data, error } = await api["visual-search"].search.post({
-          imageBase64: activeSearchQuery,
+          imageBase64: activeImageQuery,
           filter: currentFilter ?? undefined,
         });
 
@@ -80,7 +82,7 @@ const SearchClient = ({
         return data as VectorizeSelectedQuestion[];
       } else {
         const { data, error } = await api["visual-search"].text.post({
-          query: activeSearchQuery,
+          query: activeTextQuery,
           filter: currentFilter ?? undefined,
         });
 
@@ -92,7 +94,9 @@ const SearchClient = ({
         return data as VectorizeSelectedQuestion[];
       }
     },
-    enabled: !!activeSearchQuery && !!activeSearchType && !!queryKey,
+    enabled:
+      !!activeTextQuery ||
+      (!!activeImageQuery && !!activeSearchType && !!queryKey),
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -101,7 +105,7 @@ const SearchClient = ({
   const isSearching = searchQuery.isFetching;
   const error = searchQuery.error?.message || null;
   const results = searchQuery.data || null;
-  const hasSearched = !!activeSearchQuery;
+  const hasSearched = !!activeTextQuery || !!activeImageQuery;
 
   // Character limit validation
   const excessCharacters = textQuery.length - MAX_QUERY_LENGTH;
@@ -223,12 +227,13 @@ const SearchClient = ({
       const { image, filter, previewUrl: providedPreviewUrl } = params;
       if (!image) return;
 
-      setActiveSearchQuery(image);
+      setActiveImageQuery(image);
       setActiveSearchType("image");
       addSearchHistory({
         type: "image",
         query: image,
         previewUrl: providedPreviewUrl ?? undefined,
+        filter: filter ?? undefined,
       });
       const hashInput = JSON.stringify({
         query: image,
@@ -245,12 +250,13 @@ const SearchClient = ({
     (params: { query: string; filter: OptionalSearchFilter | null }) => {
       const { query, filter } = params;
       if (!query.trim()) return;
-      setActiveSearchQuery(query.trim());
+      setActiveTextQuery(query.trim());
       updateSearchQueryParam(query.trim(), filter);
       setActiveSearchType("text");
       addSearchHistory({
         type: "text",
         query: query.trim(),
+        filter: filter ?? undefined,
       });
       const hashInput = JSON.stringify({
         query: query.trim(),
@@ -268,11 +274,11 @@ const SearchClient = ({
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (textQuery.trim()) {
-          handleTextSearch({ query: textQuery, filter: currentFilter });
+          optionalFiltersRef.current?.applyFilters();
         }
       }
     },
-    [handleTextSearch, textQuery, currentFilter]
+    [textQuery]
   );
 
   const handleSearch = useCallback(
@@ -299,19 +305,41 @@ const SearchClient = ({
 
   const handleHistorySelect = useCallback(
     (item: SearchHistoryItem) => {
+      const filterToUse = item.filter || null;
+      setCurrentFilter(filterToUse);
+
       if (item.type === "text") {
         setActiveTab("text");
         setTextQuery(item.query);
-        setActiveSearchType("text");
-        updateSearchQueryParam(item.query, currentFilter);
+        handleTextSearch({ query: item.query, filter: filterToUse });
       } else {
         setActiveTab("image");
         setSelectedImage(item.query);
         setPreviewUrl(item.previewUrl || null);
-        setActiveSearchType("image");
+        handleImageSearch({
+          image: item.query,
+          filter: filterToUse,
+          previewUrl: item.previewUrl || null,
+        });
       }
     },
-    [currentFilter]
+    [handleImageSearch, handleTextSearch]
+  );
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const newTab = value as "image" | "text";
+      setActiveTab(newTab);
+
+      if (newTab === "image") {
+        window.history.replaceState({}, "", window.location.pathname);
+      } else {
+        if (activeTextQuery) {
+          updateSearchQueryParam(activeTextQuery, currentFilter);
+        }
+      }
+    },
+    [activeTextQuery, currentFilter]
   );
 
   return (
@@ -343,7 +371,7 @@ const SearchClient = ({
 
             <Tabs
               value={activeTab}
-              onValueChange={(v) => setActiveTab(v as "image" | "text")}
+              onValueChange={handleTabChange}
               className="w-full max-w-3xl"
             >
               <div
@@ -375,6 +403,7 @@ const SearchClient = ({
                     </TabsTrigger>
                   </TabsList>
                   <OptionalFilters
+                    ref={optionalFiltersRef}
                     currentFilter={currentFilter}
                     setCurrentFilter={setCurrentFilter}
                     searchButtonPortalRef={searchButtonPortalRef}
@@ -617,6 +646,7 @@ const SearchClient = ({
             results={results}
             isSearching={isSearching}
             enableSavedActivitiesQuery={hasSearched}
+            currentTab={activeTab}
           />
         </div>
       </div>

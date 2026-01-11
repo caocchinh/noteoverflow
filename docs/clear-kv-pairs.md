@@ -19,13 +19,21 @@ This workflow explains how to delete all key-value pairs from a Cloudflare KV na
 List all keys in your **remote production** KV namespace and save them to a JSON file:
 
 ```bash
+# For Bash/Git Bash:
 wrangler kv key list --binding=<YOUR_BINDING_NAME> --remote | jq '[.[].name]' > keys.json
+
+# For PowerShell (to avoid UTF-16 encoding issues):
+wrangler kv key list --binding=<YOUR_BINDING_NAME> --remote | jq '[.[].name]' | Out-File -Encoding utf8 keys.json
 ```
 
 Or using namespace ID:
 
 ```bash
+# For Bash/Git Bash:
 wrangler kv key list --namespace-id=<YOUR_NAMESPACE_ID> --remote | jq '[.[].name]' > keys.json
+
+# For PowerShell:
+wrangler kv key list --namespace-id=<YOUR_NAMESPACE_ID> --remote | jq '[.[].name]' | Out-File -Encoding utf8 keys.json
 ```
 
 This creates a `keys.json` file containing an array of all key names:
@@ -46,13 +54,13 @@ wrangler kv key list --binding=<YOUR_BINDING_NAME> | jq '[.[].name]' > keys.json
 Once you have the `keys.json` file, delete all keys from **remote production**:
 
 ```bash
-wrangler kv key bulk delete --binding=<YOUR_BINDING_NAME> --remote keys.json
+wrangler kv bulk delete --binding=<YOUR_BINDING_NAME> --remote keys.json
 ```
 
 Or with namespace ID:
 
 ```bash
-wrangler kv key bulk delete --namespace-id=<YOUR_NAMESPACE_ID> --remote keys.json
+wrangler kv bulk delete --namespace-id=<YOUR_NAMESPACE_ID> --remote keys.json
 ```
 
 ### 3. Clean up

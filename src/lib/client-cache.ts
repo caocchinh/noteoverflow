@@ -75,6 +75,13 @@ export type SearchHistoryItem = {
   query: string; // Text query or base64 image data
   timestamp: number;
   previewUrl?: string; // For image searches (data URL with prefix)
+  filter?: {
+    subject?: string;
+    curriculum?: string;
+    year?: string[];
+    season?: string[];
+    paperType?: string[];
+  };
 };
 
 const SEARCH_HISTORY_KEY = "search-history";
