@@ -326,21 +326,21 @@ const SearchClient = ({
     [handleImageSearch, handleTextSearch]
   );
 
-  const handleTabChange = useCallback(
-    (value: string) => {
-      const newTab = value as "image" | "text";
-      setActiveTab(newTab);
-
-      if (newTab === "image") {
-        window.history.replaceState({}, "", window.location.pathname);
-      } else {
-        if (activeTextQuery) {
-          updateSearchQueryParam(activeTextQuery, currentFilter);
-        }
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (activeTab === "image") {
+      window.history.replaceState({}, "", window.location.pathname);
+    } else {
+      if (activeTextQuery) {
+        updateSearchQueryParam(activeTextQuery, currentFilter);
       }
-    },
-    [activeTextQuery, currentFilter]
-  );
+    }
+  }, [activeTab, activeTextQuery, currentFilter]);
+
+  const handleTabChange = useCallback((value: string) => {
+    const newTab = value as "image" | "text";
+    setActiveTab(newTab);
+  }, []);
 
   return (
     <div

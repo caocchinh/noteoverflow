@@ -107,7 +107,7 @@ const MainContent = memo(
         ([entry]) => {
           setIsSticky(!entry.isIntersecting);
         },
-        { threshold: 0, rootMargin: "-100px 0px 0px 0px" }
+        { threshold: 0.1, rootMargin: "-50px 0px 0px 0px" }
       );
 
       const element = sentinelRef.current;
@@ -117,8 +117,9 @@ const MainContent = memo(
 
       return () => {
         if (element) observer.unobserve(element);
+        observer.disconnect();
       };
-    }, []);
+    }, [results, isSearching]);
 
     const handleInspectOpen = useCallback(() => {
       questionInspectRef.current?.setIsInspectOpen((prev) => ({
