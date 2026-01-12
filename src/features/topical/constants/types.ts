@@ -163,6 +163,8 @@ export interface FilterData {
 export type LayoutStyle = "pagination" | "infinite";
 export type ImageTheme = "dark" | "light";
 
+export type DisplayMode = "questions" | "answers";
+
 export interface UiPreferences {
   numberOfColumns: number;
   layoutStyle: LayoutStyle;

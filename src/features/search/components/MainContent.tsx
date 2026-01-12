@@ -12,19 +12,11 @@ import {
 import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvider";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { Search } from "lucide-react";
-import {
-  Dispatch,
-  SetStateAction,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import DisplayModeToggle from "@/features/topical/components/DisplayModeToggle";
 import Ultility from "./Ultility";
 import { cn } from "@/lib/utils";
+import { SearchResultsHeaderProps } from "../constants/type";
 
 const isImageUrl = (str: string) => str.startsWith("http");
 
@@ -40,16 +32,7 @@ const SearchResultsHeader = memo(
     sortParameters,
     setSortParameters,
     isSticky,
-  }: {
-    resultCount: number;
-    displayMode: DisplayMode;
-    setDisplayMode: (mode: DisplayMode) => void;
-    currentTab: "text" | "image";
-    onInspectOpen: () => void;
-    isSticky: boolean;
-    sortParameters: SortParameters;
-    setSortParameters: Dispatch<SetStateAction<SortParameters>>;
-  }) => {
+  }: SearchResultsHeaderProps) => {
     return (
       <div
         className={cn(
@@ -66,29 +49,10 @@ const SearchResultsHeader = memo(
             {displayMode === "questions" ? "question" : "answer"}
             {resultCount !== 1 ? "s" : ""}
           </p>
-          <ToggleGroup
-            type="single"
-            value={displayMode}
-            onValueChange={(value) => {
-              if (value) setDisplayMode(value as DisplayMode);
-            }}
-            className="bg-muted/50 rounded-lg p-0.5 border"
-          >
-            <ToggleGroupItem
-              value="questions"
-              size="sm"
-              className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
-            >
-              Questions
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="answers"
-              size="sm"
-              className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
-            >
-              Answers
-            </ToggleGroupItem>
-          </ToggleGroup>
+          <DisplayModeToggle
+            displayMode={displayMode}
+            setDisplayMode={setDisplayMode}
+          />
           {currentTab == "text" && (
             <ShareFilter
               isDisabled={false}

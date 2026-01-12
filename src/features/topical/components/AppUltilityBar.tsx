@@ -273,6 +273,7 @@ const AppUltilityBar = memo(
                 showFinishedQuestion={showFinishedQuestion}
                 setShowFinishedQuestion={setShowFinishedQuestion}
               />
+
               {isExportModeEnabled && (
                 <>
                   <Tooltip>

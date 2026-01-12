@@ -1,4 +1,8 @@
 import { CIE_A_LEVEL_SUBDIVISION } from "@/constants/types";
+import {
+  DisplayMode,
+  SortParameters,
+} from "@/features/topical/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
 
 export type OptionalSearchFilter = {
@@ -16,6 +20,17 @@ export interface OptionalFiltersProps {
   onSearch: ({ filter }: { filter: OptionalSearchFilter | null }) => void;
   isSearching: boolean;
   isInputValid: boolean;
+}
+
+export interface SearchResultsHeaderProps {
+  resultCount: number;
+  displayMode: DisplayMode;
+  setDisplayMode: Dispatch<SetStateAction<DisplayMode>>;
+  currentTab: "text" | "image";
+  onInspectOpen: () => void;
+  isSticky: boolean;
+  sortParameters: SortParameters;
+  setSortParameters: Dispatch<SetStateAction<SortParameters>>;
 }
 
 export type PaperTypeFilterSearchPageCache = {

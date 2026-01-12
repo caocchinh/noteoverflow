@@ -21,8 +21,9 @@ import type {
   SortParameters,
   AppMainContentProps,
   QuestionInspectRef,
+  SelectedQuestion,
+  DisplayMode,
 } from "@/features/topical/constants/types";
-import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
   updateSearchParams,
   isSubset,
@@ -41,6 +42,7 @@ import { cn } from "@/lib/utils";
 import ExportBar from "./ExportMode/ExportBar";
 import IntergrationTips from "./IntergrationTips";
 import Masonry from "./Masonry";
+import DisplayModeToggle from "./DisplayModeToggle";
 
 const AppMainContent = ({
   mountedRef,
@@ -76,6 +78,7 @@ const AppMainContent = ({
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
   const {
     uiPreferences,
     finishedQuestionsData,
@@ -554,12 +557,23 @@ const AppMainContent = ({
               </div>
             )}
           {doesSearchYieldAnyQuestions && (
-            <p className="text-sm text-left mb-1">
-              {topicalData?.data.length ?? 0} question
-              {topicalData?.data.length ?? 0 > 1 ? "s" : ""} found,{" "}
-              {filteredProcessedData?.filteredFinishedData.length ?? 0}{" "}
-              displayed
-            </p>
+            <div className="flex items-center justify-start gap-2 mb-3">
+              <p className="text-sm text-muted-foreground font-medium">
+                <span className="text-foreground font-bold">
+                  {topicalData?.data.length ?? 0}
+                </span>{" "}
+                question
+                {(topicalData?.data.length ?? 0) > 1 ? "s" : ""} found,{" "}
+                <span className="text-foreground font-bold">
+                  {filteredProcessedData?.filteredFinishedData.length ?? 0}
+                </span>{" "}
+                displayed
+              </p>
+              <DisplayModeToggle
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+              />
+            </div>
           )}
           {currentChunkIndex === 0 &&
             isTopicalDataFetched &&
@@ -599,6 +613,7 @@ const AppMainContent = ({
               finishedQuestionsFilteredPartitionedData
             }
             currentChunkIndex={currentChunkIndex}
+            displayMode={displayMode}
           />
         </ScrollArea>
       </SidebarInset>
@@ -636,6 +651,7 @@ export const MainContent = memo(
     handleInfiniteScrollNext,
     finishedQuestionsFilteredPartitionedData,
     currentChunkIndex,
+    displayMode,
   }: {
     doesSearchYieldAnyQuestions: boolean;
     filteredDisplayData: SelectedQuestion[];
@@ -645,36 +661,42 @@ export const MainContent = memo(
     handleInfiniteScrollNext: () => void;
     finishedQuestionsFilteredPartitionedData: SelectedQuestion[][] | undefined;
     currentChunkIndex: number;
+    displayMode: DisplayMode;
   }) => {
     const { uiPreferences } = useTopicalApp();
+    const isImageUrl = (str: string) => str.startsWith("http");
 
     return (
       <>
         <Masonry
-          items={filteredDisplayData?.flatMap((question) =>
-            question?.questionImages.map(
-              (imageSrc: string, imageIndex: number) => ({
-                element: (
-                  <QuestionViewItem
-                    key={`${question.id}-${imageSrc}`}
-                    isQuestionForExport={questionsForExport.has(question.id)}
-                    question={question}
-                    handleQuestionClick={handleQuestionClick}
-                    imageSrc={imageSrc}
-                    isExportModeEnabled={isExportModeEnabled}
-                    imageWidth={
-                      question.questionImagesDimensions?.[imageIndex]?.width
-                    }
-                    imageHeight={
-                      question.questionImagesDimensions?.[imageIndex]?.height
-                    }
-                  />
-                ),
-                width: question.questionImagesDimensions?.[imageIndex]?.width,
-                height: question.questionImagesDimensions?.[imageIndex]?.height,
-              })
-            )
-          )}
+          items={filteredDisplayData?.flatMap((question) => {
+            const imagesToShow =
+              displayMode === "questions"
+                ? question.questionImages
+                : question.answers.filter((answer) => isImageUrl(answer));
+
+            const dimensionsToUse =
+              displayMode === "questions"
+                ? question.questionImagesDimensions
+                : question.answersImagesDimensions;
+
+            return imagesToShow.map((imageSrc: string, imageIndex: number) => ({
+              element: (
+                <QuestionViewItem
+                  key={`${question.id}-${imageSrc}`}
+                  isQuestionForExport={questionsForExport.has(question.id)}
+                  question={question}
+                  handleQuestionClick={handleQuestionClick}
+                  imageSrc={imageSrc}
+                  isExportModeEnabled={isExportModeEnabled}
+                  imageWidth={dimensionsToUse?.[imageIndex]?.width}
+                  imageHeight={dimensionsToUse?.[imageIndex]?.height}
+                />
+              ),
+              width: dimensionsToUse?.[imageIndex]?.width,
+              height: dimensionsToUse?.[imageIndex]?.height,
+            }));
+          })}
         />
 
         {uiPreferences.layoutStyle === "infinite" && (
