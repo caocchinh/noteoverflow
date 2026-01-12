@@ -22,6 +22,7 @@ export interface MasonryItem {
 
 interface MasonryProps {
   children?: ReactNode;
+  className?: string;
   /**
    * Optional array of items with dimensions for height-aware distribution.
    * When provided, uses "shortest column first" algorithm for optimal layout.
@@ -127,7 +128,7 @@ function reorderForHorizontalFlow(
   return reordered;
 }
 
-const Masonry = ({ children, items }: MasonryProps) => {
+const Masonry = ({ children, items, className }: MasonryProps) => {
   const { uiPreferences } = useTopicalApp();
   const maxColumns = uiPreferences.numberOfColumns;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -166,6 +167,7 @@ const Masonry = ({ children, items }: MasonryProps) => {
 
   return (
     <div
+      className={className}
       ref={containerRef}
       style={{
         columnGap: `${COLUMN_GAP}px`,

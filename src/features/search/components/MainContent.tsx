@@ -12,13 +12,108 @@ import {
 import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvider";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { Search } from "lucide-react";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Ultility from "./Ultility";
+import { cn } from "@/lib/utils";
 
 const isImageUrl = (str: string) => str.startsWith("http");
 
 type DisplayMode = "questions" | "answers";
+
+const SearchResultsHeader = memo(
+  ({
+    resultCount,
+    displayMode,
+    setDisplayMode,
+    currentTab,
+    onInspectOpen,
+    sortParameters,
+    setSortParameters,
+    isSticky,
+  }: {
+    resultCount: number;
+    displayMode: DisplayMode;
+    setDisplayMode: (mode: DisplayMode) => void;
+    currentTab: "text" | "image";
+    onInspectOpen: () => void;
+    isSticky: boolean;
+    sortParameters: SortParameters;
+    setSortParameters: Dispatch<SetStateAction<SortParameters>>;
+  }) => {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2 flex-wrap transition-all duration-300",
+          isSticky
+            ? "fixed top-13 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b animate-in slide-in-from-top-2"
+            : "relative px-2 mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700"
+        )}
+      >
+        <div className="flex items-center gap-3 px-2 mb-1">
+          <p className="text-sm text-muted-foreground font-medium">
+            Found{" "}
+            <span className="text-foreground font-bold">{resultCount}</span>{" "}
+            {displayMode === "questions" ? "question" : "answer"}
+            {resultCount !== 1 ? "s" : ""}
+          </p>
+          <ToggleGroup
+            type="single"
+            value={displayMode}
+            onValueChange={(value) => {
+              if (value) setDisplayMode(value as DisplayMode);
+            }}
+            className="bg-muted/50 rounded-lg p-0.5 border"
+          >
+            <ToggleGroupItem
+              value="questions"
+              size="sm"
+              className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
+            >
+              Questions
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="answers"
+              size="sm"
+              className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
+            >
+              Answers
+            </ToggleGroupItem>
+          </ToggleGroup>
+          {currentTab == "text" && (
+            <ShareFilter
+              isDisabled={false}
+              url={typeof window !== "undefined" ? window.location.href : ""}
+              type="search result"
+            />
+          )}
+        </div>
+        {resultCount > 0 && (
+          <div className="flex items-center justify-between mb-1 gap-2">
+            <InspectTriggerButton
+              isQuestionViewDisabled={false}
+              setIsQuestionInspectOpen={onInspectOpen}
+            />
+            <Ultility
+              sortParameters={sortParameters}
+              setSortParameters={setSortParameters}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+SearchResultsHeader.displayName = "SearchResultsHeader";
 
 const MainContent = memo(
   ({
@@ -40,6 +135,33 @@ const MainContent = memo(
       VectorizeSelectedQuestion[][] | undefined
     >(undefined);
     const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
+    const [isSticky, setIsSticky] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsSticky(!entry.isIntersecting);
+        },
+        { threshold: 0, rootMargin: "-100px 0px 0px 0px" }
+      );
+
+      const element = sentinelRef.current;
+      if (element) {
+        observer.observe(element);
+      }
+
+      return () => {
+        if (element) observer.unobserve(element);
+      };
+    }, []);
+
+    const handleInspectOpen = useCallback(() => {
+      questionInspectRef.current?.setIsInspectOpen((prev) => ({
+        ...prev,
+        isOpen: true,
+      }));
+    }, []);
 
     // Helper to check if a string is an image URL
 
@@ -90,98 +212,50 @@ const MainContent = memo(
       >
         <div className="relative">
           {results && !isSearching && (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="flex items-center justify-between px-2 mb-6 gap-2 flex-wrap">
-                <div className="flex items-center gap-3 px-2 mb-1">
-                  <p className="text-sm text-muted-foreground font-medium">
-                    Found{" "}
-                    <span className="text-foreground font-bold">
-                      {sortedData.length}
-                    </span>{" "}
-                    {displayMode === "questions" ? "question" : "answer"}
-                    {sortedData.length !== 1 ? "s" : ""}
-                  </p>
-                  <ToggleGroup
-                    type="single"
-                    value={displayMode}
-                    onValueChange={(value) => {
-                      if (value) setDisplayMode(value as DisplayMode);
-                    }}
-                    className="bg-muted/50 rounded-lg p-0.5 border"
-                  >
-                    <ToggleGroupItem
-                      value="questions"
-                      size="sm"
-                      className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
-                    >
-                      Questions
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="answers"
-                      size="sm"
-                      className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
-                    >
-                      Answers
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                  {currentTab == "text" && (
-                    <ShareFilter
-                      isDisabled={false}
-                      url={
-                        typeof window !== "undefined"
-                          ? window.location.href
-                          : ""
-                      }
-                      type="search result"
-                    />
-                  )}
-                </div>
-                {sortedData.length > 0 && (
-                  <div className="flex items-center justify-between mb-1 gap-2">
-                    <InspectTriggerButton
-                      isQuestionViewDisabled={false}
-                      setIsQuestionInspectOpen={() => {
-                        questionInspectRef.current?.setIsInspectOpen(
-                          (prev) => ({
-                            ...prev,
-                            isOpen: true,
-                          })
-                        );
-                      }}
-                    />
-                    <Ultility
-                      sortParameters={sortParameters}
-                      setSortParameters={setSortParameters}
-                    />
+            <>
+              <div
+                ref={sentinelRef}
+                className="absolute top-0 w-full h-px -translate-y-4 opacity-0 pointer-events-none"
+              />
+              <SearchResultsHeader
+                resultCount={sortedData.length}
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+                currentTab={currentTab}
+                onInspectOpen={handleInspectOpen}
+                sortParameters={sortParameters}
+                setSortParameters={setSortParameters}
+                isSticky={isSticky}
+              />
+              {isSticky && <div className="h-[76px] w-full" />}
+
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                {sortedData.length === 0 ? (
+                  <div className="text-center py-4 rounded-3xl">
+                    <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
+                      <Search className="w-10 h-10 text-muted-foreground/30" />
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground">
+                      {displayMode === "answers"
+                        ? "No answers found"
+                        : "No questions found"}
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      {displayMode === "answers"
+                        ? "Try switching to questions mode or adjust your search (note: multiple choice answers are not searchable)"
+                        : "Try adjusting your filters or search terms"}
+                    </p>
                   </div>
+                ) : (
+                  <MasonryContent
+                    sortedData={sortedData}
+                    results={results}
+                    displayMode={displayMode}
+                    questionInspectRef={questionInspectRef}
+                  />
                 )}
               </div>
-
-              {sortedData.length === 0 ? (
-                <div className="text-center py-4 rounded-3xl">
-                  <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
-                    <Search className="w-10 h-10 text-muted-foreground/30" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground">
-                    {displayMode === "answers"
-                      ? "No answers found"
-                      : "No questions found"}
-                  </h3>
-                  <p className="text-muted-foreground mt-1">
-                    {displayMode === "answers"
-                      ? "Try switching to questions mode or adjust your search (note: multiple choice answers are not searchable)"
-                      : "Try adjusting your filters or search terms"}
-                  </p>
-                </div>
-              ) : (
-                <MasonryContent
-                  sortedData={sortedData}
-                  results={results}
-                  displayMode={displayMode}
-                  questionInspectRef={questionInspectRef}
-                />
-              )}
-            </div>
+            </>
           )}
         </div>
         <QuestionInspect
@@ -237,7 +311,7 @@ const MasonryContent = memo(
                 key={`${question.id}-${imageSrc}-${index}`}
                 className="w-full mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
               >
-                <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-20 flex items-center gap-1">
+                <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-15 flex items-center gap-1">
                   <span>✨</span> Best Match
                 </div>
                 <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
