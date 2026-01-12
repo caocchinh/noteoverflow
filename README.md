@@ -65,8 +65,13 @@ NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam 
 - **🔍 Past Paper Search**: Quickly find specific past papers using the intelligent search navigator. Enter a quick paper code (e.g., 9702/23/O/N/22) for instant access, or use manual filters to browse by curriculum, subject, paper type, variant, and season.
 
 <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/navigator.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px; border: 3px solid #0084ff;margin-bottom:10px" />
+<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/navigator2.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px; border: 3px solid #0084ff;margin-bottom:10px" />
 
 - **🧠 AI-Powered Semantic Search**: Search for questions using natural language or by uploading an image. NoteOverflow uses advanced vector embeddings to understand the context of your query, allowing you to find specific questions even if you don't know the exact wording.
+  <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/search1.webp" alt="Search Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
+  <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/search2.webp" alt="Search Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
+  <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/search_filter.webp" alt="Search Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
+  <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/search_history.webp" alt="Search Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
 
 - **🔖 Smart Bookmarking and progress tracking**: Create custom bookmark lists to organize questions by topic, difficulty, or revision priority. And mark questions as completed and track your progress.
 
