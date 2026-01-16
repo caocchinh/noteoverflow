@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { ExternalLink, Trash2, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ const PaperDetailsDialog = memo(
     onClearEverything,
     markingSchemeButtonRef,
   }: PaperDetailsDialogProps) => {
-    const handleCopyPaperCode = async () => {
+    const handleCopyPaperCode = useCallback(async () => {
       try {
         await navigator.clipboard.writeText(quickCodeInput);
         toast.success("Paper code copied to clipboard!", {
@@ -40,9 +40,9 @@ const PaperDetailsDialog = memo(
           duration: 3000,
         });
       }
-    };
+    }, [quickCodeInput]);
 
-    const getSeasonAbbreviation = () => {
+    const seasonAbbreviation = useMemo(() => {
       switch (selectedSeason) {
         case "Spring":
           return "(F/M)";
@@ -51,7 +51,21 @@ const PaperDetailsDialog = memo(
         default:
           return "(O/N)";
       }
-    };
+    }, [selectedSeason]);
+
+    const handleClose = useCallback(() => {
+      onOpenChange(false);
+    }, [onOpenChange]);
+
+    const handleClearAndClose = useCallback(() => {
+      onClearEverything();
+      onOpenChange(false);
+    }, [onClearEverything, onOpenChange]);
+
+    const msLink = useMemo(() => parseLink({ type: "ms" }), [parseLink]);
+    const qpLink = useMemo(() => parseLink({ type: "qp" }), [parseLink]);
+    const erLink = useMemo(() => parseLink({ type: "er" }), [parseLink]);
+    const gtLink = useMemo(() => parseLink({ type: "gt" }), [parseLink]);
 
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -115,7 +129,7 @@ const PaperDetailsDialog = memo(
                     Exam Season
                   </span>
                   <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
-                    {selectedSeason} {getSeasonAbbreviation()}
+                    {selectedSeason} {seasonAbbreviation}
                   </span>
                 </div>
 
@@ -134,11 +148,10 @@ const PaperDetailsDialog = memo(
               </div>
             </div>
 
-            {/* Action Buttons - First Row */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center sm:mt-2 mt-3">
               <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
                 <a
-                  href={parseLink({ type: "ms" })}
+                  href={msLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   ref={markingSchemeButtonRef}
@@ -147,54 +160,36 @@ const PaperDetailsDialog = memo(
                 </a>
               </Button>
               <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
-                <a
-                  href={parseLink({ type: "qp" })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={qpLink} target="_blank" rel="noopener noreferrer">
                   Open question paper <ExternalLink />
                 </a>
               </Button>
             </div>
 
-            {/* Action Buttons - Second Row */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center mt-3 sm:mt-2">
               <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
-                <a
-                  href={parseLink({ type: "er" })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={erLink} target="_blank" rel="noopener noreferrer">
                   Open examiner report <ExternalLink />
                 </a>
               </Button>
               <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
-                <a
-                  href={parseLink({ type: "gt" })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={gtLink} target="_blank" rel="noopener noreferrer">
                   Open grade threshold <ExternalLink />
                 </a>
               </Button>
             </div>
 
-            {/* Close Button */}
             <Button
               className="w-full mt-3 cursor-pointer"
-              onClick={() => onOpenChange(false)}
+              onClick={handleClose}
             >
               Close <XIcon />
             </Button>
 
-            {/* Clear Everything Button */}
             <Button
               className="w-full mt-3 cursor-pointer"
               variant="destructive"
-              onClick={() => {
-                onClearEverything();
-                onOpenChange(false);
-              }}
+              onClick={handleClearAndClose}
             >
               Clear Everything <Trash2 />
             </Button>

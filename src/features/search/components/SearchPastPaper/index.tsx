@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,9 +70,42 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     variant: false,
   });
 
-  const currentYear = new Date().getFullYear();
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
   const [isMounted, setIsMounted] = useState(false);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
+
+  const validateQuickCode = useCallback(
+    ({ code }: { code: string }): string => {
+      if (!code) return "";
+
+      const regex = /^(\d{4})\/(\d{2})\/(F\/M|M\/J|O\/N)\/(\d{2})$/;
+
+      const match = code.match(regex);
+      if (!match)
+        return "Correct format: [Subject Code]/[Paper Number]/[Season]/[Year]";
+
+      const subjectCode = match[1];
+      const subject = availableSubjects?.find((s) =>
+        s.code.includes(subjectCode)
+      );
+      if (!subject) {
+        return `Subject with code ${subjectCode} is not supported yet`;
+      }
+
+      const yearDigits = match[4];
+      const fullYear = parseInt(`20${yearDigits}`);
+      if (fullYear > currentYear) {
+        return `Year cannot exceed current year (${currentYear})`;
+      }
+
+      if (fullYear < 2010) {
+        return "Year must be 2010 or later";
+      }
+
+      return "";
+    },
+    [availableSubjects, currentYear]
+  );
 
   // Load cached state from localStorage
   useEffect(() => {
@@ -95,7 +128,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateManualInputs = (): void => {
+  const updateManualInputs = useCallback((): void => {
     const extractedComponents = quickCodeInput.split("/");
     const subject = availableSubjects?.find((s) =>
       s.code.includes(extractedComponents[0])
@@ -120,47 +153,18 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       ...INVALID_INPUTS_DEFAULT,
       variant: false,
     });
-  };
+  }, [quickCodeInput, availableSubjects]);
 
-  const validateQuickCode = ({ code }: { code: string }): string => {
-    if (!code) return "";
+  const handleQuickCodeInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.toUpperCase();
+      setQuickCodeInput(value);
+      setQuickCodeError(validateQuickCode({ code: value }));
+    },
+    [validateQuickCode]
+  );
 
-    const regex = /^(\d{4})\/(\d{2})\/(F\/M|M\/J|O\/N)\/(\d{2})$/;
-
-    const match = code.match(regex);
-    if (!match)
-      return "Correct format: [Subject Code]/[Paper Number]/[Season]/[Year]";
-
-    const subjectCode = match[1];
-    const subject = availableSubjects?.find((s) =>
-      s.code.includes(subjectCode)
-    );
-    if (!subject) {
-      return `Subject with code ${subjectCode} is not supported yet`;
-    }
-
-    const yearDigits = match[4];
-    const fullYear = parseInt(`20${yearDigits}`);
-    if (fullYear > currentYear) {
-      return `Year cannot exceed current year (${currentYear})`;
-    }
-
-    if (fullYear < 2010) {
-      return "Year must be 2010 or later";
-    }
-
-    return "";
-  };
-
-  const handleQuickCodeInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value.toUpperCase();
-    setQuickCodeInput(value);
-    setQuickCodeError(validateQuickCode({ code: value }));
-  };
-
-  const handleQuickCodeSubmit = () => {
+  const handleQuickCodeSubmit = useCallback(() => {
     if (quickCodeInput) {
       const error = validateQuickCode({ code: quickCodeInput });
       setQuickCodeError(error);
@@ -172,7 +176,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
         }, 0);
       }
     }
-  };
+  }, [quickCodeInput, validateQuickCode, updateManualInputs]);
 
   // Validation effect hooks
   useEffect(() => {
@@ -214,7 +218,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     }
   }, [selectedSubject]);
 
-  const validateManualInputs = (): boolean => {
+  const validateManualInputs = useCallback((): boolean => {
     const paperType = parseInt(selectedPaperType);
     const variant = parseInt(selectedVariant);
     const year = parseInt(selectedYear);
@@ -230,9 +234,17 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     };
     setInvalidInputs(newInvalidInputs);
     return Object.values(newInvalidInputs).every((value) => value === false);
-  };
+  }, [
+    selectedPaperType,
+    selectedVariant,
+    selectedYear,
+    selectedCurriculum,
+    selectedSubject,
+    selectedSeason,
+    currentYear,
+  ]);
 
-  const updateQuickCode = (): void => {
+  const updateQuickCode = useCallback((): void => {
     const shortSeason = getShortSeason({
       season: selectedSeason as ValidSeason,
       verbose: true,
@@ -248,33 +260,51 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       )}`
     );
     setQuickCodeError(null);
-  };
+  }, [
+    selectedSeason,
+    selectedSubject,
+    selectedPaperType,
+    selectedVariant,
+    selectedYear,
+  ]);
 
-  const parseLink = ({ type }: { type: PaperLinkType }) => {
-    const shortSeason = getShortSeason({
-      season: selectedSeason as ValidSeason,
-      verbose: false,
-    });
-    const paperType = parseInt(selectedPaperType);
-    const variant = parseInt(selectedVariant);
-    const year = parseInt(selectedYear);
-    const subjectCode = selectedSubject.split("(")[1]?.slice(0, 4);
+  const parseLink = useCallback(
+    ({ type }: { type: PaperLinkType }) => {
+      const shortSeason = getShortSeason({
+        season: selectedSeason as ValidSeason,
+        verbose: false,
+      });
+      const paperType = parseInt(selectedPaperType);
+      const variant = parseInt(selectedVariant);
+      const year = parseInt(selectedYear);
+      const subjectCode = selectedSubject.split("(")[1]?.slice(0, 4);
 
-    let newPaperCode = `${subjectCode}-${shortSeason}${year
-      .toString()
-      .slice(2)}-${type}`;
-    if (type === "ms" || type === "qp") {
-      newPaperCode = `${newPaperCode}-${paperType}${variant}`;
-    }
-    if (newPaperCode === "9608-w15-qp-12") {
-      return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
-    }
-    return `${BESTEXAMHELP_DOMAIN}/${
-      BESTEXAMHELP_CURRICULUM_CODE_PREFIX[selectedCurriculum as ValidCurriculum]
-    }/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
-  };
+      let newPaperCode = `${subjectCode}-${shortSeason}${year
+        .toString()
+        .slice(2)}-${type}`;
+      if (type === "ms" || type === "qp") {
+        newPaperCode = `${newPaperCode}-${paperType}${variant}`;
+      }
+      if (newPaperCode === "9608-w15-qp-12") {
+        return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
+      }
+      return `${BESTEXAMHELP_DOMAIN}/${
+        BESTEXAMHELP_CURRICULUM_CODE_PREFIX[
+          selectedCurriculum as ValidCurriculum
+        ]
+      }/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
+    },
+    [
+      selectedSeason,
+      selectedPaperType,
+      selectedVariant,
+      selectedYear,
+      selectedSubject,
+      selectedCurriculum,
+    ]
+  );
 
-  const clearEverything = () => {
+  const clearEverything = useCallback(() => {
     setSelectedCurriculum("CIE A-LEVEL");
     setSelectedSubject("");
     setSelectedPaperType("");
@@ -283,7 +313,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     setQuickCodeInput("");
     setQuickCodeError(null);
     setSelectedYear("");
-  };
+  }, []);
 
   // Persist state to localStorage
   useEffect(() => {

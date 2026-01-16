@@ -1,9 +1,8 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Trash2, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { TOPICAL_DATA } from "@/constants/constants";
-import { ValidCurriculum } from "@/constants/types";
 import NumberInputWithControls from "./NumberInputWithControls";
 import SeasonSelect from "./SeasonSelect";
 import { ManualInputFormProps, SubjectOption } from "./types";
@@ -51,32 +50,41 @@ const ManualInputForm = memo(
       return subjects;
     }, [selectedCurriculum]);
 
-    const getPaperTypeError = () => {
+    const curriculumData = useMemo(
+      () =>
+        TOPICAL_DATA.map((item) => ({
+          code: item.curriculum,
+          coverImage: item.coverImage,
+        })),
+      []
+    );
+
+    const getPaperTypeError = useCallback(() => {
       if (!invalidInputs.paperType) return null;
       const val = parseInt(selectedPaperType);
       if (isNaN(val) || val < 1 || val > 9) {
         return "Paper type must be between 1 and 9";
       }
       return "Paper type is required";
-    };
+    }, [invalidInputs.paperType, selectedPaperType]);
 
-    const getVariantError = () => {
+    const getVariantError = useCallback(() => {
       if (!invalidInputs.variant) return null;
       const val = parseInt(selectedVariant);
       if (isNaN(val) || val < 1 || val > 9) {
         return "Variant must be between 1 and 9";
       }
       return "Variant is required";
-    };
+    }, [invalidInputs.variant, selectedVariant]);
 
-    const getYearError = () => {
+    const getYearError = useCallback(() => {
       if (!invalidInputs.year) return null;
       const val = parseInt(selectedYear);
       if (isNaN(val) || val < 2010 || val > currentYear) {
         return `Year must be between 2010 and ${currentYear}`;
       }
       return "Year is required";
-    };
+    }, [invalidInputs.year, selectedYear, currentYear]);
 
     return (
       <div className="flex flex-col gap-5 items-center justify-center overflow-hidden rounded-xl border border-border p-4 shadow-md mt-6">
@@ -93,10 +101,7 @@ const ManualInputForm = memo(
               </span>
             </div>
             <EnhancedSelect
-              data={TOPICAL_DATA.map((item) => ({
-                code: item.curriculum,
-                coverImage: item.coverImage,
-              }))}
+              data={curriculumData}
               label="Curriculum"
               prerequisite=""
               triggerClassName="w-full"
@@ -104,9 +109,7 @@ const ManualInputForm = memo(
               popoverContentClassName="!w-[var(--radix-popover-trigger-width)]"
               selectedValue={selectedCurriculum}
               modal={true}
-              setSelectedValue={(value) => {
-                setSelectedCurriculum(value as ValidCurriculum);
-              }}
+              setSelectedValue={setSelectedCurriculum}
             />
             {invalidInputs.curriculum && (
               <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">

@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,15 +14,22 @@ const NumberInputWithControls = memo(
     label,
     error,
   }: NumberInputWithControlsProps) => {
-    const handleDecrease = () => {
+    const handleDecrease = useCallback(() => {
       const current = parseInt(value) || min;
       onChange((current > min ? current - 1 : max).toString());
-    };
+    }, [value, min, max, onChange]);
 
-    const handleIncrease = () => {
+    const handleIncrease = useCallback(() => {
       const current = parseInt(value) || min;
       onChange((current < max ? current + 1 : min).toString());
-    };
+    }, [value, min, max, onChange]);
+
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(e.target.value);
+      },
+      [onChange]
+    );
 
     return (
       <div>
@@ -48,7 +55,7 @@ const NumberInputWithControls = memo(
             value={value}
             type="number"
             className="text-center font-mono font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleInputChange}
           />
           <Button
             className="w-8 h-8 rounded-lg cursor-pointer"

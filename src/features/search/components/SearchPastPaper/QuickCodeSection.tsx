@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,15 +8,18 @@ import { QuickCodeSectionProps } from "./types";
 
 const QuickCodeSection = memo(
   ({ value, error, onChange, onSubmit }: QuickCodeSectionProps) => {
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.stopPropagation();
-        onSubmit();
-      }
-    };
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          onSubmit();
+        }
+      },
+      [onSubmit]
+    );
 
-    const isDisabled = !!error || value === "";
+    const isDisabled = useMemo(() => !!error || value === "", [error, value]);
 
     return (
       <div className="relative overflow-hidden bg-linear-to-br from-background via-accent/20 to-accent/40 rounded-xl border border-border/50shadow-md">
