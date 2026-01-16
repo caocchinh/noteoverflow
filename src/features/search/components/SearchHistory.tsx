@@ -164,7 +164,8 @@ const SearchHistory = ({
                             <img
                               src={item.previewUrl}
                               alt="Search preview"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full! object-cover"
+                              loading="lazy"
                             />
                           ) : (
                             <ImageIcon className="w-5 h-5 text-primary" />

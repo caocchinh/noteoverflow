@@ -129,7 +129,6 @@ const MainContent = memo(
     }, []);
 
     // Helper to check if a string is an image URL
-
     const filteredResults = useMemo(() => {
       if (!results) return [];
       if (displayMode === "questions") return results;

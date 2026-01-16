@@ -319,7 +319,7 @@ const SearchClient = ({
         handleImageSearch({
           image: item.query,
           filter: filterToUse,
-          previewUrl: item.previewUrl || null,
+          previewUrl: item.imageData || null,
         });
       }
     },
