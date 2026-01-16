@@ -63,17 +63,14 @@ const NavBar = () => {
             </a>
           </>
         )}
-        <Link
-          href="/search"
-          className="hidden h-10 w-full max-w-md items-center sm:flex"
-        >
+        <Link href="/search" className="h-10 w-full max-w-md items-center flex">
           <Input
             className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
             placeholder={breakpoint ? "Search" : "Search past paper question"}
             value=""
             readOnly={true}
           />
-          <Button className="h-full w-10 rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
+          <Button className="h-full w-max rounded-xl rounded-l-none border border-(--navbar-input-border) bg-(--navbar-button-bg) hover:cursor-pointer hover:bg-(--navbar-border) lg:w-14">
             <SearchIcon className="text-(--navbar-text)" />
           </Button>
         </Link>
