@@ -99,9 +99,9 @@ export default function MaintenancePage() {
 
               <p className="mt-4">
                 Students across multiple countries used NoteOverflow, namely:
-                Nigeria, the United States, the United Kingdom, UAE, Bangladesh,
-                Pakistan, Nepal, Malaysia, Singapore, Indonesia,the Philippines,
-                Vietnams ...
+                Nigeria, the United States, the United Kingdom, the UAE,
+                Bangladesh, Pakistan, Nepal, Malaysia, Singapore, Indonesia, the
+                Philippines, Vietnams ...
               </p>
               <p className="mt-3 text-red-500 font-bold text-lg">
                 But I built it on a flawed foundation.
