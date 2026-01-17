@@ -312,7 +312,7 @@ export default function MaintenancePage() {
 
             <div className="text-center pt-4">
               <p className="text-white font-medium">— Cao Cự Chính</p>
-              <p className="text-gray-500 text-sm">17/01/2025 10.18PM UTC+7</p>
+              <p className="text-gray-500 text-sm">17/01/2025 10:18 PM UTC+7</p>
             </div>
           </div>
 
