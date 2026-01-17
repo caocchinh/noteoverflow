@@ -19,7 +19,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Monitor,
-  Download,
   SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,6 +42,7 @@ import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../lib/utils";
 import LayoutSetting from "./LayoutSetting";
+import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
 
 const AppUltilityBar = memo(
   forwardRef(
@@ -50,6 +50,7 @@ const AppUltilityBar = memo(
       {
         finishedQuestionsFilteredPartitionedData,
         isExportModeEnabled,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         setIsExportModeEnabled,
         ultilityRef,
         isQuestionViewDisabled,
@@ -65,7 +66,7 @@ const AppUltilityBar = memo(
         setShowFinishedQuestion,
         filterUrl,
       }: AppUltilityBarProps,
-      ref
+      ref,
     ) => {
       const {
         isAppSidebarOpen,
@@ -87,11 +88,11 @@ const AppUltilityBar = memo(
         });
         setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
         setIsUltilityOverflowingRight(
-          isOverScrollingResult.isOverScrollingRight
+          isOverScrollingResult.isOverScrollingRight,
         );
       }, [isMobileDevice, sideBarInsetRef, ultilityRef]);
       const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
-        null
+        null,
       );
 
       useEffect(() => {
@@ -115,7 +116,7 @@ const AppUltilityBar = memo(
         () => ({
           overflowScrollHandler,
         }),
-        [overflowScrollHandler]
+        [overflowScrollHandler],
       );
 
       return (
@@ -218,7 +219,7 @@ const AppUltilityBar = memo(
                         onTabChangeCallback={({ tab }) => {
                           setCurrentChunkIndex(tab);
                           setFinishedQuestionsFilteredDisplayData(
-                            finishedQuestionsFilteredPartitionedData![tab]
+                            finishedQuestionsFilteredPartitionedData![tab],
                           );
                           if (uiPreferences.scrollUpWhenPageChange) {
                             scrollAreaRef.current?.scrollTo({
@@ -283,12 +284,12 @@ const AppUltilityBar = memo(
                           "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
                           uiPreferences.isStrictModeEnabled
                             ? "border-logo-main"
-                            : "border-muted-foreground"
+                            : "border-muted-foreground",
                         )}
                         onClick={() => {
                           setUiPreference(
                             "isStrictModeEnabled",
-                            (prev) => !prev
+                            (prev) => !prev,
                           );
                         }}
                       >
@@ -301,7 +302,7 @@ const AppUltilityBar = memo(
                             uiPreferences.isStrictModeEnabled
                               ? "text-logo-main"
                               : "text-muted-foreground",
-                            "cursor-pointer text-sm"
+                            "cursor-pointer text-sm",
                           )}
                         >
                           Strict mode
@@ -317,35 +318,9 @@ const AppUltilityBar = memo(
               )}
 
               {!isExportModeEnabled && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className={cn(
-                        "flex cursor-pointer items-center gap-2 bg-logo-main! text-white!",
-                        isQuestionViewDisabled && "opacity-50 cursor-default!"
-                      )}
-                      onClick={() => {
-                        if (isQuestionViewDisabled) {
-                          return;
-                        }
-                        setIsExportModeEnabled(true);
-                      }}
-                      variant="outline"
-                    >
-                      Export
-                      <Download />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="bottom"
-                    className="bg-logo-main! text-white! z-99999999 flex justify-center items-center gap-2"
-                    arrowClassName="!bg-logo-main !fill-logo-main"
-                  >
-                    {isQuestionViewDisabled
-                      ? "To export questions, run a search first."
-                      : "Export questions & answers to PDF."}
-                  </TooltipContent>
-                </Tooltip>
+                <ExportDisabledDialog
+                  isQuestionViewDisabled={isQuestionViewDisabled}
+                />
               )}
               <ShareFilter
                 isDisabled={isQuestionViewDisabled}
@@ -360,8 +335,8 @@ const AppUltilityBar = memo(
           </ScrollArea>
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 AppUltilityBar.displayName = "AppUltilityBar";
@@ -387,7 +362,7 @@ const ShowFinishedToggle = memo(
               isQuestionViewDisabled && "opacity-50 cursor-default!",
               showFinishedQuestion
                 ? "border-green-600"
-                : "border-muted-foreground"
+                : "border-muted-foreground",
             )}
             onClick={() => {
               if (isQuestionViewDisabled) {
@@ -399,7 +374,7 @@ const ShowFinishedToggle = memo(
             <Switch
               className={cn(
                 "border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid ",
-                isQuestionViewDisabled && "cursor-default!"
+                isQuestionViewDisabled && "cursor-default!",
               )}
               id="show-finished-question"
               checked={showFinishedQuestion ?? false}
@@ -410,7 +385,7 @@ const ShowFinishedToggle = memo(
                   ? "text-green-600"
                   : "text-muted-foreground",
                 "cursor-pointer text-sm",
-                isQuestionViewDisabled && "cursor-default!"
+                isQuestionViewDisabled && "cursor-default!",
               )}
             >
               {showFinishedQuestion ? "Show" : "Hide"} finished
@@ -421,14 +396,14 @@ const ShowFinishedToggle = memo(
           side="bottom"
           className={cn(
             !isQuestionViewDisabled && "hidden!",
-            "flex justify-center items-center gap-2"
+            "flex justify-center items-center gap-2",
           )}
         >
           To toggle this, run a search first.
         </TooltipContent>
       </Tooltip>
     );
-  }
+  },
 );
 ShowFinishedToggle.displayName = "ShowFinishedToggle";
 
@@ -452,7 +427,7 @@ const FilterToggleButton = memo(
         <SlidersHorizontal />
       </Button>
     );
-  }
+  },
 );
 FilterToggleButton.displayName = "FilterToggleButton";
 
@@ -492,14 +467,14 @@ export const InspectTriggerButton = memo(
           side="bottom"
           className={cn(
             !isQuestionViewDisabled && "hidden!",
-            "flex justify-center items-center gap-2"
+            "flex justify-center items-center gap-2",
           )}
         >
           To inspect questions, run a search first.
         </TooltipContent>
       </Tooltip>
     );
-  }
+  },
 );
 
 InspectTriggerButton.displayName = "InspectTriggerButton";

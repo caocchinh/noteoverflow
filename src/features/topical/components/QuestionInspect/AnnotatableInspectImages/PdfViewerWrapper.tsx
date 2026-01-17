@@ -38,7 +38,7 @@ const PdfViewerWrapper = memo(
         onDocumentLoaded,
         onUnmount,
       },
-      ref
+      ref,
     ) => {
       const viewerRef = useRef<HTMLDivElement | null>(null);
       const isInitalXfdfLoaded = useRef(false);
@@ -94,7 +94,7 @@ const PdfViewerWrapper = memo(
             }, 0);
           },
         }),
-        [instance]
+        [instance],
       );
 
       // Initialize WebViewer
@@ -112,7 +112,7 @@ const PdfViewerWrapper = memo(
             }/lib/webviewer`,
             licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
           },
-          viewerRef.current
+          viewerRef.current,
         ).then((inst) => {
           if (!isMounted) return;
 
@@ -122,6 +122,12 @@ const PdfViewerWrapper = memo(
           const { documentViewer, Tools } = inst.Core;
 
           inst.UI.disableElements([
+            // Disable download/save/print functionality
+            "downloadButton",
+            "printButton",
+            "saveAsButton",
+            "menuButton", // Hamburger menu that contains download options
+            // Disable text annotation tools
             "stickyToolButton",
             "highlightToolButton",
             "underlineToolButton",
@@ -136,14 +142,14 @@ const PdfViewerWrapper = memo(
             setCreateDelay: (delay: number) => void;
           }
           const freeHandTool = documentViewer.getTool(
-            Tools.ToolNames.FREEHAND
+            Tools.ToolNames.FREEHAND,
           ) as unknown as CreateToolWithDelay;
           if (freeHandTool) {
             freeHandTool.setCreateDelay(0);
           }
 
           const freeHandHighlightTool = documentViewer.getTool(
-            Tools.ToolNames.FREEHAND_HIGHLIGHT
+            Tools.ToolNames.FREEHAND_HIGHLIGHT,
           ) as unknown as CreateToolWithDelay;
           if (freeHandHighlightTool && freeHandHighlightTool.setCreateDelay) {
             freeHandHighlightTool.setCreateDelay(0);
@@ -191,7 +197,7 @@ const PdfViewerWrapper = memo(
           if (!isInitalXfdfLoaded.current) {
             documentViewer.removeEventListener(
               "documentLoaded",
-              handleDocumentLoaded
+              handleDocumentLoaded,
             );
           }
         };
@@ -214,7 +220,7 @@ const PdfViewerWrapper = memo(
         const handleAnnotationChanged: AnnotationChangedHandler = (
           annotations,
           action,
-          info
+          info,
         ) => {
           if (info?.imported) return;
           const onAnnotationsChanged =
@@ -227,20 +233,20 @@ const PdfViewerWrapper = memo(
 
         annotationManager.addEventListener(
           "annotationChanged",
-          handleAnnotationChanged
+          handleAnnotationChanged,
         );
 
         return () => {
           annotationManager.removeEventListener(
             "annotationChanged",
-            handleAnnotationChanged
+            handleAnnotationChanged,
           );
         };
       }, [instance]);
 
       return <div ref={viewerRef} style={{ height: "100%", width: "100%" }} />;
-    }
-  )
+    },
+  ),
 );
 
 PdfViewerWrapper.displayName = "PdfViewerWrapper";

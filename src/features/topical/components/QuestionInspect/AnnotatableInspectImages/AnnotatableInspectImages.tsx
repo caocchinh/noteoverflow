@@ -43,8 +43,6 @@ import {
 import Loader from "../../Loader/Loader";
 import SaveAnnotationsButton from "./SaveAnnotationsButton";
 import { toast } from "sonner";
-import NonEditModeDownloadMenu from "./NonEditModeDownloadMenu";
-import EditModeDownloadMenu from "./EditModeDownloadMenu";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -82,7 +80,7 @@ const initPdfElement = ({
         onUnmount={onUnmount}
         initialXfdf={initialXfdf}
         onAnnotationsChanged={onAnnotationsChanged}
-      />
+      />,
     );
   }
 };
@@ -105,13 +103,13 @@ const PdfPortalContent = memo(
           node.appendChild(pdfViewerElementRef.current);
         }
       },
-      [pdfViewerElementRef]
+      [pdfViewerElementRef],
     );
 
     return (
       <div key={portalKey} ref={attachPdfViewer} className="w-full h-full" />
     );
-  }
+  },
 );
 
 PdfPortalContent.displayName = "PdfPortalContent";
@@ -136,7 +134,7 @@ const AnnotatableInspectImagesComponent = memo(
         isSavingAnnotations,
         isAuthenticated,
       },
-      ref
+      ref,
     ) => {
       const [isEditMode, setIsEditMode] = useState(false);
 
@@ -145,7 +143,7 @@ const AnnotatableInspectImagesComponent = memo(
         () => ({
           isEditMode,
         }),
-        [isEditMode]
+        [isEditMode],
       );
       const [isFullscreen, setIsFullscreen] = useState(false);
       const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -216,7 +214,7 @@ const AnnotatableInspectImagesComponent = memo(
             typeOfContent,
           });
         },
-        [question]
+        [question],
       );
 
       useEffect(() => {
@@ -245,7 +243,7 @@ const AnnotatableInspectImagesComponent = memo(
           }
           setCurrentXfdf(xfdf);
         },
-        [isHavingUnsafeChangesRef, question, typeOfView]
+        [isHavingUnsafeChangesRef, question, typeOfView],
       );
 
       const handleSave = useCallback(() => {
@@ -273,7 +271,7 @@ const AnnotatableInspectImagesComponent = memo(
                   isHavingUnsafeChangesRef.current[typeOfView] = false;
                 }
               },
-            }
+            },
           );
         }
       }, [
@@ -422,12 +420,6 @@ const AnnotatableInspectImagesComponent = memo(
               className="flex items-center justify-end mb-2 gap-2 flex-wrap"
               ref={ultilityBarRef}
             >
-              {!isEditMode && (
-                <NonEditModeDownloadMenu
-                  pdfBaseFileName={pdfBaseFileName}
-                  generatePdfBlob={generatePdfBlob}
-                />
-              )}
               {imageUrls.length > 0 && (
                 <Button
                   type="button"
@@ -486,15 +478,7 @@ const AnnotatableInspectImagesComponent = memo(
                     isPdfViewerLoaded={isPdfViewerLoaded}
                     isSessionFetching={isSessionFetching}
                   />
-                  <EditModeDownloadMenu
-                    pdfBlob={pdfBlob}
-                    pdfViewerRef={pdfViewerRef}
-                    isPdfViewerLoaded={isPdfViewerLoaded}
-                    isSessionFetching={isSessionFetching}
-                    generatePdfBlob={generatePdfBlob}
-                    pdfBaseFileName={pdfBaseFileName}
-                    typeOfView={typeOfView}
-                  />
+
                   <Button
                     className="cursor-pointer h-[26px]"
                     disabled={isSessionFetching}
@@ -515,7 +499,7 @@ const AnnotatableInspectImagesComponent = memo(
                   !isEditMode
                     ? "absolute top-[999999px] left-[999999px] z-[-999999]"
                     : "",
-                  "w-full h-full"
+                  "w-full h-full",
                 )}
               >
                 <NotFullScreenContainer
@@ -527,7 +511,7 @@ const AnnotatableInspectImagesComponent = memo(
                   <div
                     className={cn(
                       "fixed inset-0 z-999998 bg-white flex flex-col h-dvh w-screen",
-                      isFullscreen ? "block" : "hidden"
+                      isFullscreen ? "block" : "hidden",
                     )}
                     data-pdf-viewer
                   >
@@ -552,15 +536,7 @@ const AnnotatableInspectImagesComponent = memo(
                           isPdfViewerLoaded={isPdfViewerLoaded}
                           isSessionFetching={isSessionFetching}
                         />
-                        <EditModeDownloadMenu
-                          pdfBlob={pdfBlob}
-                          pdfViewerRef={pdfViewerRef}
-                          isPdfViewerLoaded={isPdfViewerLoaded}
-                          isSessionFetching={isSessionFetching}
-                          generatePdfBlob={generatePdfBlob}
-                          pdfBaseFileName={pdfBaseFileName}
-                          typeOfView={typeOfView}
-                        />
+
                         <Button
                           className="relative z-99998 dark:text-white text-white !hover:text-black cursor-pointer"
                           variant="ghost"
@@ -597,7 +573,7 @@ const AnnotatableInspectImagesComponent = memo(
                       )}
                     </div>
                   </div>,
-                  document.body
+                  document.body,
                 )}
               </div>
               <div
@@ -605,7 +581,7 @@ const AnnotatableInspectImagesComponent = memo(
                   "w-full h-full flex items-center relative justify-start flex-col min-h-[100px]",
                   !isEditMode
                     ? ""
-                    : "absolute top-[999999px] left-[999999px] z-[-999999]"
+                    : "absolute top-[999999px] left-[999999px] z-[-999999]",
                 )}
               >
                 <PhotoProvider>
@@ -622,7 +598,7 @@ const AnnotatableInspectImagesComponent = memo(
                       <img
                         className={cn(
                           "w-full h-full object-contain relative z-2 max-w-[750px]! cursor-pointer",
-                          imageTheme === "dark" && "invert!"
+                          imageTheme === "dark" && "invert!",
                         )}
                         src={item}
                         alt="Question image"
@@ -652,12 +628,12 @@ const AnnotatableInspectImagesComponent = memo(
               />,
               isFullscreen
                 ? fullscreenContainerRef.current
-                : normalContainerRef.current
+                : normalContainerRef.current,
             )}
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 AnnotatableInspectImagesComponent.displayName =
@@ -695,7 +671,7 @@ const NotFullScreenContainer = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 NotFullScreenContainer.displayName = "NotFullScreenContainer";

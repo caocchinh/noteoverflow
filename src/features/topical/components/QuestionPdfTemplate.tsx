@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#ffffff",
     padding: 5,
-    paddingTop: 43,
+    paddingTop: 9,
     paddingBottom: 15,
   },
   header: {
@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
 });
 
 const ExportPdfTemplate = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   headerLogo,
   questions,
 }: {
@@ -120,7 +121,7 @@ const ExportPdfTemplate = ({
   <Document>
     {questions.map((question, index) => (
       <Page size="A4" key={index} style={styles.page}>
-        <View style={styles.header} fixed>
+        {/* <View style={styles.header} fixed>
           <View style={styles.headerContent}>
             <View style={styles.branding}>
               <PdfImage src={headerLogo} style={styles.headerLogo} />
@@ -134,7 +135,7 @@ const ExportPdfTemplate = ({
 
             <Text style={styles.headerTagline}>AS & A-Level resources</Text>
           </View>
-        </View>
+        </View> */}
         <View style={styles.bigPaperCodeContainer}>
           <Link href={question.questionLink} style={styles.bigPaperCode}>
             {question.paperCode} Q{question.questionNumber}

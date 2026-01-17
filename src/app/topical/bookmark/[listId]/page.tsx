@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { BookmarkView } from ".";
 import { Metadata } from "next";
 
-type Params = Promise<{ bookmarkId: string }>;
+type Params = Promise<{ listId: string }>;
 export const metadata: Metadata = {
   title: "Bookmarks",
   description: "Bookmark tricky questions and track your progress.",
@@ -16,12 +16,12 @@ export const metadata: Metadata = {
 const BookmarkViewPage = async (props: { params: Params }) => {
   try {
     const params = await props.params;
-    const bookmarkId = params.bookmarkId;
+    const listId = params.listId;
     const session = await verifySession();
 
     const db = await getDbAsync();
     const bookmarkList = await db.query.userBookmarkList.findFirst({
-      where: eq(userBookmarkList.id, bookmarkId),
+      where: eq(userBookmarkList.id, listId),
       with: {
         user: {
           columns: {
@@ -63,8 +63,8 @@ const BookmarkViewPage = async (props: { params: Params }) => {
       <Suspense fallback={<Loader />}>
         <BookmarkView
           BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
-          listId={bookmarkId}
-          bookmarkId={bookmarkId}
+          listId={listId}
+          bookmarkId={listId}
           isOwnerOfTheList={session?.user.id === bookmarkList.userId}
           ownerInfo={{
             ownerId: bookmarkList.user.id,

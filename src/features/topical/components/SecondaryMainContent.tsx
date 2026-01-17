@@ -17,8 +17,7 @@ import Masonry from "./Masonry";
 import ExportBar from "./ExportMode/ExportBar";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { ArrowRightFromLine } from "lucide-react";
+import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
 
 const SecondaryMainContent = ({
   topicalData,
@@ -45,7 +44,7 @@ const SecondaryMainContent = ({
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [questionsForExportArray, setQuestionsForExportArray] = useState<
     string[]
@@ -81,7 +80,7 @@ const SecondaryMainContent = ({
           acc[chunkIndex].push(item);
           return acc;
         },
-        []
+        [],
       );
 
       setFullPartitionedData(chunkedData);
@@ -184,13 +183,10 @@ const SecondaryMainContent = ({
               <p>{topicalData?.length} items</p>
 
               {!isExportModeEnabled && (
-                <Button
-                  onClick={() => setIsExportModeEnabled(true)}
-                  className="bg-logo-main! text-white! cursor-pointer mb-2"
-                >
-                  Export
-                  <ArrowRightFromLine />
-                </Button>
+                <ExportDisabledDialog
+                  variant="secondary"
+                  buttonClassName="mb-2"
+                />
               )}
             </div>
             <Masonry
@@ -201,7 +197,7 @@ const SecondaryMainContent = ({
                       <QuestionViewItem
                         key={`${question.id}-${imageSrc}`}
                         isQuestionForExport={questionsForExport.has(
-                          question.id
+                          question.id,
                         )}
                         question={question}
                         handleQuestionClick={handleQuestionClick}
@@ -220,8 +216,8 @@ const SecondaryMainContent = ({
                       question.questionImagesDimensions?.[imageIndex]?.width,
                     height:
                       question.questionImagesDimensions?.[imageIndex]?.height,
-                  })
-                )
+                  }),
+                ),
               )}
             />
 
@@ -299,7 +295,7 @@ const QuestionViewItem = memo(
         className={cn(
           "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full mb-[10px]",
           isQuestionForExport &&
-            "transform-[scale(0.975)] border-logo-main rounded-md"
+            "transform-[scale(0.975)] border-logo-main rounded-md",
         )}
       >
         {isExportModeEnabled && (
@@ -334,7 +330,7 @@ const QuestionViewItem = memo(
       prevProps.isExportModeEnabled === nextProps.isExportModeEnabled &&
       prevProps.isQuestionForExport === nextProps.isQuestionForExport
     );
-  }
+  },
 );
 
 QuestionViewItem.displayName = "QuestionViewItem";
