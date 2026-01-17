@@ -119,66 +119,85 @@ export default function MaintenancePage() {
                 aren&apos;t legal defenses—they&apos;re excuses.
               </p>
 
-              {/* Cambridge Copyright Policy */}
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <p className="text-red-400 font-semibold mb-3">
-                  ⚠️ Cambridge&apos;s Official Policy:
+              {/* Cambridge Copyright Policy - Blockquote */}
+              <div className="mt-4 p-6 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <p className="text-red-400 font-semibold mb-4">
+                  Official Copyright Notice
                 </p>
-                <Link
-                  href="https://help.cambridgeinternational.org/hc/en-gb/articles/203544371-Can-I-reproduce-Cambridge-past-examination-papers-on-the-school-s-website-my-website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <Image
-                    src="/assets/cambridge-copyright-policy.png"
-                    alt="Cambridge Copyright Policy - We are unable to give permission to publish past examination papers on any website"
-                    width={700}
-                    height={400}
-                    className="rounded-lg border border-white/10 w-full"
-                  />
-                </Link>
-                <p className="text-sm text-gray-400 mt-3">
-                  <span className="text-red-400 font-medium">
-                    &ldquo;We are unable to give permission to publish past
-                    examination papers on any website or school intranet.&rdquo;
-                  </span>{" "}
-                  — Cambridge International Education
+                <blockquote className="border-l-4 border-red-500 pl-4 py-2 text-white italic">
+                  &ldquo;We do not grant permission for the use of complete
+                  examination papers, nor do we grant permission for electronic
+                  publication, in any format, of questions from past examination
+                  papers.&rdquo;
+                </blockquote>
+                <p className="text-sm text-gray-400 mt-4">
+                  — Source: Cambridge Assessment International Education,
+                  Official Permission Guidelines
                 </p>
-                <Link
-                  href="https://help.cambridgeinternational.org/hc/en-gb/articles/203544371-Can-I-reproduce-Cambridge-past-examination-papers-on-the-school-s-website-my-website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-400 hover:underline mt-2 inline-block"
-                >
-                  View official Cambridge policy →
-                </Link>
-              </div>
-
-              {/* Second Cambridge Policy - No Permission for Electronic Publication */}
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <p className="text-red-400 font-semibold mb-3">
-                  ⛔ Even if you apply for permission:
-                </p>
-                <Image
-                  src="/assets/cambridge-no-permission.png"
-                  alt="Cambridge states they do not grant permission for electronic publication in any format"
-                  width={700}
-                  height={400}
-                  className="rounded-lg border border-white/10 w-full"
-                />
-                <p className="text-sm text-gray-400 mt-3">
-                  <span className="text-red-400 font-medium">
-                    &ldquo;We do not grant permission for the use of complete
-                    examination papers, nor do we grant permission for
-                    electronic publication, in any format.&rdquo;
-                  </span>
-                </p>
-                <p className="mt-3 text-amber-400 text-sm font-medium">
+                <div className="mt-4 flex flex-col gap-2">
+                  <Link
+                    href="https://help.cambridgeinternational.org/hc/en-gb/articles/115004418469-How-do-I-apply-for-permission-to-use-Cambridge-copyrighted-material"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-400 hover:underline"
+                  >
+                    How to apply for permission →
+                  </Link>
+                  <Link
+                    href="https://help.cambridgeinternational.org/hc/en-gb/articles/203544371-Can-I-reproduce-Cambridge-past-examination-papers-on-the-school-s-website-my-website"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-400 hover:underline"
+                  >
+                    Reproducing past papers on websites →
+                  </Link>
+                </div>
+                <p className="mt-4 text-amber-400 text-sm font-medium">
                   💡 Translation: There is zero chance a student-run platform
                   like NoteOverflow would ever receive official permission from
                   Cambridge. The path I chose was never going to be sustainable.
                 </p>
+              </div>
+              {/* Cambridge Licensing Reality */}
+              <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                <p className="text-amber-400 font-semibold mb-3">
+                  Why &ldquo;Just Get Permission&rdquo; Wasn&apos;t an Option:
+                </p>
+                <p className="text-sm text-gray-300 mb-4">
+                  Cambridge does have a formal copyright application process.
+                  Here&apos;s what it actually requires:
+                </p>
+
+                <div className="text-sm text-gray-300 space-y-2">
+                  <p>
+                    <strong className="text-amber-400">
+                      Key restrictions:
+                    </strong>
+                  </p>
+                  <ul className="list-disc list-inside ml-2 space-y-1 text-gray-400">
+                    <li>Max 70% of questions from any one paper</li>
+                    <li>No electronic publication in any format</li>
+                    <li>No questions from papers before 2017</li>
+                    <li>Cannot mix questions from different paper variants</li>
+                    <li>
+                      Must send physical copies with hand-written signatures
+                    </li>
+                  </ul>
+                  <p className="mt-3">
+                    <strong className="text-amber-400">The fees:</strong>
+                  </p>
+                  <ul className="list-disc list-inside ml-2 space-y-1 text-gray-400">
+                    <li>£300 per application (1-50 questions)</li>
+                    <li>£450 per application (51-100 questions)</li>
+                    <li>£600 per application (101+ questions)</li>
+                  </ul>
+                  <p className="mt-3 text-red-400 font-medium">
+                    💡 NoteOverflow had 30,000+ questions across multiple
+                    subjects. The licensing fees alone would be thousands of
+                    pounds, and they still wouldn&apos;t approve electronic
+                    publication.
+                  </p>
+                </div>
               </div>
               <p className="mt-3">
                 The wake-up call came when I realized hundreds of students had
@@ -218,6 +237,7 @@ export default function MaintenancePage() {
                   generations
                 </li>
               </ul>
+
               <p className="mt-3 font-medium text-white">
                 The goal hasn&apos;t changed. The approach has.
               </p>
@@ -257,7 +277,7 @@ export default function MaintenancePage() {
               </p>
               <p className="mt-3">
                 To everyone who spread the word, shared the platform with
-                classmates, and believed in what I was building—I&apos;m deeply
+                classmates, and believed in what I was building. I&apos;m deeply
                 grateful. You showed me that this mission matters.
               </p>
               <p className="mt-3 text-amber-400">
