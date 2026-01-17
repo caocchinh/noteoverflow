@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function MaintenancePage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-900 pt-24 via-gray-800 to-gray-900 pb-12 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="flex justify-center mb-6">
           <Image
             src="/assets/logo-full-colorised-white.webp"
@@ -42,7 +42,7 @@ export default function MaintenancePage() {
               </p>
 
               {/* Metrics Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
                 <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
                   <p className="text-3xl font-bold text-blue-400">2,000+</p>
                   <p className="text-sm text-gray-400 mt-1">Students Served</p>
@@ -50,7 +50,7 @@ export default function MaintenancePage() {
                 <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
                   <p className="text-3xl font-bold text-emerald-400">100+</p>
                   <p className="text-sm text-gray-400 mt-1">
-                    Daily Active Users
+                    Peak Daily Active Users
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
@@ -70,10 +70,38 @@ export default function MaintenancePage() {
                 from a single student.
               </p>
 
+              {/* Product-Market Fit Callout */}
+              <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                <p className="text-emerald-400 font-semibold mb-2">
+                  What These Numbers Mean:
+                </p>
+                <ul className="text-sm text-gray-300 space-y-2">
+                  <li>
+                    <strong className="text-white">
+                      31-minute average session time
+                    </strong>{" "}
+                    — Users weren&apos;t just visiting; they were deeply
+                    engaged. Industry average for EdTech is ~8-12 minutes.
+                  </li>
+                  <li>
+                    <strong className="text-white">
+                      9,000+ study sessions
+                    </strong>{" "}
+                    — Students returned repeatedly, indicating genuine utility,
+                    not curiosity clicks.
+                  </li>
+                </ul>
+                <p className="mt-3 text-emerald-400 font-medium">
+                  The demand for better exam preparation tools is real and
+                  validated.
+                </p>
+              </div>
+
               <p className="mt-4">
-                Students across multiple countries used NoteOverflow for topical
-                filtering, cloud-synced annotations, and progress tracking. The
-                engagement metrics proved the demand was real.
+                Students across multiple countries used NoteOverflow, namely:
+                Nigeria, the United States, the United Kingdom, UAE, Bangladesh,
+                Pakistan, Nepal, Malaysia, Singapore, Indonesia,the Philippines,
+                Vietnams ...
               </p>
               <p className="mt-3 text-red-500 font-bold text-lg">
                 But I built it on a flawed foundation.
@@ -171,9 +199,10 @@ export default function MaintenancePage() {
               </h2>
               <p>
                 The technical infrastructure I built—semantic search with vector
-                embeddings, cloud-synced PDF annotations, progress tracking—that
-                work is legitimate and valuable. The mistake was in the content
-                source, not the innovation.
+                embeddings, topical question filtering, cloud-synced PDF
+                annotations, progress tracking, bookmarking—that work is
+                legitimate and valuable. The mistake was in the content source,
+                not the innovation.
               </p>
               <p className="mt-3">
                 I&apos;m now exploring how to rebuild NoteOverflow properly:
