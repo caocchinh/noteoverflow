@@ -20,7 +20,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@elysiajs/eden": "^1.4.6",
-    "@opennextjs/cloudflare": "^1.14.8",
+    "@opennextjs/cloudflare": "^1.14.9",
     "@pdftron/webviewer": "^11.9.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

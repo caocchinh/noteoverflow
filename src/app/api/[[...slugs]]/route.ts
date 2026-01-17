@@ -2,6 +2,8 @@ import { Elysia, t } from "elysia";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
+import { getBookmarkListMetadata } from "@/server/api/getBookmarkListMetadata";
+import { getBookmarkQuestions } from "@/server/api/getBookmarkQuestions";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
 import {
@@ -64,6 +66,24 @@ const app = new Elysia({ prefix: "/api", aot: false })
   .get("/topical/bookmark/:bookmarkId", getBookmarkById, {
     params: t.Object({
       bookmarkId: t.String(),
+    }),
+  })
+
+  // GET /api/topical/bookmark-list/:listId/metadata - Get aggregated metadata for a list
+  .get("/topical/bookmark-list/:listId/metadata", getBookmarkListMetadata, {
+    params: t.Object({
+      listId: t.String(),
+    }),
+  })
+
+  // GET /api/topical/bookmark-list/:listId/questions - Get filtered questions
+  .get("/topical/bookmark-list/:listId/questions", getBookmarkQuestions, {
+    params: t.Object({
+      listId: t.String(),
+    }),
+    query: t.Object({
+      curriculum: t.String(),
+      subject: t.String(),
     }),
   })
 

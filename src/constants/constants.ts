@@ -29,7 +29,7 @@ export const TOPICAL_QUESTION_BOOKMARK_ROUTE = "/topical/bookmark";
 export const TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE = "/topical/finished";
 
 export const MAXIMUM_BOOKMARK_LISTS_PER_USER = 30;
-export const MAXIMUM_BOOKMARKS_PER_LIST = 300;
+export const MAXIMUM_BOOKMARKS_PER_LIST = 1000;
 
 export const BESTEXAMHELP_DOMAIN = "https://bestexamhelp.com/exam";
 

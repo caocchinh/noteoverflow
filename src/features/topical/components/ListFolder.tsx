@@ -62,7 +62,7 @@ export const ListFolder = ({
   listId: string;
   BETTER_AUTH_URL: string;
   visibility: "public" | "private";
-  metadata: BookmarksMetadata;
+  metadata: BookmarksMetadata | null;
   setChosenList: Dispatch<
     SetStateAction<{
       id: string;
@@ -77,6 +77,7 @@ export const ListFolder = ({
   const [isRenameAlertDialogOpen, setIsRenameAlertDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState(listName);
   const allListNameUnderCurrentVisibility = useMemo(() => {
+    if (!metadata) return [];
     return Object.keys(metadata[visibility]).map(
       (listId) => metadata[visibility][listId].listName
     );
@@ -91,6 +92,7 @@ export const ListFolder = ({
     visibility
   );
   const allListNameUnderNewVisibility = useMemo(() => {
+    if (!metadata) return [];
     return Object.keys(metadata[newVisibility]).map(
       (listId) => metadata[newVisibility][listId].listName
     );

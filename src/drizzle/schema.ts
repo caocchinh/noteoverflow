@@ -283,7 +283,10 @@ export const userBookmarks = sqliteTable(
       .notNull(),
   },
   (table) => {
-    return [primaryKey({ columns: [table.listId, table.questionId] })];
+    return [
+      primaryKey({ columns: [table.listId, table.questionId] }),
+      index("idx_bookmarks_list_user").on(table.listId, table.userId),
+    ];
   }
 );
 

@@ -6,13 +6,8 @@ import {
   SubjectMetadata,
   BreadcrumbContentProps,
 } from "@/features/topical/constants/types";
-import {
-  computeBookmarksMetadata,
-  truncateListName,
-  computeSubjectMetadata,
-  filterQuestionsByCriteria,
-} from "@/features/topical/lib/utils";
-import { useMutationState } from "@tanstack/react-query";
+import { truncateListName } from "@/features/topical/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
@@ -34,27 +29,13 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/eden";
+import type { BookmarkListMetadataResponse } from "@/server/api/getBookmarkListMetadata";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
-
-  const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
+  const { bookmarksData: bookmarkLists, savedActivitiesIsFetching } =
     useTopicalApp();
-
-  const settledBookmarksMutations = useMutationState({
-    filters: {
-      mutationKey: ["user_saved_activities", "bookmarks"],
-      predicate: (mutation) =>
-        mutation.state.status === "success" ||
-        mutation.state.status === "error",
-    },
-  });
-
-  const metadata = useMemo(() => {
-    if (!bookmarks) return null;
-    return computeBookmarksMetadata(bookmarks);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookmarks, settledBookmarksMutations]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -62,52 +43,120 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     visibility: "public" | "private";
     listName: string;
   } | null>(null);
-
-  const curriculumnMetadata = useMemo(() => {
-    if (
-      !chosenList ||
-      !metadata ||
-      !metadata[chosenList.visibility] ||
-      !metadata[chosenList.visibility][chosenList.id]
-    )
-      return null;
-    return metadata[chosenList.visibility][chosenList.id].curricula;
-  }, [chosenList, metadata]);
-
-  const questionUnderThatBookmarkList = useMemo(() => {
-    if (!chosenList) return null;
-    return bookmarks?.find((bookmark) => bookmark.id === chosenList.id)
-      ?.userBookmarks;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chosenList, bookmarks, settledBookmarksMutations]);
   const [selectedCurriculumn, setSelectedCurriculum] =
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
-  const subjectMetadata = useMemo(() => {
-    return computeSubjectMetadata(
-      questionUnderThatBookmarkList || [],
-      selectedCurriculumn,
-      selectedSubject
-    );
-  }, [selectedCurriculumn, selectedSubject, questionUnderThatBookmarkList]);
-  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
-  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
     null
   );
-  const topicalData = useMemo(() => {
-    return filterQuestionsByCriteria(
-      questionUnderThatBookmarkList,
-      currentFilter,
+  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
+  const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
+
+  // Fetch list metadata when a list is selected (lazy loading)
+  const {
+    data: listMetadata,
+    isLoading: isMetadataLoading,
+    isError: isMetadataError,
+  } = useQuery({
+    queryKey: ["bookmark-list-metadata", chosenList?.id],
+    queryFn: async () => {
+      if (!chosenList?.id) return null;
+      const { data, error } = await api.topical["bookmark-list"]({
+        listId: chosenList.id,
+      }).metadata.get();
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error);
+      }
+      return data as BookmarkListMetadataResponse;
+    },
+    enabled: !!chosenList?.id,
+    staleTime: 30 * 60 * 1000, // Cache for 30 minutes
+    gcTime: 60 * 60 * 1000, // Keep in garbage collection for 1 hour
+  });
+
+  // Fetch filtered questions when curriculum + subject are selected
+  const {
+    data: questionsData,
+    isLoading: isQuestionsLoading,
+    isError: isQuestionsError,
+  } = useQuery({
+    queryKey: [
+      "bookmark-questions",
+      chosenList?.id,
       selectedCurriculumn,
-      selectedSubject
-    );
-  }, [
-    currentFilter,
-    questionUnderThatBookmarkList,
-    selectedCurriculumn,
-    selectedSubject,
-  ]);
+      selectedSubject,
+    ],
+    queryFn: async () => {
+      if (!chosenList?.id || !selectedCurriculumn || !selectedSubject)
+        return null;
+      const { data, error } = await api.topical["bookmark-list"]({
+        listId: chosenList.id,
+      }).questions.get({
+        query: {
+          curriculum: selectedCurriculumn,
+          subject: selectedSubject,
+        },
+      });
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error);
+      }
+      return data;
+    },
+    enabled: !!chosenList?.id && !!selectedCurriculumn && !!selectedSubject,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+  });
+
+  // Derive subject metadata from fetched questions
+  const subjectMetadata = useMemo((): SubjectMetadata | null => {
+    if (!questionsData?.questions || questionsData.questions.length === 0)
+      return null;
+
+    const temp: SubjectMetadata = {
+      topic: [],
+      year: [],
+      paperType: [],
+      season: [],
+    };
+
+    questionsData.questions.forEach(({ question }) => {
+      question.topics.forEach((topic) => {
+        if (topic && !temp.topic.includes(topic)) {
+          temp.topic.push(topic);
+        }
+      });
+      if (!temp.year.includes(question.year.toString())) {
+        temp.year.push(question.year.toString());
+      }
+      if (!temp.paperType.includes(question.paperType.toString())) {
+        temp.paperType.push(question.paperType.toString());
+      }
+      if (!temp.season.includes(question.season)) {
+        temp.season.push(question.season);
+      }
+    });
+
+    return temp;
+  }, [questionsData]);
+
+  // Filter displayed questions based on current filter
+  const topicalData = useMemo(() => {
+    if (!questionsData?.questions || !currentFilter) return [];
+
+    return questionsData.questions.filter(({ question }) => {
+      if (!currentFilter.paperType.includes(question.paperType.toString()))
+        return false;
+      if (!currentFilter.year.includes(question.year.toString())) return false;
+      if (!currentFilter.season.includes(question.season)) return false;
+      const hasTopicOverlap = question.topics.some(
+        (topic) => topic && currentFilter.topic.includes(topic)
+      );
+      if (!hasTopicOverlap) return false;
+      return true;
+    });
+  }, [questionsData, currentFilter]);
 
   const isQuestionViewDisabled = useMemo(() => {
     return (
@@ -126,24 +175,48 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     topicalData,
   ]);
 
+  // Build simple metadata from bookmark lists for initial list view
+  const listsMetadata = useMemo(() => {
+    if (!bookmarkLists) return null;
+    const metadata: {
+      public: Record<string, { listName: string }>;
+      private: Record<string, { listName: string }>;
+    } = { public: {}, private: {} };
+
+    bookmarkLists.forEach((list) => {
+      const visibility = list.visibility as "public" | "private";
+      metadata[visibility][list.id] = { listName: list.listName };
+    });
+
+    return metadata;
+  }, [bookmarkLists]);
+
   // Before breadcrumb content
   const preContent = (
     <>
-      {(savedActivitiesIsFetching || isSessionPending) && (
+      {(savedActivitiesIsFetching ||
+        isSessionPending ||
+        isMetadataLoading ||
+        isQuestionsLoading) && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <Loader2 className="animate-spin" />
         </div>
       )}
 
-      {Object.keys(metadata?.private || {}).length === 0 &&
-        Object.keys(metadata?.public || {}).length === 0 &&
-        !savedActivitiesIsFetching &&
+      {!savedActivitiesIsFetching &&
         !isAuthenticated &&
-        !isSessionPending && (
-          <p className="text-sm  text-red-500 text-center">
+        !isSessionPending &&
+        bookmarkLists?.length === 0 && (
+          <p className="text-sm text-red-500 text-center">
             You are not signed in. Please sign to create a list!
           </p>
         )}
+
+      {(isMetadataError || isQuestionsError) && (
+        <p className="text-sm text-red-500 text-center">
+          Error loading data. Please try again.
+        </p>
+      )}
     </>
   );
 
@@ -172,6 +245,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   setChosenList(null);
                   setSelectedCurriculum(null);
                   setSelecteSubject(null);
+                  setCurrentFilter(null);
                 }}
               >
                 {chosenList ? (
@@ -196,6 +270,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     onClick={() => {
                       setSelectedCurriculum(null);
                       setSelecteSubject(null);
+                      setCurrentFilter(null);
                     }}
                   >
                     Curriculum
@@ -209,6 +284,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                     className="cursor-pointer"
                     onClick={() => {
                       setSelecteSubject(null);
+                      setCurrentFilter(null);
                     }}
                   >
                     Subject
@@ -248,39 +324,40 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   // Main content
   const mainContent = (
     <>
-      {metadata && !chosenList && isAuthenticated && (
+      {/* List selection view */}
+      {listsMetadata && !chosenList && isAuthenticated && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <h1 className="font-semibold text-2xl">Choose your list</h1>
           <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
-            {metadata?.private && Object.keys(metadata.private).length > 0 && (
+            {Object.keys(listsMetadata.private).length > 0 && (
               <div className="flex flex-col gap-2 w-full items-start justify-center">
                 <h2 className="font text-lg text-logo-main">Private</h2>
                 <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                  {Object.keys(metadata.private).map((listId) => (
+                  {Object.keys(listsMetadata.private).map((listId) => (
                     <ListFolder
                       BETTER_AUTH_URL={BETTER_AUTH_URL}
                       listId={listId}
-                      listName={metadata.private[listId].listName}
+                      listName={listsMetadata.private[listId].listName}
                       visibility="private"
                       key={listId}
-                      metadata={metadata}
+                      metadata={null}
                       setChosenList={setChosenList}
                     />
                   ))}
                 </div>
               </div>
             )}
-            {metadata?.public && Object.keys(metadata.public).length > 0 && (
+            {Object.keys(listsMetadata.public).length > 0 && (
               <div className="flex flex-col gap-2 w-full items-start justify-center">
                 <h2 className="font text-lg text-logo-main">Public</h2>
                 <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
-                  {Object.keys(metadata.public).map((listId) => (
+                  {Object.keys(listsMetadata.public).map((listId) => (
                     <ListFolder
-                      listName={metadata.public[listId].listName}
+                      listName={listsMetadata.public[listId].listName}
                       BETTER_AUTH_URL={BETTER_AUTH_URL}
                       listId={listId}
                       visibility="public"
-                      metadata={metadata}
+                      metadata={null}
                       key={listId}
                       setChosenList={setChosenList}
                     />
@@ -288,8 +365,8 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 </div>
               </div>
             )}
-            {Object.keys(metadata?.private || {}).length === 0 &&
-              Object.keys(metadata?.public || {}).length === 0 &&
+            {Object.keys(listsMetadata.private).length === 0 &&
+              Object.keys(listsMetadata.public).length === 0 &&
               !savedActivitiesIsFetching &&
               isAuthenticated &&
               !isSessionPending && (
@@ -307,14 +384,15 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         </div>
       )}
 
-      {curriculumnMetadata && !selectedCurriculumn && (
+      {/* Curriculum selection view - uses lazy-loaded metadata */}
+      {listMetadata && !selectedCurriculumn && chosenList && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
           <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
-            {Object.keys(curriculumnMetadata).length === 0 && (
+            {Object.keys(listMetadata.curricula).length === 0 && (
               <div className="flex flex-col gap-4 items-center justify-center w-full">
                 <p className="text-sm text-muted-foreground text-center">
-                  No curriculums found. Search for questions and add them to a
+                  No curriculums found. Search for questions and add them to
                   this list!
                 </p>
                 <NavigateToTopicalApp>
@@ -322,7 +400,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                 </NavigateToTopicalApp>
               </div>
             )}
-            {Object.keys(curriculumnMetadata).map((curriculum) => (
+            {Object.keys(listMetadata.curricula).map((curriculum) => (
               <div
                 key={curriculum}
                 className="flex flex-col items-center justify-center gap-1 cursor-pointer"
@@ -349,58 +427,65 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           </div>
         </div>
       )}
-      {curriculumnMetadata && selectedCurriculumn && !selectedSubject && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your subject</h1>
-          {Object.keys(curriculumnMetadata).length > 0 ? (
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {curriculumnMetadata?.[selectedCurriculumn]?.subjects?.map(
-                  (subject) => (
-                    <div
-                      key={subject}
-                      className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
-                      onClick={() => {
-                        setSelecteSubject(subject);
-                      }}
-                    >
-                      <Image
-                        width={150}
-                        height={200}
-                        loading="lazy"
-                        title={subject}
-                        className="object-cover rounded-[3px] "
-                        alt="Curriculum cover image"
-                        src={
-                          SUBJECT_COVER_IMAGE[
-                            selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                          ][subject]
-                        }
-                      />
-                      <p className="text-sm text-muted-foreground text-center px-1">
-                        {subject}
-                      </p>
-                    </div>
-                  )
-                )}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground text-center">
-                No subjects found. Search for questions and add them to a this
-                list!
-              </p>
-              <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
-            </div>
-          )}
-        </div>
-      )}
 
-      {topicalData?.length === 0 && selectedSubject && (
+      {/* Subject selection view */}
+      {listMetadata &&
+        selectedCurriculumn &&
+        !selectedSubject &&
+        listMetadata.curricula[selectedCurriculumn] && (
+          <div className="flex flex-col gap-4 items-center justify-center w-full">
+            <h1 className="font-semibold text-2xl">Choose your subject</h1>
+            {listMetadata.curricula[selectedCurriculumn].subjects.length > 0 ? (
+              <ScrollArea
+                className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+                type="always"
+              >
+                <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+                  {listMetadata.curricula[selectedCurriculumn].subjects.map(
+                    (subject) => (
+                      <div
+                        key={subject}
+                        className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
+                        onClick={() => {
+                          setSelecteSubject(subject);
+                        }}
+                      >
+                        <Image
+                          width={150}
+                          height={200}
+                          loading="lazy"
+                          title={subject}
+                          className="object-cover rounded-[3px] "
+                          alt="Curriculum cover image"
+                          src={
+                            SUBJECT_COVER_IMAGE[
+                              selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                            ][subject]
+                          }
+                        />
+                        <p className="text-sm text-muted-foreground text-center px-1">
+                          {subject}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="flex flex-col gap-4 items-center justify-center w-full">
+                <p className="text-sm text-muted-foreground text-center">
+                  No subjects found. Search for questions and add them to this
+                  list!
+                </p>
+                <NavigateToTopicalApp>
+                  Search for questions{" "}
+                </NavigateToTopicalApp>
+              </div>
+            )}
+          </div>
+        )}
+
+      {topicalData?.length === 0 && selectedSubject && !isQuestionsLoading && (
         <div className="flex flex-col gap-4 items-center justify-center w-full">
           <p className="text-sm text-muted-foreground text-center">
             No questions found. Search for questions and add them to this list!
