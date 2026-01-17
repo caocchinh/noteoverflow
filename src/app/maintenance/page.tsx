@@ -42,7 +42,7 @@ export default function MaintenancePage() {
               </p>
 
               {/* Metrics Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
                 <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
                   <p className="text-3xl font-bold text-blue-400">2,000+</p>
                   <p className="text-sm text-gray-400 mt-1">Students Served</p>
@@ -61,6 +61,18 @@ export default function MaintenancePage() {
                   <p className="text-3xl font-bold text-purple-400">31 min</p>
                   <p className="text-sm text-gray-400 mt-1">
                     Avg. Session Time
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                  <p className="text-3xl font-bold text-rose-400">25,797</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Finished Questions
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                  <p className="text-3xl font-bold text-cyan-400">3,062</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Questions Bookmarked
                   </p>
                 </div>
               </div>
@@ -98,7 +110,8 @@ export default function MaintenancePage() {
               </div>
 
               <p className="mt-4">
-                Students across multiple countries used NoteOverflow, namely:
+                I saw talented students across multiple countries used
+                NoteOverflow for their rigorous exam preparation, namely:
                 Nigeria, the United States, the United Kingdom, the UAE,
                 Bangladesh, Pakistan, Nepal, Malaysia, Singapore, Indonesia, the
                 Philippines, Vietnams ...
@@ -280,8 +293,11 @@ export default function MaintenancePage() {
                 classmates, and believed in what I was building. I&apos;m deeply
                 grateful. You showed me that this mission matters.
               </p>
-              <p className="mt-3 text-amber-400">
-                This isn&apos;t goodbye. It&apos;s a &ldquo;see you soon.&rdquo;
+              <p className="mt-4 text-amber-400 font-medium">
+                I haven&apos;t abandoned you. This isn&apos;t goodbye. It&apos;s
+                a &ldquo;see you soon&rdquo; .The platform you relied on taught
+                me how to build the platform you deserve. Version 2.0 will serve
+                you properly,and for the long term.
               </p>
             </section>
 
