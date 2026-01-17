@@ -309,36 +309,6 @@ export default function HomePage() {
               name="Mr. Cao Cự Chính"
               title="Founder & Developer"
             />
-            <p className="w-[350px] text-left text-(--home-page-text-muted) text-xs">
-              *This project is purely 100% created with pride by a 12th grader
-              Vietnamese student at Vinschool Central Park.{" "}
-              <span>
-                <Image
-                  alt="Vinschool"
-                  className="-mt-[5px] inline-block"
-                  height={20}
-                  src="/assets/vn.svg"
-                  width={20}
-                />
-              </span>
-            </p>
-            <motion.a
-              className="-mt-2 text-white"
-              href="https://github.com/caocchinh"
-              rel="noopener"
-              target="_blank"
-              title="Visit founder's GitHub"
-              whileHover={{
-                rotateZ: -10,
-                transition: {
-                  duration: 0.2,
-                  ease: "easeOut",
-                },
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Github />
-            </motion.a>
           </div>
 
           <div className="relative z-20 flex w-[90%] flex-col items-center justify-center md:w-[450px]">
@@ -351,6 +321,45 @@ export default function HomePage() {
             </p>
           </div>
         </section>
+
+        {/* Footer */}
+        <footer className="relative z-1000 bg-(--home-page-bg) border-t border-(--home-page-border) py-8 px-4">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/assets/logo-bg-colorised-modified-small.webp"
+                alt="NoteOverflow"
+                height={24}
+                width={24}
+              />
+              <span className="text-sm text-(--home-page-text-muted)">
+                © {new Date().getFullYear()} NoteOverflow. All rights reserved.
+              </span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/disclaimer"
+                className="text-sm text-(--home-page-text-muted) hover:text-(--home-page-text) transition-colors"
+              >
+                Disclaimer
+              </Link>
+              <Link
+                href="https://github.com/caocchinh/noteoverflow"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-(--home-page-text-muted) hover:text-(--home-page-text) transition-colors flex items-center gap-1"
+              >
+                <Github className="h-4 w-4" />
+                GitHub
+              </Link>
+            </div>
+          </div>
+          <p className="text-center text-xs text-(--home-page-text-muted) mt-4 max-w-2xl mx-auto">
+            NoteOverflow is not affiliated with Cambridge Assessment
+            International Education. All examination materials are property of
+            their respective copyright holders.
+          </p>
+        </footer>
       </ClickSpark>
     </div>
   );

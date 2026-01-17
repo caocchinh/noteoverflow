@@ -27,6 +27,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Github } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -213,11 +222,81 @@ const TopicalClient = ({
         </SidebarProvider>
       </div>
       <SupportDialog />
+      <CopyrightAnnouncementDialog />
     </>
   );
 };
 
 export default TopicalClient;
+
+const CopyrightAnnouncementDialog = memo(() => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeenCopyrightAnnouncement = localStorage.getItem(
+      "hasSeenCopyrightAnnouncement",
+    );
+    if (!hasSeenCopyrightAnnouncement) {
+      // Show immediately when user first visits
+      setIsOpen(true);
+    }
+  }, []);
+
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      setIsOpen(false);
+      localStorage.setItem("hasSeenCopyrightAnnouncement", "true");
+    }
+  };
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={handleClose}>
+      <AlertDialogContent className="sm:max-w-[450px]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-center flex items-center justify-center gap-2">
+            ⚠️ Important Announcement
+          </AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3 pt-2 text-left">
+              <p>
+                The <strong>download</strong> and <strong>export</strong>{" "}
+                features have been <strong>permanently disabled</strong> due to
+                copyright considerations.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Cambridge Assessment International Education holds the copyright
+                for all examination materials. Reproducing and distributing
+                these materials without explicit permission may constitute
+                copyright infringement.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                You can still browse, annotate, and bookmark questions. Your
+                annotations are saved to your account.
+              </p>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="w-full flex-col gap-2 sm:flex-col">
+          <AlertDialogAction
+            onClick={() => handleClose(false)}
+            className="w-full"
+          >
+            I Understand
+          </AlertDialogAction>
+          <Link
+            href="/disclaimer"
+            className="text-sm text-muted-foreground hover:text-foreground underline text-center"
+            onClick={() => handleClose(false)}
+          >
+            Read full disclaimer
+          </Link>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+});
+
+CopyrightAnnouncementDialog.displayName = "CopyrightAnnouncementDialog";
 
 const SupportDialog = memo(() => {
   const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);

@@ -13,7 +13,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { ScanText, Send } from "lucide-react";
+import { ScanText, Send, FileText } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiltersCache,
@@ -48,6 +48,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 import CoursebookCover from "./CoursebookCover";
+import Link from "next/link";
 
 const AppSidebar = memo(
   ({
@@ -98,7 +99,7 @@ const AppSidebar = memo(
           appUltilityBarRef.current?.overflowScrollHandler?.();
         }
       },
-      [appUltilityBarRef]
+      [appUltilityBarRef],
     );
 
     const availableSubjects = useMemo(() => {
@@ -110,9 +111,9 @@ const AppSidebar = memo(
     const subjectSyllabus = useMemo(
       () =>
         TOPICAL_DATA.find(
-          (item) => item.curriculum === selectedCurriculum
+          (item) => item.curriculum === selectedCurriculum,
         )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink,
-      [selectedCurriculum, selectedSubject]
+      [selectedCurriculum, selectedSubject],
     );
 
     const availableTopicsFullInfo = useMemo(() => {
@@ -256,7 +257,7 @@ const AppSidebar = memo(
         selectedPaperType,
         selectedSeason,
         setInvalidInputs,
-      ]
+      ],
     );
 
     useEffect(() => {
@@ -303,7 +304,7 @@ const AppSidebar = memo(
       if (searchParams.queryKey) {
         try {
           parsedQueryFromSearchParams = JSON.parse(
-            searchParams.queryKey as string
+            searchParams.queryKey as string,
           );
         } catch {
           parsedQueryFromSearchParams = undefined;
@@ -314,7 +315,7 @@ const AppSidebar = memo(
           !validateCurriculum(parsedQueryFromSearchParams.curriculumId) ||
           !validateSubject(
             parsedQueryFromSearchParams.curriculumId,
-            parsedQueryFromSearchParams.subjectId
+            parsedQueryFromSearchParams.subjectId,
           ) ||
           !validateFilterData({
             data: {
@@ -355,12 +356,12 @@ const AppSidebar = memo(
           validateCurriculum(parsedState.lastSessionCurriculum)
         ) {
           setSelectedCurriculum(
-            parsedState.lastSessionCurriculum as ValidCurriculum
+            parsedState.lastSessionCurriculum as ValidCurriculum,
           );
           curriculumn = parsedState.lastSessionCurriculum;
           const isSubjectValid = validateSubject(
             parsedState.lastSessionCurriculum,
-            parsedState.lastSessionSubject
+            parsedState.lastSessionSubject,
           );
           if (parsedState.lastSessionSubject && isSubjectValid) {
             setSelectedSubject(parsedState.lastSessionSubject);
@@ -380,22 +381,22 @@ const AppSidebar = memo(
             setSelectedTopic(
               parsedState.filters[parsedState.lastSessionCurriculum][
                 parsedState.lastSessionSubject
-              ].topic
+              ].topic,
             );
             setSelectedPaperType(
               parsedState.filters[parsedState.lastSessionCurriculum][
                 parsedState.lastSessionSubject
-              ].paperType
+              ].paperType,
             );
             setSelectedYear(
               parsedState.filters[parsedState.lastSessionCurriculum][
                 parsedState.lastSessionSubject
-              ].year
+              ].year,
             );
             setSelectedSeason(
               parsedState.filters[parsedState.lastSessionCurriculum][
                 parsedState.lastSessionSubject
-              ].season
+              ].season,
             );
           }
         }
@@ -403,7 +404,7 @@ const AppSidebar = memo(
         curriculumn = parsedQueryFromSearchParams.curriculumId;
         subject = parsedQueryFromSearchParams.subjectId;
         setSelectedCurriculum(
-          parsedQueryFromSearchParams.curriculumId as ValidCurriculum
+          parsedQueryFromSearchParams.curriculumId as ValidCurriculum,
         );
         setSelectedSubject(parsedQueryFromSearchParams.subjectId);
         setSelectedPaperType(parsedQueryFromSearchParams.paperType);
@@ -486,7 +487,7 @@ const AppSidebar = memo(
           if (parsedUiPreferences.isPersistantCacheEnabled) {
             const isSubjectValid = validateSubject(
               selectedCurriculum,
-              selectedSubject
+              selectedSubject,
             );
             if (selectedSubject && isSubjectValid) {
               setSelectedSubject(selectedSubject);
@@ -537,17 +538,17 @@ const AppSidebar = memo(
               })
             ) {
               setSelectedTopic(
-                parsedState.filters[selectedCurriculum][selectedSubject].topic
+                parsedState.filters[selectedCurriculum][selectedSubject].topic,
               );
               setSelectedPaperType(
                 parsedState.filters[selectedCurriculum][selectedSubject]
-                  .paperType
+                  .paperType,
               );
               setSelectedYear(
-                parsedState.filters[selectedCurriculum][selectedSubject].year
+                parsedState.filters[selectedCurriculum][selectedSubject].year,
               );
               setSelectedSeason(
-                parsedState.filters[selectedCurriculum][selectedSubject].season
+                parsedState.filters[selectedCurriculum][selectedSubject].season,
               );
             } else {
               setSelectedTopic([]);
@@ -657,7 +658,7 @@ const AppSidebar = memo(
         setCurrentQuery,
         isMobileDevice,
         setIsAppSidebarOpen,
-      ]
+      ],
     );
 
     return (
@@ -669,6 +670,13 @@ const AppSidebar = memo(
         <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
         <ScrollArea className="h-full" type="always">
           <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
+            <Link
+              href="/disclaimer"
+              className="flex w-full items-center justify-start gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <FileText className="h-4 w-4" />
+              Disclaimer
+            </Link>
             <RecentQuery
               ref={recentQueryRef}
               setIsSidebarOpen={setIsAppSidebarOpen}
@@ -683,6 +691,7 @@ const AppSidebar = memo(
               setSelectedSeason={setSelectedSeason}
               isOverwriting={isOverwriting}
             />
+
             <StrictModeToggle />
             <SidebarSeparator />
 
@@ -703,7 +712,7 @@ const AppSidebar = memo(
                       <h3
                         className={cn(
                           "w-max font-medium text-sm",
-                          invalidInputs.curriculum && "text-destructive"
+                          invalidInputs.curriculum && "text-destructive",
                         )}
                       >
                         Curriculum
@@ -731,7 +740,7 @@ const AppSidebar = memo(
                       <h3
                         className={cn(
                           "w-max font-medium text-sm",
-                          invalidInputs.subject && "text-destructive"
+                          invalidInputs.subject && "text-destructive",
                         )}
                       >
                         Subject
@@ -762,7 +771,7 @@ const AppSidebar = memo(
                   <h3
                     className={cn(
                       "w-max font-medium text-sm",
-                      invalidInputs.topic && "text-destructive"
+                      invalidInputs.topic && "text-destructive",
                     )}
                   >
                     Topic
@@ -775,7 +784,7 @@ const AppSidebar = memo(
                     label="Topic"
                     onValuesChange={useCallback(
                       (values) => setSelectedTopic(values as string[]),
-                      []
+                      [],
                     )}
                     selectedValues={selectedTopic}
                   />
@@ -792,7 +801,7 @@ const AppSidebar = memo(
                   <h3
                     className={cn(
                       "w-max font-medium text-sm",
-                      invalidInputs.paperType && "text-destructive"
+                      invalidInputs.paperType && "text-destructive",
                     )}
                   >
                     Paper
@@ -805,7 +814,7 @@ const AppSidebar = memo(
                     label="Paper"
                     onValuesChange={useCallback(
                       (values) => setSelectedPaperType(values as string[]),
-                      []
+                      [],
                     )}
                     selectedValues={selectedPaperType}
                   />
@@ -822,7 +831,7 @@ const AppSidebar = memo(
                   <h3
                     className={cn(
                       "w-max font-medium text-sm",
-                      invalidInputs.year && "text-destructive"
+                      invalidInputs.year && "text-destructive",
                     )}
                   >
                     Year
@@ -832,7 +841,7 @@ const AppSidebar = memo(
                     label="Year"
                     onValuesChange={useCallback(
                       (values) => setSelectedYear(values as string[]),
-                      []
+                      [],
                     )}
                     selectedValues={selectedYear}
                   />
@@ -847,7 +856,7 @@ const AppSidebar = memo(
                   <h3
                     className={cn(
                       "w-max font-medium text-sm",
-                      invalidInputs.season && "text-destructive"
+                      invalidInputs.season && "text-destructive",
                     )}
                   >
                     Season
@@ -857,7 +866,7 @@ const AppSidebar = memo(
                     label="Season"
                     onValuesChange={useCallback(
                       (values) => setSelectedSeason(values as string[]),
-                      []
+                      [],
                     )}
                     selectedValues={selectedSeason}
                   />
@@ -899,7 +908,7 @@ const AppSidebar = memo(
         <SidebarRail disabled={isExportModeEnabled} />
       </Sidebar>
     );
-  }
+  },
 );
 
 AppSidebar.displayName = "AppSidebar";
@@ -947,6 +956,6 @@ const ShareFilterButton = memo(
         <QR url={filterUrl} isOpen={isOpen} setIsOpen={setIsOpen} />
       </>
     );
-  }
+  },
 );
 ShareFilterButton.displayName = "ShareFilterButton";

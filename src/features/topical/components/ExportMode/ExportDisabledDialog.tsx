@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Download, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface ExportDisabledDialogProps {
   isQuestionViewDisabled?: boolean;
@@ -58,7 +59,7 @@ const ExportDisabledDialog = memo(
               <DialogDescription asChild>
                 <div className="space-y-3 pt-2">
                   <p>
-                    The PDF export feature has been temporarily disabled due to{" "}
+                    The PDF export feature has been disabled due to{" "}
                     <strong>copyright considerations</strong>.
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -67,20 +68,23 @@ const ExportDisabledDialog = memo(
                     distributing these materials without explicit permission may
                     constitute copyright infringement.
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    We are exploring ways to provide this feature in compliance
-                    with copyright law. Thank you for your understanding.
-                  </p>
                 </div>
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
+            <DialogFooter className="flex-col gap-2 sm:flex-col">
               <Button
                 onClick={() => setIsOpen(false)}
-                className="cursor-pointer"
+                className="cursor-pointer w-full"
               >
                 I Understand
               </Button>
+              <Link
+                href="/disclaimer"
+                className="text-sm text-muted-foreground hover:text-foreground underline text-center"
+                onClick={() => setIsOpen(false)}
+              >
+                Read full disclaimer
+              </Link>
             </DialogFooter>
           </DialogContent>
         </Dialog>

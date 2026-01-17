@@ -79,12 +79,6 @@ NoteOverflow is packed with features tailored for Cambridge AS and A-Level exam 
 <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/bookmark.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 <img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/select_subject.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
 
-- **📄 Mass PDF Export**: Select specific questions, topics, or years to compile into a single PDF file. Preview your selection and generate custom exam papers for offline practice or printing.
-
-<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export1.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-top:-10px;margin-bottom:10px; border: 3px solid #0084ff;margin-bottom:10px;" />
-<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export2.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
-<img src="https://raw.githubusercontent.com/caocchinh/noteoverflow/refs/heads/master/public/assets/github/export3.webp" alt="Topical Question Browser Screenshot" style="border-radius: 10px;margin-bottom:10px; border: 3px solid #0084ff;" />
-
 ## 🛠️ Tech Stack
 
 NoteOverflow is built using cutting-edge technologies to ensure scalability, performance, and developer experience:
@@ -106,6 +100,36 @@ NoteOverflow is built using cutting-edge technologies to ensure scalability, per
 > I am actively working on stabilizing the platform and will open contributions to the community once I reach a stable release. Thank you for your interest and patience!
 
 Stay tuned for updates on when I'll be accepting contributions. In the meantime, feel free to star ⭐ the repository to show your support and stay notified of future releases!
+
+## ⚠️ Disclaimer
+
+> **Important**: Please read this disclaimer carefully before using NoteOverflow.
+
+### Copyright & Intellectual Property
+
+All examination materials displayed on this platform, including question papers, mark schemes, examiner reports, and grade thresholds, are the intellectual property of **Cambridge Assessment International Education (CAIE)**. These materials are reproduced here for **educational purposes only**.
+
+NoteOverflow does not claim ownership of any Cambridge examination materials. All rights to the original content remain with Cambridge Assessment International Education.
+
+### No Affiliation
+
+NoteOverflow is an **independent, open-source project** and is **not affiliated with, endorsed by, or sponsored by** Cambridge Assessment International Education, Cambridge University Press, or any associated organizations.
+
+### Educational Use Only
+
+This platform is intended **solely for educational purposes** to assist students in their examination preparation. Users are encouraged to obtain official materials directly from Cambridge Assessment International Education or their registered Cambridge school.
+
+### Download & Export Restrictions
+
+In compliance with copyright considerations, the **download and export features have been disabled**. Users may view and annotate materials within the platform but may not download or redistribute any copyrighted content.
+
+### DMCA & Takedown Requests
+
+If you are a copyright holder and believe content on this platform infringes upon your rights, please contact us. We will respond to valid takedown requests in accordance with applicable laws.
+
+---
+
+For the full disclaimer, visit [noteoverflow.com/disclaimer](https://noteoverflow.com/disclaimer).
 
 ## 📄 License
 
