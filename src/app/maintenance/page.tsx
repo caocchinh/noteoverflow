@@ -28,6 +28,20 @@ export default function MaintenancePage() {
             Rebuilding on Solid Foundations
           </h1>
 
+          {/* Abstract */}
+          <div className="mt-6 p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+            <p className="text-gray-300 leading-relaxed">
+              I am the founder of NoteOverflow. Sadly, I have to voluntarily
+              shut down the platform due to the ethical and legal implications
+              of redistributing Cambridge Assessment&apos;s copyrighted
+              examination materials without permission. While my intentions were
+              to help students access practice resources, I have come to realize
+              that building on someone else&apos;s intellectual property without
+              authorization is not sustainable, nor is it right. This page
+              explains what happened, what I learned, and what comes next.
+            </p>
+          </div>
+
           <div className="space-y-8 text-gray-300 mt-8">
             {/* What Started Here */}
             <section>
@@ -165,10 +179,37 @@ export default function MaintenancePage() {
                     Reproducing past papers on websites →
                   </Link>
                 </div>
+                <blockquote className="border-l-4 border-red-500 pl-4 py-2 text-white italic mt-4">
+                  &ldquo;We are unable to give permission to publish past
+                  examination papers on any website or school intranet. This is
+                  due to the lack of control over the material once it is
+                  published on the internet. There have been several incidents
+                  of misuse of our material (including its sale online) and for
+                  this reason we do not give permission for publication on the
+                  internet.&rdquo;
+                </blockquote>
+                <p className="text-sm text-gray-400 mt-2">
+                  — Source: Cambridge Assessment International Education,
+                  Official Permission Guidelines
+                </p>
                 <p className="mt-4 text-amber-400 text-sm font-medium">
                   💡 Translation: There is zero chance a student-run platform
                   like NoteOverflow would ever receive official permission from
                   Cambridge. The path I chose was never going to be sustainable.
+                </p>
+                <p className="mt-3 text-gray-300 text-sm">
+                  <strong className="text-white">
+                    A note on other websites:
+                  </strong>{" "}
+                  While you may find many other websites on the internet
+                  offering similar services—hosting Cambridge past papers,
+                  topical questions, or mark schemes—the vast majority of them
+                  are operating illegally. Unless a platform has explicit
+                  written permission from Cambridge Assessment (which, as stated
+                  above, is virtually never granted for electronic publication),
+                  they are infringing on Cambridge&apos;s copyright. The
+                  difference is that I chose to acknowledge this and shut down
+                  voluntarily rather than wait for legal action.
                 </p>
               </div>
               {/* Cambridge Licensing Reality */}
