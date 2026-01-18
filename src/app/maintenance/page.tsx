@@ -31,15 +31,37 @@ export default function MaintenancePage() {
           {/* Abstract */}
           <div className="mt-6 p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
             <p className="text-gray-300 leading-relaxed">
-              I am the founder of NoteOverflow. Sadly, I have to voluntarily
-              shut down the platform due to the ethical and legal implications
-              of redistributing Cambridge Assessment&apos;s copyrighted
-              examination materials without permission. While my intentions were
-              to help students access practice resources, I have come to realize
-              that building on someone else&apos;s intellectual property without
-              authorization is not sustainable, nor is it right. This page
-              explains what happened, what I learned, and what comes next.
+              I am the founder of NoteOverflow. Unfortunately, I have to
+              voluntarily shut down the platform due to the ethical and legal
+              implications of redistributing Cambridge Assessment&apos;s
+              copyrighted examination materials without permission. While my
+              intentions were to help students access practice resources, I have
+              come to realize that building on someone else&apos;s intellectual
+              property without authorization is not sustainable, nor is it
+              right. This page explains what happened, what I learned, and what
+              comes next.
             </p>
+          </div>
+
+          {/* Important Disclaimer */}
+          <div className="mt-6 p-6 bg-amber-500/10 border-2 border-amber-500/50 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-amber-400 font-bold text-lg mb-2">
+                  Important Disclaimer
+                </p>
+                <p className="text-gray-300 leading-relaxed">
+                  This shutdown is{" "}
+                  <strong className="text-white">entirely voluntary</strong>. I
+                  have not received any legal notices, cease and desist letters,
+                  or threats from Cambridge Assessment or any other party. This
+                  decision was made proactively based on my own ethical
+                  reflection and understanding of copyright law. I chose to do
+                  the right thing before being forced to.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-8 text-gray-300 mt-8">
@@ -193,8 +215,8 @@ export default function MaintenancePage() {
                   Official Permission Guidelines
                 </p>
                 <p className="mt-4 text-amber-400 text-sm font-medium">
-                  💡 Translation: There is zero chance a student-run platform
-                  like NoteOverflow would ever receive official permission from
+                  Translation: There is zero chance a student-run platform like
+                  NoteOverflow would ever receive official permission from
                   Cambridge. The path I chose was never going to be sustainable.
                 </p>
                 <p className="mt-3 text-gray-300 text-sm">

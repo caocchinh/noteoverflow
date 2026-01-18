@@ -22,13 +22,13 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "NoteOverflow",
+  title: "NoteOverflow - Rebuilding on Solid Foundations",
   description:
-    "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
+    "NoteOverflow is being rebuilt properly. Learn about our journey, what we learned, and what's next.",
   openGraph: {
-    title: "NoteOverflow",
+    title: "NoteOverflow - Rebuilding on Solid Foundations",
     description:
-      "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
+      "NoteOverflow is being rebuilt properly. Learn about our journey, what we learned, and what's next.",
     url: "https://noteoverflow.com/",
     siteName: "NoteOverflow",
     images: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
         url: "/assets/thumbnail.webp",
         width: 1200,
         height: 627,
-        alt: "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
+        alt: "NoteOverflow - Rebuilding on Solid Foundations",
         type: "image/webp",
       },
     ],
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/assets/thumbnail.webp",
-        alt: "The world's most comprehensive AS & A-level study materials platform, NoteOverflow.",
+        alt: "NoteOverflow - Rebuilding on Solid Foundations",
       },
     ],
   },
@@ -82,17 +82,20 @@ export default function RootLayout({
         </Script>
 
         <meta
-          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
+          content="NoteOverflow is being rebuilt properly. Learn about our journey, what we learned, and what's next."
           name="description"
         />
         <meta name="image" content="/assets/thumbnail.webp" />
         <meta name="author" content="Mr. Cao Cu Chinh" />
         <meta name="theme-color" content={LOGO_MAIN_COLOR} />
         <meta name="og:image" content="/assets/thumbnail.webp" />
-        <meta name="og:title" content="NoteOverflow" />
+        <meta
+          name="og:title"
+          content="NoteOverflow - Rebuilding on Solid Foundations"
+        />
         <meta
           name="og:description"
-          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
+          content="NoteOverflow is being rebuilt properly. Learn about our journey, what we learned, and what's next."
         />
         <meta name="og:url" content="https://noteoverflow.com/" />
         <meta name="og:type" content="website" />
@@ -104,11 +107,11 @@ export default function RootLayout({
         <meta property="article:publisher" content="Mr. Cao Cu Chinh" />
         <meta
           name="twitter:image:alt"
-          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
+          content="NoteOverflow - Rebuilding on Solid Foundations"
         />
         <meta
           property="og:image:alt"
-          content="The world's most comprehensive AS & A-level study materials platform, NoteOverflow."
+          content="NoteOverflow - Rebuilding on Solid Foundations"
         />
         <link href="/assets/favicon.ico" rel="icon" />
         <link rel="apple-touch-icon" href="/assets/favicon.ico" />
