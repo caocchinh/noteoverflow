@@ -28,6 +28,17 @@ export default function MaintenancePage() {
             Rebuilding on Solid Foundations
           </h1>
 
+          {/* Founder's Note */}
+          <div className="mt-6 text-center">
+            <h2 className="text-xl md:text-2xl font-semibold text-blue-400 mb-3">
+              Founder&apos;s Note
+            </h2>
+            <p className="text-gray-300 text-lg">
+              NoteOverflow is currently in maintenance as it&apos;s undergoing a
+              strategic pivot.
+            </p>
+          </div>
+
           {/* Abstract */}
           <div className="mt-6 p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
             <p className="text-gray-300 leading-relaxed">
@@ -339,6 +350,9 @@ export default function MaintenancePage() {
               <p className="mt-3 text-emerald-400 font-medium">
                 That&apos;s the difference between a hacker and an entrepreneur.
               </p>
+              <p className="mt-3 text-white font-medium italic">
+                True innovation respects the ecosystem it serves.
+              </p>
             </section>
 
             <section>
@@ -358,7 +372,7 @@ export default function MaintenancePage() {
               </p>
               <p className="mt-4 text-amber-400 font-medium">
                 I haven&apos;t abandoned you. This isn&apos;t goodbye. It&apos;s
-                a &ldquo;see you soon&rdquo; .The platform you relied on taught
+                a &ldquo;see you. soon&rdquo;. The platform you relied on taught
                 me how to build the platform you deserve. Version 2.0 will serve
                 you properly,and for the long term.
               </p>
