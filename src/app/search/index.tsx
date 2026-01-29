@@ -6,7 +6,6 @@ import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
-import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +29,7 @@ import {
   validateSearchFilter,
 } from "@/features/search/lib/lib";
 import { hashUltil } from "@/features/topical/lib/utils";
+import { VectorizeSelectedQuestion } from "@/features/topical/types/models";
 
 const SearchClient = ({
   searchParams,
@@ -185,7 +185,7 @@ const SearchClient = ({
         // Validate file size (max 2MB)
         if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
           setImageError(
-            `Image size exceeds 2MB limit. Please upload a smaller image.`
+            `Image size exceeds 2MB limit. Please upload a smaller image.`,
           );
           // Clear the file input
           if (fileInputRef.current) {
@@ -206,7 +206,7 @@ const SearchClient = ({
         reader.readAsDataURL(file);
       }
     },
-    []
+    [],
   );
 
   const clearImage = useCallback(() => {
@@ -243,7 +243,7 @@ const SearchClient = ({
         hashUltil(hashInput).then(setQueryKey);
       }, 0);
     },
-    []
+    [],
   );
 
   const handleTextSearch = useCallback(
@@ -266,7 +266,7 @@ const SearchClient = ({
         hashUltil(hashInput).then(setQueryKey);
       }, 0);
     },
-    []
+    [],
   );
 
   const handleKeyDown = useCallback(
@@ -278,7 +278,7 @@ const SearchClient = ({
         }
       }
     },
-    [textQuery]
+    [textQuery],
   );
 
   const handleSearch = useCallback(
@@ -300,7 +300,7 @@ const SearchClient = ({
       textQuery,
       selectedImage,
       previewUrl,
-    ]
+    ],
   );
 
   const handleHistorySelect = useCallback(
@@ -323,7 +323,7 @@ const SearchClient = ({
         });
       }
     },
-    [handleImageSearch, handleTextSearch]
+    [handleImageSearch, handleTextSearch],
   );
 
   useEffect(() => {
@@ -346,14 +346,14 @@ const SearchClient = ({
     <div
       className={cn(
         "min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30 pb-12",
-        !isSearching && hasSearched ? "pb-18" : ""
+        !isSearching && hasSearched ? "pb-18" : "",
       )}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
             "mx-auto transition-all duration-700 ease-out",
-            !results ? "w-full" : "max-w-full"
+            !results ? "w-full" : "max-w-full",
           )}
         >
           <div className="flex flex-col gap-3 items-center justify-center">
@@ -377,14 +377,14 @@ const SearchClient = ({
               <div
                 className={cn(
                   "flex flex-col gap-6",
-                  !results && "items-center"
+                  !results && "items-center",
                 )}
               >
                 <div className="w-full flex items-center gap-4 justify-center flex-wrap">
                   <TabsList
                     className={cn(
                       "grid grid-cols-2 p-1 bg-muted/40 backdrop-blur-sm border shadow-sm",
-                      results ? "w-48" : "w-64"
+                      results ? "w-48" : "w-64",
                     )}
                   >
                     <TabsTrigger
@@ -422,7 +422,7 @@ const SearchClient = ({
                       size="sm"
                       className={cn(
                         "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground hover:text-foreground",
-                        !results && "w-[180px] bg-muted/40"
+                        !results && "w-[180px] bg-muted/40",
                       )}
                     >
                       <FileText className="w-4 h-4" />
@@ -456,7 +456,7 @@ const SearchClient = ({
                       className={cn(
                         "min-h-14 h-auto px-14 pt-4 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y max-h-[500px]",
                         isQueryTooLong &&
-                          "border-destructive focus:border-destructive focus:ring-destructive/10"
+                          "border-destructive focus:border-destructive focus:ring-destructive/10",
                       )}
                     />
                     {isQueryTooLong && (
@@ -489,8 +489,8 @@ const SearchClient = ({
                       previewUrl
                         ? "border-primary/50 bg-primary/5"
                         : imageError
-                        ? "border-destructive/50 bg-destructive/5 hover:border-destructive/60"
-                        : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20"
+                          ? "border-destructive/50 bg-destructive/5 hover:border-destructive/60"
+                          : "border-muted-foreground/20 hover:border-primary/40 bg-muted/5 hover:bg-muted/20",
                     )}
                   >
                     <input
@@ -546,13 +546,13 @@ const SearchClient = ({
                         <div
                           className={cn(
                             "w-16 h-16 rounded-full bg-muted/50 mb-4 flex items-center justify-center transition-transform group-hover:scale-110",
-                            imageError && "bg-destructive/5"
+                            imageError && "bg-destructive/5",
                           )}
                         >
                           <Upload
                             className={cn(
                               "w-8 h-8 text-muted-foreground",
-                              imageError && "text-destructive"
+                              imageError && "text-destructive",
                             )}
                           />
                         </div>

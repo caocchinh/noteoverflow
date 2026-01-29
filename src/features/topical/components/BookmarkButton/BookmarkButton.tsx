@@ -7,11 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  BookmarkButtonProps,
-  BookmarkButtonSharedProps,
-  BookmarkListRef,
-} from "../../constants/types";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
@@ -26,6 +22,11 @@ import { useAuth } from "@/context/AuthContext";
 import { BookmarkTrigger } from "./BookmarkTrigger";
 import { BookmarkList } from "./BookmarkList";
 import BookmarkContent from "./BookmarkContent";
+import {
+  BookmarkButtonProps,
+  BookmarkButtonSharedProps,
+  BookmarkListRef,
+} from "../../types/components";
 
 export const BookmarkButton = memo(
   ({
@@ -68,7 +69,7 @@ export const BookmarkButton = memo(
           setShouldOpen(false);
         }
       },
-      [open, setOpenProp, setIsHovering, setShouldOpen]
+      [open, setOpenProp, setIsHovering, setShouldOpen],
     );
 
     const openUI = useCallback(
@@ -102,7 +103,7 @@ export const BookmarkButton = memo(
         handleOpenChange,
         isMobileDevice,
         open,
-      ]
+      ],
     );
 
     if (!isInView) {
@@ -136,7 +137,7 @@ export const BookmarkButton = memo(
         )}
       </>
     );
-  }
+  },
 );
 
 BookmarkButton.displayName = "BookmarkButton";
@@ -232,7 +233,7 @@ const MobileBookmarkButton = memo(
         </Drawer>
       </BookmarkContent>
     );
-  }
+  },
 );
 
 MobileBookmarkButton.displayName = "MobileBookmarkButton";
@@ -321,7 +322,7 @@ const DesktopBookmarkButton = memo(
         </Popover>
       </BookmarkContent>
     );
-  }
+  },
 );
 
 DesktopBookmarkButton.displayName = "DesktopBookmarkButton";

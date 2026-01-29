@@ -5,7 +5,7 @@ import { userBookmarks, userBookmarkList, question } from "@/drizzle/schema";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { eq, and } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
-import type { SelectedQuestion } from "@/features/topical/constants/types";
+import { SelectedQuestion } from "@/features/topical/types/models";
 
 export interface BookmarkQuestionsResponse {
   questions: {
@@ -84,8 +84,8 @@ export const getBookmarkQuestions = async ({
       and(
         eq(userBookmarks.listId, listId),
         eq(question.curriculumName, curriculum),
-        eq(question.subjectId, subject)
-      )
+        eq(question.subjectId, subject),
+      ),
     )
     .orderBy(userBookmarks.updatedAt);
 
@@ -101,7 +101,7 @@ export const getBookmarkQuestions = async ({
       answers: JSON.parse(row.answers ?? "[]"),
       topics: JSON.parse(row.topics ?? "[]"),
       questionImagesDimensions: JSON.parse(
-        row.questionImagesDimensions ?? "[]"
+        row.questionImagesDimensions ?? "[]",
       ),
       answersImagesDimensions: JSON.parse(row.answersImagesDimensions ?? "[]"),
     } as SelectedQuestion,

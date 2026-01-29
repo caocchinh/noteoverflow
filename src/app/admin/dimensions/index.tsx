@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import { SelectedQuestion } from "@/features/topical/types/models";
 
 interface Question {
   id: string;
@@ -156,7 +156,7 @@ export default function ImageDimensionsClient() {
           processed: oldStats.processed + questions.length - totalFailed,
           notProcessed: Math.max(
             0,
-            oldStats.notProcessed - (questions.length - totalFailed)
+            oldStats.notProcessed - (questions.length - totalFailed),
           ),
           total: oldStats.total,
         };

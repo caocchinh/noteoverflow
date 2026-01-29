@@ -20,11 +20,6 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  BookmarkListProps,
-  BookmarkListRef,
-  SelectedQuestion,
-} from "../../constants/types";
 import { BookmarkSearchInput } from "./BookmarkSearchInput";
 import { BookmarkItem } from "./BookmarkItem";
 import { BookmarkActionDialogs } from "./BookmarkActionDialogs";
@@ -32,6 +27,8 @@ import { BookmarkActionDialogs } from "./BookmarkActionDialogs";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { fuzzySearch } from "../../lib/utils";
 import { useMutationState } from "@tanstack/react-query";
+import { BookmarkListRef, BookmarkListProps } from "../../types/components";
+import { SelectedQuestion } from "../../types/models";
 
 export const BookmarkList = memo(
   forwardRef<BookmarkListRef, BookmarkListProps>(
@@ -44,7 +41,7 @@ export const BookmarkList = memo(
         setIsAnnotationGuardDialogOpen,
         isHavingUnsafeChangesRef,
       },
-      ref
+      ref,
     ) => {
       const { bookmarksData } = useTopicalApp();
       const [searchInput, setSearchInput] = useState("");
@@ -89,7 +86,7 @@ export const BookmarkList = memo(
           searchInput,
           setSearchInput,
         }),
-        [searchInput]
+        [searchInput],
       );
 
       return (
@@ -150,8 +147,8 @@ export const BookmarkList = memo(
           />
         </div>
       );
-    }
-  )
+    },
+  ),
 );
 
 BookmarkList.displayName = "BookmarkList";
@@ -192,7 +189,7 @@ const SelectedValueList = memo(
                 "font-medium text-xs",
                 chosenBookmarkList.size > 0
                   ? "text-logo-main"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {`${chosenBookmarkList.size} selected`}
@@ -218,7 +215,7 @@ const SelectedValueList = memo(
         </CommandGroup>
       </Collapsible>
     );
-  }
+  },
 );
 
 SelectedValueList.displayName = "SelectedValueList";

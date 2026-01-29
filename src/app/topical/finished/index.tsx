@@ -1,11 +1,7 @@
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
-import {
-  QuestionInspectRef,
-  SubjectMetadata,
-  BreadcrumbContentProps,
-} from "@/features/topical/constants/types";
+
 import {
   computeFinishedQuestionsMetadata,
   computeSubjectMetadata,
@@ -32,6 +28,11 @@ import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppU
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/context/AuthContext";
+import {
+  BreadcrumbContentProps,
+  QuestionInspectRef,
+} from "@/features/topical/types/components";
+import { SubjectMetadata } from "@/features/topical/types/models";
 
 const FinishedQuestionsClient = ({
   BETTER_AUTH_URL,
@@ -65,13 +66,13 @@ const FinishedQuestionsClient = ({
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null
+    null,
   );
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
       userFinishedQuestions || [],
       selectedCurriculumn,
-      selectedSubject
+      selectedSubject,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -86,7 +87,7 @@ const FinishedQuestionsClient = ({
       userFinishedQuestions,
       currentFilter,
       selectedCurriculumn,
-      selectedSubject
+      selectedSubject,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

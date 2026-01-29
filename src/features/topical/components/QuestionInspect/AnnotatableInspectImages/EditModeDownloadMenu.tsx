@@ -4,11 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 import { Download } from "lucide-react";
 import { memo, RefObject, useCallback, useMemo } from "react";
 import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 import DownloadButton from "./DownloadButton";
+import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
 
 const EditModeDownloadMenu = memo(
   ({
@@ -60,7 +60,7 @@ const EditModeDownloadMenu = memo(
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "question" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question"
@@ -68,7 +68,7 @@ const EditModeDownloadMenu = memo(
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "answer" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="answer"
@@ -76,7 +76,7 @@ const EditModeDownloadMenu = memo(
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "question-with-answers" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question-with-answers"
@@ -90,7 +90,7 @@ const EditModeDownloadMenu = memo(
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  }
+  },
 );
 
 EditModeDownloadMenu.displayName = "EditModeDownloadMenu";

@@ -5,12 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { CACHE_EXPIRE_TIME } from "@/features/topical/constants/constants";
-import type {
-  CurrentQuery,
-  AppUltilityBarRef,
-  RecentQueryRef,
-} from "@/features/topical/constants/types";
-import { SelectedQuestion } from "@/features/topical/constants/types";
 import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCache, setCache } from "@/lib/client-cache";
@@ -39,6 +33,14 @@ import {
 import { Github } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import {
+  CurrentQuery,
+  SelectedQuestion,
+} from "@/features/topical/types/models";
+import {
+  AppUltilityBarRef,
+  RecentQueryRef,
+} from "@/features/topical/types/components";
 
 const TopicalClient = ({
   searchParams,

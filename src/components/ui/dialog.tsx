@@ -12,37 +12,16 @@ import {
 } from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Activity } from "react";
 
 function Dialog({
   open,
-  preserveState = true,
   children,
   ...props
-}: React.ComponentProps<typeof DialogPrimitiveRoot> & {
-  /**
-   * When true, uses React 19.2's Activity component to preserve component state
-   * when the dialog is closed. This improves performance for heavy dialogs by:
-   * - Preserving React state and DOM structure
-   * - Cleaning up effects when hidden
-   * - Avoiding expensive remounting on each open
-   *
-   * @default true
-   */
-  preserveState?: boolean;
-}) {
-  const activityMode = open ? "visible" : "hidden";
-
-  const dialogRoot = (
+}: React.ComponentProps<typeof DialogPrimitiveRoot>) {
+  return (
     <DialogPrimitiveRoot data-slot="dialog" open={open} {...props}>
       {children}
     </DialogPrimitiveRoot>
-  );
-
-  return preserveState ? (
-    <Activity mode={activityMode}>{dialogRoot}</Activity>
-  ) : (
-    dialogRoot
   );
 }
 

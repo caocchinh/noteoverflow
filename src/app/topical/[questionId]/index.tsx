@@ -1,9 +1,4 @@
 "use client";
-import {
-  SelectedQuestion,
-  AnnotatableInspectImagesHandle,
-  UnsafeChangesState,
-} from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
@@ -22,6 +17,11 @@ import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider"
 import QuestionAnnotationGuardDialog from "@/features/topical/components/QuestionInspect/QuestionAnnotationGuardDialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  AnnotatableInspectImagesHandle,
+  UnsafeChangesState,
+} from "@/features/topical/types/components";
+import { SelectedQuestion } from "@/features/topical/types/models";
 
 export const QuestionView = ({
   data,
@@ -64,7 +64,7 @@ export const QuestionView = ({
   const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
     useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null
+    null,
   );
 
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -208,7 +208,7 @@ export const QuestionView = ({
               className={cn(
                 "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                 currentView === "question" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
               )}
             >
               Question
@@ -218,7 +218,7 @@ export const QuestionView = ({
               className={cn(
                 "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                 currentView === "answer" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
               )}
             >
               Answer
@@ -228,7 +228,7 @@ export const QuestionView = ({
               className={cn(
                 "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                 currentView === "both" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
               )}
             >
               Both
@@ -238,7 +238,7 @@ export const QuestionView = ({
               className={cn(
                 "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
                 isCalculatorOpen &&
-                  "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!"
+                  "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!",
               )}
             >
               Calculator
@@ -319,7 +319,7 @@ export const QuestionView = ({
             ref={(node) => {
               if (node && annotatableQuestionInspectImagesElementRef.current) {
                 node.appendChild(
-                  annotatableQuestionInspectImagesElementRef.current
+                  annotatableQuestionInspectImagesElementRef.current,
                 );
               }
             }}
@@ -327,7 +327,7 @@ export const QuestionView = ({
           />,
           currentView === "both"
             ? bothViewsQuestionContainer.current
-            : questionViewContainer.current
+            : questionViewContainer.current,
         )}
       {bothViewsAnswerContainer.current &&
         answerViewContainer.current &&
@@ -337,7 +337,7 @@ export const QuestionView = ({
             ref={(node) => {
               if (node && annotatableAnswerInspectImagesElementRef.current) {
                 node.appendChild(
-                  annotatableAnswerInspectImagesElementRef.current
+                  annotatableAnswerInspectImagesElementRef.current,
                 );
               }
             }}
@@ -345,7 +345,7 @@ export const QuestionView = ({
           />,
           currentView === "both"
             ? bothViewsAnswerContainer.current
-            : answerViewContainer.current
+            : answerViewContainer.current,
         )}
       <Link ref={dummyLinkRef} href={pendingNavigation || ""} />
     </>

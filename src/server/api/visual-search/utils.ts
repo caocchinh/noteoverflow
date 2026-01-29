@@ -4,10 +4,10 @@ import { validateSearchFilter } from "@/features/search/lib/lib";
 import { queryVectorize } from "@/lib/cloudflareVectorize";
 import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { getDbAsync } from "@/drizzle/db.server";
-import { VectorizeSelectedQuestion } from "@/features/topical/constants/types";
 import { retryDatabase } from "@/dal/retry";
 import { inArray } from "drizzle-orm";
 import { question } from "@/drizzle/schema";
+import { VectorizeSelectedQuestion } from "@/features/topical/types/models";
 
 // Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
 export async function generateShortId(input: string): Promise<string> {
@@ -48,7 +48,7 @@ export interface SearchFilter {
  */
 export function validateSearchFilters(
   filter: SearchFilter | undefined,
-  status: typeof elysiaStatus
+  status: typeof elysiaStatus,
 ) {
   const validationError = validateSearchFilter(filter);
 
@@ -63,7 +63,7 @@ export function validateSearchFilters(
 }
 
 export function buildVectorizeFilter(
-  filter?: SearchFilter
+  filter?: SearchFilter,
 ): Record<string, { $eq: string } | { $in: string[] }> | undefined {
   if (!filter) return undefined;
 
@@ -92,7 +92,7 @@ export async function executeVectorSearch(
   queryEmbedding: number[],
   topK: number,
   filter: SearchFilter | undefined,
-  vectorizeBinding: VectorizeIndex
+  vectorizeBinding: VectorizeIndex,
 ): Promise<VectorizeMatches> {
   return queryVectorize(
     QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
@@ -102,7 +102,7 @@ export async function executeVectorSearch(
       returnMetadata: "all",
       filter: buildVectorizeFilter(filter),
     },
-    vectorizeBinding
+    vectorizeBinding,
   );
 }
 
@@ -111,7 +111,7 @@ export async function executeVectorSearch(
  * Returns VectorizeSelectedQuestion[] matching the topical questions format
  */
 export async function fetchQuestionResults(
-  matches: VectorizeMatches
+  matches: VectorizeMatches,
 ): Promise<VectorizeSelectedQuestion[]> {
   // Build a map of questionId -> highest score (for sorting)
   const scoreMap = new Map<string, number>();
@@ -150,7 +150,7 @@ export async function fetchQuestionResults(
         })
         .from(question)
         .where(inArray(question.id, questionIds)),
-    "fetch questions by ids"
+    "fetch questions by ids",
   );
 
   // Map results

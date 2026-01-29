@@ -23,13 +23,13 @@ import TabNavigationButtons from "../TabNavigationButtons";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { QuestionHoverCardProps } from "../../../constants/types";
 import NavigationButtons from "./NavigationButtons";
 import GoToCurrentButton from "./GoToCurrentButton";
 import SearchInputSection from "./SearchInputSection";
 import { useInspectSearch } from "./useInspectSearch";
 import { useInspectNavigation } from "./useInspectNavigation";
 import { useInspectContext } from "../../../context/InspectContext";
+import { QuestionHoverCardProps } from "@/features/topical/types/components";
 
 // Memoized wrapper with custom comparison to prevent unnecessary re-renders
 const MemoizedQuestionItem = memo(

@@ -5,7 +5,7 @@ import { Loader2, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMutating } from "@tanstack/react-query";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { BookmarkTriggerProps } from "../../constants/types";
+import { BookmarkTriggerProps } from "../../types/components";
 
 export const BookmarkTrigger = memo(
   ({
@@ -22,7 +22,7 @@ export const BookmarkTrigger = memo(
 
     const { savedActivitiesIsFetching, bookmarksData } = useTopicalApp();
     const isBookmarked = bookmarksData?.some((bookmark) =>
-      bookmark.userBookmarks.some((b) => b.question.id === question.id)
+      bookmark.userBookmarks.some((b) => b.question.id === question.id),
     );
 
     if (isMutatingThisQuestion) {
@@ -30,7 +30,7 @@ export const BookmarkTrigger = memo(
         <Badge
           className={cn(
             "text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]",
-            badgeClassName
+            badgeClassName,
           )}
         >
           Saving
@@ -45,7 +45,7 @@ export const BookmarkTrigger = memo(
           triggerButtonClassName,
           "rounded-[3px]",
           isBookmarked && "bg-logo-main! text-white!",
-          (isBookmarkDisabled || savedActivitiesIsFetching) && "opacity-50"
+          (isBookmarkDisabled || savedActivitiesIsFetching) && "opacity-50",
         )}
         tabIndex={-1}
         title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
@@ -58,7 +58,7 @@ export const BookmarkTrigger = memo(
         )}
       </Button>
     );
-  }
+  },
 );
 
 BookmarkTrigger.displayName = "BookmarkTrigger";

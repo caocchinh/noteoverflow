@@ -5,10 +5,6 @@
 import { useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/eden";
-import {
-  SelectedQuestion,
-  VectorizeSelectedQuestion,
-} from "@/features/topical/constants/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,10 +18,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  SelectedQuestion,
+  VectorizeSelectedQuestion,
+} from "@/features/topical/types/models";
 
 export default function VisualSearchIndexClient() {
   const [activeTab, setActiveTab] = useState<"image" | "text" | "index">(
-    "image"
+    "image",
   );
   const [results, setResults] = useState<SelectedQuestion[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,7 +116,7 @@ export default function VisualSearchIndexClient() {
         reader.readAsDataURL(file);
       }
     },
-    []
+    [],
   );
 
   const getFilters = useCallback(() => {
@@ -305,7 +305,7 @@ export default function VisualSearchIndexClient() {
           indexed: oldStats.indexed + questions.length - totalFailed,
           notIndexed: Math.max(
             0,
-            oldStats.notIndexed - (questions.length - totalFailed)
+            oldStats.notIndexed - (questions.length - totalFailed),
           ),
           total: oldStats.total,
         };
@@ -722,7 +722,7 @@ export default function VisualSearchIndexClient() {
                               className="w-full rounded-md border bg-white object-contain"
                             />
                           </div>
-                        )
+                        ),
                       )}
                       {/* Display Answer Images */}
                       {result.answers?.map((img: string, idx: number) => (

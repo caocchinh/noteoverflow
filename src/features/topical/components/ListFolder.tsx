@@ -36,7 +36,6 @@ import {
   renameBookmarkListAction,
 } from "../server/actions";
 import { toast } from "sonner";
-import { SavedActivitiesResponse, BookmarksMetadata } from "../constants/types";
 import {
   Dispatch,
   SetStateAction,
@@ -49,6 +48,7 @@ import { Input } from "@/components/ui/input";
 import { LIST_NAME_MAX_LENGTH } from "../constants/constants";
 import { SelectVisibility } from "./SelectVisibility";
 import { QR } from "./QR";
+import { BookmarksMetadata, SavedActivitiesResponse } from "../types/models";
 
 export const ListFolder = ({
   listName,
@@ -79,7 +79,7 @@ export const ListFolder = ({
   const allListNameUnderCurrentVisibility = useMemo(() => {
     if (!metadata) return [];
     return Object.keys(metadata[visibility]).map(
-      (listId) => metadata[visibility][listId].listName
+      (listId) => metadata[visibility][listId].listName,
     );
   }, [metadata, visibility]);
   const [renameError, setRenameError] = useState<string | null>(null);
@@ -89,12 +89,12 @@ export const ListFolder = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isBlockingInput, setIsBlockingInput] = useState(false);
   const [newVisibility, setNewVisibility] = useState<"public" | "private">(
-    visibility
+    visibility,
   );
   const allListNameUnderNewVisibility = useMemo(() => {
     if (!metadata) return [];
     return Object.keys(metadata[newVisibility]).map(
-      (listId) => metadata[newVisibility][listId].listName
+      (listId) => metadata[newVisibility][listId].listName,
     );
   }, [metadata, newVisibility]);
   const [
@@ -121,19 +121,19 @@ export const ListFolder = ({
             return prev;
           }
           const next = prev.bookmarks.filter(
-            (bookmark) => !(bookmark.id === realListId)
+            (bookmark) => !(bookmark.id === realListId),
           );
           return {
             ...prev,
             bookmarks: next,
           };
-        }
+        },
       );
     },
     onError: (error) => {
       toast.error(
         "Failed to delete bookmark list: " +
-          (error instanceof Error ? error.message : "Unknown error")
+          (error instanceof Error ? error.message : "Unknown error"),
       );
     },
     retry: false,
@@ -158,7 +158,7 @@ export const ListFolder = ({
     },
     onSuccess: (
       _,
-      { realListId, realNewName }: { realListId: string; realNewName: string }
+      { realListId, realNewName }: { realListId: string; realNewName: string },
     ) => {
       toast.success("List renamed successfully");
       setIsRenameAlertDialogOpen(false);
@@ -180,13 +180,13 @@ export const ListFolder = ({
             ...prev,
             bookmarks: next,
           };
-        }
+        },
       );
     },
     onError: (error) => {
       toast.error(
         "Failed to rename bookmark list: " +
-          (error instanceof Error ? error.message : "Unknown error")
+          (error instanceof Error ? error.message : "Unknown error"),
       );
     },
     retry: false,
@@ -214,7 +214,7 @@ export const ListFolder = ({
       {
         realListId,
         realNewVisibility,
-      }: { realListId: string; realNewVisibility: "public" | "private" }
+      }: { realListId: string; realNewVisibility: "public" | "private" },
     ) => {
       toast.success("List visibility changed successfully");
       setIsRenameAlertDialogOpen(false);
@@ -236,13 +236,13 @@ export const ListFolder = ({
             ...prev,
             bookmarks: next,
           };
-        }
+        },
       );
     },
     onError: (error) => {
       toast.error(
         "Failed to change visibility of bookmark list: " +
-          (error instanceof Error ? error.message : "Unknown error")
+          (error instanceof Error ? error.message : "Unknown error"),
       );
     },
     retry: false,
@@ -378,7 +378,7 @@ export const ListFolder = ({
                     setNewListName(e.target.value);
                     if (e.target.value.trim().length > LIST_NAME_MAX_LENGTH) {
                       setRenameError(
-                        `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
+                        `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`,
                       );
                     } else {
                       setRenameError(null);
@@ -407,16 +407,16 @@ export const ListFolder = ({
                     onClick={() => {
                       if (newListName.trim() === listName) {
                         setRenameError(
-                          "You are not allowed to rename to the same name"
+                          "You are not allowed to rename to the same name",
                         );
                         return;
                       } else if (
                         allListNameUnderCurrentVisibility.includes(
-                          newListName.trim()
+                          newListName.trim(),
                         )
                       ) {
                         setRenameError(
-                          "List name already exists with same visibility"
+                          "List name already exists with same visibility",
                         );
                         return;
                       } else if (newListName.trim() === "") {
@@ -426,7 +426,7 @@ export const ListFolder = ({
                         newListName.trim().length > LIST_NAME_MAX_LENGTH
                       ) {
                         setRenameError(
-                          `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`
+                          `List name cannot be longer than ${LIST_NAME_MAX_LENGTH} characters`,
                         );
                         return;
                       } else {
@@ -498,13 +498,13 @@ export const ListFolder = ({
                     onClick={() => {
                       if (newVisibility === visibility) {
                         setChangeVisibilityError(
-                          "You are not allowed to change to the same visibility"
+                          "You are not allowed to change to the same visibility",
                         );
                         return;
                       }
                       if (allListNameUnderNewVisibility.includes(listName)) {
                         setChangeVisibilityError(
-                          "List name already exists with same visibility"
+                          "List name already exists with same visibility",
                         );
                         return;
                       }

@@ -4,10 +4,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Lock, Globe, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  BookmarkItemProps,
-  ToggleBookmarkMutationVariables,
-} from "../../constants/types";
-import {
   useIsMutating,
   useMutation,
   useQueryClient,
@@ -21,6 +17,8 @@ import {
 import { MAXIMUM_BOOKMARKS_PER_LIST } from "@/constants/constants";
 import { toast } from "sonner";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { BookmarkItemProps } from "../../types/components";
+import { ToggleBookmarkMutationVariables } from "../../types/models";
 
 export const BookmarkItem = memo(
   ({
@@ -62,14 +60,14 @@ export const BookmarkItem = memo(
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
       },
       onError: (error, variables) => {
         handleBookmarkError(
           error,
           variables as ToggleBookmarkMutationVariables,
-          isMobileDevice
+          isMobileDevice,
         );
       },
     });
@@ -87,7 +85,7 @@ export const BookmarkItem = memo(
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
         return;
       }
@@ -114,7 +112,7 @@ export const BookmarkItem = memo(
       <CommandItem
         className={cn(
           "cursor-pointer wrap-anywhere flex items-center justify-between",
-          isMutatingThisList && "opacity-50 cursor-default"
+          isMutatingThisList && "opacity-50 cursor-default",
         )}
         onSelect={() => {
           if (isMutatingThisList) {
@@ -139,7 +137,7 @@ export const BookmarkItem = memo(
         )}
       </CommandItem>
     );
-  }
+  },
 );
 
 BookmarkItem.displayName = "BookmarkItem";

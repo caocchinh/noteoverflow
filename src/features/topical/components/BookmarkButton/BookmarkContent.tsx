@@ -1,6 +1,6 @@
 import { memo, RefObject, useCallback, type KeyboardEvent } from "react";
 import { Command } from "@/components/ui/command";
-import { BookmarkListRef } from "../../constants/types";
+import { BookmarkListRef } from "../../types/components";
 
 interface BookmarkContentProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ interface BookmarkContentProps {
 const useBookmarkKeyDown = (
   bookmarkListRef: RefObject<BookmarkListRef | null>,
   open: boolean,
-  handleOpenChange: (value: boolean | ((prev: boolean) => boolean)) => void
+  handleOpenChange: (value: boolean | ((prev: boolean) => boolean)) => void,
 ) => {
   return useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -29,7 +29,7 @@ const useBookmarkKeyDown = (
         }
       }
     },
-    [bookmarkListRef, handleOpenChange, open]
+    [bookmarkListRef, handleOpenChange, open],
   );
 };
 
@@ -43,7 +43,7 @@ const BookmarkContent = memo(
     const handleKeyDown = useBookmarkKeyDown(
       bookmarkListRef,
       open,
-      handleOpenChange
+      handleOpenChange,
     );
 
     return (
@@ -55,7 +55,7 @@ const BookmarkContent = memo(
         {children}
       </Command>
     );
-  }
+  },
 );
 
 BookmarkContent.displayName = "BookmarkContent";

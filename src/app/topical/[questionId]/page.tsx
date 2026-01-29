@@ -1,11 +1,11 @@
 import Loader from "@/components/Loader/Loader";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question as questionTable } from "@/drizzle/schema";
-import { SelectedQuestion } from "@/features/topical/constants/types";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import { QuestionView } from ".";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { SelectedQuestion } from "@/features/topical/types/models";
 
 type Params = Promise<{ questionId: string }>;
 
@@ -36,15 +36,15 @@ const QuestionViewPage = async (props: { params: Params }) => {
         answers: JSON.parse(question.answers ?? "[]"),
         topics: JSON.parse(question.topics ?? "[]"),
         answersImagesDimensions: JSON.parse(
-          question.answersImagesDimensions ?? "[]"
+          question.answersImagesDimensions ?? "[]",
         ),
         questionImagesDimensions: JSON.parse(
-          question.questionImagesDimensions ?? "[]"
+          question.questionImagesDimensions ?? "[]",
         ),
       };
       await env.TOPICAL_CACHE.put(
         JSON.stringify(decodeURIComponent(questionId)),
-        JSON.stringify(data)
+        JSON.stringify(data),
       );
       result = data;
     }

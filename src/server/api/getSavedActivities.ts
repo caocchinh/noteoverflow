@@ -6,15 +6,15 @@ import {
   userAnnotations,
   userBookmarkList,
 } from "@/drizzle/schema";
-import {
-  SavedActivitiesResponse,
-  SelectedAnnotation,
-  SelectedBookmark,
-  SelectedFinishedQuestion,
-} from "@/features/topical/constants/types";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
+import {
+  SavedActivitiesResponse,
+  SelectedFinishedQuestion,
+  SelectedBookmark,
+  SelectedAnnotation,
+} from "@/features/topical/types/models";
 
 export const getSavedActivities = async ({
   status,
@@ -81,10 +81,10 @@ async function fetchFinishedQuestions(userId: string) {
         answers: JSON.parse(item.question.answers ?? "[]"),
         topics: JSON.parse(item.question.topics ?? "[]"),
         answersImagesDimensions: JSON.parse(
-          item.question.answersImagesDimensions ?? "[]"
+          item.question.answersImagesDimensions ?? "[]",
         ),
         questionImagesDimensions: JSON.parse(
-          item.question.questionImagesDimensions ?? "[]"
+          item.question.questionImagesDimensions ?? "[]",
         ),
       },
     };
@@ -137,15 +137,15 @@ async function fetchBookmarks(userId: string) {
           question: {
             ...userBookmark.question,
             questionImages: JSON.parse(
-              userBookmark.question.questionImages ?? "[]"
+              userBookmark.question.questionImages ?? "[]",
             ),
             answers: JSON.parse(userBookmark.question.answers ?? "[]"),
             topics: JSON.parse(userBookmark.question.topics ?? "[]"),
             answersImagesDimensions: JSON.parse(
-              userBookmark.question.answersImagesDimensions ?? "[]"
+              userBookmark.question.answersImagesDimensions ?? "[]",
             ),
             questionImagesDimensions: JSON.parse(
-              userBookmark.question.questionImagesDimensions ?? "[]"
+              userBookmark.question.questionImagesDimensions ?? "[]",
             ),
           },
         };

@@ -1,10 +1,5 @@
 "use client";
-import {
-  SelectedPublickBookmark,
-  SubjectMetadata,
-  QuestionInspectRef,
-  BreadcrumbContentProps,
-} from "@/features/topical/constants/types";
+
 import { useMemo, useRef, useState } from "react";
 import { useMutationState, useQuery } from "@tanstack/react-query";
 import {
@@ -33,6 +28,14 @@ import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
+import {
+  QuestionInspectRef,
+  BreadcrumbContentProps,
+} from "@/features/topical/types/components";
+import {
+  SelectedPublickBookmark,
+  SubjectMetadata,
+} from "@/features/topical/types/models";
 
 export const BookmarkView = ({
   BETTER_AUTH_URL,
@@ -116,12 +119,12 @@ export const BookmarkView = ({
     return computeSubjectMetadata(
       bookmarkData || [],
       selectedCurriculumn,
-      selectedSubject
+      selectedSubject,
     );
   }, [bookmarkData, selectedCurriculumn, selectedSubject]);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null
+    null,
   );
 
   const topicalData = useMemo(() => {
@@ -129,7 +132,7 @@ export const BookmarkView = ({
       bookmarkData,
       currentFilter,
       selectedCurriculumn,
-      selectedSubject
+      selectedSubject,
     );
   }, [currentFilter, bookmarkData, selectedCurriculumn, selectedSubject]);
 

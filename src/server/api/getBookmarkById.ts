@@ -2,10 +2,10 @@ import "server-only";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
-import { SelectedPublickBookmark } from "@/features/topical/constants/types";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
+import { SelectedPublickBookmark } from "@/features/topical/types/models";
 
 export const getBookmarkById = async ({
   params,
@@ -86,14 +86,14 @@ export const getBookmarkById = async ({
           answers: JSON.parse(item.question.answers ?? "[]"),
           topics: JSON.parse(item.question.topics ?? "[]"),
           answersImagesDimensions: JSON.parse(
-            item.question.answersImagesDimensions ?? "[]"
+            item.question.answersImagesDimensions ?? "[]",
           ),
           questionImagesDimensions: JSON.parse(
-            item.question.questionImagesDimensions ?? "[]"
+            item.question.questionImagesDimensions ?? "[]",
           ),
         },
       };
-    }
+    },
   );
 
   return data;

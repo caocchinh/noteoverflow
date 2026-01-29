@@ -9,13 +9,11 @@ import { question } from "@/drizzle/schema";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
-import {
-  FilterData,
-  SelectedQuestion,
-} from "@/features/topical/constants/types";
+
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
+import { FilterData, SelectedQuestion } from "@/features/topical/types/models";
 
 interface TopicalQuery {
   curriculumId: string;
@@ -36,16 +34,16 @@ export const getTopicalQuestions = async ({
   const curriculumId = decodeURIComponent(query.curriculumId);
   const subjectId = decodeURIComponent(query.subjectId);
   const topic = JSON.parse(
-    decodeURIComponent(query.topic)
+    decodeURIComponent(query.topic),
   ).toSorted() as string[];
   const paperType = JSON.parse(
-    decodeURIComponent(query.paperType)
+    decodeURIComponent(query.paperType),
   ).toSorted() as string[];
   const year = JSON.parse(
-    decodeURIComponent(query.year)
+    decodeURIComponent(query.year),
   ).toSorted() as string[];
   const season = JSON.parse(
-    decodeURIComponent(query.season)
+    decodeURIComponent(query.season),
   ).toSorted() as string[];
 
   if (!validateCurriculum(curriculumId)) {
@@ -106,7 +104,7 @@ export const getTopicalQuestions = async ({
 
     if (paperType.length > 0) {
       const paperTypeNumbers = paperType.map((p: string) =>
-        Number.parseInt(p, 10)
+        Number.parseInt(p, 10),
       );
       conditions.push(inArray(question.paperType, paperTypeNumbers));
     } else {
@@ -143,7 +141,7 @@ export const getTopicalQuestions = async ({
     }
 
     const topicsCondition = topic.map((t: string) =>
-      like(question.topics, "%" + t.slice(0, 45) + "%")
+      like(question.topics, "%" + t.slice(0, 45) + "%"),
     );
     const topicsOrCondition = or(...topicsCondition);
     if (topicsOrCondition) {
@@ -175,10 +173,10 @@ export const getTopicalQuestions = async ({
         answers: JSON.parse(item.answers ?? "[]"),
         topics: JSON.parse(item.topics ?? "[]"),
         questionImagesDimensions: JSON.parse(
-          item.questionImagesDimensions ?? "[]"
+          item.questionImagesDimensions ?? "[]",
         ),
         answersImagesDimensions: JSON.parse(
-          item.answersImagesDimensions ?? "[]"
+          item.answersImagesDimensions ?? "[]",
         ),
       };
     });
@@ -197,10 +195,10 @@ export const getTopicalQuestions = async ({
     };
 
     const rateLimitedHash = await hashUltil(
-      JSON.stringify({ ...baseQuery, isRateLimited: true })
+      JSON.stringify({ ...baseQuery, isRateLimited: true }),
     );
     const nonRateLimitedHash = await hashUltil(
-      JSON.stringify({ ...baseQuery, isRateLimited: false })
+      JSON.stringify({ ...baseQuery, isRateLimited: false }),
     );
 
     await Promise.all([
@@ -209,7 +207,7 @@ export const getTopicalQuestions = async ({
         JSON.stringify(data.toSpliced(25)),
         {
           expirationTtl: 60 * 60 * 24 * 14,
-        }
+        },
       ),
       env.TOPICAL_CACHE.put(nonRateLimitedHash, JSON.stringify(data), {
         expirationTtl: 60 * 60 * 24 * 14,

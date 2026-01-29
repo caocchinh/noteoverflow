@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Blocks, FileStack, Mouse, X } from "lucide-react";
 import { PopoverContent } from "@/components/ui/popover";
 import ElasticSlider from "./ElasticSlider";
-import { LayoutStyle } from "../constants/types";
 import { useState } from "react";
 import {
   MAX_NUMBER_OF_COLUMNS,
@@ -20,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { LayoutStyle } from "../types/preferences";
 
 export default function LayoutSetting({
   triggerClassName,

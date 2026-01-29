@@ -4,11 +4,6 @@ import QuestionInspect from "@/features/topical/components/QuestionInspect/Quest
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
-import {
-  QuestionInspectRef,
-  SortParameters,
-  VectorizeSelectedQuestion,
-} from "@/features/topical/constants/types";
 import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvider";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { Search } from "lucide-react";
@@ -17,6 +12,11 @@ import DisplayModeToggle from "@/features/topical/components/DisplayModeToggle";
 import Ultility from "./Ultility";
 import { cn } from "@/lib/utils";
 import { SearchResultsHeaderProps } from "../constants/type";
+import { QuestionInspectRef } from "@/features/topical/types/components";
+import {
+  VectorizeSelectedQuestion,
+  SortParameters,
+} from "@/features/topical/types/models";
 
 const isImageUrl = (str: string) => str.startsWith("http");
 
@@ -39,7 +39,7 @@ const SearchResultsHeader = memo(
           "flex items-center justify-between gap-2 flex-wrap transition-all duration-300",
           isSticky
             ? "fixed top-13 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b animate-in slide-in-from-top-2"
-            : "relative px-2 mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700"
+            : "relative px-2 mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700",
         )}
       >
         <div className="flex items-center gap-3 px-2 mb-1">
@@ -75,7 +75,7 @@ const SearchResultsHeader = memo(
         )}
       </div>
     );
-  }
+  },
 );
 SearchResultsHeader.displayName = "SearchResultsHeader";
 
@@ -107,7 +107,7 @@ const MainContent = memo(
         ([entry]) => {
           setIsSticky(!entry.isIntersecting);
         },
-        { threshold: 0.1, rootMargin: "-50px 0px 0px 0px" }
+        { threshold: 0.1, rootMargin: "-50px 0px 0px 0px" },
       );
 
       const element = sentinelRef.current;
@@ -133,7 +133,7 @@ const MainContent = memo(
       if (!results) return [];
       if (displayMode === "questions") return results;
       return results.filter((q) =>
-        q.answers.some((answer) => isImageUrl(answer))
+        q.answers.some((answer) => isImageUrl(answer)),
       );
     }, [results, displayMode]);
 
@@ -147,7 +147,7 @@ const MainContent = memo(
             // Default to year-desc
             return b.score - a.score;
           }
-        }
+        },
       );
     }, [sortParameters.sortBy, filteredResults]);
 
@@ -158,7 +158,7 @@ const MainContent = memo(
 
       return chunkQuestionsData(
         sortedData,
-        chunkSize
+        chunkSize,
       ) as VectorizeSelectedQuestion[][];
     }, [sortedData]);
 
@@ -232,7 +232,7 @@ const MainContent = memo(
         />
       </TopicalLayoutProvider>
     );
-  }
+  },
 );
 
 const MasonryContent = memo(
@@ -319,7 +319,7 @@ const MasonryContent = memo(
         })}
       />
     );
-  }
+  },
 );
 
 MasonryContent.displayName = "MasonryContent";

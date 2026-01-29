@@ -21,10 +21,7 @@ import {
 import { SelectVisibility } from "../SelectVisibility";
 import { MAXIMUM_BOOKMARK_LISTS_PER_USER } from "@/constants/constants";
 import { LIST_NAME_MAX_LENGTH } from "../../constants/constants";
-import {
-  BookmarkActionDialogsProps,
-  CreateListMutationVariables,
-} from "../../constants/types";
+
 import {
   createListMutationFn,
   handleBookmarkError,
@@ -33,6 +30,8 @@ import {
   toggleBookmarkMutationFn,
 } from "../../utils/bookmarkUtils";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { BookmarkActionDialogsProps } from "../../types/components";
+import { CreateListMutationVariables } from "../../types/models";
 
 export const BookmarkActionDialogs = memo(
   ({
@@ -45,7 +44,7 @@ export const BookmarkActionDialogs = memo(
     setIsAnnotationGuardDialogOpen,
   }: BookmarkActionDialogsProps) => {
     const [visibility, setVisibility] = useState<"public" | "private">(
-      "public"
+      "public",
     );
     const [isInputError, setIsInputError] = useState(false);
     const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
@@ -99,7 +98,7 @@ export const BookmarkActionDialogs = memo(
         handleBookmarkError(
           error,
           variables as CreateListMutationVariables,
-          isMobileDevice
+          isMobileDevice,
         );
       },
     });
@@ -154,7 +153,7 @@ export const BookmarkActionDialogs = memo(
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
         return;
       }
@@ -219,7 +218,7 @@ export const BookmarkActionDialogs = memo(
         question,
         removeFromListMutate,
         setIsAnnotationGuardDialogOpen,
-      ]
+      ],
     );
 
     useEffect(() => {
@@ -293,7 +292,7 @@ export const BookmarkActionDialogs = memo(
                 <X
                   className={cn(
                     "cursor-pointer text-red-500",
-                    isMutatingThisQuestion && "opacity-50"
+                    isMutatingThisQuestion && "opacity-50",
                   )}
                   onMouseDown={(e) => {
                     e.stopPropagation();
@@ -428,7 +427,7 @@ export const BookmarkActionDialogs = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 BookmarkActionDialogs.displayName = "BookmarkActionDialogs";

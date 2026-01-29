@@ -1,4 +1,4 @@
-import { InvalidInputs } from "@/features/topical/constants/types";
+import { InvalidInputs } from "@/features/topical/types/models";
 import { Dispatch, RefObject, SetStateAction } from "react";
 
 export interface PaperFormState {

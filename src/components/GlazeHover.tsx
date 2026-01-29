@@ -1,5 +1,4 @@
-import type React from "react";
-import {useRef} from "react";
+import { useRef } from "react";
 
 interface GlareHoverProps {
   width?: string;
@@ -94,10 +93,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
       role="none"
       title={title}
     >
-      <div
-        ref={overlayRef}
-        style={overlayStyle}
-      />
+      <div ref={overlayRef} style={overlayStyle} />
       {children}
     </div>
   );

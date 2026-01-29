@@ -1,6 +1,5 @@
 "use client";
 import Sort from "@/features/topical/components/Sort";
-import { SortParameters } from "@/features/topical/constants/types";
 import { Dispatch, SetStateAction, useState } from "react";
 import {
   DropdownMenu,
@@ -18,6 +17,7 @@ import {
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
 import { MAX_NUMBER_OF_COLUMNS } from "@/features/topical/constants/constants";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { SortParameters } from "@/features/topical/types/models";
 
 const Ultility = ({
   sortParameters,

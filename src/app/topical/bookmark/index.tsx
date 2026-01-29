@@ -1,11 +1,6 @@
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
-import {
-  QuestionInspectRef,
-  SubjectMetadata,
-  BreadcrumbContentProps,
-} from "@/features/topical/constants/types";
 import { truncateListName } from "@/features/topical/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
@@ -31,6 +26,11 @@ import SecondaryMainContent from "@/features/topical/components/SecondaryMainCon
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
 import type { BookmarkListMetadataResponse } from "@/server/api/getBookmarkListMetadata";
+import {
+  BreadcrumbContentProps,
+  QuestionInspectRef,
+} from "@/features/topical/types/components";
+import { SubjectMetadata } from "@/features/topical/types/models";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
@@ -47,7 +47,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
   const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null
+    null,
   );
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
@@ -151,7 +151,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       if (!currentFilter.year.includes(question.year.toString())) return false;
       if (!currentFilter.season.includes(question.season)) return false;
       const hasTopicOverlap = question.topics.some(
-        (topic) => topic && currentFilter.topic.includes(topic)
+        (topic) => topic && currentFilter.topic.includes(topic),
       );
       if (!hasTopicOverlap) return false;
       return true;
@@ -467,7 +467,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                           {subject}
                         </p>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </ScrollArea>

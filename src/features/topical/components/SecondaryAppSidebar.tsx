@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SecondaryAppSidebarProps } from "../types/components";
-import { InvalidInputs } from "../types/models";
+import { InvalidInputs, SubjectMetadata } from "../types/models";
 
 const SecondaryAppSidebar = ({
   subjectMetadata,

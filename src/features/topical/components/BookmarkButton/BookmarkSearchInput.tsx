@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { CommandInput } from "@/components/ui/command";
 import { XIcon } from "lucide-react";
-import { BookmarkSearchInputProps } from "../../constants/types";
+import { BookmarkSearchInputProps } from "../../types/components";
 
 export const BookmarkSearchInput = memo(
   ({
@@ -39,7 +39,7 @@ export const BookmarkSearchInput = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 BookmarkSearchInput.displayName = "BookmarkSearchInput";
