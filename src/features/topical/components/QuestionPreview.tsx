@@ -5,7 +5,6 @@ import { BookmarkButton } from "./BookmarkButton/BookmarkButton";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
-import { SelectedQuestion } from "../constants/types";
 import Loader from "./Loader/Loader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,6 +13,7 @@ import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import { extractCurriculumCode, extractSubjectCode } from "../lib/utils";
+import { SelectedQuestion } from "../types/models";
 
 const QuestionPreview = memo(
   ({
@@ -76,7 +76,7 @@ const QuestionPreview = memo(
         return false;
       }
       return userFinishedQuestions.some(
-        (item) => item.question.id === question.id
+        (item) => item.question.id === question.id,
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userFinishedQuestions, question.id, isThisFinishedQuestionSettled]);
@@ -86,7 +86,7 @@ const QuestionPreview = memo(
         className={cn(
           "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent mansory-item border-black/50 relative overflow-hidden min-h-[110px]",
           className,
-          uiPreferences.imageTheme === "dark" && "bg-black! dark:border-white!"
+          uiPreferences.imageTheme === "dark" && "bg-black! dark:border-white!",
         )}
         onClick={useCallback(() => {
           onQuestionClick();
@@ -111,14 +111,14 @@ const QuestionPreview = memo(
             "absolute inset-0 rounded-[10px] bg-linear-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-12",
             doesThisQuestionFinished && uiPreferences.showFinishedQuestionTint
               ? "opacity-100"
-              : " opacity-0"
+              : " opacity-0",
           )}
         />
 
         <div
           className={cn(
             "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-37 z-10",
-            uiPreferences.imageTheme === "dark" && "bg-white!"
+            uiPreferences.imageTheme === "dark" && "bg-white!",
           )}
         ></div>
         {loading && (
@@ -168,11 +168,11 @@ const QuestionPreview = memo(
           isBookmarkDisabled={isSessionPending}
           triggerButtonClassName={cn(
             "absolute bottom-1 right-1 h-7 w-7 cursor-pointer z-[30]",
-            isHovering && !isMobileDevice && "md:flex hidden"
+            isHovering && !isMobileDevice && "md:flex hidden",
           )}
           popOverTriggerClassName={cn(
             "absolute bottom-0 right-0 h-7 w-7 cursor-pointer z-[30]",
-            isHovering && !isMobileDevice && "md:flex hidden"
+            isHovering && !isMobileDevice && "md:flex hidden",
           )}
           badgeClassName="hidden"
           question={question}
@@ -233,7 +233,7 @@ const QuestionPreview = memo(
                 for (const bookmark of bookmarks ?? []) {
                   if (
                     bookmark.userBookmarks.some(
-                      (b) => b.question.id === question.id
+                      (b) => b.question.id === question.id,
                     )
                   ) {
                     return true;
@@ -242,7 +242,7 @@ const QuestionPreview = memo(
                 return false;
               })() && "bg-logo-main! text-white!",
               (savedActivitiesIsLoading || savedActivitiesIsFetching) &&
-                "opacity-50"
+                "opacity-50",
             )}
             tabIndex={-1}
             onClick={(e) => {
@@ -285,7 +285,7 @@ const QuestionPreview = memo(
         <img
           className={cn(
             "w-full h-full object-contain",
-            uiPreferences.imageTheme === "dark" && "invert!"
+            uiPreferences.imageTheme === "dark" && "invert!",
           )}
           src={imageSrc}
           alt="Question preview"
@@ -302,7 +302,7 @@ const QuestionPreview = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 QuestionPreview.displayName = "QuestionPreview";

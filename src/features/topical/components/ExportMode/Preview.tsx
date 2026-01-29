@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import "@/features/topical/components/react-photo-view.css";
-import { SelectedQuestion } from "../../constants/types";
+import { SelectedQuestion } from "../../types/models";
 import { memo, useMemo, useState } from "react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { QuestionInspectFinishedCheckbox } from "../QuestionInspect/QuestionInspectFinishedCheckbox";
@@ -47,7 +47,7 @@ const ViewModeToggle = memo(
           className={cn(
             "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
             currentView === "question" &&
-              "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
+              "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30",
           )}
         >
           Question
@@ -57,14 +57,14 @@ const ViewModeToggle = memo(
           className={cn(
             "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
             currentView === "answer" &&
-              "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
+              "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30",
           )}
         >
           Answer
         </Button>
       </div>
     );
-  }
+  },
 );
 
 ViewModeToggle.displayName = "ViewModeToggle";
@@ -105,7 +105,7 @@ const PreviewUtilityBar = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 PreviewUtilityBar.displayName = "PreviewUtilityBar";
@@ -143,7 +143,7 @@ const PreviewImages = memo(
               <img
                 className={cn(
                   "w-full h-full object-contain relative z-2 max-w-[750px]! cursor-pointer",
-                  uiPreferences.imageTheme === "dark" && "invert!"
+                  uiPreferences.imageTheme === "dark" && "invert!",
                 )}
                 src={item}
                 alt={
@@ -162,7 +162,7 @@ const PreviewImages = memo(
         ))}
       </div>
     );
-  }
+  },
 );
 
 PreviewImages.displayName = "PreviewImages";
@@ -200,7 +200,7 @@ const Preview = memo(
         </ScrollArea>
       </div>
     );
-  }
+  },
 );
 
 Preview.displayName = "Preview";

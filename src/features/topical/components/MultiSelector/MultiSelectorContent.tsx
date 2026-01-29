@@ -1,15 +1,12 @@
 import { memo, RefObject, useCallback } from "react";
-import {
-  MultiSelectorContentProps,
-  MultiSelectorListRef,
-} from "../../constants/types";
 import { Command } from "@/components/ui/command";
+import { MultiSelectorContentProps, MultiSelectorListRef } from "./selectors";
 
 const useMultiSelectorKeyDown = (
   multiSelectorListRef: RefObject<MultiSelectorListRef | null>,
   inputRef: RefObject<HTMLInputElement | null>,
   open: boolean,
-  setOpen: (open: boolean) => void
+  setOpen: (open: boolean) => void,
 ) => {
   return useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -26,7 +23,7 @@ const useMultiSelectorKeyDown = (
         }
       }
     },
-    [inputRef, multiSelectorListRef, open, setOpen]
+    [inputRef, multiSelectorListRef, open, setOpen],
   );
 };
 
@@ -42,7 +39,7 @@ const MultiSelectorContent = memo(
       multiSelectorListRef,
       inputRef,
       open,
-      setOpen
+      setOpen,
     );
 
     return (
@@ -54,7 +51,7 @@ const MultiSelectorContent = memo(
         {children}
       </Command>
     );
-  }
+  },
 );
 
 MultiSelectorContent.displayName = "MultiSelectorContent";

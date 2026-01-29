@@ -6,8 +6,8 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { SelectedQuestion } from "@/features/topical/constants/types";
 import { memo } from "react";
+import { SelectedQuestion } from "../types/models";
 
 export interface FirstPageButtonProps {
   currentChunkIndex: number;
@@ -48,7 +48,7 @@ export const FirstPageButton = memo(
         <ChevronsLeft />
       </Button>
     );
-  }
+  },
 );
 FirstPageButton.displayName = "FirstPageButton";
 
@@ -91,7 +91,7 @@ export const PreviousPageButton = memo(
         <ChevronLeft />
       </Button>
     );
-  }
+  },
 );
 PreviousPageButton.displayName = "PreviousPageButton";
 
@@ -137,7 +137,7 @@ export const NextPageButton = memo(
         <ChevronRight />
       </Button>
     );
-  }
+  },
 );
 NextPageButton.displayName = "NextPageButton";
 
@@ -172,7 +172,7 @@ export const LastPageButton = memo(
           if (currentChunkIndex === fullPartitionedData!.length - 1) return;
           setCurrentChunkIndex(fullPartitionedData!.length - 1);
           setDisplayedData(
-            fullPartitionedData![fullPartitionedData!.length - 1]
+            fullPartitionedData![fullPartitionedData!.length - 1],
           );
           if (scrollUpWhenPageChange) {
             scrollAreaRef.current?.scrollTo({
@@ -185,6 +185,6 @@ export const LastPageButton = memo(
         <ChevronsRight />
       </Button>
     );
-  }
+  },
 );
 LastPageButton.displayName = "LastPageButton";

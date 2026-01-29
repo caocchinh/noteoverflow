@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import { SelectedQuestion } from "@/features/topical/constants/types";
 import {
   extractCurriculumCode,
   extractQuestionNumber,
   extractSubjectCode,
 } from "../lib/utils";
 import { memo } from "react";
+import { SelectedQuestion } from "../types/models";
 
 export const QuestionInformation = memo(
   ({
@@ -56,7 +56,7 @@ export const QuestionInformation = memo(
         </Badge>
       </div>
     );
-  }
+  },
 );
 
 QuestionInformation.displayName = "QuestionInformation";

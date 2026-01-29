@@ -17,13 +17,7 @@ import {
   INFINITE_SCROLL_CHUNK_SIZE,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
-import type {
-  SortParameters,
-  AppMainContentProps,
-  QuestionInspectRef,
-  SelectedQuestion,
-  DisplayMode,
-} from "@/features/topical/constants/types";
+
 import {
   updateSearchParams,
   isSubset,
@@ -43,6 +37,8 @@ import ExportBar from "./ExportMode/ExportBar";
 import IntergrationTips from "./IntergrationTips";
 import Masonry from "./Masonry";
 import DisplayModeToggle from "./DisplayModeToggle";
+import { AppMainContentProps, QuestionInspectRef } from "../types/components";
+import { DisplayMode, SelectedQuestion, SortParameters } from "../types/models";
 
 const AppMainContent = ({
   mountedRef,
@@ -67,7 +63,7 @@ const AppMainContent = ({
   const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
   const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [questionsForExportArray, setQuestionsForExportArray] = useState<
     string[]
@@ -153,7 +149,7 @@ const AppMainContent = ({
           // Default to year-desc
           return b.year - a.year;
         }
-      }
+      },
     );
   }, [sortParameters.sortBy, topicalData]);
 
@@ -239,7 +235,7 @@ const AppMainContent = ({
         questionId,
       });
     },
-    [isExportModeEnabled]
+    [isExportModeEnabled],
   );
 
   const handleScrollEnd = useCallback(() => {
@@ -273,10 +269,10 @@ const AppMainContent = ({
     if (chunkedData && filteredProcessedData) {
       setFullPartitionedData(chunkedData);
       setFinishedQuestionsFilteredPartitionedData(
-        filteredProcessedData.chunkData
+        filteredProcessedData.chunkData,
       );
       setFinishedQuestionsFilteredDisplayData(
-        filteredProcessedData.chunkData[0] ?? []
+        filteredProcessedData.chunkData[0] ?? [],
       );
       setCurrentChunkIndex(0);
       mainContentScrollAreaRef.current?.scrollTo({
@@ -310,7 +306,7 @@ const AppMainContent = ({
         if (existingQuestionid && typeof existingQuestionid === "string") {
           if (
             topicalData?.data.findIndex(
-              (item) => item.id === existingQuestionid
+              (item) => item.id === existingQuestionid,
             ) !== -1
           ) {
             questionInspectRef.current?.setIsInspectOpen({
@@ -712,7 +708,7 @@ export const MainContent = memo(
         )}
       </>
     );
-  }
+  },
 );
 
 MainContent.displayName = "MainContent";
@@ -742,7 +738,7 @@ const QuestionViewItem = memo(
         className={cn(
           "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full mb-[10px]",
           isQuestionForExport &&
-            "transform-[scale(0.975)] border-logo-main rounded-md"
+            "transform-[scale(0.975)] border-logo-main rounded-md",
         )}
       >
         {isExportModeEnabled && (
@@ -777,7 +773,7 @@ const QuestionViewItem = memo(
       prevProps.isExportModeEnabled === nextProps.isExportModeEnabled &&
       prevProps.isQuestionForExport === nextProps.isQuestionForExport
     );
-  }
+  },
 );
 
 QuestionViewItem.displayName = "QuestionViewItem";

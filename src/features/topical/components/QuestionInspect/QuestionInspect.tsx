@@ -17,20 +17,21 @@ import {
   useState,
 } from "react";
 import { updateSearchParams } from "../../lib/utils";
-import {
-  InspectSidebarRef,
-  InspectUltilityBarRef,
-  QuestionInspectOpenState,
-  QuestionInspectProps,
-} from "../../constants/types";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import InspectSidebar from "./InspectSidebar/InspectSidebar";
-import { QuestionInspectMainContentRef } from "../../constants/types";
 import QuestionInspectMainContent from "./QuestionInspectMainContent";
 import { usePathname } from "next/navigation";
 import QuestionAnnotationGuardDialog from "./QuestionAnnotationGuardDialog";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { InspectProvider } from "../../context/InspectContext";
+import {
+  InspectSidebarRef,
+  InspectUltilityBarRef,
+  QuestionInspectMainContentRef,
+  QuestionInspectOpenState,
+  QuestionInspectProps,
+} from "../../types/components";
 
 const sidebarProviderStyle = {
   "--sidebar-width": "299.6px",
@@ -116,7 +117,9 @@ const QuestionInspect = memo(
 
       useEffect(() => {
         if (isMobile) {
-          setIsInspectSidebarOpen(false);
+          setTimeout(() => {
+            setIsInspectSidebarOpen(false);
+          }, 0);
         }
       }, [isMobile, setIsInspectSidebarOpen]);
 
@@ -145,9 +148,11 @@ const QuestionInspect = memo(
         if (!currentQuestionId) {
           return;
         }
-        setCurrentTabThatContainsQuestion(
-          calculateTabThatQuestionResidesIn(currentQuestionId),
-        );
+        setTimeout(() => {
+          setCurrentTabThatContainsQuestion(
+            calculateTabThatQuestionResidesIn(currentQuestionId),
+          );
+        }, 0);
       }, [currentQuestionId, calculateTabThatQuestionResidesIn]);
 
       const questionInspectMainContentRef =
@@ -260,8 +265,10 @@ const QuestionInspect = memo(
         if (!isPendingClose || isAnnotationGuardDialogOpen) {
           return;
         }
-        setIsPendingClose(false);
-        handleOpenChange(false);
+        setTimeout(() => {
+          setIsPendingClose(false);
+          handleOpenChange(false);
+        }, 0);
       }, [isPendingClose, isAnnotationGuardDialogOpen, handleOpenChange]);
 
       return (
@@ -288,74 +295,54 @@ const QuestionInspect = memo(
                   View the question and answer for individual questions
                 </DialogDescription>
               </DialogHeader>
-              <SidebarProvider
-                onOpenChange={setIsInspectSidebarOpen}
-                openMobile={isInspectSidebarOpen}
-                onOpenChangeMobile={setIsInspectSidebarOpen}
-                open={isInspectSidebarOpen}
-                className="min-h-[inherit]!"
-                style={sidebarProviderStyle}
+              <InspectProvider
+                value={{
+                  allQuestions,
+                  partitionedTopicalData,
+                  listId,
+                  BETTER_AUTH_URL,
+                  isOpen: isInspectOpen,
+                  setIsOpen: setIsInspectOpen,
+                  currentQuestionId,
+                  setCurrentQuestionId,
+                  currentQuestionIndex,
+                  currentTabThatContainsQuestion,
+                  currentView: "question",
+                  setCurrentView: (view) =>
+                    questionInspectMainContentRef.current?.setCurrentView(view),
+                  isInspectSidebarOpen,
+                  setIsInspectSidebarOpen,
+                  sortParameters,
+                  setSortParameters,
+                  isAnnotationGuardDialogOpen,
+                  setIsAnnotationGuardDialogOpen,
+                  isInputFocusedRef,
+                  isHavingUnsafeChangesRef,
+                  inspectUltilityBarRef,
+                  navigationButtonsContainerRef,
+                  questionInspectMainContentRef,
+                  sideBarInspectRef,
+                  isCoolDownRef,
+                  calculateTabThatQuestionResidesIn,
+                  resetScrollPositions: () =>
+                    questionInspectMainContentRef.current?.resetScrollPositions(),
+                }}
               >
-                <InspectSidebar
-                  ref={sideBarInspectRef}
-                  inspectUltilityBarRef={inspectUltilityBarRef}
-                  calculateTabThatQuestionResidesIn={
-                    calculateTabThatQuestionResidesIn
-                  }
-                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
-                  setIsAnnotationGuardDialogOpen={
-                    setIsAnnotationGuardDialogOpen
-                  }
-                  allQuestions={allQuestions}
-                  partitionedTopicalData={partitionedTopicalData}
-                  isOpen={isInspectOpen}
-                  setIsOpen={setIsInspectOpen}
-                  currentTabThatContainsQuestion={
-                    currentTabThatContainsQuestion
-                  }
-                  isInspectSidebarOpen={isInspectSidebarOpen}
-                  currentQuestionId={currentQuestionId}
-                  setCurrentQuestionId={setCurrentQuestionId}
-                  setCurrentView={(view) =>
-                    questionInspectMainContentRef.current?.setCurrentView(view)
-                  }
-                  resetScrollPositions={() =>
-                    questionInspectMainContentRef.current?.resetScrollPositions()
-                  }
-                  listId={listId}
-                  currentQuestionIndex={currentQuestionIndex}
-                  isInputFocusedRef={isInputFocusedRef}
-                  navigationButtonsContainerRef={navigationButtonsContainerRef}
-                  questionInspectMainContentRef={questionInspectMainContentRef}
-                />
-                <QuestionInspectMainContent
-                  ref={questionInspectMainContentRef}
-                  isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-                  partitionedTopicalData={partitionedTopicalData}
-                  currentTabThatContainsQuestion={
-                    currentTabThatContainsQuestion
-                  }
-                  setIsAnnotationGuardDialogOpen={
-                    setIsAnnotationGuardDialogOpen
-                  }
-                  isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
-                  currentQuestionIndex={currentQuestionIndex}
-                  currentQuestionId={currentQuestionId}
-                  listId={listId}
-                  inspectUltilityBarRef={inspectUltilityBarRef}
-                  sideBarInspectRef={sideBarInspectRef}
-                  sortParameters={sortParameters}
-                  setSortParameters={setSortParameters}
-                  isInspectSidebarOpen={isInspectSidebarOpen}
-                  navigationButtonsContainerRef={navigationButtonsContainerRef}
-                  setIsInspectSidebarOpen={setIsInspectSidebarOpen}
-                  BETTER_AUTH_URL={BETTER_AUTH_URL}
-                  setIsOpen={setIsInspectOpen}
-                  isCoolDownRef={isCoolDownRef}
-                  isInputFocusedRef={isInputFocusedRef}
-                />
-              </SidebarProvider>
+                <SidebarProvider
+                  onOpenChange={setIsInspectSidebarOpen}
+                  openMobile={isInspectSidebarOpen}
+                  onOpenChangeMobile={setIsInspectSidebarOpen}
+                  open={isInspectSidebarOpen}
+                  className="min-h-[inherit]!"
+                  style={sidebarProviderStyle}
+                >
+                  <InspectSidebar ref={sideBarInspectRef} />
+
+                  <QuestionInspectMainContent
+                    ref={questionInspectMainContentRef}
+                  />
+                </SidebarProvider>
+              </InspectProvider>
             </DialogContent>
           </Dialog>
         </>

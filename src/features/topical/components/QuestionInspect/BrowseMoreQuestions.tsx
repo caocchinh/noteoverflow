@@ -2,10 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
-import {
-  BrowseMoreQuestionsProps,
-  SelectedQuestion,
-} from "../../constants/types";
+
 import { JumpToTabButton } from "../JumpToTabButton";
 import {
   FirstPageButton,
@@ -16,6 +13,8 @@ import {
 import QuestionPreview from "../QuestionPreview";
 import Masonry from "../Masonry";
 import { usePathname } from "next/navigation";
+import { BrowseMoreQuestionsProps } from "../../types/components";
+import { SelectedQuestion } from "../../types/models";
 
 const BrowseMoreQuestions = memo(
   ({
@@ -156,14 +155,14 @@ const BrowseMoreQuestions = memo(
                   width: question.questionImagesDimensions?.[imageIndex]?.width,
                   height:
                     question.questionImagesDimensions?.[imageIndex]?.height,
-                })
-              )
+                }),
+              ),
             )}
           />
         </CollapsibleContent>
       </Collapsible>
     );
-  }
+  },
 );
 
 BrowseMoreQuestions.displayName = "BrowseMoreQuestions";

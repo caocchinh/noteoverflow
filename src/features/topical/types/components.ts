@@ -1,315 +1,16 @@
 import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
-import type {
-  CIE_A_LEVEL_SUBDIVISION,
-  OUTDATED,
-  ValidCurriculum,
-} from "@/constants/types";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { WebViewerInstance } from "@pdftron/webviewer";
 import { Root } from "react-dom/client";
-
-export interface EnhancedSelectContentRef {
-  setInputValue: Dispatch<SetStateAction<string>>;
-}
-
-export interface MultiSelectorProps {
-  selectedValues: string[];
-  onValuesChange: (value: string[]) => void;
-  allAvailableOptions: string[];
-  maxLength?: number;
-  label: VALID_LABEL;
-}
-
-export interface EnhancedSelectAvailableOptions {
-  value: string;
-  curriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
-  isUpToDate: boolean;
-}
-
-export interface EnhancedMultiSelectorProps {
-  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
-  isMounted: boolean;
-  selectedValues: string[];
-  onValuesChange: (value: string[]) => void;
-  allAvailableOptions: EnhancedSelectAvailableOptions[];
-  maxLength?: number;
-  label: VALID_LABEL;
-}
-
-export interface MultiSelectorSharedProps {
-  selectedValues: string[];
-  onValueChange: (val: string | string[]) => void;
-  allAvailableOptions: string[];
-  label: string;
-  maxLength: number | undefined;
-  inputRef: RefObject<HTMLInputElement | null>;
-}
-
-export interface EnhancedMultiSelectorSharedProps {
-  selectedValues: string[];
-  onValueChange: (val: string | string[]) => void;
-  allAvailableOptions: EnhancedSelectAvailableOptions[];
-  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
-  allValue: string[];
-  label: string;
-  maxLength: number | undefined;
-  allFilterOptions: string[];
-  inputRef: RefObject<HTMLInputElement | null>;
-  onDeleteAll: () => void;
-  onSelectAll: () => void;
-}
-
-export interface MultiSelectorContentProps {
-  inputRef: RefObject<HTMLInputElement | null>;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  multiSelectorListRef: RefObject<MultiSelectorListRef | null>;
-  children: ReactNode;
-}
-
-export interface MultiSelectorListRef {
-  setInputValue: Dispatch<SetStateAction<string>>;
-  inputValue: string;
-}
-
-export interface MultiSelectorListProps {
-  selectedValues: string[];
-  onValueChange: (val: string | string[]) => void;
-  inputRef: RefObject<HTMLInputElement | null>;
-  label: string;
-  allAvailableOptions: string[];
-  setOpen: (open: boolean) => void;
-  maxLength: number | undefined;
-}
-
-export interface EnhancedMultiSelectorListProps {
-  selectedValues: string[];
-  onValueChange: (val: string | string[]) => void;
-  inputRef: RefObject<HTMLInputElement | null>;
-  label: string;
-  currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
-  allFilterOptions: string[];
-  allAvailableOptions: EnhancedSelectAvailableOptions[];
-  setOpen: (open: boolean) => void;
-  maxLength: number | undefined;
-}
-
-export interface MultiSelectorTriggerButtonUltilityProps {
-  onValueChange: (val: string | string[]) => void;
-  mousePreventDefault: (e: React.MouseEvent) => void;
-  setIsClickingUltility: Dispatch<SetStateAction<boolean>>;
-  allAvailableOptions: string[];
-  maxLength: number | undefined;
-  showSelectAll: boolean;
-  showDeleteAll: boolean;
-}
-
-export interface MultiSelectorSearchInputProps {
-  inputValue: string;
-  isBlockingMobileKeyboard: boolean;
-  setInputValue: (value: string) => void;
-  inputRef: RefObject<HTMLInputElement | null>;
-  label: string;
-  setOpen: (open: boolean) => void;
-  commandListScrollArea: RefObject<HTMLDivElement | null>;
-}
-
-export interface MultiSelectorTriggerProps {
-  selectedValues: string[];
-  onValueChange: (val: string | string[]) => void;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  allAvailableOptions: string[];
-  label: string;
-  setInputValue: Dispatch<SetStateAction<string>> | undefined;
-  maxLength: number | undefined;
-  showSelectAll?: boolean;
-  showDeleteAll?: boolean;
-}
-
-export type VALID_LABEL =
-  | "Curriculum"
-  | "Subject"
-  | "Topic"
-  | "Year"
-  | "Paper"
-  | "Season";
-
-export interface InvalidInputs {
-  curriculum: boolean;
-  subject: boolean;
-  topic: boolean;
-  year: boolean;
-  paperType: boolean;
-  season: boolean;
-}
-
-export interface FilterData {
-  topic: string[];
-  paperType: string[];
-  year: string[];
-  season: string[];
-}
-
-export type LayoutStyle = "pagination" | "infinite";
-export type ImageTheme = "dark" | "light";
-
-export type DisplayMode = "questions" | "answers";
-
-export interface UiPreferences {
-  numberOfColumns: number;
-  layoutStyle: LayoutStyle;
-  numberOfQuestionsPerPage: number;
-  imageTheme: ImageTheme;
-  isStrictModeEnabled: boolean;
-  isQuestionCacheEnabled: boolean;
-  showFinishedQuestionTint: boolean;
-  showScrollToTopButton: boolean;
-  scrollUpWhenPageChange: boolean;
-  recentlySearchSortedBy: SortByOptions;
-  isSessionCacheEnabled: boolean;
-  isPersistantCacheEnabled: boolean;
-}
-
-export type UiPreferencesCache = Pick<
-  UiPreferences,
-  | "numberOfColumns"
-  | "layoutStyle"
-  | "numberOfQuestionsPerPage"
-  | "imageTheme"
-  | "isStrictModeEnabled"
-  | "isQuestionCacheEnabled"
-  | "showFinishedQuestionTint"
-  | "showScrollToTopButton"
-  | "scrollUpWhenPageChange"
-  | "recentlySearchSortedBy"
-  | "isSessionCacheEnabled"
-  | "isPersistantCacheEnabled"
->;
-
-export type FiltersCache = {
-  lastSessionCurriculum: string;
-  lastSessionSubject: string;
-  filters: {
-    [curriculum: string]: {
-      [subject: string]: FilterData & {
-        topicSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
-        paperTypeSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
-      };
-    };
-  };
-};
-
-export interface SelectedQuestion {
-  year: number;
-  season: string;
-  id: string;
-  paperType: number;
-  questionImages: string[];
-  questionImagesDimensions: { width: number; height: number }[] | null;
-  answersImagesDimensions: { width: number; height: number }[] | null;
-  answers: string[];
-  topics: string[];
-}
-
-export interface VectorizeSelectedQuestion extends SelectedQuestion {
-  score: number;
-}
-
-export interface SelectedBookmark {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  listName: string;
-  visibility: string;
-  userBookmarks: {
-    updatedAt: Date;
-    question: SelectedQuestion;
-  }[];
-}
-
-export interface SelectedFinishedQuestion {
-  updatedAt: Date;
-  question: SelectedQuestion;
-}
-
-export interface SelectedAnnotation {
-  questionId: string;
-  questionXfdf: string;
-  answerXfdf: string;
-  updatedAt: Date;
-}
-
-export interface SelectedPublickBookmark {
-  updatedAt: Date;
-  question: SelectedQuestion;
-}
-
-// Generic metadata structure for consistent API responses
-export interface CurriculumMetadata {
-  subjects: string[];
-}
-
-// Unified bookmark metadata structure
-export interface BookmarkMetadataItem {
-  listName: string;
-  curricula: Partial<Record<ValidCurriculum, CurriculumMetadata>>;
-}
-
-export interface SubjectMetadata {
-  topic: string[];
-  year: string[];
-  paperType: string[];
-  season: string[];
-}
-
-type BookmarkId = string;
-
-// Organized by visibility for bookmarks
-export type BookmarksMetadata = Record<
-  "public" | "private",
-  Record<BookmarkId, BookmarkMetadataItem>
->;
-
-// Simple curriculum mapping for finished questions
-export type FinishedQuestionsMetadata = Partial<
-  Record<ValidCurriculum, CurriculumMetadata>
->;
-
-export interface SavedActivitiesResponse {
-  finishedQuestions: SelectedFinishedQuestion[];
-  bookmarks: SelectedBookmark[];
-  annotations: SelectedAnnotation[];
-}
-
-export interface MultiSelectContextProps {
-  value: string[];
-  onValueChange: (value: string | string[]) => void;
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  inputValue: string;
-  setInputValue: Dispatch<SetStateAction<string>>;
-  inputRef: RefObject<HTMLInputElement | null>;
-  commandListScrollArea: RefObject<HTMLDivElement | null>;
-  allAvailableOptions?: string[];
-  label: VALID_LABEL;
-  prerequisite: string;
-  isMobileDevice: boolean;
-  maxLength?: number;
-}
+import { ValidCurriculum } from "@/constants/types";
+import {
+  CurrentQuery,
+  FilterData,
+  SelectedQuestion,
+  SubjectMetadata,
+  TopicalData,
+  SortParameters,
+} from "./models";
 
 export interface InfiniteScrollProps {
   next: () => unknown;
@@ -318,21 +19,9 @@ export interface InfiniteScrollProps {
   isLoading?: boolean;
 }
 
-// Extend the IntersectionObserverInit interface to include scrollMargin
 export interface ExtendedIntersectionObserverInit extends IntersectionObserverInit {
   scrollMargin?: string;
 }
-
-export type SortByOptions = "ascending" | "descending";
-
-export interface SortParameters {
-  sortBy: SortByOptions;
-}
-
-export type CurrentQuery = {
-  curriculumId: string;
-  subjectId: string;
-} & FilterData;
 
 export interface QuestionHoverCardProps {
   question: SelectedQuestion;
@@ -366,6 +55,13 @@ export interface QuestionInspectProps {
   listId?: string;
   BETTER_AUTH_URL: string;
 }
+
+export type QuestionInspectOpenState = {
+  isOpen: boolean;
+  questionId: string;
+};
+
+export type QuestionInspectViewMode = "question" | "answer" | "both";
 
 export interface AppUltilityBarProps {
   finishedQuestionsFilteredPartitionedData: SelectedQuestion[][] | undefined;
@@ -414,13 +110,6 @@ export interface FinishedTrackerProps {
   }) => void;
 }
 
-export type QuestionInspectOpenState = {
-  isOpen: boolean;
-  questionId: string;
-};
-
-export type QuestionInspectViewMode = "question" | "answer" | "both";
-
 export interface SecondaryAppSidebarProps {
   subjectMetadata: SubjectMetadata | null;
   currentFilter: SubjectMetadata | null;
@@ -468,16 +157,6 @@ export interface AppMainContentProps {
   filterUrl: string;
 }
 
-export type TopicalData =
-  | SelectedPublickBookmark[]
-  | SelectedFinishedQuestion[]
-  | null;
-
-// Common type for sorting elements that have updatedAt
-export type SortableTopicalItem =
-  | SelectedPublickBookmark
-  | SelectedFinishedQuestion;
-
 export interface BreadcrumbContentProps {
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
@@ -498,29 +177,6 @@ export interface SecondaryMainContentProps {
   preContent?: ReactNode;
   breadcrumbContent: (props: BreadcrumbContentProps) => ReactNode;
   mainContent: ReactNode;
-}
-
-export interface InspectSidebarProps {
-  allQuestions: SelectedQuestion[];
-  partitionedTopicalData: SelectedQuestion[][] | undefined;
-  isOpen: QuestionInspectOpenState;
-  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
-  currentTabThatContainsQuestion: number;
-  calculateTabThatQuestionResidesIn: (questionId: string) => number;
-  isInspectSidebarOpen: boolean;
-  currentQuestionId: string | undefined;
-  setCurrentView: Dispatch<SetStateAction<QuestionInspectViewMode>>;
-  setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  isInputFocusedRef: RefObject<boolean>;
-  resetScrollPositions: () => void;
-  listId: string | undefined;
-  currentQuestionIndex: number;
-  inspectUltilityBarRef: RefObject<InspectUltilityBarRef | null>;
-  navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
-  questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
-  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
-  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
-  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface InspectSidebarRef {
@@ -555,28 +211,6 @@ export interface InspectUltilityBarRef {
 export interface QuestionInspectRef {
   setIsInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
   isInspectOpen: QuestionInspectOpenState;
-}
-
-export interface QuestionInspectMainContentProps {
-  partitionedTopicalData: SelectedQuestion[][] | undefined;
-  currentTabThatContainsQuestion: number;
-  currentQuestionIndex: number;
-  currentQuestionId: string | undefined;
-  listId: string | undefined;
-  navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
-  inspectUltilityBarRef: RefObject<InspectUltilityBarRef | null>;
-  sideBarInspectRef: RefObject<InspectSidebarRef | null>;
-  sortParameters: SortParameters | undefined;
-  setSortParameters: Dispatch<SetStateAction<SortParameters>> | undefined;
-  isInspectSidebarOpen: boolean;
-  setIsInspectSidebarOpen: Dispatch<SetStateAction<boolean>>;
-  BETTER_AUTH_URL: string;
-  setIsOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
-  isCoolDownRef: RefObject<boolean>;
-  isInputFocusedRef: RefObject<boolean>;
-  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
-  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
-  isAnnotationGuardDialogOpen: boolean;
 }
 
 export interface QuestionInspectMainContentRef {
@@ -771,19 +405,6 @@ export interface BookmarkButtonSharedProps {
   isAnnotationGuardDialogOpen?: boolean;
   setIsAnnotationGuardDialogOpen?: Dispatch<SetStateAction<boolean>>;
   isHavingUnsafeChangesRef?: IsHavingUnsafeChangesRef;
-}
-
-export interface CreateListMutationVariables {
-  question: SelectedQuestion;
-  bookmarkListName: string;
-  visibility: "public" | "private";
-}
-
-export interface ToggleBookmarkMutationVariables {
-  question: SelectedQuestion;
-  listId: string;
-  isBookmarked: boolean;
-  bookmarkListName: string;
 }
 
 export interface ExportReviewDialogProps {

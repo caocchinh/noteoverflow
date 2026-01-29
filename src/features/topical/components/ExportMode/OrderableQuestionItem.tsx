@@ -1,5 +1,5 @@
 import { CSSProperties, Dispatch, memo, SetStateAction } from "react";
-import { SelectedQuestion } from "../../constants/types";
+import { SelectedQuestion } from "../../types/models";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,7 @@ const OrderableQuestionItem = memo(
         className={cn(
           "cursor-grab flex flex-row gap-1 items-center justify-center active:cursor-grabbing p-1 -ml-1 mr-2 rounded hover:bg-foreground/10 touch-none",
           isSelected && "hover:bg-white/20",
-          isDragOverlay && "cursor-grabbing"
+          isDragOverlay && "cursor-grabbing",
         )}
         title="Drag to reorder"
         {...attributes}
@@ -70,7 +70,7 @@ const OrderableQuestionItem = memo(
           <Grip
             className={cn(
               "h-4 w-4 ml-[-2px] opacity-50",
-              mobileBreakpoint && "hidden!"
+              mobileBreakpoint && "hidden!",
             )}
           />
         </div>
@@ -94,7 +94,7 @@ const OrderableQuestionItem = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 OrderableQuestionItem.displayName = "OrderableQuestionItem";

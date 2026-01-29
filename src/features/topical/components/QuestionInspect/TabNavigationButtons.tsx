@@ -6,8 +6,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { SelectedQuestion } from "../../constants/types";
 import { JumpToTabButton } from "../JumpToTabButton";
+import { SelectedQuestion } from "../../types/models";
 
 interface TabNavigationButtonsProps {
   currentTab: number;
@@ -101,7 +101,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
                 behavior: "instant",
               });
             },
-            [listScrollAreaRef, setCurrentTab]
+            [listScrollAreaRef, setCurrentTab],
           )}
           totalTabs={partitionedTopicalData?.length ?? 0}
         />
@@ -162,7 +162,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
         </div>
       </>
     );
-  }
+  },
 );
 
 TabNavigationButtons.displayName = "TabNavigationButtons";

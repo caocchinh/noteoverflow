@@ -19,10 +19,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  ExportReviewDialogProps,
-  SelectedQuestion,
-} from "../../constants/types";
-import {
   extractPaperCode,
   extractQuestionNumber,
   fuzzySearch,
@@ -44,6 +40,8 @@ import { generateMultipleQuestionsDocxBlob } from "../../lib/generateDocxBlob";
 import ExportFormatSelector, {
   ExportFormatSelectorHandle,
 } from "./ExportFormatSelector";
+import { ExportReviewDialogProps } from "../../types/components";
+import { SelectedQuestion } from "../../types/models";
 
 interface SearchInputProps {
   value: string;
@@ -100,17 +98,17 @@ const ExportReviewDialog = memo(
     }, [allQuestions, currentlyPreviewQuestion]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterMode, setFilterMode] = useState<"selected" | "not selected">(
-      "selected"
+      "selected",
     );
     const filteredQuestions = useMemo(() => {
       let baseQuestions = allQuestions;
       if (filterMode === "not selected") {
         baseQuestions = allQuestions.filter(
-          (q) => !questionsForExport.has(q.id)
+          (q) => !questionsForExport.has(q.id),
         );
       } else {
         baseQuestions = allQuestions.filter((q) =>
-          questionsForExport.has(q.id)
+          questionsForExport.has(q.id),
         );
       }
 
@@ -120,11 +118,11 @@ const ExportReviewDialog = memo(
           (q) =>
             fuzzySearch(
               query,
-              extractPaperCode({ questionId: q.id }) + extractQuestionNumber
+              extractPaperCode({ questionId: q.id }) + extractQuestionNumber,
             ) ||
             q.topics?.some((t) => fuzzySearch(query, t)) ||
             fuzzySearch(query, q.year.toString()) ||
-            fuzzySearch(query, q.season)
+            fuzzySearch(query, q.season),
         );
       }
 
@@ -132,7 +130,7 @@ const ExportReviewDialog = memo(
     }, [allQuestions, questionsForExport, searchQuery, filterMode]);
     const canReorder = useMemo(
       () => searchQuery.trim() === "" && filterMode === "selected",
-      [searchQuery, filterMode]
+      [searchQuery, filterMode],
     );
     const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
     const [isExportModeOpen, setIsExportModeOpen] = useState(false);
@@ -183,7 +181,7 @@ const ExportReviewDialog = memo(
         currentlyPreviewQuestion,
         setQuestionsForExport,
         setQuestionsForExportArray,
-      ]
+      ],
     );
 
     const selectAll = useCallback(() => {
@@ -201,7 +199,7 @@ const ExportReviewDialog = memo(
       (order: "ascending" | "descending") => {
         // Create a map for quick lookup of question years
         const questionYearMap = new Map(
-          allQuestions.map((q) => [q.id, q.year])
+          allQuestions.map((q) => [q.id, q.year]),
         );
 
         setQuestionsForExportArray((prev) => {
@@ -213,7 +211,7 @@ const ExportReviewDialog = memo(
           return sorted;
         });
       },
-      [allQuestions, setQuestionsForExportArray]
+      [allQuestions, setQuestionsForExportArray],
     );
 
     const handleExport = useCallback(
@@ -226,7 +224,7 @@ const ExportReviewDialog = memo(
 
         exportProgressDialogRef.current?.start(
           questionsForExportArray.length,
-          mode
+          mode,
         );
 
         try {
@@ -283,7 +281,7 @@ const ExportReviewDialog = memo(
           abortControllerRef.current = null;
         }
       },
-      [questionsForExportArray, allQuestions]
+      [questionsForExportArray, allQuestions],
     );
 
     const progressPercentage = useMemo(() => {
@@ -307,7 +305,7 @@ const ExportReviewDialog = memo(
           return;
         }
       },
-      [isExportModeOpen, isExporting, isMobilePreviewOpen]
+      [isExportModeOpen, isExporting, isMobilePreviewOpen],
     );
 
     return (
@@ -316,7 +314,7 @@ const ExportReviewDialog = memo(
           <>
             {createPortal(
               <div className="fixed inset-0 z-100009 bg-black/50" />,
-              document.body
+              document.body,
             )}
           </>
         )}
@@ -364,7 +362,7 @@ const ExportReviewDialog = memo(
                     className={cn(
                       "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-3 bg-input text-black hover:bg-input dark:bg-transparent capitalize",
                       filterMode === mode &&
-                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30"
+                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30",
                     )}
                   >
                     {mode}
@@ -450,7 +448,7 @@ const ExportReviewDialog = memo(
             <>
               {createPortal(
                 <div className="fixed inset-0 z-1000014 bg-black/50" />,
-                document.body
+                document.body,
               )}
             </>
           )}
@@ -524,7 +522,7 @@ const ExportReviewDialog = memo(
         </Dialog>
       </>
     );
-  }
+  },
 );
 
 ExportReviewDialog.displayName = "ExportReviewDialog";

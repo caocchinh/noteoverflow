@@ -1,8 +1,6 @@
 import { CIE_A_LEVEL_SUBDIVISION } from "@/constants/types";
-import {
-  DisplayMode,
-  SortParameters,
-} from "@/features/topical/constants/types";
+import { DisplayMode, SortParameters } from "@/features/topical/types/models";
+
 import { Dispatch, RefObject, SetStateAction } from "react";
 
 export type OptionalSearchFilter = {

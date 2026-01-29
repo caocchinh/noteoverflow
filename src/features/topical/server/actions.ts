@@ -11,13 +11,13 @@ import {
 import { ServerActionResponse } from "@/constants/types";
 import { BookmarkService } from "../services/bookmark.service";
 import { AnnotationService } from "../services/annotation.service";
-import { FilterData } from "../constants/types";
 import {
   validateCurriculum,
   validateFilterData,
   validateSubject,
 } from "../lib/utils";
 import { MAX_NUMBER_OF_RECENT_QUERIES } from "../constants/constants";
+import { FilterData } from "../types/models";
 
 // Bookmark Actions delegated to Service
 
@@ -40,7 +40,7 @@ export const createBookmarkListAndAddBookmarkAction = async ({
       userId,
       listName,
       visibility,
-      questionId
+      questionId,
     );
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
@@ -70,7 +70,7 @@ export const addBookmarkAction = async ({
     const result = await BookmarkService.addBookmark(
       userId,
       listId,
-      questionId
+      questionId,
     );
     return result as ServerActionResponse<void>;
   } catch (error) {
@@ -153,7 +153,7 @@ export const changeBookmarkListVisibilityAction = async ({
     return await BookmarkService.changeListVisibility(
       userId,
       listId,
-      newVisibility
+      newVisibility,
     );
   } catch (error) {
     console.error(error);
@@ -224,8 +224,8 @@ export const removeFinishedQuestionAction = async ({
       .where(
         and(
           eq(finishedQuestions.userId, userId),
-          eq(finishedQuestions.questionId, questionId)
-        )
+          eq(finishedQuestions.questionId, questionId),
+        ),
       );
     return {
       success: true,
@@ -316,8 +316,8 @@ export const addRecentQuery = async ({
           .where(
             and(
               eq(recentQuery.userId, userId),
-              eq(recentQuery.queryKey, oldestQueries[0].queryKey)
-            )
+              eq(recentQuery.queryKey, oldestQueries[0].queryKey),
+            ),
           );
         deletedKey = oldestQueries[0].queryKey;
       }
@@ -374,7 +374,7 @@ export const deleteRecentQuery = async ({
     await db
       .delete(recentQuery)
       .where(
-        and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId))
+        and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId)),
       );
 
     return {
@@ -411,7 +411,7 @@ export const saveAnnotationsAction = async ({
       userId,
       questionId,
       questionXfdf,
-      answerXfdf
+      answerXfdf,
     );
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {

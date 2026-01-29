@@ -24,16 +24,14 @@ import {
 } from "@/features/topical/constants/constants";
 import DockWrapper from "@/features/topical/components/DockWrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type {
-  UiPreferences,
-  UiPreferencesCache,
-  SavedActivitiesResponse,
-} from "@/features/topical/constants/types";
+
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
 import { cn } from "@/lib/utils";
+import { UiPreferences, UiPreferencesCache } from "../types/preferences";
+import { SavedActivitiesResponse } from "../types/models";
 
 type UiPreferencesKey = keyof UiPreferences;
 
@@ -84,7 +82,7 @@ const getInitialUiPreferences = (): UiPreferences => {
   } else {
     localStorage.setItem(
       UI_PREFERENCES_CACHE_KEY,
-      JSON.stringify(DEFAULT_UI_PREFERENCES_CACHE)
+      JSON.stringify(DEFAULT_UI_PREFERENCES_CACHE),
     );
   }
 
@@ -97,7 +95,7 @@ const DesmosCalculator = dynamic(
   () => import("@/features/topical/components/DesmosCalculator"),
   {
     ssr: false,
-  }
+  },
 );
 
 const TopicalContext = createContext<{
@@ -110,7 +108,7 @@ const TopicalContext = createContext<{
   uiPreferences: UiPreferences;
   setUiPreference: <K extends keyof UiPreferences>(
     key: K,
-    value: SetStateAction<UiPreferences[K]>
+    value: SetStateAction<UiPreferences[K]>,
   ) => void;
   // Optimized user saved activities - separated to prevent unnecessary re-renders
   bookmarksData: SavedActivitiesResponse["bookmarks"] | undefined;
@@ -148,7 +146,7 @@ export default function TopicalLayoutProvider({
 
   // UI Preferences state
   const [uiPreferences, setUiPreferences] = useState<UiPreferences>(
-    DEFAULT_UI_PREFERENCES_CACHE
+    DEFAULT_UI_PREFERENCES_CACHE,
   );
 
   useEffect(() => {
@@ -158,7 +156,7 @@ export default function TopicalLayoutProvider({
       (key) =>
         key.startsWith("wc--") ||
         key.includes("webviewer") ||
-        key.includes("pdftron")
+        key.includes("pdftron"),
     );
 
     if (webViewerKeys.length > 0) {
@@ -194,7 +192,7 @@ export default function TopicalLayoutProvider({
 
       localStorage.setItem(
         UI_PREFERENCES_CACHE_KEY,
-        JSON.stringify(uiPreferencesCache)
+        JSON.stringify(uiPreferencesCache),
       );
     } catch (error) {
       console.error("Failed to save UI preferences to localStorage:", error);
@@ -205,14 +203,14 @@ export default function TopicalLayoutProvider({
   const setUiPreference = useCallback(
     <K extends UiPreferencesKey>(
       key: K,
-      value: SetStateAction<UiPreferences[K]>
+      value: SetStateAction<UiPreferences[K]>,
     ) => {
       setUiPreferences((prev) => {
         const newValue = typeof value === "function" ? value(prev[key]) : value;
         return { ...prev, [key]: newValue };
       });
     },
-    []
+    [],
   );
 
   // User saved activities query - optimized to prevent unnecessary re-renders
@@ -234,37 +232,37 @@ export default function TopicalLayoutProvider({
   // Memoize individual query states to prevent context re-renders
   const bookmarksData = useMemo(
     () => userSavedActivitiesQuery.data?.bookmarks,
-    [userSavedActivitiesQuery.data?.bookmarks]
+    [userSavedActivitiesQuery.data?.bookmarks],
   );
 
   const finishedQuestionsData = useMemo(
     () => userSavedActivitiesQuery.data?.finishedQuestions,
-    [userSavedActivitiesQuery.data?.finishedQuestions]
+    [userSavedActivitiesQuery.data?.finishedQuestions],
   );
 
   const annotationsData = useMemo(
     () => userSavedActivitiesQuery.data?.annotations,
-    [userSavedActivitiesQuery.data?.annotations]
+    [userSavedActivitiesQuery.data?.annotations],
   );
 
   const savedActivitiesError = useMemo(
     () => userSavedActivitiesQuery.error,
-    [userSavedActivitiesQuery.error]
+    [userSavedActivitiesQuery.error],
   );
 
   const savedActivitiesIsLoading = useMemo(
     () => userSavedActivitiesQuery.isLoading,
-    [userSavedActivitiesQuery.isLoading]
+    [userSavedActivitiesQuery.isLoading],
   );
 
   const savedActivitiesIsFetching = useMemo(
     () => userSavedActivitiesQuery.isFetching,
-    [userSavedActivitiesQuery.isFetching]
+    [userSavedActivitiesQuery.isFetching],
   );
 
   const savedActivitiesIsError = useMemo(
     () => userSavedActivitiesQuery.isError,
-    [userSavedActivitiesQuery.isError]
+    [userSavedActivitiesQuery.isError],
   );
 
   const contextValue = useMemo(
@@ -297,7 +295,7 @@ export default function TopicalLayoutProvider({
       savedActivitiesIsLoading,
       savedActivitiesIsFetching,
       savedActivitiesIsError,
-    ]
+    ],
   );
 
   return (
@@ -316,7 +314,7 @@ export default function TopicalLayoutProvider({
             <SidebarInset
               className={cn(
                 "relative w-full",
-                pathname === "/search" && "h-0!"
+                pathname === "/search" && "h-0!",
               )}
             >
               <div className="absolute left-0 z-1000 flex w-full items-start justify-center">

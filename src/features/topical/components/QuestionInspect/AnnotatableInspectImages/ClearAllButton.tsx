@@ -1,7 +1,7 @@
 import { memo, RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import { Brush } from "lucide-react";
-import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
+import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
 
 const ClearAllButton = memo(
   ({
@@ -29,7 +29,7 @@ const ClearAllButton = memo(
         <Brush className="h-4 w-4" />
       </Button>
     );
-  }
+  },
 );
 
 ClearAllButton.displayName = "ClearAllButton";

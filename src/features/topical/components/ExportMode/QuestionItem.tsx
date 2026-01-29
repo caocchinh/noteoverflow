@@ -1,5 +1,5 @@
 import { Dispatch, memo, ReactNode, SetStateAction, useMemo } from "react";
-import { SelectedQuestion } from "../../constants/types";
+import { SelectedQuestion } from "../../types/models";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Eye, X } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
@@ -47,10 +47,10 @@ const QuestionItem = memo(
     const isThisQuestionFinished = useMemo(
       () =>
         userFinishedQuestions?.some(
-          (item) => item.question.id === question?.id
+          (item) => item.question.id === question?.id,
         ) ?? false,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled]
+      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled],
     );
 
     return (
@@ -62,7 +62,7 @@ const QuestionItem = memo(
             "bg-logo-main! text-white!",
           isThisQuestionFinished
             ? "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
-            : "hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6]"
+            : "hover:dark:bg-[#3b3b3b] bg-white dark:bg-accent hover:bg-[#e6e6e6]",
         )}
         onClick={() => setCurrentlyPreviewQuestion(question.id)}
       >
@@ -117,7 +117,7 @@ const QuestionItem = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 QuestionItem.displayName = "QuestionItem";

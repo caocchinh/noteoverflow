@@ -36,7 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { fuzzySearch } from "../lib/utils";
-import { EnhancedSelectContentRef } from "../constants/types";
+import { EnhancedSelectContentRef } from "./MultiSelector/selectors";
 
 const EnhancedSelect = memo(
   ({
@@ -64,7 +64,7 @@ const EnhancedSelect = memo(
     const isMobileDevice = useIsMobile();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const enhancedSelectContentRef = useRef<EnhancedSelectContentRef | null>(
-      null
+      null,
     );
 
     return (
@@ -76,7 +76,7 @@ const EnhancedSelect = memo(
               aria-expanded={isOpen}
               className={cn(
                 "h-max w-[200px] justify-between whitespace-pre-wrap",
-                triggerClassName
+                triggerClassName,
               )}
               onClick={() => {
                 setIsOpen(!isOpen);
@@ -113,7 +113,7 @@ const EnhancedSelect = memo(
             align="center"
             className={cn(
               "z-1000000000000000 w-[300px] p-0 sm:w-max",
-              popoverContentClassName
+              popoverContentClassName,
             )}
             side={side || (isMobileDevice ? "bottom" : "right")}
             avoidCollisions={isMobileDevice ? false : true}
@@ -131,7 +131,7 @@ const EnhancedSelect = memo(
         </Popover>
       </div>
     );
-  }
+  },
 );
 
 EnhancedSelect.displayName = "EnhancedSelect";
@@ -177,7 +177,7 @@ const EnhancedSelectItem = ({
         avoidCollisions={true}
         className={cn(
           "relative z-[999999999999999999999999999999] hidden w-[100px] cursor-pointer border-none bg-transparent shadow-none lg:block",
-          !isOpen && "hidden!"
+          !isOpen && "hidden!",
         )}
         onClick={() => {
           setIsOpen(false);
@@ -219,7 +219,7 @@ const EnhancedSelectContent = forwardRef(
       selectedValue: string;
       setSelectedValue: Dispatch<SetStateAction<string>>;
     },
-    ref
+    ref,
   ) => {
     const [inputValue, setInputValue] = useState<string>("");
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -239,7 +239,7 @@ const EnhancedSelectContent = forwardRef(
           }
         }
       },
-      [inputValue, isOpen, setIsOpen]
+      [inputValue, isOpen, setIsOpen],
     );
 
     useImperativeHandle(
@@ -247,7 +247,7 @@ const EnhancedSelectContent = forwardRef(
       () => ({
         setInputValue,
       }),
-      [setInputValue]
+      [setInputValue],
     );
 
     return (
@@ -300,7 +300,7 @@ const EnhancedSelectContent = forwardRef(
         </ScrollArea>
       </Command>
     );
-  }
+  },
 );
 
 EnhancedSelectContent.displayName = "EnhancedSelectContent";

@@ -11,16 +11,13 @@ import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import { isValidInputs as isValidInputsUtils } from "@/features/topical/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  InvalidInputs,
-  SecondaryAppSidebarProps,
-  SubjectMetadata,
-} from "../constants/types";
 import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SecondaryAppSidebarProps } from "../types/components";
+import { InvalidInputs } from "../types/models";
 
 const SecondaryAppSidebar = ({
   subjectMetadata,
@@ -34,7 +31,7 @@ const SecondaryAppSidebar = ({
   const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
   const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
   const [selectedPaperType, setSelectedPaperType] = useState<string[] | null>(
-    null
+    null,
   );
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
@@ -77,7 +74,7 @@ const SecondaryAppSidebar = ({
       selectedPaperType,
       selectedSeason,
       setInvalidInputs,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -167,7 +164,7 @@ const SecondaryAppSidebar = ({
     if (subjectMetadata.topic) {
       const filteredTopics =
         selectedTopicRef.current?.filter((topic) =>
-          subjectMetadata.topic!.includes(topic)
+          subjectMetadata.topic!.includes(topic),
         ) ?? [];
       if (
         JSON.stringify(filteredTopics) !==
@@ -183,7 +180,7 @@ const SecondaryAppSidebar = ({
     if (subjectMetadata.year) {
       const filteredYears =
         selectedYearRef.current?.filter((year) =>
-          subjectMetadata.year!.includes(year)
+          subjectMetadata.year!.includes(year),
         ) ?? [];
 
       if (
@@ -200,7 +197,7 @@ const SecondaryAppSidebar = ({
     if (subjectMetadata.paperType) {
       const filteredPaperTypes =
         selectedPaperTypeRef.current?.filter((paperType) =>
-          subjectMetadata.paperType!.includes(paperType)
+          subjectMetadata.paperType!.includes(paperType),
         ) ?? [];
 
       if (
@@ -217,7 +214,7 @@ const SecondaryAppSidebar = ({
     if (subjectMetadata.season) {
       const filteredSeasons =
         selectedSeasonRef.current?.filter((season) =>
-          subjectMetadata.season!.includes(season)
+          subjectMetadata.season!.includes(season),
         ) ?? [];
 
       if (
@@ -301,7 +298,7 @@ const SecondaryAppSidebar = ({
               <h3
                 className={cn(
                   "w-max font-medium text-sm",
-                  invalidInputs.topic && "text-destructive"
+                  invalidInputs.topic && "text-destructive",
                 )}
               >
                 Topic
@@ -311,7 +308,7 @@ const SecondaryAppSidebar = ({
                 label="Topic"
                 onValuesChange={useCallback(
                   (values) => setSelectedTopic(values as string[]),
-                  []
+                  [],
                 )}
                 selectedValues={selectedTopic ?? []}
               />
@@ -326,7 +323,7 @@ const SecondaryAppSidebar = ({
               <h3
                 className={cn(
                   "w-max font-medium text-sm",
-                  invalidInputs.paperType && "text-destructive"
+                  invalidInputs.paperType && "text-destructive",
                 )}
               >
                 Paper
@@ -336,7 +333,7 @@ const SecondaryAppSidebar = ({
                 label="Paper"
                 onValuesChange={useCallback(
                   (values) => setSelectedPaperType(values as string[]),
-                  []
+                  [],
                 )}
                 selectedValues={selectedPaperType ?? []}
               />
@@ -351,7 +348,7 @@ const SecondaryAppSidebar = ({
               <h3
                 className={cn(
                   "w-max font-medium text-sm",
-                  invalidInputs.year && "text-destructive"
+                  invalidInputs.year && "text-destructive",
                 )}
               >
                 Year
@@ -361,7 +358,7 @@ const SecondaryAppSidebar = ({
                 label="Year"
                 onValuesChange={useCallback(
                   (values) => setSelectedYear(values as string[]),
-                  []
+                  [],
                 )}
                 selectedValues={selectedYear ?? []}
               />
@@ -376,7 +373,7 @@ const SecondaryAppSidebar = ({
               <h3
                 className={cn(
                   "w-max font-medium text-sm",
-                  invalidInputs.season && "text-destructive"
+                  invalidInputs.season && "text-destructive",
                 )}
               >
                 Season
@@ -386,7 +383,7 @@ const SecondaryAppSidebar = ({
                 label="Season"
                 onValuesChange={useCallback(
                   (values) => setSelectedSeason(values as string[]),
-                  []
+                  [],
                 )}
                 selectedValues={selectedSeason ?? []}
               />

@@ -6,7 +6,6 @@ import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckb
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, PanelsTopLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { InspectUltilityBarProps } from "../../constants/types";
 import {
   forwardRef,
   memo,
@@ -22,6 +21,7 @@ import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../../lib/utils";
 import { usePathname } from "next/navigation";
+import { InspectUltilityBarProps } from "../../types/components";
 
 const ToggleInspectSidebarButton = memo(
   ({
@@ -35,7 +35,7 @@ const ToggleInspectSidebarButton = memo(
       {isInspectSidebarOpen ? "Hide" : "Show"}
       <PanelsTopLeft />
     </Button>
-  )
+  ),
 );
 
 ToggleInspectSidebarButton.displayName = "ToggleInspectSidebarButton";
@@ -59,7 +59,7 @@ const InspectUltilityBar = memo(
         sideBarInsetRef,
         isHavingUnsafeChangesRef,
       }: InspectUltilityBarProps,
-      ref
+      ref,
     ) => {
       const ultilityRef = useRef<HTMLDivElement | null>(null);
       const { isSessionPending } = useAuth();
@@ -69,7 +69,7 @@ const InspectUltilityBar = memo(
       const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
         useState(false);
       const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
-        null
+        null,
       );
       const isMobile = useIsMobile();
       const pathname = usePathname();
@@ -82,7 +82,7 @@ const InspectUltilityBar = memo(
         });
         setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
         setIsUltilityOverflowingRight(
-          isOverScrollingResult.isOverScrollingRight
+          isOverScrollingResult.isOverScrollingRight,
         );
       }, [isMobile, sideBarInsetRef]);
 
@@ -103,7 +103,7 @@ const InspectUltilityBar = memo(
         () => ({
           overflowScrollHandler,
         }),
-        [overflowScrollHandler]
+        [overflowScrollHandler],
       );
 
       return (
@@ -155,7 +155,7 @@ const InspectUltilityBar = memo(
                   className={cn(
                     "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                     currentView === "question" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
                   )}
                 >
                   Question
@@ -165,7 +165,7 @@ const InspectUltilityBar = memo(
                   className={cn(
                     "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                     currentView === "answer" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
                   )}
                 >
                   Answer
@@ -178,7 +178,7 @@ const InspectUltilityBar = memo(
                   className={cn(
                     "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
                     currentView === "both" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 "
+                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
                   )}
                 >
                   Both
@@ -188,7 +188,7 @@ const InspectUltilityBar = memo(
                   className={cn(
                     "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
                     isCalculatorOpen &&
-                      "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!"
+                      "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!",
                   )}
                 >
                   Calculator
@@ -254,7 +254,7 @@ const InspectUltilityBar = memo(
                 type="question"
                 isDisabled={false}
                 url={`${BETTER_AUTH_URL}/topical/${encodeURIComponent(
-                  currentQuestionData?.id ?? ""
+                  currentQuestionData?.id ?? "",
                 )}`}
               />
             </div>
@@ -265,8 +265,8 @@ const InspectUltilityBar = memo(
           </ScrollArea>
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 InspectUltilityBar.displayName = "InspectUltilityBar";

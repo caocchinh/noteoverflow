@@ -1,14 +1,14 @@
-import { RefObject, useCallback, useState } from "react";
+import { Ref, RefObject, useCallback, useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { SelectedQuestion } from "../../constants/types";
 import { cn } from "@/lib/utils";
 import { Eye, EyeClosed } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SelectedQuestion } from "../../types/models";
 
 interface InspectPanelProps {
   title: string;
@@ -17,7 +17,7 @@ interface InspectPanelProps {
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   scrollAreaClassName?: string;
   initialHidden?: boolean;
-  annotableContainerRef: RefObject<HTMLDivElement | null>;
+  annotableContainerRef: Ref<HTMLDivElement>;
 }
 
 const InspectPanel = ({
@@ -70,8 +70,8 @@ const BothViews = ({
   currentQuestionData: SelectedQuestion | undefined;
   questionScrollAreaRef: RefObject<HTMLDivElement | null>;
   answerScrollAreaRef: RefObject<HTMLDivElement | null>;
-  annotableQuestionContainerRef: RefObject<HTMLDivElement | null>;
-  annotableAnswerContainerRef: RefObject<HTMLDivElement | null>;
+  annotableQuestionContainerRef: Ref<HTMLDivElement>;
+  annotableAnswerContainerRef: Ref<HTMLDivElement>;
 }) => {
   const isAnswerMultipleChoice =
     !currentQuestionData?.answers?.[0]?.includes("http");

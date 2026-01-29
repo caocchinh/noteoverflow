@@ -23,8 +23,20 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
-import { MultiSelectorListProps } from "../../constants/types";
 import { ChevronsUpDown } from "lucide-react";
+import { MultiSelectorListProps } from "./selectors";
+
+const temporaryFix = ({ item, label }: { item: string; label: string }) => {
+  if (label === "Season") {
+    if (item === "Winter") {
+      return "Winter - O/N";
+    } else if (item === "Summer") {
+      return "Summer - M/J";
+    } else if (item === "Spring") {
+      return "Spring - F/M";
+    }
+  }
+};
 
 const MultiSelectorList = forwardRef(
   (
@@ -36,19 +48,8 @@ const MultiSelectorList = forwardRef(
       allAvailableOptions,
       setOpen,
     }: MultiSelectorListProps,
-    ref
+    ref,
   ) => {
-    const temporaryFix = (item: string) => {
-      if (label === "Season") {
-        if (item === "Winter") {
-          return "Winter - O/N";
-        } else if (item === "Summer") {
-          return "Summer - M/J";
-        } else if (item === "Spring") {
-          return "Spring - F/M";
-        }
-      }
-    };
     const [inputValue, setInputValue] = useState("");
 
     useImperativeHandle(
@@ -57,7 +58,7 @@ const MultiSelectorList = forwardRef(
         setInputValue,
         inputValue,
       }),
-      [inputValue]
+      [inputValue],
     );
     const commandListScrollArea = useRef<HTMLDivElement | null>(null);
 
@@ -106,7 +107,7 @@ const MultiSelectorList = forwardRef(
           <CommandList
             className={cn(
               "z-1000 flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
-              label === "Year" || label === "Season"
+              label === "Year" || label === "Season",
             )}
           >
             <Collapsible>
@@ -120,7 +121,7 @@ const MultiSelectorList = forwardRef(
                       "font-medium text-xs",
                       filteredSelectedValue.length > 0
                         ? "text-logo-main"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {`${filteredSelectedValue.length} selected`}
@@ -145,7 +146,7 @@ const MultiSelectorList = forwardRef(
                           className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
                           defaultChecked={true}
                         />
-                        {temporaryFix(item) ?? item}
+                        {temporaryFix({ item, label })}
                       </CommandItem>
                     ))}
                 </CollapsibleContent>
@@ -171,7 +172,7 @@ const MultiSelectorList = forwardRef(
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
                       selectedValues.includes(item) &&
-                        "cursor-default opacity-50"
+                        "cursor-default opacity-50",
                     )}
                     key={item}
                     onTouchStart={blockMobileKeyboardOpen}
@@ -183,7 +184,7 @@ const MultiSelectorList = forwardRef(
                       checked={selectedValues.includes(item)}
                       className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
                     />
-                    {temporaryFix(item) ?? item}
+                    {temporaryFix({ item, label })}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -195,7 +196,7 @@ const MultiSelectorList = forwardRef(
         </ScrollArea>
       </div>
     );
-  }
+  },
 );
 
 MultiSelectorList.displayName = "MultiSelectorList";

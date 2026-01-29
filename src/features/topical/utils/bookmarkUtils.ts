@@ -1,10 +1,4 @@
 import {
-  CreateListMutationVariables,
-  SavedActivitiesResponse,
-  SelectedQuestion,
-  ToggleBookmarkMutationVariables,
-} from "@/features/topical/constants/types";
-import {
   addBookmarkAction,
   createBookmarkListAndAddBookmarkAction,
   removeBookmarkAction,
@@ -17,6 +11,12 @@ import {
   MAXIMUM_BOOKMARK_LISTS_PER_USER,
   MAXIMUM_BOOKMARKS_PER_LIST,
 } from "@/constants/constants";
+import {
+  CreateListMutationVariables,
+  SavedActivitiesResponse,
+  SelectedQuestion,
+  ToggleBookmarkMutationVariables,
+} from "../types/models";
 
 export const createListMutationFn = async ({
   question,
@@ -87,7 +87,7 @@ export const handleCreateListOptimisticUpdate = (
   callbacks?: {
     onSuccess?: () => void;
     addChosenBookmarkList?: (listId: string) => void;
-  }
+  },
 ) => {
   const { question, listId, bookmarkListName, visibility } = data;
 
@@ -100,7 +100,7 @@ export const handleCreateListOptimisticUpdate = (
 
       const updatedBookmarks = prev.bookmarks ?? [];
       const isListAlreadyExist = updatedBookmarks.some(
-        (bookmark) => bookmark.id === listId
+        (bookmark) => bookmark.id === listId,
       );
 
       callbacks?.onSuccess?.();
@@ -109,7 +109,7 @@ export const handleCreateListOptimisticUpdate = (
         // Add bookmark to existing list (shouldn't happen for create new, but safe fallback)
         callbacks?.addChosenBookmarkList?.(listId);
         const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId
+          (bookmark) => bookmark.id === listId,
         );
         if (existingBookmark) {
           existingBookmark.userBookmarks.push({
@@ -159,7 +159,7 @@ export const handleCreateListOptimisticUpdate = (
         ...prev,
         bookmarks: updatedBookmarks,
       };
-    }
+    },
   );
 };
 
@@ -173,7 +173,7 @@ export const handleToggleBookmarkOptimisticUpdate = (
   callbacks?: {
     addChosenBookmarkList?: (listId: string) => void;
     removeChosenBookmarkList?: (listId: string) => void;
-  }
+  },
 ) => {
   const { question, listId, isBookmarked } = data;
 
@@ -190,7 +190,7 @@ export const handleToggleBookmarkOptimisticUpdate = (
         // Add bookmark to existing list
         callbacks?.addChosenBookmarkList?.(listId);
         const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId
+          (bookmark) => bookmark.id === listId,
         );
         if (existingBookmark) {
           existingBookmark.userBookmarks.push({
@@ -212,12 +212,12 @@ export const handleToggleBookmarkOptimisticUpdate = (
         // Remove bookmark from list
         callbacks?.removeChosenBookmarkList?.(listId);
         const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId
+          (bookmark) => bookmark.id === listId,
         );
         if (existingBookmark) {
           existingBookmark.userBookmarks =
             existingBookmark.userBookmarks.filter(
-              (userBookmark) => userBookmark.question.id !== question.id
+              (userBookmark) => userBookmark.question.id !== question.id,
             );
         }
       }
@@ -226,14 +226,14 @@ export const handleToggleBookmarkOptimisticUpdate = (
         ...prev,
         bookmarks: updatedBookmarks,
       };
-    }
+    },
   );
 };
 
 export const handleBookmarkError = (
   error: unknown,
   variables: CreateListMutationVariables | ToggleBookmarkMutationVariables,
-  isMobileDevice: boolean
+  isMobileDevice: boolean,
 ) => {
   if (error instanceof Error) {
     if (error.message.includes(LIMIT_EXCEEDED)) {
@@ -245,7 +245,7 @@ export const handleBookmarkError = (
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
       } else if (error.message.includes("bookmark")) {
         toast.error(
@@ -255,7 +255,7 @@ export const handleBookmarkError = (
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
       }
     } else if (error.message.includes(DOES_NOT_EXIST)) {
@@ -264,7 +264,7 @@ export const handleBookmarkError = (
         {
           duration: 2000,
           position: isMobileDevice ? "top-center" : "bottom-right",
-        }
+        },
       );
     } else {
       toast.error("Failed to update bookmarks: " + error.message, {

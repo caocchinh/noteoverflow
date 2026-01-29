@@ -12,11 +12,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import {
-  IsHavingUnsafeChangesRef,
-  SavedActivitiesResponse,
-  SelectedQuestion,
-} from "../../constants/types";
+
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -29,6 +25,8 @@ import {
   useState,
 } from "react";
 import { usePathname } from "next/navigation";
+import { SavedActivitiesResponse, SelectedQuestion } from "../../types/models";
+import { IsHavingUnsafeChangesRef } from "../../types/components";
 
 export const QuestionInspectFinishedCheckbox = memo(
   ({
@@ -60,7 +58,7 @@ export const QuestionInspectFinishedCheckbox = memo(
     const isFinished = useMemo(() => {
       return (
         userFinishedQuestions?.some(
-          (item) => item.question.id === question.id
+          (item) => item.question.id === question.id,
         ) ?? false
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,7 +78,7 @@ export const QuestionInspectFinishedCheckbox = memo(
       }) => {
         if (!currentQuestionId) {
           throw new Error(
-            "No question id provided for finished question mutation"
+            "No question id provided for finished question mutation",
           );
         }
         if (isCurrentlyFinished) {
@@ -105,7 +103,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         {
           currentQuestionId,
           isCurrentlyFinished,
-        }: { currentQuestionId: string; isCurrentlyFinished: boolean }
+        }: { currentQuestionId: string; isCurrentlyFinished: boolean },
       ) => {
         // Optimistically update the cache
         queryClient.setQueryData<SavedActivitiesResponse>(
@@ -118,9 +116,9 @@ export const QuestionInspectFinishedCheckbox = memo(
             if (isCurrentlyFinished) {
               next.splice(
                 next.findIndex(
-                  (item) => item.question.id === currentQuestionId
+                  (item) => item.question.id === currentQuestionId,
                 ),
-                1
+                1,
               );
             } else {
               next.push({
@@ -142,7 +140,7 @@ export const QuestionInspectFinishedCheckbox = memo(
               ...prev,
               finishedQuestions: next,
             };
-          }
+          },
         );
 
         toast.success(
@@ -151,14 +149,14 @@ export const QuestionInspectFinishedCheckbox = memo(
             : "Question added to finished questions list.",
           {
             duration: 2000,
-          }
+          },
         );
       },
 
       onError: (error) => {
         toast.error(
           "Failed to update finished questions list: " +
-            (error instanceof Error ? error.message : "Unknown error")
+            (error instanceof Error ? error.message : "Unknown error"),
         );
       },
       retry: false,
@@ -195,7 +193,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         }
         if (savedActivitiesIsError) {
           toast.error(
-            "Failed to update finished questions list. Please refresh the page."
+            "Failed to update finished questions list. Please refresh the page.",
           );
           return;
         }
@@ -216,7 +214,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         isFinished,
         isHavingUnsafeChangesRef,
         setIsAnnotationGuardDialogOpen,
-      ]
+      ],
     );
 
     useEffect(() => {
@@ -249,7 +247,7 @@ export const QuestionInspectFinishedCheckbox = memo(
             savedActivitiesIsFetching) &&
             "pointer-events-none",
           isFinished ? "border-green-600" : "border-muted-foreground",
-          className
+          className,
         )}
         title="Add to finished question"
         onClick={toggleFinishedQuestion}
@@ -266,7 +264,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         <Label
           className={cn(
             isFinished ? "text-green-600" : "text-muted-foreground",
-            "cursor-pointer"
+            "cursor-pointer",
           )}
           htmlFor="completed-switch"
         >
@@ -280,7 +278,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         </Label>
       </div>
     );
-  }
+  },
 );
 
 QuestionInspectFinishedCheckbox.displayName = "QuestionInspectFinishedCheckbox";

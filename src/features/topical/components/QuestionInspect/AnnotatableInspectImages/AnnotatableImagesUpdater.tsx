@@ -1,10 +1,5 @@
 import { memo, useEffect, useMemo, useCallback } from "react";
 import { AnnotatableInspectImages } from "./AnnotatableInspectImages";
-import {
-  AnnotatableImagesUpdaterProps,
-  SavedActivitiesResponse,
-  SelectedAnnotation,
-} from "../../../constants/types";
 import { saveAnnotationsAction } from "@/features/topical/server/actions";
 import { useAuth } from "@/context/AuthContext";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
@@ -27,6 +22,11 @@ import {
   MY_ANNOTATIONS_BOOKMARK_LIST_NAME,
   MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
 } from "../../../constants/constants";
+import { AnnotatableImagesUpdaterProps } from "@/features/topical/types/components";
+import {
+  SavedActivitiesResponse,
+  SelectedAnnotation,
+} from "@/features/topical/types/models";
 
 const AnnotatableImagesUpdater = memo(
   ({
@@ -63,7 +63,7 @@ const AnnotatableImagesUpdater = memo(
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
       },
       onError: (error, variables) => {
@@ -81,7 +81,7 @@ const AnnotatableImagesUpdater = memo(
           {
             duration: 2000,
             position: isMobileDevice ? "top-center" : "bottom-right",
-          }
+          },
         );
       },
       onError: (error, variables) => {
@@ -115,7 +115,7 @@ const AnnotatableImagesUpdater = memo(
               if (!prev) return prev;
               const nextAnnotations = prev.annotations ?? [];
               const existingIndex = nextAnnotations.findIndex(
-                (a) => a.questionId === variables.questionId
+                (a) => a.questionId === variables.questionId,
               );
 
               const newAnnotation: SelectedAnnotation = {
@@ -143,12 +143,12 @@ const AnnotatableImagesUpdater = memo(
                 ...prev,
                 annotations: nextAnnotations,
               };
-            }
+            },
           );
         },
         onError: () => {
           toast.error(
-            "Failed to save annotations. Please try again or reload the website."
+            "Failed to save annotations. Please try again or reload the website.",
           );
         },
         retry: 2,
@@ -163,7 +163,7 @@ const AnnotatableImagesUpdater = memo(
         },
         callbacks?: {
           onSuccess?: () => void;
-        }
+        },
       ) => {
         saveAnnotationsMutation(data, {
           onSuccess: () => {
@@ -176,13 +176,13 @@ const AnnotatableImagesUpdater = memo(
         const myAnnotationsList = bookmarksData?.find(
           (b) =>
             b.listName === MY_ANNOTATIONS_BOOKMARK_LIST_NAME &&
-            b.visibility === MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY
+            b.visibility === MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY,
         );
 
         const isCreateNew = !myAnnotationsList;
         const isRealBookmarked =
           myAnnotationsList?.userBookmarks.some(
-            (b) => b.question.id === question.id
+            (b) => b.question.id === question.id,
           ) ?? false;
 
         if (!isCreateNew && isRealBookmarked) {
@@ -210,7 +210,7 @@ const AnnotatableImagesUpdater = memo(
         bookmarksData,
         createListMutate,
         toggleBookmarkMutate,
-      ]
+      ],
     );
 
     const annotationsMutationState = useMutationState({
@@ -238,7 +238,7 @@ const AnnotatableImagesUpdater = memo(
 
     const currentQuestionAnnotationData = useMemo(() => {
       return annotationsData?.find(
-        (annotation) => annotation.questionId === question?.id
+        (annotation) => annotation.questionId === question?.id,
       );
     }, [annotationsData, question?.id]);
 
@@ -283,7 +283,7 @@ const AnnotatableImagesUpdater = memo(
             isSavingAnnotations={isSavingAnnotations}
             isAuthenticated={isAuthenticated}
             question={question}
-          />
+          />,
         );
       }
     }, [
@@ -310,7 +310,7 @@ const AnnotatableImagesUpdater = memo(
     ]);
 
     return null;
-  }
+  },
 );
 
 AnnotatableImagesUpdater.displayName = "AnnotatableImagesUpdater";

@@ -4,29 +4,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Loader from "../Loader/Loader";
+import { memo } from "react";
 
-const QuestionAnnotationGuardDialog = ({ isOpen }: { isOpen: boolean }) => {
-  return (
-    <AlertDialog open={isOpen}>
-      {isOpen && <div className="fixed inset-0 z-100012 bg-black/50" />}
+const QuestionAnnotationGuardDialog = memo(
+  ({ isOpen }: { isOpen: boolean }) => {
+    return (
+      <AlertDialog open={isOpen}>
+        {isOpen && <div className="fixed inset-0 z-100012 bg-black/50" />}
 
-      <AlertDialogContent className="flex flex-col items-center justify-center gap-6 w-full max-w-[320px] p-8 rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-sm z-100013">
-        <AlertDialogTitle className="sr-only">
-          Saving annotations
-        </AlertDialogTitle>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <p className="text-lg font-semibold tracking-tight">Saving Changes</p>
-          <Loader />
-          <p className="text-sm text-muted-foreground mt-2">
-            Syncing your annotations to the database. Your annotations are
-            periodically autosave to the database. All questions that are
-            annotated will be automatically saved to &quot;Your
-            annotations&quot; private bookmark list.
-          </p>
-        </div>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-};
+        <AlertDialogContent className="flex flex-col items-center justify-center gap-6 w-full max-w-[320px] p-8 rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-sm z-100013">
+          <AlertDialogTitle className="sr-only">
+            Saving annotations
+          </AlertDialogTitle>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-lg font-semibold tracking-tight">
+              Saving Changes
+            </p>
+            <Loader />
+            <p className="text-sm text-muted-foreground mt-2">
+              Syncing your annotations to the database. Your annotations are
+              periodically autosave to the database. All questions that are
+              annotated will be automatically saved to &quot;Your
+              annotations&quot; private bookmark list.
+            </p>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  },
+);
+
+QuestionAnnotationGuardDialog.displayName = "QuestionAnnotationGuardDialog";
 
 export default QuestionAnnotationGuardDialog;

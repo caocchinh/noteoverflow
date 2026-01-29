@@ -22,7 +22,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { CurrentQuery, FilterData, RecentQueryProps } from "../constants/types";
 import {
   Dispatch,
   RefObject,
@@ -56,6 +55,8 @@ import Sort from "./Sort";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
+import { RecentQueryProps } from "../types/components";
+import { CurrentQuery, FilterData } from "../types/models";
 
 export const RecentQuery = forwardRef(
   (
@@ -72,7 +73,7 @@ export const RecentQuery = forwardRef(
       setSelectedSeason,
       setIsSidebarOpen,
     }: RecentQueryProps,
-    ref
+    ref,
   ) => {
     const { uiPreferences, setUiPreference } = useTopicalApp();
     const { isSessionPending, isAuthenticated } = useAuth();
@@ -130,7 +131,7 @@ export const RecentQuery = forwardRef(
         toast.error(
           "Failed to delete outdated data: " +
             error.message +
-            ". Please refresh the page."
+            ". Please refresh the page.",
         );
       },
     });
@@ -142,7 +143,7 @@ export const RecentQuery = forwardRef(
           queryKey: {
             curriculumId: string;
             subjectId: string;
-          } & FilterData
+          } & FilterData,
         ) => {
           const result = await addRecentQuery({ queryKey: queryKey });
           if (result.error) {
@@ -169,11 +170,12 @@ export const RecentQuery = forwardRef(
               let newData = oldData;
               if (data.deletedKey) {
                 newData = newData.filter(
-                  (item) => item.queryKey !== data.deletedKey
+                  (item) => item.queryKey !== data.deletedKey,
                 );
               }
               const isQueryAlreadyExist = newData.find(
-                (item) => item.queryKey === JSON.stringify(data.currentQueryKey)
+                (item) =>
+                  item.queryKey === JSON.stringify(data.currentQueryKey),
               );
               if (!isQueryAlreadyExist) {
                 newData.unshift({
@@ -200,14 +202,14 @@ export const RecentQuery = forwardRef(
         onError: (error) => {
           if (error.message === BAD_REQUEST) {
             toast.error(
-              "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!"
+              "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!",
             );
             return;
           }
           toast.error(
             "Failed to add recent search to database: " +
               error.message +
-              ". Please refresh the page."
+              ". Please refresh the page.",
           );
         },
       });
@@ -218,7 +220,7 @@ export const RecentQuery = forwardRef(
         mutateRecentQuery,
         isAddRecentQueryPending,
       }),
-      [isAddRecentQueryPending, mutateRecentQuery]
+      [isAddRecentQueryPending, mutateRecentQuery],
     );
 
     return (
@@ -363,7 +365,7 @@ export const RecentQuery = forwardRef(
         </DialogContent>
       </Dialog>
     );
-  }
+  },
 );
 
 RecentQuery.displayName = "RecentQuery";
@@ -431,7 +433,7 @@ const RecentQueryItem = ({
             className={cn(
               "flex flex-col items-start justify-center",
               accordionValue === index.toString() && "text-logo-main",
-              isThisItemDeleting && "text-red-500!"
+              isThisItemDeleting && "text-red-500!",
             )}
           >
             <p>
@@ -445,7 +447,7 @@ const RecentQueryItem = ({
               className={cn(
                 "text-muted-foreground",
                 accordionValue === index.toString() &&
-                  "dark:text-white text-black"
+                  "dark:text-white text-black",
               )}
             >
               {new Date(item.lastSearch).toLocaleString(undefined, {
@@ -499,7 +501,7 @@ const RecentQueryItem = ({
         <Button
           className={cn(
             "w-full mt-2 bg-logo-main text-white! cursor-pointer hover:bg-logo-main",
-            isThisItemDeleting && "bg-red-500!"
+            isThisItemDeleting && "bg-red-500!",
           )}
           onClick={() => {
             if (isThisItemDeleting || isSessionPending || !isAuthenticated) {
@@ -511,7 +513,7 @@ const RecentQueryItem = ({
                 !validateCurriculum(parsedQuery.curriculumId) ||
                 !validateSubject(
                   parsedQuery.curriculumId,
-                  parsedQuery.subjectId
+                  parsedQuery.subjectId,
                 ) ||
                 !validateFilterData({
                   data: {
@@ -540,7 +542,7 @@ const RecentQueryItem = ({
               });
               isOverwriting.current = true;
               setSelectedCurriculum(
-                parsedQuery.curriculumId as ValidCurriculum
+                parsedQuery.curriculumId as ValidCurriculum,
               );
               setSelectedSubject(parsedQuery.subjectId);
               setSelectedTopic(parsedQuery.topic);

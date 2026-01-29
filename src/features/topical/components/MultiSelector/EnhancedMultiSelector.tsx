@@ -40,12 +40,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import type {
-  EnhancedMultiSelectorListProps,
-  EnhancedMultiSelectorProps,
-  EnhancedMultiSelectorSharedProps,
-  MultiSelectorListRef,
-} from "../../constants/types";
+
 import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
@@ -58,6 +53,12 @@ import {
   MultiSelectorMobiletUltilityButtons,
 } from "./MultiSelectUltilityButtons";
 import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
+import {
+  EnhancedMultiSelectorListProps,
+  EnhancedMultiSelectorProps,
+  EnhancedMultiSelectorSharedProps,
+  MultiSelectorListRef,
+} from "./selectors";
 
 const EnhancedMultiSelector = memo(
   ({
@@ -110,7 +111,7 @@ const EnhancedMultiSelector = memo(
           onValueChange(val);
         }
       },
-      [onValueChange, selectedValues]
+      [onValueChange, selectedValues],
     );
 
     const onSelectAll = useCallback(() => {
@@ -118,7 +119,7 @@ const EnhancedMultiSelector = memo(
         .filter((item) => {
           return (
             item.curriculumnSubdivision.some(
-              (item) => item === currentFilter
+              (item) => item === currentFilter,
             ) && !selectedValues.includes(item.value)
           );
         })
@@ -134,12 +135,12 @@ const EnhancedMultiSelector = memo(
         allAvailableOptions.some(
           (option) =>
             option.value === selectedValue &&
-            option.curriculumnSubdivision.some((sub) => sub === currentFilter)
-        )
+            option.curriculumnSubdivision.some((sub) => sub === currentFilter),
+        ),
       );
 
       onValueChange(
-        selectedValues.filter((value) => !valuesToRemove.includes(value))
+        selectedValues.filter((value) => !valuesToRemove.includes(value)),
       );
     }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
 
@@ -167,7 +168,7 @@ const EnhancedMultiSelector = memo(
         )}
       </>
     );
-  }
+  },
 );
 
 EnhancedMultiSelector.displayName = "EnhancedMultiSelector";
@@ -181,7 +182,7 @@ const MaxLengthErrorMessage = memo(
       You can only select up to {maxLength}{" "}
       {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
     </h3>
-  )
+  ),
 );
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
@@ -273,7 +274,7 @@ const EnhancedMobileMultiSelector = memo(
         </Drawer>
       </>
     );
-  }
+  },
 );
 
 EnhancedMobileMultiSelector.displayName = "EnhancedMobileMultiSelector";
@@ -373,7 +374,7 @@ const EnhancedDesktopMultiSelector = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 EnhancedDesktopMultiSelector.displayName = "EnhancedDesktopMultiSelector";
@@ -391,7 +392,7 @@ const EnhancedMultiSelectorList = forwardRef(
       currentFilter,
       setOpen,
     }: EnhancedMultiSelectorListProps,
-    ref
+    ref,
   ) => {
     const temporaryFix = (item: string) => {
       if (label === "Season") {
@@ -411,7 +412,7 @@ const EnhancedMultiSelectorList = forwardRef(
         setInputValue,
         inputValue,
       }),
-      [inputValue]
+      [inputValue],
     );
     const commandListScrollArea = useRef<HTMLDivElement | null>(null);
 
@@ -420,7 +421,7 @@ const EnhancedMultiSelectorList = forwardRef(
         .filter((item) => {
           return (
             item.curriculumnSubdivision.some(
-              (item) => item === currentFilter
+              (item) => item === currentFilter,
             ) &&
             fuzzySearch(inputValue, item.value) &&
             item.isUpToDate
@@ -434,7 +435,7 @@ const EnhancedMultiSelectorList = forwardRef(
         .filter((item) => {
           return (
             item.curriculumnSubdivision.some(
-              (item) => item === currentFilter
+              (item) => item === currentFilter,
             ) &&
             fuzzySearch(inputValue, item.value) &&
             !item.isUpToDate
@@ -499,7 +500,7 @@ const EnhancedMultiSelectorList = forwardRef(
           <CommandList
             className={cn(
               "z-1000 flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
-              label === "Year" || label === "Season"
+              label === "Year" || label === "Season",
             )}
           >
             <Collapsible>
@@ -513,7 +514,7 @@ const EnhancedMultiSelectorList = forwardRef(
                       "font-medium text-xs",
                       filteredSelectedValue.length > 0
                         ? "text-logo-main"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {`${filteredSelectedValue.length} selected`}
@@ -562,7 +563,7 @@ const EnhancedMultiSelectorList = forwardRef(
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
                       selectedValues.includes(item) &&
-                        "cursor-default opacity-50"
+                        "cursor-default opacity-50",
                     )}
                     key={item}
                     onTouchStart={blockMobileKeyboardOpen}
@@ -592,7 +593,7 @@ const EnhancedMultiSelectorList = forwardRef(
                         className={cn(
                           "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
                           selectedValues.includes(item) &&
-                            "cursor-default opacity-50"
+                            "cursor-default opacity-50",
                         )}
                         key={item}
                         onTouchStart={blockMobileKeyboardOpen}
@@ -618,7 +619,7 @@ const EnhancedMultiSelectorList = forwardRef(
         </ScrollArea>
       </div>
     );
-  }
+  },
 );
 
 EnhancedMultiSelectorList.displayName = "EnhancedMultiSelectorList";

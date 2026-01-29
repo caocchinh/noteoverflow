@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { QuestionHoverCardProps } from "../../constants/types";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
 import { Loader2 } from "lucide-react";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
+import { QuestionHoverCardProps } from "../../types/components";
 
 const QuestionHoverCard = memo(
   ({
@@ -59,10 +59,10 @@ const QuestionHoverCard = memo(
     const isThisQuestionFinished = useMemo(
       () =>
         userFinishedQuestions?.some(
-          (item) => item.question.id === question?.id
+          (item) => item.question.id === question?.id,
         ) ?? false,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled]
+      [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled],
     );
 
     useEffect(() => {
@@ -91,7 +91,7 @@ const QuestionHoverCard = memo(
               "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
               isThisTheCurrentQuestion && "bg-logo-main! text-white",
               isThisQuestionFinished &&
-                "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white"
+                "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white",
             )}
             onTouchStart={useCallback(() => {
               touchStartTimeRef.current = Date.now();
@@ -137,7 +137,7 @@ const QuestionHoverCard = memo(
             <BookmarkButton
               triggerButtonClassName="h-[26px] w-[26px] border-black border !static"
               popOverTriggerClassName={cn(
-                "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]"
+                "absolute top-1/2 -translate-y-1/2 right-1 h-7 w-7  flex cursor-pointer z-[30]",
               )}
               badgeClassName="hidden"
               question={question}
@@ -195,7 +195,7 @@ const QuestionHoverCard = memo(
         <HoverCardContent
           className={cn(
             "z-100007 w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] bg-white! md:flex hidden items-center justify-center rounded-sm",
-            isThisTheCurrentQuestion && "hidden!"
+            isThisTheCurrentQuestion && "hidden!",
           )}
           side="left"
           sideOffset={25}
@@ -232,7 +232,7 @@ const QuestionHoverCard = memo(
         </HoverCardContent>
       </HoverCard>
     );
-  }
+  },
 );
 QuestionHoverCard.displayName = "QuestionHoverCard";
 

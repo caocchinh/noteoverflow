@@ -1,6 +1,5 @@
 import { Dispatch, memo, SetStateAction, useState } from "react";
 import { ArrowDownWideNarrow, Check } from "lucide-react";
-import { SortParameters } from "../constants/types";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SORT_OPTIONS } from "../constants/constants";
+import { SortParameters } from "../types/models";
 
 const Sort = memo(
   ({
@@ -81,7 +81,7 @@ const Sort = memo(
                         "mr-2 w-4 h-4",
                         currentSort === "descending"
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     {descendingSortText}
@@ -100,7 +100,7 @@ const Sort = memo(
                         "mr-2 w-4 h-4",
                         currentSort === "ascending"
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     {ascendingSortText}
@@ -118,7 +118,7 @@ const Sort = memo(
         </TooltipContent>
       </Tooltip>
     );
-  }
+  },
 );
 
 Sort.displayName = "Sort";

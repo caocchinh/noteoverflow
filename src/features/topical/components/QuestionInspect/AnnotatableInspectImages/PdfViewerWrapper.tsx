@@ -9,7 +9,7 @@ import {
   memo,
 } from "react";
 import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
-import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
+import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
 
 type AnnotationManager = WebViewerInstance["Core"]["annotationManager"];
 type AnnotationChangedHandler = Parameters<

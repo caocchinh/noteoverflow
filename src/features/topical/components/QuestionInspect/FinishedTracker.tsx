@@ -23,11 +23,6 @@ import {
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
   DEFAULT_SORT_OPTIONS,
 } from "@/features/topical/constants/constants";
-import {
-  FinishedTrackerProps,
-  SelectedQuestion,
-  SortParameters,
-} from "@/features/topical/constants/types";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { useMutationState } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -44,6 +39,8 @@ import QuestionPreview from "../QuestionPreview";
 import Sort from "../Sort";
 import Masonry from "../Masonry";
 import { usePathname } from "next/navigation";
+import { FinishedTrackerProps } from "../../types/components";
+import { SelectedQuestion, SortParameters } from "../../types/models";
 
 export const FinishedTracker = memo(
   ({ allQuestions, navigateToQuestion }: FinishedTrackerProps) => {
@@ -72,10 +69,10 @@ export const FinishedTracker = memo(
     const finishedCount = useMemo(
       () =>
         allQuestions.filter((q) =>
-          userFinishedQuestions?.some((fq) => fq.question.id === q.id)
+          userFinishedQuestions?.some((fq) => fq.question.id === q.id),
         ).length,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [allQuestions, userFinishedQuestions, settledFinishedQuestionMutations]
+      [allQuestions, userFinishedQuestions, settledFinishedQuestionMutations],
     );
 
     const progressPercentage =
@@ -83,16 +80,16 @@ export const FinishedTracker = memo(
 
     const finishedQuestions = useMemo(() => {
       const filtered = allQuestions.filter((q) =>
-        userFinishedQuestions?.some((fq) => fq.question.id === q.id)
+        userFinishedQuestions?.some((fq) => fq.question.id === q.id),
       );
 
       // Sort by updatedAt from userFinishedQuestions
       return filtered.toSorted((a, b) => {
         const aFinished = userFinishedQuestions?.find(
-          (fq) => fq.question.id === a.id
+          (fq) => fq.question.id === a.id,
         );
         const bFinished = userFinishedQuestions?.find(
-          (fq) => fq.question.id === b.id
+          (fq) => fq.question.id === b.id,
         );
 
         const aTime = aFinished ? new Date(aFinished.updatedAt).getTime() : 0;
@@ -113,7 +110,7 @@ export const FinishedTracker = memo(
     const fullPartitionedData = useMemo(() => {
       return chunkQuestionsData(
         finishedQuestions,
-        DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE
+        DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
       );
     }, [finishedQuestions]);
 
@@ -262,8 +259,8 @@ export const FinishedTracker = memo(
                               height:
                                 question.questionImagesDimensions?.[imageIndex]
                                   ?.height,
-                            })
-                          )
+                            }),
+                          ),
                         )}
                       />
                       {/* Pagination Controls */}
@@ -339,7 +336,7 @@ export const FinishedTracker = memo(
         </Dialog>
       </>
     );
-  }
+  },
 );
 
 FinishedTracker.displayName = "FinishedTracker";

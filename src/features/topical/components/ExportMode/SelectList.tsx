@@ -1,7 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import QuestionItem from "./QuestionItem";
 import { Search } from "lucide-react";
-import { ExportSelectListProps } from "../../constants/types";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -28,9 +27,10 @@ import type { Modifier } from "@dnd-kit/core";
 import OrderableQuestionItem from "./OrderableQuestionItem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { ExportSelectListProps } from "../../types/components";
 
 const createAdjustOverlayOffset = (
-  containerRef: React.RefObject<HTMLDivElement | null>
+  containerRef: React.RefObject<HTMLDivElement | null>,
 ): Modifier => {
   return ({ transform, draggingNodeRect }) => {
     if (!containerRef.current || !draggingNodeRect) {
@@ -72,7 +72,7 @@ const SelectList = memo(
         canReorder
           ? questionsForExportArray[index]
           : filteredQuestions[index]?.id,
-      [canReorder, questionsForExportArray, filteredQuestions]
+      [canReorder, questionsForExportArray, filteredQuestions],
     );
 
     const estimatedSize = secondMobileBreakPoint ? 100 : 65;
@@ -96,12 +96,12 @@ const SelectList = memo(
       }),
       useSensor(KeyboardSensor, {
         coordinateGetter: sortableKeyboardCoordinates,
-      })
+      }),
     );
 
     const adjustOverlayOffset = useMemo(
       () => createAdjustOverlayOffset(listScrollAreaRef),
-      []
+      [],
     );
 
     useEffect(() => {
@@ -118,7 +118,7 @@ const SelectList = memo(
             : filteredQuestions.map((q) => q.id);
           const itemIndex =
             predicate.findIndex(
-              (question) => question === currentlyPreviewQuestion
+              (question) => question === currentlyPreviewQuestion,
             ) ?? 0;
 
           if (itemIndex === -1) {
@@ -168,7 +168,7 @@ const SelectList = memo(
           }
         }
       },
-      [questionsForExportArray, setQuestionsForExportArray]
+      [questionsForExportArray, setQuestionsForExportArray],
     );
 
     const handleDragCancel = useCallback(() => {
@@ -186,7 +186,7 @@ const SelectList = memo(
         className={cn(
           "flex-1 pr-4",
           isMobile ? "h-[49dvh]" : "h-[63dvh]",
-          secondMobileBreakPoint && "h-[42dvh]!"
+          secondMobileBreakPoint && "h-[42dvh]!",
         )}
         type="always"
         viewportRef={listScrollAreaRef}
@@ -214,7 +214,7 @@ const SelectList = memo(
                 {virtualItems.map((virtualItem) => {
                   const questionId = questionsForExportArray[virtualItem.index];
                   const question = allQuestions.find(
-                    (q) => q.id === questionId
+                    (q) => q.id === questionId,
                   );
                   if (!question) return null;
                   return (
@@ -310,7 +310,7 @@ const SelectList = memo(
         )}
       </ScrollArea>
     );
-  }
+  },
 );
 
 SelectList.displayName = "SelectList";

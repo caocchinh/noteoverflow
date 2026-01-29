@@ -34,15 +34,15 @@ import { createRoot, Root } from "react-dom/client";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import ClearAllButton from "./ClearAllButton";
-import {
-  PdfViewerWrapperHandle,
-  AnnotatableInspectImageProps,
-  InnitPdfProps,
-  AnnotatableInspectImagesHandle,
-} from "@/features/topical/constants/types";
 import Loader from "../../Loader/Loader";
 import SaveAnnotationsButton from "./SaveAnnotationsButton";
 import { toast } from "sonner";
+import {
+  AnnotatableInspectImageProps,
+  AnnotatableInspectImagesHandle,
+  InnitPdfProps,
+  PdfViewerWrapperHandle,
+} from "@/features/topical/types/components";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,

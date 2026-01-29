@@ -15,12 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ScanText, Send, FileText } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FiltersCache,
-  InvalidInputs,
-  AppSidebarProps,
-  UiPreferencesCache,
-} from "../constants/types";
+
 import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
@@ -49,6 +44,9 @@ import { cn } from "@/lib/utils";
 import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 import CoursebookCover from "./CoursebookCover";
 import Link from "next/link";
+import { AppSidebarProps } from "../types/components";
+import { FiltersCache, UiPreferencesCache } from "../types/preferences";
+import { InvalidInputs } from "../types/models";
 
 const AppSidebar = memo(
   ({

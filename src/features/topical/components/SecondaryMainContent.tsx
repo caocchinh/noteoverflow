@@ -5,12 +5,7 @@ import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
-import type {
-  SecondaryMainContentProps,
-  SelectedQuestion,
-  SortableTopicalItem,
-  SortParameters,
-} from "@/features/topical/constants/types";
+
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { useEffect, useRef, useState, memo } from "react";
 import Masonry from "./Masonry";
@@ -18,6 +13,12 @@ import ExportBar from "./ExportMode/ExportBar";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
+import {
+  SelectedQuestion,
+  SortableTopicalItem,
+  SortParameters,
+} from "../types/models";
+import { SecondaryMainContentProps } from "../types/components";
 
 const SecondaryMainContent = ({
   topicalData,

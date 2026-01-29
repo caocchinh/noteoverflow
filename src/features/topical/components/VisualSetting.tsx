@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectItem,
 } from "@/components/ui/select";
-import { ImageTheme } from "../constants/types";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { ImageTheme } from "../types/preferences";
 
 export default function VisualSetting({}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

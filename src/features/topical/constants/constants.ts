@@ -1,10 +1,9 @@
-import type {
+import { InvalidInputs, SortByOptions } from "../types/models";
+import {
   FiltersCache,
-  UiPreferencesCache,
-  InvalidInputs,
   LayoutStyle,
-  SortByOptions,
-} from "./types";
+  UiPreferencesCache,
+} from "../types/preferences";
 
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
 export const UI_PREFERENCES_CACHE_KEY = "noteoverflow-ui-preferences-cache";

@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import {
   ExtendedIntersectionObserverInit,
   InfiniteScrollProps,
-} from "../constants/types";
+} from "../types/components";
 
 export default function InfiniteScroll({
   next,
@@ -36,11 +36,11 @@ export default function InfiniteScroll({
           rootMargin: `${window.outerHeight * 2}px`,
           scrollMargin: `${window.outerHeight * 2}px`,
           threshold: 1,
-        } as ExtendedIntersectionObserverInit
+        } as ExtendedIntersectionObserverInit,
       );
       observerRef.current.observe(node);
     },
-    [next, root, hasMore, isLoading]
+    [next, root, hasMore, isLoading],
   );
 
   return <div ref={setObserverRef} className="h-10 w-full bg-transparent" />;

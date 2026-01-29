@@ -10,18 +10,6 @@ import {
   INVALID_INPUTS_DEFAULT,
 } from "../constants/constants";
 import type {
-  FilterData,
-  FiltersCache,
-  InvalidInputs,
-  FinishedQuestionsMetadata,
-  BookmarksMetadata,
-  SelectedFinishedQuestion,
-  SelectedBookmark,
-  SelectedQuestion,
-  SubjectMetadata,
-  VectorizeSelectedQuestion,
-} from "../constants/types";
-import type {
   OUTDATED,
   CIE_A_LEVEL_SUBDIVISION,
   ValidCurriculum,
@@ -31,6 +19,18 @@ import type {
 } from "@/constants/types";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { getShortSeason } from "@/lib/utils";
+import {
+  BookmarksMetadata,
+  FilterData,
+  FinishedQuestionsMetadata,
+  InvalidInputs,
+  SelectedBookmark,
+  SelectedFinishedQuestion,
+  SelectedQuestion,
+  SubjectMetadata,
+  VectorizeSelectedQuestion,
+} from "../types/models";
+import { FiltersCache } from "../types/preferences";
 
 export const validateCurriculum = (curriculum: string): boolean => {
   return TOPICAL_DATA.some((item) => item.curriculum === curriculum);
@@ -73,10 +73,10 @@ export function hasOverlap(arr1: string[], arr2: string[]): boolean {
 
 export const validateSubject = (
   curriculum: string,
-  subject: string
+  subject: string,
 ): boolean => {
   const currentCurriculumData = TOPICAL_DATA.find(
-    (item) => item.curriculum === curriculum
+    (item) => item.curriculum === curriculum,
   );
   if (!currentCurriculumData) {
     return false;
@@ -90,17 +90,17 @@ export const validateSubject = (
  */
 export const getSubjectData = (
   curriculum: string,
-  subject: string
+  subject: string,
 ): TopicalSubject | null => {
   const currentCurriculumData = TOPICAL_DATA.find(
-    (item) => item.curriculum === curriculum
+    (item) => item.curriculum === curriculum,
   );
   if (!currentCurriculumData) {
     return null;
   }
 
   const currentSubjectData = currentCurriculumData.subject.find(
-    (_subject) => _subject.code === subject
+    (_subject) => _subject.code === subject,
   );
 
   return currentSubjectData ?? null;
@@ -111,14 +111,14 @@ export const getSubjectData = (
  */
 export const validateTopics = (
   topics: string[] | undefined,
-  subjectData: TopicalSubject
+  subjectData: TopicalSubject,
 ): boolean => {
   if (!topics || topics.length === 0) {
     return false;
   }
   return isSubset(
     topics,
-    subjectData.topic.map((topic) => topic.topicName)
+    subjectData.topic.map((topic) => topic.topicName),
   );
 };
 
@@ -127,14 +127,14 @@ export const validateTopics = (
  */
 export const validatePaperTypes = (
   paperTypes: string[] | undefined,
-  subjectData: TopicalSubject
+  subjectData: TopicalSubject,
 ): boolean => {
   if (!paperTypes || paperTypes.length === 0) {
     return false;
   }
   return isSubset(
     paperTypes,
-    subjectData.paperType.map((paperType) => paperType.paperType.toString())
+    subjectData.paperType.map((paperType) => paperType.paperType.toString()),
   );
 };
 
@@ -143,14 +143,14 @@ export const validatePaperTypes = (
  */
 export const validateYears = (
   years: string[] | undefined,
-  subjectData: TopicalSubject
+  subjectData: TopicalSubject,
 ): boolean => {
   if (!years || years.length === 0) {
     return false;
   }
   return isSubset(
     years,
-    subjectData.year.map((year) => year.toString())
+    subjectData.year.map((year) => year.toString()),
   );
 };
 
@@ -159,7 +159,7 @@ export const validateYears = (
  */
 export const validateSeasons = (
   seasons: string[] | undefined,
-  subjectData: TopicalSubject
+  subjectData: TopicalSubject,
 ): boolean => {
   if (!seasons || seasons.length === 0) {
     return false;
@@ -228,7 +228,7 @@ export const validatePartialFilterData = ({
       if (
         !isSubset(
           data.topic,
-          subjectData.topic.map((t) => t.topicName)
+          subjectData.topic.map((t) => t.topicName),
         )
       ) {
         return false;
@@ -238,7 +238,7 @@ export const validatePartialFilterData = ({
       if (
         !isSubset(
           data.paperType,
-          subjectData.paperType.map((p) => p.paperType.toString())
+          subjectData.paperType.map((p) => p.paperType.toString()),
         )
       ) {
         return false;
@@ -248,7 +248,7 @@ export const validatePartialFilterData = ({
       if (
         !isSubset(
           data.year,
-          subjectData.year.map((y) => y.toString())
+          subjectData.year.map((y) => y.toString()),
         )
       ) {
         return false;
@@ -284,13 +284,13 @@ export const validateSubcurriculumnDivision = ({
     // Import TOPICAL_DATA to validate against actual data
     // Find the curriculum data
     const curriculumData = TOPICAL_DATA.find(
-      (data: TopicalData) => data.curriculum === curriculum
+      (data: TopicalData) => data.curriculum === curriculum,
     );
     if (!curriculumData) return false;
 
     // Find the subject data
     const subjectData = curriculumData.subject.find(
-      (subj: TopicalSubject) => subj.code === subject
+      (subj: TopicalSubject) => subj.code === subject,
     );
     if (!subjectData) return false;
 
@@ -348,7 +348,7 @@ export const validateSubcurriculumnDivision = ({
 
     // Check if the value is in the valid subdivisions
     return validSubdivisions.includes(
-      value as CIE_A_LEVEL_SUBDIVISION | OUTDATED
+      value as CIE_A_LEVEL_SUBDIVISION | OUTDATED,
     );
   } catch {
     return false;
@@ -564,16 +564,16 @@ export const isOverScrolling = ({
     if (child && parent) {
       if (child.clientWidth >= parent.clientWidth) {
         const childLeft = Math.abs(
-          Math.round(child.getBoundingClientRect().left)
+          Math.round(child.getBoundingClientRect().left),
         );
         const childRight = Math.abs(
-          Math.round(child.getBoundingClientRect().right)
+          Math.round(child.getBoundingClientRect().right),
         );
         const parentLeft = Math.abs(
-          Math.round(parent.getBoundingClientRect().left)
+          Math.round(parent.getBoundingClientRect().left),
         );
         const parentRight = Math.abs(
-          Math.round(parent.getBoundingClientRect().right)
+          Math.round(parent.getBoundingClientRect().right),
         );
 
         const leftThreshold =
@@ -656,7 +656,7 @@ export const updateSearchParams = ({
     window.history.replaceState(
       {},
       "",
-      `${window.location.pathname}?${params.toString()}`
+      `${window.location.pathname}?${params.toString()}`,
     );
   } catch {
     return;
@@ -878,7 +878,7 @@ export const truncateListName = ({ listName }: { listName: string }) => {
 };
 
 export function computeCurriculumSubjectMapping<
-  T extends { question: SelectedQuestion }
+  T extends { question: SelectedQuestion },
 >(questions: T[]): Partial<Record<ValidCurriculum, string[]>> {
   const metadata: Partial<Record<ValidCurriculum, string[]>> = {};
   questions.forEach((question) => {
@@ -905,7 +905,7 @@ export function computeCurriculumSubjectMapping<
 }
 
 export function computeFinishedQuestionsMetadata(
-  finishedQuestions: SelectedFinishedQuestion[]
+  finishedQuestions: SelectedFinishedQuestion[],
 ): FinishedQuestionsMetadata {
   const curriculumSubjectMapping =
     computeCurriculumSubjectMapping(finishedQuestions);
@@ -920,11 +920,11 @@ export function computeFinishedQuestionsMetadata(
 }
 
 export function computeSubjectMetadata<
-  T extends { question: SelectedQuestion }
+  T extends { question: SelectedQuestion },
 >(
   questions: T[],
   selectedCurriculumn: string | null,
-  selectedSubject: string | null
+  selectedSubject: string | null,
 ): SubjectMetadata | null {
   if (!selectedCurriculumn || !selectedSubject) return null;
 
@@ -973,7 +973,7 @@ export function computeSubjectMetadata<
 }
 
 export function computeBookmarksMetadata(
-  bookmarks: SelectedBookmark[]
+  bookmarks: SelectedBookmark[],
 ): BookmarksMetadata {
   const metadata: BookmarksMetadata = {
     public: {},
@@ -995,7 +995,7 @@ export function computeBookmarksMetadata(
     }
 
     const curriculumSubjectMapping = computeCurriculumSubjectMapping(
-      bookmark.userBookmarks
+      bookmark.userBookmarks,
     );
 
     // Transform the flat mapping into the required nested structure
@@ -1004,7 +1004,7 @@ export function computeBookmarksMetadata(
         metadata[visibility][bookmark.id].curricula[
           curriculum as ValidCurriculum
         ] = { subjects };
-      }
+      },
     );
   });
 
@@ -1012,7 +1012,7 @@ export function computeBookmarksMetadata(
 }
 
 export function filterQuestionsByCriteria<
-  T extends { question: SelectedQuestion }
+  T extends { question: SelectedQuestion },
 >(
   items: T[] | null | undefined,
   currentFilter:
@@ -1025,7 +1025,7 @@ export function filterQuestionsByCriteria<
     | null
     | undefined,
   selectedCurriculum: ValidCurriculum | null | undefined,
-  selectedSubject: string | null | undefined
+  selectedSubject: string | null | undefined,
 ): T[] {
   if (!items || !currentFilter || !selectedCurriculum || !selectedSubject) {
     return [];
@@ -1055,7 +1055,7 @@ export function filterQuestionsByCriteria<
         item.question.topics
           .map((topic) => topic)
           .filter((topic) => topic !== null),
-        currentFilter.topic
+        currentFilter.topic,
       )
     ) {
       return false;
@@ -1070,7 +1070,7 @@ export function filterQuestionsByCriteria<
 export function chunkQuestionsData<T>(
   items: T[],
   chunkSize: number,
-  selector?: (item: T) => SelectedQuestion | VectorizeSelectedQuestion
+  selector?: (item: T) => SelectedQuestion | VectorizeSelectedQuestion,
 ): SelectedQuestion[][] | VectorizeSelectedQuestion[][] {
   const chunkedData: (SelectedQuestion | VectorizeSelectedQuestion)[][] = [];
   let currentChunks: (SelectedQuestion | VectorizeSelectedQuestion)[] = [];
@@ -1103,7 +1103,7 @@ export function extractUniqueTopicCurriculumnSubdivisions(
     value: string;
     curriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
     isUpToDate: boolean;
-  }[]
+  }[],
 ): (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[] {
   const allSubdivisions = options
     .filter((option) => option.curriculumnSubdivision)
@@ -1129,7 +1129,7 @@ type ConvertImageToPngBase64Result<T extends ConvertImageToPngBase64Params> =
  * @returns A Promise that resolves to the Base64 string or an object with base64 and dimensions.
  */
 export function convertImageToPngBase64<
-  T extends ConvertImageToPngBase64Params
+  T extends ConvertImageToPngBase64Params,
 >(params: T): Promise<ConvertImageToPngBase64Result<T>> {
   const { url, includeDimensions } = params;
   return new Promise((resolve, reject) => {

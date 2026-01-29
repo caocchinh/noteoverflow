@@ -17,7 +17,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Dispatch, memo, SetStateAction, useCallback, useState } from "react";
-import { SelectedQuestion } from "../../constants/types";
 import {
   ArrowRightFromLine,
   Eraser,
@@ -28,6 +27,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import ExportReviewDialog from "./ExportReviewDialog";
 import { createPortal } from "react-dom";
+import { SelectedQuestion } from "../../types/models";
 
 interface ExportBarButtonsProps {
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
@@ -112,7 +112,7 @@ const ExportBarButtons = memo(
         />
       </>
     );
-  }
+  },
 );
 
 ExportBarButtons.displayName = "ExportBarButtons";
@@ -127,7 +127,7 @@ const SelectAllButton = memo(
       Select all
       <WandSparkles />
     </Button>
-  )
+  ),
 );
 SelectAllButton.displayName = "SelectAllButton";
 
@@ -141,7 +141,7 @@ const DeselectAllButton = memo(
       Deselect all
       <Eraser />
     </Button>
-  )
+  ),
 );
 DeselectAllButton.displayName = "DeselectAllButton";
 
@@ -206,7 +206,7 @@ const ExportBar = ({
               {" "}
               {createPortal(
                 <div className="fixed inset-0 z-100007 bg-black/50" />,
-                document.body
+                document.body,
               )}
             </>
           )}

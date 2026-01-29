@@ -1,8 +1,8 @@
 "use client";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { DisplayMode } from "../constants/types";
 import { memo } from "react";
+import { DisplayMode } from "../types/models";
 
 interface DisplayModeToggleProps {
   displayMode: DisplayMode;
@@ -37,7 +37,7 @@ const DisplayModeToggle = memo(
         </ToggleGroupItem>
       </ToggleGroup>
     );
-  }
+  },
 );
 
 DisplayModeToggle.displayName = "DisplayModeToggle";

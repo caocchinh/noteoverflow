@@ -1,8 +1,8 @@
 import { memo, RefObject, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PdfViewerWrapperHandle } from "@/features/topical/constants/types";
 import { Loader2 } from "lucide-react";
 import { handleDownloadPdf } from "@/features/topical/lib/utils";
+import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
 
 const DownloadWithAnnotationsButton = memo(
   ({
@@ -56,7 +56,7 @@ const DownloadWithAnnotationsButton = memo(
         )}
       </Button>
     );
-  }
+  },
 );
 
 DownloadWithAnnotationsButton.displayName = "DownloadWithAnnotationsButton";

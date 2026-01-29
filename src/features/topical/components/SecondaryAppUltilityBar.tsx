@@ -24,8 +24,8 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../lib/utils";
-import { SecondaryAppUltilityBarProps } from "../constants/types";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { SecondaryAppUltilityBarProps } from "../types/components";
 
 const SecondaryAppUltilityBar = ({
   setIsSidebarOpen,
@@ -141,7 +141,7 @@ const SecondaryAppUltilityBar = ({
             side="bottom"
             className={cn(
               !isQuestionViewDisabled && "hidden!",
-              "flex justify-center items-center gap-2"
+              "flex justify-center items-center gap-2",
             )}
           >
             No question available
@@ -167,7 +167,7 @@ const SecondaryAppUltilityBar = ({
             side="bottom"
             className={cn(
               !isFilteredDisabled && "hidden!",
-              "flex justify-center items-center gap-2"
+              "flex justify-center items-center gap-2",
             )}
           >
             No question to filter

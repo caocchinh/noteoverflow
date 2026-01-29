@@ -15,9 +15,9 @@ import {
   extractQuestionNumber,
   generatePastPaperLinks,
 } from "./utils";
-import { SelectedQuestion } from "../constants/types";
 import { PdfContentType } from "./generatePdfBlob";
 import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
+import { SelectedQuestion } from "../types/models";
 
 function dataURLToUint8Array(dataURL: string): Uint8Array {
   const base64 = dataURL.split(",")[1] || dataURL;
@@ -35,7 +35,7 @@ function dataURLToUint8Array(dataURL: string): Uint8Array {
  */
 async function prepareQuestionForDocx(
   question: SelectedQuestion,
-  typeOfContent: PdfContentType
+  typeOfContent: PdfContentType,
 ) {
   const customQuestionItem: { images: string[]; text: string[] } = {
     images: [],
@@ -65,13 +65,13 @@ async function prepareQuestionForDocx(
   const [questionImagesData, answerImagesData] = await Promise.all([
     Promise.all(
       customQuestionItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl, includeDimensions: true })
-      )
+        convertImageToPngBase64({ url: imgUrl, includeDimensions: true }),
+      ),
     ),
     Promise.all(
       customAnswerItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl, includeDimensions: true })
-      )
+        convertImageToPngBase64({ url: imgUrl, includeDimensions: true }),
+      ),
     ),
   ]);
 
@@ -134,7 +134,7 @@ export async function generateMultipleQuestionsDocxBlob({
           ],
           alignment: AlignmentType.CENTER,
           spacing: { after: 400 },
-        })
+        }),
       );
     } catch (e) {
       console.error("Failed to load logo for DOCX", e);
@@ -148,7 +148,7 @@ export async function generateMultipleQuestionsDocxBlob({
 
       const batch = questions.slice(i, i + BATCH_SIZE);
       const batchResults = await Promise.all(
-        batch.map((q) => prepareQuestionForDocx(q, typeOfContent))
+        batch.map((q) => prepareQuestionForDocx(q, typeOfContent)),
       );
 
       for (const data of batchResults) {
@@ -165,7 +165,7 @@ export async function generateMultipleQuestionsDocxBlob({
               },
             },
             spacing: { after: 200, before: 200 },
-          })
+          }),
         );
 
         // Metadata: Paper Code and Question Number with Links
@@ -179,7 +179,7 @@ export async function generateMultipleQuestionsDocxBlob({
               }),
             ],
             spacing: { after: 100 },
-          })
+          }),
         );
 
         children.push(
@@ -210,7 +210,7 @@ export async function generateMultipleQuestionsDocxBlob({
               }),
             ],
             spacing: { after: 200 },
-          })
+          }),
         );
 
         // Question Content
@@ -224,7 +224,7 @@ export async function generateMultipleQuestionsDocxBlob({
                 new TextRun({ text: "Question:", bold: true, size: 22 }),
               ],
               spacing: { after: 100 },
-            })
+            }),
           );
 
           data.questionItem.text.forEach((text) => {
@@ -232,7 +232,7 @@ export async function generateMultipleQuestionsDocxBlob({
               new Paragraph({
                 children: [new TextRun(text)],
                 spacing: { after: 100 },
-              })
+              }),
             );
           });
 
@@ -259,7 +259,7 @@ export async function generateMultipleQuestionsDocxBlob({
                   } as any), // eslint-disable-line @typescript-eslint/no-explicit-any
                 ],
                 spacing: { after: 200 },
-              })
+              }),
             );
           });
         }
@@ -280,7 +280,7 @@ export async function generateMultipleQuestionsDocxBlob({
                 }),
               ],
               spacing: { before: 200, after: 100 },
-            })
+            }),
           );
 
           data.answerItem.text.forEach((text) => {
@@ -288,7 +288,7 @@ export async function generateMultipleQuestionsDocxBlob({
               new Paragraph({
                 children: [new TextRun(text)],
                 spacing: { after: 100 },
-              })
+              }),
             );
           });
 
@@ -314,7 +314,7 @@ export async function generateMultipleQuestionsDocxBlob({
                   } as any), // eslint-disable-line @typescript-eslint/no-explicit-any
                 ],
                 spacing: { after: 200 },
-              })
+              }),
             );
           });
         }

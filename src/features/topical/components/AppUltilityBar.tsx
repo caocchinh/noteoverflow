@@ -9,10 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  AppUltilityBarProps,
-  QuestionInspectOpenState,
-} from "../constants/types";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +39,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../lib/utils";
 import LayoutSetting from "./LayoutSetting";
 import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
+import {
+  AppUltilityBarProps,
+  QuestionInspectOpenState,
+} from "../types/components";
 
 const AppUltilityBar = memo(
   forwardRef(

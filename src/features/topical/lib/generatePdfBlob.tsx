@@ -8,7 +8,7 @@ import {
 } from "./utils";
 import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
 import ExportPdfTemplate from "../components/QuestionPdfTemplate";
-import { SelectedQuestion } from "../constants/types";
+import { SelectedQuestion } from "../types/models";
 
 export type PdfContentType = "question" | "answer" | "question-with-answers";
 
@@ -33,7 +33,7 @@ interface QuestionPdfData {
  */
 async function prepareQuestionForPdf(
   question: SelectedQuestion,
-  typeOfContent: PdfContentType
+  typeOfContent: PdfContentType,
 ): Promise<QuestionPdfData> {
   const questionItem: { images: string[]; text: string[] } = {
     images: [],
@@ -65,13 +65,13 @@ async function prepareQuestionForPdf(
   const [convertedQuestionImages, convertedAnswerImages] = await Promise.all([
     Promise.all(
       questionItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl })
-      )
+        convertImageToPngBase64({ url: imgUrl }),
+      ),
     ),
     Promise.all(
       answerItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl })
-      )
+        convertImageToPngBase64({ url: imgUrl }),
+      ),
     ),
   ]);
 
@@ -129,7 +129,7 @@ export async function generateSingleQuestionPdfBlob({
       <ExportPdfTemplate
         questions={[questionData]}
         headerLogo={headerLogo || ""}
-      />
+      />,
     ).toBlob();
   } catch (error) {
     console.error("Error generating PDF:", error);
@@ -150,7 +150,7 @@ async function processInBatches<T, R>(
   batchSize: number,
   processor: (item: T) => Promise<R>,
   onProgress?: (completed: number, total: number) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<R[]> {
   const results: R[] = [];
   const total = items.length;
@@ -223,7 +223,7 @@ export async function generateMultipleQuestionsPdfBlob({
             onProgress(processedCount + batchCompleted, totalQuestions);
           }
         },
-        signal
+        signal,
       );
 
       // Generate PDF blob for this chunk
@@ -231,7 +231,7 @@ export async function generateMultipleQuestionsPdfBlob({
         <ExportPdfTemplate
           questions={chunkData}
           headerLogo={headerLogo || ""}
-        />
+        />,
       ).toBlob();
 
       // Load the chunk PDF into pdf-lib
@@ -247,7 +247,7 @@ export async function generateMultipleQuestionsPdfBlob({
       const chunkPdfDoc = await PDFDocument.load(await chunkBlob.arrayBuffer());
       const copiedPages = await mergedPdf.copyPages(
         chunkPdfDoc,
-        chunkPdfDoc.getPageIndices()
+        chunkPdfDoc.getPageIndices(),
       );
       copiedPages.forEach((page) => mergedPdf.addPage(page));
     }

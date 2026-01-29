@@ -6,13 +6,13 @@ import {
 } from "@/components/ui/tooltip";
 import { Sparkles, Trash2, X as RemoveIcon } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import {
-  MultiSelectorTriggerButtonUltilityProps,
-  MultiSelectorTriggerProps,
-} from "../../constants/types";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import {
+  MultiSelectorTriggerButtonUltilityProps,
+  MultiSelectorTriggerProps,
+} from "./selectors";
 
 const MultiSelectorTrigger = memo(
   ({
@@ -63,7 +63,7 @@ const MultiSelectorTrigger = memo(
           }
         }
       },
-      [label]
+      [label],
     );
 
     return (
@@ -73,7 +73,7 @@ const MultiSelectorTrigger = memo(
           {
             "opacity-50": !allAvailableOptions,
           },
-          !allAvailableOptions && "pointer-events-none "
+          !allAvailableOptions && "pointer-events-none ",
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
@@ -171,7 +171,7 @@ const MultiSelectorTrigger = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
@@ -256,7 +256,7 @@ const MultiSelectorTriggerButtonUltility = memo(
         )}
       </>
     );
-  }
+  },
 );
 
 MultiSelectorTriggerButtonUltility.displayName =

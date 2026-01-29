@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { SelectedQuestion } from "@/features/topical/constants/types";
+import { SelectedQuestion } from "@/features/topical/types/models";
 import { FastForward } from "lucide-react";
 import { memo } from "react";
 
@@ -47,14 +47,14 @@ const GoToCurrentButton = memo(
             }
           } else {
             const currentQuestionIndexInSearchResult = searchResults.findIndex(
-              (question) => question.id === currentQuestionId
+              (question) => question.id === currentQuestionId,
             );
             if (currentQuestionIndexInSearchResult === -1) {
               return;
             }
             setTimeout(() => {
               searchVirtualizer.scrollToIndex(
-                currentQuestionIndexInSearchResult
+                currentQuestionIndexInSearchResult,
               );
             }, 0);
           }
@@ -64,7 +64,7 @@ const GoToCurrentButton = memo(
         Current
       </Button>
     );
-  }
+  },
 );
 
 GoToCurrentButton.displayName = "GoToCurrentButton";

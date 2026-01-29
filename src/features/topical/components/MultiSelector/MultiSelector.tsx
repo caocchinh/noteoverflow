@@ -16,11 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type {
-  MultiSelectorListRef,
-  MultiSelectorProps,
-  MultiSelectorSharedProps,
-} from "../../constants/types";
+
 import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import {
@@ -28,6 +24,11 @@ import {
   MultiSelectorMobiletUltilityButtons,
 } from "./MultiSelectUltilityButtons";
 import MultiSelectorList from "./MultiSelectorList";
+import {
+  MultiSelectorListRef,
+  MultiSelectorProps,
+  MultiSelectorSharedProps,
+} from "./selectors";
 
 const MultiSelector = memo(
   ({
@@ -59,7 +60,7 @@ const MultiSelector = memo(
           onValueChange(val);
         }
       },
-      [selectedValues, onValueChange]
+      [selectedValues, onValueChange],
     );
 
     const sharedProps: MultiSelectorSharedProps = {
@@ -80,7 +81,7 @@ const MultiSelector = memo(
         )}
       </>
     );
-  }
+  },
 );
 
 MultiSelector.displayName = "MultiSelector";
@@ -94,7 +95,7 @@ const MaxLengthErrorMessage = memo(
       You can only select up to {maxLength}{" "}
       {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
     </h3>
-  )
+  ),
 );
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
@@ -180,7 +181,7 @@ const MobileMultiSelector = memo(
         </Drawer>
       </>
     );
-  }
+  },
 );
 
 MobileMultiSelector.displayName = "MobileMultiSelector";
@@ -275,7 +276,7 @@ const DesktopMultiSelector = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 DesktopMultiSelector.displayName = "DesktopMultiSelector";

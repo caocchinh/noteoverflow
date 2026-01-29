@@ -18,10 +18,10 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SelectedQuestion } from "../constants/types";
 import { ValidSeason } from "@/constants/types";
 import { parsePastPaperUrl } from "../lib/utils";
 import { memo } from "react";
+import { SelectedQuestion } from "../types/models";
 
 const UNSUPPORTED_YEAR = 2009;
 

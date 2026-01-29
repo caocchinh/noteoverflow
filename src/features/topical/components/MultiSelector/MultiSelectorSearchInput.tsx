@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { MultiSelectorSearchInputProps } from "../../constants/types";
 import { CommandInput } from "@/components/ui/command";
 import { X as RemoveIcon } from "lucide-react";
+import { MultiSelectorSearchInputProps } from "./selectors";
 
 const MultiSelectorSearchInput = memo(
   ({
@@ -42,7 +42,7 @@ const MultiSelectorSearchInput = memo(
           wrapperClassName="w-full py-6 px-4 border-b"
         />
         <RemoveIcon
-          className="!bg-transparent cursor-pointer mr-2 text-destructive"
+          className="bg-transparent! cursor-pointer mr-2 text-destructive"
           size={20}
           onClick={(e) => {
             e.stopPropagation();
@@ -55,7 +55,7 @@ const MultiSelectorSearchInput = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 MultiSelectorSearchInput.displayName = "MultiSelectorSearchInput";
