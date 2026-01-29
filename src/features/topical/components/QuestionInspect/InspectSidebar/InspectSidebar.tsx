@@ -60,7 +60,7 @@ const MemoizedQuestionItem = memo(
         nextProps.setIsAnnotationGuardDialogOpen &&
       prevProps.isHavingUnsafeChangesRef === nextProps.isHavingUnsafeChangesRef
     );
-  }
+  },
 );
 MemoizedQuestionItem.displayName = "MemoizedQuestionItem";
 
@@ -83,12 +83,12 @@ const InspectSidebar = memo(
         isInputFocusedRef,
         resetScrollPositions,
         listId,
-        overflowScrollHandler,
+        inspectUltilityBarRef,
         currentQuestionIndex,
         navigationButtonsContainerRef,
         isAnnotationGuardDialogOpen,
       }: InspectSidebarProps,
-      ref
+      ref,
     ) => {
       const [currentTab, setCurrentTab] = useState(0);
       const [searchInput, setSearchInput] = useState("");
@@ -97,7 +97,7 @@ const InspectSidebar = memo(
         string | undefined
       >(undefined);
       const [pendingTab, setPendingTab] = useState<number | undefined>(
-        undefined
+        undefined,
       );
       const [
         willScrollToQuestionAfterGuard,
@@ -119,13 +119,13 @@ const InspectSidebar = memo(
 
       const getSearchItemKey = useCallback(
         (index: number) => searchResults[index]?.id ?? index,
-        [searchResults]
+        [searchResults],
       );
 
       const getDisplayItemKey = useCallback(
         (index: number) =>
           partitionedTopicalData?.[currentTab]?.[index]?.id ?? index,
-        [partitionedTopicalData, currentTab]
+        [partitionedTopicalData, currentTab],
       );
 
       const searchVirtualizer = useVirtualizer({
@@ -160,7 +160,7 @@ const InspectSidebar = memo(
 
           const itemIndex =
             partitionedTopicalData[tab].findIndex(
-              (question) => question.id === questionId
+              (question) => question.id === questionId,
             ) ?? 0;
           if (itemIndex === -1) {
             return;
@@ -170,18 +170,18 @@ const InspectSidebar = memo(
             displayVirtualizer.scrollToIndex(itemIndex);
           }, 0);
         },
-        [displayVirtualizer, partitionedTopicalData, isVirtualizationReady]
+        [displayVirtualizer, partitionedTopicalData, isVirtualizationReady],
       );
 
       const handleTransitionEnd = useCallback(
         (e: React.TransitionEvent) => {
           if (e.propertyName === "left") {
-            if (overflowScrollHandler) {
-              overflowScrollHandler();
+            if (inspectUltilityBarRef.current?.overflowScrollHandler) {
+              inspectUltilityBarRef.current.overflowScrollHandler();
             }
           }
         },
-        [overflowScrollHandler]
+        [inspectUltilityBarRef],
       );
 
       const handleNextQuestion = useCallback(() => {
@@ -243,7 +243,7 @@ const InspectSidebar = memo(
             }
           } else {
             const currentQuestionIndexInSearchResult = searchResults.findIndex(
-              (question) => question.id === currentQuestionId
+              (question) => question.id === currentQuestionId,
             );
             if (currentQuestionIndexInSearchResult === -1) {
               return;
@@ -262,7 +262,7 @@ const InspectSidebar = memo(
               } else {
                 setCurrentQuestionId(newQuestionId);
                 searchVirtualizer.scrollToIndex(
-                  currentQuestionIndexInSearchResult + 1
+                  currentQuestionIndexInSearchResult + 1,
                 );
               }
             }
@@ -337,7 +337,7 @@ const InspectSidebar = memo(
             }
           } else {
             const currentQuestionIndexInSearchResult = searchResults.findIndex(
-              (question) => question.id === currentQuestionId
+              (question) => question.id === currentQuestionId,
             );
             if (currentQuestionIndexInSearchResult === -1) {
               return;
@@ -356,7 +356,7 @@ const InspectSidebar = memo(
               } else {
                 setCurrentQuestionId(newQuestionId);
                 searchVirtualizer.scrollToIndex(
-                  currentQuestionIndexInSearchResult - 1
+                  currentQuestionIndexInSearchResult - 1,
                 );
               }
             }
@@ -395,7 +395,7 @@ const InspectSidebar = memo(
           );
         } else {
           const currentQuestionIndexInSearchResult = searchResults.findIndex(
-            (question) => question.id === currentQuestionId
+            (question) => question.id === currentQuestionId,
           );
           if (currentQuestionIndexInSearchResult === -1) {
             return true;
@@ -427,7 +427,7 @@ const InspectSidebar = memo(
           );
         } else {
           const currentQuestionIndexInSearchResult = searchResults.findIndex(
-            (question) => question.id === currentQuestionId
+            (question) => question.id === currentQuestionId,
           );
           if (currentQuestionIndexInSearchResult === -1) {
             return true;
@@ -519,7 +519,7 @@ const InspectSidebar = memo(
           setPendingQuestionId,
           setPendingTab,
           scrollToQuestion,
-        ]
+        ],
       );
 
       useImperativeHandle(
@@ -537,7 +537,7 @@ const InspectSidebar = memo(
           navigateToQuestion,
           isHandleNextQuestionDisabled,
           isHandlePreviousQuestionDisabled,
-        ]
+        ],
       );
       const hasMountedRef = useRef(false);
 
@@ -546,14 +546,14 @@ const InspectSidebar = memo(
         if (!isOpen.isOpen) {
           return;
         }
-        overflowScrollHandler?.();
+        inspectUltilityBarRef.current?.overflowScrollHandler();
         const tab = calculateTabThatQuestionResidesIn(isOpen.questionId);
         if (!isVirtualizationReady) {
           setCurrentTab(tab);
           setCurrentQuestionId(
             !isOpen.questionId
               ? partitionedTopicalData?.[tab]?.[0]?.id
-              : isOpen.questionId
+              : isOpen.questionId,
           );
         } else {
           scrollToQuestion({ questionId: isOpen.questionId, tab });
@@ -564,7 +564,7 @@ const InspectSidebar = memo(
           }, 0);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [isOpen, overflowScrollHandler, isVirtualizationReady]);
+      }, [isOpen, inspectUltilityBarRef, isVirtualizationReady]);
 
       useEffect(() => {
         if (!hasMountedRef.current) {
@@ -671,7 +671,7 @@ const InspectSidebar = memo(
               <ScrollArea
                 className={cn(
                   "w-full",
-                  searchInput.length > 0 ? "h-[90%]" : "h-[80%] "
+                  searchInput.length > 0 ? "h-[90%]" : "h-[80%] ",
                 )}
                 type="always"
                 viewportRef={listScrollAreaRef}
@@ -679,7 +679,7 @@ const InspectSidebar = memo(
                 <div
                   className={cn(
                     "relative w-full",
-                    searchInput.length > 0 && "hidden!"
+                    searchInput.length > 0 && "hidden!",
                   )}
                   style={{
                     height: displayVirtualizer.getTotalSize(),
@@ -775,7 +775,7 @@ const InspectSidebar = memo(
               <div
                 className={cn(
                   "w-full flex items-center justify-around -mt-2",
-                  searchInput.length > 0 && "hidden"
+                  searchInput.length > 0 && "hidden",
                 )}
               >
                 <TabNavigationButtons
@@ -803,12 +803,12 @@ const InspectSidebar = memo(
                   isHandlePreviousQuestionDisabled
                 }
               />,
-              navigationButtonsContainerRef.current
+              navigationButtonsContainerRef.current,
             )}
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 InspectSidebar.displayName = "InspectSidebar";

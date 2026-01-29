@@ -319,8 +319,7 @@ export interface InfiniteScrollProps {
 }
 
 // Extend the IntersectionObserverInit interface to include scrollMargin
-export interface ExtendedIntersectionObserverInit
-  extends IntersectionObserverInit {
+export interface ExtendedIntersectionObserverInit extends IntersectionObserverInit {
   scrollMargin?: string;
 }
 
@@ -516,7 +515,7 @@ export interface InspectSidebarProps {
   resetScrollPositions: () => void;
   listId: string | undefined;
   currentQuestionIndex: number;
-  overflowScrollHandler?: () => void;
+  inspectUltilityBarRef: RefObject<InspectUltilityBarRef | null>;
   navigationButtonsContainerRef: RefObject<HTMLDivElement | null>;
   questionInspectMainContentRef: RefObject<QuestionInspectMainContentRef | null>;
   isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
@@ -682,7 +681,7 @@ export interface AnnotatableInspectImageProps {
     },
     callbacks?: {
       onSuccess?: () => void;
-    }
+    },
   ) => void;
   isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
 }

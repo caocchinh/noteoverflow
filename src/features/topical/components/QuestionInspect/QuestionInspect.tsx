@@ -298,9 +298,7 @@ const QuestionInspect = memo(
               >
                 <InspectSidebar
                   ref={sideBarInspectRef}
-                  overflowScrollHandler={
-                    inspectUltilityBarRef.current?.overflowScrollHandler
-                  }
+                  inspectUltilityBarRef={inspectUltilityBarRef}
                   calculateTabThatQuestionResidesIn={
                     calculateTabThatQuestionResidesIn
                   }
