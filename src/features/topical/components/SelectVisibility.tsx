@@ -27,7 +27,7 @@ export const SelectVisibility = ({
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a visibility" />
       </SelectTrigger>
-      <SelectContent className="z-[999999] dark:bg-accent w-[var(--radix-select-trigger-width)]">
+      <SelectContent className="z-999999 dark:bg-accent w-(--radix-select-trigger-width)">
         <SelectItem value="public" className="w-full">
           <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
             <Globe className="w-4 h-4" />

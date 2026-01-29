@@ -59,7 +59,7 @@ export const JumpToTabButton = memo(
           </p>
         </PopoverTrigger>
         <PopoverContent
-          className="z-[999999] dark:bg-accent w-[200px] flex flex-col gap-2"
+          className="z-999999 dark:bg-accent w-[200px] flex flex-col gap-2"
           side="top"
           sideOffset={17}
         >
@@ -84,7 +84,9 @@ export const JumpToTabButton = memo(
               value={Number.isNaN(jumpToTabInput) ? "" : jumpToTabInput}
               onChange={(e) => {
                 setJumpToTabInput(
-                  e.target.value.length > 0 ? parseInt(e.target.value, 10) : NaN
+                  e.target.value.length > 0
+                    ? parseInt(e.target.value, 10)
+                    : NaN,
                 );
                 setIsInvalidInput(false);
               }}
@@ -106,6 +108,6 @@ export const JumpToTabButton = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 JumpToTabButton.displayName = "JumpToTabButton";

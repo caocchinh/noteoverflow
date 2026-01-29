@@ -9,7 +9,7 @@ interface NavigateToTopicalAppProps {
 
 const NavigateToTopicalApp = ({ children }: NavigateToTopicalAppProps) => {
   return (
-    <Button className="!bg-logo-main !text-white" asChild>
+    <Button className="bg-logo-main! text-white!" asChild>
       <Link href="/topical" className="w-[250px]" prefetch={false}>
         {children}
         <ScanText />

@@ -42,7 +42,7 @@ const PastPaperLink = ({
       target="_blank"
       className={cn(
         "w-full h-full flex items-center hover:bg-input/90 rounded-md p-1",
-        question.year === UNSUPPORTED_YEAR && "pointer-events-none"
+        question.year === UNSUPPORTED_YEAR && "pointer-events-none",
       )}
       href={
         question.year === UNSUPPORTED_YEAR
@@ -71,21 +71,21 @@ export const BestExamHelpUltility = memo(
               <Button
                 variant="outline"
                 className={cn(
-                  "w-9 h-9 cursor-pointer !p-0",
-                  question?.year === UNSUPPORTED_YEAR && "opacity-50 "
+                  "w-9 h-9 cursor-pointer p-0!",
+                  question?.year === UNSUPPORTED_YEAR && "opacity-50 ",
                 )}
               >
                 <FileText />
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent className="z-[99999999]" side="bottom">
+          <TooltipContent className="z-99999999" side="bottom">
             {question?.year === UNSUPPORTED_YEAR
               ? "Only supported year 2010 and above"
               : "Resources"}
           </TooltipContent>
         </Tooltip>
-        <PopoverContent className="z-[99999999] p-3 bg-accent w-max">
+        <PopoverContent className="z-99999999 p-3 bg-accent w-max">
           <div className="flex flex-col gap-1">
             <PastPaperLink question={question} type="qp">
               <ScrollText className="mr-2 h-4 w-4" />
@@ -126,6 +126,6 @@ export const BestExamHelpUltility = memo(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 BestExamHelpUltility.displayName = "BestExamHelpUltility";

@@ -23,8 +23,8 @@ export const ScrollToTopButton = ({
         <TooltipTrigger asChild>
           <Button
             className={cn(
-              "fixed cursor-pointer !px-[10px] bottom-[2.5%] right-[1.5%] rounded-sm z-[50]",
-              !isScrollingAndShouldShowScrollButton && "!hidden"
+              "fixed cursor-pointer px-[10px]! bottom-[2.5%] right-[1.5%] rounded-sm z-50",
+              !isScrollingAndShouldShowScrollButton && "hidden!",
             )}
             onClick={() =>
               scrollAreaRef.current?.scrollTo({

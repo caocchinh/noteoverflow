@@ -29,7 +29,7 @@ export default function VisualSetting({}) {
           Visual settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+      <PopoverContent className="z-100006 flex flex-col items-center justify-center gap-3">
         <X
           className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}
@@ -83,7 +83,7 @@ export default function VisualSetting({}) {
             <SelectTrigger>
               <SelectValue placeholder="Image theme" />
             </SelectTrigger>
-            <SelectContent className="z-[1000010] dark:bg-accent">
+            <SelectContent className="z-1000010 dark:bg-accent">
               <SelectItem value="light">Light</SelectItem>
               <SelectItem value="dark">Dark</SelectItem>
             </SelectContent>

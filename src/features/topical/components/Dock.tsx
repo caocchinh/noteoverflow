@@ -76,7 +76,7 @@ function DockItem({
   const targetSize = useTransform(
     mouseDistance,
     [-distance, 0, distance],
-    [baseItemSize, magnification, baseItemSize]
+    [baseItemSize, magnification, baseItemSize],
   );
   const size = useSpring(targetSize, spring);
 
@@ -84,9 +84,9 @@ function DockItem({
     <motion.div
       aria-haspopup="true"
       className={cn(
-        "relative inline-flex cursor-pointer items-center justify-center rounded-md border-1 border-neutral-700 bg-[#060010] shadow-md dark:bg-white",
+        "relative inline-flex cursor-pointer items-center justify-center rounded-md border border-neutral-700 bg-[#060010] shadow-md dark:bg-white",
         className,
-        backgroundColor
+        backgroundColor,
       )}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
@@ -103,8 +103,8 @@ function DockItem({
       {Children.map(children, (child) =>
         cloneElement(
           child as React.ReactElement<{ isHovered: MotionValue<number> }>,
-          { isHovered }
-        )
+          { isHovered },
+        ),
       )}
     </motion.div>
   );
@@ -143,7 +143,7 @@ function DockLabel({
           className={cn(
             className,
             "-top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs",
-            backgroundColor
+            backgroundColor,
           )}
           exit={{ opacity: 0, y: 0 }}
           initial={{ opacity: 0, y: 0 }}
@@ -187,7 +187,7 @@ export default function Dock({
 
   const maxHeight = useMemo(
     () => Math.max(dockHeight, magnification + magnification / 2 + 4),
-    [magnification, dockHeight]
+    [magnification, dockHeight],
   );
   const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
   const height = useSpring(heightRow, spring);
@@ -199,7 +199,7 @@ export default function Dock({
     >
       <motion.div
         aria-label="Application dock"
-        className={`${className} -translate-x-1/2 absolute bottom-2 left-1/2 flex w-fit transform items-end gap-4 rounded-md border-1 border-neutral-700 bg-background px-4 pb-2`}
+        className={`${className} -translate-x-1/2 absolute bottom-2 left-1/2 flex w-fit transform items-end gap-4 rounded-md border border-neutral-700 bg-background px-4 pb-2`}
         onMouseLeave={() => {
           isHovered.set(0);
           mouseX.set(Number.POSITIVE_INFINITY);

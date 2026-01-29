@@ -30,7 +30,7 @@ export default function CacheAccordion() {
           Cache settings
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[100006] flex flex-col items-center justify-center gap-3">
+      <PopoverContent className="z-100006 flex flex-col items-center justify-center gap-3">
         <X
           className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}
@@ -79,7 +79,7 @@ export default function CacheAccordion() {
                   onCheckedChange={() => {
                     setUiPreference(
                       "isPersistantCacheEnabled",
-                      (prev) => !prev
+                      (prev) => !prev,
                     );
                   }}
                 />

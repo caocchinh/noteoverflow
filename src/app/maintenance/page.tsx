@@ -387,7 +387,7 @@ export default function MaintenancePage() {
               </blockquote>
               <p className="text-gray-400 mt-3 text-center">— Elon Musk</p>
 
-              <p className="mt-6 text-center text-gray-300">
+              <div className="mt-6 text-center text-gray-300">
                 The failure to do things right before launch taught me more than
                 any success could have. I planted NoteOverflow on unstable
                 foundation.
@@ -396,7 +396,7 @@ export default function MaintenancePage() {
                   Now I&apos;m replanting it properly with roots that can
                   support decades of growth.
                 </p>
-              </p>
+              </div>
 
               <p className="mt-6 text-center text-blue-400 font-semibold text-lg">
                 Stay tuned.

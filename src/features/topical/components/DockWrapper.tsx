@@ -38,7 +38,7 @@ const DockWrapper = () => {
               <LayoutDashboard
                 className={cn(
                   "text-white dark:text-black",
-                  pathname === TOPICAL_QUESTION_APP_ROUTE && "!text-white"
+                  pathname === TOPICAL_QUESTION_APP_ROUTE && "text-white!",
                 )}
                 size={18}
               />
@@ -58,7 +58,7 @@ const DockWrapper = () => {
               <Bookmark
                 className={cn(
                   "text-white dark:text-black",
-                  pathname === TOPICAL_QUESTION_BOOKMARK_ROUTE && "!text-white"
+                  pathname === TOPICAL_QUESTION_BOOKMARK_ROUTE && "text-white!",
                 )}
                 size={18}
               />
@@ -81,7 +81,7 @@ const DockWrapper = () => {
                 className={cn(
                   "text-white dark:text-black",
                   pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE &&
-                    "!text-white"
+                    "text-white!",
                 )}
                 size={18}
               />
