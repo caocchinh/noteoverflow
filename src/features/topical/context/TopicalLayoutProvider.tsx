@@ -144,14 +144,13 @@ export default function TopicalLayoutProvider({
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
 
-  // UI Preferences state
+  // UI Preferences state - use lazy initialization to avoid setState in effect
   const [uiPreferences, setUiPreferences] = useState<UiPreferences>(
-    DEFAULT_UI_PREFERENCES_CACHE,
+    getInitialUiPreferences,
   );
 
   useEffect(() => {
     if (isMounted.current) return;
-    setUiPreferences(getInitialUiPreferences());
     const webViewerKeys = Object.keys(localStorage).filter(
       (key) =>
         key.startsWith("wc--") ||

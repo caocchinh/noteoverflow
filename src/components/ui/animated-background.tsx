@@ -5,6 +5,7 @@ import {
   cloneElement,
   type ReactElement,
   useEffect,
+  useEffectEvent,
   useId,
   useState,
 } from "react";
@@ -40,9 +41,15 @@ export function AnimatedBackground({
     }
   };
 
+  const onDefaultValueChange = useEffectEvent(
+    ({ _defaultValue }: { _defaultValue: string }) => {
+      setActiveId(_defaultValue);
+    },
+  );
+
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setActiveId(defaultValue);
+      onDefaultValueChange({ _defaultValue: defaultValue });
     }
   }, [defaultValue]);
 
@@ -85,7 +92,7 @@ export function AnimatedBackground({
           )}
         </AnimatePresence>
         <div className="z-10">{child.props.children}</div>
-      </>
+      </>,
     );
   });
 }

@@ -1,4 +1,4 @@
-import {type JSX, useEffect, useRef} from "react";
+import { type JSX, useEffect, useRef } from "react";
 
 class Pixel {
   width: number;
@@ -20,7 +20,15 @@ class Pixel {
   isReverse: boolean;
   isShimmer: boolean;
 
-  constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, x: number, y: number, color: string, speed: number, delay: number) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    color: string,
+    speed: number,
+    delay: number,
+  ) {
     this.width = canvas.width;
     this.height = canvas.height;
     this.ctx = context;
@@ -48,7 +56,12 @@ class Pixel {
   draw() {
     const centerOffset = this.maxSizeInteger * 0.5 - this.size * 0.5;
     this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(this.x + centerOffset, this.y + centerOffset, this.size, this.size);
+    this.ctx.fillRect(
+      this.x + centerOffset,
+      this.y + centerOffset,
+      this.size,
+      this.size,
+    );
   }
 
   appear() {
@@ -159,13 +172,29 @@ interface VariantConfig {
   noFocus: boolean;
 }
 
-export default function PixelCard({variant = "default", gap, speed, colors, noFocus, className = "", children}: PixelCardProps): JSX.Element {
+export default function PixelCard({
+  variant = "default",
+  gap,
+  speed,
+  colors,
+  noFocus,
+  className = "",
+  children,
+}: PixelCardProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelsRef = useRef<Pixel[]>([]);
-  const animationRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
-  const timePreviousRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
-  const reducedMotion = useRef(typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false).current;
+  const animationRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(
+    null,
+  );
+  const timePreviousRef = useRef(
+    typeof performance !== "undefined" ? performance.now() : 0,
+  );
+  const reducedMotion = useRef(
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  ).current;
 
   const variantCfg: VariantConfig = VARIANTS[variant] || VARIANTS.default;
   const finalGap = gap ?? variantCfg.gap;
@@ -191,8 +220,13 @@ export default function PixelCard({variant = "default", gap, speed, colors, noFo
     const colorsArray = finalColors.split(",");
     const pxs: Pixel[] = [];
     for (let x = 0; x < width; x += Number.parseInt(finalGap.toString(), 10)) {
-      for (let y = 0; y < height; y += Number.parseInt(finalGap.toString(), 10)) {
-        const color = colorsArray[Math.floor(Math.random() * colorsArray.length)];
+      for (
+        let y = 0;
+        y < height;
+        y += Number.parseInt(finalGap.toString(), 10)
+      ) {
+        const color =
+          colorsArray[Math.floor(Math.random() * colorsArray.length)];
 
         const dx = x - width / 2;
         const dy = y - height / 2;
@@ -201,14 +235,27 @@ export default function PixelCard({variant = "default", gap, speed, colors, noFo
         if (!ctx) {
           return;
         }
-        pxs.push(new Pixel(canvasRef.current, ctx, x, y, color, getEffectiveSpeed(finalSpeed, reducedMotion), delay));
+        pxs.push(
+          new Pixel(
+            canvasRef.current,
+            ctx,
+            x,
+            y,
+            color,
+            getEffectiveSpeed(finalSpeed, reducedMotion),
+            delay,
+          ),
+        );
       }
     }
     pixelsRef.current = pxs;
   };
 
   // Define a type for callable methods of Pixel
-  type PixelMethod = Extract<keyof Pixel, "appear" | "disappear" | "shimmer" | "draw">;
+  type PixelMethod = Extract<
+    keyof Pixel,
+    "appear" | "disappear" | "shimmer" | "draw"
+  >;
 
   const doAnimate = (fnName: PixelMethod) => {
     animationRef.current = requestAnimationFrame(() => doAnimate(fnName));
@@ -282,7 +329,7 @@ export default function PixelCard({variant = "default", gap, speed, colors, noFo
 
   return (
     <div
-      className={`relative isolate grid aspect-[4/5] h-[60px] w-[230px] select-none place-items-center overflow-hidden rounded-lg border border-background/20 transition-colors duration-200 ease-[cubic-bezier(0.5,1,0.89,1)] ${className}`}
+      className={`relative isolate grid aspect-4/5 h-[60px] w-[230px] select-none place-items-center overflow-hidden rounded-lg border border-background/20 transition-colors duration-200 ease-[cubic-bezier(0.5,1,0.89,1)] ${className}`}
       onBlur={finalNoFocus ? undefined : onBlur}
       onFocus={finalNoFocus ? undefined : onFocus}
       onMouseEnter={onMouseEnter}
@@ -290,10 +337,7 @@ export default function PixelCard({variant = "default", gap, speed, colors, noFo
       ref={containerRef}
       tabIndex={finalNoFocus ? -1 : 0}
     >
-      <canvas
-        className="block h-full w-full"
-        ref={canvasRef}
-      />
+      <canvas className="block h-full w-full" ref={canvasRef} />
       {children}
     </div>
   );

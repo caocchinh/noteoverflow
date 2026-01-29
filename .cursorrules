@@ -1,4 +1,3 @@
-
 When asked to review code or before finalizing changes, verify compliance with the following rules:
 
 # React Strict Guidelines (v19+)
@@ -35,6 +34,50 @@ When asked to review code or before finalizing changes, verify compliance with t
 - **Context**: Use `<Context>` provider directly. Do NOT use `<Context.Provider>`.
 - **use API**: Use `use(Promise)` or `use(Context)` in render.
 - **Form Actions**: Prefer `useActionState` (or `useFormState` if older) regarding form submissions.
+
+## Component & Hook Purity (React 19.2)
+
+> Pure functions only perform a calculation and nothing more. This makes code easier to understand, debug, and allows React to automatically optimize components and Hooks correctly.
+
+### Idempotency
+
+- **Consistent Output**: Components MUST always return the same output given the same inputs (props, state, context).
+- **No Non-Idempotent Calls in Render**: Do NOT call `new Date()`, `Math.random()`, or other non-idempotent functions during render.
+  - [Bad] `const time = new Date();` in render
+  - [Good] Use `useState(() => new Date())` + `useEffect` with `setInterval` to sync external time.
+
+### Side Effects in Render
+
+- **No Side Effects**: Rendering MUST be pure. Side effects belong in event handlers or Effects.
+- **No DOM Mutation**: Do NOT modify `document.title` or other DOM properties directly in render.
+  - [Good] Synchronize with `useEffect` or use Next.js `<Head>` / metadata API.
+
+### Mutation Rules
+
+- **Local Mutation OK**: Mutating locally-created values during render is fine (e.g., `items.push()` on a local array).
+- **No External Mutation**: Do NOT mutate values created outside the component.
+  - [Bad] `const items = [];` outside component, then `items.push()` inside render.
+- **Lazy Init OK**: `SuperCalculator.initializeIfNotReady()` is acceptable if it doesn't affect other components.
+
+### Props & State Immutability
+
+- **Never Mutate Props**: Do NOT modify `item.url = ...`. Make a copy: `const url = new Url(item.url, base);`
+- **Never Mutate State Directly**: Use the setter function from `useState`, not direct assignment.
+  - [Bad] `count = count + 1;`
+  - [Good] `setCount(count + 1);`
+
+### Hook Arguments & Return Values
+
+- **Immutable Hook Args**: Do NOT mutate values passed to hooks. Make copies if modification needed.
+  - [Bad] `icon.className = computeStyle(icon, theme);`
+  - [Good] `const newIcon = { ...icon }; newIcon.className = ...;`
+- **Immutable Hook Returns**: Do NOT mutate values returned from hooks (they may be memoized).
+
+### JSX Value Immutability
+
+- **No Mutation After JSX Use**: Once a value is used in JSX, do NOT mutate it.
+  - [Bad] `const header = <Header styles={styles} />; styles.size = "small";`
+  - [Good] Create separate objects for each use: `headerStyles` and `footerStyles`.
 
 # Next.js Guidelines (App Router)
 

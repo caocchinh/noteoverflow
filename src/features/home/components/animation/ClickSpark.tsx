@@ -86,7 +86,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
           return t * (2 - t);
       }
     },
-    [easing]
+    [easing],
   );
 
   useEffect(() => {
@@ -168,9 +168,9 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
   };
 
   return (
-    <div className="relative h-full w-full z-[1090]" onClick={handleClick}>
+    <div className="relative h-full w-full z-1090" onClick={handleClick}>
       <canvas
-        className="pointer-events-none absolute inset-0 z-[1090]"
+        className="pointer-events-none absolute inset-0 z-1090"
         ref={canvasRef}
       />
       {children}

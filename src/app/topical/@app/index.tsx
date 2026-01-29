@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffectEvent, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -233,6 +233,9 @@ export default TopicalClient;
 
 const CopyrightAnnouncementDialog = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
+  const onShowCopyrightAnnouncement = useEffectEvent(() => {
+    setIsOpen(true);
+  });
 
   useEffect(() => {
     const hasSeenCopyrightAnnouncement = localStorage.getItem(
@@ -240,7 +243,7 @@ const CopyrightAnnouncementDialog = memo(() => {
     );
     if (!hasSeenCopyrightAnnouncement) {
       // Show immediately when user first visits
-      setIsOpen(true);
+      onShowCopyrightAnnouncement();
     }
   }, []);
 

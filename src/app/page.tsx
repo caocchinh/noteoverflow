@@ -120,6 +120,14 @@ const glowAnimation = {
   },
 };
 
+// Pre-generate random star positions at module level to avoid impure function calls during render
+const starPositions = Array.from({ length: 20 }, () => ({
+  top: Math.random() * 100,
+  left: Math.random() * 100,
+  duration: 3 + Math.random() * 2,
+  delay: Math.random() * 2,
+}));
+
 export default function HomePage() {
   const [isTrigger, setIsTrigger] = useState(false);
   const alreadyScrambled = useRef(false);
@@ -278,23 +286,23 @@ export default function HomePage() {
             ></motion.div>
 
             <div className="absolute inset-0 opacity-20">
-              {Array.from({ length: 20 }).map((_, i) => (
+              {starPositions.map((star, i) => (
                 <motion.div
                   key={i}
                   className="absolute h-1 w-1 rounded-full bg-white"
                   style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
+                    top: `${star.top}%`,
+                    left: `${star.left}%`,
                   }}
                   animate={{
                     opacity: [0.2, 0.8, 0.2],
                     scale: [1, 1.5, 1],
                   }}
                   transition={{
-                    duration: 3 + Math.random() * 2,
+                    duration: star.duration,
                     repeat: Infinity,
                     ease: "easeInOut",
-                    delay: Math.random() * 2,
+                    delay: star.delay,
                   }}
                 />
               ))}

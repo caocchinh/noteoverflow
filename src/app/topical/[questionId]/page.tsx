@@ -10,12 +10,16 @@ import { SelectedQuestion } from "@/features/topical/types/models";
 type Params = Promise<{ questionId: string }>;
 
 const QuestionViewPage = async (props: { params: Params }) => {
+  let result: SelectedQuestion | null = null;
+  let error: "not_found" | "fetch_error" | null = null;
+
   try {
     const params = await props.params;
     const questionId = params.questionId;
     const { env } = await getCloudflareContext({ async: true });
     const response = await env.TOPICAL_CACHE.get(JSON.stringify(questionId));
-    let result = response ? (JSON.parse(response) as SelectedQuestion) : null;
+    result = response ? (JSON.parse(response) as SelectedQuestion) : null;
+
     if (result === null) {
       const db = await getDbAsync();
       const question = await db.query.question.findFirst({
@@ -23,47 +27,55 @@ const QuestionViewPage = async (props: { params: Params }) => {
       });
 
       if (!question) {
-        return (
-          <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
-            The question that you are looking for do not exist!
-          </div>
+        error = "not_found";
+      } else {
+        const data: SelectedQuestion = {
+          ...question,
+          questionImages: JSON.parse(question.questionImages ?? "[]"),
+          answers: JSON.parse(question.answers ?? "[]"),
+          topics: JSON.parse(question.topics ?? "[]"),
+          answersImagesDimensions: JSON.parse(
+            question.answersImagesDimensions ?? "[]",
+          ),
+          questionImagesDimensions: JSON.parse(
+            question.questionImagesDimensions ?? "[]",
+          ),
+        };
+        await env.TOPICAL_CACHE.put(
+          JSON.stringify(decodeURIComponent(questionId)),
+          JSON.stringify(data),
         );
+        result = data;
       }
-
-      const data: SelectedQuestion = {
-        ...question,
-        questionImages: JSON.parse(question.questionImages ?? "[]"),
-        answers: JSON.parse(question.answers ?? "[]"),
-        topics: JSON.parse(question.topics ?? "[]"),
-        answersImagesDimensions: JSON.parse(
-          question.answersImagesDimensions ?? "[]",
-        ),
-        questionImagesDimensions: JSON.parse(
-          question.questionImagesDimensions ?? "[]",
-        ),
-      };
-      await env.TOPICAL_CACHE.put(
-        JSON.stringify(decodeURIComponent(questionId)),
-        JSON.stringify(data),
-      );
-      result = data;
     }
-
-    return (
-      <Suspense fallback={<Loader />}>
-        <QuestionView
-          data={result}
-          BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
-        />
-      </Suspense>
-    );
   } catch {
+    error = "fetch_error";
+  }
+
+  if (error === "not_found") {
+    return (
+      <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+        The question that you are looking for do not exist!
+      </div>
+    );
+  }
+
+  if (error === "fetch_error" || !result) {
     return (
       <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
         Something went wrong while fetching resources, please refresh the page!
       </div>
     );
   }
+
+  return (
+    <Suspense fallback={<Loader />}>
+      <QuestionView
+        data={result}
+        BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
+      />
+    </Suspense>
+  );
 };
 
 export default QuestionViewPage;

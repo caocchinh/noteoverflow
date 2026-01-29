@@ -369,10 +369,6 @@ export const useInspectNavigation = ({
     isAnnotationGuardDialogOpen,
     pendingQuestionId,
     pendingTab,
-    scrollToQuestion,
-    setCurrentQuestionId,
-    willScrollToQuestionAfterGuard,
-    setCurrentTab,
   ]);
 
   return {

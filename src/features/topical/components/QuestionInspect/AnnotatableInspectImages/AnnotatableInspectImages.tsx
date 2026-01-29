@@ -10,6 +10,7 @@ import {
   forwardRef,
   useImperativeHandle,
   RefObject,
+  useEffectEvent,
 } from "react";
 import {
   Loader2,
@@ -151,9 +152,13 @@ const AnnotatableInspectImagesComponent = memo(
       const [key, setKey] = useState(0);
       const [isMounted, setIsMounted] = useState(false);
       const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
+      const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+      const [normalContainer, setNormalContainer] =
+        useState<HTMLDivElement | null>(null);
+      const [fullscreenContainer, setFullscreenContainer] =
+        useState<HTMLDivElement | null>(null);
 
       const latestXfdfRef = useRef(currentXfdf);
-      latestXfdfRef.current = currentXfdf;
       const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
       const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
       const pdfViewerRootRef = useRef<Root | null>(null);
@@ -183,6 +188,10 @@ const AnnotatableInspectImagesComponent = memo(
         const sanitizedPaperCode = (paperCode || "").replace("/", "_");
         return `NoteOverflow_${sanitizedPaperCode}_Q${questionNumber || ""}`;
       }, [paperCode, questionNumber]);
+
+      useEffect(() => {
+        latestXfdfRef.current = currentXfdf;
+      }, [currentXfdf]);
 
       useEffect(() => {
         isAuthenticatedRef.current = isAuthenticated;
@@ -240,6 +249,7 @@ const AnnotatableInspectImagesComponent = memo(
           if (isAuthenticatedRef.current) {
             isHavingUnsafeChangesRef.current[typeOfView] = true;
             isHavingUnsafeChangesRef.current.questionId = question?.id || "";
+            setHasUnsavedChanges(true);
           }
           setCurrentXfdf(xfdf);
         },
@@ -269,6 +279,7 @@ const AnnotatableInspectImagesComponent = memo(
               onSuccess: () => {
                 if (latestXfdfRef.current === xfdfBeingSaved) {
                   isHavingUnsafeChangesRef.current[typeOfView] = false;
+                  setHasUnsavedChanges(false);
                 }
               },
             },
@@ -346,6 +357,10 @@ const AnnotatableInspectImagesComponent = memo(
         question,
       ]);
 
+      const onPdfViewerMount = useEffectEvent(() => {
+        setKey((prev) => prev + 1);
+      });
+
       useEffect(() => {
         if (
           !pdfBlob ||
@@ -372,7 +387,7 @@ const AnnotatableInspectImagesComponent = memo(
           },
           onAnnotationsChanged: handleAnnotationsChanged,
         });
-        setKey((prev) => prev + 1);
+        onPdfViewerMount();
       }, [
         isEditMode,
         isMounted,
@@ -384,13 +399,17 @@ const AnnotatableInspectImagesComponent = memo(
         initialXfdf,
       ]);
 
-      useEffect(() => {
+      const onQuestionChange = useEffectEvent(() => {
         setIsFullscreen(false);
         setIsEditMode(false);
         setPdfBlob(null);
         setTimeout(() => {
           setIsMounted(true);
         }, 0);
+      });
+
+      useEffect(() => {
+        onQuestionChange();
         return () => {
           setTimeout(() => {
             setIsMounted(false);
@@ -465,9 +484,7 @@ const AnnotatableInspectImagesComponent = memo(
                   <SaveAnnotationsButton
                     onSave={handleSave}
                     isSaving={isSavingAnnotations}
-                    hasUnsavedChanges={
-                      isHavingUnsafeChangesRef.current[typeOfView]
-                    }
+                    hasUnsavedChanges={hasUnsavedChanges}
                     isDisabled={isSessionFetching || !isPdfViewerLoaded}
                     isUserNotAuthenticated={
                       !isAuthenticated && !isSessionFetching
@@ -503,7 +520,10 @@ const AnnotatableInspectImagesComponent = memo(
                 )}
               >
                 <NotFullScreenContainer
-                  normalContainerRef={normalContainerRef}
+                  onRefChange={(node) => {
+                    normalContainerRef.current = node;
+                    setNormalContainer(node);
+                  }}
                   pdfBlob={pdfBlob}
                   isPdfViewerLoaded={isPdfViewerLoaded}
                 />
@@ -523,9 +543,7 @@ const AnnotatableInspectImagesComponent = memo(
                         <SaveAnnotationsButton
                           onSave={handleSave}
                           isSaving={isSavingAnnotations}
-                          hasUnsavedChanges={
-                            isHavingUnsafeChangesRef.current[typeOfView]
-                          }
+                          hasUnsavedChanges={hasUnsavedChanges}
                           isUserNotAuthenticated={
                             !isAuthenticated && !isSessionFetching
                           }
@@ -559,7 +577,10 @@ const AnnotatableInspectImagesComponent = memo(
                       </div>
                     </div>
                     <div
-                      ref={fullscreenContainerRef}
+                      ref={(node) => {
+                        fullscreenContainerRef.current = node;
+                        setFullscreenContainer(node);
+                      }}
                       className="h-[calc(100dvh-30px)] w-full relative"
                     >
                       {!isPdfViewerLoaded && (
@@ -619,16 +640,14 @@ const AnnotatableInspectImagesComponent = memo(
               </div>
             </div>
           </div>
-          {fullscreenContainerRef.current &&
-            normalContainerRef.current &&
+          {fullscreenContainer &&
+            normalContainer &&
             createPortal(
               <PdfPortalContent
                 portalKey={key}
                 pdfViewerElementRef={pdfViewerElementRef}
               />,
-              isFullscreen
-                ? fullscreenContainerRef.current
-                : normalContainerRef.current,
+              isFullscreen ? fullscreenContainer : normalContainer,
             )}
         </>
       );
@@ -654,16 +673,16 @@ LoadingMessage.displayName = "LoadingMessage";
 
 const NotFullScreenContainer = memo(
   ({
-    normalContainerRef,
+    onRefChange,
     pdfBlob,
     isPdfViewerLoaded,
   }: {
-    normalContainerRef: RefObject<HTMLDivElement | null>;
+    onRefChange: (node: HTMLDivElement | null) => void;
     pdfBlob: Blob | null;
     isPdfViewerLoaded: boolean;
   }) => {
     return (
-      <div ref={normalContainerRef} className="w-full relative h-[67dvh]">
+      <div ref={onRefChange} className="w-full relative h-[67dvh]">
         {!isPdfViewerLoaded && (
           <LoadingMessage
             message={pdfBlob ? "Initializing PDF viewer" : "Generating PDF"}
