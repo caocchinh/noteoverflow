@@ -1,16 +1,18 @@
-import { dirname } from "path";
+import { includeIgnoreFile } from "@eslint/compat";
 import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const gitignorePath = fileURLToPath(new URL("./.gitignore", import.meta.url));
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  includeIgnoreFile(gitignorePath),
+  // Additional ESLint-only ignores (not in .gitignore)
+  {
+    ignores: ["public/lib/**"],
+  },
+  ...nextCoreWebVitals,
+  ...nextTypescript,
 ];
 
 export default eslintConfig;
