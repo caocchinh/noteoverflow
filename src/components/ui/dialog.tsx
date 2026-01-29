@@ -12,11 +12,38 @@ import {
 } from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Activity } from "react";
 
 function Dialog({
+  open,
+  preserveState = true,
+  children,
   ...props
-}: React.ComponentProps<typeof DialogPrimitiveRoot>) {
-  return <DialogPrimitiveRoot data-slot="dialog" {...props} />;
+}: React.ComponentProps<typeof DialogPrimitiveRoot> & {
+  /**
+   * When true, uses React 19.2's Activity component to preserve component state
+   * when the dialog is closed. This improves performance for heavy dialogs by:
+   * - Preserving React state and DOM structure
+   * - Cleaning up effects when hidden
+   * - Avoiding expensive remounting on each open
+   *
+   * @default true
+   */
+  preserveState?: boolean;
+}) {
+  const activityMode = open ? "visible" : "hidden";
+
+  const dialogRoot = (
+    <DialogPrimitiveRoot data-slot="dialog" open={open} {...props}>
+      {children}
+    </DialogPrimitiveRoot>
+  );
+
+  return preserveState ? (
+    <Activity mode={activityMode}>{dialogRoot}</Activity>
+  ) : (
+    dialogRoot
+  );
 }
 
 function DialogTrigger({
@@ -45,7 +72,7 @@ function DialogOverlay({
     <DialogPrimitiveOverlay
       className={cn(
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-100004 bg-black/50 data-[state=closed]:animate-out data-[state=open]:animate-in",
-        className
+        className,
       )}
       data-slot="dialog-overlay"
       {...props}
@@ -74,7 +101,7 @@ function DialogContent({
       <DialogPrimitiveContent
         className={cn(
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-100005 grid w-[95%] max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 data-[state=closed]:animate-out data-[state=open]:animate-in sm:max-w-lg",
-          className
+          className,
         )}
         data-slot="dialog-content"
         {...props}
@@ -110,7 +137,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
+        className,
       )}
       data-slot="dialog-footer"
       {...props}

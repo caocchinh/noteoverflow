@@ -13,8 +13,7 @@ const convert = new Convert({
 });
 
 try {
-  // Run tsc with --pretty to get colored output
-  const output = execSync("tsc --noEmit --pretty", {
+  execSync("tsc --noEmit ", {
     encoding: "utf-8",
     stdio: ["pipe", "pipe", "pipe"],
   });

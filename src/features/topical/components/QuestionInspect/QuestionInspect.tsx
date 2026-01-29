@@ -49,7 +49,7 @@ const QuestionInspect = memo(
         sortParameters,
         setSortParameters,
       }: QuestionInspectProps,
-      ref
+      ref,
     ) => {
       const pathname = usePathname();
       const pathNameRef = useRef(pathname);
@@ -101,7 +101,7 @@ const QuestionInspect = memo(
       const currentQuestionIndex = useMemo(() => {
         return (
           partitionedTopicalData?.[currentTabThatContainsQuestion]?.findIndex(
-            (question) => question.id === currentQuestionId
+            (question) => question.id === currentQuestionId,
           ) ?? 0
         );
       }, [
@@ -126,19 +126,19 @@ const QuestionInspect = memo(
           isInspectOpen,
           setIsInspectOpen,
         }),
-        [setIsInspectOpen, isInspectOpen]
+        [setIsInspectOpen, isInspectOpen],
       );
 
       const calculateTabThatQuestionResidesIn = useCallback(
         (questionId: string) => {
           const tab = questionId
-            ? partitionedTopicalData?.findIndex((partition) =>
-                partition.some((question) => question.id === questionId)
-              ) ?? 0
+            ? (partitionedTopicalData?.findIndex((partition) =>
+                partition.some((question) => question.id === questionId),
+              ) ?? 0)
             : 0;
           return tab;
         },
-        [partitionedTopicalData]
+        [partitionedTopicalData],
       );
 
       useEffect(() => {
@@ -146,7 +146,7 @@ const QuestionInspect = memo(
           return;
         }
         setCurrentTabThatContainsQuestion(
-          calculateTabThatQuestionResidesIn(currentQuestionId)
+          calculateTabThatQuestionResidesIn(currentQuestionId),
         );
       }, [currentQuestionId, calculateTabThatQuestionResidesIn]);
 
@@ -162,7 +162,7 @@ const QuestionInspect = memo(
         (e: React.KeyboardEvent<HTMLDivElement>) => {
           questionInspectMainContentRef.current?.handleKeyboardNavigation(e);
         },
-        []
+        [],
       );
 
       const handleKeyUp = useCallback(() => {
@@ -185,7 +185,7 @@ const QuestionInspect = memo(
             return;
           }
         },
-        [isCalculatorOpen, isInspectOpen.isOpen]
+        [isCalculatorOpen, isInspectOpen.isOpen],
       );
 
       useEffect(() => {
@@ -253,7 +253,7 @@ const QuestionInspect = memo(
           isInspectOpen.questionId,
           partitionedTopicalData,
           isAnnotationGuardDialogOpen,
-        ]
+        ],
       );
 
       useEffect(() => {
@@ -362,8 +362,8 @@ const QuestionInspect = memo(
           </Dialog>
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 QuestionInspect.displayName = "QuestionInspect";
