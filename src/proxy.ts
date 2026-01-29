@@ -14,7 +14,7 @@ const MAINTENANCE_PROTECTED_ROUTES = [
   "/disclaimer",
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if this path should be protected and redirect to maintenance
