@@ -7,7 +7,15 @@ import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import { useEffect, useRef, useState, memo } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+  memo,
+  useCallback,
+} from "react";
 import Masonry from "./Masonry";
 import ExportBar from "./ExportMode/ExportBar";
 import { cn } from "@/lib/utils";
@@ -35,11 +43,9 @@ const SecondaryMainContent = ({
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
-  const [fullPartitionedData, setFullPartitionedData] = useState<
-    SelectedQuestion[][] | undefined
-  >(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
+  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] =
+    useState(1);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: "descending",
   });
@@ -51,42 +57,60 @@ const SecondaryMainContent = ({
     string[]
   >([]);
   const questionsForExportRef = useRef(questionsForExport);
-  questionsForExportRef.current = questionsForExport;
+
   const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
 
-  // Process topical data into chunks
+  // Reset state when data changes
+  const onDataChange = useEffectEvent(() => {
+    setCurrentChunkIndex(0);
+    setInfiniteScrollLoadedChunks(1);
+  });
+
+  useEffect(() => {
+    questionsForExportRef.current = questionsForExport;
+  }, [questionsForExport]);
+
+  // Derive partitioned data using useMemo (not useState + useEffect)
+  const fullPartitionedData = useMemo(() => {
+    if (!topicalData) return undefined;
+
+    const chunkSize =
+      uiPreferences.layoutStyle === "pagination"
+        ? uiPreferences.numberOfQuestionsPerPage
+        : 20; // INFINITE_SCROLL_CHUNK_SIZE equivalent
+
+    const sortedData = topicalData
+      .toSorted((a: SortableTopicalItem, b: SortableTopicalItem) => {
+        const aIndex = new Date(a.updatedAt || 0).getTime();
+        const bIndex = new Date(b.updatedAt || 0).getTime();
+        return sortParameters.sortBy === "descending"
+          ? bIndex - aIndex
+          : aIndex - bIndex;
+      })
+      .map((item) => item.question);
+
+    return sortedData.reduce(
+      (acc: SelectedQuestion[][], item: SelectedQuestion, index: number) => {
+        const chunkIndex = Math.floor(index / chunkSize);
+        if (!acc[chunkIndex]) {
+          acc[chunkIndex] = [];
+        }
+        acc[chunkIndex].push(item);
+        return acc;
+      },
+      [],
+    );
+  }, [
+    topicalData,
+    uiPreferences.layoutStyle,
+    uiPreferences.numberOfQuestionsPerPage,
+    sortParameters.sortBy,
+  ]);
+
+  // Handle side effects when data changes (reset pagination, scroll to top)
   useEffect(() => {
     if (topicalData) {
-      const chunkSize =
-        uiPreferences.layoutStyle === "pagination"
-          ? uiPreferences.numberOfQuestionsPerPage
-          : 20; // INFINITE_SCROLL_CHUNK_SIZE equivalent
-
-      const sortedData = topicalData
-        .toSorted((a: SortableTopicalItem, b: SortableTopicalItem) => {
-          const aIndex = new Date(a.updatedAt || 0).getTime();
-          const bIndex = new Date(b.updatedAt || 0).getTime();
-          return sortParameters.sortBy === "descending"
-            ? bIndex - aIndex
-            : aIndex - bIndex;
-        })
-        .map((item) => item.question);
-
-      const chunkedData = sortedData.reduce(
-        (acc: SelectedQuestion[][], item: SelectedQuestion, index: number) => {
-          const chunkIndex = Math.floor(index / chunkSize);
-          if (!acc[chunkIndex]) {
-            acc[chunkIndex] = [];
-          }
-          acc[chunkIndex].push(item);
-          return acc;
-        },
-        [],
-      );
-
-      setFullPartitionedData(chunkedData);
-      setDisplayedData(chunkedData[0] ?? []);
-      setCurrentChunkIndex(0);
+      onDataChange();
       scrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
@@ -99,33 +123,53 @@ const SecondaryMainContent = ({
     sortParameters.sortBy,
   ]);
 
-  const handleQuestionClick = (questionId: string) => {
-    if (isExportModeEnabled) {
-      setQuestionsForExport((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(questionId)) {
-          newSet.delete(questionId);
-        } else {
-          newSet.add(questionId);
-        }
-        return newSet;
-      });
-      setQuestionsForExportArray((prev) => {
-        if (prev.includes(questionId)) {
-          return prev.filter((id) => id !== questionId);
-        } else {
-          return [...prev, questionId];
-        }
-      });
-      return;
-    }
-    questionInspectRef.current?.setIsInspectOpen({
-      isOpen: true,
-      questionId,
-    });
-  };
+  // Derive displayed data based on layout style
+  const displayedData = useMemo(() => {
+    if (!fullPartitionedData) return [];
 
-  useEffect(() => {
+    if (uiPreferences.layoutStyle === "pagination") {
+      return fullPartitionedData[currentChunkIndex] ?? [];
+    } else {
+      return fullPartitionedData.slice(0, infiniteScrollLoadedChunks).flat();
+    }
+  }, [
+    fullPartitionedData,
+    currentChunkIndex,
+    infiniteScrollLoadedChunks,
+    uiPreferences.layoutStyle,
+  ]);
+
+  const handleQuestionClick = useCallback(
+    (questionId: string) => {
+      if (isExportModeEnabled) {
+        setQuestionsForExport((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(questionId)) {
+            newSet.delete(questionId);
+          } else {
+            newSet.add(questionId);
+          }
+          return newSet;
+        });
+        setQuestionsForExportArray((prev) => {
+          if (prev.includes(questionId)) {
+            return prev.filter((id) => id !== questionId);
+          } else {
+            return [...prev, questionId];
+          }
+        });
+        return;
+      }
+      questionInspectRef.current?.setIsInspectOpen({
+        isOpen: true,
+        questionId,
+      });
+    },
+    [isExportModeEnabled, questionInspectRef],
+  );
+
+  // Sync export selections when topicalData changes (cleanup stale selections)
+  const syncExportSelections = useEffectEvent(() => {
     if (topicalData?.length === 0) {
       setIsExportModeEnabled(false);
       setQuestionsForExport(new Set());
@@ -141,6 +185,10 @@ const SecondaryMainContent = ({
         return next.length === prev.length ? prev : next;
       });
     }
+  });
+
+  useEffect(() => {
+    syncExportSelections();
   }, [topicalData]);
 
   return (
@@ -152,7 +200,6 @@ const SecondaryMainContent = ({
           fullPartitionedData,
           currentChunkIndex,
           setCurrentChunkIndex,
-          setDisplayedData,
           scrollAreaRef,
           isExportModeEnabled,
         })}
@@ -227,10 +274,7 @@ const SecondaryMainContent = ({
                 next={() => {
                   if (fullPartitionedData) {
                     setCurrentChunkIndex(currentChunkIndex + 1);
-                    setDisplayedData([
-                      ...displayedData,
-                      ...(fullPartitionedData[currentChunkIndex + 1] ?? []),
-                    ]);
+                    setInfiniteScrollLoadedChunks((prev) => prev + 1);
                   }
                 }}
                 hasMore={

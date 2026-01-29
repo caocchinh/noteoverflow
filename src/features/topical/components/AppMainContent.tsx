@@ -1,5 +1,13 @@
 "use client";
-import React, { memo, useCallback, useMemo } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -8,7 +16,6 @@ import {
   OctagonAlert,
   RefreshCcw,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
@@ -103,10 +110,8 @@ const AppMainContent = ({
     setFinishedQuestionsFilteredPartitionedData,
   ] = useState<SelectedQuestion[][] | undefined>(undefined);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [
-    finishedQuestionsFilteredDisplayData,
-    setFinishedQuestionsFilteredDisplayData,
-  ] = useState<SelectedQuestion[]>([]);
+  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] =
+    useState(1);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
@@ -253,17 +258,35 @@ const AppMainContent = ({
   const handleInfiniteScrollNext = useCallback(() => {
     if (finishedQuestionsFilteredPartitionedData) {
       setCurrentChunkIndex(currentChunkIndex + 1);
-      setFinishedQuestionsFilteredDisplayData([
-        ...finishedQuestionsFilteredDisplayData,
-        ...(finishedQuestionsFilteredPartitionedData[currentChunkIndex + 1] ??
-          []),
-      ]);
+      setInfiniteScrollLoadedChunks((prev) => prev + 1);
+    }
+  }, [finishedQuestionsFilteredPartitionedData, currentChunkIndex]);
+
+  // Derive displayed data based on layout style
+  const finishedQuestionsFilteredDisplayData = useMemo(() => {
+    if (!finishedQuestionsFilteredPartitionedData) return [];
+
+    if (uiPreferences.layoutStyle === "pagination") {
+      // For pagination, show only current chunk
+      return finishedQuestionsFilteredPartitionedData[currentChunkIndex] ?? [];
+    } else {
+      // For infinite scroll, show all chunks up to the loaded count
+      return finishedQuestionsFilteredPartitionedData
+        .slice(0, infiniteScrollLoadedChunks)
+        .flat();
     }
   }, [
     finishedQuestionsFilteredPartitionedData,
     currentChunkIndex,
-    finishedQuestionsFilteredDisplayData,
+    infiniteScrollLoadedChunks,
+    uiPreferences.layoutStyle,
   ]);
+
+  // Reset state when data changes
+  const onDataChange = useEffectEvent(() => {
+    setCurrentChunkIndex(0);
+    setInfiniteScrollLoadedChunks(1);
+  });
 
   useEffect(() => {
     if (chunkedData && filteredProcessedData) {
@@ -271,10 +294,7 @@ const AppMainContent = ({
       setFinishedQuestionsFilteredPartitionedData(
         filteredProcessedData.chunkData,
       );
-      setFinishedQuestionsFilteredDisplayData(
-        filteredProcessedData.chunkData[0] ?? [],
-      );
-      setCurrentChunkIndex(0);
+      onDataChange();
       mainContentScrollAreaRef.current?.scrollTo({
         top: 0,
         behavior: "instant",
@@ -397,9 +417,6 @@ const AppMainContent = ({
           scrollAreaRef={mainContentScrollAreaRef}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}
-          setFinishedQuestionsFilteredDisplayData={
-            setFinishedQuestionsFilteredDisplayData
-          }
           sortParameters={sortParameters}
           setSortParameters={setSortParameters}
           showFinishedQuestion={showFinishedQuestion}

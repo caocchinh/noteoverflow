@@ -26,7 +26,14 @@ import {
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { useMutationState } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { JumpToTabButton } from "../JumpToTabButton";
 import {
@@ -40,13 +47,12 @@ import Sort from "../Sort";
 import Masonry from "../Masonry";
 import { usePathname } from "next/navigation";
 import { FinishedTrackerProps } from "../../types/components";
-import { SelectedQuestion, SortParameters } from "../../types/models";
+import { SortParameters } from "../../types/models";
 
 export const FinishedTracker = memo(
   ({ allQuestions, navigateToQuestion }: FinishedTrackerProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-    const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
     const [sortParameters, setSortParameters] = useState<SortParameters>({
       sortBy: DEFAULT_SORT_OPTIONS,
     });
@@ -114,19 +120,24 @@ export const FinishedTracker = memo(
       );
     }, [finishedQuestions]);
 
-    // Update displayed data when fullPartitionedData changes
+    // Reset chunk index when data changes
+    const onDataChange = useEffectEvent(() => {
+      setCurrentChunkIndex(0);
+    });
+
     useEffect(() => {
-      if (fullPartitionedData.length > 0) {
-        setDisplayedData(fullPartitionedData[0] ?? 0);
-        setCurrentChunkIndex(0);
-        if (scrollAreaRef?.current) {
-          scrollAreaRef.current.scrollTo({
-            top: 0,
-            behavior: "instant",
-          });
-        }
+      onDataChange();
+      if (scrollAreaRef?.current) {
+        scrollAreaRef.current.scrollTo({
+          top: 0,
+          behavior: "instant",
+        });
       }
-    }, [fullPartitionedData, scrollAreaRef]);
+    }, [fullPartitionedData]);
+
+    const displayedData = useMemo(() => {
+      return fullPartitionedData?.[currentChunkIndex] ?? [];
+    }, [fullPartitionedData, currentChunkIndex]);
 
     return (
       <>
@@ -268,16 +279,12 @@ export const FinishedTracker = memo(
                         <FirstPageButton
                           currentChunkIndex={currentChunkIndex}
                           setCurrentChunkIndex={setCurrentChunkIndex}
-                          fullPartitionedData={fullPartitionedData}
-                          setDisplayedData={setDisplayedData}
                           scrollUpWhenPageChange={true}
                           scrollAreaRef={scrollAreaRef}
                         />
                         <PreviousPageButton
                           currentChunkIndex={currentChunkIndex}
                           setCurrentChunkIndex={setCurrentChunkIndex}
-                          fullPartitionedData={fullPartitionedData}
-                          setDisplayedData={setDisplayedData}
                           scrollUpWhenPageChange={true}
                           scrollAreaRef={scrollAreaRef}
                         />
@@ -288,7 +295,6 @@ export const FinishedTracker = memo(
                           prefix="page"
                           onTabChangeCallback={({ tab }) => {
                             setCurrentChunkIndex(tab);
-                            setDisplayedData(fullPartitionedData[tab]);
                             if (scrollAreaRef?.current) {
                               scrollAreaRef.current.scrollTo({
                                 top: 0,
@@ -300,16 +306,14 @@ export const FinishedTracker = memo(
                         <NextPageButton
                           currentChunkIndex={currentChunkIndex}
                           setCurrentChunkIndex={setCurrentChunkIndex}
-                          fullPartitionedData={fullPartitionedData}
-                          setDisplayedData={setDisplayedData}
+                          totalPages={fullPartitionedData.length}
                           scrollUpWhenPageChange={true}
                           scrollAreaRef={scrollAreaRef}
                         />
                         <LastPageButton
                           currentChunkIndex={currentChunkIndex}
                           setCurrentChunkIndex={setCurrentChunkIndex}
-                          fullPartitionedData={fullPartitionedData}
-                          setDisplayedData={setDisplayedData}
+                          totalPages={fullPartitionedData.length}
                           scrollUpWhenPageChange={true}
                           scrollAreaRef={scrollAreaRef}
                         />

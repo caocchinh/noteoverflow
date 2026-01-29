@@ -1,33 +1,11 @@
+import { UseInspectNavigationProps } from "@/features/topical/types/hooks";
 import {
   useState,
   useCallback,
   useMemo,
   useEffect,
-  Dispatch,
-  SetStateAction,
+  useEffectEvent,
 } from "react";
-import { SelectedQuestion } from "../../../types/models";
-import { IsHavingUnsafeChangesRef } from "../../../types/components";
-import { Virtualizer } from "@tanstack/react-virtual";
-
-interface UseInspectNavigationProps {
-  partitionedTopicalData: SelectedQuestion[][] | undefined;
-  currentTabThatContainsQuestion: number;
-  currentQuestionIndex: number;
-  currentQuestionId: string | undefined;
-  setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
-  searchInput: string;
-  searchResults: SelectedQuestion[];
-  isHavingUnsafeChangesRef: IsHavingUnsafeChangesRef;
-  setIsAnnotationGuardDialogOpen: Dispatch<SetStateAction<boolean>>;
-  isAnnotationGuardDialogOpen: boolean;
-  scrollToQuestion: (params: { questionId: string; tab: number }) => void;
-  searchVirtualizer: Virtualizer<HTMLDivElement, Element>;
-  listScrollAreaRef: React.RefObject<HTMLDivElement | null>;
-  isVirtualizationReady: boolean;
-  calculateTabThatQuestionResidesIn: (questionId: string) => number;
-  setCurrentTab: Dispatch<SetStateAction<number>>;
-}
 
 export const useInspectNavigation = ({
   partitionedTopicalData,
@@ -352,6 +330,28 @@ export const useInspectNavigation = ({
     currentQuestionId,
   ]);
 
+  const onGuardComplete = useEffectEvent(
+    ({
+      _pendingQuestionId,
+      _pendingTab,
+    }: {
+      _pendingQuestionId: string;
+      _pendingTab: number;
+    }) => {
+      if (willScrollToQuestionAfterGuard) {
+        scrollToQuestion({
+          questionId: _pendingQuestionId,
+          tab: _pendingTab,
+        });
+      }
+      setCurrentQuestionId(_pendingQuestionId);
+      setCurrentTab(_pendingTab);
+      setWillScrollToQuestionAfterGuard(false);
+      setPendingQuestionId(undefined);
+      setPendingTab(undefined);
+    },
+  );
+
   useEffect(() => {
     if (
       !isAnnotationGuardDialogOpen &&
@@ -359,17 +359,10 @@ export const useInspectNavigation = ({
       pendingQuestionId &&
       pendingTab !== undefined
     ) {
-      setCurrentQuestionId(pendingQuestionId);
-      setCurrentTab(pendingTab);
-      if (willScrollToQuestionAfterGuard) {
-        scrollToQuestion({
-          questionId: pendingQuestionId,
-          tab: pendingTab,
-        });
-      }
-      setWillScrollToQuestionAfterGuard(false);
-      setPendingQuestionId(undefined);
-      setPendingTab(undefined);
+      onGuardComplete({
+        _pendingQuestionId: pendingQuestionId,
+        _pendingTab: pendingTab,
+      });
     }
   }, [
     currentQuestionId,

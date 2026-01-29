@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useEffectEvent } from "react";
 import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { BookmarkButton } from "@/features/topical/components/BookmarkButton/BookmarkButton";
 import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspect/QuestionInspectFinishedCheckbox";
@@ -15,7 +15,6 @@ import AnnotatableImagesUpdater from "@/features/topical/components/QuestionInsp
 import BothViews from "@/features/topical/components/QuestionInspect/BothViews";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import QuestionAnnotationGuardDialog from "@/features/topical/components/QuestionInspect/QuestionAnnotationGuardDialog";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AnnotatableInspectImagesHandle,
@@ -35,19 +34,37 @@ export const QuestionView = ({
   >("question");
   const { isSessionPending } = useAuth();
   const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
-  const router = useRouter();
 
-  const questionViewContainer = useRef<HTMLDivElement | null>(null);
-  const answerViewContainer = useRef<HTMLDivElement | null>(null);
-  const bothViewsQuestionContainer = useRef<HTMLDivElement | null>(null);
-  const bothViewsAnswerContainer = useRef<HTMLDivElement | null>(null);
+  const [questionViewContainer, setQuestionViewContainer] =
+    useState<HTMLDivElement | null>(null);
+  const [answerViewContainer, setAnswerViewContainer] =
+    useState<HTMLDivElement | null>(null);
+  const [bothViewsQuestionContainer, setBothViewsQuestionContainer] =
+    useState<HTMLDivElement | null>(null);
+  const [bothViewsAnswerContainer, setBothViewsAnswerContainer] =
+    useState<HTMLDivElement | null>(null);
   const dummyLinkRef = useRef<HTMLAnchorElement | null>(null);
 
-  const annotatableQuestionInspectImagesElementRef =
-    useRef<HTMLDivElement | null>(null);
+  const [annotatableQuestionInspectImagesElement] =
+    useState<HTMLDivElement | null>(() => {
+      if (typeof document !== "undefined") {
+        const el = document.createElement("div");
+        el.className = "w-full h-full";
+        return el;
+      }
+      return null;
+    });
   const annotatableQuestionInspectImagesRootRef = useRef<Root | null>(null);
-  const annotatableAnswerInspectImagesElementRef =
-    useRef<HTMLDivElement | null>(null);
+
+  const [annotatableAnswerInspectImagesElement] =
+    useState<HTMLDivElement | null>(() => {
+      if (typeof document !== "undefined") {
+        const el = document.createElement("div");
+        el.className = "w-full h-full";
+        return el;
+      }
+      return null;
+    });
   const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
 
   const annotatableQuestionInspectImagesRootElementRef =
@@ -72,27 +89,6 @@ export const QuestionView = ({
   const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Instantly initalizes the element since there's no constrain (act like normal React rerender cycle)
-  if (
-    !annotatableQuestionInspectImagesElementRef.current &&
-    typeof document !== "undefined"
-  ) {
-    annotatableQuestionInspectImagesElementRef.current =
-      document.createElement("div");
-    annotatableQuestionInspectImagesElementRef.current.className =
-      "w-full h-full";
-  }
-
-  if (
-    !annotatableAnswerInspectImagesElementRef.current &&
-    typeof document !== "undefined"
-  ) {
-    annotatableAnswerInspectImagesElementRef.current =
-      document.createElement("div");
-    annotatableAnswerInspectImagesElementRef.current.className =
-      "w-full h-full";
-  }
-
   // Cleanup roots only when component unmounts
   useEffect(() => {
     setTimeout(() => {
@@ -105,21 +101,22 @@ export const QuestionView = ({
           annotatableQuestionInspectImagesRootRef.current.unmount();
           annotatableQuestionInspectImagesRootRef.current = null;
         }
-        if (annotatableQuestionInspectImagesElementRef.current) {
-          annotatableQuestionInspectImagesElementRef.current.remove();
-          annotatableQuestionInspectImagesElementRef.current = null;
+        if (annotatableQuestionInspectImagesElement) {
+          annotatableQuestionInspectImagesElement.remove();
         }
         if (annotatableAnswerInspectImagesRootRef.current) {
           annotatableAnswerInspectImagesRootRef.current.unmount();
           annotatableAnswerInspectImagesRootRef.current = null;
         }
-        if (annotatableAnswerInspectImagesElementRef.current) {
-          annotatableAnswerInspectImagesElementRef.current.remove();
-          annotatableAnswerInspectImagesElementRef.current = null;
+        if (annotatableAnswerInspectImagesElement) {
+          annotatableAnswerInspectImagesElement.remove();
         }
       }, 0);
     };
-  }, []);
+  }, [
+    annotatableAnswerInspectImagesElement,
+    annotatableQuestionInspectImagesElement,
+  ]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -166,21 +163,25 @@ export const QuestionView = ({
     return () => {
       document.removeEventListener("click", handleClick, true);
     };
-  }, [router]);
+  }, []);
+
+  const onGuardComplete = useEffectEvent(() => {
+    setPendingNavigation(null);
+    dummyLinkRef.current?.click();
+  });
 
   useEffect(() => {
     if (pendingNavigation && !isAnnotationGuardDialogOpen) {
-      setPendingNavigation(null);
-      dummyLinkRef.current?.click();
+      onGuardComplete();
     }
-  }, [isAnnotationGuardDialogOpen, pendingNavigation, router]);
+  }, [isAnnotationGuardDialogOpen, pendingNavigation]);
 
   return (
     <>
       <QuestionAnnotationGuardDialog isOpen={isAnnotationGuardDialogOpen} />
       <AnnotatableImagesUpdater
         isMounted={isMounted}
-        elementRef={annotatableQuestionInspectImagesElementRef}
+        elementRef={{ current: annotatableQuestionInspectImagesElement }}
         elementRootRef={annotatableQuestionInspectImagesRootRef}
         typeOfView="question"
         componentRef={annotatableQuestionInspectImagesRootElementRef}
@@ -191,7 +192,7 @@ export const QuestionView = ({
       />
       <AnnotatableImagesUpdater
         isMounted={isMounted}
-        elementRef={annotatableAnswerInspectImagesElementRef}
+        elementRef={{ current: annotatableAnswerInspectImagesElement }}
         elementRootRef={annotatableAnswerInspectImagesRootRef}
         typeOfView="answer"
         componentRef={annotatableAnswerInspectImagesRootElementRef}
@@ -273,7 +274,7 @@ export const QuestionView = ({
                 showSubject={true}
               />
             </div>
-            <div ref={questionViewContainer}></div>
+            <div ref={setQuestionViewContainer}></div>
           </ScrollArea>
         </div>
         <div
@@ -291,7 +292,7 @@ export const QuestionView = ({
                 showSubject={true}
               />
             </div>
-            <div ref={answerViewContainer}></div>
+            <div ref={setAnswerViewContainer}></div>
           </ScrollArea>
         </div>
         <div className={cn(currentView === "both" ? "block w-full" : "hidden")}>
@@ -306,46 +307,50 @@ export const QuestionView = ({
             currentQuestionData={data}
             questionScrollAreaRef={bothViewsQuestionScrollAreaRef}
             answerScrollAreaRef={bothViewsAnswerScrollAreaRef}
-            annotableQuestionContainerRef={bothViewsQuestionContainer}
-            annotableAnswerContainerRef={bothViewsAnswerContainer}
+            annotableQuestionContainerRef={setBothViewsQuestionContainer}
+            annotableAnswerContainerRef={setBothViewsAnswerContainer}
           />
         </div>
       </div>
-      {bothViewsQuestionContainer.current &&
-        questionViewContainer.current &&
+      {bothViewsQuestionContainer &&
+        questionViewContainer &&
         (currentView === "question" || currentView === "both") &&
         createPortal(
           <div
             ref={(node) => {
-              if (node && annotatableQuestionInspectImagesElementRef.current) {
-                node.appendChild(
-                  annotatableQuestionInspectImagesElementRef.current,
-                );
+              if (
+                node &&
+                annotatableQuestionInspectImagesElement &&
+                annotatableQuestionInspectImagesElement.parentNode !== node
+              ) {
+                node.appendChild(annotatableQuestionInspectImagesElement);
               }
             }}
             className="w-full h-full"
           />,
           currentView === "both"
-            ? bothViewsQuestionContainer.current
-            : questionViewContainer.current,
+            ? bothViewsQuestionContainer
+            : questionViewContainer,
         )}
-      {bothViewsAnswerContainer.current &&
-        answerViewContainer.current &&
+      {bothViewsAnswerContainer &&
+        answerViewContainer &&
         (currentView === "answer" || currentView === "both") &&
         createPortal(
           <div
             ref={(node) => {
-              if (node && annotatableAnswerInspectImagesElementRef.current) {
-                node.appendChild(
-                  annotatableAnswerInspectImagesElementRef.current,
-                );
+              if (
+                node &&
+                annotatableAnswerInspectImagesElement &&
+                annotatableAnswerInspectImagesElement.parentNode !== node
+              ) {
+                node.appendChild(annotatableAnswerInspectImagesElement);
               }
             }}
             className="w-full h-full"
           />,
           currentView === "both"
-            ? bothViewsAnswerContainer.current
-            : answerViewContainer.current,
+            ? bothViewsAnswerContainer
+            : answerViewContainer,
         )}
       <Link ref={dummyLinkRef} href={pendingNavigation || ""} />
     </>

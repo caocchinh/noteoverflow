@@ -71,9 +71,6 @@ export interface AppUltilityBarProps {
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
-  setFinishedQuestionsFilteredDisplayData: Dispatch<
-    SetStateAction<SelectedQuestion[]>
-  >;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
   showFinishedQuestion: boolean;
@@ -129,7 +126,6 @@ export interface SecondaryAppUltilityBarProps {
   isFilteredDisabled: boolean;
   currentChunkIndex?: number;
   setCurrentChunkIndex?: Dispatch<SetStateAction<number>>;
-  setDisplayedData?: Dispatch<SetStateAction<SelectedQuestion[]>>;
   scrollAreaRef?: RefObject<HTMLDivElement | null>;
   sortParameters: SortParameters;
   setSortParameters: Dispatch<SetStateAction<SortParameters>>;
@@ -163,7 +159,6 @@ export interface BreadcrumbContentProps {
   fullPartitionedData: SelectedQuestion[][] | undefined;
   currentChunkIndex: number;
   setCurrentChunkIndex: Dispatch<SetStateAction<number>>;
-  setDisplayedData: Dispatch<SetStateAction<SelectedQuestion[]>>;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   isExportModeEnabled: boolean;
 }

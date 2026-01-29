@@ -227,7 +227,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     fullPartitionedData,
     currentChunkIndex,
     setCurrentChunkIndex,
-    setDisplayedData,
     scrollAreaRef,
     isExportModeEnabled,
   }: BreadcrumbContentProps) =>
@@ -315,7 +314,6 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           fullPartitionedData={fullPartitionedData}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}
-          setDisplayedData={setDisplayedData}
           scrollAreaRef={scrollAreaRef}
         />
       </div>

@@ -58,7 +58,6 @@ const AppUltilityBar = memo(
         scrollAreaRef,
         currentChunkIndex,
         setCurrentChunkIndex,
-        setFinishedQuestionsFilteredDisplayData,
         sortParameters,
         sideBarInsetRef,
         setSortParameters,
@@ -184,12 +183,6 @@ const AppUltilityBar = memo(
                       <FirstPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={
-                          finishedQuestionsFilteredPartitionedData
-                        }
-                        setDisplayedData={
-                          setFinishedQuestionsFilteredDisplayData
-                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -198,12 +191,6 @@ const AppUltilityBar = memo(
                       <PreviousPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={
-                          finishedQuestionsFilteredPartitionedData
-                        }
-                        setDisplayedData={
-                          setFinishedQuestionsFilteredDisplayData
-                        }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
                         }
@@ -218,9 +205,6 @@ const AppUltilityBar = memo(
                         prefix="page"
                         onTabChangeCallback={({ tab }) => {
                           setCurrentChunkIndex(tab);
-                          setFinishedQuestionsFilteredDisplayData(
-                            finishedQuestionsFilteredPartitionedData![tab],
-                          );
                           if (uiPreferences.scrollUpWhenPageChange) {
                             scrollAreaRef.current?.scrollTo({
                               top: 0,
@@ -232,11 +216,8 @@ const AppUltilityBar = memo(
                       <NextPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={
-                          finishedQuestionsFilteredPartitionedData
-                        }
-                        setDisplayedData={
-                          setFinishedQuestionsFilteredDisplayData
+                        totalPages={
+                          finishedQuestionsFilteredPartitionedData!.length
                         }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange
@@ -246,11 +227,8 @@ const AppUltilityBar = memo(
                       <LastPageButton
                         currentChunkIndex={currentChunkIndex}
                         setCurrentChunkIndex={setCurrentChunkIndex}
-                        fullPartitionedData={
-                          finishedQuestionsFilteredPartitionedData
-                        }
-                        setDisplayedData={
-                          setFinishedQuestionsFilteredDisplayData
+                        totalPages={
+                          finishedQuestionsFilteredPartitionedData!.length
                         }
                         scrollUpWhenPageChange={
                           uiPreferences.scrollUpWhenPageChange

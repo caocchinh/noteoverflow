@@ -34,7 +34,6 @@ const SecondaryAppUltilityBar = ({
   fullPartitionedData,
   currentChunkIndex,
   setCurrentChunkIndex,
-  setDisplayedData,
   scrollAreaRef,
   isFilteredDisabled,
   sortParameters,
@@ -179,7 +178,6 @@ const SecondaryAppUltilityBar = ({
           fullPartitionedData &&
           currentChunkIndex !== undefined &&
           setCurrentChunkIndex &&
-          setDisplayedData &&
           scrollAreaRef && (
             <>
               <Separator orientation="vertical" className="h-[30px]!" />
@@ -187,27 +185,22 @@ const SecondaryAppUltilityBar = ({
                 <FirstPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
                   scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                   scrollAreaRef={scrollAreaRef}
                 />
                 <PreviousPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
                   scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                   scrollAreaRef={scrollAreaRef}
                 />
                 <JumpToTabButton
                   className="mx-4"
                   tab={currentChunkIndex}
-                  totalTabs={fullPartitionedData!.length}
+                  totalTabs={fullPartitionedData.length}
                   prefix="page"
                   onTabChangeCallback={({ tab }) => {
                     setCurrentChunkIndex(tab);
-                    setDisplayedData(fullPartitionedData![tab]);
                     if (uiPreferences.scrollUpWhenPageChange) {
                       scrollAreaRef.current?.scrollTo({
                         top: 0,
@@ -219,16 +212,14 @@ const SecondaryAppUltilityBar = ({
                 <NextPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
+                  totalPages={fullPartitionedData.length}
                   scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                   scrollAreaRef={scrollAreaRef}
                 />
                 <LastPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={fullPartitionedData}
-                  setDisplayedData={setDisplayedData}
+                  totalPages={fullPartitionedData.length}
                   scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                   scrollAreaRef={scrollAreaRef}
                 />

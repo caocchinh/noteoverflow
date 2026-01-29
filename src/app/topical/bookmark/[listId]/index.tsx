@@ -184,7 +184,6 @@ export const BookmarkView = ({
     fullPartitionedData,
     currentChunkIndex,
     setCurrentChunkIndex,
-    setDisplayedData,
     scrollAreaRef,
     isExportModeEnabled,
   }: BreadcrumbContentProps) => (
@@ -240,7 +239,6 @@ export const BookmarkView = ({
         fullPartitionedData={fullPartitionedData}
         currentChunkIndex={currentChunkIndex}
         setCurrentChunkIndex={setCurrentChunkIndex}
-        setDisplayedData={setDisplayedData}
         scrollAreaRef={scrollAreaRef}
       />
     </div>

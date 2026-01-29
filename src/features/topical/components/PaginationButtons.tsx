@@ -7,13 +7,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { memo } from "react";
-import { SelectedQuestion } from "../types/models";
 
 export interface FirstPageButtonProps {
   currentChunkIndex: number;
   setCurrentChunkIndex: (index: number) => void;
-  fullPartitionedData: SelectedQuestion[][] | undefined;
-  setDisplayedData: (data: SelectedQuestion[]) => void;
   scrollUpWhenPageChange: boolean;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -22,8 +19,6 @@ export const FirstPageButton = memo(
   ({
     currentChunkIndex,
     setCurrentChunkIndex,
-    fullPartitionedData,
-    setDisplayedData,
     scrollUpWhenPageChange,
     scrollAreaRef,
   }: FirstPageButtonProps) => {
@@ -36,7 +31,6 @@ export const FirstPageButton = memo(
         onClick={() => {
           if (currentChunkIndex === 0) return;
           setCurrentChunkIndex(0);
-          setDisplayedData(fullPartitionedData![0]);
           if (scrollUpWhenPageChange) {
             scrollAreaRef.current?.scrollTo({
               top: 0,
@@ -55,8 +49,6 @@ FirstPageButton.displayName = "FirstPageButton";
 export interface PreviousPageButtonProps {
   currentChunkIndex: number;
   setCurrentChunkIndex: (index: number) => void;
-  fullPartitionedData: SelectedQuestion[][] | undefined;
-  setDisplayedData: (data: SelectedQuestion[]) => void;
   scrollUpWhenPageChange: boolean;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -65,8 +57,6 @@ export const PreviousPageButton = memo(
   ({
     currentChunkIndex,
     setCurrentChunkIndex,
-    fullPartitionedData,
-    setDisplayedData,
     scrollUpWhenPageChange,
     scrollAreaRef,
   }: PreviousPageButtonProps) => {
@@ -79,7 +69,6 @@ export const PreviousPageButton = memo(
         onClick={() => {
           if (currentChunkIndex === 0) return;
           setCurrentChunkIndex(currentChunkIndex - 1);
-          setDisplayedData(fullPartitionedData![currentChunkIndex - 1]);
           if (scrollUpWhenPageChange) {
             scrollAreaRef.current?.scrollTo({
               top: 0,
@@ -98,8 +87,7 @@ PreviousPageButton.displayName = "PreviousPageButton";
 export interface NextPageButtonProps {
   currentChunkIndex: number;
   setCurrentChunkIndex: (index: number) => void;
-  fullPartitionedData: SelectedQuestion[][] | undefined;
-  setDisplayedData: (data: SelectedQuestion[]) => void;
+  totalPages: number;
   scrollUpWhenPageChange: boolean;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -108,8 +96,7 @@ export const NextPageButton = memo(
   ({
     currentChunkIndex,
     setCurrentChunkIndex,
-    fullPartitionedData,
-    setDisplayedData,
+    totalPages,
     scrollUpWhenPageChange,
     scrollAreaRef,
   }: NextPageButtonProps) => {
@@ -118,14 +105,10 @@ export const NextPageButton = memo(
         variant="outline"
         className="cursor-pointer p-[8px]! rounded-[2px]"
         title="Next page"
-        disabled={
-          currentChunkIndex === fullPartitionedData!.length - 1 ||
-          fullPartitionedData!.length - 1 < 1
-        }
+        disabled={currentChunkIndex === totalPages - 1 || totalPages - 1 < 1}
         onClick={() => {
-          if (currentChunkIndex === fullPartitionedData!.length - 1) return;
+          if (currentChunkIndex === totalPages - 1) return;
           setCurrentChunkIndex(currentChunkIndex + 1);
-          setDisplayedData(fullPartitionedData![currentChunkIndex + 1]);
           if (scrollUpWhenPageChange) {
             scrollAreaRef.current?.scrollTo({
               top: 0,
@@ -144,8 +127,7 @@ NextPageButton.displayName = "NextPageButton";
 export interface LastPageButtonProps {
   currentChunkIndex: number;
   setCurrentChunkIndex: (index: number) => void;
-  fullPartitionedData: SelectedQuestion[][] | undefined;
-  setDisplayedData: (data: SelectedQuestion[]) => void;
+  totalPages: number;
   scrollUpWhenPageChange: boolean;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -154,8 +136,7 @@ export const LastPageButton = memo(
   ({
     currentChunkIndex,
     setCurrentChunkIndex,
-    fullPartitionedData,
-    setDisplayedData,
+    totalPages,
     scrollUpWhenPageChange,
     scrollAreaRef,
   }: LastPageButtonProps) => {
@@ -164,16 +145,10 @@ export const LastPageButton = memo(
         variant="outline"
         className="cursor-pointer p-[8px]! rounded-[2px]"
         title="Last page"
-        disabled={
-          currentChunkIndex === fullPartitionedData!.length - 1 ||
-          fullPartitionedData!.length - 1 < 1
-        }
+        disabled={currentChunkIndex === totalPages - 1 || totalPages - 1 < 1}
         onClick={() => {
-          if (currentChunkIndex === fullPartitionedData!.length - 1) return;
-          setCurrentChunkIndex(fullPartitionedData!.length - 1);
-          setDisplayedData(
-            fullPartitionedData![fullPartitionedData!.length - 1],
-          );
+          if (currentChunkIndex === totalPages - 1) return;
+          setCurrentChunkIndex(totalPages - 1);
           if (scrollUpWhenPageChange) {
             scrollAreaRef.current?.scrollTo({
               top: 0,

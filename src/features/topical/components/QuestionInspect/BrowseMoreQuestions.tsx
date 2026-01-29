@@ -1,7 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { memo, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useRef,
+  useState,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+} from "react";
 
 import { JumpToTabButton } from "../JumpToTabButton";
 import {
@@ -14,7 +21,6 @@ import QuestionPreview from "../QuestionPreview";
 import Masonry from "../Masonry";
 import { usePathname } from "next/navigation";
 import { BrowseMoreQuestionsProps } from "../../types/components";
-import { SelectedQuestion } from "../../types/models";
 
 const BrowseMoreQuestions = memo(
   ({
@@ -24,24 +30,27 @@ const BrowseMoreQuestions = memo(
     setIsBrowseMoreOpen,
   }: BrowseMoreQuestionsProps) => {
     const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-    const [displayedData, setDisplayedData] = useState<SelectedQuestion[]>([]);
     const expandedContentRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
 
-    // Update displayed data when partitionedTopicalData changes
+    const onDataChange = useEffectEvent(() => {
+      setCurrentChunkIndex(0);
+    });
+
     useEffect(() => {
-      if (partitionedTopicalData && partitionedTopicalData.length > 0) {
-        setDisplayedData(partitionedTopicalData[0] ?? []);
-        setCurrentChunkIndex(0);
-        if (scrollAreaRef?.current) {
-          scrollAreaRef.current.scrollTo({
-            top: 0,
-            behavior: "instant",
-          });
-        }
+      onDataChange();
+      if (scrollAreaRef?.current) {
+        scrollAreaRef.current.scrollTo({
+          top: 0,
+          behavior: "instant",
+        });
       }
     }, [partitionedTopicalData]);
+
+    const displayedData = useMemo(() => {
+      return partitionedTopicalData?.[currentChunkIndex] ?? [];
+    }, [partitionedTopicalData, currentChunkIndex]);
 
     return (
       <Collapsible open={isBrowseMoreOpen} onOpenChange={setIsBrowseMoreOpen}>
@@ -78,16 +87,12 @@ const BrowseMoreQuestions = memo(
                 <FirstPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={partitionedTopicalData}
-                  setDisplayedData={setDisplayedData}
                   scrollUpWhenPageChange={true}
                   scrollAreaRef={scrollAreaRef}
                 />
                 <PreviousPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={partitionedTopicalData}
-                  setDisplayedData={setDisplayedData}
                   scrollUpWhenPageChange={true}
                   scrollAreaRef={scrollAreaRef}
                 />
@@ -98,7 +103,6 @@ const BrowseMoreQuestions = memo(
                   prefix="page"
                   onTabChangeCallback={({ tab }) => {
                     setCurrentChunkIndex(tab);
-                    setDisplayedData(partitionedTopicalData[tab]);
                     if (scrollAreaRef?.current) {
                       scrollAreaRef.current.scrollTo({
                         top: 0,
@@ -110,16 +114,14 @@ const BrowseMoreQuestions = memo(
                 <NextPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={partitionedTopicalData}
-                  setDisplayedData={setDisplayedData}
+                  totalPages={partitionedTopicalData.length}
                   scrollUpWhenPageChange={true}
                   scrollAreaRef={scrollAreaRef}
                 />
                 <LastPageButton
                   currentChunkIndex={currentChunkIndex}
                   setCurrentChunkIndex={setCurrentChunkIndex}
-                  fullPartitionedData={partitionedTopicalData}
-                  setDisplayedData={setDisplayedData}
+                  totalPages={partitionedTopicalData.length}
                   scrollUpWhenPageChange={true}
                   scrollAreaRef={scrollAreaRef}
                 />
