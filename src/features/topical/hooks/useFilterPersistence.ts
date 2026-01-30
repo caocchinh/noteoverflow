@@ -1,13 +1,6 @@
-import {
-  useState,
-  useCallback,
-  useEffect,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
   FILTERS_CACHE_KEY,
-  DEFAULT_CACHE,
   UI_PREFERENCES_CACHE_KEY,
 } from "../constants/constants";
 import {
@@ -17,10 +10,14 @@ import {
   syncFilterCacheToLocalStorage,
   validateSubcurriculumnDivision,
 } from "@/features/topical/lib/utils";
-import { ValidCurriculum } from "@/constants/types";
 import { FiltersCache, UiPreferencesCache } from "../types/preferences";
 import { CurrentQuery } from "../types/models";
-import { FilterStateValues, FilterStateSetters } from "./useFilterState";
+import {
+  FilterStateValues,
+  FilterStateSetters,
+  FilterStateHandlers,
+} from "./useFilterState";
+import { ValidCurriculum } from "@/constants/types";
 
 export interface UseFilterPersistenceProps {
   currentQuery: CurrentQuery;
@@ -29,21 +26,18 @@ export interface UseFilterPersistenceProps {
   searchParams: { [key: string]: string | string[] | undefined };
   setIsValidSearchParams: (isValid: boolean) => void;
   mountedRef: React.MutableRefObject<boolean>;
-  isMobileDevice: boolean;
-  values: FilterStateValues;
+  filterState: Omit<FilterStateValues, "invalidInputs" | "setInvalidInputs">;
   setters: FilterStateSetters;
-  resetAllFilters: () => void;
+  handlers: Omit<FilterStateHandlers, "resetEverything" | "revert">;
 }
 
 export const useFilterPersistence = ({
-  currentQuery,
   setCurrentQuery,
   setIsSearchEnabled,
   searchParams,
   setIsValidSearchParams,
   mountedRef,
-  isMobileDevice,
-  values: {
+  filterState: {
     selectedCurriculum,
     selectedSubject,
     selectedTopic,
@@ -53,83 +47,17 @@ export const useFilterPersistence = ({
     currentTopicFilter,
     currentPaperTypeFilter,
   },
-  setters: {
-    setSelectedCurriculum,
-    setSelectedSubject,
-    setSelectedTopic,
-    setSelectedYear,
-    setSelectedPaperType,
-    setSelectedSeason,
-    setCurrentTopicFilter,
-    setCurrentPaperTypeFilter,
+  setters: { setCurrentTopicFilter, setCurrentPaperTypeFilter },
+  handlers: {
+    handleCurriculumChange,
+    handleSubjectChange,
+    handleTopicChange,
+    handleYearChange,
+    handlePaperTypeChange,
+    handleSeasonChange,
   },
-  resetAllFilters,
 }: UseFilterPersistenceProps) => {
   const [isMounted, setIsMounted] = useState(false);
-
-  const [sidebarKey, setSidebarKey] = useState(0);
-
-  const revert = useCallback(() => {
-    if (!currentQuery.curriculumId || !currentQuery.subjectId) {
-      return;
-    }
-    setSelectedCurriculum(currentQuery.curriculumId as ValidCurriculum);
-    setSelectedSubject(currentQuery.subjectId);
-    setSelectedTopic(currentQuery.topic);
-    setSelectedYear(currentQuery.year);
-    setSelectedPaperType(currentQuery.paperType);
-    setSelectedSeason(currentQuery.season);
-  }, [
-    currentQuery.curriculumId,
-    currentQuery.paperType,
-    currentQuery.season,
-    currentQuery.subjectId,
-    currentQuery.topic,
-    currentQuery.year,
-    setSelectedCurriculum,
-    setSelectedPaperType,
-    setSelectedSeason,
-    setSelectedSubject,
-    setSelectedTopic,
-    setSelectedYear,
-  ]);
-
-  const resetEverything = useCallback(() => {
-    try {
-      const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-      const stateToSave: FiltersCache = existingStateJSON
-        ? JSON.parse(existingStateJSON)
-        : { ...DEFAULT_CACHE };
-
-      stateToSave.lastSessionCurriculum = "";
-      stateToSave.lastSessionSubject = "";
-      if (selectedCurriculum && selectedSubject) {
-        stateToSave.filters = {
-          ...stateToSave.filters,
-          [selectedCurriculum]: {
-            ...stateToSave.filters?.[selectedCurriculum],
-            [selectedSubject]: {
-              topic: [],
-              paperType: [],
-              year: [],
-              season: [],
-              paperTypeSubcurriculumnDivisionPreference: undefined,
-              topicSubcurriculumnDivisionPreference: undefined,
-            },
-          },
-        };
-      }
-
-      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-    } catch (error) {
-      console.error("Failed to access localStorage:", error);
-    }
-
-    resetAllFilters();
-    if (!isMobileDevice) {
-      setSidebarKey((prev) => prev + 1);
-    }
-  }, [resetAllFilters, isMobileDevice, selectedCurriculum, selectedSubject]);
 
   useEffect(() => {
     if (mountedRef.current) {
@@ -190,7 +118,7 @@ export const useFilterPersistence = ({
         parsedState.lastSessionCurriculum &&
         validateCurriculum(parsedState.lastSessionCurriculum)
       ) {
-        setSelectedCurriculum(
+        handleCurriculumChange(
           parsedState.lastSessionCurriculum as ValidCurriculum,
         );
 
@@ -200,7 +128,7 @@ export const useFilterPersistence = ({
           parsedState.lastSessionSubject,
         );
         if (parsedState.lastSessionSubject && isSubjectValid) {
-          setSelectedSubject(parsedState.lastSessionSubject);
+          handleSubjectChange(parsedState.lastSessionSubject);
           subject = parsedState.lastSessionSubject;
         }
         console.log(
@@ -228,8 +156,8 @@ export const useFilterPersistence = ({
             enforceZeroLength: false,
           })
         ) {
-          setSelectedSubject(parsedState.lastSessionSubject);
-          setSelectedTopic(
+          handleSubjectChange(parsedState.lastSessionSubject);
+          handleTopicChange(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].topic,
@@ -239,17 +167,17 @@ export const useFilterPersistence = ({
               parsedState.lastSessionSubject
             ].topic,
           );
-          setSelectedPaperType(
+          handlePaperTypeChange(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].paperType,
           );
-          setSelectedYear(
+          handleYearChange(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].year,
           );
-          setSelectedSeason(
+          handleSeasonChange(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].season,
@@ -259,14 +187,12 @@ export const useFilterPersistence = ({
     } else if (parsedQueryFromSearchParams) {
       curriculumn = parsedQueryFromSearchParams.curriculumId;
       subject = parsedQueryFromSearchParams.subjectId;
-      setSelectedCurriculum(
-        parsedQueryFromSearchParams.curriculumId as ValidCurriculum,
-      );
-      setSelectedSubject(parsedQueryFromSearchParams.subjectId);
-      setSelectedPaperType(parsedQueryFromSearchParams.paperType);
-      setSelectedTopic(parsedQueryFromSearchParams.topic);
-      setSelectedYear(parsedQueryFromSearchParams.year);
-      setSelectedSeason(parsedQueryFromSearchParams.season);
+      handleCurriculumChange(parsedQueryFromSearchParams.curriculumId);
+      handleSubjectChange(parsedQueryFromSearchParams.subjectId);
+      handlePaperTypeChange(parsedQueryFromSearchParams.paperType);
+      handleTopicChange(parsedQueryFromSearchParams.topic);
+      handleYearChange(parsedQueryFromSearchParams.year);
+      handleSeasonChange(parsedQueryFromSearchParams.season);
       syncFilterCacheToLocalStorage({
         selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
         selectedSubject: parsedQueryFromSearchParams.subjectId,
@@ -321,6 +247,12 @@ export const useFilterPersistence = ({
       setIsMounted(true);
     }, 0);
   }, [
+    handleCurriculumChange,
+    handlePaperTypeChange,
+    handleSeasonChange,
+    handleSubjectChange,
+    handleTopicChange,
+    handleYearChange,
     mountedRef,
     searchParams,
     setCurrentPaperTypeFilter,
@@ -328,12 +260,6 @@ export const useFilterPersistence = ({
     setCurrentTopicFilter,
     setIsSearchEnabled,
     setIsValidSearchParams,
-    setSelectedCurriculum,
-    setSelectedPaperType,
-    setSelectedSeason,
-    setSelectedSubject,
-    setSelectedTopic,
-    setSelectedYear,
   ]);
 
   useEffect(() => {
@@ -364,8 +290,5 @@ export const useFilterPersistence = ({
 
   return {
     isMounted,
-    sidebarKey,
-    revert,
-    resetEverything,
   };
 };

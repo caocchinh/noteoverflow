@@ -14,7 +14,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { ScanText, Send, FileText } from "lucide-react";
-import { memo, useCallback, useState, SetStateAction } from "react";
+import { memo, useCallback, useState } from "react";
 import {
   useFilterState,
   useFilterValidation,
@@ -32,7 +32,7 @@ import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 import CoursebookCover from "./CoursebookCover";
 import Link from "next/link";
 import { AppSidebarProps } from "../types/components";
-import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
+import { ValidCurriculum } from "@/constants/types";
 
 const AppSidebar = memo(
   ({
@@ -52,7 +52,7 @@ const AppSidebar = memo(
     const { setIsAppSidebarOpen } = useTopicalApp();
 
     const {
-      values: {
+      filterState: {
         selectedCurriculum,
         selectedSubject,
         selectedTopic,
@@ -61,17 +61,10 @@ const AppSidebar = memo(
         selectedSeason,
         currentPaperTypeFilter,
         currentTopicFilter,
+        invalidInputs,
+        setInvalidInputs,
       },
-      setters: {
-        setSelectedCurriculum,
-        setSelectedSubject,
-        setSelectedTopic,
-        setSelectedYear,
-        setSelectedPaperType,
-        setSelectedSeason,
-        setCurrentPaperTypeFilter,
-        setCurrentTopicFilter,
-      },
+      setters: { setCurrentPaperTypeFilter, setCurrentTopicFilter },
       handlers: {
         handleCurriculumChange,
         handleSubjectChange,
@@ -79,7 +72,8 @@ const AppSidebar = memo(
         handleYearChange,
         handlePaperTypeChange,
         handleSeasonChange,
-        resetAllFilters,
+        resetEverything,
+        revert,
       },
       refs: {
         curriculumRef,
@@ -89,9 +83,8 @@ const AppSidebar = memo(
         paperTypeRef,
         seasonRef,
       },
-      invalidInputs,
-      setInvalidInputs,
-    } = useFilterState();
+      other: { sidebarKey },
+    } = useFilterState({ currentQuery });
 
     const { validateInputs } = useFilterValidation({
       curriculumRef,
@@ -109,15 +102,6 @@ const AppSidebar = memo(
       setInvalidInputs,
     });
 
-    const handleTransitionEnd = useCallback(
-      (e: React.TransitionEvent) => {
-        if (e.propertyName === "left") {
-          appUltilityBarRef.current?.overflowScrollHandler?.();
-        }
-      },
-      [appUltilityBarRef],
-    );
-
     const {
       availableCurriculum,
       availableSubjects,
@@ -132,21 +116,14 @@ const AppSidebar = memo(
       selectedSubject,
     });
 
-    const {
-      isMounted,
-
-      sidebarKey,
-      revert,
-      resetEverything,
-    } = useFilterPersistence({
+    const { isMounted } = useFilterPersistence({
       currentQuery,
       setCurrentQuery,
       setIsSearchEnabled,
       searchParams,
       setIsValidSearchParams,
       mountedRef,
-      isMobileDevice,
-      values: {
+      filterState: {
         selectedCurriculum,
         selectedSubject,
         selectedTopic,
@@ -157,16 +134,17 @@ const AppSidebar = memo(
         currentTopicFilter,
       },
       setters: {
-        setSelectedCurriculum,
-        setSelectedSubject,
-        setSelectedTopic,
-        setSelectedYear,
-        setSelectedPaperType,
-        setSelectedSeason,
         setCurrentPaperTypeFilter,
         setCurrentTopicFilter,
       },
-      resetAllFilters,
+      handlers: {
+        handleCurriculumChange,
+        handleSubjectChange,
+        handleTopicChange,
+        handleYearChange,
+        handlePaperTypeChange,
+        handleSeasonChange,
+      },
     });
 
     const handleSearch = useCallback(
@@ -209,6 +187,15 @@ const AppSidebar = memo(
       ],
     );
 
+    const handleTransitionEnd = useCallback(
+      (e: React.TransitionEvent) => {
+        if (e.propertyName === "left") {
+          appUltilityBarRef.current?.overflowScrollHandler?.();
+        }
+      },
+      [appUltilityBarRef],
+    );
+
     return (
       <Sidebar
         key={sidebarKey}
@@ -231,12 +218,12 @@ const AppSidebar = memo(
               setIsSearchEnabled={setIsSearchEnabled}
               setCurrentQuery={setCurrentQuery}
               currentQuery={currentQuery}
-              setSelectedCurriculum={setSelectedCurriculum}
-              setSelectedSubject={setSelectedSubject}
-              setSelectedTopic={setSelectedTopic}
-              setSelectedYear={setSelectedYear}
-              setSelectedPaperType={setSelectedPaperType}
-              setSelectedSeason={setSelectedSeason}
+              setSelectedCurriculum={handleCurriculumChange}
+              setSelectedSubject={handleSubjectChange}
+              setSelectedTopic={handleTopicChange}
+              setSelectedYear={handleYearChange}
+              setSelectedPaperType={handlePaperTypeChange}
+              setSelectedSeason={handleSeasonChange}
             />
 
             <StrictModeToggle />
@@ -269,7 +256,9 @@ const AppSidebar = memo(
                         label="Curriculum"
                         prerequisite=""
                         selectedValue={selectedCurriculum}
-                        setSelectedValue={handleCurriculumChange}
+                        setSelectedValue={(value) => {
+                          handleCurriculumChange(value as ValidCurriculum);
+                        }}
                       />
                       {invalidInputs.curriculum && (
                         <p className="text-destructive text-sm">
