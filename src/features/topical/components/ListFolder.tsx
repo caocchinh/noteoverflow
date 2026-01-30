@@ -40,6 +40,7 @@ import {
   Dispatch,
   SetStateAction,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -248,9 +249,14 @@ export const ListFolder = ({
     retry: false,
   });
 
-  useEffect(() => {
+  const onChangeVisibility = useEffectEvent(() => {
     setChangeVisibilityError(null);
+  });
+
+  useEffect(() => {
+    onChangeVisibility();
   }, [newVisibility]);
+
   const [isQRDialogOpen, setIsQRDialogOpen] = useState(false);
   const isMutatingThisList = useIsMutating({ mutationKey }) > 0;
 

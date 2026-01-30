@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
 // @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
 import Desmos from "desmos";
@@ -31,8 +31,11 @@ const initCalculatorElement = () => {
 const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
   const { setIsCalculatorOpen } = useTopicalApp();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const fullscreenContainerRef = useRef<HTMLDivElement>(null);
-  const draggableContainerRef = useRef<HTMLDivElement>(null);
+  const [fullscreenContainer, setFullscreenContainer] =
+    useState<HTMLDivElement | null>(null);
+  const [draggableContainer, setDraggableContainer] =
+    useState<HTMLDivElement | null>(null);
+
   // Function to calculate Rnd dimensions based on window size
   const getCalculatedDimensions = () => {
     const defaultDimensions = {
@@ -40,22 +43,22 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
       y: 0,
       width: Math.min(
         window.innerWidth * scaleFactor,
-        window.innerHeight * scaleFactor * aspectRatio
+        window.innerHeight * scaleFactor * aspectRatio,
       ),
       height: Math.min(
         window.innerHeight * scaleFactor,
-        (window.innerWidth * scaleFactor) / aspectRatio
+        (window.innerWidth * scaleFactor) / aspectRatio,
       ),
     };
     const minWidth = Math.min(
       window.innerWidth * (scaleFactor - 0.2),
       window.innerHeight * (scaleFactor - 0.2) * aspectRatio,
-      300
+      300,
     );
     const minHeight = Math.min(
       window.innerHeight * (scaleFactor - 0.2),
       (window.innerWidth * (scaleFactor - 0.2)) / aspectRatio,
-      200
+      200,
     );
 
     return {
@@ -75,10 +78,10 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
     height: getCalculatedDimensions().default.height,
   }));
   const [rndMinWidth, setRndMinWidth] = useState(
-    () => getCalculatedDimensions().minWidth
+    () => getCalculatedDimensions().minWidth,
   );
   const [rndMinHeight, setRndMinHeight] = useState(
-    () => getCalculatedDimensions().minHeight
+    () => getCalculatedDimensions().minHeight,
   );
 
   // Function to calculate Rnd dimensions based on window size
@@ -113,7 +116,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
       e.stopPropagation();
       setIsFullscreen(!isFullscreen);
     },
-    [isFullscreen, setIsFullscreen]
+    [isFullscreen, setIsFullscreen],
   );
 
   const onClose = useCallback(
@@ -122,7 +125,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
       e.stopPropagation();
       setIsCalculatorOpen(false);
     },
-    [setIsCalculatorOpen]
+    [setIsCalculatorOpen],
   );
 
   useEffect(() => {
@@ -138,7 +141,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
         <div
           className={cn(
             "fixed inset-0 z-999999 border border-gray-300 bg-gray-800",
-            isFullscreen ? "block" : "hidden"
+            isFullscreen ? "block" : "hidden",
           )}
           style={{ width: "100vw", height: "100vh", top: 0, left: 0 }}
         >
@@ -169,7 +172,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                 </Button>
               </div>
             </div>
-            <div ref={fullscreenContainerRef} className="flex-1"></div>
+            <div ref={setFullscreenContainer} className="flex-1"></div>
           </div>
         </div>
 
@@ -221,13 +224,13 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                   </Button>
                 </div>
               </div>
-              <div ref={draggableContainerRef} className="flex-1"></div>
+              <div ref={setDraggableContainer} className="flex-1"></div>
             </div>
           </Rnd>
         </div>
       </div>
-      {fullscreenContainerRef.current &&
-        draggableContainerRef.current &&
+      {fullscreenContainer &&
+        draggableContainer &&
         createPortal(
           <div
             ref={(node) => {
@@ -237,9 +240,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
             }}
             className="w-full h-full"
           />,
-          isFullscreen
-            ? fullscreenContainerRef.current
-            : draggableContainerRef.current
+          isFullscreen ? fullscreenContainer : draggableContainer,
         )}
     </>
   );

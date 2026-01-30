@@ -1,4 +1,11 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -221,10 +228,16 @@ export const BookmarkActionDialogs = memo(
       ],
     );
 
+    const onGuardComplete = useEffectEvent(
+      ({ _listId }: { _listId: string }) => {
+        setIsPendingRemoveFromList(false);
+        removeFromList({ listId: _listId });
+      },
+    );
+
     useEffect(() => {
       if (isPendingRemoveFromList && !isAnnotationGuardDialogOpen && listId) {
-        setIsPendingRemoveFromList(false);
-        removeFromList({ listId });
+        onGuardComplete({ _listId: listId });
       }
     }, [
       isAnnotationGuardDialogOpen,

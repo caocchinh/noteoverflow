@@ -90,7 +90,7 @@ export interface UseFilterStateReturn {
 export function useFilterState({
   currentQuery,
 }: {
-  currentQuery: CurrentQuery;
+  currentQuery?: CurrentQuery;
 }): UseFilterStateReturn {
   // State
   const [selectedCurriculum, setSelectedCurriculum] =
@@ -287,6 +287,9 @@ export function useFilterState({
   );
 
   const revert = useCallback(() => {
+    if (!currentQuery) {
+      return;
+    }
     if (!currentQuery.curriculumId || !currentQuery.subjectId) {
       return;
     }
@@ -296,14 +299,7 @@ export function useFilterState({
     setSelectedYear(currentQuery.year);
     setSelectedPaperType(currentQuery.paperType);
     setSelectedSeason(currentQuery.season);
-  }, [
-    currentQuery.curriculumId,
-    currentQuery.paperType,
-    currentQuery.season,
-    currentQuery.subjectId,
-    currentQuery.topic,
-    currentQuery.year,
-  ]);
+  }, [currentQuery]);
 
   const resetEverything = useCallback(() => {
     try {

@@ -20,11 +20,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ValidCurriculum } from "@/constants/types";
-import {
-  useAvailableFilters,
-  useFilterState,
-  usePaperTypePersistence,
-} from "../../topical/hooks";
+import { useAvailableFilters, useFilterState } from "../../topical/hooks";
 import { Button } from "@/components/ui/button";
 import { Filter, Save, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -58,45 +54,25 @@ const OptionalFilters = memo(
       ref,
     ) => {
       const {
-        values: {
+        filterState: {
           selectedCurriculum,
           selectedSubject,
           selectedYear,
           selectedPaperType,
           selectedSeason,
+          currentPaperTypeFilter,
         },
-        setters: {
-          setSelectedCurriculum,
-          setSelectedSubject,
-          setSelectedPaperType,
-          setSelectedYear,
-          setSelectedSeason,
-        },
+        setters: { setCurrentPaperTypeFilter },
         handlers: {
           handleCurriculumChange,
           handleSubjectChange,
           handlePaperTypeChange,
           handleYearChange,
           handleSeasonChange,
-          resetAllFilters,
+          resetEverything,
         },
         refs: { curriculumRef, subjectRef, yearRef, paperTypeRef, seasonRef },
-      } = useFilterState({
-        initialCurriculum:
-          (currentFilter?.curriculum as ValidCurriculum) || "CIE A-LEVEL",
-        initialSubject: currentFilter?.subject || "",
-        initialYear: currentFilter?.year || [],
-        initialPaperType: currentFilter?.paperType || [],
-        initialSeason: currentFilter?.season || [],
-        onCurriculumChange: () => setCurrentPaperTypeFilter(undefined),
-        onSubjectChange: () => setCurrentPaperTypeFilter(undefined),
-      });
-
-      const { currentPaperTypeFilter, setCurrentPaperTypeFilter } =
-        usePaperTypePersistence({
-          selectedCurriculum,
-          selectedSubject,
-        });
+      } = useFilterState({});
 
       const {
         availableCurriculum,
@@ -123,9 +99,9 @@ const OptionalFilters = memo(
         (selectedPaperType.length > 0 ? 1 : 0);
 
       const handleClearAll = useCallback(() => {
-        resetAllFilters();
+        resetEverything();
         setCurrentPaperTypeFilter(undefined);
-      }, [resetAllFilters, setCurrentPaperTypeFilter]);
+      }, [resetEverything, setCurrentPaperTypeFilter]);
 
       const handleApplyFilters = useCallback(() => {
         const newFilter: OptionalSearchFilter = {};
@@ -169,21 +145,21 @@ const OptionalFilters = memo(
         }) => {
           if (_currentFilter) {
             if (_currentFilter.curriculum) {
-              setSelectedCurriculum(
+              handleCurriculumChange(
                 _currentFilter.curriculum as ValidCurriculum,
               );
             }
             if (_currentFilter.subject) {
-              setSelectedSubject(_currentFilter.subject);
+              handleSubjectChange(_currentFilter.subject);
             }
             if (_currentFilter.year) {
-              setSelectedYear(_currentFilter.year);
+              handleYearChange(_currentFilter.year);
             }
             if (_currentFilter.paperType) {
-              setSelectedPaperType(_currentFilter.paperType);
+              handlePaperTypeChange(_currentFilter.paperType);
             }
             if (_currentFilter.season) {
-              setSelectedSeason(_currentFilter.season);
+              handleSeasonChange(_currentFilter.season);
             }
           }
           setTimeout(() => {
@@ -273,7 +249,9 @@ const OptionalFilters = memo(
                       label="Curriculum"
                       prerequisite=""
                       selectedValue={selectedCurriculum}
-                      setSelectedValue={handleCurriculumChange}
+                      setSelectedValue={(value) =>
+                        handleCurriculumChange(value as ValidCurriculum)
+                      }
                       triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
                       modal={true}
                     />

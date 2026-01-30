@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useEffectEvent } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,11 +12,7 @@ const IntergrationTips = () => {
   const [isOpen, setIsOpen] = useState(true);
   const isMounted = useRef(false);
   const { setIsCalculatorOpen } = useTopicalApp();
-
-  useEffect(() => {
-    if (isMounted.current) {
-      return;
-    }
+  const onMount = useEffectEvent(() => {
     const saved = localStorage.getItem("integrationTipsOpen");
     if (saved !== null) {
       try {
@@ -25,6 +21,13 @@ const IntergrationTips = () => {
         console.error(e);
       }
     }
+  });
+
+  useEffect(() => {
+    if (isMounted.current) {
+      return;
+    }
+    onMount();
     setTimeout(() => {
       isMounted.current = true;
     }, 0);

@@ -1,7 +1,6 @@
 "use client";
 
 import { ValidCurriculum } from "@/constants/types";
-
 import {
   computeFinishedQuestionsMetadata,
   computeSubjectMetadata,
@@ -137,7 +136,6 @@ const FinishedQuestionsClient = ({
     currentChunkIndex,
     setCurrentChunkIndex,
     isExportModeEnabled,
-    setDisplayedData,
     scrollAreaRef,
   }: BreadcrumbContentProps) => (
     <div
@@ -193,7 +191,6 @@ const FinishedQuestionsClient = ({
         currentChunkIndex={currentChunkIndex}
         isExportModeEnabled={isExportModeEnabled}
         setCurrentChunkIndex={setCurrentChunkIndex}
-        setDisplayedData={setDisplayedData}
         scrollAreaRef={scrollAreaRef}
       />
     </div>
