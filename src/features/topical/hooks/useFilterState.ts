@@ -1,7 +1,17 @@
 import { useState, useCallback, useRef, SetStateAction } from "react";
-import { ValidCurriculum } from "@/constants/types";
+import { CIE_A_LEVEL_SUBDIVISION, ValidCurriculum } from "@/constants/types";
 import { InvalidInputs } from "../types/models";
-import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
+import {
+  FILTERS_CACHE_KEY,
+  INVALID_INPUTS_DEFAULT,
+  UI_PREFERENCES_CACHE_KEY,
+} from "../constants/constants";
+import {
+  validateSubject,
+  validateSubcurriculumnDivision,
+  validateFilterData,
+} from "../lib/utils";
+import { FiltersCache, UiPreferencesCache } from "../types/preferences";
 
 export interface UseFilterStateOptions {
   /** Initial curriculum value */
@@ -38,6 +48,8 @@ export interface FilterStateValues {
   selectedYear: string[];
   selectedPaperType: string[];
   selectedSeason: string[];
+  currentTopicFilter: CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined;
+  currentPaperTypeFilter: CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined;
 }
 
 export interface FilterStateSetters {
@@ -47,6 +59,12 @@ export interface FilterStateSetters {
   setSelectedYear: React.Dispatch<SetStateAction<string[]>>;
   setSelectedPaperType: React.Dispatch<SetStateAction<string[]>>;
   setSelectedSeason: React.Dispatch<SetStateAction<string[]>>;
+  setCurrentTopicFilter: React.Dispatch<
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined>
+  >;
+  setCurrentPaperTypeFilter: React.Dispatch<
+    SetStateAction<CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined>
+  >;
 }
 
 export interface FilterStateHandlers {
@@ -92,8 +110,6 @@ export function useFilterState(
     initialYear = [],
     initialPaperType = [],
     initialSeason = [],
-    onCurriculumChange,
-    onSubjectChange,
   } = options;
 
   // State
@@ -109,6 +125,12 @@ export function useFilterState(
   const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
     ...INVALID_INPUTS_DEFAULT,
   });
+  const [currentTopicFilter, setCurrentTopicFilter] = useState<
+    CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
+  >(undefined);
+  const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
+    CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
+  >(undefined);
 
   // Refs for scrolling to invalid inputs
   const curriculumRef = useRef<HTMLDivElement | null>(null);
@@ -119,33 +141,131 @@ export function useFilterState(
   const seasonRef = useRef<HTMLDivElement | null>(null);
 
   // Handlers
-  const handleCurriculumChange = useCallback(
-    (value: string) => {
-      setSelectedCurriculum(value as ValidCurriculum);
-      // Reset dependent fields
-      setSelectedSubject("");
-      setSelectedTopic([]);
-      setSelectedYear([]);
-      setSelectedPaperType([]);
-      setSelectedSeason([]);
-      onCurriculumChange?.(value as ValidCurriculum);
-    },
-    [onCurriculumChange],
-  );
+  const handleCurriculumChange = useCallback((value: string) => {
+    setSelectedCurriculum(value as ValidCurriculum);
+    // Reset dependent fields
+    setSelectedSubject("");
+    setSelectedTopic([]);
+    setSelectedYear([]);
+    setSelectedPaperType([]);
+    setSelectedSeason([]);
+    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+    setCurrentPaperTypeFilter(undefined);
+    setCurrentTopicFilter(undefined);
+  }, []);
 
   const handleSubjectChange = useCallback(
     (value: string | ((prev: string) => string)) => {
       const newValue =
         typeof value === "function" ? value(selectedSubject) : value;
       setSelectedSubject(newValue);
-      // Reset dependent fields
-      setSelectedTopic([]);
-      setSelectedYear([]);
-      setSelectedPaperType([]);
-      setSelectedSeason([]);
-      onSubjectChange?.(newValue);
+      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+      const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
+      if (savedState && savedUiPreferences) {
+        try {
+          const parsedState: FiltersCache = JSON.parse(savedState);
+          const parsedUiPreferences: UiPreferencesCache =
+            JSON.parse(savedUiPreferences);
+          if (parsedUiPreferences.isPersistantCacheEnabled) {
+            const isSubjectValid = validateSubject(
+              selectedCurriculum,
+              newValue,
+            );
+            if (newValue && isSubjectValid) {
+              setSelectedSubject(newValue);
+            }
+            try {
+              const savedPaperTypeSubcurriculumnDivision =
+                parsedState.filters[selectedCurriculum][newValue]
+                  .paperTypeSubcurriculumnDivisionPreference;
+              const savedTopicSubcurriculumnDivision =
+                parsedState.filters[selectedCurriculum][newValue]
+                  .topicSubcurriculumnDivisionPreference;
+              if (
+                savedPaperTypeSubcurriculumnDivision &&
+                validateSubcurriculumnDivision({
+                  value: savedPaperTypeSubcurriculumnDivision,
+                  type: "paperType",
+                  curriculum: selectedCurriculum,
+                  subject: newValue,
+                })
+              ) {
+                setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
+              } else {
+                setCurrentPaperTypeFilter(undefined);
+              }
+              if (
+                savedTopicSubcurriculumnDivision &&
+                validateSubcurriculumnDivision({
+                  value: savedTopicSubcurriculumnDivision,
+                  type: "topic",
+                  curriculum: selectedCurriculum,
+                  subject: newValue,
+                })
+              ) {
+                setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+              } else {
+                setCurrentTopicFilter(undefined);
+              }
+            } catch {
+              setCurrentTopicFilter(undefined);
+              setCurrentPaperTypeFilter(undefined);
+            }
+            if (
+              isSubjectValid &&
+              validateFilterData({
+                data: parsedState.filters[selectedCurriculum][newValue],
+                curriculumn: selectedCurriculum,
+                subject: newValue,
+                enforceZeroLength: false,
+              })
+            ) {
+              setSelectedTopic(
+                parsedState.filters[selectedCurriculum][newValue].topic,
+              );
+              setSelectedPaperType(
+                parsedState.filters[selectedCurriculum][newValue].paperType,
+              );
+              setSelectedYear(
+                parsedState.filters[selectedCurriculum][newValue].year,
+              );
+              setSelectedSeason(
+                parsedState.filters[selectedCurriculum][newValue].season,
+              );
+            } else {
+              setSelectedTopic([]);
+              setSelectedYear([]);
+              setSelectedPaperType([]);
+              setSelectedSeason([]);
+            }
+          } else {
+            setSelectedTopic([]);
+            setSelectedYear([]);
+            setSelectedPaperType([]);
+            setSelectedSeason([]);
+            setCurrentTopicFilter(undefined);
+            setCurrentPaperTypeFilter(undefined);
+          }
+        } catch {
+          setSelectedTopic([]);
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+          setCurrentTopicFilter(undefined);
+          setCurrentPaperTypeFilter(undefined);
+        }
+      } else {
+        setSelectedTopic([]);
+        setSelectedYear([]);
+        setSelectedPaperType([]);
+        setSelectedSeason([]);
+        setCurrentTopicFilter(undefined);
+        setCurrentPaperTypeFilter(undefined);
+      }
+
+      setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
     },
-    [selectedSubject, onSubjectChange],
+    [selectedSubject, selectedCurriculum],
   );
 
   const handleTopicChange = useCallback((values: string[]) => {
@@ -238,6 +358,8 @@ export function useFilterState(
       selectedYear,
       selectedPaperType,
       selectedSeason,
+      currentPaperTypeFilter,
+      currentTopicFilter,
     },
     setters: {
       setSelectedCurriculum: setSelectedCurriculumWithClear,
@@ -246,6 +368,8 @@ export function useFilterState(
       setSelectedYear: setSelectedYearWithClear,
       setSelectedPaperType: setSelectedPaperTypeWithClear,
       setSelectedSeason: setSelectedSeasonWithClear,
+      setCurrentPaperTypeFilter,
+      setCurrentTopicFilter,
     },
     handlers: {
       handleCurriculumChange,

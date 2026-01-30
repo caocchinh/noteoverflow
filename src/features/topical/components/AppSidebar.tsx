@@ -32,17 +32,7 @@ import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 import CoursebookCover from "./CoursebookCover";
 import Link from "next/link";
 import { AppSidebarProps } from "../types/components";
-import {
-  FILTERS_CACHE_KEY,
-  INVALID_INPUTS_DEFAULT,
-  UI_PREFERENCES_CACHE_KEY,
-} from "../constants/constants";
-import {
-  validateSubject,
-  validateSubcurriculumnDivision,
-  validateFilterData,
-} from "../lib/utils";
-import { FiltersCache, UiPreferencesCache } from "../types/preferences";
+import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
 
 const AppSidebar = memo(
   ({
@@ -69,6 +59,8 @@ const AppSidebar = memo(
         selectedYear,
         selectedPaperType,
         selectedSeason,
+        currentPaperTypeFilter,
+        currentTopicFilter,
       },
       setters: {
         setSelectedCurriculum,
@@ -77,6 +69,8 @@ const AppSidebar = memo(
         setSelectedYear,
         setSelectedPaperType,
         setSelectedSeason,
+        setCurrentPaperTypeFilter,
+        setCurrentTopicFilter,
       },
       handlers: {
         handleCurriculumChange,
@@ -97,16 +91,7 @@ const AppSidebar = memo(
       },
       invalidInputs,
       setInvalidInputs,
-    } = useFilterState({
-      onCurriculumChange: () => {
-        setCurrentTopicFilter(undefined);
-        setCurrentPaperTypeFilter(undefined);
-      },
-      onSubjectChange: () => {
-        setCurrentTopicFilter(undefined);
-        setCurrentPaperTypeFilter(undefined);
-      },
-    });
+    } = useFilterState();
 
     const { validateInputs } = useFilterValidation({
       curriculumRef,
@@ -149,10 +134,7 @@ const AppSidebar = memo(
 
     const {
       isMounted,
-      currentTopicFilter,
-      setCurrentTopicFilter,
-      currentPaperTypeFilter,
-      setCurrentPaperTypeFilter,
+
       sidebarKey,
       revert,
       resetEverything,
@@ -171,6 +153,8 @@ const AppSidebar = memo(
         selectedYear,
         selectedPaperType,
         selectedSeason,
+        currentPaperTypeFilter,
+        currentTopicFilter,
       },
       setters: {
         setSelectedCurriculum,
@@ -179,6 +163,8 @@ const AppSidebar = memo(
         setSelectedYear,
         setSelectedPaperType,
         setSelectedSeason,
+        setCurrentPaperTypeFilter,
+        setCurrentTopicFilter,
       },
       resetAllFilters,
     });
@@ -220,160 +206,6 @@ const AppSidebar = memo(
         setCurrentQuery,
         isMobileDevice,
         setIsAppSidebarOpen,
-      ],
-    );
-
-    const handleCurriculumSelectChange = useCallback(
-      (valueOrFn: SetStateAction<string>) => {
-        const value =
-          typeof valueOrFn === "function"
-            ? (valueOrFn as (prev: string) => string)(selectedCurriculum)
-            : valueOrFn;
-        handleCurriculumChange(value);
-        setSelectedSubject("");
-        setSelectedTopic([]);
-        setSelectedYear([]);
-        setSelectedPaperType([]);
-        setSelectedSeason([]);
-        setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-      },
-      [
-        handleCurriculumChange,
-        selectedCurriculum,
-        setInvalidInputs,
-        setSelectedPaperType,
-        setSelectedSeason,
-        setSelectedSubject,
-        setSelectedTopic,
-        setSelectedYear,
-      ],
-    );
-
-    const handleSubjectSelectChange = useCallback(
-      (valueOrFn: SetStateAction<string>) => {
-        const value =
-          typeof valueOrFn === "function"
-            ? (valueOrFn as (prev: string) => string)(selectedSubject)
-            : valueOrFn;
-        handleSubjectChange(value);
-        const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-        const savedUiPreferences = localStorage.getItem(
-          UI_PREFERENCES_CACHE_KEY,
-        );
-        if (savedState && savedUiPreferences) {
-          try {
-            const parsedState: FiltersCache = JSON.parse(savedState);
-            const parsedUiPreferences: UiPreferencesCache =
-              JSON.parse(savedUiPreferences);
-            if (parsedUiPreferences.isPersistantCacheEnabled) {
-              const isSubjectValid = validateSubject(selectedCurriculum, value);
-              if (value && isSubjectValid) {
-                setSelectedSubject(value);
-              }
-              try {
-                const savedPaperTypeSubcurriculumnDivision =
-                  parsedState.filters[selectedCurriculum][value]
-                    .paperTypeSubcurriculumnDivisionPreference;
-                const savedTopicSubcurriculumnDivision =
-                  parsedState.filters[selectedCurriculum][value]
-                    .topicSubcurriculumnDivisionPreference;
-                if (
-                  savedPaperTypeSubcurriculumnDivision &&
-                  validateSubcurriculumnDivision({
-                    value: savedPaperTypeSubcurriculumnDivision,
-                    type: "paperType",
-                    curriculum: selectedCurriculum,
-                    subject: value,
-                  })
-                ) {
-                  setCurrentPaperTypeFilter(
-                    savedPaperTypeSubcurriculumnDivision,
-                  );
-                } else {
-                  setCurrentPaperTypeFilter(undefined);
-                }
-                if (
-                  savedTopicSubcurriculumnDivision &&
-                  validateSubcurriculumnDivision({
-                    value: savedTopicSubcurriculumnDivision,
-                    type: "topic",
-                    curriculum: selectedCurriculum,
-                    subject: value,
-                  })
-                ) {
-                  setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
-                } else {
-                  setCurrentTopicFilter(undefined);
-                }
-              } catch {
-                setCurrentTopicFilter(undefined);
-                setCurrentPaperTypeFilter(undefined);
-              }
-              if (
-                isSubjectValid &&
-                validateFilterData({
-                  data: parsedState.filters[selectedCurriculum][value],
-                  curriculumn: selectedCurriculum,
-                  subject: value,
-                })
-              ) {
-                setSelectedTopic(
-                  parsedState.filters[selectedCurriculum][value].topic,
-                );
-                setSelectedPaperType(
-                  parsedState.filters[selectedCurriculum][value].paperType,
-                );
-                setSelectedYear(
-                  parsedState.filters[selectedCurriculum][value].year,
-                );
-                setSelectedSeason(
-                  parsedState.filters[selectedCurriculum][value].season,
-                );
-              } else {
-                setSelectedTopic([]);
-                setSelectedYear([]);
-                setSelectedPaperType([]);
-                setSelectedSeason([]);
-              }
-            } else {
-              setSelectedTopic([]);
-              setSelectedYear([]);
-              setSelectedPaperType([]);
-              setSelectedSeason([]);
-              setCurrentTopicFilter(undefined);
-              setCurrentPaperTypeFilter(undefined);
-            }
-          } catch {
-            setSelectedTopic([]);
-            setSelectedYear([]);
-            setSelectedPaperType([]);
-            setSelectedSeason([]);
-            setCurrentTopicFilter(undefined);
-            setCurrentPaperTypeFilter(undefined);
-          }
-        } else {
-          setSelectedTopic([]);
-          setSelectedYear([]);
-          setSelectedPaperType([]);
-          setSelectedSeason([]);
-          setCurrentTopicFilter(undefined);
-          setCurrentPaperTypeFilter(undefined);
-        }
-
-        setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-      },
-      [
-        handleSubjectChange,
-        selectedSubject,
-        selectedCurriculum,
-        setCurrentPaperTypeFilter,
-        setCurrentTopicFilter,
-        setInvalidInputs,
-        setSelectedPaperType,
-        setSelectedSeason,
-        setSelectedSubject,
-        setSelectedTopic,
-        setSelectedYear,
       ],
     );
 
@@ -437,7 +269,7 @@ const AppSidebar = memo(
                         label="Curriculum"
                         prerequisite=""
                         selectedValue={selectedCurriculum}
-                        setSelectedValue={handleCurriculumSelectChange}
+                        setSelectedValue={handleCurriculumChange}
                       />
                       {invalidInputs.curriculum && (
                         <p className="text-destructive text-sm">
@@ -463,7 +295,7 @@ const AppSidebar = memo(
                         label="Subject"
                         prerequisite={subjectPrerequisite}
                         selectedValue={selectedSubject}
-                        setSelectedValue={handleSubjectSelectChange}
+                        setSelectedValue={handleSubjectChange}
                       />
                       {invalidInputs.subject && (
                         <p className="text-destructive text-sm">

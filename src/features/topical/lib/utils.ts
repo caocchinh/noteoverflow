@@ -112,8 +112,9 @@ export const getSubjectData = (
 export const validateTopics = (
   topics: string[] | undefined,
   subjectData: TopicalSubject,
+  enforceZeroLength: boolean,
 ): boolean => {
-  if (!topics || topics.length === 0) {
+  if (!topics || (topics.length === 0 && enforceZeroLength)) {
     return false;
   }
   return isSubset(
@@ -128,8 +129,9 @@ export const validateTopics = (
 export const validatePaperTypes = (
   paperTypes: string[] | undefined,
   subjectData: TopicalSubject,
+  enforceZeroLength: boolean,
 ): boolean => {
-  if (!paperTypes || paperTypes.length === 0) {
+  if (!paperTypes || (paperTypes.length === 0 && enforceZeroLength)) {
     return false;
   }
   return isSubset(
@@ -144,8 +146,9 @@ export const validatePaperTypes = (
 export const validateYears = (
   years: string[] | undefined,
   subjectData: TopicalSubject,
+  enforceZeroLength: boolean,
 ): boolean => {
-  if (!years || years.length === 0) {
+  if (!years || (years.length === 0 && enforceZeroLength)) {
     return false;
   }
   return isSubset(
@@ -160,8 +163,9 @@ export const validateYears = (
 export const validateSeasons = (
   seasons: string[] | undefined,
   subjectData: TopicalSubject,
+  enforceZeroLength: boolean,
 ): boolean => {
-  if (!seasons || seasons.length === 0) {
+  if (!seasons || (seasons.length === 0 && enforceZeroLength)) {
     return false;
   }
   return isSubset(seasons, subjectData.season);
@@ -175,10 +179,12 @@ export const validateFilterData = ({
   data,
   curriculumn,
   subject,
+  enforceZeroLength = true,
 }: {
   data: FilterData;
   curriculumn: string;
   subject: string;
+  enforceZeroLength?: boolean;
 }): boolean => {
   try {
     const subjectData = getSubjectData(curriculumn, subject);
@@ -186,16 +192,16 @@ export const validateFilterData = ({
       return false;
     }
 
-    if (!validateTopics(data.topic, subjectData)) {
+    if (!validateTopics(data.topic, subjectData, enforceZeroLength)) {
       return false;
     }
-    if (!validatePaperTypes(data.paperType, subjectData)) {
+    if (!validatePaperTypes(data.paperType, subjectData, enforceZeroLength)) {
       return false;
     }
-    if (!validateYears(data.year, subjectData)) {
+    if (!validateYears(data.year, subjectData, enforceZeroLength)) {
       return false;
     }
-    if (!validateSeasons(data.season, subjectData)) {
+    if (!validateSeasons(data.season, subjectData, enforceZeroLength)) {
       return false;
     }
     return true;

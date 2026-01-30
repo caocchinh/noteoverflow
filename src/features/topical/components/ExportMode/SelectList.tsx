@@ -77,6 +77,7 @@ const SelectList = memo(
 
     const estimatedSize = secondMobileBreakPoint ? 100 : 65;
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const listVirtualizer = useVirtualizer({
       count: canReorder
         ? questionsForExportArray.length

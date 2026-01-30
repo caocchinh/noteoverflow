@@ -17,7 +17,7 @@ import {
   syncFilterCacheToLocalStorage,
   validateSubcurriculumnDivision,
 } from "@/features/topical/lib/utils";
-import { CIE_A_LEVEL_SUBDIVISION, ValidCurriculum } from "@/constants/types";
+import { ValidCurriculum } from "@/constants/types";
 import { FiltersCache, UiPreferencesCache } from "../types/preferences";
 import { CurrentQuery } from "../types/models";
 import { FilterStateValues, FilterStateSetters } from "./useFilterState";
@@ -50,6 +50,8 @@ export const useFilterPersistence = ({
     selectedYear,
     selectedPaperType,
     selectedSeason,
+    currentTopicFilter,
+    currentPaperTypeFilter,
   },
   setters: {
     setSelectedCurriculum,
@@ -58,16 +60,12 @@ export const useFilterPersistence = ({
     setSelectedYear,
     setSelectedPaperType,
     setSelectedSeason,
+    setCurrentTopicFilter,
+    setCurrentPaperTypeFilter,
   },
   resetAllFilters,
 }: UseFilterPersistenceProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [currentTopicFilter, setCurrentTopicFilter] = useState<
-    CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-  >(undefined);
-  const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
-    CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-  >(undefined);
 
   const [sidebarKey, setSidebarKey] = useState(0);
 
@@ -195,6 +193,7 @@ export const useFilterPersistence = ({
         setSelectedCurriculum(
           parsedState.lastSessionCurriculum as ValidCurriculum,
         );
+
         curriculumn = parsedState.lastSessionCurriculum;
         const isSubjectValid = validateSubject(
           parsedState.lastSessionCurriculum,
@@ -204,6 +203,20 @@ export const useFilterPersistence = ({
           setSelectedSubject(parsedState.lastSessionSubject);
           subject = parsedState.lastSessionSubject;
         }
+        console.log(
+          "isSubjectValid",
+          isSubjectValid,
+          validateFilterData({
+            curriculumn: parsedState.lastSessionCurriculum,
+            data: parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ],
+            subject: parsedState.lastSessionSubject,
+          }),
+          parsedState.filters[parsedState.lastSessionCurriculum][
+            parsedState.lastSessionSubject
+          ],
+        );
         if (
           isSubjectValid &&
           validateFilterData({
@@ -212,10 +225,16 @@ export const useFilterPersistence = ({
               parsedState.lastSessionSubject
             ],
             subject: parsedState.lastSessionSubject,
+            enforceZeroLength: false,
           })
         ) {
           setSelectedSubject(parsedState.lastSessionSubject);
           setSelectedTopic(
+            parsedState.filters[parsedState.lastSessionCurriculum][
+              parsedState.lastSessionSubject
+            ].topic,
+          );
+          console.log(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].topic,
@@ -304,7 +323,9 @@ export const useFilterPersistence = ({
   }, [
     mountedRef,
     searchParams,
+    setCurrentPaperTypeFilter,
     setCurrentQuery,
+    setCurrentTopicFilter,
     setIsSearchEnabled,
     setIsValidSearchParams,
     setSelectedCurriculum,
@@ -343,10 +364,6 @@ export const useFilterPersistence = ({
 
   return {
     isMounted,
-    currentTopicFilter,
-    setCurrentTopicFilter,
-    currentPaperTypeFilter,
-    setCurrentPaperTypeFilter,
     sidebarKey,
     revert,
     resetEverything,
