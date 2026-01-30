@@ -13,26 +13,26 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { ScanText, Send, FileText } from "lucide-react";
-import { memo, useCallback, useState } from "react";
+import { ScanText, FileText } from "lucide-react";
+import { memo, useCallback } from "react";
 import {
   useFilterState,
   useFilterValidation,
   useAvailableFilters,
   useFilterPersistence,
-} from "../hooks";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
+} from "../../hooks";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { Button } from "@/components/ui/button";
-import { QR } from "./QR";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
-import CoursebookCover from "./CoursebookCover";
+import EnhancedMultiSelector from "../MultiSelector/EnhancedMultiSelector";
+import CoursebookCover from "../CoursebookCover";
 import Link from "next/link";
-import { AppSidebarProps } from "../types/components";
+import { AppSidebarProps } from "../../types/components";
 import { ValidCurriculum } from "@/constants/types";
+import StrictModeToggle from "./StrictModeToggle";
+import ShareFilterButton from "./ShareFilterButton";
 
 const AppSidebar = memo(
   ({
@@ -434,51 +434,3 @@ const AppSidebar = memo(
 AppSidebar.displayName = "AppSidebar";
 
 export default AppSidebar;
-
-const StrictModeToggle = memo(() => {
-  const { uiPreferences, setUiPreference } = useTopicalApp();
-
-  const handleStrictModeToggle = useCallback(() => {
-    setUiPreference("isStrictModeEnabled", (prev) => !prev);
-  }, [setUiPreference]);
-
-  return (
-    <div className="w-full flex items-center justify-around rounded-md border border-muted-foreground/20 bg-muted p-2">
-      <div className="w-[70%] flex items-start justify-center flex-col">
-        <p className="text-sm font-semibold">Strict mode</p>
-        <p className="text-xs text-muted-foreground">
-          Questions containing unrelated topics will be excluded.
-        </p>
-      </div>
-      <Switch
-        checked={uiPreferences.isStrictModeEnabled}
-        title="Toggle"
-        className="hover:cursor-pointer"
-        onCheckedChange={handleStrictModeToggle}
-      />
-    </div>
-  );
-});
-StrictModeToggle.displayName = "StrictModeToggle";
-
-const ShareFilterButton = memo(
-  ({ isDisabled, filterUrl }: { isDisabled: boolean; filterUrl: string }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-      <>
-        <Button
-          className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
-          disabled={isDisabled}
-          onClick={() => {
-            setIsOpen(true);
-          }}
-        >
-          Share filter
-          <Send />
-        </Button>
-        <QR url={filterUrl} isOpen={isOpen} setIsOpen={setIsOpen} />
-      </>
-    );
-  },
-);
-ShareFilterButton.displayName = "ShareFilterButton";

@@ -10,7 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { getCache, setCache } from "@/lib/client-cache";
 import { INITIAL_QUERY } from "@/constants/constants";
 import AppMainContent from "@/features/topical/components/AppMainContent";
-import AppSidebar from "@/features/topical/components/AppSidebar";
+import AppSidebar from "@/features/topical/components/AppSidebar/AppSidebar";
 import { api } from "@/lib/eden";
 import { Button } from "@/components/ui/button";
 import {
