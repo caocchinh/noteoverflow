@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { PAPER_TYPE_FILTER_SEARCH_PAGE_KEY } from "@/constants/constants";
 import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
 import { PaperTypeFilterSearchPageCache } from "@/features/search/constants/type";
@@ -9,55 +9,54 @@ export interface UsePaperTypePersistenceProps {
   selectedSubject: string;
 }
 
+const getSavedPaperTypeFilter = (
+  curriculum: string,
+  subject: string,
+): CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined => {
+  if (!curriculum || !subject) return undefined;
+
+  try {
+    const savedCache = localStorage.getItem(PAPER_TYPE_FILTER_SEARCH_PAGE_KEY);
+    if (!savedCache) return undefined;
+
+    const parsedCache: PaperTypeFilterSearchPageCache = JSON.parse(savedCache);
+    const savedFilter = parsedCache[curriculum]?.[subject];
+
+    if (
+      savedFilter &&
+      validateSubcurriculumnDivision({
+        value: savedFilter,
+        type: "paperType",
+        curriculum,
+        subject,
+      })
+    ) {
+      return savedFilter;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+};
+
 export const usePaperTypePersistence = ({
   selectedCurriculum,
   selectedSubject,
 }: UsePaperTypePersistenceProps) => {
   const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
     CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-  >(() => {
-    if (!selectedCurriculum || !selectedSubject) {
-      return undefined;
-    }
-    try {
-      const savedCache = localStorage.getItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-      );
-      if (savedCache) {
-        const parsedCache: PaperTypeFilterSearchPageCache =
-          JSON.parse(savedCache);
-        const savedFilter = parsedCache[selectedCurriculum]?.[selectedSubject];
+  >(() => getSavedPaperTypeFilter(selectedCurriculum, selectedSubject));
 
-        if (
-          savedFilter &&
-          validateSubcurriculumnDivision({
-            value: savedFilter,
-            type: "paperType",
-            curriculum: selectedCurriculum,
-            subject: selectedSubject,
-          })
-        ) {
-          return savedFilter;
-        }
-      }
-    } catch {
-      return undefined;
-    }
-    return undefined;
-  });
-
-  const isMountedRef = useRef(false);
-
+  // Sync state when curriculum or subject changes
   useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+    setCurrentPaperTypeFilter(
+      getSavedPaperTypeFilter(selectedCurriculum, selectedSubject),
+    );
+  }, [selectedCurriculum, selectedSubject]);
 
   // Save paper type filter preference to localStorage when it changes
   useEffect(() => {
-    if (!isMountedRef.current || !selectedCurriculum || !selectedSubject) {
+    if (!selectedCurriculum || !selectedSubject || !currentPaperTypeFilter) {
       return;
     }
 

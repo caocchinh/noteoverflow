@@ -51,9 +51,9 @@ export interface FilterStateSetters {
 
 export interface FilterStateHandlers {
   /** Handle curriculum change with cascading reset of dependent fields */
-  handleCurriculumChange: (value: string | ((prev: string) => string)) => void;
+  handleCurriculumChange: (value: string) => void;
   /** Handle subject change with cascading reset of dependent fields */
-  handleSubjectChange: (value: string | ((prev: string) => string)) => void;
+  handleSubjectChange: (value: string) => void;
   /** Handle topic change */
   handleTopicChange: (values: string[]) => void;
   /** Handle year change */
@@ -120,19 +120,17 @@ export function useFilterState(
 
   // Handlers
   const handleCurriculumChange = useCallback(
-    (value: string | ((prev: string) => string)) => {
-      const newValue =
-        typeof value === "function" ? value(selectedCurriculum) : value;
-      setSelectedCurriculum(newValue as ValidCurriculum);
+    (value: string) => {
+      setSelectedCurriculum(value as ValidCurriculum);
       // Reset dependent fields
       setSelectedSubject("");
       setSelectedTopic([]);
       setSelectedYear([]);
       setSelectedPaperType([]);
       setSelectedSeason([]);
-      onCurriculumChange?.(newValue as ValidCurriculum);
+      onCurriculumChange?.(value as ValidCurriculum);
     },
-    [selectedCurriculum, onCurriculumChange],
+    [onCurriculumChange],
   );
 
   const handleSubjectChange = useCallback(

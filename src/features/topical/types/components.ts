@@ -224,7 +224,6 @@ export interface RecentQueryProps {
   setSelectedYear: Dispatch<SetStateAction<string[]>>;
   setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
   setSelectedSeason: Dispatch<SetStateAction<string[]>>;
-  isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
 }
 

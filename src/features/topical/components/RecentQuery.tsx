@@ -24,7 +24,6 @@ import {
 } from "@tanstack/react-query";
 import {
   Dispatch,
-  RefObject,
   SetStateAction,
   useState,
   forwardRef,
@@ -64,7 +63,6 @@ export const RecentQuery = forwardRef(
       currentQuery,
       setIsSearchEnabled,
       setCurrentQuery,
-      isOverwriting,
       setSelectedCurriculum,
       setSelectedSubject,
       setSelectedTopic,
@@ -344,7 +342,6 @@ export const RecentQuery = forwardRef(
                       setSelectedPaperType={setSelectedPaperType}
                       setAccordionValue={setAccordionValue}
                       setSelectedSeason={setSelectedSeason}
-                      isOverwriting={isOverwriting}
                       setIsSidebarOpen={setIsSidebarOpen}
                       currentQuery={currentQuery}
                       setIsSearchEnabled={setIsSearchEnabled}
@@ -375,7 +372,6 @@ const RecentQueryItem = ({
   setQueryThatIsDeleting,
   index,
   setCurrentQuery,
-  isOverwriting,
   setIsSidebarOpen,
   setIsSearchEnabled,
   accordionValue,
@@ -403,7 +399,6 @@ const RecentQueryItem = ({
   setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
   setAccordionValue: Dispatch<SetStateAction<string>>;
   setSelectedSeason: Dispatch<SetStateAction<string[]>>;
-  isOverwriting: RefObject<boolean>;
   setIsSidebarOpen: (isSidebarOpen: boolean) => void;
   setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
   accordionValue: string;
@@ -540,7 +535,6 @@ const RecentQueryItem = ({
                 questionId: "",
                 isInspectOpen: false,
               });
-              isOverwriting.current = true;
               setSelectedCurriculum(
                 parsedQuery.curriculumId as ValidCurriculum,
               );
@@ -550,9 +544,6 @@ const RecentQueryItem = ({
               setSelectedYear(parsedQuery.year);
               setIsSearchEnabled(true);
               setSelectedPaperType(parsedQuery.paperType);
-              setTimeout(() => {
-                isOverwriting.current = false;
-              }, 0);
             }
             if (isMobileDevice) {
               setIsSidebarOpen(false);

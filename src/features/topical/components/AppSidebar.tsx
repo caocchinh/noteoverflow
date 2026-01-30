@@ -14,29 +14,13 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { ScanText, Send, FileText } from "lucide-react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useState, SetStateAction } from "react";
 import {
   useFilterState,
   useFilterValidation,
   useAvailableFilters,
+  useFilterPersistence,
 } from "../hooks";
-import {
-  DEFAULT_CACHE,
-  FILTERS_CACHE_KEY,
-  INVALID_INPUTS_DEFAULT,
-  UI_PREFERENCES_CACHE_KEY,
-} from "../constants/constants";
-import type {
-  CIE_A_LEVEL_SUBDIVISION,
-  ValidCurriculum,
-} from "@/constants/types";
-import {
-  validateCurriculum,
-  validateFilterData,
-  validateSubject,
-  syncFilterCacheToLocalStorage,
-  validateSubcurriculumnDivision,
-} from "@/features/topical/lib/utils";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { Button } from "@/components/ui/button";
 import { QR } from "./QR";
@@ -48,6 +32,16 @@ import EnhancedMultiSelector from "./MultiSelector/EnhancedMultiSelector";
 import CoursebookCover from "./CoursebookCover";
 import Link from "next/link";
 import { AppSidebarProps } from "../types/components";
+import {
+  FILTERS_CACHE_KEY,
+  INVALID_INPUTS_DEFAULT,
+  UI_PREFERENCES_CACHE_KEY,
+} from "../constants/constants";
+import {
+  validateSubject,
+  validateSubcurriculumnDivision,
+  validateFilterData,
+} from "../lib/utils";
 import { FiltersCache, UiPreferencesCache } from "../types/preferences";
 
 const AppSidebar = memo(
@@ -64,18 +58,8 @@ const AppSidebar = memo(
     appUltilityBarRef,
     recentQueryRef,
   }: AppSidebarProps) => {
-    const [isMounted, setIsMounted] = useState(false);
-    const [currentTopicFilter, setCurrentTopicFilter] = useState<
-      CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-    >(undefined);
-    const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
-      CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-    >(undefined);
-
-    const [sidebarKey, setSidebarKey] = useState(0);
     const isMobileDevice = useIsMobile();
     const { setIsAppSidebarOpen } = useTopicalApp();
-    const isOverwriting = useRef(false);
 
     const {
       values: {
@@ -163,418 +147,41 @@ const AppSidebar = memo(
       selectedSubject,
     });
 
-    const revert = useCallback(() => {
-      if (!currentQuery.curriculumId || !currentQuery.subjectId) {
-        return;
-      }
-      isOverwriting.current = true;
-      setSelectedCurriculum(currentQuery.curriculumId as ValidCurriculum);
-      setSelectedSubject(currentQuery.subjectId);
-      setSelectedTopic(currentQuery.topic);
-      setSelectedYear(currentQuery.year);
-      setSelectedPaperType(currentQuery.paperType);
-      setSelectedSeason(currentQuery.season);
-      setTimeout(() => {
-        isOverwriting.current = false;
-      }, 0);
-    }, [
-      currentQuery.curriculumId,
-      currentQuery.paperType,
-      currentQuery.season,
-      currentQuery.subjectId,
-      currentQuery.topic,
-      currentQuery.year,
-      setSelectedCurriculum,
-      setSelectedPaperType,
-      setSelectedSeason,
-      setSelectedSubject,
-      setSelectedTopic,
-      setSelectedYear,
-    ]);
-
-    const resetEverything = useCallback(() => {
-      isOverwriting.current = true;
-      try {
-        const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-        const stateToSave: FiltersCache = existingStateJSON
-          ? JSON.parse(existingStateJSON)
-          : { ...DEFAULT_CACHE };
-
-        stateToSave.lastSessionCurriculum = "";
-        stateToSave.lastSessionCurriculum = "";
-        if (selectedCurriculum && selectedSubject) {
-          stateToSave.filters = {
-            ...stateToSave.filters,
-            [selectedCurriculum]: {
-              ...stateToSave.filters?.[selectedCurriculum],
-              [selectedSubject]: {
-                topic: [],
-                paperType: [],
-                year: [],
-                season: [],
-                paperTypeSubcurriculumnDivisionPreference: undefined,
-                topicSubcurriculumnDivisionPreference: undefined,
-              },
-            },
-          };
-        }
-
-        localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(stateToSave));
-      } catch (error) {
-        console.error("Failed to access localStorage:", error);
-      }
-
-      resetAllFilters();
-      if (!isMobileDevice) {
-        setSidebarKey((prev) => prev + 1);
-      }
-      setTimeout(() => {
-        isOverwriting.current = false;
-      }, 0);
-    }, [resetAllFilters, isMobileDevice, selectedCurriculum, selectedSubject]);
-
-    useEffect(() => {
-      if (mountedRef.current) {
-        return;
-      }
-      let parsedQueryFromSearchParams;
-      if (searchParams.queryKey) {
-        try {
-          parsedQueryFromSearchParams = JSON.parse(
-            searchParams.queryKey as string,
-          );
-        } catch {
-          parsedQueryFromSearchParams = undefined;
-          setIsValidSearchParams(false);
-        }
-        if (
-          !parsedQueryFromSearchParams ||
-          !validateCurriculum(parsedQueryFromSearchParams.curriculumId) ||
-          !validateSubject(
-            parsedQueryFromSearchParams.curriculumId,
-            parsedQueryFromSearchParams.subjectId,
-          ) ||
-          !validateFilterData({
-            data: {
-              topic: parsedQueryFromSearchParams.topic,
-              paperType: parsedQueryFromSearchParams.paperType,
-              year: parsedQueryFromSearchParams.year,
-              season: parsedQueryFromSearchParams.season,
-            },
-            curriculumn: parsedQueryFromSearchParams.curriculumId,
-            subject: parsedQueryFromSearchParams.subjectId,
-          })
-        ) {
-          parsedQueryFromSearchParams = undefined;
-          setIsValidSearchParams(false);
-        } else {
-          setIsValidSearchParams(true);
-          setCurrentQuery(parsedQueryFromSearchParams);
-          setIsSearchEnabled(true);
-        }
-      }
-
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
-      const parsedState: FiltersCache = savedState
-        ? JSON.parse(savedState)
-        : false;
-      const parsedUiPreferences: UiPreferencesCache = savedUiPreferences
-        ? JSON.parse(savedUiPreferences)
-        : false;
-
-      let subject: string | undefined;
-      let curriculumn: string | undefined;
-
-      if (savedState && savedUiPreferences && !parsedQueryFromSearchParams) {
-        if (
-          parsedUiPreferences.isSessionCacheEnabled &&
-          parsedState.lastSessionCurriculum &&
-          validateCurriculum(parsedState.lastSessionCurriculum)
-        ) {
-          setSelectedCurriculum(
-            parsedState.lastSessionCurriculum as ValidCurriculum,
-          );
-          curriculumn = parsedState.lastSessionCurriculum;
-          const isSubjectValid = validateSubject(
-            parsedState.lastSessionCurriculum,
-            parsedState.lastSessionSubject,
-          );
-          if (parsedState.lastSessionSubject && isSubjectValid) {
-            setSelectedSubject(parsedState.lastSessionSubject);
-            subject = parsedState.lastSessionSubject;
-          }
-          if (
-            isSubjectValid &&
-            validateFilterData({
-              curriculumn: parsedState.lastSessionCurriculum,
-              data: parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ],
-              subject: parsedState.lastSessionSubject,
-            })
-          ) {
-            setSelectedSubject(parsedState.lastSessionSubject);
-            setSelectedTopic(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].topic,
-            );
-            setSelectedPaperType(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].paperType,
-            );
-            setSelectedYear(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].year,
-            );
-            setSelectedSeason(
-              parsedState.filters[parsedState.lastSessionCurriculum][
-                parsedState.lastSessionSubject
-              ].season,
-            );
-          }
-        }
-      } else if (parsedQueryFromSearchParams) {
-        curriculumn = parsedQueryFromSearchParams.curriculumId;
-        subject = parsedQueryFromSearchParams.subjectId;
-        setSelectedCurriculum(
-          parsedQueryFromSearchParams.curriculumId as ValidCurriculum,
-        );
-        setSelectedSubject(parsedQueryFromSearchParams.subjectId);
-        setSelectedPaperType(parsedQueryFromSearchParams.paperType);
-        setSelectedTopic(parsedQueryFromSearchParams.topic);
-        setSelectedYear(parsedQueryFromSearchParams.year);
-        setSelectedSeason(parsedQueryFromSearchParams.season);
-        syncFilterCacheToLocalStorage({
-          selectedCurriculum: parsedQueryFromSearchParams.curriculumId,
-          selectedSubject: parsedQueryFromSearchParams.subjectId,
-          selectedTopic: parsedQueryFromSearchParams.topic,
-          selectedPaperType: parsedQueryFromSearchParams.paperType,
-          selectedYear: parsedQueryFromSearchParams.year,
-          selectedSeason: parsedQueryFromSearchParams.season,
-        });
-      }
-      if (curriculumn && subject) {
-        try {
-          const savedPaperTypeSubcurriculumnDivision =
-            parsedState.filters[curriculumn][subject]
-              .paperTypeSubcurriculumnDivisionPreference;
-          const savedTopicSubcurriculumnDivision =
-            parsedState.filters[curriculumn][subject]
-              .topicSubcurriculumnDivisionPreference;
-          if (
-            savedPaperTypeSubcurriculumnDivision &&
-            validateSubcurriculumnDivision({
-              value: savedPaperTypeSubcurriculumnDivision,
-              type: "paperType",
-              subject,
-              curriculum: curriculumn,
-            })
-          ) {
-            setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
-          } else {
-            setCurrentPaperTypeFilter(undefined);
-          }
-          if (
-            savedTopicSubcurriculumnDivision &&
-            validateSubcurriculumnDivision({
-              value: savedTopicSubcurriculumnDivision,
-              type: "topic",
-              subject,
-              curriculum: curriculumn,
-            })
-          ) {
-            setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
-          } else {
-            setCurrentTopicFilter(undefined);
-          }
-        } catch {
-          setCurrentTopicFilter(undefined);
-          setCurrentPaperTypeFilter(undefined);
-        }
-      }
-
-      setTimeout(() => {
-        mountedRef.current = true;
-        setIsMounted(true);
-      }, 0);
-    }, [
-      mountedRef,
-      searchParams,
+    const {
+      isMounted,
+      currentTopicFilter,
+      setCurrentTopicFilter,
+      currentPaperTypeFilter,
+      setCurrentPaperTypeFilter,
+      sidebarKey,
+      revert,
+      resetEverything,
+    } = useFilterPersistence({
+      currentQuery,
       setCurrentQuery,
       setIsSearchEnabled,
+      searchParams,
       setIsValidSearchParams,
-      setSelectedCurriculum,
-      setSelectedPaperType,
-      setSelectedSeason,
-      setSelectedSubject,
-      setSelectedTopic,
-      setSelectedYear,
-    ]);
-
-    useEffect(() => {
-      if (!mountedRef.current || isOverwriting.current) {
-        return;
-      }
-      const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
-      const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
-
-      if (savedState && savedUiPreferences) {
-        try {
-          const parsedState: FiltersCache = JSON.parse(savedState);
-          const parsedUiPreferences: UiPreferencesCache =
-            JSON.parse(savedUiPreferences);
-          if (parsedUiPreferences.isPersistantCacheEnabled) {
-            const isSubjectValid = validateSubject(
-              selectedCurriculum,
-              selectedSubject,
-            );
-            if (selectedSubject && isSubjectValid) {
-              setSelectedSubject(selectedSubject);
-            }
-            try {
-              const savedPaperTypeSubcurriculumnDivision =
-                parsedState.filters[selectedCurriculum][selectedSubject]
-                  .paperTypeSubcurriculumnDivisionPreference;
-              const savedTopicSubcurriculumnDivision =
-                parsedState.filters[selectedCurriculum][selectedSubject]
-                  .topicSubcurriculumnDivisionPreference;
-              if (
-                savedPaperTypeSubcurriculumnDivision &&
-                validateSubcurriculumnDivision({
-                  value: savedPaperTypeSubcurriculumnDivision,
-                  type: "paperType",
-                  curriculum: selectedCurriculum,
-                  subject: selectedSubject,
-                })
-              ) {
-                setCurrentPaperTypeFilter(savedPaperTypeSubcurriculumnDivision);
-              } else {
-                setCurrentPaperTypeFilter(undefined);
-              }
-              if (
-                savedTopicSubcurriculumnDivision &&
-                validateSubcurriculumnDivision({
-                  value: savedTopicSubcurriculumnDivision,
-                  type: "topic",
-                  curriculum: selectedCurriculum,
-                  subject: selectedSubject,
-                })
-              ) {
-                setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
-              } else {
-                setCurrentTopicFilter(undefined);
-              }
-            } catch {
-              setCurrentTopicFilter(undefined);
-              setCurrentPaperTypeFilter(undefined);
-            }
-            if (
-              isSubjectValid &&
-              validateFilterData({
-                data: parsedState.filters[selectedCurriculum][selectedSubject],
-                curriculumn: selectedCurriculum,
-                subject: selectedSubject,
-              })
-            ) {
-              setSelectedTopic(
-                parsedState.filters[selectedCurriculum][selectedSubject].topic,
-              );
-              setSelectedPaperType(
-                parsedState.filters[selectedCurriculum][selectedSubject]
-                  .paperType,
-              );
-              setSelectedYear(
-                parsedState.filters[selectedCurriculum][selectedSubject].year,
-              );
-              setSelectedSeason(
-                parsedState.filters[selectedCurriculum][selectedSubject].season,
-              );
-            } else {
-              setSelectedTopic([]);
-              setSelectedYear([]);
-              setSelectedPaperType([]);
-              setSelectedSeason([]);
-            }
-          } else {
-            setSelectedTopic([]);
-            setSelectedYear([]);
-            setSelectedPaperType([]);
-            setSelectedSeason([]);
-            setCurrentTopicFilter(undefined);
-            setCurrentPaperTypeFilter(undefined);
-          }
-        } catch {
-          setSelectedTopic([]);
-          setSelectedYear([]);
-          setSelectedPaperType([]);
-          setSelectedSeason([]);
-          setCurrentTopicFilter(undefined);
-          setCurrentPaperTypeFilter(undefined);
-        }
-      } else {
-        setSelectedTopic([]);
-        setSelectedYear([]);
-        setSelectedPaperType([]);
-        setSelectedSeason([]);
-        setCurrentTopicFilter(undefined);
-        setCurrentPaperTypeFilter(undefined);
-      }
-
-      setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedSubject]);
-
-    useEffect(() => {
-      if (!mountedRef.current || isOverwriting.current) {
-        return;
-      }
-      setSelectedSubject("");
-      setSelectedTopic([]);
-      setSelectedYear([]);
-      setSelectedPaperType([]);
-      setSelectedSeason([]);
-      setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-    }, [
-      selectedCurriculum,
-      isOverwriting,
       mountedRef,
-      setSelectedSubject,
-      setSelectedTopic,
-      setSelectedYear,
-      setSelectedPaperType,
-      setSelectedSeason,
-      setInvalidInputs,
-    ]);
-
-    useEffect(() => {
-      if (!mountedRef.current) {
-        return;
-      }
-      syncFilterCacheToLocalStorage({
+      isMobileDevice,
+      values: {
         selectedCurriculum,
         selectedSubject,
         selectedTopic,
-        selectedPaperType,
         selectedYear,
+        selectedPaperType,
         selectedSeason,
-        paperTypeSubcurriculumnDivisionPreference: currentPaperTypeFilter,
-        topicSubcurriculumnDivisionPreference: currentTopicFilter,
-      });
-    }, [
-      selectedCurriculum,
-      selectedSubject,
-      selectedTopic,
-      selectedPaperType,
-      selectedYear,
-      selectedSeason,
-      currentPaperTypeFilter,
-      currentTopicFilter,
-      mountedRef,
-    ]);
+      },
+      setters: {
+        setSelectedCurriculum,
+        setSelectedSubject,
+        setSelectedTopic,
+        setSelectedYear,
+        setSelectedPaperType,
+        setSelectedSeason,
+      },
+      resetAllFilters,
+    });
 
     const handleSearch = useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -617,13 +224,158 @@ const AppSidebar = memo(
     );
 
     const handleCurriculumSelectChange = useCallback(
-      (value: string | ((prev: string) => string)) => {
+      (valueOrFn: SetStateAction<string>) => {
+        const value =
+          typeof valueOrFn === "function"
+            ? (valueOrFn as (prev: string) => string)(selectedCurriculum)
+            : valueOrFn;
         handleCurriculumChange(value);
+        setSelectedSubject("");
+        setSelectedTopic([]);
+        setSelectedYear([]);
+        setSelectedPaperType([]);
+        setSelectedSeason([]);
+        setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
       },
-      [handleCurriculumChange],
+      [
+        handleCurriculumChange,
+        selectedCurriculum,
+        setInvalidInputs,
+        setSelectedPaperType,
+        setSelectedSeason,
+        setSelectedSubject,
+        setSelectedTopic,
+        setSelectedYear,
+      ],
     );
 
-    const handleSubjectSelectChange = handleSubjectChange;
+    const handleSubjectSelectChange = useCallback(
+      (valueOrFn: SetStateAction<string>) => {
+        const value =
+          typeof valueOrFn === "function"
+            ? (valueOrFn as (prev: string) => string)(selectedSubject)
+            : valueOrFn;
+        handleSubjectChange(value);
+        const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
+        const savedUiPreferences = localStorage.getItem(
+          UI_PREFERENCES_CACHE_KEY,
+        );
+        if (savedState && savedUiPreferences) {
+          try {
+            const parsedState: FiltersCache = JSON.parse(savedState);
+            const parsedUiPreferences: UiPreferencesCache =
+              JSON.parse(savedUiPreferences);
+            if (parsedUiPreferences.isPersistantCacheEnabled) {
+              const isSubjectValid = validateSubject(selectedCurriculum, value);
+              if (value && isSubjectValid) {
+                setSelectedSubject(value);
+              }
+              try {
+                const savedPaperTypeSubcurriculumnDivision =
+                  parsedState.filters[selectedCurriculum][value]
+                    .paperTypeSubcurriculumnDivisionPreference;
+                const savedTopicSubcurriculumnDivision =
+                  parsedState.filters[selectedCurriculum][value]
+                    .topicSubcurriculumnDivisionPreference;
+                if (
+                  savedPaperTypeSubcurriculumnDivision &&
+                  validateSubcurriculumnDivision({
+                    value: savedPaperTypeSubcurriculumnDivision,
+                    type: "paperType",
+                    curriculum: selectedCurriculum,
+                    subject: value,
+                  })
+                ) {
+                  setCurrentPaperTypeFilter(
+                    savedPaperTypeSubcurriculumnDivision,
+                  );
+                } else {
+                  setCurrentPaperTypeFilter(undefined);
+                }
+                if (
+                  savedTopicSubcurriculumnDivision &&
+                  validateSubcurriculumnDivision({
+                    value: savedTopicSubcurriculumnDivision,
+                    type: "topic",
+                    curriculum: selectedCurriculum,
+                    subject: value,
+                  })
+                ) {
+                  setCurrentTopicFilter(savedTopicSubcurriculumnDivision);
+                } else {
+                  setCurrentTopicFilter(undefined);
+                }
+              } catch {
+                setCurrentTopicFilter(undefined);
+                setCurrentPaperTypeFilter(undefined);
+              }
+              if (
+                isSubjectValid &&
+                validateFilterData({
+                  data: parsedState.filters[selectedCurriculum][value],
+                  curriculumn: selectedCurriculum,
+                  subject: value,
+                })
+              ) {
+                setSelectedTopic(
+                  parsedState.filters[selectedCurriculum][value].topic,
+                );
+                setSelectedPaperType(
+                  parsedState.filters[selectedCurriculum][value].paperType,
+                );
+                setSelectedYear(
+                  parsedState.filters[selectedCurriculum][value].year,
+                );
+                setSelectedSeason(
+                  parsedState.filters[selectedCurriculum][value].season,
+                );
+              } else {
+                setSelectedTopic([]);
+                setSelectedYear([]);
+                setSelectedPaperType([]);
+                setSelectedSeason([]);
+              }
+            } else {
+              setSelectedTopic([]);
+              setSelectedYear([]);
+              setSelectedPaperType([]);
+              setSelectedSeason([]);
+              setCurrentTopicFilter(undefined);
+              setCurrentPaperTypeFilter(undefined);
+            }
+          } catch {
+            setSelectedTopic([]);
+            setSelectedYear([]);
+            setSelectedPaperType([]);
+            setSelectedSeason([]);
+            setCurrentTopicFilter(undefined);
+            setCurrentPaperTypeFilter(undefined);
+          }
+        } else {
+          setSelectedTopic([]);
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+          setCurrentTopicFilter(undefined);
+          setCurrentPaperTypeFilter(undefined);
+        }
+
+        setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
+      },
+      [
+        handleSubjectChange,
+        selectedSubject,
+        selectedCurriculum,
+        setCurrentPaperTypeFilter,
+        setCurrentTopicFilter,
+        setInvalidInputs,
+        setSelectedPaperType,
+        setSelectedSeason,
+        setSelectedSubject,
+        setSelectedTopic,
+        setSelectedYear,
+      ],
+    );
 
     return (
       <Sidebar
@@ -653,7 +405,6 @@ const AppSidebar = memo(
               setSelectedYear={setSelectedYear}
               setSelectedPaperType={setSelectedPaperType}
               setSelectedSeason={setSelectedSeason}
-              isOverwriting={isOverwriting}
             />
 
             <StrictModeToggle />

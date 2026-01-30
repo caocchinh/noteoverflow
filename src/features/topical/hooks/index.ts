@@ -16,3 +16,6 @@ export type {
 
 export { usePaperTypePersistence } from "./usePaperTypePersistence";
 export { useAvailableFilters } from "./useAvailableFilters";
+
+export { useFilterPersistence } from "./useFilterPersistence";
+export type { UseFilterPersistenceProps } from "./useFilterPersistence";
