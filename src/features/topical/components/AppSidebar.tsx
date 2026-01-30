@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ScanText, Send, FileText } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-
+import { useFilterState, useFilterValidation } from "../hooks";
 import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
@@ -31,7 +31,6 @@ import {
   validateFilterData,
   validateSubject,
   syncFilterCacheToLocalStorage,
-  isValidInputs as isValidInputsUtils,
   validateSubcurriculumnDivision,
 } from "@/features/topical/lib/utils";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
@@ -46,7 +45,6 @@ import CoursebookCover from "./CoursebookCover";
 import Link from "next/link";
 import { AppSidebarProps } from "../types/components";
 import { FiltersCache, UiPreferencesCache } from "../types/preferences";
-import { InvalidInputs } from "../types/models";
 
 const AppSidebar = memo(
   ({
@@ -63,13 +61,6 @@ const AppSidebar = memo(
     recentQueryRef,
   }: AppSidebarProps) => {
     const [isMounted, setIsMounted] = useState(false);
-    const [selectedCurriculum, setSelectedCurriculum] =
-      useState<ValidCurriculum>("CIE A-LEVEL");
-    const [selectedSubject, setSelectedSubject] = useState<string>("");
-    const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
-    const [selectedYear, setSelectedYear] = useState<string[]>([]);
-    const [selectedPaperType, setSelectedPaperType] = useState<string[]>([]);
-    const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
     const [currentTopicFilter, setCurrentTopicFilter] = useState<
       CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
     >(undefined);
@@ -77,19 +68,73 @@ const AppSidebar = memo(
       CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
     >(undefined);
 
-    const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
-      ...INVALID_INPUTS_DEFAULT,
-    });
     const [sidebarKey, setSidebarKey] = useState(0);
     const isMobileDevice = useIsMobile();
     const { setIsAppSidebarOpen } = useTopicalApp();
-    const curriculumRef = useRef<HTMLDivElement | null>(null);
-    const subjectRef = useRef<HTMLDivElement | null>(null);
-    const topicRef = useRef<HTMLDivElement | null>(null);
-    const yearRef = useRef<HTMLDivElement | null>(null);
-    const paperTypeRef = useRef<HTMLDivElement | null>(null);
-    const seasonRef = useRef<HTMLDivElement | null>(null);
     const isOverwriting = useRef(false);
+
+    const {
+      values: {
+        selectedCurriculum,
+        selectedSubject,
+        selectedTopic,
+        selectedYear,
+        selectedPaperType,
+        selectedSeason,
+      },
+      setters: {
+        setSelectedCurriculum,
+        setSelectedSubject,
+        setSelectedTopic,
+        setSelectedYear,
+        setSelectedPaperType,
+        setSelectedSeason,
+      },
+      handlers: {
+        handleCurriculumChange,
+        handleSubjectChange,
+        handleTopicChange,
+        handleYearChange,
+        handlePaperTypeChange,
+        handleSeasonChange,
+        resetAllFilters,
+      },
+      refs: {
+        curriculumRef,
+        subjectRef,
+        topicRef,
+        yearRef,
+        paperTypeRef,
+        seasonRef,
+      },
+      invalidInputs,
+      setInvalidInputs,
+    } = useFilterState({
+      onCurriculumChange: () => {
+        setCurrentTopicFilter(undefined);
+        setCurrentPaperTypeFilter(undefined);
+      },
+      onSubjectChange: () => {
+        setCurrentTopicFilter(undefined);
+        setCurrentPaperTypeFilter(undefined);
+      },
+    });
+
+    const { validateInputs } = useFilterValidation({
+      curriculumRef,
+      subjectRef,
+      topicRef,
+      yearRef,
+      paperTypeRef,
+      seasonRef,
+      selectedCurriculum,
+      selectedSubject,
+      selectedTopic,
+      selectedYear,
+      selectedPaperType,
+      selectedSeason,
+      setInvalidInputs,
+    });
 
     const handleTransitionEnd = useCallback(
       (e: React.TransitionEvent) => {
@@ -174,7 +219,20 @@ const AppSidebar = memo(
       setTimeout(() => {
         isOverwriting.current = false;
       }, 0);
-    }, [currentQuery]);
+    }, [
+      currentQuery.curriculumId,
+      currentQuery.paperType,
+      currentQuery.season,
+      currentQuery.subjectId,
+      currentQuery.topic,
+      currentQuery.year,
+      setSelectedCurriculum,
+      setSelectedPaperType,
+      setSelectedSeason,
+      setSelectedSubject,
+      setSelectedTopic,
+      setSelectedYear,
+    ]);
 
     const resetEverything = useCallback(() => {
       isOverwriting.current = true;
@@ -208,91 +266,14 @@ const AppSidebar = memo(
         console.error("Failed to access localStorage:", error);
       }
 
-      setSelectedCurriculum("CIE A-LEVEL");
-      setSelectedSubject("");
-      setSelectedTopic([]);
-      setSelectedYear([]);
-      setSelectedPaperType([]);
-      setSelectedSeason([]);
+      resetAllFilters();
       if (!isMobileDevice) {
         setSidebarKey((prev) => prev + 1);
       }
       setTimeout(() => {
         isOverwriting.current = false;
       }, 0);
-    }, [selectedCurriculum, selectedSubject, isMobileDevice]);
-
-    const isValidInputs = useCallback(
-      ({ scrollOnError = true }: { scrollOnError?: boolean }) => {
-        return isValidInputsUtils({
-          scrollOnError,
-          curriculumRef: curriculumRef,
-          subjectRef: subjectRef,
-          topicRef: topicRef,
-          yearRef: yearRef,
-          paperTypeRef: paperTypeRef,
-          seasonRef: seasonRef,
-          selectedCurriculum: selectedCurriculum,
-          selectedSubject: selectedSubject,
-          selectedTopic: selectedTopic,
-          selectedYear: selectedYear,
-          selectedPaperType: selectedPaperType,
-          selectedSeason: selectedSeason,
-          setInvalidInputs: setInvalidInputs,
-        });
-      },
-      [
-        curriculumRef,
-        subjectRef,
-        topicRef,
-        yearRef,
-        paperTypeRef,
-        seasonRef,
-        selectedCurriculum,
-        selectedSubject,
-        selectedTopic,
-        selectedYear,
-        selectedPaperType,
-        selectedSeason,
-        setInvalidInputs,
-      ],
-    );
-
-    useEffect(() => {
-      if (selectedCurriculum) {
-        setInvalidInputs((prev) => ({ ...prev, curriculum: false }));
-      }
-    }, [selectedCurriculum]);
-
-    useEffect(() => {
-      if (selectedSubject) {
-        setInvalidInputs((prev) => ({ ...prev, subject: false }));
-      }
-    }, [selectedSubject]);
-
-    useEffect(() => {
-      if (selectedTopic.length > 0) {
-        setInvalidInputs((prev) => ({ ...prev, topic: false }));
-      }
-    }, [selectedTopic]);
-
-    useEffect(() => {
-      if (selectedPaperType.length > 0) {
-        setInvalidInputs((prev) => ({ ...prev, paperType: false }));
-      }
-    }, [selectedPaperType]);
-
-    useEffect(() => {
-      if (selectedYear.length > 0) {
-        setInvalidInputs((prev) => ({ ...prev, year: false }));
-      }
-    }, [selectedYear]);
-
-    useEffect(() => {
-      if (selectedSeason.length > 0) {
-        setInvalidInputs((prev) => ({ ...prev, season: false }));
-      }
-    }, [selectedSeason]);
+    }, [resetAllFilters, isMobileDevice, selectedCurriculum, selectedSubject]);
 
     useEffect(() => {
       if (mountedRef.current) {
@@ -468,6 +449,12 @@ const AppSidebar = memo(
       setCurrentQuery,
       setIsSearchEnabled,
       setIsValidSearchParams,
+      setSelectedCurriculum,
+      setSelectedPaperType,
+      setSelectedSeason,
+      setSelectedSubject,
+      setSelectedTopic,
+      setSelectedYear,
     ]);
 
     useEffect(() => {
@@ -593,7 +580,17 @@ const AppSidebar = memo(
       setSelectedPaperType([]);
       setSelectedSeason([]);
       setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-    }, [selectedCurriculum, isOverwriting, mountedRef]);
+    }, [
+      selectedCurriculum,
+      isOverwriting,
+      mountedRef,
+      setSelectedSubject,
+      setSelectedTopic,
+      setSelectedYear,
+      setSelectedPaperType,
+      setSelectedSeason,
+      setInvalidInputs,
+    ]);
 
     useEffect(() => {
       if (!mountedRef.current) {
@@ -629,12 +626,14 @@ const AppSidebar = memo(
           subjectId: selectedSubject,
           topic: selectedTopic.toSorted(),
           paperType: selectedPaperType.toSorted(),
-          year: selectedYear.toSorted((a, b) => Number(b) - Number(a)),
+          year: selectedYear.toSorted(
+            (a: string, b: string) => Number(b) - Number(a),
+          ),
           season: selectedSeason.toSorted(),
         };
         const isSameQuery =
           JSON.stringify(currentQuery) == JSON.stringify(query);
-        if (isValidInputs({ scrollOnError: true }) && !isSameQuery) {
+        if (validateInputs({ scrollOnError: true }) && !isSameQuery) {
           setIsSearchEnabled(true);
           setCurrentQuery({
             ...query,
@@ -651,13 +650,22 @@ const AppSidebar = memo(
         selectedYear,
         selectedSeason,
         currentQuery,
-        isValidInputs,
+        validateInputs,
         setIsSearchEnabled,
         setCurrentQuery,
         isMobileDevice,
         setIsAppSidebarOpen,
       ],
     );
+
+    const handleCurriculumSelectChange = useCallback(
+      (value: string | ((prev: string) => string)) => {
+        handleCurriculumChange(value);
+      },
+      [handleCurriculumChange],
+    );
+
+    const handleSubjectSelectChange = handleSubjectChange;
 
     return (
       <Sidebar
@@ -720,9 +728,7 @@ const AppSidebar = memo(
                         label="Curriculum"
                         prerequisite=""
                         selectedValue={selectedCurriculum}
-                        setSelectedValue={useCallback((value) => {
-                          setSelectedCurriculum(value as ValidCurriculum);
-                        }, [])}
+                        setSelectedValue={handleCurriculumSelectChange}
                       />
                       {invalidInputs.curriculum && (
                         <p className="text-destructive text-sm">
@@ -748,9 +754,7 @@ const AppSidebar = memo(
                         label="Subject"
                         prerequisite={subjectPrerequisite}
                         selectedValue={selectedSubject}
-                        setSelectedValue={useCallback(setSelectedSubject, [
-                          setSelectedSubject,
-                        ])}
+                        setSelectedValue={handleSubjectSelectChange}
                       />
                       {invalidInputs.subject && (
                         <p className="text-destructive text-sm">
@@ -780,10 +784,7 @@ const AppSidebar = memo(
                     setCurrentFilter={setCurrentTopicFilter}
                     allAvailableOptions={availableTopicsFullInfo ?? []}
                     label="Topic"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedTopic(values as string[]),
-                      [],
-                    )}
+                    onValuesChange={handleTopicChange}
                     selectedValues={selectedTopic}
                   />
                   {invalidInputs.topic && (
@@ -810,10 +811,7 @@ const AppSidebar = memo(
                     setCurrentFilter={setCurrentPaperTypeFilter}
                     allAvailableOptions={availablePaperTypeFullInfo ?? []}
                     label="Paper"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedPaperType(values as string[]),
-                      [],
-                    )}
+                    onValuesChange={handlePaperTypeChange}
                     selectedValues={selectedPaperType}
                   />
                   {invalidInputs.paperType && (
@@ -837,10 +835,7 @@ const AppSidebar = memo(
                   <MultiSelector
                     allAvailableOptions={availableYears ?? []}
                     label="Year"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedYear(values as string[]),
-                      [],
-                    )}
+                    onValuesChange={handleYearChange}
                     selectedValues={selectedYear}
                   />
                   {invalidInputs.year && (
@@ -862,10 +857,7 @@ const AppSidebar = memo(
                   <MultiSelector
                     allAvailableOptions={availableSeasons ?? []}
                     label="Season"
-                    onValuesChange={useCallback(
-                      (values) => setSelectedSeason(values as string[]),
-                      [],
-                    )}
+                    onValuesChange={handleSeasonChange}
                     selectedValues={selectedSeason}
                   />
                   {invalidInputs.season && (
@@ -915,6 +907,11 @@ export default AppSidebar;
 
 const StrictModeToggle = memo(() => {
   const { uiPreferences, setUiPreference } = useTopicalApp();
+
+  const handleStrictModeToggle = useCallback(() => {
+    setUiPreference("isStrictModeEnabled", (prev) => !prev);
+  }, [setUiPreference]);
+
   return (
     <div className="w-full flex items-center justify-around rounded-md border border-muted-foreground/20 bg-muted p-2">
       <div className="w-[70%] flex items-start justify-center flex-col">
@@ -927,9 +924,7 @@ const StrictModeToggle = memo(() => {
         checked={uiPreferences.isStrictModeEnabled}
         title="Toggle"
         className="hover:cursor-pointer"
-        onCheckedChange={useCallback(() => {
-          setUiPreference("isStrictModeEnabled", (prev) => !prev);
-        }, [setUiPreference])}
+        onCheckedChange={handleStrictModeToggle}
       />
     </div>
   );

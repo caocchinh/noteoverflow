@@ -26,6 +26,7 @@ import {
   TOPICAL_DATA,
 } from "@/constants/constants";
 import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
+import { useFilterState } from "../../topical/hooks";
 import { Button } from "@/components/ui/button";
 import { Filter, Save, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -62,22 +63,41 @@ const OptionalFilters = memo(
       },
       ref,
     ) => {
-      const [selectedCurriculum, setSelectedCurriculum] =
-        useState<ValidCurriculum>(
+      const {
+        values: {
+          selectedCurriculum,
+          selectedSubject,
+          selectedYear,
+          selectedPaperType,
+          selectedSeason,
+        },
+        setters: {
+          setSelectedCurriculum,
+          setSelectedSubject,
+          setSelectedPaperType,
+          setSelectedYear,
+          setSelectedSeason,
+        },
+        handlers: {
+          handleCurriculumChange,
+          handleSubjectChange,
+          handlePaperTypeChange,
+          handleYearChange,
+          handleSeasonChange,
+          resetAllFilters,
+        },
+        refs: { curriculumRef, subjectRef, yearRef, paperTypeRef, seasonRef },
+      } = useFilterState({
+        initialCurriculum:
           (currentFilter?.curriculum as ValidCurriculum) || "CIE A-LEVEL",
-        );
-      const [selectedSubject, setSelectedSubject] = useState<string>(
-        currentFilter?.subject || "",
-      );
-      const [selectedYear, setSelectedYear] = useState<string[]>(
-        currentFilter?.year || [],
-      );
-      const [selectedPaperType, setSelectedPaperType] = useState<string[]>(
-        currentFilter?.paperType || [],
-      );
-      const [selectedSeason, setSelectedSeason] = useState<string[]>(
-        currentFilter?.season || [],
-      );
+        initialSubject: currentFilter?.subject || "",
+        initialYear: currentFilter?.year || [],
+        initialPaperType: currentFilter?.paperType || [],
+        initialSeason: currentFilter?.season || [],
+        onCurriculumChange: () => setCurrentPaperTypeFilter(undefined),
+        onSubjectChange: () => setCurrentPaperTypeFilter(undefined),
+      });
+
       const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
         CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
       >(undefined);
@@ -85,11 +105,6 @@ const OptionalFilters = memo(
       const [portalContainer, setPortalContainer] =
         useState<HTMLElement | null>(null);
       const [isSheetOpen, setIsSheetOpen] = useState(false);
-      const curriculumRef = useRef<HTMLDivElement | null>(null);
-      const subjectRef = useRef<HTMLDivElement | null>(null);
-      const yearRef = useRef<HTMLDivElement | null>(null);
-      const paperTypeRef = useRef<HTMLDivElement | null>(null);
-      const seasonRef = useRef<HTMLDivElement | null>(null);
 
       const availableCurriculum = useMemo(() => {
         return TOPICAL_DATA.map((item) => ({
@@ -142,35 +157,6 @@ const OptionalFilters = memo(
         if (selectedPaperType.length > 0) count++;
         return count;
       }, [selectedSubject, selectedYear, selectedSeason, selectedPaperType]);
-
-      // Handler for curriculum change - resets all dependent state
-      const handleCurriculumChange = useCallback(
-        (value: React.SetStateAction<string>) => {
-          const newValue =
-            typeof value === "function" ? value(selectedCurriculum) : value;
-          setSelectedCurriculum(newValue as ValidCurriculum);
-          setSelectedSubject("");
-          setSelectedYear([]);
-          setSelectedPaperType([]);
-          setSelectedSeason([]);
-          setCurrentPaperTypeFilter(undefined);
-        },
-        [selectedCurriculum],
-      );
-
-      // Handler for subject change - resets filter selections
-      const handleSubjectChange = useCallback(
-        (value: React.SetStateAction<string>) => {
-          const newValue =
-            typeof value === "function" ? value(selectedSubject) : value;
-          setSelectedSubject(newValue);
-          setSelectedYear([]);
-          setSelectedPaperType([]);
-          setSelectedSeason([]);
-          setCurrentPaperTypeFilter(undefined);
-        },
-        [selectedSubject],
-      );
 
       // Load paper type filter preference when subject changes
       useEffect(() => {
@@ -243,12 +229,9 @@ const OptionalFilters = memo(
       }, [selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
 
       const handleClearAll = useCallback(() => {
-        setSelectedSubject("");
-        setSelectedYear([]);
-        setSelectedPaperType([]);
-        setSelectedSeason([]);
+        resetAllFilters();
         setCurrentPaperTypeFilter(undefined);
-      }, []);
+      }, [resetAllFilters, setCurrentPaperTypeFilter]);
 
       const handleApplyFilters = useCallback(() => {
         const newFilter: OptionalSearchFilter = {};
@@ -273,6 +256,8 @@ const OptionalFilters = memo(
         setCurrentFilter,
         onSearch,
       ]);
+
+      const handleCloseSheet = useCallback(() => setIsSheetOpen(false), []);
 
       useImperativeHandle(
         ref,
@@ -425,10 +410,7 @@ const OptionalFilters = memo(
                       setCurrentFilter={setCurrentPaperTypeFilter}
                       allAvailableOptions={availablePaperTypeFullInfo ?? []}
                       label="Paper"
-                      onValuesChange={useCallback(
-                        (values) => setSelectedPaperType(values as string[]),
-                        [],
-                      )}
+                      onValuesChange={handlePaperTypeChange}
                       selectedValues={selectedPaperType}
                     />
                   </div>
@@ -440,10 +422,7 @@ const OptionalFilters = memo(
                     <MultiSelector
                       allAvailableOptions={availableYears ?? []}
                       label="Year"
-                      onValuesChange={useCallback(
-                        (values) => setSelectedYear(values as string[]),
-                        [],
-                      )}
+                      onValuesChange={handleYearChange}
                       selectedValues={selectedYear}
                     />
                   </div>
@@ -455,10 +434,7 @@ const OptionalFilters = memo(
                     <MultiSelector
                       allAvailableOptions={availableSeasons ?? []}
                       label="Season"
-                      onValuesChange={useCallback(
-                        (values) => setSelectedSeason(values as string[]),
-                        [],
-                      )}
+                      onValuesChange={handleSeasonChange}
                       selectedValues={selectedSeason}
                     />
                   </div>
@@ -466,9 +442,7 @@ const OptionalFilters = memo(
               </ScrollArea>
               <SheetFooter className="flex flex-row gap-3 px-4 py-4 border-t">
                 <Button
-                  onClick={useCallback(() => {
-                    setIsSheetOpen(false);
-                  }, [])}
+                  onClick={handleCloseSheet}
                   className="flex-1 gap-2 bg-logo-main text-white! hover:bg-logo-main/90 cursor-pointer"
                   disabled={isSearching}
                 >

@@ -9,15 +9,14 @@ import MultiSelector from "@/features/topical/components/MultiSelector/MultiSele
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
-import { isValidInputs as isValidInputsUtils } from "@/features/topical/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { INVALID_INPUTS_DEFAULT } from "../constants/constants";
+import { useFilterState, useFilterValidation } from "@/features/topical/hooks";
+import { useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SecondaryAppSidebarProps } from "../types/components";
-import { InvalidInputs, SubjectMetadata } from "../types/models";
+import { SubjectMetadata } from "../types/models";
 
 const SecondaryAppSidebar = ({
   subjectMetadata,
@@ -28,78 +27,50 @@ const SecondaryAppSidebar = ({
   selectedCurriculumn,
   selectedSubject,
 }: SecondaryAppSidebarProps) => {
-  const [selectedTopic, setSelectedTopic] = useState<string[] | null>(null);
-  const [selectedYear, setSelectedYear] = useState<string[] | null>(null);
-  const [selectedPaperType, setSelectedPaperType] = useState<string[] | null>(
-    null,
-  );
-  const [invalidInputs, setInvalidInputs] = useState<InvalidInputs>({
-    ...INVALID_INPUTS_DEFAULT,
+  const {
+    values: { selectedTopic, selectedYear, selectedPaperType, selectedSeason },
+    setters: {
+      setSelectedTopic,
+      setSelectedYear,
+      setSelectedPaperType,
+      setSelectedSeason,
+    },
+    handlers: {
+      handleTopicChange,
+      handleYearChange,
+      handlePaperTypeChange,
+      handleSeasonChange,
+      resetAllFilters,
+    },
+    refs: { topicRef, yearRef, paperTypeRef, seasonRef },
+    invalidInputs,
+    setInvalidInputs,
+  } = useFilterState({
+    initialTopic: currentFilter?.topic || [],
+    initialYear: currentFilter?.year || [],
+    initialPaperType: currentFilter?.paperType || [],
+    initialSeason: currentFilter?.season || [],
   });
-  const [selectedSeason, setSelectedSeason] = useState<string[] | null>(null);
 
-  const topicRef = useRef<HTMLDivElement | null>(null);
-  const yearRef = useRef<HTMLDivElement | null>(null);
-  const paperTypeRef = useRef<HTMLDivElement | null>(null);
-  const seasonRef = useRef<HTMLDivElement | null>(null);
-
-  // Refs to track selected values without triggering effects
+  // Refs to track selected values without triggering effects (keeping existing pattern)
   const selectedTopicRef = useRef<string[] | null>(null);
   const selectedYearRef = useRef<string[] | null>(null);
   const selectedPaperTypeRef = useRef<string[] | null>(null);
   const selectedSeasonRef = useRef<string[] | null>(null);
 
-  const isValidInputs = useCallback(
-    ({ scrollOnError = true }: { scrollOnError?: boolean }) => {
-      return isValidInputsUtils({
-        scrollOnError,
-        topicRef: topicRef,
-        yearRef: yearRef,
-        paperTypeRef: paperTypeRef,
-        seasonRef: seasonRef,
-        selectedTopic: selectedTopic ?? [],
-        selectedYear: selectedYear ?? [],
-        selectedPaperType: selectedPaperType ?? [],
-        selectedSeason: selectedSeason ?? [],
-        setInvalidInputs: setInvalidInputs,
-      });
-    },
-    [
-      topicRef,
-      yearRef,
-      paperTypeRef,
-      seasonRef,
-      selectedTopic,
-      selectedYear,
-      selectedPaperType,
-      selectedSeason,
-      setInvalidInputs,
-    ],
-  );
-
-  useEffect(() => {
-    if (selectedTopic && selectedTopic.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, topic: false }));
-    }
-  }, [selectedTopic]);
-
-  useEffect(() => {
-    if (selectedPaperType && selectedPaperType.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
-    }
-  }, [selectedPaperType]);
-
-  useEffect(() => {
-    if (selectedYear && selectedYear.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, year: false }));
-    }
-  }, [selectedYear]);
-
-  useEffect(() => {
-    if (selectedSeason && selectedSeason.length > 0) {
-      setInvalidInputs((prev) => ({ ...prev, season: false }));
-    }
-  }, [selectedSeason]);
+  const { validateInputs } = useFilterValidation({
+    topicRef,
+    yearRef,
+    paperTypeRef,
+    seasonRef,
+    selectedTopic,
+    selectedYear,
+    selectedPaperType,
+    selectedSeason,
+    selectedSubject: selectedSubject || undefined,
+    selectedCurriculum: selectedCurriculumn || undefined,
+    setInvalidInputs,
+  });
 
   // Update refs when selected values change
   useEffect(() => {
@@ -132,18 +103,8 @@ const SecondaryAppSidebar = ({
   ]);
 
   const handleResetEverything = useCallback(() => {
-    setSelectedPaperType([]);
-    setSelectedTopic([]);
-    setSelectedYear([]);
-    setSelectedSeason([]);
-    setInvalidInputs({ ...INVALID_INPUTS_DEFAULT });
-  }, [
-    setSelectedPaperType,
-    setSelectedTopic,
-    setSelectedYear,
-    setSelectedSeason,
-    setInvalidInputs,
-  ]);
+    resetAllFilters();
+  }, [resetAllFilters]);
 
   useEffect(() => {
     // When subjectMetadata changes, filter selections to keep only available options
@@ -231,7 +192,14 @@ const SecondaryAppSidebar = ({
     if (didUpdate) {
       setCurrentFilter(updatedFilter);
     }
-  }, [subjectMetadata, setCurrentFilter]);
+  }, [
+    subjectMetadata,
+    setCurrentFilter,
+    setSelectedPaperType,
+    setSelectedSeason,
+    setSelectedTopic,
+    setSelectedYear,
+  ]);
 
   useEffect(() => {
     if (!currentFilter && subjectMetadata?.topic) {
@@ -246,7 +214,16 @@ const SecondaryAppSidebar = ({
         season: subjectMetadata?.season,
       });
     }
-  }, [currentFilter, selectedSubject, setCurrentFilter, subjectMetadata]);
+  }, [
+    currentFilter,
+    selectedSubject,
+    setCurrentFilter,
+    subjectMetadata,
+    setSelectedPaperType,
+    setSelectedSeason,
+    setSelectedTopic,
+    setSelectedYear,
+  ]);
 
   const handleFilter = useCallback(() => {
     const filter = {
@@ -258,8 +235,11 @@ const SecondaryAppSidebar = ({
       season: selectedSeason?.toSorted() ?? [],
     };
     const isSameQuery = JSON.stringify(currentFilter) == JSON.stringify(filter);
-    const isValid = isValidInputs({ scrollOnError: true });
-    if (isValid && isValidInputs({ scrollOnError: true }) && !isSameQuery) {
+
+    // Check validation
+    const isValid = validateInputs({ scrollOnError: true });
+
+    if (isValid && !isSameQuery) {
       setCurrentFilter({
         ...filter,
       });
@@ -275,7 +255,7 @@ const SecondaryAppSidebar = ({
     selectedYear,
     selectedSeason,
     currentFilter,
-    isValidInputs,
+    validateInputs,
     setCurrentFilter,
     setIsSidebarOpen,
   ]);
@@ -306,10 +286,7 @@ const SecondaryAppSidebar = ({
               <MultiSelector
                 allAvailableOptions={subjectMetadata?.topic ?? []}
                 label="Topic"
-                onValuesChange={useCallback(
-                  (values) => setSelectedTopic(values as string[]),
-                  [],
-                )}
+                onValuesChange={handleTopicChange}
                 selectedValues={selectedTopic ?? []}
               />
               {invalidInputs.topic && (
@@ -331,10 +308,7 @@ const SecondaryAppSidebar = ({
               <MultiSelector
                 allAvailableOptions={subjectMetadata?.paperType ?? []}
                 label="Paper"
-                onValuesChange={useCallback(
-                  (values) => setSelectedPaperType(values as string[]),
-                  [],
-                )}
+                onValuesChange={handlePaperTypeChange}
                 selectedValues={selectedPaperType ?? []}
               />
               {invalidInputs.paperType && (
@@ -356,10 +330,7 @@ const SecondaryAppSidebar = ({
               <MultiSelector
                 allAvailableOptions={subjectMetadata?.year ?? []}
                 label="Year"
-                onValuesChange={useCallback(
-                  (values) => setSelectedYear(values as string[]),
-                  [],
-                )}
+                onValuesChange={handleYearChange}
                 selectedValues={selectedYear ?? []}
               />
               {invalidInputs.year && (
@@ -381,10 +352,7 @@ const SecondaryAppSidebar = ({
               <MultiSelector
                 allAvailableOptions={subjectMetadata?.season ?? []}
                 label="Season"
-                onValuesChange={useCallback(
-                  (values) => setSelectedSeason(values as string[]),
-                  [],
-                )}
+                onValuesChange={handleSeasonChange}
                 selectedValues={selectedSeason ?? []}
               />
               {invalidInputs.season && (
