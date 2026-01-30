@@ -28,28 +28,31 @@ const SecondaryAppSidebar = ({
   selectedSubject,
 }: SecondaryAppSidebarProps) => {
   const {
-    values: { selectedTopic, selectedYear, selectedPaperType, selectedSeason },
-    setters: {
-      setSelectedTopic,
-      setSelectedYear,
-      setSelectedPaperType,
-      setSelectedSeason,
+    filterState: {
+      selectedTopic,
+      selectedYear,
+      selectedPaperType,
+      selectedSeason,
+      invalidInputs,
+      setInvalidInputs,
     },
     handlers: {
       handleTopicChange,
       handleYearChange,
       handlePaperTypeChange,
       handleSeasonChange,
-      resetAllFilters,
+      resetEverything,
     },
     refs: { topicRef, yearRef, paperTypeRef, seasonRef },
-    invalidInputs,
-    setInvalidInputs,
   } = useFilterState({
-    initialTopic: currentFilter?.topic || [],
-    initialYear: currentFilter?.year || [],
-    initialPaperType: currentFilter?.paperType || [],
-    initialSeason: currentFilter?.season || [],
+    currentQuery: {
+      curriculumId: selectedCurriculumn ?? "",
+      subjectId: selectedSubject ?? "",
+      topic: currentFilter?.topic ?? [],
+      year: currentFilter?.year ?? [],
+      paperType: currentFilter?.paperType ?? [],
+      season: currentFilter?.season ?? [],
+    },
   });
 
   // Refs to track selected values without triggering effects (keeping existing pattern)
@@ -90,21 +93,21 @@ const SecondaryAppSidebar = ({
   }, [selectedSeason]);
 
   const handleRevert = useCallback(() => {
-    setSelectedTopic(currentFilter?.topic ?? []);
-    setSelectedYear(currentFilter?.year ?? []);
-    setSelectedPaperType(currentFilter?.paperType ?? []);
-    setSelectedSeason(currentFilter?.season ?? []);
+    handleTopicChange(currentFilter?.topic ?? []);
+    handleYearChange(currentFilter?.year ?? []);
+    handlePaperTypeChange(currentFilter?.paperType ?? []);
+    handleSeasonChange(currentFilter?.season ?? []);
   }, [
     currentFilter,
-    setSelectedTopic,
-    setSelectedYear,
-    setSelectedPaperType,
-    setSelectedSeason,
+    handleTopicChange,
+    handleYearChange,
+    handlePaperTypeChange,
+    handleSeasonChange,
   ]);
 
   const handleResetEverything = useCallback(() => {
-    resetAllFilters();
-  }, [resetAllFilters]);
+    resetEverything();
+  }, [resetEverything]);
 
   useEffect(() => {
     // When subjectMetadata changes, filter selections to keep only available options
@@ -131,7 +134,7 @@ const SecondaryAppSidebar = ({
         JSON.stringify(filteredTopics) !==
         JSON.stringify(selectedTopicRef.current)
       ) {
-        setSelectedTopic(filteredTopics);
+        handleTopicChange(filteredTopics);
         didUpdate = true;
       }
       updatedFilter.topic = filteredTopics;
@@ -148,7 +151,7 @@ const SecondaryAppSidebar = ({
         JSON.stringify(filteredYears) !==
         JSON.stringify(selectedYearRef.current)
       ) {
-        setSelectedYear(filteredYears);
+        handleYearChange(filteredYears);
         didUpdate = true;
       }
       updatedFilter.year = filteredYears;
@@ -165,7 +168,7 @@ const SecondaryAppSidebar = ({
         JSON.stringify(filteredPaperTypes) !==
         JSON.stringify(selectedPaperTypeRef.current)
       ) {
-        setSelectedPaperType(filteredPaperTypes);
+        handlePaperTypeChange(filteredPaperTypes);
         didUpdate = true;
       }
       updatedFilter.paperType = filteredPaperTypes;
@@ -182,7 +185,7 @@ const SecondaryAppSidebar = ({
         JSON.stringify(filteredSeasons) !==
         JSON.stringify(selectedSeasonRef.current)
       ) {
-        setSelectedSeason(filteredSeasons);
+        handleSeasonChange(filteredSeasons);
         didUpdate = true;
       }
       updatedFilter.season = filteredSeasons;
@@ -195,18 +198,18 @@ const SecondaryAppSidebar = ({
   }, [
     subjectMetadata,
     setCurrentFilter,
-    setSelectedPaperType,
-    setSelectedSeason,
-    setSelectedTopic,
-    setSelectedYear,
+    handlePaperTypeChange,
+    handleSeasonChange,
+    handleTopicChange,
+    handleYearChange,
   ]);
 
   useEffect(() => {
     if (!currentFilter && subjectMetadata?.topic) {
-      setSelectedPaperType(subjectMetadata?.paperType);
-      setSelectedSeason(subjectMetadata.season);
-      setSelectedYear(subjectMetadata.year);
-      setSelectedTopic(subjectMetadata.topic);
+      handlePaperTypeChange(subjectMetadata?.paperType ?? []);
+      handleSeasonChange(subjectMetadata.season);
+      handleYearChange(subjectMetadata.year);
+      handleTopicChange(subjectMetadata.topic);
       setCurrentFilter({
         paperType: subjectMetadata?.paperType,
         topic: subjectMetadata?.topic,
@@ -219,10 +222,10 @@ const SecondaryAppSidebar = ({
     selectedSubject,
     setCurrentFilter,
     subjectMetadata,
-    setSelectedPaperType,
-    setSelectedSeason,
-    setSelectedTopic,
-    setSelectedYear,
+    handlePaperTypeChange,
+    handleSeasonChange,
+    handleTopicChange,
+    handleYearChange,
   ]);
 
   const handleFilter = useCallback(() => {
@@ -270,7 +273,7 @@ const SecondaryAppSidebar = ({
           <SheetHeader className="sr-only">
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>
-          <div className="flex w-full flex-col items-center justify-start gap-4 px-4 py-2">
+          <div className="flex w-full flex-col items-centegrep -r . | wc -lr justify-start gap-4 px-4 py-2">
             <div
               className="flex flex-col items-start justify-start gap-1 w-full"
               ref={topicRef}

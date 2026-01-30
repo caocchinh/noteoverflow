@@ -16,19 +16,8 @@ import {
 import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
 import { Button } from "@/components/ui/button";
 import { History, Loader2, ScanText, Wrench } from "lucide-react";
-import {
-  useIsMutating,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  Dispatch,
-  SetStateAction,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useIsMutating } from "@tanstack/react-query";
+import { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -48,14 +37,12 @@ import {
   validateSubject,
 } from "../lib/utils";
 import { toast } from "sonner";
-import { deleteRecentQuery, addRecentQuery } from "../server/actions";
-import { BAD_REQUEST } from "@/constants/constants";
 import Sort from "./Sort";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/eden";
 import { RecentQueryProps } from "../types/components";
-import { CurrentQuery, FilterData } from "../types/models";
+import { FilterData } from "../types/models";
+import { useRecentQueries } from "../hooks";
 
 export const RecentQuery = forwardRef(
   (
@@ -75,142 +62,19 @@ export const RecentQuery = forwardRef(
   ) => {
     const { uiPreferences, setUiPreference } = useTopicalApp();
     const { isSessionPending, isAuthenticated } = useAuth();
+    const isMobile = useIsMobile();
     const {
-      data: recentQuery,
-      isError: isRecentQueryError,
-      isFetching: isRecentQueryFetching,
-    } = useQuery({
-      queryKey: ["user_recent_query"],
-      queryFn: async () => {
-        const { data, error } = await api.topical["recent-query"].get();
-        if (error) {
-          throw new Error(error.value.error);
-        }
-        return data;
-      },
-      enabled: isAuthenticated,
-    });
+      recentQuery,
+      isRecentQueryError,
+      isRecentQueryFetching,
+      deleteRecentQueryMutation,
+      mutateRecentQuery,
+      isAddRecentQueryPending,
+    } = useRecentQueries();
 
     const [accordionValue, setAccordionValue] =
       useState<string>("skibidi toilet");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    const queryClient = useQueryClient();
-    const [queryThatIsDeleting, setQueryThatIsDeleting] = useState<
-      string | null
-    >(null);
-
-    const key = ["delete_recent_query", queryThatIsDeleting];
-
-    const { mutate: deleteRecentQueryMutation } = useMutation({
-      mutationKey: key,
-      mutationFn: async (queryKey: string) => {
-        const result = await deleteRecentQuery({ queryKey: queryKey });
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        return queryKey;
-      },
-      onSuccess: (data) => {
-        queryClient.setQueryData<
-          {
-            queryKey: string;
-            sortParams: string | null;
-            lastSearch: number;
-          }[]
-        >(["user_recent_query"], (oldData) => {
-          if (!oldData) {
-            return oldData;
-          }
-          return oldData.filter((item) => item.queryKey !== data);
-        });
-      },
-      onError: (error) => {
-        toast.error(
-          "Failed to delete outdated data: " +
-            error.message +
-            ". Please refresh the page.",
-        );
-      },
-    });
-
-    const { mutate: mutateRecentQuery, isPending: isAddRecentQueryPending } =
-      useMutation({
-        mutationKey: ["add_recent_query"],
-        mutationFn: async (
-          queryKey: {
-            curriculumId: string;
-            subjectId: string;
-          } & FilterData,
-        ) => {
-          const result = await addRecentQuery({ queryKey: queryKey });
-          if (result.error) {
-            throw new Error(result.error);
-          }
-          return {
-            deletedKey: result.data?.deletedKey,
-            lastSearch: result.data?.lastSearch,
-            currentQueryKey: queryKey,
-          };
-        },
-        onSuccess: (data) => {
-          queryClient.setQueryData<
-            {
-              queryKey: string;
-              sortParams: string | null;
-              lastSearch: number;
-            }[]
-          >(["user_recent_query"], (oldData) => {
-            if (!oldData) {
-              return oldData;
-            }
-            if (data && data.currentQueryKey) {
-              let newData = oldData;
-              if (data.deletedKey) {
-                newData = newData.filter(
-                  (item) => item.queryKey !== data.deletedKey,
-                );
-              }
-              const isQueryAlreadyExist = newData.find(
-                (item) =>
-                  item.queryKey === JSON.stringify(data.currentQueryKey),
-              );
-              if (!isQueryAlreadyExist) {
-                newData.unshift({
-                  queryKey: JSON.stringify(data.currentQueryKey),
-                  sortParams: null,
-                  lastSearch: data.lastSearch?.getTime() ?? 0,
-                });
-              } else {
-                newData = newData.map((item) => {
-                  if (item.queryKey === JSON.stringify(data.currentQueryKey)) {
-                    return {
-                      ...item,
-                      lastSearch: data.lastSearch?.getTime() ?? 0,
-                    };
-                  }
-                  return item;
-                });
-              }
-              return newData;
-            }
-            return oldData;
-          });
-        },
-        onError: (error) => {
-          if (error.message === BAD_REQUEST) {
-            toast.error(
-              "Failed to add recent search to database. Invalid or outdata data. Please refresh the website!",
-            );
-            return;
-          }
-          toast.error(
-            "Failed to add recent search to database: " +
-              error.message +
-              ". Please refresh the page.",
-          );
-        },
-      });
 
     useImperativeHandle(
       ref,
@@ -219,6 +83,71 @@ export const RecentQuery = forwardRef(
         isAddRecentQueryPending,
       }),
       [isAddRecentQueryPending, mutateRecentQuery],
+    );
+
+    const handleApplyQuery = useCallback(
+      (
+        parsedQuery: {
+          curriculumId: string;
+          subjectId: string;
+        } & FilterData,
+      ) => {
+        const stringifiedNewQuery = JSON.stringify(parsedQuery);
+        if (stringifiedNewQuery !== JSON.stringify(currentQuery)) {
+          if (
+            !validateCurriculum(parsedQuery.curriculumId) ||
+            !validateSubject(parsedQuery.curriculumId, parsedQuery.subjectId) ||
+            !validateFilterData({
+              data: {
+                topic: parsedQuery.topic,
+                paperType: parsedQuery.paperType,
+                year: parsedQuery.year,
+                season: parsedQuery.season,
+              },
+              curriculumn: parsedQuery.curriculumId,
+              subject: parsedQuery.subjectId,
+            })
+          ) {
+            toast.error("Outdated data. Entry will be deleted.");
+            setTimeout(() => {
+              deleteRecentQueryMutation(JSON.stringify(parsedQuery));
+            }, 0);
+            return;
+          }
+          setAccordionValue("dom dom yes yes");
+          setCurrentQuery(parsedQuery);
+          updateSearchParams({
+            query: JSON.stringify(parsedQuery),
+            questionId: "",
+            isInspectOpen: false,
+          });
+          setSelectedCurriculum(parsedQuery.curriculumId as ValidCurriculum);
+          setSelectedSubject(parsedQuery.subjectId);
+          setSelectedTopic(parsedQuery.topic);
+          setSelectedSeason(parsedQuery.season);
+          setSelectedYear(parsedQuery.year);
+          setIsSearchEnabled(true);
+          setSelectedPaperType(parsedQuery.paperType);
+        }
+        if (isMobile) {
+          setIsSidebarOpen(false);
+        }
+        setIsDialogOpen(false);
+      },
+      [
+        currentQuery,
+        deleteRecentQueryMutation,
+        isMobile,
+        setCurrentQuery,
+        setIsSearchEnabled,
+        setIsSidebarOpen,
+        setSelectedCurriculum,
+        setSelectedPaperType,
+        setSelectedSeason,
+        setSelectedSubject,
+        setSelectedTopic,
+        setSelectedYear,
+      ],
     );
 
     return (
@@ -334,23 +263,12 @@ export const RecentQuery = forwardRef(
                   return (
                     <RecentQueryItem
                       key={item.queryKey + index}
-                      setCurrentQuery={setCurrentQuery}
-                      setSelectedCurriculum={setSelectedCurriculum}
-                      setSelectedSubject={setSelectedSubject}
-                      setSelectedTopic={setSelectedTopic}
-                      setSelectedYear={setSelectedYear}
-                      setSelectedPaperType={setSelectedPaperType}
-                      setAccordionValue={setAccordionValue}
-                      setSelectedSeason={setSelectedSeason}
-                      setIsSidebarOpen={setIsSidebarOpen}
-                      currentQuery={currentQuery}
-                      setIsSearchEnabled={setIsSearchEnabled}
-                      accordionValue={accordionValue}
                       index={index}
                       item={item}
-                      setQueryThatIsDeleting={setQueryThatIsDeleting}
-                      deleteRecentQueryMutation={deleteRecentQueryMutation}
-                      setIsDialogOpen={setIsDialogOpen}
+                      accordionValue={accordionValue}
+                      onApplyQuery={handleApplyQuery}
+                      isAuthenticated={isAuthenticated}
+                      isSessionPending={isSessionPending}
                     />
                   );
                 })}
@@ -368,46 +286,28 @@ export const RecentQuery = forwardRef(
 RecentQuery.displayName = "RecentQuery";
 
 const RecentQueryItem = ({
-  currentQuery,
-  setQueryThatIsDeleting,
-  index,
-  setCurrentQuery,
-  setIsSidebarOpen,
-  setIsSearchEnabled,
-  accordionValue,
-  setSelectedCurriculum,
-  setSelectedPaperType,
-  setSelectedSeason,
-  setSelectedSubject,
-  setSelectedYear,
-  setSelectedTopic,
-  setIsDialogOpen,
   item,
-  deleteRecentQueryMutation,
-  setAccordionValue,
+  index,
+  accordionValue,
+  onApplyQuery,
+  isAuthenticated,
+  isSessionPending,
 }: {
   item: {
     queryKey: string;
     lastSearch: Date;
   };
   index: number;
-  setCurrentQuery: Dispatch<SetStateAction<CurrentQuery>>;
-  setSelectedCurriculum: Dispatch<SetStateAction<ValidCurriculum>>;
-  setSelectedSubject: Dispatch<SetStateAction<string>>;
-  setSelectedTopic: Dispatch<SetStateAction<string[]>>;
-  setSelectedYear: Dispatch<SetStateAction<string[]>>;
-  setSelectedPaperType: Dispatch<SetStateAction<string[]>>;
-  setAccordionValue: Dispatch<SetStateAction<string>>;
-  setSelectedSeason: Dispatch<SetStateAction<string[]>>;
-  setIsSidebarOpen: (isSidebarOpen: boolean) => void;
-  setIsSearchEnabled: Dispatch<SetStateAction<boolean>>;
   accordionValue: string;
-  currentQuery: CurrentQuery;
-  setQueryThatIsDeleting: Dispatch<SetStateAction<string | null>>;
-  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-  deleteRecentQueryMutation: (queryKey: string) => void;
+  onApplyQuery: (
+    parsedQuery: {
+      curriculumId: string;
+      subjectId: string;
+    } & FilterData,
+  ) => void;
+  isAuthenticated: boolean;
+  isSessionPending: boolean;
 }) => {
-  const isMobileDevice = useIsMobile();
   const parsedQuery = JSON.parse(item.queryKey) as {
     curriculumId: string;
     subjectId: string;
@@ -415,7 +315,7 @@ const RecentQueryItem = ({
   const isThisItemDeleting = useIsMutating({
     mutationKey: ["delete_recent_query", item.queryKey],
   });
-  const { isSessionPending, isAuthenticated } = useAuth();
+
   return (
     <AccordionItem
       value={index.toString()}
@@ -502,53 +402,7 @@ const RecentQueryItem = ({
             if (isThisItemDeleting || isSessionPending || !isAuthenticated) {
               return;
             }
-            const stringifiedNewQuery = JSON.stringify(parsedQuery);
-            if (stringifiedNewQuery !== JSON.stringify(currentQuery)) {
-              if (
-                !validateCurriculum(parsedQuery.curriculumId) ||
-                !validateSubject(
-                  parsedQuery.curriculumId,
-                  parsedQuery.subjectId,
-                ) ||
-                !validateFilterData({
-                  data: {
-                    topic: parsedQuery.topic,
-                    paperType: parsedQuery.paperType,
-                    year: parsedQuery.year,
-                    season: parsedQuery.season,
-                  },
-                  curriculumn: parsedQuery.curriculumId,
-                  subject: parsedQuery.subjectId,
-                })
-              ) {
-                toast.error("Outdated data. Entry will be deleted.");
-                setQueryThatIsDeleting(item.queryKey);
-                setTimeout(() => {
-                  deleteRecentQueryMutation(item.queryKey);
-                }, 0);
-                return;
-              }
-              setAccordionValue("dom dom yes yes");
-              setCurrentQuery(parsedQuery);
-              updateSearchParams({
-                query: JSON.stringify(parsedQuery),
-                questionId: "",
-                isInspectOpen: false,
-              });
-              setSelectedCurriculum(
-                parsedQuery.curriculumId as ValidCurriculum,
-              );
-              setSelectedSubject(parsedQuery.subjectId);
-              setSelectedTopic(parsedQuery.topic);
-              setSelectedSeason(parsedQuery.season);
-              setSelectedYear(parsedQuery.year);
-              setIsSearchEnabled(true);
-              setSelectedPaperType(parsedQuery.paperType);
-            }
-            if (isMobileDevice) {
-              setIsSidebarOpen(false);
-            }
-            setIsDialogOpen(false);
+            onApplyQuery(parsedQuery);
           }}
         >
           Search

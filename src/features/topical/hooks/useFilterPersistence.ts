@@ -131,20 +131,6 @@ export const useFilterPersistence = ({
           handleSubjectChange(parsedState.lastSessionSubject);
           subject = parsedState.lastSessionSubject;
         }
-        console.log(
-          "isSubjectValid",
-          isSubjectValid,
-          validateFilterData({
-            curriculumn: parsedState.lastSessionCurriculum,
-            data: parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ],
-            subject: parsedState.lastSessionSubject,
-          }),
-          parsedState.filters[parsedState.lastSessionCurriculum][
-            parsedState.lastSessionSubject
-          ],
-        );
         if (
           isSubjectValid &&
           validateFilterData({
@@ -158,11 +144,6 @@ export const useFilterPersistence = ({
         ) {
           handleSubjectChange(parsedState.lastSessionSubject);
           handleTopicChange(
-            parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ].topic,
-          );
-          console.log(
             parsedState.filters[parsedState.lastSessionCurriculum][
               parsedState.lastSessionSubject
             ].topic,

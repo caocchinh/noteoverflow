@@ -1,6 +1,5 @@
 export { useFilterState } from "./useFilterState";
 export type {
-  UseFilterStateOptions,
   UseFilterStateReturn,
   FilterStateRefs,
   FilterStateValues,
@@ -19,3 +18,5 @@ export { useAvailableFilters } from "./useAvailableFilters";
 
 export { useFilterPersistence } from "./useFilterPersistence";
 export type { UseFilterPersistenceProps } from "./useFilterPersistence";
+
+export { useRecentQueries } from "./useRecentQueries";
