@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useEffectEvent, memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,217 +48,221 @@ const truncateQuery = (query: string, maxLength = 67) => {
   return query.substring(0, maxLength) + "...";
 };
 
-const SearchHistory = ({
-  onSelectHistory,
-  className,
-  isSearching,
-}: SearchHistoryProps) => {
-  const [history, setHistory] = useState<SearchHistoryItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+const SearchHistory = memo(
+  ({ onSelectHistory, className, isSearching }: SearchHistoryProps) => {
+    const [history, setHistory] = useState<SearchHistoryItem[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
 
-  const loadHistory = useCallback(async () => {
-    const items = await getSearchHistory();
-    setHistory(items);
-  }, []);
+    const loadHistory = useCallback(async () => {
+      const items = await getSearchHistory();
+      setHistory(items);
+    }, []);
 
-  useEffect(() => {
-    if (isOpen) {
+    const onOpen = useEffectEvent(() => {
       loadHistory();
-    }
-  }, [isOpen, loadHistory]);
+    });
 
-  const handleClearHistory = useCallback(async () => {
-    await clearSearchHistory();
-    setHistory([]);
-  }, []);
+    useEffect(() => {
+      if (isOpen) {
+        onOpen();
+      }
+    }, [isOpen]);
 
-  const handleDeleteItem = useCallback(
-    async (e: React.MouseEvent, id: string) => {
-      e.stopPropagation();
-      await removeSearchHistoryItem(id);
-      setHistory((prev) => prev.filter((item) => item.id !== id));
-    },
-    []
-  );
+    const handleClearHistory = useCallback(async () => {
+      await clearSearchHistory();
+      setHistory([]);
+    }, []);
 
-  const handleSelectItem = useCallback(
-    (item: SearchHistoryItem) => {
-      onSelectHistory(item);
-      setIsOpen(false);
-    },
-    [onSelectHistory]
-  );
+    const handleDeleteItem = useCallback(
+      async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        await removeSearchHistoryItem(id);
+        setHistory((prev) => prev.filter((item) => item.id !== id));
+      },
+      [],
+    );
 
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground hover:text-foreground",
-            className
-          )}
-        >
-          <History className="w-4 h-4" />
-          <span>History</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="max-w-2xl max-h-[95vh] p-0 dark:bg-accent"
-        showCloseButton={false}
-      >
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <DialogTitle>Local Search History</DialogTitle>
-            {history.length > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleClearHistory}
-                className="h-8 px-3 text-xs cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4 mr-1.5" />
-                Clear All
-              </Button>
-            )}
-          </div>
-        </DialogHeader>
-        <ScrollArea className="h-[67dvh] overflow-x-hidden [&>div>div]:block!">
-          {history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <History className="w-16 h-16 text-muted-foreground/30 mb-4" />
-              <p className="text-base font-medium text-muted-foreground">
-                No search history
-              </p>
-              <p className="text-sm text-muted-foreground/60 mt-2">
-                Your recent searches will appear here
-              </p>
-            </div>
-          ) : (
-            <div className="p-4 w-full">
-              {history.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    if (!isSearching) {
-                      handleSelectItem(item);
-                    }
-                  }}
-                  className={cn(
-                    "w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer mb-2 border border-transparent hover:border-primary/20",
-                    {
-                      "cursor-not-allowed opacity-50": isSearching,
-                    }
-                  )}
-                >
-                  <div className="flex items-start gap-4 w-full">
-                    <div className="mt-0.5">
-                      {item.type === "text" ? (
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Type className="w-5 h-5 text-primary" />
-                        </div>
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-                          {item.previewUrl ? (
-                            <img
-                              src={item.previewUrl}
-                              alt="Search preview"
-                              className="w-full h-full! object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <ImageIcon className="w-5 h-5 text-primary" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col w-[77%]">
-                      <p className="text-sm font-medium text-foreground wrap-break-word ">
-                        {item.type === "text"
-                          ? truncateQuery(item.query, 120)
-                          : "Image search"}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <p className="text-xs text-muted-foreground">
-                          {formatTimestamp(item.timestamp)}
-                        </p>
-                        {item.filter && (
-                          <>
-                            {item.filter.subject && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[10px] h-4 px-1.5 rounded-sm"
-                              >
-                                {item.filter.subject}
-                              </Badge>
-                            )}
-                            {item.filter.year &&
-                              item.filter.year.length > 0 && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] h-4 px-1.5 rounded-sm"
-                                >
-                                  {item.filter.year.length === 1
-                                    ? `${item.filter.year[0]} year`
-                                    : `${item.filter.year.length} years`}
-                                </Badge>
-                              )}
-                            {item.filter.season &&
-                              item.filter.season.length > 0 && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] h-4 px-1.5 rounded-sm"
-                                >
-                                  {item.filter.season.length === 1
-                                    ? `${item.filter.season[0]} season`
-                                    : `${item.filter.season.length} seasons`}
-                                </Badge>
-                              )}
-                            {item.filter.paperType &&
-                              item.filter.paperType.length > 0 && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] h-4 px-1.5 rounded-sm"
-                                >
-                                  {item.filter.paperType.length === 1
-                                    ? `${item.filter.paperType[0]} paper`
-                                    : `${item.filter.paperType.length} papers`}
-                                </Badge>
-                              )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-                        onClick={(e) => handleDeleteItem(e, item.id)}
-                        title="Remove from history"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-        <DialogFooter className="px-6 py-4 border-t flex items-center justify-center">
+    const handleSelectItem = useCallback(
+      (item: SearchHistoryItem) => {
+        onSelectHistory(item);
+        setIsOpen(false);
+      },
+      [onSelectHistory],
+    );
+
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="w-full cursor-pointer"
-            onClick={() => setIsOpen(false)}
+            size="sm"
+            className={cn(
+              "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground hover:text-foreground",
+              className,
+            )}
           >
-            Close
+            <History className="w-4 h-4" />
+            <span>History</span>
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+        </DialogTrigger>
+        <DialogContent
+          className="max-w-2xl max-h-[95vh] p-0 dark:bg-accent"
+          showCloseButton={false}
+        >
+          <DialogHeader className="px-6 py-4 border-b">
+            <div className="flex items-center justify-between">
+              <DialogTitle>Local Search History</DialogTitle>
+              {history.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleClearHistory}
+                  className="h-8 px-3 text-xs cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 mr-1.5" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          </DialogHeader>
+          <ScrollArea className="h-[67dvh] overflow-x-hidden [&>div>div]:block!">
+            {history.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <History className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                <p className="text-base font-medium text-muted-foreground">
+                  No search history
+                </p>
+                <p className="text-sm text-muted-foreground/60 mt-2">
+                  Your recent searches will appear here
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 w-full">
+                {history.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      if (!isSearching) {
+                        handleSelectItem(item);
+                      }
+                    }}
+                    className={cn(
+                      "w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer mb-2 border border-transparent hover:border-primary/20",
+                      {
+                        "cursor-not-allowed opacity-50": isSearching,
+                      },
+                    )}
+                  >
+                    <div className="flex items-start gap-4 w-full">
+                      <div className="mt-0.5">
+                        {item.type === "text" ? (
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Type className="w-5 h-5 text-primary" />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                            {item.previewUrl ? (
+                              <img
+                                src={item.previewUrl}
+                                alt="Search preview"
+                                className="w-full h-full! object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <ImageIcon className="w-5 h-5 text-primary" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col w-[77%]">
+                        <p className="text-sm font-medium text-foreground wrap-break-word ">
+                          {item.type === "text"
+                            ? truncateQuery(item.query, 120)
+                            : "Image search"}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <p className="text-xs text-muted-foreground">
+                            {formatTimestamp(item.timestamp)}
+                          </p>
+                          {item.filter && (
+                            <>
+                              {item.filter.subject && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] h-4 px-1.5 rounded-sm"
+                                >
+                                  {item.filter.subject}
+                                </Badge>
+                              )}
+                              {item.filter.year &&
+                                item.filter.year.length > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] h-4 px-1.5 rounded-sm"
+                                  >
+                                    {item.filter.year.length === 1
+                                      ? `${item.filter.year[0]} year`
+                                      : `${item.filter.year.length} years`}
+                                  </Badge>
+                                )}
+                              {item.filter.season &&
+                                item.filter.season.length > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] h-4 px-1.5 rounded-sm"
+                                  >
+                                    {item.filter.season.length === 1
+                                      ? `${item.filter.season[0]} season`
+                                      : `${item.filter.season.length} seasons`}
+                                  </Badge>
+                                )}
+                              {item.filter.paperType &&
+                                item.filter.paperType.length > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] h-4 px-1.5 rounded-sm"
+                                  >
+                                    {item.filter.paperType.length === 1
+                                      ? `${item.filter.paperType[0]} paper`
+                                      : `${item.filter.paperType.length} papers`}
+                                  </Badge>
+                                )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                          onClick={(e) => handleDeleteItem(e, item.id)}
+                          title="Remove from history"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter className="px-6 py-4 border-t flex items-center justify-center">
+            <Button
+              variant="outline"
+              className="w-full cursor-pointer"
+              onClick={() => setIsOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+);
+
+SearchHistory.displayName = "SearchHistory";
 
 export default SearchHistory;

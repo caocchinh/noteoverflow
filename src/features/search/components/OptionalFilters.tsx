@@ -13,6 +13,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -59,29 +60,30 @@ const OptionalFilters = memo(
         isSearching,
         isInputValid,
       },
-      ref
+      ref,
     ) => {
       const [selectedCurriculum, setSelectedCurriculum] =
         useState<ValidCurriculum>(
-          (currentFilter?.curriculum as ValidCurriculum) || "CIE A-LEVEL"
+          (currentFilter?.curriculum as ValidCurriculum) || "CIE A-LEVEL",
         );
       const [selectedSubject, setSelectedSubject] = useState<string>(
-        currentFilter?.subject || ""
+        currentFilter?.subject || "",
       );
       const [selectedYear, setSelectedYear] = useState<string[]>(
-        currentFilter?.year || []
+        currentFilter?.year || [],
       );
       const [selectedPaperType, setSelectedPaperType] = useState<string[]>(
-        currentFilter?.paperType || []
+        currentFilter?.paperType || [],
       );
       const [selectedSeason, setSelectedSeason] = useState<string[]>(
-        currentFilter?.season || []
+        currentFilter?.season || [],
       );
       const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
         CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
       >(undefined);
       const isMountedRef = useRef(false);
-      const [isMounted, setIsMounted] = useState(false);
+      const [portalContainer, setPortalContainer] =
+        useState<HTMLElement | null>(null);
       const [isSheetOpen, setIsSheetOpen] = useState(false);
       const curriculumRef = useRef<HTMLDivElement | null>(null);
       const subjectRef = useRef<HTMLDivElement | null>(null);
@@ -99,7 +101,7 @@ const OptionalFilters = memo(
       const availableSubjects = useMemo(() => {
         return TOPICAL_DATA[
           TOPICAL_DATA.findIndex(
-            (item) => item.curriculum === selectedCurriculum
+            (item) => item.curriculum === selectedCurriculum,
           )
         ]?.subject;
       }, [selectedCurriculum]);
@@ -141,24 +143,34 @@ const OptionalFilters = memo(
         return count;
       }, [selectedSubject, selectedYear, selectedSeason, selectedPaperType]);
 
-      // Reset selections when curriculum changes
-      useEffect(() => {
-        if (!isMountedRef.current) return;
-        setSelectedSubject("");
-        setSelectedYear([]);
-        setSelectedPaperType([]);
-        setSelectedSeason([]);
-        setCurrentPaperTypeFilter(undefined);
-      }, [selectedCurriculum]);
+      // Handler for curriculum change - resets all dependent state
+      const handleCurriculumChange = useCallback(
+        (value: React.SetStateAction<string>) => {
+          const newValue =
+            typeof value === "function" ? value(selectedCurriculum) : value;
+          setSelectedCurriculum(newValue as ValidCurriculum);
+          setSelectedSubject("");
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+          setCurrentPaperTypeFilter(undefined);
+        },
+        [selectedCurriculum],
+      );
 
-      // Reset filter selections when subject changes
-      useEffect(() => {
-        if (!isMountedRef.current) return;
-        setSelectedYear([]);
-        setSelectedPaperType([]);
-        setSelectedSeason([]);
-        setCurrentPaperTypeFilter(undefined);
-      }, [selectedSubject]);
+      // Handler for subject change - resets filter selections
+      const handleSubjectChange = useCallback(
+        (value: React.SetStateAction<string>) => {
+          const newValue =
+            typeof value === "function" ? value(selectedSubject) : value;
+          setSelectedSubject(newValue);
+          setSelectedYear([]);
+          setSelectedPaperType([]);
+          setSelectedSeason([]);
+          setCurrentPaperTypeFilter(undefined);
+        },
+        [selectedSubject],
+      );
 
       // Load paper type filter preference when subject changes
       useEffect(() => {
@@ -168,7 +180,7 @@ const OptionalFilters = memo(
 
         try {
           const savedCache = localStorage.getItem(
-            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY
+            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
           );
           if (savedCache) {
             const parsedCache: PaperTypeFilterSearchPageCache =
@@ -205,7 +217,7 @@ const OptionalFilters = memo(
 
         try {
           const existingCache = localStorage.getItem(
-            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY
+            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
           );
           const parsedCache: PaperTypeFilterSearchPageCache = existingCache
             ? JSON.parse(existingCache)
@@ -220,12 +232,12 @@ const OptionalFilters = memo(
 
           localStorage.setItem(
             PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-            JSON.stringify(parsedCache)
+            JSON.stringify(parsedCache),
           );
         } catch (error) {
           console.error(
             "Failed to save paper type filter to localStorage:",
-            error
+            error,
           );
         }
       }, [selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
@@ -267,51 +279,64 @@ const OptionalFilters = memo(
         () => ({
           applyFilters: handleApplyFilters,
         }),
-        [handleApplyFilters]
+        [handleApplyFilters],
+      );
+
+      const onMount = useEffectEvent(
+        ({
+          _currentFilter,
+        }: {
+          _currentFilter: OptionalSearchFilter | null;
+        }) => {
+          if (_currentFilter) {
+            if (_currentFilter.curriculum) {
+              setSelectedCurriculum(
+                _currentFilter.curriculum as ValidCurriculum,
+              );
+            }
+            if (_currentFilter.subject) {
+              setSelectedSubject(_currentFilter.subject);
+            }
+            if (_currentFilter.year) {
+              setSelectedYear(_currentFilter.year);
+            }
+            if (_currentFilter.paperType) {
+              setSelectedPaperType(_currentFilter.paperType);
+            }
+            if (_currentFilter.season) {
+              setSelectedSeason(_currentFilter.season);
+            }
+          }
+          setTimeout(() => {
+            if (isMountedRef.current) return;
+            isMountedRef.current = true;
+            setPortalContainer(searchButtonPortalRef.current);
+          }, 0);
+        },
       );
 
       // Sync internal state with currentFilter
       useEffect(() => {
-        if (currentFilter) {
-          if (currentFilter.curriculum) {
-            setSelectedCurriculum(currentFilter.curriculum as ValidCurriculum);
-          }
-          if (currentFilter.subject) {
-            setSelectedSubject(currentFilter.subject);
-          }
-          if (currentFilter.year) {
-            setSelectedYear(currentFilter.year);
-          }
-          if (currentFilter.paperType) {
-            setSelectedPaperType(currentFilter.paperType);
-          }
-          if (currentFilter.season) {
-            setSelectedSeason(currentFilter.season);
-          }
+        if (currentFilter && !isMountedRef.current) {
+          onMount({ _currentFilter: currentFilter });
         }
-        setTimeout(() => {
-          if (isMountedRef.current) return;
-          isMountedRef.current = true;
-          setIsMounted(true);
-        }, 0);
       }, [currentFilter]);
 
       // Render search button through portal
-      const searchButton =
-        isMounted && searchButtonPortalRef.current
-          ? createPortal(
-              <Button
-                onClick={handleApplyFilters}
-                disabled={isSearching || !isInputValid}
-                size="lg"
-                className="rounded-full px-8 w-full bg-logo-main! cursor-pointer text-white! h-12 gap-2 transition-all text-base"
-              >
-                <Search className="w-4 h-4" />
-                {isSearching ? "Searching..." : "Search Questions"}
-              </Button>,
-              searchButtonPortalRef.current
-            )
-          : null;
+      const searchButton = portalContainer
+        ? createPortal(
+            <Button
+              onClick={handleApplyFilters}
+              disabled={isSearching || !isInputValid}
+              size="lg"
+              className="rounded-full px-8 w-full bg-logo-main! cursor-pointer text-white! h-12 gap-2 transition-all text-base"
+            >
+              <Search className="w-4 h-4" />
+              {isSearching ? "Searching..." : "Search Questions"}
+            </Button>,
+            portalContainer,
+          )
+        : null;
 
       return (
         <>
@@ -369,9 +394,7 @@ const OptionalFilters = memo(
                       label="Curriculum"
                       prerequisite=""
                       selectedValue={selectedCurriculum}
-                      setSelectedValue={useCallback((value) => {
-                        setSelectedCurriculum(value as ValidCurriculum);
-                      }, [])}
+                      setSelectedValue={handleCurriculumChange}
                       triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
                       modal={true}
                     />
@@ -386,9 +409,7 @@ const OptionalFilters = memo(
                       label="Subject"
                       prerequisite={subjectPrerequisite}
                       selectedValue={selectedSubject}
-                      setSelectedValue={useCallback(setSelectedSubject, [
-                        setSelectedSubject,
-                      ])}
+                      setSelectedValue={handleSubjectChange}
                       triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
                       modal={true}
                     />
@@ -399,14 +420,14 @@ const OptionalFilters = memo(
                       Paper
                     </Label>
                     <EnhancedMultiSelector
-                      isMounted={isMounted}
+                      isMounted={!!portalContainer}
                       currentFilter={currentPaperTypeFilter}
                       setCurrentFilter={setCurrentPaperTypeFilter}
                       allAvailableOptions={availablePaperTypeFullInfo ?? []}
                       label="Paper"
                       onValuesChange={useCallback(
                         (values) => setSelectedPaperType(values as string[]),
-                        []
+                        [],
                       )}
                       selectedValues={selectedPaperType}
                     />
@@ -421,7 +442,7 @@ const OptionalFilters = memo(
                       label="Year"
                       onValuesChange={useCallback(
                         (values) => setSelectedYear(values as string[]),
-                        []
+                        [],
                       )}
                       selectedValues={selectedYear}
                     />
@@ -436,7 +457,7 @@ const OptionalFilters = memo(
                       label="Season"
                       onValuesChange={useCallback(
                         (values) => setSelectedSeason(values as string[]),
-                        []
+                        [],
                       )}
                       selectedValues={selectedSeason}
                     />
@@ -468,8 +489,8 @@ const OptionalFilters = memo(
           </Sheet>
         </>
       );
-    }
-  )
+    },
+  ),
 );
 
 OptionalFilters.displayName = "OptionalFilters";

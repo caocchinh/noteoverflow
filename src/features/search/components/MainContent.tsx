@@ -95,9 +95,7 @@ const MainContent = memo(
     const [sortParameters, setSortParameters] = useState<SortParameters>({
       sortBy: DEFAULT_SORT_OPTIONS,
     });
-    const [fullPartitionedData, setFullPartitionedData] = useState<
-      VectorizeSelectedQuestion[][] | undefined
-    >(undefined);
+
     const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
     const [isSticky, setIsSticky] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -151,8 +149,8 @@ const MainContent = memo(
       );
     }, [sortParameters.sortBy, filteredResults]);
 
-    const chunkedData = useMemo(() => {
-      if (!sortedData || sortedData.length === 0) return null;
+    const fullPartitionedData = useMemo(() => {
+      if (!sortedData || sortedData.length === 0) return [];
 
       const chunkSize = 25;
 
@@ -161,12 +159,6 @@ const MainContent = memo(
         chunkSize,
       ) as VectorizeSelectedQuestion[][];
     }, [sortedData]);
-
-    useEffect(() => {
-      if (chunkedData) {
-        setFullPartitionedData(chunkedData);
-      }
-    }, [chunkedData]);
 
     return (
       <TopicalLayoutProvider
