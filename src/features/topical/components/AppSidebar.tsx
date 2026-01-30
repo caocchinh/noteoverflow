@@ -5,7 +5,7 @@ import CacheSetting from "@/features/topical/components/CacheSetting";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
 import VisualSetting from "@/features/topical/components/VisualSetting";
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
-import { TOPICAL_DATA } from "@/constants/constants";
+
 import {
   Sidebar,
   SidebarContent,
@@ -14,8 +14,12 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { ScanText, Send, FileText } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useFilterState, useFilterValidation } from "../hooks";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  useFilterState,
+  useFilterValidation,
+  useAvailableFilters,
+} from "../hooks";
 import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
@@ -145,65 +149,19 @@ const AppSidebar = memo(
       [appUltilityBarRef],
     );
 
-    const availableSubjects = useMemo(() => {
-      return TOPICAL_DATA[
-        TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-      ]?.subject;
-    }, [selectedCurriculum]);
-
-    const subjectSyllabus = useMemo(
-      () =>
-        TOPICAL_DATA.find(
-          (item) => item.curriculum === selectedCurriculum,
-        )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink,
-      [selectedCurriculum, selectedSubject],
-    );
-
-    const availableTopicsFullInfo = useMemo(() => {
-      return availableSubjects
-        ?.find((item) => item.code === selectedSubject)
-        ?.topic.map((item) => {
-          return {
-            value: item.topicName,
-            curriculumnSubdivision: item.topicCurriculumnSubdivision,
-            isUpToDate: item.isTopicUpToDate,
-          };
-        });
-    }, [availableSubjects, selectedSubject]);
-
-    const availableYears = useMemo(() => {
-      return availableSubjects
-        ?.find((item) => item.code === selectedSubject)
-        ?.year.map(String);
-    }, [availableSubjects, selectedSubject]);
-
-    const availablePaperTypeFullInfo = useMemo(() => {
-      return availableSubjects
-        ?.find((item) => item.code === selectedSubject)
-        ?.paperType.map((item) => {
-          return {
-            value: item.paperType.toString(),
-            curriculumnSubdivision: item.paperTypeCurriculumnSubdivision,
-            isUpToDate: true,
-          };
-        });
-    }, [availableSubjects, selectedSubject]);
-
-    const availableSeasons = useMemo(() => {
-      return availableSubjects?.find((item) => item.code === selectedSubject)
-        ?.season;
-    }, [availableSubjects, selectedSubject]);
-
-    const availableCurriculum = useMemo(() => {
-      return TOPICAL_DATA.map((item) => ({
-        code: item.curriculum,
-        coverImage: item.coverImage,
-      }));
-    }, []);
-
-    const subjectPrerequisite = useMemo(() => {
-      return selectedCurriculum ? "" : "Curriculum";
-    }, [selectedCurriculum]);
+    const {
+      availableCurriculum,
+      availableSubjects,
+      availableTopicsFullInfo,
+      subjectSyllabus,
+      availableYears,
+      availablePaperTypeFullInfo,
+      availableSeasons,
+      subjectPrerequisite,
+    } = useAvailableFilters({
+      selectedCurriculum,
+      selectedSubject,
+    });
 
     const revert = useCallback(() => {
       if (!currentQuery.curriculumId || !currentQuery.subjectId) {

@@ -112,6 +112,13 @@ const MobileMultiSelector = memo(
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
 
+    const handleSetInputValue = useCallback(
+      (val: string | ((prev: string) => string)) => {
+        multiSelectorListRef.current?.setInputValue(val);
+      },
+      [],
+    );
+
     return (
       <>
         <MultiSelectorTrigger
@@ -121,7 +128,7 @@ const MobileMultiSelector = memo(
           setOpen={setOpen}
           allAvailableOptions={allAvailableOptions}
           label={label}
-          setInputValue={multiSelectorListRef.current?.setInputValue}
+          setInputValue={handleSetInputValue}
           maxLength={maxLength}
         />
         {maxLength && selectedValues.length > maxLength && (
@@ -200,6 +207,13 @@ const DesktopMultiSelector = memo(
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState<boolean>(false);
 
+    const handleSetInputValue = useCallback(
+      (val: string | ((prev: string) => string)) => {
+        multiSelectorListRef.current?.setInputValue(val);
+      },
+      [],
+    );
+
     return (
       <Popover modal={false} open={open}>
         <PopoverTrigger asChild className="w-full">
@@ -211,7 +225,7 @@ const DesktopMultiSelector = memo(
               setOpen={setOpen}
               allAvailableOptions={allAvailableOptions}
               label={label}
-              setInputValue={multiSelectorListRef.current?.setInputValue}
+              setInputValue={handleSetInputValue}
               maxLength={maxLength}
             />
             {maxLength && selectedValues.length > maxLength && (

@@ -13,3 +13,6 @@ export type {
   UseFilterValidationOptions,
   UseFilterValidationReturn,
 } from "./useFilterValidation";
+
+export { usePaperTypePersistence } from "./usePaperTypePersistence";
+export { useAvailableFilters } from "./useAvailableFilters";

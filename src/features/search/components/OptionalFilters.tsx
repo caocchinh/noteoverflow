@@ -15,18 +15,16 @@ import {
   useEffect,
   useEffectEvent,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { CIE_A_LEVEL_SUBDIVISION, ValidCurriculum } from "@/constants/types";
+import { ValidCurriculum } from "@/constants/types";
 import {
-  PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-  TOPICAL_DATA,
-} from "@/constants/constants";
-import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
-import { useFilterState } from "../../topical/hooks";
+  useAvailableFilters,
+  useFilterState,
+  usePaperTypePersistence,
+} from "../../topical/hooks";
 import { Button } from "@/components/ui/button";
 import { Filter, Save, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -40,11 +38,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {
-  OptionalFiltersProps,
-  OptionalSearchFilter,
-  PaperTypeFilterSearchPageCache,
-} from "../constants/type";
+import { OptionalFiltersProps, OptionalSearchFilter } from "../constants/type";
 
 export interface OptionalFiltersHandle {
   applyFilters: () => void;
@@ -98,135 +92,35 @@ const OptionalFilters = memo(
         onSubjectChange: () => setCurrentPaperTypeFilter(undefined),
       });
 
-      const [currentPaperTypeFilter, setCurrentPaperTypeFilter] = useState<
-        CIE_A_LEVEL_SUBDIVISION | "Outdated" | undefined
-      >(undefined);
+      const { currentPaperTypeFilter, setCurrentPaperTypeFilter } =
+        usePaperTypePersistence({
+          selectedCurriculum,
+          selectedSubject,
+        });
+
+      const {
+        availableCurriculum,
+        availableSubjects,
+        availableYears,
+        availablePaperTypeFullInfo,
+        availableSeasons,
+        subjectPrerequisite,
+      } = useAvailableFilters({
+        selectedCurriculum,
+        selectedSubject,
+      });
+
       const isMountedRef = useRef(false);
       const [portalContainer, setPortalContainer] =
         useState<HTMLElement | null>(null);
       const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-      const availableCurriculum = useMemo(() => {
-        return TOPICAL_DATA.map((item) => ({
-          code: item.curriculum,
-          coverImage: item.coverImage,
-        }));
-      }, []);
-
-      const availableSubjects = useMemo(() => {
-        return TOPICAL_DATA[
-          TOPICAL_DATA.findIndex(
-            (item) => item.curriculum === selectedCurriculum,
-          )
-        ]?.subject;
-      }, [selectedCurriculum]);
-
-      const availableYears = useMemo(() => {
-        return availableSubjects
-          ?.find((item) => item.code === selectedSubject)
-          ?.year.map(String);
-      }, [availableSubjects, selectedSubject]);
-
-      const availablePaperTypeFullInfo = useMemo(() => {
-        return availableSubjects
-          ?.find((item) => item.code === selectedSubject)
-          ?.paperType.map((item) => {
-            return {
-              value: item.paperType.toString(),
-              curriculumnSubdivision: item.paperTypeCurriculumnSubdivision,
-              isUpToDate: true,
-            };
-          });
-      }, [availableSubjects, selectedSubject]);
-
-      const availableSeasons = useMemo(() => {
-        return availableSubjects?.find((item) => item.code === selectedSubject)
-          ?.season;
-      }, [availableSubjects, selectedSubject]);
-
-      const subjectPrerequisite = useMemo(() => {
-        return selectedCurriculum ? "" : "Curriculum";
-      }, [selectedCurriculum]);
-
       // Count active filters
-      const activeFilterCount = useMemo(() => {
-        let count = 0;
-        if (selectedSubject) count++;
-        if (selectedYear.length > 0) count++;
-        if (selectedSeason.length > 0) count++;
-        if (selectedPaperType.length > 0) count++;
-        return count;
-      }, [selectedSubject, selectedYear, selectedSeason, selectedPaperType]);
-
-      // Load paper type filter preference when subject changes
-      useEffect(() => {
-        if (!isMountedRef.current || !selectedCurriculum || !selectedSubject) {
-          return;
-        }
-
-        try {
-          const savedCache = localStorage.getItem(
-            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-          );
-          if (savedCache) {
-            const parsedCache: PaperTypeFilterSearchPageCache =
-              JSON.parse(savedCache);
-            const savedFilter =
-              parsedCache[selectedCurriculum]?.[selectedSubject];
-
-            if (
-              savedFilter &&
-              validateSubcurriculumnDivision({
-                value: savedFilter,
-                type: "paperType",
-                curriculum: selectedCurriculum,
-                subject: selectedSubject,
-              })
-            ) {
-              setCurrentPaperTypeFilter(savedFilter);
-            } else {
-              setCurrentPaperTypeFilter(undefined);
-            }
-          } else {
-            setCurrentPaperTypeFilter(undefined);
-          }
-        } catch {
-          setCurrentPaperTypeFilter(undefined);
-        }
-      }, [selectedCurriculum, selectedSubject]);
-
-      // Save paper type filter preference to localStorage when it changes
-      useEffect(() => {
-        if (!isMountedRef.current || !selectedCurriculum || !selectedSubject) {
-          return;
-        }
-
-        try {
-          const existingCache = localStorage.getItem(
-            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-          );
-          const parsedCache: PaperTypeFilterSearchPageCache = existingCache
-            ? JSON.parse(existingCache)
-            : {};
-
-          if (!parsedCache[selectedCurriculum]) {
-            parsedCache[selectedCurriculum] = {};
-          }
-
-          parsedCache[selectedCurriculum][selectedSubject] =
-            currentPaperTypeFilter;
-
-          localStorage.setItem(
-            PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-            JSON.stringify(parsedCache),
-          );
-        } catch (error) {
-          console.error(
-            "Failed to save paper type filter to localStorage:",
-            error,
-          );
-        }
-      }, [selectedCurriculum, selectedSubject, currentPaperTypeFilter]);
+      const activeFilterCount =
+        (selectedSubject ? 1 : 0) +
+        (selectedYear.length > 0 ? 1 : 0) +
+        (selectedSeason.length > 0 ? 1 : 0) +
+        (selectedPaperType.length > 0 ? 1 : 0);
 
       const handleClearAll = useCallback(() => {
         resetAllFilters();

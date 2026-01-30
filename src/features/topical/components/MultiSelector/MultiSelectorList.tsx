@@ -26,7 +26,13 @@ import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 import { ChevronsUpDown } from "lucide-react";
 import { MultiSelectorListProps } from "./selectors";
 
-const temporaryFix = ({ item, label }: { item: string; label: string }) => {
+const formatOptionLabel = ({
+  item,
+  label,
+}: {
+  item: string;
+  label: string;
+}) => {
   if (label === "Season") {
     if (item === "Winter") {
       return "Winter - O/N";
@@ -36,6 +42,7 @@ const temporaryFix = ({ item, label }: { item: string; label: string }) => {
       return "Spring - F/M";
     }
   }
+  return item;
 };
 
 const MultiSelectorList = forwardRef(
@@ -146,7 +153,7 @@ const MultiSelectorList = forwardRef(
                           className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
                           defaultChecked={true}
                         />
-                        {temporaryFix({ item, label })}
+                        {formatOptionLabel({ item, label })}
                       </CommandItem>
                     ))}
                 </CollapsibleContent>
@@ -184,7 +191,7 @@ const MultiSelectorList = forwardRef(
                       checked={selectedValues.includes(item)}
                       className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
                     />
-                    {temporaryFix({ item, label })}
+                    {formatOptionLabel({ item, label })}
                   </CommandItem>
                 ))}
               </CommandGroup>

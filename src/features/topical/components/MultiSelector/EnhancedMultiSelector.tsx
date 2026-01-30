@@ -204,6 +204,13 @@ const EnhancedMobileMultiSelector = memo(
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
+    const handleSetInputValue = useCallback(
+      (val: string | ((prev: string) => string)) => {
+        multiSelectorListRef.current?.setInputValue(val);
+      },
+      [],
+    );
+
     return (
       <>
         <MultiSelectorTrigger
@@ -213,7 +220,7 @@ const EnhancedMobileMultiSelector = memo(
           setOpen={setOpen}
           allAvailableOptions={allValue}
           label={label}
-          setInputValue={multiSelectorListRef.current?.setInputValue}
+          setInputValue={handleSetInputValue}
           maxLength={maxLength}
           showDeleteAll={true}
           showSelectAll={false}
@@ -297,7 +304,12 @@ const EnhancedDesktopMultiSelector = memo(
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState<boolean>(false);
-
+    const handleSetInputValue = useCallback(
+      (val: string | ((prev: string) => string)) => {
+        multiSelectorListRef.current?.setInputValue(val);
+      },
+      [],
+    );
     return (
       <Popover modal={false} open={open}>
         <PopoverTrigger asChild className="w-full">
@@ -309,7 +321,7 @@ const EnhancedDesktopMultiSelector = memo(
               setOpen={setOpen}
               allAvailableOptions={allValue}
               label={label}
-              setInputValue={multiSelectorListRef.current?.setInputValue}
+              setInputValue={handleSetInputValue}
               maxLength={maxLength}
               showDeleteAll={true}
               showSelectAll={false}

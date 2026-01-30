@@ -5,7 +5,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sparkles, Trash2, X as RemoveIcon } from "lucide-react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -38,16 +45,22 @@ const MultiSelectorTrigger = memo(
       e.stopPropagation();
     }, []);
 
-    useEffect(() => {
-      if (contentRef.current) {
-        const containerHeight = contentRef.current.clientHeight;
-        const height = Math.min(containerHeight || 0, 85);
+    const onContainerHeightChange = useEffectEvent(
+      ({ height }: { height: number }) => {
         if (height >= 85) {
           setPaddingRight("10px");
         } else {
           setPaddingRight("initial");
         }
         setContentHeight(height);
+      },
+    );
+
+    useEffect(() => {
+      if (contentRef.current) {
+        const containerHeight = contentRef.current.clientHeight;
+        const height = Math.min(containerHeight || 0, 85);
+        onContainerHeightChange({ height });
       }
     }, [selectedValues]);
 
