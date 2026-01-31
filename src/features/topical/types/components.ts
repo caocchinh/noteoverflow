@@ -54,6 +54,8 @@ export interface QuestionInspectProps {
   setSortParameters?: Dispatch<SetStateAction<SortParameters>>;
   listId?: string;
   BETTER_AUTH_URL: string;
+  isInspectOpen: QuestionInspectOpenState;
+  setIsInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>>;
 }
 
 export type QuestionInspectOpenState = {

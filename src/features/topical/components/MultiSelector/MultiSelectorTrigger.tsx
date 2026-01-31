@@ -12,6 +12,7 @@ import {
   useEffectEvent,
   useRef,
   useState,
+  useId,
 } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -39,6 +40,7 @@ const MultiSelectorTrigger = memo(
     const [isClickingUltility, setIsClickingUltility] =
       useState<boolean>(false);
     const [paddingRight, setPaddingRight] = useState("initial");
+    const id = useId();
 
     const mousePreventDefault = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
@@ -102,6 +104,7 @@ const MultiSelectorTrigger = memo(
             showDeleteAll={showDeleteAll}
           />
           <Button
+            id={id}
             className="h-6 flex-1 cursor-pointer text-xs"
             onClick={() => {
               if (!isClickingUltility) {

@@ -11,6 +11,7 @@ import {
   memo,
   forwardRef,
   useImperativeHandle,
+  useId,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,12 +67,14 @@ const EnhancedSelect = memo(
     const enhancedSelectContentRef = useRef<EnhancedSelectContentRef | null>(
       null,
     );
+    const id = useId();
 
     return (
       <div className="flex flex-col gap-1">
         <Popover modal={modal || isMobileDevice} open={isOpen}>
           <PopoverTrigger asChild>
             <Button
+              id={id}
               ref={triggerRef}
               aria-expanded={isOpen}
               className={cn(

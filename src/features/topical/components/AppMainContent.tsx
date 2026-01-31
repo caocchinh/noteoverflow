@@ -1,13 +1,5 @@
 "use client";
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -19,24 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import { usePathname } from "next/navigation";
-import {
-  INFINITE_SCROLL_CHUNK_SIZE,
-  DEFAULT_SORT_OPTIONS,
-} from "@/features/topical/constants/constants";
-
-import {
-  updateSearchParams,
-  isSubset,
-  chunkQuestionsData,
-} from "@/features/topical/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
-import { useMutationState } from "@tanstack/react-query";
+import {
+  useExportMode,
+  useQuestionData,
+  useQuestionInspect,
+} from "@/features/topical/hooks";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -44,8 +29,8 @@ import ExportBar from "./ExportMode/ExportBar";
 import IntergrationTips from "./IntergrationTips";
 import Masonry from "./Masonry";
 import DisplayModeToggle from "./DisplayModeToggle";
-import { AppMainContentProps, QuestionInspectRef } from "../types/components";
-import { DisplayMode, SelectedQuestion, SortParameters } from "../types/models";
+import { AppMainContentProps } from "../types/components";
+import { DisplayMode, SelectedQuestion } from "../types/models";
 
 const AppMainContent = ({
   mountedRef,
@@ -66,181 +51,65 @@ const AppMainContent = ({
   isExportModeEnabled,
   setIsExportModeEnabled,
 }: AppMainContentProps) => {
-  const pathname = usePathname();
-  const [openInspectOnMount, setOpenInspectOnMount] = useState(false);
-  const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
-  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
-    new Set(),
-  );
-  const [questionsForExportArray, setQuestionsForExportArray] = useState<
-    string[]
-  >([]);
-  const questionsForExportRef = useRef(questionsForExport);
-  questionsForExportRef.current = questionsForExport;
   const [
     isScrollingAndShouldShowScrollButton,
     setIsScrollingAndShouldShowScrollButton,
   ] = useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
+
+  // Hooks
   const {
-    uiPreferences,
-    finishedQuestionsData,
-    isAppSidebarOpen,
-    setIsAppSidebarOpen,
-  } = useTopicalApp();
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !mountedRef.current) {
-      return;
-    }
-    if (currentQuery.curriculumId && currentQuery.subjectId) {
-      updateSearchParams({
-        query: JSON.stringify(currentQuery),
-        questionId: "",
-        isInspectOpen: false,
-      });
-    }
-  }, [currentQuery, mountedRef, uiPreferences.isStrictModeEnabled]);
-
-  const [fullPartitionedData, setFullPartitionedData] = useState<
-    SelectedQuestion[][] | undefined
-  >(undefined);
-  const [
-    finishedQuestionsFilteredPartitionedData,
-    setFinishedQuestionsFilteredPartitionedData,
-  ] = useState<SelectedQuestion[][] | undefined>(undefined);
-  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] =
-    useState(1);
-  const [sortParameters, setSortParameters] = useState<SortParameters>({
-    sortBy: DEFAULT_SORT_OPTIONS,
-  });
-  const questionInspectRef = useRef<QuestionInspectRef | null>(null);
-  const previousSidebarOpenRef = useRef(isAppSidebarOpen);
-  const mainContentScrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const doesSearchYieldAnyQuestions = (topicalData?.data?.length ?? 0) > 0;
-
-  const onSettledFinishedQuestion = useMutationState({
-    filters: {
-      mutationKey: ["user_saved_activities", "finished_questions"],
-      predicate: (mutation) =>
-        (mutation.state.status === "success" ||
-          mutation.state.status === "error") &&
-        !showFinishedQuestion,
-    },
-  });
-
-  useEffect(() => {
-    if (isExportModeEnabled) {
-      previousSidebarOpenRef.current = isAppSidebarOpen;
-      setIsAppSidebarOpen(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExportModeEnabled, setIsAppSidebarOpen]);
-
-  useEffect(() => {
-    if (!isExportModeEnabled) {
-      setIsAppSidebarOpen(previousSidebarOpenRef.current);
-    }
-  }, [isExportModeEnabled, setIsAppSidebarOpen]);
-
-  const sortedData = useMemo(() => {
-    if (!topicalData?.data) return [];
-    return topicalData.data.toSorted(
-      (a: SelectedQuestion, b: SelectedQuestion) => {
-        if (sortParameters.sortBy === "ascending") {
-          return a.year - b.year;
-        } else {
-          // Default to year-desc
-          return b.year - a.year;
-        }
-      },
-    );
-  }, [sortParameters.sortBy, topicalData]);
-
-  const chunkedData = useMemo(() => {
-    if (!sortedData) return null;
-
-    const chunkSize =
-      uiPreferences.layoutStyle === "pagination"
-        ? uiPreferences.numberOfQuestionsPerPage
-        : INFINITE_SCROLL_CHUNK_SIZE;
-
-    return chunkQuestionsData(sortedData, chunkSize);
-  }, [
-    sortedData,
-    uiPreferences.layoutStyle,
-    uiPreferences.numberOfQuestionsPerPage,
-  ]);
-
-  const filteredProcessedData = useMemo(() => {
-    const chunkSize =
-      uiPreferences.layoutStyle === "pagination"
-        ? uiPreferences.numberOfQuestionsPerPage
-        : INFINITE_SCROLL_CHUNK_SIZE;
-
-    const filteredStrictModeData = uiPreferences.isStrictModeEnabled
-      ? sortedData.filter((item) => {
-          return isSubset(item.topics, currentQuery.topic);
-        })
-      : sortedData;
-
-    const filteredFinishedData = filteredStrictModeData.filter((question) => {
-      if (!finishedQuestionsData) return true;
-      if (
-        !showFinishedQuestion &&
-        finishedQuestionsData.some((item) => item.question.id === question.id)
-      ) {
-        return false;
-      }
-      return true;
-    });
-
-    const chunkData = chunkQuestionsData(filteredFinishedData, chunkSize);
-
-    return {
-      chunkData,
-      filteredFinishedData,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    onSettledFinishedQuestion,
-    uiPreferences.layoutStyle,
-    uiPreferences.numberOfQuestionsPerPage,
-    uiPreferences.isStrictModeEnabled,
-    sortedData,
-    currentQuery.topic,
-    finishedQuestionsData,
+    sortParameters,
+    setSortParameters,
     showFinishedQuestion,
-  ]);
+    setShowFinishedQuestion,
+    currentChunkIndex,
+    setCurrentChunkIndex,
+    fullPartitionedData,
+    finishedQuestionsFilteredPartitionedData,
+    filteredProcessedData,
+    doesSearchYieldAnyQuestions,
+    finishedQuestionsFilteredDisplayData,
+    handleInfiniteScrollNext,
+    mainContentScrollAreaRef,
+  } = useQuestionData({
+    topicalData,
+    currentQuery,
+  });
+
+  const {
+    questionsForExport,
+    questionsForExportArray,
+    setQuestionsForExport,
+    setQuestionsForExportArray,
+    toggleQuestionSelection,
+    useAllQuestions,
+    useNoQuestions,
+  } = useExportMode({
+    isExportModeEnabled,
+    setIsExportModeEnabled,
+    allQuestions: filteredProcessedData?.filteredFinishedData ?? [],
+  });
+
+  const { isInspectOpen, setIsInspectOpen } = useQuestionInspect({
+    mountedRef,
+    currentQuery,
+    topicalData,
+    searchParams,
+  });
 
   const handleQuestionClick = useCallback(
     (questionId: string) => {
       if (isExportModeEnabled) {
-        setQuestionsForExport((prev) => {
-          const newSet = new Set(prev);
-          if (newSet.has(questionId)) {
-            newSet.delete(questionId);
-          } else {
-            newSet.add(questionId);
-          }
-          return newSet;
-        });
-        setQuestionsForExportArray((prev) => {
-          if (prev.includes(questionId)) {
-            return prev.filter((id) => id !== questionId);
-          } else {
-            return [...prev, questionId];
-          }
-        });
+        toggleQuestionSelection(questionId);
         return;
       }
-      questionInspectRef.current?.setIsInspectOpen({
+      setIsInspectOpen({
         isOpen: true,
         questionId,
       });
     },
-    [isExportModeEnabled],
+    [isExportModeEnabled, toggleQuestionSelection, setIsInspectOpen],
   );
 
   const handleScrollEnd = useCallback(() => {
@@ -249,147 +118,20 @@ const AppMainContent = ({
     } else {
       setIsScrollingAndShouldShowScrollButton(true);
     }
-  }, []);
+  }, [mainContentScrollAreaRef]);
 
   const handleRefetch = useCallback(() => {
     refetchTopicalData();
   }, [refetchTopicalData]);
 
-  const handleInfiniteScrollNext = useCallback(() => {
-    if (finishedQuestionsFilteredPartitionedData) {
-      setCurrentChunkIndex(currentChunkIndex + 1);
-      setInfiniteScrollLoadedChunks((prev) => prev + 1);
-    }
-  }, [finishedQuestionsFilteredPartitionedData, currentChunkIndex]);
-
-  // Derive displayed data based on layout style
-  const finishedQuestionsFilteredDisplayData = useMemo(() => {
-    if (!finishedQuestionsFilteredPartitionedData) return [];
-
-    if (uiPreferences.layoutStyle === "pagination") {
-      // For pagination, show only current chunk
-      return finishedQuestionsFilteredPartitionedData[currentChunkIndex] ?? [];
-    } else {
-      // For infinite scroll, show all chunks up to the loaded count
-      return finishedQuestionsFilteredPartitionedData
-        .slice(0, infiniteScrollLoadedChunks)
-        .flat();
-    }
-  }, [
-    finishedQuestionsFilteredPartitionedData,
-    currentChunkIndex,
-    infiniteScrollLoadedChunks,
-    uiPreferences.layoutStyle,
-  ]);
-
-  // Reset state when data changes
-  const onDataChange = useEffectEvent(() => {
-    setCurrentChunkIndex(0);
-    setInfiniteScrollLoadedChunks(1);
-  });
-
-  useEffect(() => {
-    if (chunkedData && filteredProcessedData) {
-      setFullPartitionedData(chunkedData);
-      setFinishedQuestionsFilteredPartitionedData(
-        filteredProcessedData.chunkData,
-      );
-      onDataChange();
-      mainContentScrollAreaRef.current?.scrollTo({
-        top: 0,
-        behavior: "instant",
-      });
-    }
-  }, [chunkedData, filteredProcessedData]);
-
-  useEffect(() => {
-    if (topicalData) {
-      questionInspectRef.current?.setIsInspectOpen({
-        isOpen: false,
-        questionId: "",
-      });
-    }
-  }, [topicalData, uiPreferences.isStrictModeEnabled]);
-
-  useEffect(() => {
-    if (!mountedRef.current) {
-      return;
-    }
-    if (!uiPreferences.isQuestionCacheEnabled) {
-      setOpenInspectOnMount(true);
-      return;
-    }
-    if (!openInspectOnMount && topicalData) {
-      try {
-        const existingQuestionid = searchParams.questionId;
-
-        if (existingQuestionid && typeof existingQuestionid === "string") {
-          if (
-            topicalData?.data.findIndex(
-              (item) => item.id === existingQuestionid,
-            ) !== -1
-          ) {
-            questionInspectRef.current?.setIsInspectOpen({
-              isOpen: searchParams.isInspectOpen === "true",
-              questionId: existingQuestionid,
-            });
-          }
-        }
-      } finally {
-        setOpenInspectOnMount(true);
-      }
-    }
-  }, [
-    uiPreferences.isQuestionCacheEnabled,
-    openInspectOnMount,
-    searchParams,
-    topicalData,
-    mountedRef,
-  ]);
-
-  useEffect(() => {
-    mainContentScrollAreaRef.current?.scrollTo({
-      top: 0,
-      behavior: "instant",
-    });
-  }, [currentQuery]);
-
-  const isQuestionViewDisabled = useMemo(() => {
-    return (
-      !isSearchEnabled ||
-      !doesSearchYieldAnyQuestions ||
-      isTopicalDataError ||
-      !fullPartitionedData ||
-      fullPartitionedData.length === 0 ||
-      isTopicalDataFetching ||
-      !isTopicalDataFetched
-    );
-  }, [
-    isSearchEnabled,
-    doesSearchYieldAnyQuestions,
-    isTopicalDataError,
-    fullPartitionedData,
-    isTopicalDataFetching,
-    isTopicalDataFetched,
-  ]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !mountedRef.current) {
-      return;
-    }
-    if (pathname === "/topical") {
-      if (currentQuery.curriculumId && currentQuery.subjectId) {
-        updateSearchParams({
-          query: JSON.stringify(currentQuery),
-          questionId: questionInspectRef.current?.isInspectOpen.questionId
-            ? questionInspectRef.current?.isInspectOpen.questionId
-            : "",
-          isInspectOpen: false,
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  const isQuestionViewDisabled =
+    !isSearchEnabled ||
+    !doesSearchYieldAnyQuestions ||
+    isTopicalDataError ||
+    !fullPartitionedData ||
+    fullPartitionedData.length === 0 ||
+    isTopicalDataFetching ||
+    !isTopicalDataFetched;
 
   return (
     <>
@@ -411,9 +153,7 @@ const AppMainContent = ({
           ultilityRef={ultilityRef}
           ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
-          setIsQuestionInspectOpen={
-            questionInspectRef.current?.setIsInspectOpen
-          }
+          setIsQuestionInspectOpen={setIsInspectOpen}
           scrollAreaRef={mainContentScrollAreaRef}
           currentChunkIndex={currentChunkIndex}
           setCurrentChunkIndex={setCurrentChunkIndex}
@@ -632,7 +372,8 @@ const AppMainContent = ({
       </SidebarInset>
 
       <QuestionInspect
-        ref={questionInspectRef}
+        isInspectOpen={isInspectOpen}
+        setIsInspectOpen={setIsInspectOpen}
         partitionedTopicalData={fullPartitionedData}
         currentQuery={currentQuery}
         BETTER_AUTH_URL={BETTER_AUTH_URL}
@@ -647,6 +388,8 @@ const AppMainContent = ({
           setIsExportModeEnabled={setIsExportModeEnabled}
           setQuestionsForExportArray={setQuestionsForExportArray}
           setQuestionsForExport={setQuestionsForExport}
+          useAllQuestions={useAllQuestions}
+          useNoQuestions={useNoQuestions}
         />
       )}
     </>

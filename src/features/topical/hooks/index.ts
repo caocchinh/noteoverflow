@@ -20,3 +20,7 @@ export { useFilterPersistence } from "./useFilterPersistence";
 export type { UseFilterPersistenceProps } from "./useFilterPersistence";
 
 export { useRecentQueries } from "./useRecentQueries";
+
+export { useExportMode } from "./useExportMode";
+export { useQuestionData } from "./useQuestionData";
+export { useQuestionInspect } from "./useQuestionInspect";

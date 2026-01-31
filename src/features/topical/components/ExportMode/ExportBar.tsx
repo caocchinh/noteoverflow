@@ -170,6 +170,8 @@ const ExitButton = memo(() => {
 ExitButton.displayName = "ExitButton";
 
 const ExportBar = ({
+  useAllQuestions,
+  useNoQuestions,
   questionsForExport,
   questionsForExportArray,
   allQuestions,
@@ -183,18 +185,10 @@ const ExportBar = ({
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
   setQuestionsForExportArray: Dispatch<SetStateAction<string[]>>;
   setQuestionsForExport: Dispatch<SetStateAction<Set<string>>>;
+  useAllQuestions: () => void;
+  useNoQuestions: () => void;
 }) => {
   const isMobile = useIsMobile({ breakpoint: 505 });
-  const useAllQuestions = useCallback(() => {
-    const ids = allQuestions.map((question) => question.id);
-    setQuestionsForExport(new Set(ids));
-    setQuestionsForExportArray(ids);
-  }, [allQuestions, setQuestionsForExport, setQuestionsForExportArray]);
-
-  const useNoQuestions = useCallback(() => {
-    setQuestionsForExport(new Set());
-    setQuestionsForExportArray([]);
-  }, [setQuestionsForExport, setQuestionsForExportArray]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   if (isMobile) {

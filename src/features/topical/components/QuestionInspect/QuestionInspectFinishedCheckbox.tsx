@@ -23,6 +23,8 @@ import {
   useEffect,
   useMemo,
   useState,
+  useOptimistic,
+  startTransition,
 } from "react";
 import { usePathname } from "next/navigation";
 import { SavedActivitiesResponse, SelectedQuestion } from "../../types/models";
@@ -64,10 +66,15 @@ export const QuestionInspectFinishedCheckbox = memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userFinishedQuestions, question.id, isMutatingThisQuestion]);
 
+    const [optimisticIsFinished, setOptimisticIsFinished] = useOptimistic(
+      isFinished,
+      (_state, newStatus: boolean) => newStatus,
+    );
+
     const queryClient = useQueryClient();
     const { savedActivitiesIsFetching, savedActivitiesIsError } =
       useTopicalApp();
-    const { mutate } = useMutation({
+    const { mutateAsync } = useMutation({
       mutationKey: ["user_saved_activities", "finished_questions", question.id],
       mutationFn: async ({
         currentQuestionId,
@@ -197,9 +204,13 @@ export const QuestionInspectFinishedCheckbox = memo(
           );
           return;
         }
-        mutate({
-          currentQuestionId: question.id,
-          isCurrentlyFinished: isFinished,
+
+        startTransition(async () => {
+          setOptimisticIsFinished(!isFinished);
+          await mutateAsync({
+            currentQuestionId: question.id,
+            isCurrentlyFinished: isFinished,
+          });
         });
       },
       [
@@ -209,19 +220,23 @@ export const QuestionInspectFinishedCheckbox = memo(
         savedActivitiesIsFetching,
         isAuthenticated,
         savedActivitiesIsError,
-        mutate,
+        mutateAsync,
         question.id,
         isFinished,
         isHavingUnsafeChangesRef,
         setIsAnnotationGuardDialogOpen,
+        setOptimisticIsFinished,
       ],
     );
 
     useEffect(() => {
       if (!isAnnotationGuardDialogOpen && isPendingToggle) {
-        mutate({
-          currentQuestionId: question.id,
-          isCurrentlyFinished: isFinished,
+        startTransition(async () => {
+          setOptimisticIsFinished(!isFinished);
+          await mutateAsync({
+            currentQuestionId: question.id,
+            isCurrentlyFinished: isFinished,
+          });
         });
         setIsPendingToggle(false);
       }
@@ -229,9 +244,10 @@ export const QuestionInspectFinishedCheckbox = memo(
       isAnnotationGuardDialogOpen,
       isFinished,
       isPendingToggle,
-      mutate,
+      mutateAsync,
       question.id,
       toggleFinishedQuestion,
+      setOptimisticIsFinished,
     ]);
 
     if (!question.id) {
@@ -246,7 +262,7 @@ export const QuestionInspectFinishedCheckbox = memo(
             isSessionPending ||
             savedActivitiesIsFetching) &&
             "pointer-events-none",
-          isFinished ? "border-green-600" : "border-muted-foreground",
+          optimisticIsFinished ? "border-green-600" : "border-muted-foreground",
           className,
         )}
         title="Add to finished question"
@@ -258,12 +274,12 @@ export const QuestionInspectFinishedCheckbox = memo(
           <Switch
             className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
             id="completed-switch"
-            checked={isFinished}
+            checked={optimisticIsFinished}
           />
         )}
         <Label
           className={cn(
-            isFinished ? "text-green-600" : "text-muted-foreground",
+            optimisticIsFinished ? "text-green-600" : "text-muted-foreground",
             "cursor-pointer",
           )}
           htmlFor="completed-switch"
@@ -273,7 +289,7 @@ export const QuestionInspectFinishedCheckbox = memo(
           ) : savedActivitiesIsFetching ? (
             <>Loading</>
           ) : (
-            <>Complete{isFinished && "d"}</>
+            <>Complete{optimisticIsFinished && "d"}</>
           )}
         </Label>
       </div>

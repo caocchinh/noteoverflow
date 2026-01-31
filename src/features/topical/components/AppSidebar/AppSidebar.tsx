@@ -147,6 +147,17 @@ const AppSidebar = memo(
       },
     });
 
+    const onCurriculumChange = useCallback(
+      (value: string | ((prev: string) => string)) => {
+        if (typeof value === "function") {
+          handleCurriculumChange((prev) => value(prev) as ValidCurriculum);
+        } else {
+          handleCurriculumChange(value as ValidCurriculum);
+        }
+      },
+      [handleCurriculumChange],
+    );
+
     const handleSearch = useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -256,9 +267,7 @@ const AppSidebar = memo(
                         label="Curriculum"
                         prerequisite=""
                         selectedValue={selectedCurriculum}
-                        setSelectedValue={(value) => {
-                          handleCurriculumChange(value as ValidCurriculum);
-                        }}
+                        setSelectedValue={onCurriculumChange}
                       />
                       {invalidInputs.curriculum && (
                         <p className="text-destructive text-sm">

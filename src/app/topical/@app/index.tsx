@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { CACHE_EXPIRE_TIME } from "@/features/topical/constants/constants";
-import { updateSearchParams } from "@/features/topical/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCache, setCache } from "@/lib/client-cache";
 import { INITIAL_QUERY } from "@/constants/constants";
@@ -50,8 +49,7 @@ const TopicalClient = ({
   BETTER_AUTH_URL: string;
 }) => {
   const isMobileDevice = useIsMobile();
-  const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences } =
-    useTopicalApp();
+  const { isAppSidebarOpen, setIsAppSidebarOpen } = useTopicalApp();
   const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<CurrentQuery>({
     ...INITIAL_QUERY,
@@ -72,19 +70,6 @@ const TopicalClient = ({
     params.set("queryKey", JSON.stringify(currentQuery));
     return `${BETTER_AUTH_URL}/topical?${params.toString()}`;
   }, [BETTER_AUTH_URL, currentQuery]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !mountedRef.current) {
-      return;
-    }
-    if (currentQuery.curriculumId && currentQuery.subjectId) {
-      updateSearchParams({
-        query: JSON.stringify(currentQuery),
-        questionId: "",
-        isInspectOpen: false,
-      });
-    }
-  }, [currentQuery, uiPreferences.isStrictModeEnabled]);
 
   const search = useCallback(async () => {
     const { data, error } = await api.topical.get({
