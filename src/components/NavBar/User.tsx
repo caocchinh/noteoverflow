@@ -1,27 +1,36 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { authClient } from "@/lib/auth/auth-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ImageIcon,
   Loader2,
   LogOut,
+  Mail,
+  MessageCircle,
   RefreshCcw,
   ShieldUser,
   SquareUserRound,
-  MessageCircle,
-  Mail,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { authClient } from "@/lib/auth/auth-client";
 import GlareHover from "../GlazeHover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,15 +44,6 @@ import {
 } from "../ui/dropdown-menu";
 import { Skeleton } from "../ui/skeleton";
 import AvatarChange from "./AvatarChange";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { useAuth } from "@/context/AuthContext";
 
 const User = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -93,10 +93,10 @@ const User = () => {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="relative z-100001 flex flex-col bg-background px-0 text-foreground">
+        <DropdownMenuContent className="bg-background text-foreground relative z-100001 flex flex-col px-0">
           <DropdownMenuItem asChild>
             <Button
-              className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
+              className="hover:bg-muted w-full cursor-pointer px-4 py-2"
               onClick={() => {
                 setIsMenuOpen(false);
                 if (typeof window !== "undefined") {
@@ -180,8 +180,7 @@ const User = () => {
                     src={user.selectedImage || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {user.name.split(" ")[0]?.charAt(0) +
-                      user.name.split(" ")[1]?.charAt(0)}
+                    {user.name.split(" ")[0]?.charAt(0) + user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </GlareHover>
               </Avatar>
@@ -191,15 +190,11 @@ const User = () => {
 
         <DropdownMenuContent
           align="end"
-          className="relative z-100001 flex w-[200px] flex-col border-white/50 bg-background px-1 text-foreground"
+          className="bg-background text-foreground relative z-100001 flex w-[200px] flex-col border-white/50 px-1"
         >
-          <DropdownMenuSub
-            defaultOpen={false}
-            onOpenChange={setIsSubMenuOpen}
-            open={isSubMenuOpen}
-          >
+          <DropdownMenuSub defaultOpen={false} onOpenChange={setIsSubMenuOpen} open={isSubMenuOpen}>
             <Button
-              className="p-0! flex h-full w-full cursor-pointer items-center justify-start"
+              className="flex h-full w-full cursor-pointer items-center justify-start p-0!"
               onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
               variant="ghost"
             >
@@ -213,11 +208,10 @@ const User = () => {
                     src={user.selectedImage || "/assets/avatar/blue.webp"}
                   />
                   <AvatarFallback className="h-[32px] w-[32px]">
-                    {user.name.split(" ")[0]?.charAt(0) +
-                      user.name.split(" ")[1]?.charAt(0)}
+                    {user.name.split(" ")[0]?.charAt(0) + user.name.split(" ")[1]?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <p className="w-max max-w-[120px] whitespace-pre-line font-medium text-sm">
+                <p className="w-max max-w-[120px] text-sm font-medium whitespace-pre-line">
                   {user.name}
                 </p>
               </DropdownMenuSubTrigger>
@@ -230,7 +224,7 @@ const User = () => {
               >
                 <DropdownMenuItem asChild title="Change avatar">
                   <Button
-                    className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 hover:bg-muted"
+                    className="hover:bg-muted flex w-full cursor-pointer items-center gap-2 px-4 py-2"
                     onClick={() => {
                       setIsDialogOpen(true);
                     }}
@@ -250,13 +244,10 @@ const User = () => {
               <DropdownMenuItem asChild title="Admin Panel">
                 <Button
                   asChild
-                  className="w-full cursor-pointer px-4 py-2 hover:bg-muted"
+                  className="hover:bg-muted w-full cursor-pointer px-4 py-2"
                   variant="ghost"
                 >
-                  <Link
-                    className="flex w-full items-center justify-start gap-2"
-                    href="/admin"
-                  >
+                  <Link className="flex w-full items-center justify-start gap-2" href="/admin">
                     <ShieldUser />
                     Admin Panel
                   </Link>
@@ -270,7 +261,7 @@ const User = () => {
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                className="flex w-full cursor-pointer items-center justify-start px-3 py-2 hover:bg-muted data-[variant=destructive]:*:[svg]:text-destructive! relative  select-none  gap-2 rounded-sm text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-inset:pl-8 data-[variant=destructive]:text-destructive data-disabled:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                className="hover:bg-muted data-[variant=destructive]:*:[svg]:text-destructive! focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-pointer items-center justify-start gap-2 rounded-sm px-3 py-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
                 size="icon"
                 variant="ghost"
               >
@@ -283,11 +274,10 @@ const User = () => {
                 <DialogTitle>Feedback</DialogTitle>
               </DialogHeader>
               <DialogDescription>
-                Send me your feedback, suggestions or critiques thorugh my
-                email.
+                Send me your feedback, suggestions or critiques thorugh my email.
               </DialogDescription>
               <Button
-                className="text-sm text-background! dark:hover:bg-white hover:bg-foreground-secondary bg-foreground w-max cursor-pointer rounded-md px-2 py-1"
+                className="text-background! hover:bg-foreground-secondary bg-foreground w-max cursor-pointer rounded-md px-2 py-1 text-sm dark:hover:bg-white"
                 variant="ghost"
                 onClick={() => {
                   navigator.clipboard.writeText("founder@noteoverflow.com");
@@ -311,7 +301,7 @@ const User = () => {
             title="Sign out"
           >
             <Button
-              className="flex w-full cursor-pointer items-center justify-start px-4 py-2 hover:bg-muted"
+              className="hover:bg-muted flex w-full cursor-pointer items-center justify-start px-4 py-2"
               onClick={handleSignOut}
               size="icon"
               variant="ghost"

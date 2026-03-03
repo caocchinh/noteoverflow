@@ -1,13 +1,13 @@
-import { status as elysiaStatus } from "elysia";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { validateSearchFilter } from "@/features/search/lib/lib";
-import { queryVectorize } from "@/lib/cloudflareVectorize";
-import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
-import { getDbAsync } from "@/drizzle/db.server";
 import { retryDatabase } from "@/dal/retry";
-import { inArray } from "drizzle-orm";
+import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
+import { validateSearchFilter } from "@/features/search/lib/lib";
+import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { VectorizeSelectedQuestion } from "@/features/topical/types/models";
+import { queryVectorize } from "@/lib/cloudflareVectorize";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
+import { inArray } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
 
 // Helper to generate deterministic short IDs for Vectorize (max 64 bytes)
 export async function generateShortId(input: string): Promise<string> {
@@ -67,17 +67,14 @@ export function buildVectorizeFilter(
 ): Record<string, { $eq: string } | { $in: string[] }> | undefined {
   if (!filter) return undefined;
 
-  const vectorizeFilter: Record<string, { $eq: string } | { $in: string[] }> =
-    {};
+  const vectorizeFilter: Record<string, { $eq: string } | { $in: string[] }> = {};
   if (filter.subject) vectorizeFilter.subject = { $eq: filter.subject };
-  if (filter.curriculum)
-    vectorizeFilter.curriculum = { $eq: filter.curriculum };
+  if (filter.curriculum) vectorizeFilter.curriculum = { $eq: filter.curriculum };
   if (filter.year && filter.year.length > 0) {
     vectorizeFilter.year = { $in: filter.year };
   }
 
-  if (filter.season && filter.season.length > 0)
-    vectorizeFilter.season = { $in: filter.season };
+  if (filter.season && filter.season.length > 0) vectorizeFilter.season = { $in: filter.season };
   if (filter.paperType && filter.paperType.length > 0) {
     vectorizeFilter.paperType = { $in: filter.paperType };
   }

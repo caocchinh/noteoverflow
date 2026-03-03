@@ -1,26 +1,11 @@
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Sparkles, Trash2, X as RemoveIcon } from "lucide-react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-  useId,
-} from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
-  MultiSelectorTriggerButtonUltilityProps,
-  MultiSelectorTriggerProps,
-} from "./selectors";
+import { X as RemoveIcon, Sparkles, Trash2 } from "lucide-react";
+import { memo, useCallback, useEffect, useEffectEvent, useId, useRef, useState } from "react";
+import { MultiSelectorTriggerButtonUltilityProps, MultiSelectorTriggerProps } from "./selectors";
 
 const MultiSelectorTrigger = memo(
   ({
@@ -37,8 +22,7 @@ const MultiSelectorTrigger = memo(
   }: MultiSelectorTriggerProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [contentHeight, setContentHeight] = useState<number>(0);
-    const [isClickingUltility, setIsClickingUltility] =
-      useState<boolean>(false);
+    const [isClickingUltility, setIsClickingUltility] = useState<boolean>(false);
     const [paddingRight, setPaddingRight] = useState("initial");
     const id = useId();
 
@@ -47,16 +31,14 @@ const MultiSelectorTrigger = memo(
       e.stopPropagation();
     }, []);
 
-    const onContainerHeightChange = useEffectEvent(
-      ({ height }: { height: number }) => {
-        if (height >= 85) {
-          setPaddingRight("10px");
-        } else {
-          setPaddingRight("initial");
-        }
-        setContentHeight(height);
-      },
-    );
+    const onContainerHeightChange = useEffectEvent(({ height }: { height: number }) => {
+      if (height >= 85) {
+        setPaddingRight("10px");
+      } else {
+        setPaddingRight("initial");
+      }
+      setContentHeight(height);
+    });
 
     useEffect(() => {
       if (contentRef.current) {
@@ -84,11 +66,11 @@ const MultiSelectorTrigger = memo(
     return (
       <div
         className={cn(
-          "relative mb-0 flex w-full flex-col flex-wrap gap-1 rounded-lg bg-background p-1 py-2 ring-1 ring-muted dark:bg-secondary",
+          "bg-background ring-muted dark:bg-secondary relative mb-0 flex w-full flex-col flex-wrap gap-1 rounded-lg p-1 py-2 ring-1",
           {
             "opacity-50": !allAvailableOptions,
           },
-          !allAvailableOptions && "pointer-events-none ",
+          !allAvailableOptions && "pointer-events-none",
         )}
       >
         <div className="flex items-center justify-center gap-2 px-1">
@@ -113,11 +95,7 @@ const MultiSelectorTrigger = memo(
               }
             }}
             onKeyDown={(e) => {
-              if (
-                e.key === "Enter" &&
-                !isClickingUltility &&
-                allAvailableOptions
-              ) {
+              if (e.key === "Enter" && !isClickingUltility && allAvailableOptions) {
                 setInputValue?.("");
                 setOpen(!open);
               }
@@ -147,7 +125,7 @@ const MultiSelectorTrigger = memo(
             <div className="flex w-full flex-wrap gap-2 p-1" ref={contentRef}>
               {selectedValues.map((item) => (
                 <Badge
-                  className="wrap-anywhere dark:border-white/25! flex items-center gap-1 whitespace-pre-wrap rounded-xl px-1 text-left"
+                  className="flex items-center gap-1 rounded-xl px-1 text-left wrap-anywhere whitespace-pre-wrap dark:border-white/25!"
                   key={item}
                   variant={"secondary"}
                 >
@@ -178,7 +156,7 @@ const MultiSelectorTrigger = memo(
                     type="button"
                   >
                     <span className="sr-only">Remove {item} option</span>
-                    <RemoveIcon className="h-4 w-4 cursor-pointer transition-colors duration-100 ease-in-out hover:stroke-destructive" />
+                    <RemoveIcon className="hover:stroke-destructive h-4 w-4 cursor-pointer transition-colors duration-100 ease-in-out" />
                   </button>
                 </Badge>
               ))}
@@ -210,7 +188,7 @@ const MultiSelectorTriggerButtonUltility = memo(
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-destructive"
+                className="hover:text-destructive h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out"
                 onClick={() => {
                   onValueChange([]);
                 }}
@@ -230,19 +208,17 @@ const MultiSelectorTriggerButtonUltility = memo(
                 }}
                 variant="outline"
               >
-                <Trash2 className="h-4 w-4 " />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="z-100000000000">
-              Remove all
-            </TooltipContent>
+            <TooltipContent className="z-100000000000">Remove all</TooltipContent>
           </Tooltip>
         )}
         {!maxLength && showSelectAll && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className=" h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
+                className="h-7 w-7 cursor-pointer transition-colors duration-100 ease-in-out hover:text-yellow-500"
                 onClick={() => {
                   onValueChange(allAvailableOptions ?? []);
                 }}
@@ -262,12 +238,10 @@ const MultiSelectorTriggerButtonUltility = memo(
                 }}
                 variant="outline"
               >
-                <Sparkles className="h-4 w-4 " />
+                <Sparkles className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="z-100000000000">
-              Select all
-            </TooltipContent>
+            <TooltipContent className="z-100000000000">Select all</TooltipContent>
           </Tooltip>
         )}
       </>
@@ -275,5 +249,4 @@ const MultiSelectorTriggerButtonUltility = memo(
   },
 );
 
-MultiSelectorTriggerButtonUltility.displayName =
-  "MultiSelectorTriggerButtonUltility";
+MultiSelectorTriggerButtonUltility.displayName = "MultiSelectorTriggerButtonUltility";

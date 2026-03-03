@@ -1,36 +1,25 @@
 "use client";
-import React, { memo, useCallback, useRef, useState } from "react";
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowUp,
-  Loader2,
-  OctagonAlert,
-  RefreshCcw,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SidebarInset } from "@/components/ui/sidebar";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import QuestionPreview from "@/features/topical/components/QuestionPreview";
+import { SidebarInset } from "@/components/ui/sidebar";
+import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
 import InfiniteScroll from "@/features/topical/components/InfiniteScroll";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
+import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
-import AppUltilityBar from "@/features/topical/components/AppUltilityBar";
-import {
-  useExportMode,
-  useQuestionData,
-  useQuestionInspect,
-} from "@/features/topical/hooks";
-import Image from "next/image";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { useExportMode, useQuestionData, useQuestionInspect } from "@/features/topical/hooks";
 import { cn } from "@/lib/utils";
+import { ArrowDown, ArrowLeft, ArrowUp, Loader2, OctagonAlert, RefreshCcw } from "lucide-react";
+import Image from "next/image";
+import { memo, useCallback, useState } from "react";
+import { AppMainContentProps } from "../types/components";
+import { DisplayMode, SelectedQuestion } from "../types/models";
+import DisplayModeToggle from "./DisplayModeToggle";
 import ExportBar from "./ExportMode/ExportBar";
 import IntergrationTips from "./IntergrationTips";
 import Masonry from "./Masonry";
-import DisplayModeToggle from "./DisplayModeToggle";
-import { AppMainContentProps } from "../types/components";
-import { DisplayMode, SelectedQuestion } from "../types/models";
 
 const AppMainContent = ({
   mountedRef,
@@ -51,10 +40,8 @@ const AppMainContent = ({
   isExportModeEnabled,
   setIsExportModeEnabled,
 }: AppMainContentProps) => {
-  const [
-    isScrollingAndShouldShowScrollButton,
-    setIsScrollingAndShouldShowScrollButton,
-  ] = useState(false);
+  const [isScrollingAndShouldShowScrollButton, setIsScrollingAndShouldShowScrollButton] =
+    useState(false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("questions");
 
   // Hooks
@@ -136,20 +123,16 @@ const AppMainContent = ({
   return (
     <>
       <SidebarInset
-        className="relative! flex flex-col items-center justify-start px-0! gap-2 p-4 pl-2 md:items-start w-full overflow-hidden"
+        className="relative! flex w-full flex-col items-center justify-start gap-2 overflow-hidden p-4 px-0! pl-2 md:items-start"
         ref={sideBarInsetRef}
       >
         <ScrollToTopButton
-          isScrollingAndShouldShowScrollButton={
-            isScrollingAndShouldShowScrollButton
-          }
+          isScrollingAndShouldShowScrollButton={isScrollingAndShouldShowScrollButton}
           scrollAreaRef={mainContentScrollAreaRef}
         />
 
         <AppUltilityBar
-          finishedQuestionsFilteredPartitionedData={
-            finishedQuestionsFilteredPartitionedData
-          }
+          finishedQuestionsFilteredPartitionedData={finishedQuestionsFilteredPartitionedData}
           ultilityRef={ultilityRef}
           ref={appUltilityBarRef}
           isQuestionViewDisabled={isQuestionViewDisabled}
@@ -169,152 +152,127 @@ const AppMainContent = ({
 
         <ScrollArea
           viewportRef={mainContentScrollAreaRef}
-          className="h-[78vh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+          className="[&_.bg-border]:bg-logo-main h-[78vh] w-full overflow-auto px-4"
           type="always"
           viewPortOnScrollEnd={handleScrollEnd}
         >
-          {!isTopicalDataFetching &&
-            !isTopicalDataFetched &&
-            isValidSearchParams && (
-              <div className="flex flex-col items-center justify-center w-full h-full mb-3 gap-2">
-                <h1 className="w-full text-center font-bold text-2xl -mb-1">
-                  Topical questions
-                </h1>
+          {!isTopicalDataFetching && !isTopicalDataFetched && isValidSearchParams && (
+            <div className="mb-3 flex h-full w-full flex-col items-center justify-center gap-2">
+              <h1 className="-mb-1 w-full text-center text-2xl font-bold">Topical questions</h1>
 
-                <div className="flex mb-1 flex-row items-center justify-center w-full gap-2 px-4 rounded-lg ">
-                  <ArrowLeft
-                    className="hidden md:block text-green-600 dark:text-green-700"
-                    size={20}
-                  />
-                  <ArrowUp
-                    className="md:hidden block text-green-600 dark:text-green-700"
-                    size={20}
-                  />
-                  <span className="text-green-700 dark:text-green-700 text-lg text-center font-medium">
-                    Use the sidebar/filter on the{" "}
-                    <span className="hidden md:inline">left</span>
-                    <span className="md:hidden inline">top</span> to search for
-                    questions
-                  </span>
-                </div>
+              <div className="mb-1 flex w-full flex-row items-center justify-center gap-2 rounded-lg px-4">
+                <ArrowLeft
+                  className="hidden text-green-600 md:block dark:text-green-700"
+                  size={20}
+                />
+                <ArrowUp className="block text-green-600 md:hidden dark:text-green-700" size={20} />
+                <span className="text-center text-lg font-medium text-green-700 dark:text-green-700">
+                  Use the sidebar/filter on the <span className="hidden md:inline">left</span>
+                  <span className="inline md:hidden">top</span> to search for questions
+                </span>
+              </div>
 
-                <div className="flex flex-row flex-wrap w-full  gap-4 items-stretch justify-center">
-                  <div className="w-full md:w-[377px] flex items-center justify-center flex-col gap-2 max-w-full! h-[inherit]  p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm ">
-                    <h3 className="text-lg font-semibold text-center mb-3 text-orange-700 dark:text-orange-400">
-                      Inspect Mode Keyboard Navigation
-                    </h3>
-                    <ul className=" flex items-center justify-center flex-col">
-                      <li className="flex items-center flex-col gap-2 text-orange-600 dark:text-orange-400">
-                        <div className="flex flex-row items-center gap-2">
-                          <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                            ↑↓
-                          </kbd>
-                          <span>or</span>
-                          <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                            WASD
-                          </kbd>
-                        </div>
-                        <span>
-                          to navigate between questions during inspect
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                        <kbd className="px-2 py-1 bg-orange-100 dark:bg-orange-800 rounded">
-                          E
+              <div className="flex w-full flex-row flex-wrap items-stretch justify-center gap-4">
+                <div className="flex h-[inherit] w-full max-w-full! flex-col items-center justify-center gap-2 rounded-lg bg-orange-50 p-3 shadow-sm md:w-[377px] dark:bg-orange-900/20">
+                  <h3 className="mb-3 text-center text-lg font-semibold text-orange-700 dark:text-orange-400">
+                    Inspect Mode Keyboard Navigation
+                  </h3>
+                  <ul className="flex flex-col items-center justify-center">
+                    <li className="flex flex-col items-center gap-2 text-orange-600 dark:text-orange-400">
+                      <div className="flex flex-row items-center gap-2">
+                        <kbd className="rounded bg-orange-100 px-2 py-1 dark:bg-orange-800">↑↓</kbd>
+                        <span>or</span>
+                        <kbd className="rounded bg-orange-100 px-2 py-1 dark:bg-orange-800">
+                          WASD
                         </kbd>
-                        <span>to toggle between questions and answers</span>
-                      </li>
-                    </ul>
-                  </div>
+                      </div>
+                      <span>to navigate between questions during inspect</span>
+                    </li>
+                    <li className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+                      <kbd className="rounded bg-orange-100 px-2 py-1 dark:bg-orange-800">E</kbd>
+                      <span>to toggle between questions and answers</span>
+                    </li>
+                  </ul>
+                </div>
 
-                  <div className="w-full md:w-[377px] max-w-full! h-[inherit] p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg shadow-sm ">
-                    <h3 className="text-lg font-semibold text-center mb-2 text-gray-700 dark:text-gray-300">
-                      Customize Your Experience
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-center">
-                      Scroll down to the bottom of the sidebar to adjust content
-                      layout, cache behaviour, and visual settings to your
-                      preference.
+                <div className="h-[inherit] w-full max-w-full! rounded-lg bg-gray-50 p-3 shadow-sm md:w-[377px] dark:bg-gray-800/50">
+                  <h3 className="mb-2 text-center text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    Customize Your Experience
+                  </h3>
+                  <p className="text-center text-gray-600 dark:text-gray-400">
+                    Scroll down to the bottom of the sidebar to adjust content layout, cache
+                    behaviour, and visual settings to your preference.
+                  </p>
+                </div>
+
+                <div className="h-[inherit] w-full max-w-full! rounded-lg bg-blue-50 p-3 shadow-sm md:w-[377px] dark:bg-blue-900/20">
+                  <h3 className="mb-2 text-center text-lg font-semibold text-blue-700 dark:text-blue-400">
+                    Track Your Progress
+                  </h3>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p className="text-center text-blue-600 dark:text-blue-400">
+                      Bookmark questions to create your personal list, share with friends, and mark
+                      completed questions to track your revision progress. Use the mini sidebar
+                      below to access it.
                     </p>
-                  </div>
-
-                  <div className="w-full md:w-[377px] max-w-full! h-[inherit] p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
-                    <h3 className="text-lg font-semibold text-center mb-2 text-blue-700 dark:text-blue-400">
-                      Track Your Progress
-                    </h3>
-                    <div className="flex flex-col gap-2 items-center justify-center">
-                      <p className="text-blue-600 dark:text-blue-400 text-center">
-                        Bookmark questions to create your personal list, share
-                        with friends, and mark completed questions to track your
-                        revision progress. Use the mini sidebar below to access
-                        it.
-                      </p>
-                      <ArrowDown className="text-blue-700" />
-                    </div>
+                    <ArrowDown className="text-blue-700" />
                   </div>
                 </div>
               </div>
-            )}
-          {!isTopicalDataFetching &&
-            !isTopicalDataFetched &&
-            !isValidSearchParams && (
-              <div className="text-red-500 text-center">
-                Invalid URL parameters, or data has been outdated! Please input
-                manually using the filter on the left.
-              </div>
-            )}
+            </div>
+          )}
+          {!isTopicalDataFetching && !isTopicalDataFetched && !isValidSearchParams && (
+            <div className="text-center text-red-500">
+              Invalid URL parameters, or data has been outdated! Please input manually using the
+              filter on the left.
+            </div>
+          )}
           {topicalData?.isRateLimited && (
-            <p className="text-md text-center mb-2 text-red-600">
-              Limited results displayed due to rate limiting. Sign in for
-              complete access.
+            <p className="text-md mb-2 text-center text-red-600">
+              Limited results displayed due to rate limiting. Sign in for complete access.
             </p>
           )}
           {topicalData?.isRateLimited &&
             window.location.href ===
               "https://noteoverflow.com/topical?queryKey=%7B%22curriculumId%22%3A%22CIE+A-LEVEL%22%2C%22subjectId%22%3A%22Physics+%289702%29%22%2C%22topic%22%3A%5B%22GRAVITATIONAL+FIELDS%22%2C%22MOTION+IN+A+CIRCLE%22%5D%2C%22paperType%22%3A%5B%224%22%5D%2C%22year%22%3A%5B%222025%22%2C%222024%22%2C%222023%22%2C%222022%22%2C%222021%22%2C%222020%22%2C%222019%22%2C%222018%22%2C%222017%22%2C%222016%22%2C%222015%22%2C%222014%22%2C%222013%22%2C%222012%22%2C%222011%22%2C%222010%22%2C%222009%22%5D%2C%22season%22%3A%5B%22Spring%22%2C%22Summer%22%2C%22Winter%22%5D%7D" && (
-              <p className="text-md text-center mb-2 text-green-600">
-                New user here? Look around these questions and try out the
-                website, or use the filter at the top left to choose another
-                subject
+              <p className="text-md mb-2 text-center text-green-600">
+                New user here? Look around these questions and try out the website, or use the
+                filter at the top left to choose another subject
               </p>
             )}
-          {isTopicalDataError &&
-            !isTopicalDataFetching &&
-            isTopicalDataFetched && (
-              <div className="flex flex-col items-center justify-center w-full h-full mb-3">
-                <div className="flex items-start justify-center gap-2">
-                  <p className="text-md text-center mb-2 text-red-600">
-                    An error occurred while fetching data. Please try again.
-                  </p>
-                  <OctagonAlert className="text-red-600" />
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={handleRefetch}
-                  className="flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  Refetch
-                  <RefreshCcw />
-                </Button>
+          {isTopicalDataError && !isTopicalDataFetching && isTopicalDataFetched && (
+            <div className="mb-3 flex h-full w-full flex-col items-center justify-center">
+              <div className="flex items-start justify-center gap-2">
+                <p className="text-md mb-2 text-center text-red-600">
+                  An error occurred while fetching data. Please try again.
+                </p>
+                <OctagonAlert className="text-red-600" />
               </div>
-            )}{" "}
+              <Button
+                variant="outline"
+                onClick={handleRefetch}
+                className="flex cursor-pointer items-center justify-center gap-1"
+              >
+                Refetch
+                <RefreshCcw />
+              </Button>
+            </div>
+          )}{" "}
           {!doesSearchYieldAnyQuestions &&
             isTopicalDataFetched &&
             !isTopicalDataError &&
             !isTopicalDataFetching && (
-              <div className="flex items-center justify-center w-full h-full">
-                <p className="text-md text-center mb-2 text-red-600">
-                  No questions found. Try changing the filters. Certain topics
-                  may be paired with specific papers.
+              <div className="flex h-full w-full items-center justify-center">
+                <p className="text-md mb-2 text-center text-red-600">
+                  No questions found. Try changing the filters. Certain topics may be paired with
+                  specific papers.
                 </p>
               </div>
             )}
           {doesSearchYieldAnyQuestions && (
-            <div className="flex items-center justify-start gap-2 mb-3">
-              <p className="text-sm text-muted-foreground font-medium">
-                <span className="text-foreground font-bold">
-                  {topicalData?.data.length ?? 0}
-                </span>{" "}
+            <div className="mb-3 flex items-center justify-start gap-2">
+              <p className="text-muted-foreground text-sm font-medium">
+                <span className="text-foreground font-bold">{topicalData?.data.length ?? 0}</span>{" "}
                 question
                 {(topicalData?.data.length ?? 0) > 1 ? "s" : ""} found,{" "}
                 <span className="text-foreground font-bold">
@@ -322,10 +280,7 @@ const AppMainContent = ({
                 </span>{" "}
                 displayed
               </p>
-              <DisplayModeToggle
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-              />
+              <DisplayModeToggle displayMode={displayMode} setDisplayMode={setDisplayMode} />
             </div>
           )}
           {currentChunkIndex === 0 &&
@@ -339,8 +294,8 @@ const AppMainContent = ({
             isTopicalDataFetched &&
             !isTopicalDataError &&
             !isTopicalDataFetching && (
-              <div className="flex items-center justify-center w-full h-full flex-col gap-2">
-                <p className="text-xl font-semibold text-center text-green-700">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+                <p className="text-center text-xl font-semibold text-green-700">
                   You finished everything!
                 </p>
                 <Image
@@ -352,9 +307,7 @@ const AppMainContent = ({
                 />
               </div>
             )}
-          {isTopicalDataFetching && (
-            <Loader2 className="animate-spin m-auto mb-2" />
-          )}
+          {isTopicalDataFetching && <Loader2 className="m-auto mb-2 animate-spin" />}
           <MainContent
             doesSearchYieldAnyQuestions={doesSearchYieldAnyQuestions}
             filteredDisplayData={finishedQuestionsFilteredDisplayData}
@@ -362,9 +315,7 @@ const AppMainContent = ({
             isExportModeEnabled={isExportModeEnabled}
             handleQuestionClick={handleQuestionClick}
             handleInfiniteScrollNext={handleInfiniteScrollNext}
-            finishedQuestionsFilteredPartitionedData={
-              finishedQuestionsFilteredPartitionedData
-            }
+            finishedQuestionsFilteredPartitionedData={finishedQuestionsFilteredPartitionedData}
             currentChunkIndex={currentChunkIndex}
             displayMode={displayMode}
           />
@@ -460,8 +411,7 @@ export const MainContent = memo(
             next={handleInfiniteScrollNext}
             hasMore={
               !!finishedQuestionsFilteredPartitionedData &&
-              currentChunkIndex <
-                finishedQuestionsFilteredPartitionedData.length - 1
+              currentChunkIndex < finishedQuestionsFilteredPartitionedData.length - 1
             }
             isLoading={!finishedQuestionsFilteredPartitionedData}
           />
@@ -496,18 +446,17 @@ const QuestionViewItem = memo(
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
-          "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full mb-[10px]",
-          isQuestionForExport &&
-            "transform-[scale(0.975)] border-logo-main rounded-md",
+          "relative mb-[10px] w-full border-2 border-transparent transition-all duration-200 ease-in-out",
+          isQuestionForExport && "border-logo-main transform-[scale(0.975)] rounded-md",
         )}
       >
         {isExportModeEnabled && (
           <div
-            className="absolute z-20 top-2 left-2 w-max h-max"
+            className="absolute top-2 left-2 z-20 h-max w-max"
             onClick={() => handleQuestionClick(question.id)}
           >
             <Checkbox
-              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full  cursor-pointer"
+              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 cursor-pointer rounded-full bg-white data-[state=checked]:text-white dark:bg-white"
               checked={isQuestionForExport}
             />
           </div>

@@ -23,19 +23,19 @@ const NonEditModeDownloadMenu = memo(
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="cursor-pointer h-[26px]" variant="outline">
+          <Button className="h-[26px] cursor-pointer" variant="outline">
             <span className="hidden sm:block">Download</span>
             <Download className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="z-999998 flex flex-col dark:bg-accent p-2 gap-2"
+          className="dark:bg-accent z-999998 flex flex-col gap-2 p-2"
           data-annotatable-download-menu
         >
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "question" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question"
@@ -43,7 +43,7 @@ const NonEditModeDownloadMenu = memo(
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "answer" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="answer"
@@ -51,7 +51,7 @@ const NonEditModeDownloadMenu = memo(
           <DownloadButton
             onGeneratePdf={useCallback(
               () => generatePdfBlob({ typeOfContent: "question-with-answers" }),
-              [generatePdfBlob]
+              [generatePdfBlob],
             )}
             pdfBaseFileName={pdfBaseFileName}
             typeOfDownload="question-with-answers"
@@ -59,7 +59,7 @@ const NonEditModeDownloadMenu = memo(
         </DropdownMenuContent>
       </DropdownMenu>
     );
-  }
+  },
 );
 
 NonEditModeDownloadMenu.displayName = "NonEditModeDownloadMenu";

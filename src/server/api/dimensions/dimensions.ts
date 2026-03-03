@@ -1,12 +1,12 @@
-import "server-only";
+import { retryDatabase } from "@/dal/retry";
+import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
-import { retryDatabase } from "@/dal/retry";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { status as elysiaStatus } from "elysia";
-import { verifySession } from "@/dal/verifySession";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { getImageDimensionsFromUrl } from "@/lib/image-utils";
+import { eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
+import "server-only";
 
 interface ImageDimension {
   width: number;
@@ -17,9 +17,7 @@ interface ImageDimension {
  * Fetch image dimensions from a URL using native Web APIs
  * Works in Cloudflare Workers environment
  */
-async function getImageDimensions(
-  imageUrl: string
-): Promise<ImageDimension | null> {
+async function getImageDimensions(imageUrl: string): Promise<ImageDimension | null> {
   return await getImageDimensionsFromUrl(imageUrl);
 }
 
@@ -34,9 +32,7 @@ function isImageUrl(url: string): boolean {
   const imageHostDomains = ["notestack.online", "noteoverflow.com"];
 
   const hasImageExtension = imageExtensions.test(url);
-  const isFromImageHost = imageHostDomains.some((domain) =>
-    url.includes(domain)
-  );
+  const isFromImageHost = imageHostDomains.some((domain) => url.includes(domain));
 
   return hasImageExtension || isFromImageHost;
 }
@@ -132,10 +128,7 @@ export async function processSingleQuestion({
       questionDimensions.push(dimensions);
       successfulCount++;
     } catch (error) {
-      console.error(
-        `Failed to get dimensions for question image: ${imageUrl}`,
-        error
-      );
+      console.error(`Failed to get dimensions for question image: ${imageUrl}`, error);
       failedCount++;
       break;
     }
@@ -157,10 +150,7 @@ export async function processSingleQuestion({
         answerDimensions.push(dimensions);
         successfulCount++;
       } catch (error) {
-        console.error(
-          `Failed to get dimensions for answer image: ${answer}`,
-          error
-        );
+        console.error(`Failed to get dimensions for answer image: ${answer}`, error);
         failedCount++;
         break;
       }
@@ -185,7 +175,7 @@ export async function processSingleQuestion({
               updatedAt: new Date(),
             })
             .where(eq(question.id, id)),
-        `update question ${id} dimensions`
+        `update question ${id} dimensions`,
       );
       return {
         success: true,

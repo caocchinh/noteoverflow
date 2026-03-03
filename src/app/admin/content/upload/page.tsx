@@ -1,11 +1,5 @@
 "use client";
 
-import { DialogTitle } from "@radix-ui/react-dialog";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -17,22 +11,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   BAD_REQUEST,
   FAILED_TO_UPLOAD_IMAGE,
@@ -75,33 +61,29 @@ import {
   validateTopic,
   validateYear,
 } from "@/features/admin/content/lib/utils";
-import { uploadImage } from "@/features/admin/lib/utils";
 import { uploadAction } from "@/features/admin/content/server/actions";
-import { cn, parseQuestionId } from "@/lib/utils";
+import { uploadImage } from "@/features/admin/lib/utils";
 import {
   getCurriculumAction,
   getSubjectByCurriculumAction,
   getSubjectInfoAction,
   isQuestionExistsAction,
 } from "@/features/admin/server/actions";
+import { cn, parseQuestionId } from "@/lib/utils";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight, Loader2, Upload } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const UploadPage = () => {
-  const [selectedCurriculum, setSelectedCurriculum] = useState<
-    string | undefined
-  >(undefined);
-  const [selectedSubject, setSelectedSubject] = useState<string | undefined>(
-    undefined
-  );
-  const [selectedTopic, setSelectedTopic] = useState<string | undefined>(
-    undefined
-  );
-  const [selectedPaperType, setSelectedPaperType] = useState<
-    string | undefined
-  >(undefined);
+  const [selectedCurriculum, setSelectedCurriculum] = useState<string | undefined>(undefined);
+  const [selectedSubject, setSelectedSubject] = useState<string | undefined>(undefined);
+  const [selectedTopic, setSelectedTopic] = useState<string | undefined>(undefined);
+  const [selectedPaperType, setSelectedPaperType] = useState<string | undefined>(undefined);
   const [selectedSeason, setSelectedSeason] = useState<ValidSeason | "">("");
-  const [selectedYear, setSelectedYear] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedYear, setSelectedYear] = useState<string | undefined>(undefined);
   const queryClient = useQueryClient();
   const [questionNumber, setQuestionNumber] = useState<string>("");
   const [questionNumberError, setQuestionNumberError] = useState<string>("");
@@ -110,9 +92,7 @@ const UploadPage = () => {
   const [questionImages, setQuestionImages] = useState<File[]>([]);
   const [answerImages, setAnswerImages] = useState<File[]>([]);
   const [imageDialogOpen, setImageDialogOpen] = useState<boolean>(false);
-  const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(
-    undefined
-  );
+  const [imageDialogImage, setImageDialogImage] = useState<string | undefined>(undefined);
   const [currentTab, setCurrentTab] = useState<ValidTabs>("information");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState<boolean>(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
@@ -196,7 +176,7 @@ const UploadPage = () => {
     queryFn: async (): Promise<SubjectType[]> => {
       try {
         const { success, data, error } = await getSubjectByCurriculumAction(
-          selectedCurriculum ?? ""
+          selectedCurriculum ?? "",
         );
         if (!success) {
           throw new Error(error || "Failed to fetch subject data");
@@ -223,7 +203,7 @@ const UploadPage = () => {
       try {
         const { success, data, error } = await getSubjectInfoAction(
           selectedSubject ?? "",
-          selectedCurriculum ?? ""
+          selectedCurriculum ?? "",
         );
         if (!success) {
           throw new Error(error || "Failed to fetch subject information");
@@ -265,9 +245,7 @@ const UploadPage = () => {
     }
   };
 
-  const handleQuestionNumberChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleQuestionNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuestionNumber(value);
 
@@ -385,14 +363,14 @@ const UploadPage = () => {
           paperCode,
           curriculumName: selectedCurriculum ?? "",
           questionNumber: questionNumber ?? "",
-        })
+        }),
       );
       if (!success) {
         handleError(error);
       }
       if (data) {
         throw new Error(
-          "Question already exists! If you want to overwrite it, please use the update page."
+          "Question already exists! If you want to overwrite it, please use the update page.",
         );
       }
       const { success: success2, error: error2 } = await uploadAction({
@@ -448,7 +426,7 @@ const UploadPage = () => {
           // if (!success4) {
           //   handleError(error4);
           // }
-        })
+        }),
       );
       if (isMultipleChoice) {
         // const { success: success5, error: error5 } = await createAnswerAction({
@@ -499,16 +477,14 @@ const UploadPage = () => {
             // if (!success7) {
             //   handleError(error7);
             // }
-          })
+          }),
         );
       }
 
       await resetAllInputs();
       toast.success("Question uploaded successfully");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred");
     } finally {
       setIsUploadDialogOpen(false);
       setIsUploading(false);
@@ -535,9 +511,7 @@ const UploadPage = () => {
     <>
       <div>
         <Dialog onOpenChange={setImageDialogOpen} open={imageDialogOpen}>
-          <DialogDescription className="sr-only">
-            Preview Image
-          </DialogDescription>
+          <DialogDescription className="sr-only">Preview Image</DialogDescription>
           <DialogContent
             className="max-h-[70vh] overflow-y-auto"
             onClick={() => setImageDialogOpen(false)}
@@ -554,15 +528,11 @@ const UploadPage = () => {
         </Dialog>
       </div>
       <div className="mt-4 flex w-full flex-row flex-wrap items-start justify-evenly gap-8">
-        <div className="flex w-full flex-col flex-wrap items-start justify-start gap-4 rounded-md border-2 border-foreground-muted bg-card p-4 sm:w-[350px]">
-          <h1 className="w-full text-center font-semibold text-xl">
-            Information
-          </h1>
+        <div className="border-foreground-muted bg-card flex w-full flex-col flex-wrap items-start justify-start gap-4 rounded-md border-2 p-4 sm:w-[350px]">
+          <h1 className="w-full text-center text-xl font-semibold">Information</h1>
           {isCurriculumError && (
             <div className="mb-2 w-full rounded border border-red-400 bg-red-100 p-2 text-red-700">
-              <p className="text-sm">
-                Error loading curriculum: {curriculumError?.message}
-              </p>
+              <p className="text-sm">Error loading curriculum: {curriculumError?.message}</p>
               <Button
                 className="mt-1 cursor-pointer"
                 onClick={() => refetchCurriculum()}
@@ -599,9 +569,7 @@ const UploadPage = () => {
           />
           {isSubjectError && (
             <div className="mb-2 w-full rounded border border-red-400 bg-red-100 p-2 text-red-700">
-              <p className="text-sm">
-                Error loading subjects: {subjectError?.message}
-              </p>
+              <p className="text-sm">Error loading subjects: {subjectError?.message}</p>
               <Button
                 className="mt-1 cursor-pointer"
                 onClick={() => refetchSubject()}
@@ -613,12 +581,12 @@ const UploadPage = () => {
             </div>
           )}
           {isSubjectInfoError && (
-            <div className="mb-2 w-full rounded border border-red-400 bg-red-100 p-2 text-red-700 ">
+            <div className="mb-2 w-full rounded border border-red-400 bg-red-100 p-2 text-red-700">
               <p className="text-sm">
                 Error loading subject information: {subjectInfoError?.message}
               </p>
               <Button
-                className="bg-white! text-red-700! mt-1 cursor-pointer"
+                className="mt-1 cursor-pointer bg-white! text-red-700!"
                 onClick={() => refetchSubjectInfo()}
                 size="sm"
                 variant="outline"
@@ -639,9 +607,7 @@ const UploadPage = () => {
           />
           <EnhancedSelect
             disabled={!selectedSubject}
-            existingItems={
-              subjectInfo?.paperTypeData?.map((item) => item.toString()) ?? []
-            }
+            existingItems={subjectInfo?.paperTypeData?.map((item) => item.toString()) ?? []}
             inputType="number"
             isLoading={isSubjectInfoFetching && !!selectedSubject}
             labels={PAPER_TYPE_LABELS}
@@ -662,9 +628,7 @@ const UploadPage = () => {
           />
           <EnhancedSelect
             disabled={!selectedSubject}
-            existingItems={
-              subjectInfo?.yearData?.map((item) => item.toString()) ?? []
-            }
+            existingItems={subjectInfo?.yearData?.map((item) => item.toString()) ?? []}
             inputType="number"
             isLoading={isSubjectInfoFetching && !!selectedSubject}
             labels={YEAR_LABELS}
@@ -678,10 +642,7 @@ const UploadPage = () => {
               Question Number
             </Label>
             <Input
-              className={cn(
-                "w-full",
-                questionNumberError ? "border-red-500" : ""
-              )}
+              className={cn("w-full", questionNumberError ? "border-red-500" : "")}
               id="questionNumber"
               onChange={handleQuestionNumberChange}
               placeholder="Enter question number"
@@ -689,9 +650,7 @@ const UploadPage = () => {
               value={questionNumber}
             />
             {questionNumberError && (
-              <span className="mt-1 text-red-500 text-sm">
-                {questionNumberError}
-              </span>
+              <span className="mt-1 text-sm text-red-500">{questionNumberError}</span>
             )}
           </div>
           <div className="flex w-full flex-col">
@@ -699,10 +658,7 @@ const UploadPage = () => {
               Paper Variant
             </Label>
             <Input
-              className={cn(
-                "w-full",
-                paperVariantError ? "border-red-500" : ""
-              )}
+              className={cn("w-full", paperVariantError ? "border-red-500" : "")}
               id="paperVariant"
               onChange={handlePaperVariantChange}
               placeholder="Enter paper variant"
@@ -710,9 +666,7 @@ const UploadPage = () => {
               value={paperVariantInput}
             />
             {paperVariantError && (
-              <span className="mt-1 text-red-500 text-sm">
-                {paperVariantError}
-              </span>
+              <span className="mt-1 text-sm text-red-500">{paperVariantError}</span>
             )}
           </div>
           <div className="flex w-full flex-row items-center justify-start gap-2">
@@ -728,9 +682,7 @@ const UploadPage = () => {
         <div className="flex w-max flex-col items-center justify-center gap-4">
           <div className="flex w-full flex-wrap items-start justify-center gap-12">
             <div className="flex w-[370px] flex-col items-center justify-center gap-4">
-              <h1 className="w-full text-center font-semibold text-xl">
-                Question
-              </h1>
+              <h1 className="w-full text-center text-xl font-semibold">Question</h1>
               <ReorderableImageList
                 images={questionImages}
                 onRemoveImage={handleRemoveQuestionImage}
@@ -753,9 +705,7 @@ const UploadPage = () => {
             </div>
             {isMultipleChoice ? (
               <div className="flex w-max flex-col items-center justify-center gap-4">
-                <h1 className="w-full text-center font-semibold text-xl">
-                  Answer
-                </h1>
+                <h1 className="w-full text-center text-xl font-semibold">Answer</h1>
                 <RadioGroup
                   defaultValue="A"
                   onValueChange={(value) => setMultipleChoiceInput(value)}
@@ -792,9 +742,7 @@ const UploadPage = () => {
               </div>
             ) : (
               <div className="flex w-[370px] flex-col items-center justify-center gap-4">
-                <h1 className="w-full text-center font-semibold text-xl">
-                  Answer
-                </h1>
+                <h1 className="w-full text-center text-xl font-semibold">Answer</h1>
                 <ReorderableImageList
                   images={answerImages}
                   onRemoveImage={handleRemoveAnswerImage}
@@ -818,10 +766,7 @@ const UploadPage = () => {
             )}
           </div>
           <div className="mt-4 flex w-full flex-row items-center justify-center gap-4">
-            <AlertDialog
-              onOpenChange={setIsUploadDialogOpen}
-              open={isUploadDialogOpen}
-            >
+            <AlertDialog onOpenChange={setIsUploadDialogOpen} open={isUploadDialogOpen}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex-1">
@@ -851,13 +796,9 @@ const UploadPage = () => {
                   {!selectedYear && <p>-Year</p>}
                   {!questionNumber && <p>-Question Number</p>}
                   {!paperVariantInput && <p>-Paper Variant</p>}
-                  {isMultipleChoice && !multipleChoiceInput && (
-                    <p>-Multiple Choice Answer</p>
-                  )}
+                  {isMultipleChoice && !multipleChoiceInput && <p>-Multiple Choice Answer</p>}
                   {!questionImages.length && <p>-Question Image</p>}
-                  {!(answerImages.length || isMultipleChoice) && (
-                    <p>-Answer Image</p>
-                  )}
+                  {!(answerImages.length || isMultipleChoice) && <p>-Answer Image</p>}
                 </TooltipContent>
               </Tooltip>
               <AlertDialogContent>
@@ -923,9 +864,7 @@ const UploadPage = () => {
                       <div className="font-semibold">Paper Variant:</div>
                       <div>{paperVariantInput}</div>
                       <div className="font-semibold">Question Type:</div>
-                      <div>
-                        {isMultipleChoice ? "Multiple Choice" : "Theory (FRQ)"}
-                      </div>
+                      <div>{isMultipleChoice ? "Multiple Choice" : "Theory (FRQ)"}</div>
                     </div>
                     <Button
                       className="w-full cursor-pointer"
@@ -936,16 +875,11 @@ const UploadPage = () => {
                   </TabsContent>
                   <TabsContent value="image-preview">
                     <div className="mt-2 flex w-full flex-col items-start justify-center gap-2">
-                      <h4 className="font-semibold">
-                        Question (ordered by order)
-                      </h4>
+                      <h4 className="font-semibold">Question (ordered by order)</h4>
                       <ScrollArea
-                        className={cn(
-                          "w-full",
-                          isMultipleChoice ? "h-[150px]" : "h-[100px]"
-                        )}
+                        className={cn("w-full", isMultipleChoice ? "h-[150px]" : "h-[100px]")}
                       >
-                        <div className="flex w-full flex-col items-start justify-center gap-2 ">
+                        <div className="flex w-full flex-col items-start justify-center gap-2">
                           {questionImages.map((image, index) => (
                             <div
                               className="flex w-full flex-row items-center justify-center gap-2"
@@ -956,9 +890,7 @@ const UploadPage = () => {
                                 className="flex-1 cursor-pointer"
                                 onClick={() => {
                                   setImageDialogOpen(true);
-                                  setImageDialogImage(
-                                    URL.createObjectURL(image)
-                                  );
+                                  setImageDialogImage(URL.createObjectURL(image));
                                 }}
                                 variant="outline"
                               >
@@ -988,9 +920,7 @@ const UploadPage = () => {
                                   className="flex-1 cursor-pointer"
                                   onClick={() => {
                                     setImageDialogOpen(true);
-                                    setImageDialogImage(
-                                      URL.createObjectURL(image)
-                                    );
+                                    setImageDialogImage(URL.createObjectURL(image));
                                   }}
                                   variant="outline"
                                 >
@@ -1046,10 +976,7 @@ const UploadPage = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            <AlertDialog
-              onOpenChange={setIsResetDialogOpen}
-              open={isResetDialogOpen}
-            >
+            <AlertDialog onOpenChange={setIsResetDialogOpen} open={isResetDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button
                   className="flex-1 cursor-pointer"
@@ -1061,12 +988,10 @@ const UploadPage = () => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center">
-                    Reset all inputs
-                  </AlertDialogTitle>
+                  <AlertDialogTitle className="text-center">Reset all inputs</AlertDialogTitle>
                   <AlertDialogDescription className="text-center">
-                    Are you absolutely sure you want to reset all inputs? New
-                    values will be kept for the new items you have added.
+                    Are you absolutely sure you want to reset all inputs? New values will be kept
+                    for the new items you have added.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex flex-row items-center justify-center gap-4">

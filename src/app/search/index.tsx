@@ -1,35 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import "@/features/topical/components/react-photo-view.css";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/eden";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImageIcon, Search, Type, Upload, X, FileText } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import MainContent from "@/features/search/components/MainContent";
 import OptionalFilters, {
   OptionalFiltersHandle,
 } from "@/features/search/components/OptionalFilters";
-import { cn } from "@/lib/utils";
+import SearchHistory from "@/features/search/components/SearchHistory";
 import SearchPastPaper from "@/features/search/components/SearchPastPaper";
-import { OptionalSearchFilter } from "@/features/search/constants/type";
 import {
   getRandomPhrase,
   MAX_IMAGE_UPLOAD_SIZE,
   MAX_QUERY_LENGTH,
 } from "@/features/search/constants/constants";
-import MainContent from "@/features/search/components/MainContent";
-import SearchHistory from "@/features/search/components/SearchHistory";
-import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
-import {
-  updateSearchQueryParam,
-  validateSearchFilter,
-} from "@/features/search/lib/lib";
+import { OptionalSearchFilter } from "@/features/search/constants/type";
+import { updateSearchQueryParam, validateSearchFilter } from "@/features/search/lib/lib";
+import "@/features/topical/components/react-photo-view.css";
 import { hashUltil } from "@/features/topical/lib/utils";
 import { VectorizeSelectedQuestion } from "@/features/topical/types/models";
+import { addSearchHistory, SearchHistoryItem } from "@/lib/client-cache";
+import { api } from "@/lib/eden";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { FileText, ImageIcon, Search, Type, Upload, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 
 const SearchClient = ({
   searchParams,
@@ -45,9 +42,7 @@ const SearchClient = ({
   const [imageError, setImageError] = useState<string | null>(null);
   const [filterError, setFilterError] = useState<string | null>(null);
 
-  const [activeSearchType, setActiveSearchType] = useState<
-    "image" | "text" | null
-  >(null);
+  const [activeSearchType, setActiveSearchType] = useState<"image" | "text" | null>(null);
 
   const randomPhrase = useMemo(() => getRandomPhrase(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -57,8 +52,7 @@ const SearchClient = ({
   const [queryKey, setQueryKey] = useState<string | null>(null);
   const [activeTextQuery, setActiveTextQuery] = useState<string | null>(null);
   const [activeImageQuery, setActiveImageQuery] = useState<string | null>(null);
-  const [currentFilter, setCurrentFilter] =
-    useState<OptionalSearchFilter | null>(null);
+  const [currentFilter, setCurrentFilter] = useState<OptionalSearchFilter | null>(null);
 
   const searchQuery = useQuery({
     queryKey: ["search", queryKey ?? "none"],
@@ -94,9 +88,7 @@ const SearchClient = ({
         return data as VectorizeSelectedQuestion[];
       }
     },
-    enabled:
-      !!activeTextQuery ||
-      (!!activeImageQuery && !!activeSearchType && !!queryKey),
+    enabled: !!activeTextQuery || (!!activeImageQuery && !!activeSearchType && !!queryKey),
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -111,9 +103,7 @@ const SearchClient = ({
   const excessCharacters = textQuery.length - MAX_QUERY_LENGTH;
   const isQueryTooLong = excessCharacters > 0;
   const isInputValid =
-    activeTab === "image"
-      ? !!selectedImage
-      : textQuery.trim().length > 0 && !isQueryTooLong;
+    activeTab === "image" ? !!selectedImage : textQuery.trim().length > 0 && !isQueryTooLong;
 
   useEffect(() => {
     if (!searchParams) return;
@@ -178,36 +168,31 @@ const SearchClient = ({
   }, [isSearching]);
 
   // Visual Search Handlers
-  const handleImageSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        // Validate file size (max 2MB)
-        if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
-          setImageError(
-            `Image size exceeds 2MB limit. Please upload a smaller image.`,
-          );
-          // Clear the file input
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-          return;
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 2MB)
+      if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
+        setImageError(`Image size exceeds 2MB limit. Please upload a smaller image.`);
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
         }
-
-        setImageError(null);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          // Remove data URL prefix for API
-          const base64Content = base64String.split(",")[1];
-          setSelectedImage(base64Content);
-          setPreviewUrl(base64String);
-        };
-        reader.readAsDataURL(file);
+        return;
       }
-    },
-    [],
-  );
+
+      setImageError(null);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // Remove data URL prefix for API
+        const base64Content = base64String.split(",")[1];
+        setSelectedImage(base64Content);
+        setPreviewUrl(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
 
   const clearImage = useCallback(() => {
     setSelectedImage(null);
@@ -293,14 +278,7 @@ const SearchClient = ({
         });
       }
     },
-    [
-      activeTab,
-      handleTextSearch,
-      handleImageSearch,
-      textQuery,
-      selectedImage,
-      previewUrl,
-    ],
+    [activeTab, handleTextSearch, handleImageSearch, textQuery, selectedImage, previewUrl],
   );
 
   const handleHistorySelect = useCallback(
@@ -345,60 +323,50 @@ const SearchClient = ({
   return (
     <div
       className={cn(
-        "min-h-screen pt-20 bg-linear-to-b from-background via-muted/10 to-muted/30 pb-12",
+        "from-background via-muted/10 to-muted/30 min-h-screen bg-linear-to-b pt-20 pb-12",
         !isSearching && hasSearched ? "pb-18" : "",
       )}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div
           className={cn(
             "mx-auto transition-all duration-700 ease-out",
             !results ? "w-full" : "max-w-full",
           )}
         >
-          <div className="flex flex-col gap-3 items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-3">
             {!hasSearched && (
               <div className="text-center">
-                <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r pb-4 from-logo-main dark:to-white  to-logo-main/60 bg-clip-text text-transparent sm:text-5xl">
+                <h1 className="from-logo-main to-logo-main/60 bg-linear-to-r bg-clip-text pb-4 text-4xl font-bold tracking-tight text-transparent sm:text-5xl dark:to-white">
                   {randomPhrase}
                 </h1>
-                <p className="text-lg text-muted-foreground mx-auto -mt-2">
-                  Search through thousands of AS & A-level past paper questions
-                  and answers.
+                <p className="text-muted-foreground mx-auto -mt-2 text-lg">
+                  Search through thousands of AS & A-level past paper questions and answers.
                 </p>
               </div>
             )}
 
-            <Tabs
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="w-full max-w-3xl"
-            >
-              <div
-                className={cn(
-                  "flex flex-col gap-6",
-                  !results && "items-center",
-                )}
-              >
-                <div className="w-full flex items-center gap-4 justify-center flex-wrap">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-3xl">
+              <div className={cn("flex flex-col gap-6", !results && "items-center")}>
+                <div className="flex w-full flex-wrap items-center justify-center gap-4">
                   <TabsList
                     className={cn(
-                      "grid grid-cols-2 p-1 bg-muted/40 backdrop-blur-sm border shadow-sm",
+                      "bg-muted/40 grid grid-cols-2 border p-1 shadow-sm backdrop-blur-sm",
                       results ? "w-48" : "w-64",
                     )}
                   >
                     <TabsTrigger
                       value="text"
-                      className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                      className="data-[state=active]:bg-background cursor-pointer rounded-sm transition-all data-[state=active]:shadow-sm"
                     >
-                      <Type className="w-4 h-4 mr-2" />
+                      <Type className="mr-2 h-4 w-4" />
                       Text
                     </TabsTrigger>
                     <TabsTrigger
                       value="image"
-                      className="rounded-sm data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all cursor-pointer"
+                      className="data-[state=active]:bg-background cursor-pointer rounded-sm transition-all data-[state=active]:shadow-sm"
                     >
-                      <ImageIcon className="w-4 h-4 mr-2" />
+                      <ImageIcon className="mr-2 h-4 w-4" />
                       Image
                     </TabsTrigger>
                   </TabsList>
@@ -421,22 +389,20 @@ const SearchClient = ({
                       variant="outline"
                       size="sm"
                       className={cn(
-                        "gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground hover:text-foreground",
-                        !results && "w-[180px] bg-muted/40",
+                        "border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-foreground h-10 cursor-pointer gap-2 rounded-sm px-4 transition-all",
+                        !results && "bg-muted/40 w-[180px]",
                       )}
                     >
-                      <FileText className="w-4 h-4" />
+                      <FileText className="h-4 w-4" />
                       <span>Past Paper Navigator</span>
                     </Button>
                   </SearchPastPaper>
                 </div>
 
-                <TabsContent value="text" className="mt-0 w-full mb-2">
-                  <div
-                    className={cn("relative group transition-all duration-300")}
-                  >
-                    <div className="flex items-start pt-4 pointer-events-none absolute inset-y-0 pl-5 z-10">
-                      <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <TabsContent value="text" className="mt-0 mb-2 w-full">
+                  <div className={cn("group relative transition-all duration-300")}>
+                    <div className="pointer-events-none absolute inset-y-0 z-10 flex items-start pt-4 pl-5">
+                      <Search className="text-muted-foreground group-focus-within:text-primary h-5 w-5 transition-colors" />
                     </div>
                     <Textarea
                       disabled={isSearching}
@@ -448,21 +414,17 @@ const SearchClient = ({
                         setTextareaHeight(target.offsetHeight);
                       }}
                       placeholder="Search for questions (e.g. 'Two particles P and Q of masses 0.2kg')..."
-                      style={
-                        textareaHeight
-                          ? { height: `${textareaHeight}px` }
-                          : undefined
-                      }
+                      style={textareaHeight ? { height: `${textareaHeight}px` } : undefined}
                       className={cn(
-                        "min-h-14 h-auto px-14 pt-4 text-lg rounded-2xl border-muted-foreground/20 bg-background/60 backdrop-blur-xl shadow-sm hover:shadow-md hover:border-primary/30 focus:border-primary focus:shadow-lg focus:ring-4 focus:ring-primary/10 resize-y max-h-[500px]",
+                        "border-muted-foreground/20 bg-background/60 hover:border-primary/30 focus:border-primary focus:ring-primary/10 h-auto max-h-[500px] min-h-14 resize-y rounded-2xl px-14 pt-4 text-lg shadow-sm backdrop-blur-xl hover:shadow-md focus:shadow-lg focus:ring-4",
                         isQueryTooLong &&
                           "border-destructive focus:border-destructive focus:ring-destructive/10",
                       )}
                     />
                     {isQueryTooLong && (
-                      <p className="text-sm text-destructive mt-2 ml-1">
-                        Query is too long. Please reduce by {excessCharacters}{" "}
-                        character{excessCharacters > 1 ? "s" : ""}.
+                      <p className="text-destructive mt-2 ml-1 text-sm">
+                        Query is too long. Please reduce by {excessCharacters} character
+                        {excessCharacters > 1 ? "s" : ""}.
                       </p>
                     )}
                     {textQuery && (
@@ -471,7 +433,7 @@ const SearchClient = ({
                         size="icon"
                         disabled={isSearching}
                         onClick={() => setTextQuery("")}
-                        className="absolute inset-y-0 cursor-pointer right-3 mt-2 h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full"
+                        className="hover:bg-muted text-muted-foreground hover:text-foreground absolute inset-y-0 right-3 mt-2 h-9 w-9 cursor-pointer rounded-full"
                       >
                         <X className="h-5 w-5" />
                       </Button>
@@ -481,11 +443,11 @@ const SearchClient = ({
 
                 <TabsContent
                   value="image"
-                  className="mt-0 w-full flex items-center justify-center flex-col mb-2"
+                  className="mt-0 mb-2 flex w-full flex-col items-center justify-center"
                 >
                   <div
                     className={cn(
-                      "relative border-2 border-dashed rounded-3xl transition-all overflow-hidden w-full h-48 sm:h-64  max-w-lg ",
+                      "relative h-48 w-full max-w-lg overflow-hidden rounded-3xl border-2 border-dashed transition-all sm:h-64",
                       previewUrl
                         ? "border-primary/50 bg-primary/5"
                         : imageError
@@ -498,10 +460,10 @@ const SearchClient = ({
                       type="file"
                       accept="image/*"
                       onChange={handleImageSelect}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                     />
                     {previewUrl ? (
-                      <div className="absolute z-20 inset-0 flex items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
+                      <div className="bg-background/50 absolute inset-0 z-20 flex items-center justify-center p-4 backdrop-blur-sm">
                         <div className="absolute top-2 right-2 z-20 flex items-center gap-2">
                           <Button
                             variant="ghost"
@@ -512,9 +474,9 @@ const SearchClient = ({
                               fileInputRef.current?.click();
                             }}
                             title="Choose Another Image"
-                            className="cursor-pointer h-8 px-3 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md text-xs"
+                            className="bg-background/80 hover:bg-background h-8 cursor-pointer rounded-full border px-3 text-xs shadow-sm backdrop-blur-md"
                           >
-                            <Upload className="w-4 h-4 mr-1" />
+                            <Upload className="mr-1 h-4 w-4" />
                             Change
                           </Button>
                           <Button
@@ -526,9 +488,9 @@ const SearchClient = ({
                               clearImage();
                             }}
                             title="Clear Image"
-                            className="cursor-pointer h-8 w-8 rounded-full bg-background/80 hover:bg-background shadow-sm border backdrop-blur-md"
+                            className="bg-background/80 hover:bg-background h-8 w-8 cursor-pointer rounded-full border shadow-sm backdrop-blur-md"
                           >
-                            <X className="w-5 h-5" />
+                            <X className="h-5 w-5" />
                           </Button>
                         </div>
                         <PhotoProvider>
@@ -536,54 +498,48 @@ const SearchClient = ({
                             <img
                               src={previewUrl}
                               alt="Preview"
-                              className="max-w-full max-h-full rounded-xl object-contain shadow-lg cursor-pointer"
+                              className="max-h-full max-w-full cursor-pointer rounded-xl object-contain shadow-lg"
                             />
                           </PhotoView>
                         </PhotoProvider>
                       </div>
                     ) : (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                         <div
                           className={cn(
-                            "w-16 h-16 rounded-full bg-muted/50 mb-4 flex items-center justify-center transition-transform group-hover:scale-110",
+                            "bg-muted/50 mb-4 flex h-16 w-16 items-center justify-center rounded-full transition-transform group-hover:scale-110",
                             imageError && "bg-destructive/5",
                           )}
                         >
                           <Upload
                             className={cn(
-                              "w-8 h-8 text-muted-foreground",
+                              "text-muted-foreground h-8 w-8",
                               imageError && "text-destructive",
                             )}
                           />
                         </div>
-                        <p className="text-lg font-medium text-foreground">
-                          Drop an image here
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-foreground text-lg font-medium">Drop an image here</p>
+                        <p className="text-muted-foreground mt-1 text-sm">
                           or click to upload screenshot (max 2MB)
                         </p>
                       </div>
                     )}
                   </div>
-                  {imageError && (
-                    <p className="text-sm text-destructive mt-2">
-                      {imageError}
-                    </p>
-                  )}
+                  {imageError && <p className="text-destructive mt-2 text-sm">{imageError}</p>}
                 </TabsContent>
               </div>
             </Tabs>
-            <div className="flex gap-3 w-full max-w-3xl justify-center">
+            <div className="flex w-full max-w-3xl justify-center gap-3">
               <div ref={searchButtonPortalRef} className="w-full" />
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto mt-4">
+        <div className="mx-auto mt-4 max-w-7xl">
           {filterError && (
-            <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-              <div className="p-2 bg-destructive/10 rounded-full">
-                <X className="w-4 h-4" />
+            <div className="bg-destructive/5 text-destructive border-destructive/20 animate-in fade-in slide-in-from-bottom-2 mb-8 flex items-center gap-3 rounded-2xl border p-4">
+              <div className="bg-destructive/10 rounded-full p-2">
+                <X className="h-4 w-4" />
               </div>
               <div>
                 <p className="font-semibold">Invalid filter</p>
@@ -592,9 +548,9 @@ const SearchClient = ({
             </div>
           )}
           {error && (
-            <div className="p-4 bg-destructive/5 text-destructive rounded-2xl border border-destructive/20 mb-8 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-              <div className="p-2 bg-destructive/10 rounded-full">
-                <X className="w-4 h-4" />
+            <div className="bg-destructive/5 text-destructive border-destructive/20 animate-in fade-in slide-in-from-bottom-2 mb-8 flex items-center gap-3 rounded-2xl border p-4">
+              <div className="bg-destructive/10 rounded-full p-2">
+                <X className="h-4 w-4" />
               </div>
               <div>
                 <p className="font-semibold">Search failed</p>
@@ -604,25 +560,19 @@ const SearchClient = ({
           )}
 
           {isSearching && (
-            <div className="flex flex-col items-center justify-center py-6 animate-in fade-in zoom-in-95 duration-500">
+            <div className="animate-in fade-in zoom-in-95 flex flex-col items-center justify-center py-6 duration-500">
               <div className="relative">
-                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                <div className="border-primary/20 border-t-primary h-16 w-16 animate-spin rounded-full border-4" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Search className="w-6 h-6 text-primary/40 animate-pulse" />
+                  <Search className="text-primary/40 h-6 w-6 animate-pulse" />
                 </div>
               </div>
               <p className="text-muted-foreground mt-2 font-medium tracking-tight">
                 Searching
                 <span className="inline-flex w-6">
-                  <span className="animate-[dot_1.4s_ease-in-out_infinite]">
-                    .
-                  </span>
-                  <span className="animate-[dot_1.4s_ease-in-out_0.2s_infinite]">
-                    .
-                  </span>
-                  <span className="animate-[dot_1.4s_ease-in-out_0.4s_infinite]">
-                    .
-                  </span>
+                  <span className="animate-[dot_1.4s_ease-in-out_infinite]">.</span>
+                  <span className="animate-[dot_1.4s_ease-in-out_0.2s_infinite]">.</span>
+                  <span className="animate-[dot_1.4s_ease-in-out_0.4s_infinite]">.</span>
                 </span>
               </p>
               <style jsx>{`

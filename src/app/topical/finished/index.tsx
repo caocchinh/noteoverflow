@@ -1,57 +1,44 @@
 "use client";
 
-import { ValidCurriculum } from "@/constants/types";
-import {
-  computeFinishedQuestionsMetadata,
-  computeSubjectMetadata,
-  filterQuestionsByCriteria,
-} from "@/features/topical/lib/utils";
-import { useMutationState } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CURRICULUM_COVER_IMAGE, SUBJECT_COVER_IMAGE } from "@/constants/constants";
+import { ValidCurriculum } from "@/constants/types";
+import { useAuth } from "@/context/AuthContext";
 import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
-import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
-import Image from "next/image";
-import {
-  CURRICULUM_COVER_IMAGE,
-  SUBJECT_COVER_IMAGE,
-} from "@/constants/constants";
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
+import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/context/AuthContext";
 import {
-  BreadcrumbContentProps,
-  QuestionInspectRef,
-} from "@/features/topical/types/components";
+  computeFinishedQuestionsMetadata,
+  computeSubjectMetadata,
+  filterQuestionsByCriteria,
+} from "@/features/topical/lib/utils";
+import { BreadcrumbContentProps, QuestionInspectRef } from "@/features/topical/types/components";
 import { SubjectMetadata } from "@/features/topical/types/models";
+import { useMutationState } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useMemo, useRef, useState } from "react";
 
-const FinishedQuestionsClient = ({
-  BETTER_AUTH_URL,
-}: {
-  BETTER_AUTH_URL: string;
-}) => {
+const FinishedQuestionsClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
   const settledFinishedQuestionMutations = useMutationState({
     filters: {
       mutationKey: ["user_saved_activities", "finished_questions"],
       predicate: (mutation) =>
-        mutation.state.status === "success" ||
-        mutation.state.status === "error",
+        mutation.state.status === "success" || mutation.state.status === "error",
     },
   });
 
-  const {
-    finishedQuestionsData: userFinishedQuestions,
-    savedActivitiesIsFetching,
-  } = useTopicalApp();
+  const { finishedQuestionsData: userFinishedQuestions, savedActivitiesIsFetching } =
+    useTopicalApp();
   const metadata = useMemo(() => {
     if (!userFinishedQuestions) {
       return null;
@@ -61,12 +48,9 @@ const FinishedQuestionsClient = ({
   }, [userFinishedQuestions, settledFinishedQuestionMutations]);
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedCurriculumn, setSelectedCurriculum] =
-    useState<ValidCurriculum | null>(null);
+  const [selectedCurriculumn, setSelectedCurriculum] = useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
-  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null,
-  );
+  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(null);
   const subjectMetadata = useMemo(() => {
     return computeSubjectMetadata(
       userFinishedQuestions || [],
@@ -113,14 +97,14 @@ const FinishedQuestionsClient = ({
   const preContent = (
     <>
       {(savedActivitiesIsFetching || isSessionPending) && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full ">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
           <Loader2 className="animate-spin" />
         </div>
       )}
 
       {!isAuthenticated && !isSessionPending && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-red-500 text-center">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <p className="text-center text-sm text-red-500">
             You are not signed in. Please sign to view your finished questions!
           </p>
         </div>
@@ -139,12 +123,12 @@ const FinishedQuestionsClient = ({
     scrollAreaRef,
   }: BreadcrumbContentProps) => (
     <div
-      className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
+      className="mb-2 flex w-full flex-row flex-wrap items-center justify-between gap-2 sm:w-[95%]"
       ref={sideBarInsetRef}
     >
       <div>
         {" "}
-        <Breadcrumb className="flex mr-0 sm:mr-6 max-w-full w-max">
+        <Breadcrumb className="mr-0 flex w-max max-w-full sm:mr-6">
           <BreadcrumbList>
             <BreadcrumbItem
               className="cursor-pointer"
@@ -200,14 +184,14 @@ const FinishedQuestionsClient = ({
   const mainContent = (
     <>
       {metadata && !selectedCurriculumn && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your curriculumn</h1>
           {Object.keys(metadata || {}).length > 0 ? (
-            <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full  ">
+            <div className="flex w-full flex-row flex-wrap items-center justify-center gap-5">
               {Object.keys(metadata || {}).map((curriculum) => (
                 <div
                   key={curriculum}
-                  className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  className="flex cursor-pointer flex-col items-center justify-center gap-1"
                   onClick={() => {
                     setSelectedCurriculum(curriculum as ValidCurriculum);
                   }}
@@ -217,23 +201,18 @@ const FinishedQuestionsClient = ({
                     width={182}
                     height={80}
                     loading="lazy"
-                    className="h-20! object-cover border border-foreground p-2 rounded-sm bg-white "
+                    className="border-foreground h-20! rounded-sm border bg-white object-cover p-2"
                     alt="Curriculum cover image"
-                    src={
-                      CURRICULUM_COVER_IMAGE[
-                        curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                      ]
-                    }
+                    src={CURRICULUM_COVER_IMAGE[curriculum as keyof typeof CURRICULUM_COVER_IMAGE]}
                   />
                   <p>{curriculum}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground text-center">
-                No curriculums found. Search for questions and add them to your
-                finished questions!
+            <div className="flex w-full flex-col items-center justify-center gap-4">
+              <p className="text-muted-foreground text-center text-sm">
+                No curriculums found. Search for questions and add them to your finished questions!
               </p>
               <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
             </div>
@@ -242,18 +221,15 @@ const FinishedQuestionsClient = ({
       )}
 
       {metadata && selectedCurriculumn && !selectedSubject && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your subject</h1>
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your subject</h1>
           {Object.keys(metadata).length > 0 ? (
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
+            <ScrollArea className="[&_.bg-border]:bg-logo-main h-[60dvh] w-full px-4" type="always">
+              <div className="flex w-full flex-row flex-wrap items-start justify-center gap-8">
                 {metadata?.[selectedCurriculumn]?.subjects?.map((subject) => (
                   <div
                     key={subject}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
+                    className="flex w-[150px] cursor-pointer flex-col items-center justify-center gap-1"
                     onClick={() => {
                       setSelecteSubject(subject);
                     }}
@@ -263,7 +239,7 @@ const FinishedQuestionsClient = ({
                       height={200}
                       loading="lazy"
                       title={subject}
-                      className="h-[200px]! w-40 object-cover rounded-[3px] "
+                      className="h-[200px]! w-40 rounded-[3px] object-cover"
                       alt="Curriculum cover image"
                       src={
                         SUBJECT_COVER_IMAGE[
@@ -271,18 +247,15 @@ const FinishedQuestionsClient = ({
                         ][subject]
                       }
                     />
-                    <p className="text-sm text-muted-foreground text-center px-1">
-                      {subject}
-                    </p>
+                    <p className="text-muted-foreground px-1 text-center text-sm">{subject}</p>
                   </div>
                 ))}
               </div>
             </ScrollArea>
           ) : (
-            <div className="flex flex-col gap-4 items-center justify-center w-full">
-              <p className="text-sm text-muted-foreground text-center">
-                No subjects found. Search for questions and add them to your
-                finished questions!
+            <div className="flex w-full flex-col items-center justify-center gap-4">
+              <p className="text-muted-foreground text-center text-sm">
+                No subjects found. Search for questions and add them to your finished questions!
               </p>
               <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
             </div>
@@ -291,10 +264,10 @@ const FinishedQuestionsClient = ({
       )}
 
       {selectedSubject && topicalData && topicalData.length === 0 && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground text-center">
-            No questions found. Search for questions and add them to your
-            finished questions! Or change your filters.
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground text-center text-sm">
+            No questions found. Search for questions and add them to your finished questions! Or
+            change your filters.
           </p>
           <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
         </div>

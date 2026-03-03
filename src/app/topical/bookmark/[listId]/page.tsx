@@ -3,9 +3,9 @@ import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { Metadata } from "next";
 import { Suspense } from "react";
 import { BookmarkView } from ".";
-import { Metadata } from "next";
 
 type Params = Promise<{ listId: string }>;
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
 
     if (!bookmarkList) {
       return (
-        <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+        <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
           The list that you are looking for do not exist!
         </div>
       );
@@ -45,7 +45,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
 
     if (isThisBookmarkListPrivate && !session) {
       return (
-        <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+        <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
           You are not authorized to view this list!
         </div>
       );
@@ -53,7 +53,7 @@ const BookmarkViewPage = async (props: { params: Params }) => {
 
     if (isThisBookmarkListPrivate && session?.user.id !== bookmarkList.userId) {
       return (
-        <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+        <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
           This list is kept private. You are not authorized to view this list!
         </div>
       );
@@ -70,15 +70,14 @@ const BookmarkViewPage = async (props: { params: Params }) => {
             ownerId: bookmarkList.user.id,
             ownerName: bookmarkList.user.name,
             listName: bookmarkList.listName,
-            ownerAvatar:
-              bookmarkList.user.selectedImage ?? "/assets/avatar/blue.webp",
+            ownerAvatar: bookmarkList.user.selectedImage ?? "/assets/avatar/blue.webp",
           }}
         />
       </Suspense>
     );
   } catch {
     return (
-      <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+      <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
         Something went wrong while fetching resources, please refresh the page!
       </div>
     );

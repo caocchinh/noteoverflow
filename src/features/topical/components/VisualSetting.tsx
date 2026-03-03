@@ -1,17 +1,15 @@
-import { Popover } from "@/components/ui/popover";
-import { PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { LandPlot, X } from "lucide-react";
-import { PopoverContent } from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
-  SelectValue,
-  SelectTrigger,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { LandPlot, X } from "lucide-react";
+import { useState } from "react";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 import { ImageTheme } from "../types/preferences";
 
@@ -22,7 +20,7 @@ export default function VisualSetting({}) {
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
-          className="flex w-full -mt-1 cursor-pointer items-center justify-start gap-2"
+          className="-mt-1 flex w-full cursor-pointer items-center justify-start gap-2"
           variant="secondary"
         >
           <LandPlot />
@@ -31,11 +29,11 @@ export default function VisualSetting({}) {
       </PopoverTrigger>
       <PopoverContent className="z-100006 flex flex-col items-center justify-center gap-3">
         <X
-          className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+          className="absolute top-2 right-2 h-4 w-4 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}
         />
         <div className="flex flex-row items-center justify-center gap-2">
-          <h4 className="text-sm font-medium text-center">
+          <h4 className="text-center text-sm font-medium">
             Show green tint on finished questions?
           </h4>
           <Switch
@@ -47,9 +45,7 @@ export default function VisualSetting({}) {
         </div>
         <hr />
         <div className="flex flex-row items-center justify-center gap-2">
-          <h4 className="text-sm font-medium text-center ">
-            Show scroll to top button?
-          </h4>
+          <h4 className="text-center text-sm font-medium">Show scroll to top button?</h4>
           <Switch
             checked={uiPreferences.showScrollToTopButton}
             onCheckedChange={() => {
@@ -59,7 +55,7 @@ export default function VisualSetting({}) {
         </div>
         <hr />
         <div className="flex flex-row items-center justify-center gap-2">
-          <h4 className="text-sm font-medium text-center ">
+          <h4 className="text-center text-sm font-medium">
             Scroll up when page changes? (Pagination layout only)
           </h4>
           <Switch
@@ -71,9 +67,7 @@ export default function VisualSetting({}) {
         </div>
         <hr />
         <div className="flex flex-row items-center justify-center gap-2">
-          <h4 className="text-sm font-medium text-center ">
-            Question & Answer image theme
-          </h4>
+          <h4 className="text-center text-sm font-medium">Question & Answer image theme</h4>
           <Select
             value={uiPreferences.imageTheme}
             onValueChange={(value) => {
@@ -83,7 +77,7 @@ export default function VisualSetting({}) {
             <SelectTrigger>
               <SelectValue placeholder="Image theme" />
             </SelectTrigger>
-            <SelectContent className="z-1000010 dark:bg-accent">
+            <SelectContent className="dark:bg-accent z-1000010">
               <SelectItem value="light">Light</SelectItem>
               <SelectItem value="dark">Dark</SelectItem>
             </SelectContent>

@@ -1,17 +1,11 @@
-import "server-only";
-import { eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
+import "server-only";
 
-export const isQuestionExists = async (
-  questionId: string
-): Promise<boolean> => {
+export const isQuestionExists = async (questionId: string): Promise<boolean> => {
   const db = await getDbAsync();
-  const result = await db
-    .select()
-    .from(question)
-    .where(eq(question.id, questionId))
-    .limit(1);
+  const result = await db.select().from(question).where(eq(question.id, questionId)).limit(1);
   return result.length > 0;
 };
 

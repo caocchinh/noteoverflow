@@ -1,13 +1,10 @@
-import { gsap } from 'gsap';
-import type React from 'react';
-import { type RefObject, useEffect, useRef } from 'react';
+import { gsap } from "gsap";
+import type React from "react";
+import { type RefObject, useEffect, useRef } from "react";
 
 const lerp = (a: number, b: number, n: number): number => (1 - n) * a + n * b;
 
-const getMousePos = (
-  e: Event,
-  container?: HTMLElement | null
-): { x: number; y: number } => {
+const getMousePos = (e: Event, container?: HTMLElement | null): { x: number; y: number } => {
   const mouseEvent = e as MouseEvent;
   if (container) {
     const bounds = container.getBoundingClientRect();
@@ -24,10 +21,7 @@ interface CrosshairProps {
   containerRef?: RefObject<HTMLElement>;
 }
 
-const Crosshair: React.FC<CrosshairProps> = ({
-  color = 'white',
-  containerRef = null,
-}) => {
+const Crosshair: React.FC<CrosshairProps> = ({ color = "white", containerRef = null }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const lineHorizontalRef = useRef<HTMLDivElement>(null);
   const lineVerticalRef = useRef<HTMLDivElement>(null);
@@ -47,25 +41,19 @@ const Crosshair: React.FC<CrosshairProps> = ({
           mouseEvent.clientY < bounds.top ||
           mouseEvent.clientY > bounds.bottom
         ) {
-          gsap.to(
-            [lineHorizontalRef.current, lineVerticalRef.current].filter(
-              Boolean
-            ),
-            { opacity: 0 }
-          );
+          gsap.to([lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean), {
+            opacity: 0,
+          });
         } else {
-          gsap.to(
-            [lineHorizontalRef.current, lineVerticalRef.current].filter(
-              Boolean
-            ),
-            { opacity: 1 }
-          );
+          gsap.to([lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean), {
+            opacity: 1,
+          });
         }
       }
     };
 
     const target: HTMLElement | Window = containerRef?.current || window;
-    target.addEventListener('mousemove', handleMouseMove);
+    target.addEventListener("mousemove", handleMouseMove);
 
     const renderedStyles: {
       [key: string]: { previous: number; current: number; amt: number };
@@ -74,32 +62,24 @@ const Crosshair: React.FC<CrosshairProps> = ({
       ty: { previous: 0, current: 0, amt: 0.15 },
     };
 
-    gsap.set(
-      [lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean),
-      { opacity: 0 }
-    );
+    gsap.set([lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean), { opacity: 0 });
 
     const onMouseMove = () => {
-      renderedStyles.tx.previous = renderedStyles.tx.current =
-        mouseRef.current.x;
-      renderedStyles.ty.previous = renderedStyles.ty.current =
-        mouseRef.current.y;
+      renderedStyles.tx.previous = renderedStyles.tx.current = mouseRef.current.x;
+      renderedStyles.ty.previous = renderedStyles.ty.current = mouseRef.current.y;
 
-      gsap.to(
-        [lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean),
-        {
-          duration: 0.9,
-          ease: 'Power3.easeOut',
-          opacity: 1,
-        }
-      );
+      gsap.to([lineHorizontalRef.current, lineVerticalRef.current].filter(Boolean), {
+        duration: 0.9,
+        ease: "Power3.easeOut",
+        opacity: 1,
+      });
 
       requestAnimationFrame(render);
 
-      target.removeEventListener('mousemove', onMouseMove);
+      target.removeEventListener("mousemove", onMouseMove);
     };
 
-    target.addEventListener('mousemove', onMouseMove);
+    target.addEventListener("mousemove", onMouseMove);
 
     const primitiveValues = { turbulence: 0 };
 
@@ -108,34 +88,28 @@ const Crosshair: React.FC<CrosshairProps> = ({
         paused: true,
         onStart: () => {
           if (lineHorizontalRef.current) {
-            lineHorizontalRef.current.style.filter = 'url(#filter-noise-x)';
+            lineHorizontalRef.current.style.filter = "url(#filter-noise-x)";
           }
           if (lineVerticalRef.current) {
-            lineVerticalRef.current.style.filter = 'url(#filter-noise-y)';
+            lineVerticalRef.current.style.filter = "url(#filter-noise-y)";
           }
         },
         onUpdate: () => {
           if (filterXRef.current && filterYRef.current) {
-            filterXRef.current.setAttribute(
-              'baseFrequency',
-              primitiveValues.turbulence.toString()
-            );
-            filterYRef.current.setAttribute(
-              'baseFrequency',
-              primitiveValues.turbulence.toString()
-            );
+            filterXRef.current.setAttribute("baseFrequency", primitiveValues.turbulence.toString());
+            filterYRef.current.setAttribute("baseFrequency", primitiveValues.turbulence.toString());
           }
         },
         onComplete: () => {
           if (lineHorizontalRef.current && lineVerticalRef.current) {
-            lineHorizontalRef.current.style.filter = 'none';
-            lineVerticalRef.current.style.filter = 'none';
+            lineHorizontalRef.current.style.filter = "none";
+            lineVerticalRef.current.style.filter = "none";
           }
         },
       })
       .to(primitiveValues, {
         duration: 0.5,
-        ease: 'power1',
+        ease: "power1",
         startAt: { turbulence: 1 },
         turbulence: 0,
       });
@@ -162,20 +136,20 @@ const Crosshair: React.FC<CrosshairProps> = ({
     };
 
     const links: NodeListOf<HTMLAnchorElement> = containerRef?.current
-      ? containerRef.current.querySelectorAll('a')
-      : document.querySelectorAll('a');
+      ? containerRef.current.querySelectorAll("a")
+      : document.querySelectorAll("a");
 
     for (const link of links) {
-      link.addEventListener('mouseenter', enter);
-      link.addEventListener('mouseleave', leave);
+      link.addEventListener("mouseenter", enter);
+      link.addEventListener("mouseleave", leave);
     }
 
     return () => {
-      target.removeEventListener('mousemove', handleMouseMove);
-      target.removeEventListener('mousemove', onMouseMove);
+      target.removeEventListener("mousemove", handleMouseMove);
+      target.removeEventListener("mousemove", onMouseMove);
       for (const link of links) {
-        link.removeEventListener('mouseenter', enter);
-        link.removeEventListener('mouseleave', leave);
+        link.removeEventListener("mouseenter", enter);
+        link.removeEventListener("mouseleave", leave);
       }
     };
   }, [containerRef]);
@@ -185,22 +159,22 @@ const Crosshair: React.FC<CrosshairProps> = ({
       className="cursor"
       ref={cursorRef}
       style={{
-        position: containerRef ? 'absolute' : 'fixed',
+        position: containerRef ? "absolute" : "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
         zIndex: 10_000,
       }}
     >
       <svg
         style={{
-          position: 'absolute',
+          position: "absolute",
           left: 0,
           top: 0,
-          width: '100%',
-          height: '100%',
+          width: "100%",
+          height: "100%",
         }}
       >
         <title>Crosshair Effect</title>
@@ -228,24 +202,24 @@ const Crosshair: React.FC<CrosshairProps> = ({
       <div
         ref={lineHorizontalRef}
         style={{
-          position: 'absolute',
-          width: '100%',
-          height: '1px',
+          position: "absolute",
+          width: "100%",
+          height: "1px",
           background: color,
-          pointerEvents: 'none',
-          transform: 'translateY(50%)',
+          pointerEvents: "none",
+          transform: "translateY(50%)",
           opacity: 0,
         }}
       />
       <div
         ref={lineVerticalRef}
         style={{
-          position: 'absolute',
-          height: '100%',
-          width: '1px',
+          position: "absolute",
+          height: "100%",
+          width: "1px",
           background: color,
-          pointerEvents: 'none',
-          transform: 'translateX(50%)',
+          pointerEvents: "none",
+          transform: "translateX(50%)",
           opacity: 0,
         }}
       />

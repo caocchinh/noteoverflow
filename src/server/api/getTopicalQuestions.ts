@@ -1,19 +1,19 @@
-import "server-only";
-import {
-  validateCurriculum,
-  validateSubject,
-  validateFilterData,
-  hashUltil,
-} from "@/features/topical/lib/utils";
-import { question } from "@/drizzle/schema";
-import { and, eq, inArray, like, or } from "drizzle-orm";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
+import { question } from "@/drizzle/schema";
+import {
+  hashUltil,
+  validateCurriculum,
+  validateFilterData,
+  validateSubject,
+} from "@/features/topical/lib/utils";
+import { and, eq, inArray, like, or } from "drizzle-orm";
+import "server-only";
 
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { status as elysiaStatus } from "elysia";
 import { FilterData, SelectedQuestion } from "@/features/topical/types/models";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { status as elysiaStatus } from "elysia";
 
 interface TopicalQuery {
   curriculumId: string;
@@ -33,18 +33,10 @@ export const getTopicalQuestions = async ({
 }) => {
   const curriculumId = decodeURIComponent(query.curriculumId);
   const subjectId = decodeURIComponent(query.subjectId);
-  const topic = JSON.parse(
-    decodeURIComponent(query.topic),
-  ).toSorted() as string[];
-  const paperType = JSON.parse(
-    decodeURIComponent(query.paperType),
-  ).toSorted() as string[];
-  const year = JSON.parse(
-    decodeURIComponent(query.year),
-  ).toSorted() as string[];
-  const season = JSON.parse(
-    decodeURIComponent(query.season),
-  ).toSorted() as string[];
+  const topic = JSON.parse(decodeURIComponent(query.topic)).toSorted() as string[];
+  const paperType = JSON.parse(decodeURIComponent(query.paperType)).toSorted() as string[];
+  const year = JSON.parse(decodeURIComponent(query.year)).toSorted() as string[];
+  const season = JSON.parse(decodeURIComponent(query.season)).toSorted() as string[];
 
   if (!validateCurriculum(curriculumId)) {
     return status(HTTP_STATUS.BAD_REQUEST, {
@@ -103,9 +95,7 @@ export const getTopicalQuestions = async ({
     ];
 
     if (paperType.length > 0) {
-      const paperTypeNumbers = paperType.map((p: string) =>
-        Number.parseInt(p, 10),
-      );
+      const paperTypeNumbers = paperType.map((p: string) => Number.parseInt(p, 10));
       conditions.push(inArray(question.paperType, paperTypeNumbers));
     } else {
       return status(HTTP_STATUS.BAD_REQUEST, {
@@ -172,12 +162,8 @@ export const getTopicalQuestions = async ({
         questionImages: JSON.parse(item.questionImages ?? "[]"),
         answers: JSON.parse(item.answers ?? "[]"),
         topics: JSON.parse(item.topics ?? "[]"),
-        questionImagesDimensions: JSON.parse(
-          item.questionImagesDimensions ?? "[]",
-        ),
-        answersImagesDimensions: JSON.parse(
-          item.answersImagesDimensions ?? "[]",
-        ),
+        questionImagesDimensions: JSON.parse(item.questionImagesDimensions ?? "[]"),
+        answersImagesDimensions: JSON.parse(item.answersImagesDimensions ?? "[]"),
       };
     });
 
@@ -194,21 +180,15 @@ export const getTopicalQuestions = async ({
       season,
     };
 
-    const rateLimitedHash = await hashUltil(
-      JSON.stringify({ ...baseQuery, isRateLimited: true }),
-    );
+    const rateLimitedHash = await hashUltil(JSON.stringify({ ...baseQuery, isRateLimited: true }));
     const nonRateLimitedHash = await hashUltil(
       JSON.stringify({ ...baseQuery, isRateLimited: false }),
     );
 
     await Promise.all([
-      env.TOPICAL_CACHE.put(
-        rateLimitedHash,
-        JSON.stringify(data.toSpliced(25)),
-        {
-          expirationTtl: 60 * 60 * 24 * 14,
-        },
-      ),
+      env.TOPICAL_CACHE.put(rateLimitedHash, JSON.stringify(data.toSpliced(25)), {
+        expirationTtl: 60 * 60 * 24 * 14,
+      }),
       env.TOPICAL_CACHE.put(nonRateLimitedHash, JSON.stringify(data), {
         expirationTtl: 60 * 60 * 24 * 14,
       }),

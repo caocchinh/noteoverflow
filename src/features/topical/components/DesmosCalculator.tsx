@@ -3,12 +3,12 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
 // @ts-expect-error: desmos package has complex type definitions that conflict with TypeScript module resolution
-import Desmos from "desmos";
-import { cn } from "@/lib/utils";
-import { Maximize, Shrink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { cn } from "@/lib/utils";
+import Desmos from "desmos";
+import { Maximize, Shrink, X } from "lucide-react";
 import { createPortal } from "react-dom";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 interface DesmosCalculatorProps {
   isOpen: boolean;
@@ -31,10 +31,8 @@ const initCalculatorElement = () => {
 const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
   const { setIsCalculatorOpen } = useTopicalApp();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [fullscreenContainer, setFullscreenContainer] =
-    useState<HTMLDivElement | null>(null);
-  const [draggableContainer, setDraggableContainer] =
-    useState<HTMLDivElement | null>(null);
+  const [fullscreenContainer, setFullscreenContainer] = useState<HTMLDivElement | null>(null);
+  const [draggableContainer, setDraggableContainer] = useState<HTMLDivElement | null>(null);
 
   // Function to calculate Rnd dimensions based on window size
   const getCalculatedDimensions = () => {
@@ -77,12 +75,8 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
     width: getCalculatedDimensions().default.width,
     height: getCalculatedDimensions().default.height,
   }));
-  const [rndMinWidth, setRndMinWidth] = useState(
-    () => getCalculatedDimensions().minWidth,
-  );
-  const [rndMinHeight, setRndMinHeight] = useState(
-    () => getCalculatedDimensions().minHeight,
-  );
+  const [rndMinWidth, setRndMinWidth] = useState(() => getCalculatedDimensions().minWidth);
+  const [rndMinHeight, setRndMinHeight] = useState(() => getCalculatedDimensions().minHeight);
 
   // Function to calculate Rnd dimensions based on window size
   const calculateRndDimensions = useCallback(() => {
@@ -145,15 +139,13 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
           )}
           style={{ width: "100vw", height: "100vh", top: 0, left: 0 }}
         >
-          <div className="flex flex-col h-full">
+          <div className="flex h-full flex-col">
             {/* Header with close button */}
-            <div className="flex items-center justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 h-[40px]">
-              <span className="text-sm font-medium text-gray-300">
-                Desmos Calculator
-              </span>
+            <div className="flex h-[40px] items-center justify-between border-b border-gray-700 bg-gray-700 px-2 py-1">
+              <span className="text-sm font-medium text-gray-300">Desmos Calculator</span>
               <div className="flex items-center gap-1">
                 <Button
-                  className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
+                  className="!hover:text-black relative z-999999 cursor-pointer text-white dark:text-white"
                   variant="ghost"
                   size="icon"
                   onClick={toggleFullscreen}
@@ -162,7 +154,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                   <Shrink />
                 </Button>
                 <Button
-                  className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
+                  className="!hover:text-black relative z-999999 cursor-pointer text-white dark:text-white"
                   variant="ghost"
                   size="icon"
                   onClick={onClose}
@@ -184,7 +176,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
             minWidth={rndMinWidth}
             minHeight={rndMinHeight}
             bounds="window"
-            className="z-999999 border border-gray-300 rounded-t-lg shadow-2xl bg-gray-800"
+            className="z-999999 rounded-t-lg border border-gray-300 bg-gray-800 shadow-2xl"
             dragHandleClassName="calculator-drag-handle"
             onDragStop={(e, d) => {
               setRndPosition({ x: d.x, y: d.y });
@@ -197,15 +189,15 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
               });
             }}
           >
-            <div className="flex flex-col h-full">
+            <div className="flex h-full flex-col">
               {/* Header with close button */}
-              <div className="flex items-center justify-between px-2 border-b border-gray-700 bg-gray-700 rounded-t-lg">
-                <span className="text-sm font-medium py-1  min-h-[50px] flex items-center text-gray-300  calculator-drag-handle cursor-move flex-1">
+              <div className="flex items-center justify-between rounded-t-lg border-b border-gray-700 bg-gray-700 px-2">
+                <span className="calculator-drag-handle flex min-h-[50px] flex-1 cursor-move items-center py-1 text-sm font-medium text-gray-300">
                   Desmos Calculator
                 </span>
                 <div className="flex items-center gap-1">
                   <Button
-                    className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
+                    className="!hover:text-black relative z-999999 cursor-pointer text-white dark:text-white"
                     variant="ghost"
                     size="icon"
                     onClick={toggleFullscreen}
@@ -214,7 +206,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                     <Maximize />
                   </Button>
                   <Button
-                    className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
+                    className="!hover:text-black relative z-999999 cursor-pointer text-white dark:text-white"
                     variant="ghost"
                     size="icon"
                     onClick={onClose}
@@ -238,7 +230,7 @@ const DesmosCalculator = memo(({ isOpen }: DesmosCalculatorProps) => {
                 node.appendChild(calculatorElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
           isFullscreen ? fullscreenContainer : draggableContainer,
         )}

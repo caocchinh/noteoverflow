@@ -1,6 +1,14 @@
+import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Sort from "./Sort";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, Monitor, SlidersHorizontal } from "lucide-react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { isOverScrolling } from "../lib/utils";
+import { SecondaryAppUltilityBarProps } from "../types/components";
 import { JumpToTabButton } from "./JumpToTabButton";
 import {
   FirstPageButton,
@@ -8,24 +16,7 @@ import {
   NextPageButton,
   PreviousPageButton,
 } from "./PaginationButtons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Monitor,
-  SlidersHorizontal,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { isOverScrolling } from "../lib/utils";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import { SecondaryAppUltilityBarProps } from "../types/components";
+import Sort from "./Sort";
 
 const SecondaryAppUltilityBar = memo(
   ({
@@ -46,10 +37,8 @@ const SecondaryAppUltilityBar = memo(
     const isMobileDevice = useIsMobile();
     const { uiPreferences } = useTopicalApp();
     const ultilityRef = useRef<HTMLDivElement | null>(null);
-    const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
-      useState(false);
-    const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
-      useState(false);
+    const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] = useState(false);
+    const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] = useState(false);
     const overflowScrollHandler = useCallback(() => {
       const isOverScrollingResult = isOverScrolling({
         child: ultilityRef.current,
@@ -77,12 +66,12 @@ const SecondaryAppUltilityBar = memo(
     return (
       <ScrollArea
         viewPortOnScroll={overflowScrollHandler}
-        className="max-w-full w-max relative"
+        className="relative w-max max-w-full"
         viewportRef={ultilityHorizontalScrollBarRef}
       >
         {isUltilityOverflowingRight && (
           <Button
-            className="absolute right-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
+            className="absolute top-1 right-0 z-200 h-7 w-7 cursor-pointer rounded-full"
             title="Move right"
             onClick={() => {
               if (ultilityHorizontalScrollBarRef.current) {
@@ -98,7 +87,7 @@ const SecondaryAppUltilityBar = memo(
         )}
         {isUltilityOverflowingLeft && (
           <Button
-            className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
+            className="absolute top-1 left-0 z-200 h-7 w-7 cursor-pointer rounded-full"
             title="Move left"
             onClick={() => {
               if (ultilityHorizontalScrollBarRef.current) {
@@ -113,7 +102,7 @@ const SecondaryAppUltilityBar = memo(
           </Button>
         )}
         <div
-          className="flex flex-row h-full items-center justify-start gap-2 w-max pr-2"
+          className="flex h-full w-max flex-row items-center justify-start gap-2 pr-2"
           ref={ultilityRef}
         >
           <Tooltip>
@@ -141,7 +130,7 @@ const SecondaryAppUltilityBar = memo(
               side="bottom"
               className={cn(
                 !isQuestionViewDisabled && "hidden!",
-                "flex justify-center items-center gap-2",
+                "flex items-center justify-center gap-2",
               )}
             >
               No question available
@@ -167,7 +156,7 @@ const SecondaryAppUltilityBar = memo(
               side="bottom"
               className={cn(
                 !isFilteredDisabled && "hidden!",
-                "flex justify-center items-center gap-2",
+                "flex items-center justify-center gap-2",
               )}
             >
               No question to filter
@@ -186,17 +175,13 @@ const SecondaryAppUltilityBar = memo(
                   <FirstPageButton
                     currentChunkIndex={currentChunkIndex}
                     setCurrentChunkIndex={setCurrentChunkIndex}
-                    scrollUpWhenPageChange={
-                      uiPreferences.scrollUpWhenPageChange
-                    }
+                    scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                     scrollAreaRef={scrollAreaRef}
                   />
                   <PreviousPageButton
                     currentChunkIndex={currentChunkIndex}
                     setCurrentChunkIndex={setCurrentChunkIndex}
-                    scrollUpWhenPageChange={
-                      uiPreferences.scrollUpWhenPageChange
-                    }
+                    scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                     scrollAreaRef={scrollAreaRef}
                   />
                   <JumpToTabButton
@@ -218,18 +203,14 @@ const SecondaryAppUltilityBar = memo(
                     currentChunkIndex={currentChunkIndex}
                     setCurrentChunkIndex={setCurrentChunkIndex}
                     totalPages={fullPartitionedData.length}
-                    scrollUpWhenPageChange={
-                      uiPreferences.scrollUpWhenPageChange
-                    }
+                    scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                     scrollAreaRef={scrollAreaRef}
                   />
                   <LastPageButton
                     currentChunkIndex={currentChunkIndex}
                     setCurrentChunkIndex={setCurrentChunkIndex}
                     totalPages={fullPartitionedData.length}
-                    scrollUpWhenPageChange={
-                      uiPreferences.scrollUpWhenPageChange
-                    }
+                    scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
                     scrollAreaRef={scrollAreaRef}
                   />
                 </div>
@@ -244,10 +225,7 @@ const SecondaryAppUltilityBar = memo(
           />
         </div>
 
-        <ScrollBar
-          orientation="horizontal"
-          className="[&_.bg-border]:bg-transparent"
-        />
+        <ScrollBar orientation="horizontal" className="[&_.bg-border]:bg-transparent" />
       </ScrollArea>
     );
   },

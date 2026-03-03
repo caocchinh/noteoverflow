@@ -12,7 +12,7 @@ export const ShareFilterButton = ({
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Button
-      className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+      className="bg-logo-main hover:bg-logo-main/90 w-full cursor-pointer text-white"
       disabled={isQuestionViewDisabled}
       onClick={() => {
         setIsOpen(!isOpen);

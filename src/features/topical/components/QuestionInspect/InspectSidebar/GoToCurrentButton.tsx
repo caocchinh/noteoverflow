@@ -17,13 +17,7 @@ const GoToCurrentButton = memo(
     currentTabThatContainsQuestion: number;
     setCurrentTab: (tab: number) => void;
     currentQuestionId?: string;
-    scrollToQuestion: ({
-      questionId,
-      tab,
-    }: {
-      questionId: string;
-      tab: number;
-    }) => void;
+    scrollToQuestion: ({ questionId, tab }: { questionId: string; tab: number }) => void;
     searchResults: SelectedQuestion[];
     searchVirtualizer: {
       scrollToIndex: (index: number) => void;
@@ -32,7 +26,7 @@ const GoToCurrentButton = memo(
     return (
       <Button
         variant="default"
-        className="cursor-pointer rounded-[3px] flex items-center justify-center gap-1"
+        className="flex cursor-pointer items-center justify-center gap-1 rounded-[3px]"
         title="Go to current question"
         onClick={() => {
           if (searchInput === "") {
@@ -53,9 +47,7 @@ const GoToCurrentButton = memo(
               return;
             }
             setTimeout(() => {
-              searchVirtualizer.scrollToIndex(
-                currentQuestionIndexInSearchResult,
-              );
+              searchVirtualizer.scrollToIndex(currentQuestionIndexInSearchResult);
             }, 0);
           }
         }}

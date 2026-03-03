@@ -1,3 +1,20 @@
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
+import {
+  FirstPageButton,
+  LastPageButton,
+  NextPageButton,
+  PreviousPageButton,
+} from "@/features/topical/components/PaginationButtons";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import Sort from "@/features/topical/components/Sort";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, Monitor, SlidersHorizontal } from "lucide-react";
 import {
   Dispatch,
   forwardRef,
@@ -9,40 +26,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Monitor,
-  SlidersHorizontal,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  FirstPageButton,
-  PreviousPageButton,
-  NextPageButton,
-  LastPageButton,
-} from "@/features/topical/components/PaginationButtons";
-import { ShareFilter } from "@/features/topical/components/ShareFilter";
-import { Separator } from "@/components/ui/separator";
-import { JumpToTabButton } from "@/features/topical/components/JumpToTabButton";
-import Sort from "@/features/topical/components/Sort";
-import { Switch } from "@/components/ui/switch";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../lib/utils";
-import LayoutSetting from "./LayoutSetting";
+import { AppUltilityBarProps, QuestionInspectOpenState } from "../types/components";
 import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
-import {
-  AppUltilityBarProps,
-  QuestionInspectOpenState,
-} from "../types/components";
+import LayoutSetting from "./LayoutSetting";
 
 const AppUltilityBar = memo(
   forwardRef(
@@ -67,16 +55,10 @@ const AppUltilityBar = memo(
       }: AppUltilityBarProps,
       ref,
     ) => {
-      const {
-        isAppSidebarOpen,
-        setIsAppSidebarOpen,
-        uiPreferences,
-        setUiPreference,
-      } = useTopicalApp();
-      const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
-        useState(false);
-      const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
-        useState(false);
+      const { isAppSidebarOpen, setIsAppSidebarOpen, uiPreferences, setUiPreference } =
+        useTopicalApp();
+      const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] = useState(false);
+      const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] = useState(false);
       const isMobileDevice = useIsMobile();
 
       const overflowScrollHandler = useCallback(() => {
@@ -86,13 +68,9 @@ const AppUltilityBar = memo(
           specialLeftCase: !isMobileDevice,
         });
         setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
-        setIsUltilityOverflowingRight(
-          isOverScrollingResult.isOverScrollingRight,
-        );
+        setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
       }, [isMobileDevice, sideBarInsetRef, ultilityRef]);
-      const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
-        null,
-      );
+      const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
 
       useEffect(() => {
         window.addEventListener("resize", overflowScrollHandler);
@@ -122,7 +100,7 @@ const AppUltilityBar = memo(
         <>
           {isUltilityOverflowingRight && (
             <Button
-              className="absolute right-0 top-5 rounded-full cursor-pointer w-7 h-7 z-200"
+              className="absolute top-5 right-0 z-200 h-7 w-7 cursor-pointer rounded-full"
               title="Move right"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -138,7 +116,7 @@ const AppUltilityBar = memo(
           )}
           {isUltilityOverflowingLeft && (
             <Button
-              className="absolute left-0 top-5 rounded-full cursor-pointer w-7 h-7 z-200"
+              className="absolute top-5 left-0 z-200 h-7 w-7 cursor-pointer rounded-full"
               title="Move left"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -154,11 +132,11 @@ const AppUltilityBar = memo(
           )}
           <ScrollArea
             viewPortOnScroll={overflowScrollHandler}
-            className="w-full  "
+            className="w-full"
             viewportRef={ultilityHorizontalScrollBarRef}
           >
             <div
-              className="flex flex-row h-full items-center justify-start gap-2 w-max mt-1 pl-4 pr-2"
+              className="mt-1 flex h-full w-max flex-row items-center justify-start gap-2 pr-2 pl-4"
               ref={ultilityRef}
             >
               {!isExportModeEnabled && (
@@ -173,71 +151,56 @@ const AppUltilityBar = memo(
                   />
                 </>
               )}
-              {uiPreferences.layoutStyle === "pagination" &&
-                !isQuestionViewDisabled && (
-                  <>
-                    {!isExportModeEnabled && (
-                      <Separator orientation="vertical" className="h-[30px]!" />
-                    )}
-                    <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
-                      <FirstPageButton
-                        currentChunkIndex={currentChunkIndex}
-                        setCurrentChunkIndex={setCurrentChunkIndex}
-                        scrollUpWhenPageChange={
-                          uiPreferences.scrollUpWhenPageChange
+              {uiPreferences.layoutStyle === "pagination" && !isQuestionViewDisabled && (
+                <>
+                  {!isExportModeEnabled && (
+                    <Separator orientation="vertical" className="h-[30px]!" />
+                  )}
+                  <div className="flex flex-row items-center justify-center gap-2 rounded-sm px-2">
+                    <FirstPageButton
+                      currentChunkIndex={currentChunkIndex}
+                      setCurrentChunkIndex={setCurrentChunkIndex}
+                      scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
+                      scrollAreaRef={scrollAreaRef}
+                    />
+                    <PreviousPageButton
+                      currentChunkIndex={currentChunkIndex}
+                      setCurrentChunkIndex={setCurrentChunkIndex}
+                      scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
+                      scrollAreaRef={scrollAreaRef}
+                    />
+                    <JumpToTabButton
+                      className="mx-4"
+                      tab={currentChunkIndex}
+                      totalTabs={finishedQuestionsFilteredPartitionedData!.length}
+                      prefix="page"
+                      onTabChangeCallback={({ tab }) => {
+                        setCurrentChunkIndex(tab);
+                        if (uiPreferences.scrollUpWhenPageChange) {
+                          scrollAreaRef.current?.scrollTo({
+                            top: 0,
+                            behavior: "instant",
+                          });
                         }
-                        scrollAreaRef={scrollAreaRef}
-                      />
-                      <PreviousPageButton
-                        currentChunkIndex={currentChunkIndex}
-                        setCurrentChunkIndex={setCurrentChunkIndex}
-                        scrollUpWhenPageChange={
-                          uiPreferences.scrollUpWhenPageChange
-                        }
-                        scrollAreaRef={scrollAreaRef}
-                      />
-                      <JumpToTabButton
-                        className="mx-4"
-                        tab={currentChunkIndex}
-                        totalTabs={
-                          finishedQuestionsFilteredPartitionedData!.length
-                        }
-                        prefix="page"
-                        onTabChangeCallback={({ tab }) => {
-                          setCurrentChunkIndex(tab);
-                          if (uiPreferences.scrollUpWhenPageChange) {
-                            scrollAreaRef.current?.scrollTo({
-                              top: 0,
-                              behavior: "instant",
-                            });
-                          }
-                        }}
-                      />
-                      <NextPageButton
-                        currentChunkIndex={currentChunkIndex}
-                        setCurrentChunkIndex={setCurrentChunkIndex}
-                        totalPages={
-                          finishedQuestionsFilteredPartitionedData!.length
-                        }
-                        scrollUpWhenPageChange={
-                          uiPreferences.scrollUpWhenPageChange
-                        }
-                        scrollAreaRef={scrollAreaRef}
-                      />
-                      <LastPageButton
-                        currentChunkIndex={currentChunkIndex}
-                        setCurrentChunkIndex={setCurrentChunkIndex}
-                        totalPages={
-                          finishedQuestionsFilteredPartitionedData!.length
-                        }
-                        scrollUpWhenPageChange={
-                          uiPreferences.scrollUpWhenPageChange
-                        }
-                        scrollAreaRef={scrollAreaRef}
-                      />
-                    </div>
-                  </>
-                )}
+                      }}
+                    />
+                    <NextPageButton
+                      currentChunkIndex={currentChunkIndex}
+                      setCurrentChunkIndex={setCurrentChunkIndex}
+                      totalPages={finishedQuestionsFilteredPartitionedData!.length}
+                      scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
+                      scrollAreaRef={scrollAreaRef}
+                    />
+                    <LastPageButton
+                      currentChunkIndex={currentChunkIndex}
+                      setCurrentChunkIndex={setCurrentChunkIndex}
+                      totalPages={finishedQuestionsFilteredPartitionedData!.length}
+                      scrollUpWhenPageChange={uiPreferences.scrollUpWhenPageChange}
+                      scrollAreaRef={scrollAreaRef}
+                    />
+                  </div>
+                </>
+              )}
               <Separator orientation="vertical" className="h-[30px]!" />
               <Sort
                 sortParameters={sortParameters}
@@ -259,16 +222,13 @@ const AppUltilityBar = memo(
                     <TooltipTrigger asChild>
                       <div
                         className={cn(
-                          "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
+                          "flex h-full cursor-pointer items-center justify-center gap-1 rounded-md border p-2",
                           uiPreferences.isStrictModeEnabled
                             ? "border-logo-main"
                             : "border-muted-foreground",
                         )}
                         onClick={() => {
-                          setUiPreference(
-                            "isStrictModeEnabled",
-                            (prev) => !prev,
-                          );
+                          setUiPreference("isStrictModeEnabled", (prev) => !prev);
                         }}
                       >
                         <Switch
@@ -296,20 +256,12 @@ const AppUltilityBar = memo(
               )}
 
               {!isExportModeEnabled && (
-                <ExportDisabledDialog
-                  isQuestionViewDisabled={isQuestionViewDisabled}
-                />
+                <ExportDisabledDialog isQuestionViewDisabled={isQuestionViewDisabled} />
               )}
-              <ShareFilter
-                isDisabled={isQuestionViewDisabled}
-                url={filterUrl}
-              />
+              <ShareFilter isDisabled={isQuestionViewDisabled} url={filterUrl} />
             </div>
 
-            <ScrollBar
-              orientation="horizontal"
-              className="[&_.bg-border]:bg-transparent"
-            />
+            <ScrollBar orientation="horizontal" className="[&_.bg-border]:bg-transparent" />
           </ScrollArea>
         </>
       );
@@ -336,11 +288,9 @@ const ShowFinishedToggle = memo(
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-              isQuestionViewDisabled && "opacity-50 cursor-default!",
-              showFinishedQuestion
-                ? "border-green-600"
-                : "border-muted-foreground",
+              "flex h-full cursor-pointer items-center justify-center gap-1 rounded-md border p-2",
+              isQuestionViewDisabled && "cursor-default! opacity-50",
+              showFinishedQuestion ? "border-green-600" : "border-muted-foreground",
             )}
             onClick={() => {
               if (isQuestionViewDisabled) {
@@ -351,7 +301,7 @@ const ShowFinishedToggle = memo(
           >
             <Switch
               className={cn(
-                "border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid ",
+                "cursor-pointer border border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid",
                 isQuestionViewDisabled && "cursor-default!",
               )}
               id="show-finished-question"
@@ -359,9 +309,7 @@ const ShowFinishedToggle = memo(
             />
             <p
               className={cn(
-                showFinishedQuestion
-                  ? "text-green-600"
-                  : "text-muted-foreground",
+                showFinishedQuestion ? "text-green-600" : "text-muted-foreground",
                 "cursor-pointer text-sm",
                 isQuestionViewDisabled && "cursor-default!",
               )}
@@ -374,7 +322,7 @@ const ShowFinishedToggle = memo(
           side="bottom"
           className={cn(
             !isQuestionViewDisabled && "hidden!",
-            "flex justify-center items-center gap-2",
+            "flex items-center justify-center gap-2",
           )}
         >
           To toggle this, run a search first.
@@ -415,9 +363,7 @@ export const InspectTriggerButton = memo(
     setIsQuestionInspectOpen,
   }: {
     isQuestionViewDisabled: boolean;
-    setIsQuestionInspectOpen:
-      | Dispatch<SetStateAction<QuestionInspectOpenState>>
-      | undefined;
+    setIsQuestionInspectOpen: Dispatch<SetStateAction<QuestionInspectOpenState>> | undefined;
   }) => {
     return (
       <Tooltip>
@@ -445,7 +391,7 @@ export const InspectTriggerButton = memo(
           side="bottom"
           className={cn(
             !isQuestionViewDisabled && "hidden!",
-            "flex justify-center items-center gap-2",
+            "flex items-center justify-center gap-2",
           )}
         >
           To inspect questions, run a search first.

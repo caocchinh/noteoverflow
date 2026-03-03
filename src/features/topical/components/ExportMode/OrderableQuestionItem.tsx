@@ -1,11 +1,11 @@
-import { CSSProperties, Dispatch, memo, SetStateAction } from "react";
-import { SelectedQuestion } from "../../types/models";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
 import { Grip } from "lucide-react";
+import { CSSProperties, Dispatch, memo, SetStateAction } from "react";
+import { SelectedQuestion } from "../../types/models";
 import QuestionItem from "./QuestionItem";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface OrderableQuestionItemProps {
   question: SelectedQuestion;
@@ -29,14 +29,7 @@ const OrderableQuestionItem = memo(
     isDragOverlay = false,
     currentlyPreviewQuestion,
   }: OrderableQuestionItemProps) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: question.id,
       disabled: isDragOverlay,
     });
@@ -56,7 +49,7 @@ const OrderableQuestionItem = memo(
     const dragHandle = (
       <div
         className={cn(
-          "cursor-grab flex flex-row gap-1 items-center justify-center active:cursor-grabbing p-1 -ml-1 mr-2 rounded hover:bg-foreground/10 touch-none",
+          "hover:bg-foreground/10 mr-2 -ml-1 flex cursor-grab touch-none flex-row items-center justify-center gap-1 rounded p-1 active:cursor-grabbing",
           isSelected && "hover:bg-white/20",
           isDragOverlay && "cursor-grabbing",
         )}
@@ -65,24 +58,15 @@ const OrderableQuestionItem = memo(
         {...listeners}
       >
         {index !== undefined && <span> {index + 1}. </span>}
-        <div className="flex flex-row gap-0 items-center justify-center">
+        <div className="flex flex-row items-center justify-center gap-0">
           <Grip className="h-4 w-4 opacity-50" />
-          <Grip
-            className={cn(
-              "h-4 w-4 ml-[-2px] opacity-50",
-              mobileBreakpoint && "hidden!",
-            )}
-          />
+          <Grip className={cn("ml-[-2px] h-4 w-4 opacity-50", mobileBreakpoint && "hidden!")} />
         </div>
       </div>
     );
 
     return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className={cn("list-none", isDragOverlay && "")}
-      >
+      <div ref={setNodeRef} style={style} className={cn("list-none", isDragOverlay && "")}>
         <QuestionItem
           question={question}
           currentlyPreviewQuestion={currentlyPreviewQuestion}

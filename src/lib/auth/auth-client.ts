@@ -1,7 +1,6 @@
-import { adminClient, multiSessionClient } from "better-auth/client/plugins";
+import { adminClient, inferAdditionalFields, multiSessionClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { AdminRole, ac, OwnerRole, UserRole } from "./permission";
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import { ac, AdminRole, OwnerRole, UserRole } from "./permission";
 
 export const authClient = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL,

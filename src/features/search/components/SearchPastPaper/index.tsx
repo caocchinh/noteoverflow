@@ -1,7 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
   BESTEXAMHELP_DOMAIN,
@@ -18,18 +15,17 @@ import {
   PAST_PAPER_NAVIGATOR_CACHE_KEY,
   TOPICAL_DATA,
 } from "@/constants/constants";
-import {
-  PastPaperNavigatorCache,
-  ValidCurriculum,
-  ValidSeason,
-} from "@/constants/types";
+import { PastPaperNavigatorCache, ValidCurriculum, ValidSeason } from "@/constants/types";
 import { INVALID_INPUTS_DEFAULT } from "@/features/topical/constants/constants";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { getShortSeason } from "@/lib/utils";
+import { Search as SearchIcon } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import ChromeExtensionBanner from "./ChromeExtensionBanner";
-import QuickCodeSection from "./QuickCodeSection";
 import ManualInputForm from "./ManualInputForm";
 import PaperDetailsDialog from "./PaperDetailsDialog";
+import QuickCodeSection from "./QuickCodeSection";
 import { InvalidInputsWithVariant, PaperLinkType } from "./types";
 
 const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
@@ -37,8 +33,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [quickCodeError, setQuickCodeError] = useState<string | null>(null);
   const [quickCodeInput, setQuickCodeInput] = useState<string>("");
-  const [selectedCurriculum, setSelectedCurriculum] =
-    useState<string>("CIE A-LEVEL");
+  const [selectedCurriculum, setSelectedCurriculum] = useState<string>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPaperType, setSelectedPaperType] = useState<string>("");
   const [selectedVariant, setSelectedVariant] = useState<string>("");
@@ -48,9 +43,8 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
 
   const availableSubjects = useMemo(() => {
     let subjects =
-      TOPICAL_DATA[
-        TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-      ]?.subject;
+      TOPICAL_DATA[TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)]
+        ?.subject;
     if (selectedCurriculum === "CIE A-LEVEL") {
       subjects = subjects?.filter((subject) => !subject.code.includes("9709"));
       subjects.unshift({
@@ -81,13 +75,10 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       const regex = /^(\d{4})\/(\d{2})\/(F\/M|M\/J|O\/N)\/(\d{2})$/;
 
       const match = code.match(regex);
-      if (!match)
-        return "Correct format: [Subject Code]/[Paper Number]/[Season]/[Year]";
+      if (!match) return "Correct format: [Subject Code]/[Paper Number]/[Season]/[Year]";
 
       const subjectCode = match[1];
-      const subject = availableSubjects?.find((s) =>
-        s.code.includes(subjectCode)
-      );
+      const subject = availableSubjects?.find((s) => s.code.includes(subjectCode));
       if (!subject) {
         return `Subject with code ${subjectCode} is not supported yet`;
       }
@@ -104,7 +95,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
 
       return "";
     },
-    [availableSubjects, currentYear]
+    [availableSubjects, currentYear],
   );
 
   // Load cached state from localStorage
@@ -130,9 +121,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
 
   const updateManualInputs = useCallback((): void => {
     const extractedComponents = quickCodeInput.split("/");
-    const subject = availableSubjects?.find((s) =>
-      s.code.includes(extractedComponents[0])
-    );
+    const subject = availableSubjects?.find((s) => s.code.includes(extractedComponents[0]));
 
     setSelectedSubject(subject?.code ?? "");
     setSelectedPaperType(extractedComponents[1][0]);
@@ -161,7 +150,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       setQuickCodeInput(value);
       setQuickCodeError(validateQuickCode({ code: value }));
     },
-    [validateQuickCode]
+    [validateQuickCode],
   );
 
   const handleQuickCodeSubmit = useCallback(() => {
@@ -252,21 +241,12 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
     setQuickCodeInput(
       `${selectedSubject
         .split("(")[1]
-        .slice(
-          0,
-          4
-        )}/${selectedPaperType}${selectedVariant}/${shortSeason}/${selectedYear.slice(
-        2
-      )}`
+        .slice(0, 4)}/${selectedPaperType}${selectedVariant}/${shortSeason}/${selectedYear.slice(
+        2,
+      )}`,
     );
     setQuickCodeError(null);
-  }, [
-    selectedSeason,
-    selectedSubject,
-    selectedPaperType,
-    selectedVariant,
-    selectedYear,
-  ]);
+  }, [selectedSeason, selectedSubject, selectedPaperType, selectedVariant, selectedYear]);
 
   const parseLink = useCallback(
     ({ type }: { type: PaperLinkType }) => {
@@ -279,9 +259,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       const year = parseInt(selectedYear);
       const subjectCode = selectedSubject.split("(")[1]?.slice(0, 4);
 
-      let newPaperCode = `${subjectCode}-${shortSeason}${year
-        .toString()
-        .slice(2)}-${type}`;
+      let newPaperCode = `${subjectCode}-${shortSeason}${year.toString().slice(2)}-${type}`;
       if (type === "ms" || type === "qp") {
         newPaperCode = `${newPaperCode}-${paperType}${variant}`;
       }
@@ -289,9 +267,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
         return "https://pastpapers.co/cie/A-Level/Computer-Science-9608/2015/2015%20Nov/9608_w15_qp_12.pdf";
       }
       return `${BESTEXAMHELP_DOMAIN}/${
-        BESTEXAMHELP_CURRICULUM_CODE_PREFIX[
-          selectedCurriculum as ValidCurriculum
-        ]
+        BESTEXAMHELP_CURRICULUM_CODE_PREFIX[selectedCurriculum as ValidCurriculum]
       }/${BESTEXAMHELP_SUBJECT_CODE[subjectCode]}/${year}/${newPaperCode}.php`;
     },
     [
@@ -301,7 +277,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       selectedYear,
       selectedSubject,
       selectedCurriculum,
-    ]
+    ],
   );
 
   const clearEverything = useCallback(() => {
@@ -328,7 +304,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
           year: selectedYear,
           season: selectedSeason,
           quickCode: quickCodeInput,
-        })
+        }),
       );
     }
   }, [
@@ -367,7 +343,7 @@ const SearchPastPaper = memo(({ children }: { children?: React.ReactNode }) => {
       ) : (
         <>
           <div
-            className="h-10 w-full max-w-md items-center flex"
+            className="flex h-10 w-full max-w-md items-center"
             onClick={() => setIsDialogOpen(true)}
           >
             <Input

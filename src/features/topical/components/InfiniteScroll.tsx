@@ -1,8 +1,5 @@
 import { useCallback, useRef } from "react";
-import {
-  ExtendedIntersectionObserverInit,
-  InfiniteScrollProps,
-} from "../types/components";
+import { ExtendedIntersectionObserverInit, InfiniteScrollProps } from "../types/components";
 
 export default function InfiniteScroll({
   next,

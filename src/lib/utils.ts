@@ -38,10 +38,7 @@ export function isEmbeddedBrowser() {
     "WeChat",
     "QQBrowser",
   ];
-  const embeddedBrowserRegex = new RegExp(
-    embeddedBrowserPatterns.join("|"),
-    "i"
-  );
+  const embeddedBrowserRegex = new RegExp(embeddedBrowserPatterns.join("|"), "i");
   return embeddedBrowserRegex.test(userAgent);
 }
 

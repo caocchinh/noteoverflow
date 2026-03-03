@@ -31,11 +31,7 @@ export const validatePaperType = (value: string): string | null => {
     return "Paper type cannot have leading or trailing whitespace";
   }
   const paperTypeNumber = Number(value);
-  if (
-    Number.isNaN(paperTypeNumber) ||
-    paperTypeNumber < 1 ||
-    paperTypeNumber > 9
-  ) {
+  if (Number.isNaN(paperTypeNumber) || paperTypeNumber < 1 || paperTypeNumber > 9) {
     return "Paper type must be a number between 1 and 9";
   }
   return null;
@@ -81,11 +77,7 @@ export const validateQuestionNumber = (value: string): string => {
     return "Question number cannot have leading or trailing whitespace";
   }
   const questionNumber = Number(value);
-  if (
-    Number.isNaN(questionNumber) ||
-    questionNumber < 1 ||
-    questionNumber > 100
-  ) {
+  if (Number.isNaN(questionNumber) || questionNumber < 1 || questionNumber > 100) {
     return "Question number must be between 1 and 100";
   }
   return "";

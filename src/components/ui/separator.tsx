@@ -15,8 +15,8 @@ const Separator = memo(
     return (
       <SeparatorPrimitiveRoot
         className={cn(
-          "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
-          className
+          "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+          className,
         )}
         data-slot="separator"
         decorative={decorative}
@@ -24,7 +24,7 @@ const Separator = memo(
         {...props}
       />
     );
-  }
+  },
 );
 Separator.displayName = "Separator";
 

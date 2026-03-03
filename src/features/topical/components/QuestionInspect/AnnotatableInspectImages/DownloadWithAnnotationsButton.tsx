@@ -1,8 +1,8 @@
-import { memo, RefObject, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { handleDownloadPdf } from "@/features/topical/lib/utils";
 import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
+import { Loader2 } from "lucide-react";
+import { memo, RefObject, useCallback, useState } from "react";
 
 const DownloadWithAnnotationsButton = memo(
   ({
@@ -23,8 +23,7 @@ const DownloadWithAnnotationsButton = memo(
 
       setIsGenerating(true);
       try {
-        const pdfWithAnnotations =
-          await pdfViewerRef.current.exportPdfWithAnnotations();
+        const pdfWithAnnotations = await pdfViewerRef.current.exportPdfWithAnnotations();
 
         if (!pdfWithAnnotations) {
           console.error("Failed to export PDF with annotations");
@@ -41,7 +40,7 @@ const DownloadWithAnnotationsButton = memo(
 
     return (
       <Button
-        className="cursor-pointer h-[26px]"
+        className="h-[26px] cursor-pointer"
         disabled={isSessionFetching || !isPdfViewerLoaded || isGenerating}
         variant="outline"
         onClick={handleDownload}

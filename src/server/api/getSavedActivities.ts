@@ -1,26 +1,18 @@
-import "server-only";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
-import {
-  finishedQuestions,
-  userAnnotations,
-  userBookmarkList,
-} from "@/drizzle/schema";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { eq } from "drizzle-orm";
-import { status as elysiaStatus } from "elysia";
+import { finishedQuestions, userAnnotations, userBookmarkList } from "@/drizzle/schema";
 import {
   SavedActivitiesResponse,
-  SelectedFinishedQuestion,
-  SelectedBookmark,
   SelectedAnnotation,
+  SelectedBookmark,
+  SelectedFinishedQuestion,
 } from "@/features/topical/types/models";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
+import { eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
+import "server-only";
 
-export const getSavedActivities = async ({
-  status,
-}: {
-  status: typeof elysiaStatus;
-}) => {
+export const getSavedActivities = async ({ status }: { status: typeof elysiaStatus }) => {
   const session = await verifySession();
   if (!session) {
     return status(HTTP_STATUS.UNAUTHORIZED, {
@@ -31,12 +23,11 @@ export const getSavedActivities = async ({
   const userId = session.user.id;
 
   // Fetch finished questions, bookmarks, and annotations in parallel
-  const [finishedQuestionsData, bookmarksData, annotationsData] =
-    await Promise.all([
-      fetchFinishedQuestions(userId),
-      fetchBookmarks(userId),
-      fetchAnnotations(userId),
-    ]);
+  const [finishedQuestionsData, bookmarksData, annotationsData] = await Promise.all([
+    fetchFinishedQuestions(userId),
+    fetchBookmarks(userId),
+    fetchAnnotations(userId),
+  ]);
 
   const responseData: SavedActivitiesResponse = {
     finishedQuestions: finishedQuestionsData,
@@ -80,12 +71,8 @@ async function fetchFinishedQuestions(userId: string) {
         questionImages: JSON.parse(item.question.questionImages ?? "[]"),
         answers: JSON.parse(item.question.answers ?? "[]"),
         topics: JSON.parse(item.question.topics ?? "[]"),
-        answersImagesDimensions: JSON.parse(
-          item.question.answersImagesDimensions ?? "[]",
-        ),
-        questionImagesDimensions: JSON.parse(
-          item.question.questionImagesDimensions ?? "[]",
-        ),
+        answersImagesDimensions: JSON.parse(item.question.answersImagesDimensions ?? "[]"),
+        questionImagesDimensions: JSON.parse(item.question.questionImagesDimensions ?? "[]"),
       },
     };
   });
@@ -136,9 +123,7 @@ async function fetchBookmarks(userId: string) {
           ...userBookmark,
           question: {
             ...userBookmark.question,
-            questionImages: JSON.parse(
-              userBookmark.question.questionImages ?? "[]",
-            ),
+            questionImages: JSON.parse(userBookmark.question.questionImages ?? "[]"),
             answers: JSON.parse(userBookmark.question.answers ?? "[]"),
             topics: JSON.parse(userBookmark.question.topics ?? "[]"),
             answersImagesDimensions: JSON.parse(

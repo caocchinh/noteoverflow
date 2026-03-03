@@ -1,23 +1,16 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import {
   AnimatePresence,
-  type MotionValue,
   motion,
+  type MotionValue,
   type SpringOptions,
   useMotionValue,
   useSpring,
   useTransform,
 } from "motion/react";
-import {
-  Children,
-  cloneElement,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { cn } from "@/lib/utils";
+import { Children, cloneElement, useEffect, useMemo, useRef, useState } from "react";
 
 export type DockItemData = {
   icon: React.ReactNode;
@@ -101,10 +94,9 @@ function DockItem({
       tabIndex={0}
     >
       {Children.map(children, (child) =>
-        cloneElement(
-          child as React.ReactElement<{ isHovered: MotionValue<number> }>,
-          { isHovered },
-        ),
+        cloneElement(child as React.ReactElement<{ isHovered: MotionValue<number> }>, {
+          isHovered,
+        }),
       )}
     </motion.div>
   );
@@ -117,12 +109,7 @@ type DockLabelProps = {
   backgroundColor?: string;
 };
 
-function DockLabel({
-  children,
-  className = "",
-  isHovered,
-  backgroundColor,
-}: DockLabelProps) {
+function DockLabel({ children, className = "", isHovered, backgroundColor }: DockLabelProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -142,7 +129,7 @@ function DockLabel({
           animate={{ opacity: 1, y: -10 }}
           className={cn(
             className,
-            "-top-6 absolute left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-white text-xs",
+            "absolute -top-6 left-1/2 w-fit rounded-md border border-neutral-700 bg-[#060010] px-2 py-0.5 text-xs whitespace-pre text-white",
             backgroundColor,
           )}
           exit={{ opacity: 0, y: 0 }}
@@ -165,11 +152,7 @@ type DockIconProps = {
 };
 
 function DockIcon({ children, className = "" }: DockIconProps) {
-  return (
-    <div className={`flex items-center justify-center ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`flex items-center justify-center ${className}`}>{children}</div>;
 }
 
 export default function Dock({
@@ -199,7 +182,7 @@ export default function Dock({
     >
       <motion.div
         aria-label="Application dock"
-        className={`${className} -translate-x-1/2 absolute bottom-2 left-1/2 flex w-fit transform items-end gap-4 rounded-md border border-neutral-700 bg-background px-4 pb-2`}
+        className={`${className} bg-background absolute bottom-2 left-1/2 flex w-fit -translate-x-1/2 transform items-end gap-4 rounded-md border border-neutral-700 px-4 pb-2`}
         onMouseLeave={() => {
           isHovered.set(0);
           mouseX.set(Number.POSITIVE_INFINITY);
@@ -224,9 +207,7 @@ export default function Dock({
             spring={spring}
           >
             <DockIcon>{item.icon}</DockIcon>
-            <DockLabel backgroundColor={item.backgroundColor}>
-              {item.label}
-            </DockLabel>
+            <DockLabel backgroundColor={item.backgroundColor}>{item.label}</DockLabel>
           </DockItem>
         ))}
       </motion.div>

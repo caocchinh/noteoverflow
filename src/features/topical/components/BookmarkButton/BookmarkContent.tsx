@@ -1,5 +1,5 @@
-import { memo, RefObject, useCallback, type KeyboardEvent } from "react";
 import { Command } from "@/components/ui/command";
+import { memo, RefObject, useCallback, type KeyboardEvent } from "react";
 import { BookmarkListRef } from "../../types/components";
 
 interface BookmarkContentProps {
@@ -34,23 +34,14 @@ const useBookmarkKeyDown = (
 };
 
 const BookmarkContent = memo(
-  ({
-    children,
-    bookmarkListRef,
-    open,
-    handleOpenChange,
-  }: BookmarkContentProps) => {
-    const handleKeyDown = useBookmarkKeyDown(
-      bookmarkListRef,
-      open,
-      handleOpenChange,
-    );
+  ({ children, bookmarkListRef, open, handleOpenChange }: BookmarkContentProps) => {
+    const handleKeyDown = useBookmarkKeyDown(bookmarkListRef, open, handleOpenChange);
 
     return (
       <Command
         shouldFilter={false}
         onKeyDown={handleKeyDown}
-        className="h-max! bg-transparent overflow-visible w-max!"
+        className="h-max! w-max! overflow-visible bg-transparent"
       >
         {children}
       </Command>

@@ -1,10 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  extractCurriculumCode,
-  extractQuestionNumber,
-  extractSubjectCode,
-} from "../lib/utils";
 import { memo } from "react";
+import { extractCurriculumCode, extractQuestionNumber, extractSubjectCode } from "../lib/utils";
 import { SelectedQuestion } from "../types/models";
 
 export const QuestionInformation = memo(
@@ -32,7 +28,7 @@ export const QuestionInformation = memo(
     };
 
     return (
-      <div className="flex flex-row flex-wrap w-full mb-3 gap-2 justify-start items-start">
+      <div className="mb-3 flex w-full flex-row flex-wrap items-start justify-start gap-2">
         {showCurriculumn && (
           <Badge className="bg-green-600 text-white">
             {extractCurriculumCode({ questionId: question.id })}
@@ -51,9 +47,7 @@ export const QuestionInformation = memo(
         <Badge>{temporaryFix(question.season) ?? question.season}</Badge>
         <Badge>{question.year}</Badge>
         <Badge>Paper {question.paperType}</Badge>
-        <Badge>
-          Question {extractQuestionNumber({ questionId: question.id })}
-        </Badge>
+        <Badge>Question {extractQuestionNumber({ questionId: question.id })}</Badge>
       </div>
     );
   },

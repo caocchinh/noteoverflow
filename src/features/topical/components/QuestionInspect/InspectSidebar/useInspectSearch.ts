@@ -1,9 +1,5 @@
-import { useState, useMemo } from "react";
-import {
-  extractPaperCode,
-  extractQuestionNumber,
-  fuzzySearch,
-} from "../../../lib/utils";
+import { useMemo, useState } from "react";
+import { extractPaperCode, extractQuestionNumber, fuzzySearch } from "../../../lib/utils";
 import { SelectedQuestion } from "../../../types/models";
 
 export const useInspectSearch = (allQuestions: SelectedQuestion[]) => {

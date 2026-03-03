@@ -1,14 +1,9 @@
-import React, { useCallback, useRef, memo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { X } from "lucide-react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
   DrawerContent,
@@ -17,16 +12,17 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
-import { BookmarkTrigger } from "./BookmarkTrigger";
-import { BookmarkList } from "./BookmarkList";
-import BookmarkContent from "./BookmarkContent";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import {
   BookmarkButtonProps,
   BookmarkButtonSharedProps,
   BookmarkListRef,
 } from "../../types/components";
+import BookmarkContent from "./BookmarkContent";
+import { BookmarkList } from "./BookmarkList";
+import { BookmarkTrigger } from "./BookmarkTrigger";
 
 export const BookmarkButton = memo(
   ({
@@ -48,8 +44,7 @@ export const BookmarkButton = memo(
   }: BookmarkButtonProps) => {
     const [_open, _setOpen] = useState(false);
     const open = openProp ?? _open;
-    const { savedActivitiesIsLoading, savedActivitiesIsError } =
-      useTopicalApp();
+    const { savedActivitiesIsLoading, savedActivitiesIsError } = useTopicalApp();
     const { isAuthenticated } = useAuth();
     const isMobileDevice = useIsMobile();
 
@@ -186,7 +181,7 @@ const MobileBookmarkButton = memo(
             />
           </DrawerTrigger>
           <DrawerContent
-            className="z-100012 h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="dark:bg-accent z-100012 h-[95vh] max-h-[95vh]"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -208,9 +203,9 @@ const MobileBookmarkButton = memo(
               <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
             </div>
 
-            <div className="flex flex-row gap-3 p-2 ">
+            <div className="flex flex-row gap-3 p-2">
               <Button
-                className="flex-1/3 cursor-pointer mb-4"
+                className="mb-4 flex-1/3 cursor-pointer"
                 onClick={() => {
                   handleOpenChange(false);
                 }}
@@ -282,7 +277,7 @@ const DesktopBookmarkButton = memo(
             </div>
           </PopoverTrigger>
           <PopoverContent
-            className="flex flex-col z-100010 w-[270px] px-0! dark:bg-accent"
+            className="dark:bg-accent z-100010 flex w-[270px] flex-col px-0!"
             onClick={(e) => e.stopPropagation()}
             align={popOverAlign}
             onOpenAutoFocus={(e) => {
@@ -307,7 +302,7 @@ const DesktopBookmarkButton = memo(
               isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
               ref={bookmarkListRef}
             />
-            <div className="w-full px-2 mt-2 flex items-center justify-center">
+            <div className="mt-2 flex w-full items-center justify-center px-2">
               <Button
                 className="w-full cursor-pointer"
                 variant="destructive"

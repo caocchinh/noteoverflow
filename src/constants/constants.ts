@@ -47,10 +47,7 @@ export const BESTEXAMHELP_SUBJECT_CODE: Record<string, string> = {
   "9699": "sociology-9699",
 };
 
-export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<
-  ValidCurriculum,
-  string
-> = {
+export const BESTEXAMHELP_CURRICULUM_CODE_PREFIX: Record<ValidCurriculum, string> = {
   "CIE A-LEVEL": "cambridge-international-a-level",
   "CIE IGCSE": "",
 };
@@ -60,10 +57,7 @@ export const CURRICULUM_COVER_IMAGE: Record<ValidCurriculum, string> = {
   "CIE IGCSE": "/assets/cover/igcse-logo1.webp",
 };
 
-export const SUBJECT_COVER_IMAGE: Record<
-  ValidCurriculum,
-  Record<string, string>
-> = {
+export const SUBJECT_COVER_IMAGE: Record<ValidCurriculum, Record<string, string>> = {
   "CIE A-LEVEL": {
     "Physics (9702)": "/assets/cover/Physics (9702).webp",
     "Chemistry (9701)": "/assets/cover/Chemistry (9701).webp",
@@ -77,18 +71,13 @@ export const SUBJECT_COVER_IMAGE: Record<
     "Mathematics Pure Math 2,3 (9709)": "/assets/cover/Pure 2&3 (9709).webp",
     "Computer Science (9608)": "/assets/cover/Computer Science (9608).webp",
     "Computer Science (9618)": "/assets/cover/Computer Science (9618).webp",
-    "Further Mathematics (9231)":
-      "/assets/cover/Further Mathematics (9231).webp",
+    "Further Mathematics (9231)": "/assets/cover/Further Mathematics (9231).webp",
     "Economics (9708)": "/assets/cover/Economics (9708).webp",
     "Psychology (9990)": "/assets/cover/Psychology (9990).webp",
-    "Mathematics Mechanics 1 (9709)":
-      "/assets/cover/Mathematics Mechanics 1 (9709).webp",
-    "Mathematics Mechanics 2 (9709)":
-      "/assets/cover/Mathematics Mechanics 2 (9709).webp",
-    "Mathematics Statistics 1 (9709)":
-      "/assets/cover/Mathematics Statistics 1 (9709).webp",
-    "Mathematics Statistics 2 (9709)":
-      "/assets/cover/Mathematics Statistics 2 (9709).webp",
+    "Mathematics Mechanics 1 (9709)": "/assets/cover/Mathematics Mechanics 1 (9709).webp",
+    "Mathematics Mechanics 2 (9709)": "/assets/cover/Mathematics Mechanics 2 (9709).webp",
+    "Mathematics Statistics 1 (9709)": "/assets/cover/Mathematics Statistics 1 (9709).webp",
+    "Mathematics Statistics 2 (9709)": "/assets/cover/Mathematics Statistics 2 (9709).webp",
     "Sociology (9699)": "/assets/cover/Sociology (9699).webp",
   },
   "CIE IGCSE": {
@@ -106,8 +95,7 @@ export const TOPICAL_DATA: TopicalData[] = [
     subject: [
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Physics (9702)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/664565-2025-2027-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/664565-2025-2027-syllabus.pdf",
         code: "Physics (9702)",
         topic: [
           {
@@ -252,8 +240,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           },
         ],
         year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011,
+          2010, 2009,
         ],
         paperType: [
           {
@@ -281,8 +269,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Chemistry (9701)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf",
         code: "Chemistry (9701)",
         topic: [
           {
@@ -341,8 +328,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
           {
-            topicName:
-              "AN INTRODUCTION TO THE CHEMISTRY OF TRANSITION ELEMENTS",
+            topicName: "AN INTRODUCTION TO THE CHEMISTRY OF TRANSITION ELEMENTS",
             topicCurriculumnSubdivision: ["A-Level"],
             isTopicUpToDate: true,
           },
@@ -403,8 +389,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           },
         ],
         year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011,
+          2010, 2009,
         ],
         paperType: [
           {
@@ -432,8 +418,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Biology (9700)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/664560-2025-2027-syllabus.pdf",
         code: "Biology (9700)",
         topic: [
           {
@@ -533,8 +518,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           },
         ],
         year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011,
+          2010, 2009,
         ],
         paperType: [
           {
@@ -561,10 +546,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter", "Spring"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 1 (9709)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Pure Mathematics 1 (9709)"],
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Pure Mathematics 1 (9709)",
         topic: [
           {
@@ -619,8 +602,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           },
         ],
         year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011,
+          2010, 2009,
         ],
         paperType: [
           {
@@ -631,12 +614,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter", "Spring"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Mathematics Pure Math 2,3 (9709)"
-          ],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Pure Math 2,3 (9709)"],
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Pure Math 2,3 (9709)",
         topic: [
           {
@@ -686,8 +665,8 @@ export const TOPICAL_DATA: TopicalData[] = [
           },
         ],
         year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012, 2011, 2010, 2009,
+          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011,
+          2010, 2009,
         ],
         paperType: [
           {
@@ -703,11 +682,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Mathematics Probability & Statistics 1 (9709)"
-          ],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Probability & Statistics 1 (9709)"],
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Probability & Statistics 1 (9709)",
         topic: [
           {
@@ -757,11 +733,8 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"][
-            "Mathematics Probability & Statistics 2 (9709)"
-          ],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Probability & Statistics 2 (9709)"],
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         code: "Mathematics Probability & Statistics 2 (9709)",
         topic: [
           {
@@ -808,8 +781,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mechanics (9709)"],
         code: "Mechanics (9709)",
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597421-2023-2025-syllabus.pdf",
         topic: [
           {
             topicName: "FORCES & EQUILIBRIUM",
@@ -852,10 +824,8 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter", "Spring"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Further Mathematics (9231)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/597381-2023-2025-syllabus.pdf",
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Further Mathematics (9231)"],
+        syllabusLink: "https://www.cambridgeinternational.org/Images/597381-2023-2025-syllabus.pdf",
         code: "Further Mathematics (9231)",
         topic: [
           {
@@ -994,10 +964,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
         ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012,
-        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012],
         paperType: [
           {
             paperType: 1,
@@ -1019,11 +986,9 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9618)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9618)"],
         code: "Computer Science (9618)",
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/636089-2024-2025-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/636089-2024-2025-syllabus.pdf",
         topic: [
           {
             topicName: "INFORMATION REPRESENTATION",
@@ -1136,8 +1101,7 @@ export const TOPICAL_DATA: TopicalData[] = [
 
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Economics (9708)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/595463-2023-2025-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/595463-2023-2025-syllabus.pdf",
         code: "Economics (9708)",
         topic: [
           {
@@ -1171,10 +1135,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
         ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-          2014, 2013, 2012,
-        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012],
         paperType: [
           {
             paperType: 1,
@@ -1189,8 +1150,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Psychology (9990)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/634461-2024-2026-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/634461-2024-2026-syllabus.pdf",
         code: "Psychology (9990)",
         topic: [
           {
@@ -1255,8 +1215,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
       {
         coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Sociology (9699)"],
-        syllabusLink:
-          "https://www.cambridgeinternational.org/Images/636099-2024-2026-syllabus.pdf",
+        syllabusLink: "https://www.cambridgeinternational.org/Images/636099-2024-2026-syllabus.pdf",
         code: "Sociology (9699)",
         topic: [
           {
@@ -1305,9 +1264,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
         ],
-        year: [
-          2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015,
-        ],
+        year: [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015],
         paperType: [
           { paperType: 1, paperTypeCurriculumnSubdivision: ["AS-Level"] },
           { paperType: 2, paperTypeCurriculumnSubdivision: ["AS-Level"] },
@@ -1318,8 +1275,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
 
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9608)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Computer Science (9608)"],
         code: "Computer Science (9608)",
         // Topic name up to date but the syllabus isn't
         topic: [
@@ -1395,8 +1351,7 @@ export const TOPICAL_DATA: TopicalData[] = [
       },
 
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 1 (9709)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 1 (9709)"],
         code: "Mathematics Mechanics 1 (9709)",
         topic: [
           {
@@ -1430,9 +1385,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
         ],
-        year: [
-          2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009,
-        ],
+        year: [2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009],
         paperType: [
           {
             paperTypeCurriculumnSubdivision: ["Outdated"],
@@ -1442,8 +1395,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 2 (9709)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Mechanics 2 (9709)"],
         code: "Mathematics Mechanics 2 (9709)",
         topic: [
           {
@@ -1487,8 +1439,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 1 (9709)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 1 (9709)"],
         code: "Mathematics Statistics 1 (9709)",
         topic: [
           {
@@ -1527,9 +1478,7 @@ export const TOPICAL_DATA: TopicalData[] = [
             isTopicUpToDate: true,
           },
         ],
-        year: [
-          2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009,
-        ],
+        year: [2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009],
         paperType: [
           {
             paperType: 6,
@@ -1539,8 +1488,7 @@ export const TOPICAL_DATA: TopicalData[] = [
         season: ["Summer", "Winter"],
       },
       {
-        coverImage:
-          SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 2 (9709)"],
+        coverImage: SUBJECT_COVER_IMAGE["CIE A-LEVEL"]["Mathematics Statistics 2 (9709)"],
         code: "Mathematics Statistics 2 (9709)",
         topic: [
           {
@@ -1587,8 +1535,7 @@ export const TOPICAL_DATA: TopicalData[] = [
   },
 ];
 
-export const PAST_PAPER_NAVIGATOR_CACHE_KEY =
-  "noteoverflow-past-paper-navigator-cache";
+export const PAST_PAPER_NAVIGATOR_CACHE_KEY = "noteoverflow-past-paper-navigator-cache";
 
 export const INITIAL_QUERY = {
   curriculumId: "",
@@ -1599,5 +1546,4 @@ export const INITIAL_QUERY = {
   season: [],
 };
 
-export const PAPER_TYPE_FILTER_SEARCH_PAGE_KEY =
-  "noteoverflow-paper-type-filter-search-page";
+export const PAPER_TYPE_FILTER_SEARCH_PAGE_KEY = "noteoverflow-paper-type-filter-search-page";

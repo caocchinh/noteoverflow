@@ -1,22 +1,19 @@
-import "server-only";
+import { MAX_IMAGE_UPLOAD_SIZE, MAX_QUERY_LENGTH } from "@/features/search/constants/constants";
+import { NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE } from "@/features/topical/constants/constants";
+import { hashUltil } from "@/features/topical/lib/utils";
+import { embedText, processImage } from "@/lib/cloudflareAI";
+import { ERROR_CODES, HTTP_STATUS } from "@/lib/errors";
+import { base64ToBytes, validateImageFormat } from "@/lib/image-utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { HTTP_STATUS, ERROR_CODES } from "@/lib/errors";
 import { status as elysiaStatus } from "elysia";
-import { processImage, embedText } from "@/lib/cloudflareAI";
+import "server-only";
+import { checkRateLimit, incrementSearchCount } from "./rate-limit";
 import {
   executeVectorSearch,
   fetchQuestionResults,
   SearchFilter,
   validateSearchFilters,
 } from "./utils";
-import { NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE } from "@/features/topical/constants/constants";
-import {
-  MAX_IMAGE_UPLOAD_SIZE,
-  MAX_QUERY_LENGTH,
-} from "@/features/search/constants/constants";
-import { validateImageFormat, base64ToBytes } from "@/lib/image-utils";
-import { hashUltil } from "@/features/topical/lib/utils";
-import { checkRateLimit, incrementSearchCount } from "./rate-limit";
 
 /**
  * Search for matching questions by uploading an image
@@ -33,11 +30,7 @@ export async function searchByImage({
   };
   status: typeof elysiaStatus;
 }) {
-  const {
-    imageBase64,
-    topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE,
-    filter,
-  } = body;
+  const { imageBase64, topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE, filter } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   // Validate image data exists
@@ -57,9 +50,7 @@ export async function searchByImage({
     // Validate actual image size
     if (imageBytes.byteLength > MAX_IMAGE_UPLOAD_SIZE) {
       return status(HTTP_STATUS.BAD_REQUEST, {
-        error: `Image size exceeds ${
-          MAX_IMAGE_UPLOAD_SIZE / (1024 * 1024)
-        }MB limit`,
+        error: `Image size exceeds ${MAX_IMAGE_UPLOAD_SIZE / (1024 * 1024)}MB limit`,
         code: ERROR_CODES.BAD_REQUEST,
       });
     }
@@ -123,7 +114,7 @@ export async function searchByImage({
       queryEmbedding,
       topK,
       filter,
-      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
+      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE,
     );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);
@@ -161,11 +152,7 @@ export async function searchByText({
   };
   status: typeof elysiaStatus;
 }) {
-  const {
-    query,
-    topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE,
-    filter,
-  } = body;
+  const { query, topK = NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE, filter } = body;
   const { env } = await getCloudflareContext({ async: true });
 
   // Validate filters using the same validation as getTopicalQuestions
@@ -226,7 +213,7 @@ export async function searchByText({
       queryEmbedding,
       topK,
       filter,
-      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
+      env.QUESTION_SEMANTIC_SEARCH_VECTORIZE,
     );
   } catch (error) {
     console.error("Failed to query Vectorize:", error);

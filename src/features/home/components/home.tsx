@@ -1,17 +1,16 @@
 "use client";
 
-import type React from "react";
-import { Sparkles } from "lucide-react";
-import { Bricolage_Grotesque } from "next/font/google";
-import { Spotlight } from "./spotlight";
-import { Particles } from "./particles";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import AnimatedText from "@/features/home/components/animation/AnimatedText";
 import RotatingText from "@/features/home/components/animation/RotatingText";
+import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
+import { Bricolage_Grotesque } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Particles } from "./particles";
+import { Spotlight } from "./spotlight";
 
 const brico = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -24,13 +23,7 @@ export default function Home() {
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden xl:h-screen">
       <Spotlight />
 
-      <Particles
-        className="absolute inset-0 z-0"
-        quantity={100}
-        ease={80}
-        refresh
-        color={color}
-      />
+      <Particles className="absolute inset-0 z-0" quantity={100} ease={80} refresh color={color} />
 
       <div className="relative z-[100] mx-auto max-w-4xl px-4 py-16 text-center">
         <div className="mb-0 inline-flex items-center gap-2 rounded-full">
@@ -45,8 +38,8 @@ export default function Home() {
 
         <h1
           className={cn(
-            "mb-4 cursor-crosshair bg-gradient-to-b dark:from-foreground dark:via-foreground/80 dark:to-foreground/40 from-background via-background/80 to-background/40  bg-clip-text text-4xl font-bold text-transparent sm:text-7xl",
-            brico.className
+            "dark:from-foreground dark:via-foreground/80 dark:to-foreground/40 from-background via-background/80 to-background/40 mb-4 cursor-crosshair bg-gradient-to-b bg-clip-text text-4xl font-bold text-transparent sm:text-7xl",
+            brico.className,
           )}
         >
           CIE Exams Preparation
@@ -64,13 +57,7 @@ export default function Home() {
                 splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
                 staggerDuration={0.025}
                 staggerFrom={"last"}
-                texts={[
-                  "Free forever.",
-                  "Reimagined.",
-                  "Simplified.",
-                  "Accelerated.",
-                  "Refined.",
-                ]}
+                texts={["Free forever.", "Reimagined.", "Simplified.", "Accelerated.", "Refined."]}
                 transition={{ type: "spring", damping: 30, stiffness: 400 }}
               />
             </div>
@@ -85,7 +72,7 @@ export default function Home() {
           <div className="mt-7 w-full">
             <Button
               asChild
-              className="!px-6 w-[90%] cursor-pointer rounded-lg border border-[var(--home-page-text)] bg-transparent p-6 text-[var(--home-page-text)] shadow-lg transition-all hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 active:scale-[0.99] md:w-[50%]"
+              className="w-[90%] cursor-pointer rounded-lg border border-[var(--home-page-text)] bg-transparent p-6 !px-6 text-[var(--home-page-text)] shadow-lg transition-all hover:bg-[var(--home-page-text)] hover:text-[var(--home-page-bg)] hover:opacity-90 active:scale-[0.99] md:w-[50%]"
             >
               <Link href={TOPICAL_QUESTION_APP_ROUTE}>
                 Get Started

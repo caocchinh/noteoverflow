@@ -1,19 +1,15 @@
-import { useState, useCallback, useRef, SetStateAction } from "react";
 import { CIE_A_LEVEL_SUBDIVISION, ValidCurriculum } from "@/constants/types";
-import { CurrentQuery, InvalidInputs } from "../types/models";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { SetStateAction, useCallback, useRef, useState } from "react";
 import {
   DEFAULT_CACHE,
   FILTERS_CACHE_KEY,
   INVALID_INPUTS_DEFAULT,
   UI_PREFERENCES_CACHE_KEY,
 } from "../constants/constants";
-import {
-  validateSubject,
-  validateSubcurriculumnDivision,
-  validateFilterData,
-} from "../lib/utils";
+import { validateFilterData, validateSubcurriculumnDivision, validateSubject } from "../lib/utils";
+import { CurrentQuery, InvalidInputs } from "../types/models";
 import { FiltersCache, UiPreferencesCache } from "../types/preferences";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface FilterStateRefs {
   curriculumRef: React.RefObject<HTMLDivElement | null>;
@@ -54,19 +50,13 @@ export interface FilterStateHandlers {
   /** Handle subject change with cascading reset of dependent fields */
   handleSubjectChange: (value: string | ((prev: string) => string)) => void;
   /** Handle topic change */
-  handleTopicChange: (
-    values: string[] | ((prev: string[]) => string[]),
-  ) => void;
+  handleTopicChange: (values: string[] | ((prev: string[]) => string[])) => void;
   /** Handle year change */
   handleYearChange: (values: string[] | ((prev: string[]) => string[])) => void;
   /** Handle paper type change */
-  handlePaperTypeChange: (
-    values: string[] | ((prev: string[]) => string[]),
-  ) => void;
+  handlePaperTypeChange: (values: string[] | ((prev: string[]) => string[])) => void;
   /** Handle season change */
-  handleSeasonChange: (
-    values: string[] | ((prev: string[]) => string[]),
-  ) => void;
+  handleSeasonChange: (values: string[] | ((prev: string[]) => string[])) => void;
   /** Reset all filter selections */
   resetEverything: () => void;
   revert: () => void;
@@ -93,8 +83,7 @@ export function useFilterState({
   currentQuery?: CurrentQuery;
 }): UseFilterStateReturn {
   // State
-  const [selectedCurriculum, setSelectedCurriculum] =
-    useState<ValidCurriculum>("CIE A-LEVEL");
+  const [selectedCurriculum, setSelectedCurriculum] = useState<ValidCurriculum>("CIE A-LEVEL");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
@@ -124,8 +113,7 @@ export function useFilterState({
   // Handlers
   const handleCurriculumChange = useCallback(
     (value: ValidCurriculum | ((prev: ValidCurriculum) => ValidCurriculum)) => {
-      const newValue =
-        typeof value === "function" ? value(selectedCurriculum) : value;
+      const newValue = typeof value === "function" ? value(selectedCurriculum) : value;
       setSelectedCurriculum(newValue as ValidCurriculum);
       // Reset dependent fields
       setSelectedSubject("");
@@ -142,21 +130,16 @@ export function useFilterState({
 
   const handleSubjectChange = useCallback(
     (value: string | ((prev: string) => string)) => {
-      const newValue =
-        typeof value === "function" ? value(selectedSubject) : value;
+      const newValue = typeof value === "function" ? value(selectedSubject) : value;
       setSelectedSubject(newValue);
       const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
       const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
       if (savedState && savedUiPreferences) {
         try {
           const parsedState: FiltersCache = JSON.parse(savedState);
-          const parsedUiPreferences: UiPreferencesCache =
-            JSON.parse(savedUiPreferences);
+          const parsedUiPreferences: UiPreferencesCache = JSON.parse(savedUiPreferences);
           if (parsedUiPreferences.isPersistantCacheEnabled) {
-            const isSubjectValid = validateSubject(
-              selectedCurriculum,
-              newValue,
-            );
+            const isSubjectValid = validateSubject(selectedCurriculum, newValue);
             if (newValue && isSubjectValid) {
               setSelectedSubject(newValue);
             }
@@ -206,18 +189,10 @@ export function useFilterState({
                 enforceZeroLength: false,
               })
             ) {
-              setSelectedTopic(
-                parsedState.filters[selectedCurriculum][newValue].topic,
-              );
-              setSelectedPaperType(
-                parsedState.filters[selectedCurriculum][newValue].paperType,
-              );
-              setSelectedYear(
-                parsedState.filters[selectedCurriculum][newValue].year,
-              );
-              setSelectedSeason(
-                parsedState.filters[selectedCurriculum][newValue].season,
-              );
+              setSelectedTopic(parsedState.filters[selectedCurriculum][newValue].topic);
+              setSelectedPaperType(parsedState.filters[selectedCurriculum][newValue].paperType);
+              setSelectedYear(parsedState.filters[selectedCurriculum][newValue].year);
+              setSelectedSeason(parsedState.filters[selectedCurriculum][newValue].season);
             } else {
               setSelectedTopic([]);
               setSelectedYear([]);
@@ -254,37 +229,25 @@ export function useFilterState({
     [selectedSubject, selectedCurriculum],
   );
 
-  const handleTopicChange = useCallback(
-    (values: string[] | ((prev: string[]) => string[])) => {
-      setSelectedTopic(values);
-      setInvalidInputs((prev) => ({ ...prev, topic: false }));
-    },
-    [],
-  );
+  const handleTopicChange = useCallback((values: string[] | ((prev: string[]) => string[])) => {
+    setSelectedTopic(values);
+    setInvalidInputs((prev) => ({ ...prev, topic: false }));
+  }, []);
 
-  const handleYearChange = useCallback(
-    (values: string[] | ((prev: string[]) => string[])) => {
-      setSelectedYear(values);
-      setInvalidInputs((prev) => ({ ...prev, year: false }));
-    },
-    [],
-  );
+  const handleYearChange = useCallback((values: string[] | ((prev: string[]) => string[])) => {
+    setSelectedYear(values);
+    setInvalidInputs((prev) => ({ ...prev, year: false }));
+  }, []);
 
-  const handlePaperTypeChange = useCallback(
-    (values: string[] | ((prev: string[]) => string[])) => {
-      setSelectedPaperType(values);
-      setInvalidInputs((prev) => ({ ...prev, paperType: false }));
-    },
-    [],
-  );
+  const handlePaperTypeChange = useCallback((values: string[] | ((prev: string[]) => string[])) => {
+    setSelectedPaperType(values);
+    setInvalidInputs((prev) => ({ ...prev, paperType: false }));
+  }, []);
 
-  const handleSeasonChange = useCallback(
-    (values: string[] | ((prev: string[]) => string[])) => {
-      setSelectedSeason(values);
-      setInvalidInputs((prev) => ({ ...prev, season: false }));
-    },
-    [],
-  );
+  const handleSeasonChange = useCallback((values: string[] | ((prev: string[]) => string[])) => {
+    setSelectedSeason(values);
+    setInvalidInputs((prev) => ({ ...prev, season: false }));
+  }, []);
 
   const revert = useCallback(() => {
     if (!currentQuery) {

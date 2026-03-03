@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { memo, useCallback, useRef, useState } from "react";
 
 import {
   Drawer,
@@ -10,25 +10,17 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import MultiSelectorContent from "./MultiSelectorContent";
+import MultiSelectorList from "./MultiSelectorList";
 import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
 } from "./MultiSelectUltilityButtons";
-import MultiSelectorList from "./MultiSelectorList";
-import {
-  MultiSelectorListRef,
-  MultiSelectorProps,
-  MultiSelectorSharedProps,
-} from "./selectors";
+import { MultiSelectorListRef, MultiSelectorProps, MultiSelectorSharedProps } from "./selectors";
 
 const MultiSelector = memo(
   ({
@@ -40,11 +32,7 @@ const MultiSelector = memo(
   }: MultiSelectorProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
-    if (
-      maxLength !== undefined &&
-      typeof maxLength == "number" &&
-      maxLength <= 0
-    ) {
+    if (maxLength !== undefined && typeof maxLength == "number" && maxLength <= 0) {
       throw new Error("maxLength must be greater than 0");
     }
 
@@ -89,14 +77,12 @@ MultiSelector.displayName = "MultiSelector";
 export default MultiSelector;
 
 // Shared error message component
-const MaxLengthErrorMessage = memo(
-  ({ maxLength, label }: { maxLength: number; label: string }) => (
-    <h3 className="w-max font-medium text-sm text-destructive mt-1">
-      You can only select up to {maxLength}{" "}
-      {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
-    </h3>
-  ),
-);
+const MaxLengthErrorMessage = memo(({ maxLength, label }: { maxLength: number; label: string }) => (
+  <h3 className="text-destructive mt-1 w-max text-sm font-medium">
+    You can only select up to {maxLength}{" "}
+    {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
+  </h3>
+));
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
 
@@ -112,12 +98,9 @@ const MobileMultiSelector = memo(
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
 
-    const handleSetInputValue = useCallback(
-      (val: string | ((prev: string) => string)) => {
-        multiSelectorListRef.current?.setInputValue(val);
-      },
-      [],
-    );
+    const handleSetInputValue = useCallback((val: string | ((prev: string) => string)) => {
+      multiSelectorListRef.current?.setInputValue(val);
+    }, []);
 
     return (
       <>
@@ -140,7 +123,7 @@ const MobileMultiSelector = memo(
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}
-            className="z-100011 h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="dark:bg-accent z-100011 h-[95vh] max-h-[95vh]"
           >
             <DrawerHeader className="sr-only">
               <DrawerTitle>Select</DrawerTitle>
@@ -151,10 +134,9 @@ const MobileMultiSelector = memo(
               <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
             </div>
             {maxLength && selectedValues.length > maxLength && (
-              <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
+              <h3 className="text-destructive mx-auto -mt-1 w-max text-sm font-medium">
                 You can only select up to {maxLength}{" "}
-                {label.toLowerCase() +
-                  (label.toLowerCase() === "topic" ? "s" : "")}
+                {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
@@ -207,12 +189,9 @@ const DesktopMultiSelector = memo(
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState<boolean>(false);
 
-    const handleSetInputValue = useCallback(
-      (val: string | ((prev: string) => string)) => {
-        multiSelectorListRef.current?.setInputValue(val);
-      },
-      [],
-    );
+    const handleSetInputValue = useCallback((val: string | ((prev: string) => string)) => {
+      multiSelectorListRef.current?.setInputValue(val);
+    }, []);
 
     return (
       <Popover modal={false} open={open}>
@@ -240,7 +219,7 @@ const DesktopMultiSelector = memo(
             e.preventDefault();
           }}
           autoFocus={false}
-          className="z-100007 m-0 border p-0 shadow-none dark:bg-accent"
+          className="dark:bg-accent z-100007 m-0 border p-0 shadow-none"
           side="right"
           onWheel={(e) => e.stopPropagation()}
           onInteractOutside={(e) => {
@@ -279,7 +258,7 @@ const DesktopMultiSelector = memo(
           />
           <div className="m-2">
             <Button
-              className="w-full cursor-pointer h-[30px]"
+              className="h-[30px] w-full cursor-pointer"
               onClick={() => {
                 setOpen(false);
               }}

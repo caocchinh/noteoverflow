@@ -1,12 +1,5 @@
+import { Children, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import {
-  ReactNode,
-  Children,
-  useMemo,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
 
 const COLUMN_WIDTH = 260;
 const COLUMN_GAP = 10;
@@ -35,17 +28,12 @@ interface MasonryProps {
  * Calculates actual column count based on container width.
  * Matches CSS columns behavior: fits as many columns as possible within the width.
  */
-function calculateActualColumnCount(
-  containerWidth: number,
-  maxColumns: number
-): number {
+function calculateActualColumnCount(containerWidth: number, maxColumns: number): number {
   if (containerWidth <= 0) return maxColumns;
 
   // CSS columns formula: how many columns of COLUMN_WIDTH + gaps fit?
   // Each column needs COLUMN_WIDTH, plus gap between columns
-  const possibleColumns = Math.floor(
-    (containerWidth + COLUMN_GAP) / (COLUMN_WIDTH + COLUMN_GAP)
-  );
+  const possibleColumns = Math.floor((containerWidth + COLUMN_GAP) / (COLUMN_WIDTH + COLUMN_GAP));
 
   return Math.max(1, Math.min(possibleColumns, maxColumns));
 }
@@ -55,10 +43,7 @@ function calculateActualColumnCount(
  * Places each item in the column with the smallest cumulative height.
  * Uses aspect ratio (height/width) for relative height since columns share the same width.
  */
-function distributeByShortestColumn(
-  items: MasonryItem[],
-  columnCount: number
-): ReactNode[] {
+function distributeByShortestColumn(items: MasonryItem[], columnCount: number): ReactNode[] {
   if (columnCount <= 1 || items.length === 0) {
     return items.map((item) => item.element);
   }
@@ -84,8 +69,7 @@ function distributeByShortestColumn(
 
     // Update column height using aspect ratio (height/width gives relative height)
     // Default to 1:1 ratio if dimensions not provided
-    const relativeHeight =
-      item.width && item.height ? item.height / item.width : 1;
+    const relativeHeight = item.width && item.height ? item.height / item.width : 1;
     columnHeights[shortestColumn] += relativeHeight;
   });
 
@@ -97,10 +81,7 @@ function distributeByShortestColumn(
  * Reorders children using round-robin for horizontal-first display in CSS columns.
  * Used as fallback when no item dimensions are provided.
  */
-function reorderForHorizontalFlow(
-  items: ReactNode[],
-  columnCount: number
-): ReactNode[] {
+function reorderForHorizontalFlow(items: ReactNode[], columnCount: number): ReactNode[] {
   if (columnCount <= 1 || items.length === 0) return items;
 
   const totalItems = items.length;

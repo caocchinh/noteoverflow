@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 
-import {Mail} from "lucide-react";
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {toast} from "sonner";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { Mail } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import styles from "./profile.module.css";
 
 interface ProfileCardProps {
@@ -41,8 +41,13 @@ const clamp = (value: number, min = 0, max = 100): number => Math.min(Math.max(v
 
 const round = (value: number, precision = 3): number => Number.parseFloat(value.toFixed(precision));
 
-const adjust = (value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number =>
-  round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
+const adjust = (
+  value: number,
+  fromMin: number,
+  fromMax: number,
+  toMin: number,
+  toMax: number,
+): number => round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
 
 const easeInOutCubic = (x: number): number => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
 
@@ -72,7 +77,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
     let rafId: number | null = null;
 
-    const updateCardTransform = (offsetX: number, offsetY: number, card: HTMLElement, wrap: HTMLElement) => {
+    const updateCardTransform = (
+      offsetX: number,
+      offsetY: number,
+      card: HTMLElement,
+      wrap: HTMLElement,
+    ) => {
       const width = card.clientWidth;
       const height = card.clientHeight;
 
@@ -99,7 +109,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       }
     };
 
-    const createSmoothAnimation = (duration: number, startX: number, startY: number, card: HTMLElement, wrap: HTMLElement) => {
+    const createSmoothAnimation = (
+      duration: number,
+      startX: number,
+      startY: number,
+      card: HTMLElement,
+      wrap: HTMLElement,
+    ) => {
       const startTime = performance.now();
       const targetX = wrap.clientWidth / 2;
       const targetY = wrap.clientHeight / 2;
@@ -144,9 +160,14 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       }
 
       const rect = card.getBoundingClientRect();
-      animationHandlers.updateCardTransform(event.clientX - rect.left, event.clientY - rect.top, card, wrap);
+      animationHandlers.updateCardTransform(
+        event.clientX - rect.left,
+        event.clientY - rect.top,
+        card,
+        wrap,
+      );
     },
-    [animationHandlers]
+    [animationHandlers],
   );
 
   const handlePointerEnter = useCallback(() => {
@@ -171,11 +192,17 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         return;
       }
 
-      animationHandlers.createSmoothAnimation(ANIMATION_CONFIG.SMOOTH_DURATION, event.offsetX, event.offsetY, card, wrap);
+      animationHandlers.createSmoothAnimation(
+        ANIMATION_CONFIG.SMOOTH_DURATION,
+        event.offsetX,
+        event.offsetY,
+        card,
+        wrap,
+      );
       wrap.classList.remove("active");
       card.classList.remove("active");
     },
-    [animationHandlers]
+    [animationHandlers],
   );
 
   useEffect(() => {
@@ -202,7 +229,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
 
     animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
-    animationHandlers.createSmoothAnimation(ANIMATION_CONFIG.INITIAL_DURATION, initialX, initialY, card, wrap);
+    animationHandlers.createSmoothAnimation(
+      ANIMATION_CONFIG.INITIAL_DURATION,
+      initialX,
+      initialY,
+      card,
+      wrap,
+    );
 
     return () => {
       card.removeEventListener("pointerenter", pointerEnterHandler);
@@ -217,10 +250,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       ({
         "--icon": iconUrl ? `url(${iconUrl})` : "none",
         "--grain": grainUrl ? `url(${grainUrl})` : "none",
-        "--behind-gradient": showBehindGradient ? behindGradient ?? DEFAULT_BEHIND_GRADIENT : "none",
+        "--behind-gradient": showBehindGradient
+          ? (behindGradient ?? DEFAULT_BEHIND_GRADIENT)
+          : "none",
         "--inner-gradient": innerGradient ?? DEFAULT_INNER_GRADIENT,
       }) as React.CSSProperties,
-    [iconUrl, grainUrl, showBehindGradient, behindGradient, innerGradient]
+    [iconUrl, grainUrl, showBehindGradient, behindGradient, innerGradient],
   );
 
   const handleContactClick = useCallback(() => {
@@ -243,10 +278,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       ref={wrapRef}
       style={cardStyle}
     >
-      <section
-        className={styles.pcCard}
-        ref={cardRef}
-      >
+      <section className={styles.pcCard} ref={cardRef}>
         <div className={styles.pcInside}>
           <div className={styles.pcShine} />
           <div className={styles.pcGlare} />
@@ -268,7 +300,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   aria-label={`Copy email ${name || "user"}`}
                   className={styles.pcContactBtn}
                   onClick={handleContactClick}
-                  style={{pointerEvents: "auto"}}
+                  style={{ pointerEvents: "auto" }}
                   type="button"
                 >
                   {buttonText}

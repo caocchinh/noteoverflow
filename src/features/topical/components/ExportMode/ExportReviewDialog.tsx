@@ -7,41 +7,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { memo, useCallback, useMemo, useRef, useState, useEffect } from "react";
-import {
-  Download,
-  CheckCircle2,
-  XCircle,
-  Search,
-  X,
-  Loader2,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CheckCircle2, Download, Loader2, Search, X, XCircle } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { generateMultipleQuestionsDocxBlob } from "../../lib/generateDocxBlob";
+import { generateMultipleQuestionsPdfBlob, PdfContentType } from "../../lib/generatePdfBlob";
 import {
   extractPaperCode,
   extractQuestionNumber,
   fuzzySearch,
   handleDownloadPdf,
 } from "../../lib/utils";
-import {
-  generateMultipleQuestionsPdfBlob,
-  PdfContentType,
-} from "../../lib/generatePdfBlob";
-import SelectList from "./SelectList";
-import SortUtil from "./SortUtil";
-import Preview from "./Preview";
-import { createPortal } from "react-dom";
-import { Input } from "@/components/ui/input";
-import ExportProgressDialog, {
-  ExportProgressDialogHandle,
-} from "./ExportProgressDialog";
-import { generateMultipleQuestionsDocxBlob } from "../../lib/generateDocxBlob";
-import ExportFormatSelector, {
-  ExportFormatSelectorHandle,
-} from "./ExportFormatSelector";
 import { ExportReviewDialogProps } from "../../types/components";
 import { SelectedQuestion } from "../../types/models";
+import ExportFormatSelector, { ExportFormatSelectorHandle } from "./ExportFormatSelector";
+import ExportProgressDialog, { ExportProgressDialogHandle } from "./ExportProgressDialog";
+import Preview from "./Preview";
+import SelectList from "./SelectList";
+import SortUtil from "./SortUtil";
 
 interface SearchInputProps {
   value: string;
@@ -54,19 +40,19 @@ const SearchInput = memo(({ value, onChange }: SearchInputProps) => {
   }, [onChange]);
 
   return (
-    <div className="relative flex-1 min-w-[200px]">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="relative min-w-[200px] flex-1">
+      <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
       <Input
         type="text"
         placeholder="Search by topic, year, or ID..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-9 pl-10 pr-10 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+        className="bg-background focus:ring-primary/50 h-9 w-full rounded-md border pr-10 pl-10 text-sm transition-all focus:ring-2 focus:outline-none"
       />
       {value && (
         <div
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 cursor-pointer transition-colors"
           aria-label="Clear search"
         >
           <X className="h-4 w-4" />
@@ -88,38 +74,27 @@ const ExportReviewDialog = memo(
     setQuestionsForExportArray,
     allQuestions,
   }: ExportReviewDialogProps) => {
-    const [currentlyPreviewQuestion, setCurrentlyPreviewQuestion] = useState<
-      string | null
-    >(null);
+    const [currentlyPreviewQuestion, setCurrentlyPreviewQuestion] = useState<string | null>(null);
     const previewQuestionData = useMemo(() => {
       return currentlyPreviewQuestion
         ? allQuestions.find((q) => q.id === currentlyPreviewQuestion)
         : undefined;
     }, [allQuestions, currentlyPreviewQuestion]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [filterMode, setFilterMode] = useState<"selected" | "not selected">(
-      "selected",
-    );
+    const [filterMode, setFilterMode] = useState<"selected" | "not selected">("selected");
     const filteredQuestions = useMemo(() => {
       let baseQuestions = allQuestions;
       if (filterMode === "not selected") {
-        baseQuestions = allQuestions.filter(
-          (q) => !questionsForExport.has(q.id),
-        );
+        baseQuestions = allQuestions.filter((q) => !questionsForExport.has(q.id));
       } else {
-        baseQuestions = allQuestions.filter((q) =>
-          questionsForExport.has(q.id),
-        );
+        baseQuestions = allQuestions.filter((q) => questionsForExport.has(q.id));
       }
 
       if (searchQuery.trim()) {
         const query = searchQuery.trim();
         return baseQuestions.filter(
           (q) =>
-            fuzzySearch(
-              query,
-              extractPaperCode({ questionId: q.id }) + extractQuestionNumber,
-            ) ||
+            fuzzySearch(query, extractPaperCode({ questionId: q.id }) + extractQuestionNumber) ||
             q.topics?.some((t) => fuzzySearch(query, t)) ||
             fuzzySearch(query, q.year.toString()) ||
             fuzzySearch(query, q.season),
@@ -177,11 +152,7 @@ const ExportReviewDialog = memo(
           }
         });
       },
-      [
-        currentlyPreviewQuestion,
-        setQuestionsForExport,
-        setQuestionsForExportArray,
-      ],
+      [currentlyPreviewQuestion, setQuestionsForExport, setQuestionsForExportArray],
     );
 
     const selectAll = useCallback(() => {
@@ -198,9 +169,7 @@ const ExportReviewDialog = memo(
     const sortByYear = useCallback(
       (order: "ascending" | "descending") => {
         // Create a map for quick lookup of question years
-        const questionYearMap = new Map(
-          allQuestions.map((q) => [q.id, q.year]),
-        );
+        const questionYearMap = new Map(allQuestions.map((q) => [q.id, q.year]));
 
         setQuestionsForExportArray((prev) => {
           const sorted = [...prev].sort((a, b) => {
@@ -222,10 +191,7 @@ const ExportReviewDialog = memo(
         setIsExporting(true);
         abortControllerRef.current = new AbortController();
 
-        exportProgressDialogRef.current?.start(
-          questionsForExportArray.length,
-          mode,
-        );
+        exportProgressDialogRef.current?.start(questionsForExportArray.length, mode);
 
         try {
           const questionMap = new Map(allQuestions.map((q) => [q.id, q]));
@@ -240,8 +206,7 @@ const ExportReviewDialog = memo(
           let blob: Blob | null = null;
           let fileName = "";
 
-          const currentFormat =
-            exportFormatSelectorRef.current?.getFormat() || "pdf";
+          const currentFormat = exportFormatSelectorRef.current?.getFormat() || "pdf";
 
           if (currentFormat === "pdf") {
             blob = await generateMultipleQuestionsPdfBlob({
@@ -311,41 +276,34 @@ const ExportReviewDialog = memo(
     return (
       <>
         {isOpen && (
-          <>
-            {createPortal(
-              <div className="fixed inset-0 z-100009 bg-black/50" />,
-              document.body,
-            )}
-          </>
+          <>{createPortal(<div className="fixed inset-0 z-100009 bg-black/50" />, document.body)}</>
         )}
         <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
           <DialogContent
-            className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2"
+            className="dark:bg-accent z-100010 h-[94dvh] w-[95vw] max-w-screen! gap-2"
             showCloseButton={false}
             onInteractOutside={handleInteractOutside}
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
-              <div className="flex flex-col items-start justify-start flex-wrap gap-0">
-                <DialogTitle>
-                  {questionsForExport.size} questions selected for export
-                </DialogTitle>
+            <DialogHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
+              <div className="flex flex-col flex-wrap items-start justify-start gap-0">
+                <DialogTitle>{questionsForExport.size} questions selected for export</DialogTitle>
                 <DialogDescription className="text-md sr-only">
                   Review and customize your selection before exporting
                 </DialogDescription>
               </div>
             </DialogHeader>
 
-            <div className="flex items-center gap-3 p-2 bg-logo-main rounded-md">
+            <div className="bg-logo-main flex items-center gap-3 rounded-md p-2">
               <div className="flex-1">
                 <Progress
                   value={progressPercentage}
                   className="h-3 bg-gray-200 [&>div]:bg-[#0084ff] [&>div]:bg-[repeating-linear-gradient(45deg,#0084ff,#0084ff_4px,#0066cc_4px,#0066cc_8px)]"
                 />
               </div>
-              <span className="text-sm font-medium text-white whitespace-nowrap">
+              <span className="text-sm font-medium whitespace-nowrap text-white">
                 {questionsForExport.size} / {allQuestions.length} selected
-                <span className="text-xs text-white/80 ml-1">
+                <span className="ml-1 text-xs text-white/80">
                   ({Math.round(progressPercentage)}%)
                 </span>
               </span>
@@ -354,15 +312,15 @@ const ExportReviewDialog = memo(
             <div className="flex flex-wrap items-center gap-3">
               <SearchInput value={searchQuery} onChange={setSearchQuery} />
 
-              <div className="flex items-center gap-0 p-[3px] bg-input/80 rounded-md">
+              <div className="bg-input/80 flex items-center gap-0 rounded-md p-[3px]">
                 {(["selected", "not selected"] as const).map((mode) => (
                   <Button
                     key={mode}
                     onClick={() => setFilterMode(mode)}
                     className={cn(
-                      "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-3 bg-input text-black hover:bg-input dark:bg-transparent capitalize",
+                      "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-3 py-1 text-black capitalize dark:bg-transparent",
                       filterMode === mode &&
-                        "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30",
+                        "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
                     )}
                   >
                     {mode}
@@ -370,27 +328,17 @@ const ExportReviewDialog = memo(
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={selectAll}
-                className="cursor-pointer"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+              <Button variant="outline" size="sm" onClick={selectAll} className="cursor-pointer">
+                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
                 Select all
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={deselectAll}
-                className="cursor-pointer"
-              >
-                <XCircle className="h-3.5 w-3.5 mr-1.5" />
+              <Button variant="outline" size="sm" onClick={deselectAll} className="cursor-pointer">
+                <XCircle className="mr-1.5 h-3.5 w-3.5" />
                 Clear selection
               </Button>
               <SortUtil sortByYear={sortByYear} />
             </div>
-            <div className="flex flex-row gap-2 w-full">
+            <div className="flex w-full flex-row gap-2">
               <SelectList
                 isOpen={isOpen}
                 currentlyPreviewQuestion={currentlyPreviewQuestion}
@@ -404,13 +352,13 @@ const ExportReviewDialog = memo(
                 questionsForExport={questionsForExport}
                 setIsMobilePreviewOpen={setIsMobilePreviewOpen}
               />
-              <div className="hidden lg:block w-[60%]">
+              <div className="hidden w-[60%] lg:block">
                 <Preview previewQuestionData={previewQuestionData} />
               </div>
             </div>
-            <DialogFooter className="w-full flex-row! gap-2 flex-wrap">
+            <DialogFooter className="w-full flex-row! flex-wrap gap-2">
               <Button
-                className="cursor-pointer flex-1"
+                className="flex-1 cursor-pointer"
                 variant="outline"
                 onClick={() => setIsOpen(false)}
                 disabled={isExporting}
@@ -420,7 +368,7 @@ const ExportReviewDialog = memo(
               <Button
                 onClick={() => setIsExportModeOpen(true)}
                 disabled={questionsForExport.size === 0 || isExporting}
-                className="cursor-pointer flex-1 bg-logo-main hover:bg-logo-main/90 text-white gap-2"
+                className="bg-logo-main hover:bg-logo-main/90 flex-1 cursor-pointer gap-2 text-white"
               >
                 {isExporting ? (
                   <>
@@ -439,20 +387,13 @@ const ExportReviewDialog = memo(
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={isExportModeOpen}
-          onOpenChange={setIsExportModeOpen}
-          modal={false}
-        >
+        <Dialog open={isExportModeOpen} onOpenChange={setIsExportModeOpen} modal={false}>
           {isExportModeOpen && (
             <>
-              {createPortal(
-                <div className="fixed inset-0 z-1000014 bg-black/50" />,
-                document.body,
-              )}
+              {createPortal(<div className="fixed inset-0 z-1000014 bg-black/50" />, document.body)}
             </>
           )}
-          <DialogContent className="max-w-[430px]! z-1000015 gap-4 export-mode-content">
+          <DialogContent className="export-mode-content z-1000015 max-w-[430px]! gap-4">
             <DialogHeader>
               <DialogTitle>Select Export Mode</DialogTitle>
               <DialogDescription>
@@ -476,7 +417,7 @@ const ExportReviewDialog = memo(
                 <Button
                   key={mode.value}
                   variant="outline"
-                  className="justify-start w-full cursor-pointer hover:bg-accent"
+                  className="hover:bg-accent w-full cursor-pointer justify-start"
                   onClick={() => handleExport(mode.value)}
                   disabled={isExporting}
                 >
@@ -499,19 +440,15 @@ const ExportReviewDialog = memo(
           ref={exportProgressDialogRef}
           onCancel={() => abortControllerRef.current?.abort()}
         />
-        <Dialog
-          open={isMobilePreviewOpen}
-          onOpenChange={setIsMobilePreviewOpen}
-          modal={false}
-        >
-          <DialogContent className="w-[95vw] h-[94dvh] max-w-screen! z-100010 dark:bg-accent gap-2 mobile-preview-content">
-            <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
+        <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen} modal={false}>
+          <DialogContent className="dark:bg-accent mobile-preview-content z-100010 h-[94dvh] w-[95vw] max-w-screen! gap-2">
+            <DialogHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
               <DialogTitle>Preview</DialogTitle>
             </DialogHeader>
             <Preview previewQuestionData={previewQuestionData} />
             <DialogFooter className="w-full flex-row! gap-2">
               <Button
-                className="cursor-pointer flex-1"
+                className="flex-1 cursor-pointer"
                 variant="outline"
                 onClick={() => setIsMobilePreviewOpen(false)}
               >

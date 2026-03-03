@@ -16,18 +16,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Dispatch, memo, SetStateAction, useCallback, useState } from "react";
-import {
-  ArrowRightFromLine,
-  Eraser,
-  Menu,
-  WandSparkles,
-  X,
-} from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ExportReviewDialog from "./ExportReviewDialog";
+import { ArrowRightFromLine, Eraser, Menu, WandSparkles, X } from "lucide-react";
+import { Dispatch, memo, SetStateAction, useCallback, useState } from "react";
 import { createPortal } from "react-dom";
 import { SelectedQuestion } from "../../types/models";
+import ExportReviewDialog from "./ExportReviewDialog";
 
 interface ExportBarButtonsProps {
   setIsExportModeEnabled: Dispatch<SetStateAction<boolean>>;
@@ -62,16 +56,11 @@ const ExportBarButtons = memo(
       <>
         <Dialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
           <ExitButton />
-          <DialogContent
-            showCloseButton={false}
-            className="z-100009"
-            overlayClassName="z-100008"
-          >
+          <DialogContent showCloseButton={false} className="z-100009" overlayClassName="z-100008">
             <DialogHeader>
               <DialogTitle>Leave export mode?</DialogTitle>
               <DialogDescription>
-                You&apos;ll lose your current export selection. Are you sure you
-                want to exit?
+                You&apos;ll lose your current export selection. Are you sure you want to exit?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -117,37 +106,25 @@ const ExportBarButtons = memo(
 
 ExportBarButtons.displayName = "ExportBarButtons";
 
-const SelectAllButton = memo(
-  ({ useAllQuestions }: { useAllQuestions: () => void }) => (
-    <Button
-      className="cursor-pointer flex-1"
-      variant="outline"
-      onClick={useAllQuestions}
-    >
-      Select all
-      <WandSparkles />
-    </Button>
-  ),
-);
+const SelectAllButton = memo(({ useAllQuestions }: { useAllQuestions: () => void }) => (
+  <Button className="flex-1 cursor-pointer" variant="outline" onClick={useAllQuestions}>
+    Select all
+    <WandSparkles />
+  </Button>
+));
 SelectAllButton.displayName = "SelectAllButton";
 
-const DeselectAllButton = memo(
-  ({ useNoQuestions }: { useNoQuestions: () => void }) => (
-    <Button
-      className="cursor-pointer flex-1"
-      variant="outline"
-      onClick={useNoQuestions}
-    >
-      Deselect all
-      <Eraser />
-    </Button>
-  ),
-);
+const DeselectAllButton = memo(({ useNoQuestions }: { useNoQuestions: () => void }) => (
+  <Button className="flex-1 cursor-pointer" variant="outline" onClick={useNoQuestions}>
+    Deselect all
+    <Eraser />
+  </Button>
+));
 DeselectAllButton.displayName = "DeselectAllButton";
 
 const PreviewExportButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
-    className="cursor-pointer bg-logo-main! text-white! flex-1"
+    className="bg-logo-main! flex-1 cursor-pointer text-white!"
     variant="outline"
     onClick={onClick}
   >
@@ -160,7 +137,7 @@ PreviewExportButton.displayName = "PreviewExportButton";
 const ExitButton = memo(() => {
   return (
     <DialogTrigger asChild>
-      <Button variant="destructive" className="cursor-pointer flex-1">
+      <Button variant="destructive" className="flex-1 cursor-pointer">
         Exit
       </Button>
     </DialogTrigger>
@@ -193,49 +170,36 @@ const ExportBar = ({
 
   if (isMobile) {
     return (
-      <div className="fixed w-max z-1000 h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2">
+      <div className="dark:bg-accent fixed bottom-[12px] left-1/2 z-1000 h-[50px] w-max -translate-x-1/2 rounded-md border border-black bg-white p-2 dark:border-white">
         <>
           {isDrawerOpen && (
             <>
               {" "}
-              {createPortal(
-                <div className="fixed inset-0 z-100007 bg-black/50" />,
-                document.body,
-              )}
+              {createPortal(<div className="fixed inset-0 z-100007 bg-black/50" />, document.body)}
             </>
           )}
         </>
-        <Drawer
-          modal={false}
-          open={isDrawerOpen}
-          onOpenChange={setIsDrawerOpen}
-        >
+        <Drawer modal={false} open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              className="cursor-pointer w-[80vw] h-full"
-            >
+            <Button variant="outline" className="h-full w-[80vw] cursor-pointer">
               <Menu />
               Export tool bar
             </Button>
           </DrawerTrigger>
-          <DrawerContent
-            className="z-100008"
-            onInteractOutside={() => setIsDrawerOpen(false)}
-          >
+          <DrawerContent className="z-100008" onInteractOutside={() => setIsDrawerOpen(false)}>
             <DrawerHeader className="relative">
               <DrawerTitle>Tool bar</DrawerTitle>
               <DrawerClose asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-4 top-4 cursor-pointer"
+                  className="absolute top-4 right-4 cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <div className="flex flex-col gap-3 mt-4 px-4 pb-4">
+            <div className="mt-4 flex flex-col gap-3 px-4 pb-4">
               <ExportBarButtons
                 setIsExportModeEnabled={setIsExportModeEnabled}
                 setQuestionsForExport={setQuestionsForExport}
@@ -254,7 +218,7 @@ const ExportBar = ({
   }
 
   return (
-    <div className="fixed w-max z-1000 h-[50px] left-1/2 -translate-x-1/2 bottom-[12px] rounded-md bg-white dark:bg-accent border-black dark:border-white border p-2 flex flex-row gap-2">
+    <div className="dark:bg-accent fixed bottom-[12px] left-1/2 z-1000 flex h-[50px] w-max -translate-x-1/2 flex-row gap-2 rounded-md border border-black bg-white p-2 dark:border-white">
       <ExportBarButtons
         setIsExportModeEnabled={setIsExportModeEnabled}
         setQuestionsForExport={setQuestionsForExport}

@@ -1,18 +1,4 @@
 "use client";
-import { ChevronsUpDown, XIcon } from "lucide-react";
-import Image from "next/image";
-import {
-  SetStateAction,
-  Dispatch,
-  useRef,
-  useState,
-  useCallback,
-  KeyboardEvent,
-  memo,
-  forwardRef,
-  useImperativeHandle,
-  useId,
-} from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -23,19 +9,25 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { ChevronsUpDown, XIcon } from "lucide-react";
+import Image from "next/image";
+import {
+  Dispatch,
+  forwardRef,
+  KeyboardEvent,
+  memo,
+  SetStateAction,
+  useCallback,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { fuzzySearch } from "../lib/utils";
 import { EnhancedSelectContentRef } from "./MultiSelector/selectors";
 
@@ -64,9 +56,7 @@ const EnhancedSelect = memo(
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const isMobileDevice = useIsMobile();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
-    const enhancedSelectContentRef = useRef<EnhancedSelectContentRef | null>(
-      null,
-    );
+    const enhancedSelectContentRef = useRef<EnhancedSelectContentRef | null>(null);
     const id = useId();
 
     return (
@@ -89,8 +79,7 @@ const EnhancedSelect = memo(
             >
               {(() => {
                 if (selectedValue) {
-                  return data?.find((item) => item.code === selectedValue)
-                    ?.code;
+                  return data?.find((item) => item.code === selectedValue)?.code;
                 }
                 if (prerequisite) {
                   return `Select ${prerequisite.toLowerCase()} first`;
@@ -114,10 +103,7 @@ const EnhancedSelect = memo(
               enhancedSelectContentRef.current?.setInputValue("");
             }}
             align="center"
-            className={cn(
-              "z-1000000000000000 w-[300px] p-0 sm:w-max",
-              popoverContentClassName,
-            )}
+            className={cn("z-1000000000000000 w-[300px] p-0 sm:w-max", popoverContentClassName)}
             side={side || (isMobileDevice ? "bottom" : "right")}
             avoidCollisions={isMobileDevice ? false : true}
           >
@@ -170,7 +156,7 @@ const EnhancedSelectItem = ({
         >
           <Checkbox
             checked={selectedValue === item.code}
-            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main rounded-full"
+            className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main rounded-full data-[state=checked]:text-white"
           />
           {item.code}
         </CommandItem>
@@ -189,7 +175,7 @@ const EnhancedSelectItem = ({
         side="right"
         sideOffset={-10}
       >
-        <div className="absolute top-0 left-10 rounded-md border  dark:bg-accent bg-card p-2">
+        <div className="dark:bg-accent bg-card absolute top-0 left-10 rounded-md border p-2">
           <Image
             alt={item.code}
             className="rounded-[2px]"
@@ -255,7 +241,7 @@ const EnhancedSelectContent = forwardRef(
 
     return (
       <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-        <div className="flex items-center gap-1 dark:bg-accent">
+        <div className="dark:bg-accent flex items-center gap-1">
           <CommandInput
             className="h-9 border-none"
             placeholder={`Search ${label.toLowerCase()}`}
@@ -270,7 +256,7 @@ const EnhancedSelectContent = forwardRef(
             }}
           />
           <XIcon
-            className="bg-transparent! cursor-pointer mr-2 text-destructive"
+            className="text-destructive mr-2 cursor-pointer bg-transparent!"
             size={20}
             onClick={() => {
               if (inputValue) {

@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
 import type { CIE_A_LEVEL_SUBDIVISION, OUTDATED } from "@/constants/types";
+import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 
 export interface EnhancedSelectAvailableOptions {
   value: string;
@@ -7,13 +7,7 @@ export interface EnhancedSelectAvailableOptions {
   isUpToDate: boolean;
 }
 
-export type VALID_LABEL =
-  | "Curriculum"
-  | "Subject"
-  | "Topic"
-  | "Year"
-  | "Paper"
-  | "Season";
+export type VALID_LABEL = "Curriculum" | "Subject" | "Topic" | "Year" | "Paper" | "Season";
 
 export interface EnhancedSelectContentRef {
   setInputValue: Dispatch<SetStateAction<string>>;
@@ -29,9 +23,7 @@ export interface MultiSelectorProps {
 
 export interface EnhancedMultiSelectorProps {
   currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
+  setCurrentFilter: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>>;
   isMounted: boolean;
   selectedValues: string[];
   onValuesChange: (value: string[]) => void;
@@ -54,9 +46,7 @@ export interface EnhancedMultiSelectorSharedProps {
   onValueChange: (val: string | string[]) => void;
   allAvailableOptions: EnhancedSelectAvailableOptions[];
   currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
+  setCurrentFilter: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>>;
   allValue: string[];
   label: string;
   maxLength: number | undefined;
@@ -95,9 +85,7 @@ export interface EnhancedMultiSelectorListProps {
   inputRef: RefObject<HTMLInputElement | null>;
   label: string;
   currentFilter: CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined;
-  setCurrentFilter: Dispatch<
-    SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-  >;
+  setCurrentFilter: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>>;
   allFilterOptions: string[];
   allAvailableOptions: EnhancedSelectAvailableOptions[];
   setOpen: (open: boolean) => void;

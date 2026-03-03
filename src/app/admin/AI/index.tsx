@@ -2,13 +2,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/eden";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -17,16 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  SelectedQuestion,
-  VectorizeSelectedQuestion,
-} from "@/features/topical/types/models";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SelectedQuestion, VectorizeSelectedQuestion } from "@/features/topical/types/models";
+import { api } from "@/lib/eden";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 
 export default function VisualSearchIndexClient() {
-  const [activeTab, setActiveTab] = useState<"image" | "text" | "index">(
-    "image",
-  );
+  const [activeTab, setActiveTab] = useState<"image" | "text" | "index">("image");
   const [results, setResults] = useState<SelectedQuestion[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,23 +96,20 @@ export default function VisualSearchIndexClient() {
     return data;
   };
 
-  const handleImageSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          // Remove data URL prefix for API
-          const base64Content = base64String.split(",")[1];
-          setSelectedImage(base64Content);
-          setPreviewUrl(base64String);
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    [],
-  );
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // Remove data URL prefix for API
+        const base64Content = base64String.split(",")[1];
+        setSelectedImage(base64Content);
+        setPreviewUrl(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
 
   const getFilters = useCallback(() => {
     const filters: {
@@ -153,13 +145,7 @@ export default function VisualSearchIndexClient() {
     }
 
     return Object.keys(filters).length > 0 ? filters : undefined;
-  }, [
-    filterSubject,
-    filterCurriculum,
-    filterYear,
-    filterSeason,
-    filterPaperType,
-  ]);
+  }, [filterSubject, filterCurriculum, filterYear, filterSeason, filterPaperType]);
 
   const handleImageSearch = useCallback(async () => {
     if (!selectedImage) return;
@@ -303,10 +289,7 @@ export default function VisualSearchIndexClient() {
         return {
           ...oldStats,
           indexed: oldStats.indexed + questions.length - totalFailed,
-          notIndexed: Math.max(
-            0,
-            oldStats.notIndexed - (questions.length - totalFailed),
-          ),
+          notIndexed: Math.max(0, oldStats.notIndexed - (questions.length - totalFailed)),
           total: oldStats.total,
         };
       });
@@ -378,8 +361,8 @@ export default function VisualSearchIndexClient() {
   );
 
   return (
-    <div className="container mx-auto py-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="container mx-auto max-w-5xl py-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Visual Search Admin</h1>
       </div>
 
@@ -408,9 +391,7 @@ export default function VisualSearchIndexClient() {
           <Card>
             <CardHeader>
               <CardTitle>Search by Image</CardTitle>
-              <CardDescription>
-                Upload an image to search for similar questions.
-              </CardDescription>
+              <CardDescription>Upload an image to search for similar questions.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -425,12 +406,8 @@ export default function VisualSearchIndexClient() {
               </div>
 
               {previewUrl && (
-                <div className="mt-4 border rounded-lg overflow-hidden w-fit bg-slate-50">
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="max-h-64 object-contain"
-                  />
+                <div className="mt-4 w-fit overflow-hidden rounded-lg border bg-slate-50">
+                  <img src={previewUrl} alt="Preview" className="max-h-64 object-contain" />
                 </div>
               )}
             </CardContent>
@@ -450,9 +427,7 @@ export default function VisualSearchIndexClient() {
           <Card>
             <CardHeader>
               <CardTitle>Search by Text</CardTitle>
-              <CardDescription>
-                Enter a text query to search for questions.
-              </CardDescription>
+              <CardDescription>Enter a text query to search for questions.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -482,32 +457,26 @@ export default function VisualSearchIndexClient() {
             <div className="grid grid-cols-3 gap-4">
               <Card>
                 <CardHeader className="py-4">
-                  <CardTitle className="text-2xl text-blue-600 text-center">
+                  <CardTitle className="text-center text-2xl text-blue-600">
                     {stats.indexed}
                   </CardTitle>
-                  <CardDescription className="text-center">
-                    Indexed
-                  </CardDescription>
+                  <CardDescription className="text-center">Indexed</CardDescription>
                 </CardHeader>
               </Card>
               <Card>
                 <CardHeader className="py-4">
-                  <CardTitle className="text-2xl text-gray-600 text-center">
+                  <CardTitle className="text-center text-2xl text-gray-600">
                     {stats.notIndexed}
                   </CardTitle>
-                  <CardDescription className="text-center">
-                    Not Indexed
-                  </CardDescription>
+                  <CardDescription className="text-center">Not Indexed</CardDescription>
                 </CardHeader>
               </Card>
               <Card>
                 <CardHeader className="py-4">
-                  <CardTitle className="text-2xl text-purple-600 text-center">
+                  <CardTitle className="text-center text-2xl text-purple-600">
                     {stats.total}
                   </CardTitle>
-                  <CardDescription className="text-center">
-                    Total
-                  </CardDescription>
+                  <CardDescription className="text-center">Total</CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -516,9 +485,7 @@ export default function VisualSearchIndexClient() {
           <Card>
             <CardHeader>
               <CardTitle>Bulk Indexing</CardTitle>
-              <CardDescription>
-                Index questions into the vector database.
-              </CardDescription>
+              <CardDescription>Index questions into the vector database.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -556,7 +523,7 @@ export default function VisualSearchIndexClient() {
               <Button
                 onClick={handleIndexQuestions}
                 disabled={isIndexing}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+                className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700"
               >
                 {isIndexing
                   ? `Indexing ${currentProgress.current}/${currentProgress.total}...`
@@ -565,68 +532,55 @@ export default function VisualSearchIndexClient() {
 
               {/* Current Progress Indicator */}
               {isIndexing && currentProgress.total > 0 && (
-                <div className="p-4 bg-blue-50 rounded-md text-sm border border-blue-200 dark:bg-blue-900/30">
-                  <p className="font-semibold mb-2">
-                    Indexing question {currentProgress.current} of{" "}
-                    {currentProgress.total}
+                <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm dark:bg-blue-900/30">
+                  <p className="mb-2 font-semibold">
+                    Indexing question {currentProgress.current} of {currentProgress.total}
                   </p>
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                    <div className="rounded bg-green-100 p-2 dark:bg-green-900/30">
                       <div className="text-xl font-bold text-green-700 dark:text-green-400">
                         {currentProgress.indexed}
                       </div>
-                      <div className="text-xs text-green-800 dark:text-green-500">
-                        Indexed
-                      </div>
+                      <div className="text-xs text-green-800 dark:text-green-500">Indexed</div>
                     </div>
-                    <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                    <div className="rounded bg-yellow-100 p-2 dark:bg-yellow-900/30">
                       <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                         {currentProgress.skipped}
                       </div>
-                      <div className="text-xs text-yellow-800 dark:text-yellow-500">
-                        Skipped
-                      </div>
+                      <div className="text-xs text-yellow-800 dark:text-yellow-500">Skipped</div>
                     </div>
-                    <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                    <div className="rounded bg-red-100 p-2 dark:bg-red-900/30">
                       <div className="text-xl font-bold text-red-700 dark:text-red-400">
                         {currentProgress.failed}
                       </div>
-                      <div className="text-xs text-red-800 dark:text-red-500">
-                        Failed
-                      </div>
+                      <div className="text-xs text-red-800 dark:text-red-500">Failed</div>
                     </div>
                   </div>
                 </div>
               )}
 
               {indexResult && (
-                <div className="p-4 bg-muted rounded-md text-sm border">
-                  <p className="font-semibold mb-2">{indexResult.message}</p>
+                <div className="bg-muted rounded-md border p-4 text-sm">
+                  <p className="mb-2 font-semibold">{indexResult.message}</p>
                   {indexResult.progress && (
                     <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                      <div className="rounded bg-green-100 p-2 dark:bg-green-900/30">
                         <div className="text-xl font-bold text-green-700 dark:text-green-400">
                           {indexResult.progress.indexed}
                         </div>
-                        <div className="text-xs text-green-800 dark:text-green-500">
-                          Indexed
-                        </div>
+                        <div className="text-xs text-green-800 dark:text-green-500">Indexed</div>
                       </div>
-                      <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                      <div className="rounded bg-yellow-100 p-2 dark:bg-yellow-900/30">
                         <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                           {indexResult.progress.skipped}
                         </div>
-                        <div className="text-xs text-yellow-800 dark:text-yellow-500">
-                          Skipped
-                        </div>
+                        <div className="text-xs text-yellow-800 dark:text-yellow-500">Skipped</div>
                       </div>
-                      <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                      <div className="rounded bg-red-100 p-2 dark:bg-red-900/30">
                         <div className="text-xl font-bold text-red-700 dark:text-red-400">
                           {indexResult.progress.failed}
                         </div>
-                        <div className="text-xs text-red-800 dark:text-red-500">
-                          Failed
-                        </div>
+                        <div className="text-xs text-red-800 dark:text-red-500">Failed</div>
                       </div>
                     </div>
                   )}
@@ -639,21 +593,19 @@ export default function VisualSearchIndexClient() {
 
       {/* Error Message */}
       {error && (
-        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded border border-red-200">
-          {error}
-        </div>
+        <div className="mt-6 rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
       )}
 
       {/* Extracted Text Debug */}
       {extractedText && (
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle className="text-lg text-muted-foreground uppercase tracking-wider">
+            <CardTitle className="text-muted-foreground text-lg tracking-wider uppercase">
               OCR Extracted Text
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted p-4 rounded text-sm font-mono whitespace-pre-wrap border">
+            <div className="bg-muted rounded border p-4 font-mono text-sm whitespace-pre-wrap">
               {extractedText}
             </div>
           </CardContent>
@@ -677,25 +629,20 @@ export default function VisualSearchIndexClient() {
               {results.map((result) => (
                 <Card key={result.id} className="overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-3">
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-start justify-between">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs text-muted-foreground font-mono">
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="text-muted-foreground font-mono text-xs">
                             ID: {result.id}
                           </span>
                         </div>
                         <CardTitle className="text-lg">
-                          {result.season} {result.year} - paper{" "}
-                          {result.paperType}
+                          {result.season} {result.year} - paper {result.paperType}
                         </CardTitle>
                         {result.topics && result.topics.length > 0 && (
-                          <div className="flex gap-1 flex-wrap mt-2">
+                          <div className="mt-2 flex flex-wrap gap-1">
                             {result.topics.map((topic, i) => (
-                              <Badge
-                                key={i}
-                                variant="outline"
-                                className="text-xs"
-                              >
+                              <Badge key={i} variant="outline" className="text-xs">
                                 {topic}
                               </Badge>
                             ))}
@@ -706,33 +653,25 @@ export default function VisualSearchIndexClient() {
                   </CardHeader>
 
                   <CardContent className="p-4 pt-4">
-                    <div className="gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 flex flex-col">
-                      {result.questionImages?.map(
-                        (img: string, idx: number) => (
-                          <div
-                            key={`q-${idx}`}
-                            className="shrink-0 relative group w-full "
-                          >
-                            <Badge className="absolute top-0 left-0 rounded-tl-none rounded-br-md rounded-tr-none rounded-bl-none z-10 pointer-events-none">
-                              Q
-                            </Badge>
-                            <img
-                              src={img}
-                              alt={`Question ${idx + 1}`}
-                              className="w-full rounded-md border bg-white object-contain"
-                            />
-                          </div>
-                        ),
-                      )}
+                    <div className="scrollbar-thin scrollbar-thumb-gray-300 flex flex-col gap-4 overflow-x-auto pb-2">
+                      {result.questionImages?.map((img: string, idx: number) => (
+                        <div key={`q-${idx}`} className="group relative w-full shrink-0">
+                          <Badge className="pointer-events-none absolute top-0 left-0 z-10 rounded-tl-none rounded-tr-none rounded-br-md rounded-bl-none">
+                            Q
+                          </Badge>
+                          <img
+                            src={img}
+                            alt={`Question ${idx + 1}`}
+                            className="w-full rounded-md border bg-white object-contain"
+                          />
+                        </div>
+                      ))}
                       {/* Display Answer Images */}
                       {result.answers?.map((img: string, idx: number) => (
-                        <div
-                          key={`a-${idx}`}
-                          className="shrink-0 relative group"
-                        >
+                        <div key={`a-${idx}`} className="group relative shrink-0">
                           <Badge
                             variant="default"
-                            className="absolute top-0 left-0 rounded-tl-none rounded-br-md rounded-tr-none rounded-bl-none z-10 pointer-events-none bg-emerald-600 hover:bg-emerald-600"
+                            className="pointer-events-none absolute top-0 left-0 z-10 rounded-tl-none rounded-tr-none rounded-br-md rounded-bl-none bg-emerald-600 hover:bg-emerald-600"
                           >
                             A
                           </Badge>
@@ -743,7 +682,7 @@ export default function VisualSearchIndexClient() {
                               className="h-40 rounded-md border bg-white object-contain"
                             />
                           ) : (
-                            <div className="h-40 w-48 p-3 text-xs overflow-y-auto bg-muted border rounded-md font-mono">
+                            <div className="bg-muted h-40 w-48 overflow-y-auto rounded-md border p-3 font-mono text-xs">
                               {img}
                             </div>
                           )}

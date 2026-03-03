@@ -1,10 +1,6 @@
-import { useRef, useState, useEffect, useEffectEvent } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
@@ -62,46 +58,43 @@ a=-\\pi
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button
-          className="text-center cursor-pointer mb-2 text-sm h-[30px]"
-          variant="outline"
-        >
+        <Button className="mb-2 h-[30px] cursor-pointer text-center text-sm" variant="outline">
           {isOpen ? "Hide" : "Show"} Tips
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="flex items-center justify-center w-full flex-col mb-4">
-        <p className="text-md text-center mb-2 text-green-600 ">
-          Watch this video to learn how to utilize Desmos to enhance your
-          studies in integration. You can use the embedded Desmos calculator in
-          inspect mode. Click buttons below to try out!
+      <CollapsibleContent className="mb-4 flex w-full flex-col items-center justify-center">
+        <p className="text-md mb-2 text-center text-green-600">
+          Watch this video to learn how to utilize Desmos to enhance your studies in integration.
+          You can use the embedded Desmos calculator in inspect mode. Click buttons below to try
+          out!
         </p>
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             <Button
               onClick={copyToDesmos}
               size="sm"
               variant="outline"
-              className="text-xs cursor-pointer uppercase flex-1"
+              className="flex-1 cursor-pointer text-xs uppercase"
             >
               Click to copy the Desmos command template
             </Button>
             <Button
               onClick={() => setIsCalculatorOpen(true)}
               size="sm"
-              className="text-xs cursor-pointer uppercase flex-1"
+              className="flex-1 cursor-pointer text-xs uppercase"
             >
               Click to try the embedded calculator
             </Button>
           </div>
         </div>
-        <div className="relative w-full max-w-3xl aspect-video rounded-xl overflow-hidden shadow-md border border-border">
+        <div className="border-border relative aspect-video w-full max-w-3xl overflow-hidden rounded-xl border shadow-md">
           <iframe
             title="Integration topic walkthrough"
             src="https://www.youtube.com/embed/otA0aCjlou0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
-            className="w-full h-full"
+            className="h-full w-full"
           />
         </div>
       </CollapsibleContent>

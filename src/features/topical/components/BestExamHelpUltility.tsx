@@ -1,26 +1,12 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import {
-  ScrollText,
-  PencilLine,
-  FileText,
-  Highlighter,
-  ClipboardList,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ValidSeason } from "@/constants/types";
-import { parsePastPaperUrl } from "../lib/utils";
+import { cn } from "@/lib/utils";
+import { ClipboardList, FileText, Highlighter, PencilLine, ScrollText } from "lucide-react";
 import { memo } from "react";
+import { parsePastPaperUrl } from "../lib/utils";
 import { SelectedQuestion } from "../types/models";
 
 const UNSUPPORTED_YEAR = 2009;
@@ -41,7 +27,7 @@ const PastPaperLink = ({
     <a
       target="_blank"
       className={cn(
-        "w-full h-full flex items-center hover:bg-input/90 rounded-md p-1",
+        "hover:bg-input/90 flex h-full w-full items-center rounded-md p-1",
         question.year === UNSUPPORTED_YEAR && "pointer-events-none",
       )}
       href={
@@ -71,8 +57,8 @@ export const BestExamHelpUltility = memo(
               <Button
                 variant="outline"
                 className={cn(
-                  "w-9 h-9 cursor-pointer p-0!",
-                  question?.year === UNSUPPORTED_YEAR && "opacity-50 ",
+                  "h-9 w-9 cursor-pointer p-0!",
+                  question?.year === UNSUPPORTED_YEAR && "opacity-50",
                 )}
               >
                 <FileText />
@@ -85,7 +71,7 @@ export const BestExamHelpUltility = memo(
               : "Resources"}
           </TooltipContent>
         </Tooltip>
-        <PopoverContent className="z-99999999 p-3 bg-accent w-max">
+        <PopoverContent className="bg-accent z-99999999 w-max p-3">
           <div className="flex flex-col gap-1">
             <PastPaperLink question={question} type="qp">
               <ScrollText className="mr-2 h-4 w-4" />

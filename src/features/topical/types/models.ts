@@ -90,9 +90,7 @@ export type BookmarksMetadata = Record<
 >;
 
 // Simple curriculum mapping for finished questions
-export type FinishedQuestionsMetadata = Partial<
-  Record<ValidCurriculum, CurriculumMetadata>
->;
+export type FinishedQuestionsMetadata = Partial<Record<ValidCurriculum, CurriculumMetadata>>;
 
 export interface SavedActivitiesResponse {
   finishedQuestions: SelectedFinishedQuestion[];
@@ -111,15 +109,10 @@ export type CurrentQuery = {
   subjectId: string;
 } & FilterData;
 
-export type TopicalData =
-  | SelectedPublickBookmark[]
-  | SelectedFinishedQuestion[]
-  | null;
+export type TopicalData = SelectedPublickBookmark[] | SelectedFinishedQuestion[] | null;
 
 // Common type for sorting elements that have updatedAt
-export type SortableTopicalItem =
-  | SelectedPublickBookmark
-  | SelectedFinishedQuestion;
+export type SortableTopicalItem = SelectedPublickBookmark | SelectedFinishedQuestion;
 
 export interface CreateListMutationVariables {
   question: SelectedQuestion;

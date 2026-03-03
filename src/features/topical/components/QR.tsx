@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { QRCodeCanvas } from "qrcode.react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Download, Link as LinkIcon } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
 
 export const QR = ({
@@ -41,16 +36,14 @@ export const QR = ({
       }}
     >
       <DialogContent
-        className="flex flex-col items-center justify-center gap-2 w-full p-4 dark:bg-accent z-9999999"
+        className="dark:bg-accent z-9999999 flex w-full flex-col items-center justify-center gap-2 p-4"
         overlayClassName="z-[999998]"
       >
         <DialogTitle className="sr-only">QR Code</DialogTitle>
-        <DialogDescription>
-          Share the {type} with your friends!
-        </DialogDescription>
+        <DialogDescription>Share the {type} with your friends!</DialogDescription>
         <QRCodeCanvas
           ref={canvasRef}
-          className="rounded-md w-full h-full min-h-[300px] min-w-[300px]"
+          className="h-full min-h-[300px] w-full min-w-[300px] rounded-md"
           value={typeof window != "undefined" ? url : ""}
           title={"Noteoverflow"}
           size={300}
@@ -69,7 +62,7 @@ export const QR = ({
           }}
         />
         <Button
-          className="flex items-center w-full gap-2 mt-3 rounded-sm cursor-pointer active:opacity-80"
+          className="mt-3 flex w-full cursor-pointer items-center gap-2 rounded-sm active:opacity-80"
           onClick={() => {
             if (canvasRef.current) {
               const canvas = canvasRef.current;
@@ -84,7 +77,7 @@ export const QR = ({
           <Download />
         </Button>
         <Button
-          className="flex items-center w-full gap-2 bg-logo-main! text-white! rounded-sm cursor-pointer active:opacity-80"
+          className="bg-logo-main! flex w-full cursor-pointer items-center gap-2 rounded-sm text-white! active:opacity-80"
           onClick={() => {
             navigator.clipboard.writeText(url);
             setCopied(true);

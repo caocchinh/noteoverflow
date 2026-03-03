@@ -13,11 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import {
   DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
@@ -26,16 +22,13 @@ import {
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
 import { useMutationState } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import {
-  memo,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { usePathname } from "next/navigation";
+import { memo, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { FinishedTrackerProps } from "../../types/components";
+import { SortParameters } from "../../types/models";
 import { JumpToTabButton } from "../JumpToTabButton";
+import Masonry from "../Masonry";
 import {
   FirstPageButton,
   LastPageButton,
@@ -44,10 +37,6 @@ import {
 } from "../PaginationButtons";
 import QuestionPreview from "../QuestionPreview";
 import Sort from "../Sort";
-import Masonry from "../Masonry";
-import { usePathname } from "next/navigation";
-import { FinishedTrackerProps } from "../../types/components";
-import { SortParameters } from "../../types/models";
 
 export const FinishedTracker = memo(
   ({ allQuestions, navigateToQuestion }: FinishedTrackerProps) => {
@@ -67,16 +56,14 @@ export const FinishedTracker = memo(
       filters: {
         mutationKey: ["user_saved_activities", "finished_questions"],
         predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
+          mutation.state.status === "success" || mutation.state.status === "error",
       },
     });
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
     const finishedCount = useMemo(
       () =>
-        allQuestions.filter((q) =>
-          userFinishedQuestions?.some((fq) => fq.question.id === q.id),
-        ).length,
+        allQuestions.filter((q) => userFinishedQuestions?.some((fq) => fq.question.id === q.id))
+          .length,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [allQuestions, userFinishedQuestions, settledFinishedQuestionMutations],
     );
@@ -91,19 +78,13 @@ export const FinishedTracker = memo(
 
       // Sort by updatedAt from userFinishedQuestions
       return filtered.toSorted((a, b) => {
-        const aFinished = userFinishedQuestions?.find(
-          (fq) => fq.question.id === a.id,
-        );
-        const bFinished = userFinishedQuestions?.find(
-          (fq) => fq.question.id === b.id,
-        );
+        const aFinished = userFinishedQuestions?.find((fq) => fq.question.id === a.id);
+        const bFinished = userFinishedQuestions?.find((fq) => fq.question.id === b.id);
 
         const aTime = aFinished ? new Date(aFinished.updatedAt).getTime() : 0;
         const bTime = bFinished ? new Date(bFinished.updatedAt).getTime() : 0;
 
-        return sortParameters.sortBy === "descending"
-          ? bTime - aTime
-          : aTime - bTime;
+        return sortParameters.sortBy === "descending" ? bTime - aTime : aTime - bTime;
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -114,10 +95,7 @@ export const FinishedTracker = memo(
     ]);
 
     const fullPartitionedData = useMemo(() => {
-      return chunkQuestionsData(
-        finishedQuestions,
-        DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE,
-      );
+      return chunkQuestionsData(finishedQuestions, DEFAULT_NUMBER_OF_QUESTIONS_PER_PAGE);
     }, [finishedQuestions]);
 
     // Reset chunk index when data changes
@@ -153,25 +131,23 @@ export const FinishedTracker = memo(
           <Tooltip>
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
-                <div className="absolute w-full left-0 top-0 p-2 bg-green-600 cursor-pointer backdrop-blur-sm border-b">
-                  {!savedActivitiesIsFetching &&
-                    !isSessionPending &&
-                    isAuthenticated && (
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1">
-                          <Progress
-                            value={progressPercentage}
-                            className="h-3 bg-gray-200 [&>div]:bg-[#0084ff] [&>div]:bg-[repeating-linear-gradient(45deg,#0084ff,#0084ff_4px,#0066cc_4px,#0066cc_8px)]"
-                          />
-                        </div>
-                        <span className="text-sm font-medium text-white whitespace-nowrap">
-                          {finishedCount} / {allQuestions.length} completed
-                          <span className="text-xs text-white ml-1">
-                            ({Math.round(progressPercentage)}%)
-                          </span>
-                        </span>
+                <div className="absolute top-0 left-0 w-full cursor-pointer border-b bg-green-600 p-2 backdrop-blur-sm">
+                  {!savedActivitiesIsFetching && !isSessionPending && isAuthenticated && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <Progress
+                          value={progressPercentage}
+                          className="h-3 bg-gray-200 [&>div]:bg-[#0084ff] [&>div]:bg-[repeating-linear-gradient(45deg,#0084ff,#0084ff_4px,#0066cc_4px,#0066cc_8px)]"
+                        />
                       </div>
-                    )}
+                      <span className="text-sm font-medium whitespace-nowrap text-white">
+                        {finishedCount} / {allQuestions.length} completed
+                        <span className="ml-1 text-xs text-white">
+                          ({Math.round(progressPercentage)}%)
+                        </span>
+                      </span>
+                    </div>
+                  )}
                   {(isSessionPending || savedActivitiesIsFetching) && (
                     <div className="flex items-center justify-center gap-2 text-sm text-white">
                       <Loader2 className="animate-spin" size={14} />
@@ -191,7 +167,7 @@ export const FinishedTracker = memo(
             </TooltipContent>
           </Tooltip>
           <DialogContent
-            className="max-w-5xl! h-[95dvh] z-100008 dark:bg-accent gap-2"
+            className="dark:bg-accent z-100008 h-[95dvh] max-w-5xl! gap-2"
             showCloseButton={false}
           >
             {(isSessionPending || savedActivitiesIsFetching) && (
@@ -206,132 +182,112 @@ export const FinishedTracker = memo(
               </div>
             )}
 
-            {!savedActivitiesIsFetching &&
-              !isSessionPending &&
-              isAuthenticated && (
-                <>
-                  <DialogHeader className="flex flex-row items-start justify-between flex-wrap gap-2">
-                    <div className="flex flex-col items-start justify-start flex-wrap gap-0">
-                      <DialogTitle>
-                        {finishedCount} finished questions
-                      </DialogTitle>
-                      <DialogDescription className="text-md">
-                        Here are the questions you&apos;ve currently completed
-                      </DialogDescription>
-                    </div>
-                    <Sort
-                      sortParameters={sortParameters}
-                      setSortParameters={setSortParameters}
-                      isDisabled={false}
-                      disabledMessage=""
-                      descendingSortText="Most recently completed"
-                      ascendingSortText="Least recently completed"
-                    />
-                  </DialogHeader>
+            {!savedActivitiesIsFetching && !isSessionPending && isAuthenticated && (
+              <>
+                <DialogHeader className="flex flex-row flex-wrap items-start justify-between gap-2">
+                  <div className="flex flex-col flex-wrap items-start justify-start gap-0">
+                    <DialogTitle>{finishedCount} finished questions</DialogTitle>
+                    <DialogDescription className="text-md">
+                      Here are the questions you&apos;ve currently completed
+                    </DialogDescription>
+                  </div>
+                  <Sort
+                    sortParameters={sortParameters}
+                    setSortParameters={setSortParameters}
+                    isDisabled={false}
+                    disabledMessage=""
+                    descendingSortText="Most recently completed"
+                    ascendingSortText="Least recently completed"
+                  />
+                </DialogHeader>
 
-                  {finishedQuestions.length > 0 ? (
-                    <ScrollArea
-                      className="max-h-[75vh] pr-4"
-                      viewportRef={scrollAreaRef}
-                      type="always"
-                    >
-                      <Masonry
-                        items={displayedData?.flatMap((question) =>
-                          question?.questionImages.map(
-                            (imageSrc: string, imageIndex: number) => ({
-                              element: (
-                                <QuestionPreview
-                                  question={question}
-                                  key={`${question.id}-${imageSrc}`}
-                                  imageSrc={imageSrc}
-                                  onQuestionClick={() => {
-                                    setIsDialogOpen(false);
-                                    navigateToQuestion({
-                                      questionId: question?.id,
-                                    });
-                                  }}
-                                  imageWidth={
-                                    question.questionImagesDimensions?.[
-                                      imageIndex
-                                    ]?.width
-                                  }
-                                  imageHeight={
-                                    question.questionImagesDimensions?.[
-                                      imageIndex
-                                    ]?.height
-                                  }
-                                  showCurriculumBadge={pathname == "/search"}
-                                  showSubjectBadge={pathname == "/search"}
-                                />
-                              ),
-                              width:
-                                question.questionImagesDimensions?.[imageIndex]
-                                  ?.width,
-                              height:
-                                question.questionImagesDimensions?.[imageIndex]
-                                  ?.height,
-                            }),
+                {finishedQuestions.length > 0 ? (
+                  <ScrollArea
+                    className="max-h-[75vh] pr-4"
+                    viewportRef={scrollAreaRef}
+                    type="always"
+                  >
+                    <Masonry
+                      items={displayedData?.flatMap((question) =>
+                        question?.questionImages.map((imageSrc: string, imageIndex: number) => ({
+                          element: (
+                            <QuestionPreview
+                              question={question}
+                              key={`${question.id}-${imageSrc}`}
+                              imageSrc={imageSrc}
+                              onQuestionClick={() => {
+                                setIsDialogOpen(false);
+                                navigateToQuestion({
+                                  questionId: question?.id,
+                                });
+                              }}
+                              imageWidth={question.questionImagesDimensions?.[imageIndex]?.width}
+                              imageHeight={question.questionImagesDimensions?.[imageIndex]?.height}
+                              showCurriculumBadge={pathname == "/search"}
+                              showSubjectBadge={pathname == "/search"}
+                            />
                           ),
-                        )}
+                          width: question.questionImagesDimensions?.[imageIndex]?.width,
+                          height: question.questionImagesDimensions?.[imageIndex]?.height,
+                        })),
+                      )}
+                    />
+                    {/* Pagination Controls */}
+                    <div className="mt-6 flex w-full flex-row items-center justify-center gap-2">
+                      <FirstPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
                       />
-                      {/* Pagination Controls */}
-                      <div className="flex flex-row items-center justify-center gap-2 mt-6 w-full">
-                        <FirstPageButton
-                          currentChunkIndex={currentChunkIndex}
-                          setCurrentChunkIndex={setCurrentChunkIndex}
-                          scrollUpWhenPageChange={true}
-                          scrollAreaRef={scrollAreaRef}
-                        />
-                        <PreviousPageButton
-                          currentChunkIndex={currentChunkIndex}
-                          setCurrentChunkIndex={setCurrentChunkIndex}
-                          scrollUpWhenPageChange={true}
-                          scrollAreaRef={scrollAreaRef}
-                        />
-                        <JumpToTabButton
-                          className="mx-4"
-                          tab={currentChunkIndex}
-                          totalTabs={fullPartitionedData.length}
-                          prefix="page"
-                          onTabChangeCallback={({ tab }) => {
-                            setCurrentChunkIndex(tab);
-                            if (scrollAreaRef?.current) {
-                              scrollAreaRef.current.scrollTo({
-                                top: 0,
-                                behavior: "instant",
-                              });
-                            }
-                          }}
-                        />
-                        <NextPageButton
-                          currentChunkIndex={currentChunkIndex}
-                          setCurrentChunkIndex={setCurrentChunkIndex}
-                          totalPages={fullPartitionedData.length}
-                          scrollUpWhenPageChange={true}
-                          scrollAreaRef={scrollAreaRef}
-                        />
-                        <LastPageButton
-                          currentChunkIndex={currentChunkIndex}
-                          setCurrentChunkIndex={setCurrentChunkIndex}
-                          totalPages={fullPartitionedData.length}
-                          scrollUpWhenPageChange={true}
-                          scrollAreaRef={scrollAreaRef}
-                        />
-                      </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="flex items-center justify-center w-full">
-                      <p className="text-sm text-muted-foreground">
-                        No finished questions yet.
-                      </p>
+                      <PreviousPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                      <JumpToTabButton
+                        className="mx-4"
+                        tab={currentChunkIndex}
+                        totalTabs={fullPartitionedData.length}
+                        prefix="page"
+                        onTabChangeCallback={({ tab }) => {
+                          setCurrentChunkIndex(tab);
+                          if (scrollAreaRef?.current) {
+                            scrollAreaRef.current.scrollTo({
+                              top: 0,
+                              behavior: "instant",
+                            });
+                          }
+                        }}
+                      />
+                      <NextPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        totalPages={fullPartitionedData.length}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
+                      <LastPageButton
+                        currentChunkIndex={currentChunkIndex}
+                        setCurrentChunkIndex={setCurrentChunkIndex}
+                        totalPages={fullPartitionedData.length}
+                        scrollUpWhenPageChange={true}
+                        scrollAreaRef={scrollAreaRef}
+                      />
                     </div>
-                  )}
-                </>
-              )}
+                  </ScrollArea>
+                ) : (
+                  <div className="flex w-full items-center justify-center">
+                    <p className="text-muted-foreground text-sm">No finished questions yet.</p>
+                  </div>
+                )}
+              </>
+            )}
 
             <DialogFooter className="w-full self-end">
               <DialogClose asChild>
-                <Button className="cursor-pointer w-full" variant="outline">
+                <Button className="w-full cursor-pointer" variant="outline">
                   Close
                 </Button>
               </DialogClose>

@@ -1,13 +1,8 @@
-import { memo, RefObject, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
-import { JumpToTabButton } from "../JumpToTabButton";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { memo, RefObject, useCallback } from "react";
 import { SelectedQuestion } from "../../types/models";
+import { JumpToTabButton } from "../JumpToTabButton";
 
 interface TabNavigationButtonsProps {
   currentTab: number;
@@ -15,13 +10,7 @@ interface TabNavigationButtonsProps {
   partitionedTopicalData: SelectedQuestion[][] | undefined;
   currentTabThatContainsQuestion: number;
   currentQuestionId: string | undefined;
-  scrollToQuestion: ({
-    questionId,
-    tab,
-  }: {
-    questionId: string;
-    tab: number;
-  }) => void;
+  scrollToQuestion: ({ questionId, tab }: { questionId: string; tab: number }) => void;
   listScrollAreaRef: RefObject<HTMLDivElement | null>;
 }
 
@@ -56,7 +45,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
               }
             }}
             variant="outline"
-            className="w-9 h-9 cursor-pointer rounded-[2px]"
+            className="h-9 w-9 cursor-pointer rounded-[2px]"
           >
             <ChevronsLeft />
           </Button>
@@ -64,16 +53,10 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
             title="Jump to previous tab"
             disabled={currentTab === 0}
             onClick={() => {
-              if (
-                currentTab > 0 &&
-                currentTab < (partitionedTopicalData?.length ?? 0)
-              ) {
+              if (currentTab > 0 && currentTab < (partitionedTopicalData?.length ?? 0)) {
                 setCurrentTab(currentTab - 1);
               }
-              if (
-                currentTabThatContainsQuestion == currentTab - 1 &&
-                currentQuestionId
-              ) {
+              if (currentTabThatContainsQuestion == currentTab - 1 && currentQuestionId) {
                 scrollToQuestion({
                   questionId: currentQuestionId,
                   tab: currentTab - 1,
@@ -86,7 +69,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
               }
             }}
             variant="outline"
-            className="w-9 h-9 cursor-pointer rounded-[2px]"
+            className="h-9 w-9 cursor-pointer rounded-[2px]"
           >
             <ChevronLeft />
           </Button>
@@ -113,10 +96,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
               if (currentTab < (partitionedTopicalData?.length ?? 0) - 1) {
                 setCurrentTab(currentTab + 1);
               }
-              if (
-                currentTabThatContainsQuestion == currentTab + 1 &&
-                currentQuestionId
-              ) {
+              if (currentTabThatContainsQuestion == currentTab + 1 && currentQuestionId) {
                 scrollToQuestion({
                   questionId: currentQuestionId,
                   tab: currentTab + 1,
@@ -129,7 +109,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
               }
             }}
             variant="outline"
-            className="w-9 h-9 cursor-pointer rounded-[2px]"
+            className="h-9 w-9 cursor-pointer rounded-[2px]"
           >
             <ChevronRight />
           </Button>
@@ -139,8 +119,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
             onClick={() => {
               setCurrentTab((partitionedTopicalData?.length ?? 1) - 1);
               if (
-                currentTabThatContainsQuestion ==
-                  (partitionedTopicalData?.length ?? 1) - 1 &&
+                currentTabThatContainsQuestion == (partitionedTopicalData?.length ?? 1) - 1 &&
                 currentQuestionId
               ) {
                 scrollToQuestion({
@@ -155,7 +134,7 @@ const TabNavigationButtons = memo<TabNavigationButtonsProps>(
               }
             }}
             variant="outline"
-            className="w-9 h-9 cursor-pointer rounded-[2px]"
+            className="h-9 w-9 cursor-pointer rounded-[2px]"
           >
             <ChevronsRight />
           </Button>

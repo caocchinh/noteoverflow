@@ -1,20 +1,15 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { ScanText } from "lucide-react";
-import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
-import LayoutSetting from "@/features/topical/components/LayoutSetting";
-import VisualSetting from "@/features/topical/components/VisualSetting";
-import ButtonUltility from "@/features/topical/components/ButtonUltility";
-import { useFilterState, useFilterValidation } from "@/features/topical/hooks";
-import { useRef, useEffect, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import ButtonUltility from "@/features/topical/components/ButtonUltility";
+import LayoutSetting from "@/features/topical/components/LayoutSetting";
+import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
+import VisualSetting from "@/features/topical/components/VisualSetting";
+import { useFilterState, useFilterValidation } from "@/features/topical/hooks";
+import { cn } from "@/lib/utils";
+import { ScanText } from "lucide-react";
+import { useCallback, useEffect, useRef } from "react";
 import { SecondaryAppSidebarProps } from "../types/components";
 import { SubjectMetadata } from "../types/models";
 
@@ -127,13 +122,8 @@ const SecondaryAppSidebar = ({
     // Filter topics - keep only those still in metadata
     if (subjectMetadata.topic) {
       const filteredTopics =
-        selectedTopicRef.current?.filter((topic) =>
-          subjectMetadata.topic!.includes(topic),
-        ) ?? [];
-      if (
-        JSON.stringify(filteredTopics) !==
-        JSON.stringify(selectedTopicRef.current)
-      ) {
+        selectedTopicRef.current?.filter((topic) => subjectMetadata.topic!.includes(topic)) ?? [];
+      if (JSON.stringify(filteredTopics) !== JSON.stringify(selectedTopicRef.current)) {
         handleTopicChange(filteredTopics);
         didUpdate = true;
       }
@@ -143,14 +133,9 @@ const SecondaryAppSidebar = ({
     // Filter years
     if (subjectMetadata.year) {
       const filteredYears =
-        selectedYearRef.current?.filter((year) =>
-          subjectMetadata.year!.includes(year),
-        ) ?? [];
+        selectedYearRef.current?.filter((year) => subjectMetadata.year!.includes(year)) ?? [];
 
-      if (
-        JSON.stringify(filteredYears) !==
-        JSON.stringify(selectedYearRef.current)
-      ) {
+      if (JSON.stringify(filteredYears) !== JSON.stringify(selectedYearRef.current)) {
         handleYearChange(filteredYears);
         didUpdate = true;
       }
@@ -164,10 +149,7 @@ const SecondaryAppSidebar = ({
           subjectMetadata.paperType!.includes(paperType),
         ) ?? [];
 
-      if (
-        JSON.stringify(filteredPaperTypes) !==
-        JSON.stringify(selectedPaperTypeRef.current)
-      ) {
+      if (JSON.stringify(filteredPaperTypes) !== JSON.stringify(selectedPaperTypeRef.current)) {
         handlePaperTypeChange(filteredPaperTypes);
         didUpdate = true;
       }
@@ -177,14 +159,10 @@ const SecondaryAppSidebar = ({
     // Filter seasons
     if (subjectMetadata.season) {
       const filteredSeasons =
-        selectedSeasonRef.current?.filter((season) =>
-          subjectMetadata.season!.includes(season),
-        ) ?? [];
+        selectedSeasonRef.current?.filter((season) => subjectMetadata.season!.includes(season)) ??
+        [];
 
-      if (
-        JSON.stringify(filteredSeasons) !==
-        JSON.stringify(selectedSeasonRef.current)
-      ) {
+      if (JSON.stringify(filteredSeasons) !== JSON.stringify(selectedSeasonRef.current)) {
         handleSeasonChange(filteredSeasons);
         didUpdate = true;
       }
@@ -266,21 +244,18 @@ const SecondaryAppSidebar = ({
   return (
     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
       <SheetContent
-        className="z-100006 overflow-hidden  py-2"
+        className="z-100006 overflow-hidden py-2"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <ScrollArea className="h-full" type="always">
           <SheetHeader className="sr-only">
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>
-          <div className="flex w-full flex-col items-centegrep -r . | wc -lr justify-start gap-4 px-4 py-2">
-            <div
-              className="flex flex-col items-start justify-start gap-1 w-full"
-              ref={topicRef}
-            >
+          <div className="items-centegrep -r . | wc -lr flex w-full flex-col justify-start gap-4 px-4 py-2">
+            <div className="flex w-full flex-col items-start justify-start gap-1" ref={topicRef}>
               <h3
                 className={cn(
-                  "w-max font-medium text-sm",
+                  "w-max text-sm font-medium",
                   invalidInputs.topic && "text-destructive",
                 )}
               >
@@ -292,17 +267,15 @@ const SecondaryAppSidebar = ({
                 onValuesChange={handleTopicChange}
                 selectedValues={selectedTopic ?? []}
               />
-              {invalidInputs.topic && (
-                <p className="text-destructive text-sm">Topic is required</p>
-              )}
+              {invalidInputs.topic && <p className="text-destructive text-sm">Topic is required</p>}
             </div>
             <div
-              className="flex flex-col items-start justify-start gap-1 w-full"
+              className="flex w-full flex-col items-start justify-start gap-1"
               ref={paperTypeRef}
             >
               <h3
                 className={cn(
-                  "w-max font-medium text-sm",
+                  "w-max text-sm font-medium",
                   invalidInputs.paperType && "text-destructive",
                 )}
               >
@@ -318,13 +291,10 @@ const SecondaryAppSidebar = ({
                 <p className="text-destructive text-sm">Paper is required</p>
               )}
             </div>
-            <div
-              className="flex flex-col items-start justify-start gap-1 w-full"
-              ref={yearRef}
-            >
+            <div className="flex w-full flex-col items-start justify-start gap-1" ref={yearRef}>
               <h3
                 className={cn(
-                  "w-max font-medium text-sm",
+                  "w-max text-sm font-medium",
                   invalidInputs.year && "text-destructive",
                 )}
               >
@@ -336,17 +306,12 @@ const SecondaryAppSidebar = ({
                 onValuesChange={handleYearChange}
                 selectedValues={selectedYear ?? []}
               />
-              {invalidInputs.year && (
-                <p className="text-destructive text-sm">Year is required</p>
-              )}
+              {invalidInputs.year && <p className="text-destructive text-sm">Year is required</p>}
             </div>
-            <div
-              className="flex flex-col items-start justify-start gap-1 w-full"
-              ref={seasonRef}
-            >
+            <div className="flex w-full flex-col items-start justify-start gap-1" ref={seasonRef}>
               <h3
                 className={cn(
-                  "w-max font-medium text-sm",
+                  "w-max text-sm font-medium",
                   invalidInputs.season && "text-destructive",
                 )}
               >
@@ -363,7 +328,7 @@ const SecondaryAppSidebar = ({
               )}
             </div>
           </div>
-          <div className="flex w-full flex-col items-center justify-center gap-4 px-4 mt-2">
+          <div className="mt-2 flex w-full flex-col items-center justify-center gap-4 px-4">
             <ButtonUltility
               isMounted={true}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -371,7 +336,7 @@ const SecondaryAppSidebar = ({
               resetEverything={handleResetEverything}
             >
               <Button
-                className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+                className="bg-logo-main hover:bg-logo-main/90 w-full cursor-pointer text-white"
                 onClick={handleFilter}
               >
                 Filter

@@ -1,11 +1,13 @@
-import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
-import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import ButtonUltility from "@/features/topical/components/ButtonUltility";
 import CacheSetting from "@/features/topical/components/CacheSetting";
+import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import LayoutSetting from "@/features/topical/components/LayoutSetting";
-import VisualSetting from "@/features/topical/components/VisualSetting";
+import MultiSelector from "@/features/topical/components/MultiSelector/MultiSelector";
 import { RecentQuery } from "@/features/topical/components/RecentQuery";
+import VisualSetting from "@/features/topical/components/VisualSetting";
 
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sidebar,
   SidebarContent,
@@ -13,26 +15,24 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { ScanText, FileText } from "lucide-react";
+import { ValidCurriculum } from "@/constants/types";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { FileText, ScanText } from "lucide-react";
+import Link from "next/link";
 import { memo, useCallback } from "react";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import {
-  useFilterState,
-  useFilterValidation,
   useAvailableFilters,
   useFilterPersistence,
+  useFilterState,
+  useFilterValidation,
 } from "../../hooks";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import EnhancedMultiSelector from "../MultiSelector/EnhancedMultiSelector";
-import CoursebookCover from "../CoursebookCover";
-import Link from "next/link";
 import { AppSidebarProps } from "../../types/components";
-import { ValidCurriculum } from "@/constants/types";
-import StrictModeToggle from "./StrictModeToggle";
+import CoursebookCover from "../CoursebookCover";
+import EnhancedMultiSelector from "../MultiSelector/EnhancedMultiSelector";
 import ShareFilterButton from "./ShareFilterButton";
+import StrictModeToggle from "./StrictModeToggle";
 
 const AppSidebar = memo(
   ({
@@ -75,14 +75,7 @@ const AppSidebar = memo(
         resetEverything,
         revert,
       },
-      refs: {
-        curriculumRef,
-        subjectRef,
-        topicRef,
-        yearRef,
-        paperTypeRef,
-        seasonRef,
-      },
+      refs: { curriculumRef, subjectRef, topicRef, yearRef, paperTypeRef, seasonRef },
       other: { sidebarKey },
     } = useFilterState({ currentQuery });
 
@@ -166,13 +159,10 @@ const AppSidebar = memo(
           subjectId: selectedSubject,
           topic: selectedTopic.toSorted(),
           paperType: selectedPaperType.toSorted(),
-          year: selectedYear.toSorted(
-            (a: string, b: string) => Number(b) - Number(a),
-          ),
+          year: selectedYear.toSorted((a: string, b: string) => Number(b) - Number(a)),
           season: selectedSeason.toSorted(),
         };
-        const isSameQuery =
-          JSON.stringify(currentQuery) == JSON.stringify(query);
+        const isSameQuery = JSON.stringify(currentQuery) == JSON.stringify(query);
         if (validateInputs({ scrollOnError: true }) && !isSameQuery) {
           setIsSearchEnabled(true);
           setCurrentQuery({
@@ -208,17 +198,13 @@ const AppSidebar = memo(
     );
 
     return (
-      <Sidebar
-        key={sidebarKey}
-        variant="floating"
-        onTransitionEnd={handleTransitionEnd}
-      >
-        <SidebarHeader className="sr-only m-0 p-0 ">Filters</SidebarHeader>
+      <Sidebar key={sidebarKey} variant="floating" onTransitionEnd={handleTransitionEnd}>
+        <SidebarHeader className="sr-only m-0 p-0">Filters</SidebarHeader>
         <ScrollArea className="h-full" type="always">
           <SidebarContent className="flex w-full flex-col items-center justify-start gap-4 overflow-x-hidden p-4 pt-2">
             <Link
               href="/disclaimer"
-              className="flex w-full items-center justify-start gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground flex w-full items-center justify-start gap-2 text-sm transition-colors"
             >
               <FileText className="h-4 w-4" />
               Disclaimer
@@ -256,7 +242,7 @@ const AppSidebar = memo(
                     >
                       <h3
                         className={cn(
-                          "w-max font-medium text-sm",
+                          "w-max text-sm font-medium",
                           invalidInputs.curriculum && "text-destructive",
                         )}
                       >
@@ -270,19 +256,14 @@ const AppSidebar = memo(
                         setSelectedValue={onCurriculumChange}
                       />
                       {invalidInputs.curriculum && (
-                        <p className="text-destructive text-sm">
-                          Curriculum is required
-                        </p>
+                        <p className="text-destructive text-sm">Curriculum is required</p>
                       )}
                     </div>
 
-                    <div
-                      className="flex flex-col items-start justify-start gap-1"
-                      ref={subjectRef}
-                    >
+                    <div className="flex flex-col items-start justify-start gap-1" ref={subjectRef}>
                       <h3
                         className={cn(
-                          "w-max font-medium text-sm",
+                          "w-max text-sm font-medium",
                           invalidInputs.subject && "text-destructive",
                         )}
                       >
@@ -296,22 +277,20 @@ const AppSidebar = memo(
                         setSelectedValue={handleSubjectChange}
                       />
                       {invalidInputs.subject && (
-                        <p className="text-destructive text-sm">
-                          Subject is required
-                        </p>
+                        <p className="text-destructive text-sm">Subject is required</p>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-4 w-full">
+              <div className="flex w-full flex-col items-center justify-center gap-4">
                 <div
-                  className="flex flex-col items-start justify-start gap-1 w-full"
+                  className="flex w-full flex-col items-start justify-start gap-1"
                   ref={topicRef}
                 >
                   <h3
                     className={cn(
-                      "w-max font-medium text-sm",
+                      "w-max text-sm font-medium",
                       invalidInputs.topic && "text-destructive",
                     )}
                   >
@@ -327,18 +306,16 @@ const AppSidebar = memo(
                     selectedValues={selectedTopic}
                   />
                   {invalidInputs.topic && (
-                    <p className="text-destructive text-sm">
-                      Topic is required
-                    </p>
+                    <p className="text-destructive text-sm">Topic is required</p>
                   )}
                 </div>
                 <div
-                  className="flex flex-col items-start justify-start gap-1 w-full"
+                  className="flex w-full flex-col items-start justify-start gap-1"
                   ref={paperTypeRef}
                 >
                   <h3
                     className={cn(
-                      "w-max font-medium text-sm",
+                      "w-max text-sm font-medium",
                       invalidInputs.paperType && "text-destructive",
                     )}
                   >
@@ -354,18 +331,13 @@ const AppSidebar = memo(
                     selectedValues={selectedPaperType}
                   />
                   {invalidInputs.paperType && (
-                    <p className="text-destructive text-sm">
-                      Paper is required
-                    </p>
+                    <p className="text-destructive text-sm">Paper is required</p>
                   )}
                 </div>
-                <div
-                  className="flex flex-col items-start justify-start gap-1 w-full"
-                  ref={yearRef}
-                >
+                <div className="flex w-full flex-col items-start justify-start gap-1" ref={yearRef}>
                   <h3
                     className={cn(
-                      "w-max font-medium text-sm",
+                      "w-max text-sm font-medium",
                       invalidInputs.year && "text-destructive",
                     )}
                   >
@@ -382,12 +354,12 @@ const AppSidebar = memo(
                   )}
                 </div>
                 <div
-                  className="flex flex-col items-start justify-start gap-1 w-full"
+                  className="flex w-full flex-col items-start justify-start gap-1"
                   ref={seasonRef}
                 >
                   <h3
                     className={cn(
-                      "w-max font-medium text-sm",
+                      "w-max text-sm font-medium",
                       invalidInputs.season && "text-destructive",
                     )}
                   >
@@ -400,9 +372,7 @@ const AppSidebar = memo(
                     selectedValues={selectedSeason}
                   />
                   {invalidInputs.season && (
-                    <p className="text-destructive text-sm">
-                      Season is required
-                    </p>
+                    <p className="text-destructive text-sm">Season is required</p>
                   )}
                 </div>
               </div>
@@ -414,17 +384,14 @@ const AppSidebar = memo(
                   setIsSidebarOpen={setIsAppSidebarOpen}
                 >
                   <Button
-                    className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+                    className="bg-logo-main hover:bg-logo-main/90 w-full cursor-pointer text-white"
                     disabled={!isMounted || isTopicalDataFetching}
                     onClick={handleSearch}
                   >
                     {isTopicalDataFetching ? "Searching" : "Search"}
                     <ScanText />
                   </Button>
-                  <ShareFilterButton
-                    isDisabled={isTopicalDataFetching}
-                    filterUrl={filterUrl}
-                  />
+                  <ShareFilterButton isDisabled={isTopicalDataFetching} filterUrl={filterUrl} />
                 </ButtonUltility>
               </div>
             </div>

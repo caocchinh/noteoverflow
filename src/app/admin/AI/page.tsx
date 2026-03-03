@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { verifySession } from "@/dal/verifySession";
+import { redirect } from "next/navigation";
 import VisualSearchIndexClient from ".";
 
 const VisualSearchIndexPage = async () => {

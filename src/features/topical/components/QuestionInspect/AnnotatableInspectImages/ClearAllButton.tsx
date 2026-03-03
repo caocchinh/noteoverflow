@@ -1,7 +1,7 @@
-import { memo, RefObject } from "react";
 import { Button } from "@/components/ui/button";
-import { Brush } from "lucide-react";
 import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
+import { Brush } from "lucide-react";
+import { memo, RefObject } from "react";
 
 const ClearAllButton = memo(
   ({
@@ -15,7 +15,7 @@ const ClearAllButton = memo(
   }) => {
     return (
       <Button
-        className="cursor-pointer h-[26px]"
+        className="h-[26px] cursor-pointer"
         disabled={isSessionFetching || !isPdfViewerLoaded}
         variant="outline"
         onClick={(e) => {

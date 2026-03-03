@@ -1,5 +1,5 @@
-import { memo, RefObject, useCallback } from "react";
 import { Command } from "@/components/ui/command";
+import { memo, RefObject, useCallback } from "react";
 import { MultiSelectorContentProps, MultiSelectorListRef } from "./selectors";
 
 const useMultiSelectorKeyDown = (
@@ -28,24 +28,13 @@ const useMultiSelectorKeyDown = (
 };
 
 const MultiSelectorContent = memo(
-  ({
-    children,
-    inputRef,
-    open,
-    setOpen,
-    multiSelectorListRef,
-  }: MultiSelectorContentProps) => {
-    const handleKeyDown = useMultiSelectorKeyDown(
-      multiSelectorListRef,
-      inputRef,
-      open,
-      setOpen,
-    );
+  ({ children, inputRef, open, setOpen, multiSelectorListRef }: MultiSelectorContentProps) => {
+    const handleKeyDown = useMultiSelectorKeyDown(multiSelectorListRef, inputRef, open, setOpen);
 
     return (
       <Command
         shouldFilter={false}
-        className="h-max! relative flex flex-col space-y-2 overflow-visible bg-transparent"
+        className="relative flex h-max! flex-col space-y-2 overflow-visible bg-transparent"
         onKeyDown={handleKeyDown}
       >
         {children}

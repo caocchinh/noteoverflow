@@ -1,5 +1,5 @@
-import Navigation from '@/features/admin/components/Navigation';
-import { UPLOAD_NAVIGATION_ITEMS } from '@/features/admin/constants/constants';
+import Navigation from "@/features/admin/components/Navigation";
+import { UPLOAD_NAVIGATION_ITEMS } from "@/features/admin/constants/constants";
 
 const ContentLayout = ({ children }: { children: React.ReactNode }) => {
   return (

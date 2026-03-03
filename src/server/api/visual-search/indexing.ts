@@ -1,16 +1,16 @@
-import "server-only";
+import { retryDatabase } from "@/dal/retry";
+import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
-import { retryDatabase } from "@/dal/retry";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { status as elysiaStatus } from "elysia";
-import { verifySession } from "@/dal/verifySession";
+import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
 import { processImage } from "@/lib/cloudflareAI";
 import { upsertVectorize } from "@/lib/cloudflareVectorize";
-import { QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME } from "@/features/topical/constants/constants";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { imageUrlToBase64 } from "@/lib/utils";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
+import "server-only";
 import { generateShortId, VectorMetadata } from "./utils";
 
 /**
@@ -89,16 +89,7 @@ export async function indexSingleQuestion({
     paperType: string;
   };
 }) {
-  const {
-    id,
-    questionImages,
-    answers,
-    subjectId,
-    curriculumName,
-    year,
-    season,
-    paperType,
-  } = body;
+  const { id, questionImages, answers, subjectId, curriculumName, year, season, paperType } = body;
 
   // Verify admin session
   const session = await verifySession();
@@ -206,7 +197,7 @@ export async function indexSingleQuestion({
       await upsertVectorize(
         QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME,
         vectorsToUpsert,
-        env.QUESTION_SEMANTIC_SEARCH_VECTORIZE
+        env.QUESTION_SEMANTIC_SEARCH_VECTORIZE,
       );
 
       // Only mark as indexed if upsert succeeded
@@ -218,7 +209,7 @@ export async function indexSingleQuestion({
               isQuestionImageIndexed: 1,
             })
             .where(eq(question.id, id)),
-        `update question ${id} isQuestionImageIndexed`
+        `update question ${id} isQuestionImageIndexed`,
       );
 
       return {

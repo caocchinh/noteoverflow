@@ -23,9 +23,7 @@ export type MotivationalPhrase = (typeof MOTIVATIONAL_PHRASES)[number];
  * Returns a random motivational phrase from the collection.
  */
 export const getRandomPhrase = (): string => {
-  return MOTIVATIONAL_PHRASES[
-    Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)
-  ];
+  return MOTIVATIONAL_PHRASES[Math.floor(Math.random() * MOTIVATIONAL_PHRASES.length)];
 };
 
 export const MAX_QUERY_LENGTH = 500;

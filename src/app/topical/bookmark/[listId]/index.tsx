@@ -1,12 +1,5 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { useMutationState, useQuery } from "@tanstack/react-query";
-import {
-  computeSubjectMetadata,
-  filterQuestionsByCriteria,
-  computeCurriculumSubjectMapping,
-} from "@/features/topical/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,28 +7,26 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CURRICULUM_COVER_IMAGE, SUBJECT_COVER_IMAGE } from "@/constants/constants";
 import { ValidCurriculum } from "@/constants/types";
+import { useAuth } from "@/context/AuthContext";
 import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
 import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
-import Image from "next/image";
-import {
-  CURRICULUM_COVER_IMAGE,
-  SUBJECT_COVER_IMAGE,
-} from "@/constants/constants";
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import { Loader2 } from "lucide-react";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
-import { useAuth } from "@/context/AuthContext";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import {
+  computeCurriculumSubjectMapping,
+  computeSubjectMetadata,
+  filterQuestionsByCriteria,
+} from "@/features/topical/lib/utils";
+import { BreadcrumbContentProps, QuestionInspectRef } from "@/features/topical/types/components";
+import { SelectedPublickBookmark, SubjectMetadata } from "@/features/topical/types/models";
 import { api } from "@/lib/eden";
-import {
-  QuestionInspectRef,
-  BreadcrumbContentProps,
-} from "@/features/topical/types/components";
-import {
-  SelectedPublickBookmark,
-  SubjectMetadata,
-} from "@/features/topical/types/models";
+import { useMutationState, useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useMemo, useRef, useState } from "react";
 
 export const BookmarkView = ({
   BETTER_AUTH_URL,
@@ -56,76 +47,55 @@ export const BookmarkView = ({
   };
 }) => {
   const { isSessionPending } = useAuth();
-  const { bookmarksData: bookmarks, savedActivitiesIsFetching } =
-    useTopicalApp();
+  const { bookmarksData: bookmarks, savedActivitiesIsFetching } = useTopicalApp();
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const settledBookmarksMutations = useMutationState({
     filters: {
       mutationKey: ["user_saved_activities", "bookmarks"],
       predicate: (mutation) =>
-        mutation.state.status === "success" ||
-        mutation.state.status === "error",
+        mutation.state.status === "success" || mutation.state.status === "error",
     },
   });
 
   // Fetch bookmark data only if user is not the owner
-  const { data: fetchedBookmarkData, isPending: isFetchedBookmarkPending } =
-    useQuery({
-      queryKey: ["bookmark", bookmarkId],
-      queryFn: async () => {
-        const { data, error } = await api.topical
-          .bookmark({ bookmarkId: bookmarkId })
-          .get();
-        if (error) {
-          // @ts-expect-error Wait for the library to fix the type inference
-          throw new Error(error.value.error);
-        }
-        return data;
-      },
-      enabled: !isOwnerOfTheList && !!bookmarkId,
-    });
+  const { data: fetchedBookmarkData, isPending: isFetchedBookmarkPending } = useQuery({
+    queryKey: ["bookmark", bookmarkId],
+    queryFn: async () => {
+      const { data, error } = await api.topical.bookmark({ bookmarkId: bookmarkId }).get();
+      if (error) {
+        // @ts-expect-error Wait for the library to fix the type inference
+        throw new Error(error.value.error);
+      }
+      return data;
+    },
+    enabled: !isOwnerOfTheList && !!bookmarkId,
+  });
 
   // Get bookmark data based on ownership
   const bookmarkData = useMemo((): SelectedPublickBookmark[] => {
     if (isOwnerOfTheList) {
       // User is owner, find the specific bookmark from their saved activities
-      return (
-        bookmarks?.find((bookmark) => bookmark.id === bookmarkId)
-          ?.userBookmarks ?? []
-      );
+      return bookmarks?.find((bookmark) => bookmark.id === bookmarkId)?.userBookmarks ?? [];
     } else {
       // User is not owner, use fetched data
       return Array.isArray(fetchedBookmarkData) ? fetchedBookmarkData : [];
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isOwnerOfTheList,
-    bookmarks,
-    bookmarkId,
-    fetchedBookmarkData,
-    settledBookmarksMutations,
-  ]);
+  }, [isOwnerOfTheList, bookmarks, bookmarkId, fetchedBookmarkData, settledBookmarksMutations]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const metadata = useMemo(() => {
     return bookmarkData ? computeCurriculumSubjectMapping(bookmarkData) : {};
   }, [bookmarkData]);
-  const [selectedCurriculumn, setSelectedCurriculum] =
-    useState<ValidCurriculum | null>(null);
+  const [selectedCurriculumn, setSelectedCurriculum] = useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
 
   const subjectMetadata = useMemo(() => {
-    return computeSubjectMetadata(
-      bookmarkData || [],
-      selectedCurriculumn,
-      selectedSubject,
-    );
+    return computeSubjectMetadata(bookmarkData || [], selectedCurriculumn, selectedSubject);
   }, [bookmarkData, selectedCurriculumn, selectedSubject]);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
-  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null,
-  );
+  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(null);
 
   const topicalData = useMemo(() => {
     return filterQuestionsByCriteria(
@@ -152,7 +122,7 @@ export const BookmarkView = ({
       {(savedActivitiesIsFetching ||
         isSessionPending ||
         (isFetchedBookmarkPending && !isOwnerOfTheList)) && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
           <Loader2 className="animate-spin" />
         </div>
       )}
@@ -160,7 +130,7 @@ export const BookmarkView = ({
       {!isSessionPending &&
         !(isFetchedBookmarkPending && !isOwnerOfTheList) &&
         !savedActivitiesIsFetching && (
-          <div className="flex flex-row items-center justify-start w-full gap-1 mb-1">
+          <div className="mb-1 flex w-full flex-row items-center justify-start gap-1">
             <Image
               src={ownerInfo.ownerAvatar}
               alt="owner avatar"
@@ -169,7 +139,7 @@ export const BookmarkView = ({
               loading="lazy"
               className="rounded-full"
             />
-            <p className="text-sm text-logo-main">
+            <p className="text-logo-main text-sm">
               {ownerInfo.ownerName}&apos;s list - {ownerInfo.listName}
             </p>
           </div>
@@ -188,12 +158,12 @@ export const BookmarkView = ({
     isExportModeEnabled,
   }: BreadcrumbContentProps) => (
     <div
-      className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
+      className="mb-2 flex w-full flex-row flex-wrap items-center justify-between gap-2 sm:w-[95%]"
       ref={sideBarInsetRef}
     >
       <div>
         {" "}
-        <Breadcrumb className="flex mr-0 sm:mr-6 max-w-full w-max">
+        <Breadcrumb className="mr-0 flex w-max max-w-full sm:mr-6">
           <BreadcrumbList>
             <BreadcrumbItem
               className="cursor-pointer"
@@ -248,13 +218,13 @@ export const BookmarkView = ({
   const mainContent = (
     <>
       {metadata && !selectedCurriculumn && Object.keys(metadata).length > 0 && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
-          <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your curriculumn</h1>
+          <div className="flex w-full flex-row flex-wrap items-center justify-center gap-5">
             {Object.keys(metadata).map((curriculum) => (
               <div
                 key={curriculum}
-                className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1"
                 onClick={() => {
                   setSelectedCurriculum(curriculum as ValidCurriculum);
                 }}
@@ -264,13 +234,9 @@ export const BookmarkView = ({
                   width={182}
                   height={80}
                   loading="lazy"
-                  className="h-20! object-cover border border-foreground p-2 rounded-sm bg-white "
+                  className="border-foreground h-20! rounded-sm border bg-white object-cover p-2"
                   alt="Curriculum cover image"
-                  src={
-                    CURRICULUM_COVER_IMAGE[
-                      curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                    ]
-                  }
+                  src={CURRICULUM_COVER_IMAGE[curriculum as keyof typeof CURRICULUM_COVER_IMAGE]}
                 />
                 <p>{curriculum}</p>
               </div>
@@ -284,8 +250,8 @@ export const BookmarkView = ({
         !savedActivitiesIsFetching &&
         !selectedSubject &&
         !selectedCurriculumn && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-muted-foreground text-center">
+          <div className="flex w-full flex-col items-center justify-center gap-4">
+            <p className="text-muted-foreground text-center text-sm">
               Nothing found in this bookmark list!
             </p>
             <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
@@ -293,69 +259,57 @@ export const BookmarkView = ({
         )}
 
       {selectedSubject && topicalData && topicalData.length === 0 && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground text-center">
-            No questions found. Search for questions and add them to your
-            finished questions! Or change your filters.
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground text-center text-sm">
+            No questions found. Search for questions and add them to your finished questions! Or
+            change your filters.
           </p>
           <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
         </div>
       )}
 
-      {metadata &&
-        selectedCurriculumn &&
-        !selectedSubject &&
-        Object.keys(metadata).length > 0 && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your subject</h1>
-            <ScrollArea
-              className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
-              type="always"
-            >
-              <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                {metadata[selectedCurriculumn]?.map((subject) => (
-                  <div
-                    key={subject}
-                    className="flex flex-col items-center justify-center gap-1 cursor-pointer w-[150px]"
-                    onClick={() => {
-                      setSelecteSubject(subject);
-                    }}
-                  >
-                    <Image
-                      width={150}
-                      height={200}
-                      loading="lazy"
-                      title={subject}
-                      className="h-[200px]! w-40 object-cover rounded-[3px] "
-                      alt="Curriculum cover image"
-                      src={
-                        SUBJECT_COVER_IMAGE[
-                          selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                        ][subject]
-                      }
-                    />
-                    <p className="text-sm text-muted-foreground text-center px-1">
-                      {subject}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
+      {metadata && selectedCurriculumn && !selectedSubject && Object.keys(metadata).length > 0 && (
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your subject</h1>
+          <ScrollArea className="[&_.bg-border]:bg-logo-main h-[60dvh] w-full px-4" type="always">
+            <div className="flex w-full flex-row flex-wrap items-start justify-center gap-8">
+              {metadata[selectedCurriculumn]?.map((subject) => (
+                <div
+                  key={subject}
+                  className="flex w-[150px] cursor-pointer flex-col items-center justify-center gap-1"
+                  onClick={() => {
+                    setSelecteSubject(subject);
+                  }}
+                >
+                  <Image
+                    width={150}
+                    height={200}
+                    loading="lazy"
+                    title={subject}
+                    className="h-[200px]! w-40 rounded-[3px] object-cover"
+                    alt="Curriculum cover image"
+                    src={
+                      SUBJECT_COVER_IMAGE[selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE][
+                        subject
+                      ]
+                    }
+                  />
+                  <p className="text-muted-foreground px-1 text-center text-sm">{subject}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
 
-      {metadata &&
-        selectedCurriculumn &&
-        !selectedSubject &&
-        Object.keys(metadata).length == 0 && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <p className="text-sm text-muted-foreground text-center">
-              No subjects found. Search for questions and add them to a this
-              list!
-            </p>
-            <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
-          </div>
-        )}
+      {metadata && selectedCurriculumn && !selectedSubject && Object.keys(metadata).length == 0 && (
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground text-center text-sm">
+            No subjects found. Search for questions and add them to a this list!
+          </p>
+          <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
+        </div>
+      )}
     </>
   );
 

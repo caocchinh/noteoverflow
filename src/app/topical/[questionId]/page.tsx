@@ -1,11 +1,11 @@
 import Loader from "@/components/Loader/Loader";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question as questionTable } from "@/drizzle/schema";
+import { SelectedQuestion } from "@/features/topical/types/models";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import { QuestionView } from ".";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { SelectedQuestion } from "@/features/topical/types/models";
 
 type Params = Promise<{ questionId: string }>;
 
@@ -34,12 +34,8 @@ const QuestionViewPage = async (props: { params: Params }) => {
           questionImages: JSON.parse(question.questionImages ?? "[]"),
           answers: JSON.parse(question.answers ?? "[]"),
           topics: JSON.parse(question.topics ?? "[]"),
-          answersImagesDimensions: JSON.parse(
-            question.answersImagesDimensions ?? "[]",
-          ),
-          questionImagesDimensions: JSON.parse(
-            question.questionImagesDimensions ?? "[]",
-          ),
+          answersImagesDimensions: JSON.parse(question.answersImagesDimensions ?? "[]"),
+          questionImagesDimensions: JSON.parse(question.questionImagesDimensions ?? "[]"),
         };
         await env.TOPICAL_CACHE.put(
           JSON.stringify(decodeURIComponent(questionId)),
@@ -54,7 +50,7 @@ const QuestionViewPage = async (props: { params: Params }) => {
 
   if (error === "not_found") {
     return (
-      <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+      <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
         The question that you are looking for do not exist!
       </div>
     );
@@ -62,7 +58,7 @@ const QuestionViewPage = async (props: { params: Params }) => {
 
   if (error === "fetch_error" || !result) {
     return (
-      <div className="pt-16 text-center text-md font-bold text-red-500 relative h-screen">
+      <div className="text-md relative h-screen pt-16 text-center font-bold text-red-500">
         Something went wrong while fetching resources, please refresh the page!
       </div>
     );
@@ -70,10 +66,7 @@ const QuestionViewPage = async (props: { params: Params }) => {
 
   return (
     <Suspense fallback={<Loader />}>
-      <QuestionView
-        data={result}
-        BETTER_AUTH_URL={process.env.BETTER_AUTH_URL}
-      />
+      <QuestionView data={result} BETTER_AUTH_URL={process.env.BETTER_AUTH_URL} />
     </Suspense>
   );
 };

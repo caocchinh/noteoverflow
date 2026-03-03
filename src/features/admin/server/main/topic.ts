@@ -1,7 +1,7 @@
-import "server-only";
-import { and, eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { topic } from "@/drizzle/schema";
+import { and, eq } from "drizzle-orm";
+import "server-only";
 
 export const createTopic = async ({
   topic: topicProp,
@@ -13,32 +13,22 @@ export const createTopic = async ({
   curriculumName: string;
 }) => {
   const db = await getDbAsync();
-  await db
-    .insert(topic)
-    .values({ topic: topicProp, subjectId, curriculumName });
+  await db.insert(topic).values({ topic: topicProp, subjectId, curriculumName });
 };
 
-export const getTopic = async (
-  subjectId: string,
-  curriculumName: string
-): Promise<string[]> => {
+export const getTopic = async (subjectId: string, curriculumName: string): Promise<string[]> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(topic)
-    .where(
-      and(
-        eq(topic.subjectId, subjectId),
-        eq(topic.curriculumName, curriculumName)
-      )
-    );
+    .where(and(eq(topic.subjectId, subjectId), eq(topic.curriculumName, curriculumName)));
   return result.map((item) => item.topic);
 };
 
 export const isTopicExists = async (
   topicProp: string,
   subjectId: string,
-  curriculumName: string
+  curriculumName: string,
 ): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
@@ -48,8 +38,8 @@ export const isTopicExists = async (
       and(
         eq(topic.topic, topicProp),
         eq(topic.subjectId, subjectId),
-        eq(topic.curriculumName, curriculumName)
-      )
+        eq(topic.curriculumName, curriculumName),
+      ),
     )
     .limit(1);
   return result.length > 0;

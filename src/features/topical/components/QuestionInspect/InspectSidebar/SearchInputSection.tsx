@@ -19,17 +19,11 @@ const SearchInputSection = memo(
     currentQuestionId?: string;
     currentTabThatContainsQuestion: number;
     setCurrentTab: (tab: number) => void;
-    scrollToQuestion: ({
-      questionId,
-      tab,
-    }: {
-      questionId: string;
-      tab: number;
-    }) => void;
+    scrollToQuestion: ({ questionId, tab }: { questionId: string; tab: number }) => void;
     listScrollAreaRef: RefObject<HTMLDivElement | null>;
   }) => {
     return (
-      <div className="flex items-center gap-2 border-b border-border">
+      <div className="border-border flex items-center gap-2 border-b">
         <Search />
         <Input
           onFocus={() => {
@@ -38,7 +32,7 @@ const SearchInputSection = memo(
           onBlur={() => {
             isInputFocusedRef.current = false;
           }}
-          className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-accent placeholder:text-sm"
+          className="dark:bg-accent border-none placeholder:text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Search questions"
           value={searchInput}
           tabIndex={-1}
@@ -62,7 +56,7 @@ const SearchInputSection = memo(
         />
         {searchInput.length > 0 && (
           <X
-            className="text-red-600 hover:text-red-600/80 cursor-pointer"
+            className="cursor-pointer text-red-600 hover:text-red-600/80"
             onClick={() => {
               setSearchInput("");
               setCurrentTab(currentTabThatContainsQuestion);
@@ -79,7 +73,7 @@ const SearchInputSection = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 SearchInputSection.displayName = "SearchInputSection";

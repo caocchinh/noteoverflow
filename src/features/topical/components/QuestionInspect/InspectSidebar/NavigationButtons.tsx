@@ -18,7 +18,7 @@ const NavigationButtons = memo(
       <div className="flex items-center justify-center gap-2">
         <Button
           variant="outline"
-          className="w-9 rounded-sm cursor-pointer"
+          className="w-9 cursor-pointer rounded-sm"
           onClick={handleNextQuestion}
           disabled={isHandleNextQuestionDisabled}
           title="Next question"
@@ -27,7 +27,7 @@ const NavigationButtons = memo(
         </Button>
         <Button
           variant="outline"
-          className="w-9 rounded-sm cursor-pointer"
+          className="w-9 cursor-pointer rounded-sm"
           onClick={handlePreviousQuestion}
           disabled={isHandlePreviousQuestionDisabled}
           title="Previous question"
@@ -36,7 +36,7 @@ const NavigationButtons = memo(
         </Button>
       </div>
     );
-  }
+  },
 );
 
 NavigationButtons.displayName = "NavigationButtons";

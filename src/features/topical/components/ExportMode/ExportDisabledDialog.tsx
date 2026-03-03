@@ -1,6 +1,5 @@
 "use client";
 
-import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,9 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AlertTriangle, Download } from "lucide-react";
 import Link from "next/link";
+import { memo, useState } from "react";
 
 interface ExportDisabledDialogProps {
   isQuestionViewDisabled?: boolean;
@@ -33,9 +33,9 @@ const ExportDisabledDialog = memo(
         <Button
           className={cn(
             variant === "primary"
-              ? "flex cursor-pointer items-center gap-2 bg-logo-main! text-white!"
-              : "bg-logo-main! text-white! cursor-pointer",
-            isQuestionViewDisabled && "opacity-50 cursor-default!",
+              ? "bg-logo-main! flex cursor-pointer items-center gap-2 text-white!"
+              : "bg-logo-main! cursor-pointer text-white!",
+            isQuestionViewDisabled && "cursor-default! opacity-50",
             buttonClassName,
           )}
           onClick={() => {
@@ -62,25 +62,21 @@ const ExportDisabledDialog = memo(
                     The PDF export feature has been disabled due to{" "}
                     <strong>copyright considerations</strong>.
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Cambridge Assessment International Education holds the
-                    copyright for all examination materials. Reproducing and
-                    distributing these materials without explicit permission may
-                    constitute copyright infringement.
+                  <p className="text-muted-foreground text-sm">
+                    Cambridge Assessment International Education holds the copyright for all
+                    examination materials. Reproducing and distributing these materials without
+                    explicit permission may constitute copyright infringement.
                   </p>
                 </div>
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="flex-col gap-2 sm:flex-col">
-              <Button
-                onClick={() => setIsOpen(false)}
-                className="cursor-pointer w-full"
-              >
+              <Button onClick={() => setIsOpen(false)} className="w-full cursor-pointer">
                 I Understand
               </Button>
               <Link
                 href="/disclaimer"
-                className="text-sm text-muted-foreground hover:text-foreground underline text-center"
+                className="text-muted-foreground hover:text-foreground text-center text-sm underline"
                 onClick={() => setIsOpen(false)}
               >
                 Read full disclaimer

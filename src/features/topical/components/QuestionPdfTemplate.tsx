@@ -1,11 +1,11 @@
 import {
   Document,
+  Link,
   Page,
   Image as PdfImage,
-  View,
-  Link,
   StyleSheet,
   Text,
+  View,
 } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
@@ -141,20 +141,13 @@ const ExportPdfTemplate = ({
             {question.paperCode} Q{question.questionNumber}
           </Link>
         </View>
-        <MainContent
-          images={question.questionItem.images}
-          text={question.questionItem.text}
-        />
-        {(question.answerItem.images.length > 0 ||
-          question.answerItem.text.length > 0) && (
+        <MainContent images={question.questionItem.images} text={question.questionItem.text} />
+        {(question.answerItem.images.length > 0 || question.answerItem.text.length > 0) && (
           <View style={{ marginTop: 10 }}>
             <Link href={question.answerLink} style={styles.bigPaperCode}>
               Answer
             </Link>
-            <MainContent
-              images={question.answerItem.images}
-              text={question.answerItem.text}
-            />
+            <MainContent images={question.answerItem.images} text={question.answerItem.text} />
           </View>
         )}
 
@@ -166,13 +159,7 @@ const ExportPdfTemplate = ({
   </Document>
 );
 
-const MainContent = ({
-  images,
-  text,
-}: {
-  images: string[];
-  text: string[];
-}) => (
+const MainContent = ({ images, text }: { images: string[]; text: string[] }) => (
   <View>
     {images.map((src, index) => (
       <PdfImage key={index} src={src} style={styles.image} />

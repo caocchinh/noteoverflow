@@ -72,7 +72,7 @@ function calculateDelay(
   baseDelay: number,
   maxDelay: number,
   backoffMultiplier: number,
-  jitterRange: number
+  jitterRange: number,
 ): number {
   const exponentialDelay = baseDelay * Math.pow(backoffMultiplier, attempt);
   const jitter = Math.random() * jitterRange;
@@ -88,7 +88,7 @@ function calculateDelay(
 export async function retryWithBackoff<T>(
   operation: () => Promise<T>,
   config: RetryConfig,
-  operationName: string = "operation"
+  operationName: string = "operation",
 ): Promise<T> {
   const {
     maxRetries = 3,
@@ -107,18 +107,14 @@ export async function retryWithBackoff<T>(
         console.log(
           `[RETRY-${operationId}] Attempting ${operationName} - attempt ${
             attempt + 1
-          }/${maxRetries + 1}`
+          }/${maxRetries + 1}`,
         );
       }
 
       const result = await operation();
 
       if (attempt > 0) {
-        console.log(
-          `[RETRY-${operationId}] ${operationName} succeeded on attempt ${
-            attempt + 1
-          }`
-        );
+        console.log(`[RETRY-${operationId}] ${operationName} succeeded on attempt ${attempt + 1}`);
       }
 
       return result;
@@ -128,28 +124,20 @@ export async function retryWithBackoff<T>(
       // Check if this is the last attempt
       if (attempt === maxRetries) {
         console.error(
-          `[RETRY-${operationId}] ${operationName} failed after ${
-            maxRetries + 1
-          } attempts:`,
-          lastError.message
+          `[RETRY-${operationId}] ${operationName} failed after ${maxRetries + 1} attempts:`,
+          lastError.message,
         );
         throw lastError;
       }
 
       // Calculate delay and wait
-      const delay = calculateDelay(
-        attempt,
-        baseDelay,
-        maxDelay,
-        backoffMultiplier,
-        jitterRange
-      );
+      const delay = calculateDelay(attempt, baseDelay, maxDelay, backoffMultiplier, jitterRange);
 
       console.warn(
         `[RETRY-${operationId}] ${operationName} failed (attempt ${
           attempt + 1
         }), retrying in ${Math.round(delay)}ms:`,
-        lastError.message
+        lastError.message,
       );
 
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -164,7 +152,7 @@ export async function retryWithBackoff<T>(
  */
 export function retryAuth<T>(
   operation: () => Promise<T>,
-  operationName: string = "auth operation"
+  operationName: string = "auth operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.AUTH, operationName);
 }
@@ -174,7 +162,7 @@ export function retryAuth<T>(
  */
 export function retryDatabase<T>(
   operation: () => Promise<T>,
-  operationName: string = "database operation"
+  operationName: string = "database operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.DATABASE, operationName);
 }
@@ -184,7 +172,7 @@ export function retryDatabase<T>(
  */
 export function retryExternalApi<T>(
   operation: () => Promise<T>,
-  operationName: string = "external API operation"
+  operationName: string = "external API operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.EXTERNAL_API, operationName);
 }
@@ -194,7 +182,7 @@ export function retryExternalApi<T>(
  */
 export function retryCache<T>(
   operation: () => Promise<T>,
-  operationName: string = "cache operation"
+  operationName: string = "cache operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.CACHE, operationName);
 }
@@ -204,7 +192,7 @@ export function retryCache<T>(
  */
 export function retryFileUpload<T>(
   operation: () => Promise<T>,
-  operationName: string = "file upload operation"
+  operationName: string = "file upload operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.FILE_UPLOAD, operationName);
 }
@@ -214,7 +202,7 @@ export function retryFileUpload<T>(
  */
 export function retryAI<T>(
   operation: () => Promise<T>,
-  operationName: string = "AI operation"
+  operationName: string = "AI operation",
 ): Promise<T> {
   return retryWithBackoff(operation, RETRY_CONFIGS.AI, operationName);
 }

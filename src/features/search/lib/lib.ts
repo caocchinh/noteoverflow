@@ -1,16 +1,16 @@
-import { OptionalSearchFilter } from "../constants/type";
 import {
   validateCurriculum,
-  validateSubject,
   validatePartialFilterData,
+  validateSubject,
 } from "@/features/topical/lib/utils";
+import { OptionalSearchFilter } from "../constants/type";
 
 /**
  * Validate search filters using the same logic as server-side
  * Returns null if valid, or an error message string if invalid
  */
 export const validateSearchFilter = (
-  filter: OptionalSearchFilter | null | undefined
+  filter: OptionalSearchFilter | null | undefined,
 ): string | null => {
   if (!filter) return null;
 
@@ -30,11 +30,7 @@ export const validateSearchFilter = (
   }
 
   // Validate subject if curriculum and subject are provided
-  if (
-    filter.curriculum &&
-    filter.subject &&
-    !validateSubject(filter.curriculum, filter.subject)
-  ) {
+  if (filter.curriculum && filter.subject && !validateSubject(filter.curriculum, filter.subject)) {
     return "Invalid subject for the selected curriculum";
   }
 
@@ -60,7 +56,7 @@ export const validateSearchFilter = (
 
 export const updateSearchQueryParam = (
   query: string,
-  filter: OptionalSearchFilter | null = null
+  filter: OptionalSearchFilter | null = null,
 ) => {
   try {
     if (typeof window === "undefined") {
@@ -73,11 +69,7 @@ export const updateSearchQueryParam = (
       params.set("filter", JSON.stringify(filter));
     }
 
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`
-    );
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
   } catch {
     return;
   }

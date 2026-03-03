@@ -1,11 +1,11 @@
-import { ValidContentType } from "@/constants/types";
-import { uploadToR2 } from "../server/actions";
 import {
   FAILED_TO_UPLOAD_IMAGE,
   TOPICAL_QUESTION_APP_ROUTE,
   UNAUTHORIZED,
 } from "@/constants/constants";
+import { ValidContentType } from "@/constants/types";
 import { redirect } from "next/navigation";
+import { uploadToR2 } from "../server/actions";
 
 export const uploadImage = async ({
   file,
@@ -38,7 +38,7 @@ export const uploadImage = async ({
       httpMetadata: {
         contentType: file.type,
       },
-    })
+    }),
   );
 
   const response = await uploadToR2({ formData: form });

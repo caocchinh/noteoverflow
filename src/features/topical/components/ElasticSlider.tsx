@@ -1,13 +1,7 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from "react";
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-  useTransform,
-} from "motion/react";
 import { Button } from "@/components/ui/button";
 import { SquareMinus, SquarePlus } from "lucide-react";
+import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "motion/react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 
 const MAX_OVERFLOW = 30;
 
@@ -31,9 +25,7 @@ const ElasticSlider: React.FC<ElasticSliderProps> = ({
   setValue,
 }) => {
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-0 w-48 ${className}`}
-    >
+    <div className={`flex w-48 flex-col items-center justify-center gap-0 ${className}`}>
       <Slider
         startingValue={startingValue}
         minValue={minValue}
@@ -91,8 +83,7 @@ const Slider: React.FC<SliderProps> = ({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.buttons > 0 && sliderRef.current) {
       const { left, width } = sliderRef.current.getBoundingClientRect();
-      let newValue =
-        minValue + ((e.clientX - left) / width) * (maxValue - minValue);
+      let newValue = minValue + ((e.clientX - left) / width) * (maxValue - minValue);
       if (isStepped) {
         newValue = Math.round(newValue / stepSize) * stepSize;
       }
@@ -117,7 +108,7 @@ const Slider: React.FC<SliderProps> = ({
 
   return (
     <>
-      <p className=" text-foreground transform text-md font-medium tracking-wide -mb-3">
+      <p className="text-foreground text-md -mb-3 transform font-medium tracking-wide">
         {Math.round(sliderValue)}
       </p>
       <motion.div
@@ -129,7 +120,7 @@ const Slider: React.FC<SliderProps> = ({
           scale,
           opacity: useTransform(scale, [1, 1.2], [0.7, 1]),
         }}
-        className="flex w-full touch-none select-none flex-row items-center justify-center gap-2"
+        className="flex w-full touch-none flex-row items-center justify-center gap-2 select-none"
       >
         <motion.div
           animate={{
@@ -137,23 +128,21 @@ const Slider: React.FC<SliderProps> = ({
             transition: { duration: 0.25 },
           }}
           style={{
-            x: useTransform(() =>
-              region === "left" ? -overflow.get() / scale.get() : 0,
-            ),
+            x: useTransform(() => (region === "left" ? -overflow.get() / scale.get() : 0)),
           }}
           onClick={() => {
             if (sliderValue && sliderValue > minValue) {
               setSliderValue(sliderValue - 1);
             }
           }}
-          className="cursor-pointer flex items-center justify-center"
+          className="flex cursor-pointer items-center justify-center"
         >
           <SquareMinus />
         </motion.div>
 
         <div
           ref={sliderRef}
-          className="relative flex w-full flex-row max-w-xs grow cursor-grab touch-none select-none items-center py-4"
+          className="relative flex w-full max-w-xs grow cursor-grab touch-none flex-row items-center py-4 select-none"
           onPointerMove={handlePointerMove}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
@@ -170,8 +159,7 @@ const Slider: React.FC<SliderProps> = ({
               scaleY: useTransform(overflow, [0, MAX_OVERFLOW], [1, 0.8]),
               transformOrigin: useTransform(() => {
                 if (sliderRef.current) {
-                  const { left, width } =
-                    sliderRef.current.getBoundingClientRect();
+                  const { left, width } = sliderRef.current.getBoundingClientRect();
                   return clientX.get() < left + width / 2 ? "right" : "left";
                 }
                 return "center";
@@ -184,7 +172,7 @@ const Slider: React.FC<SliderProps> = ({
           >
             <div className="relative h-full grow overflow-hidden rounded-full bg-gray-400">
               <div
-                className="absolute h-full bg-logo-main rounded-full"
+                className="bg-logo-main absolute h-full rounded-full"
                 style={{ width: `${getRangePercentage()}%` }}
               />
             </div>
@@ -197,9 +185,7 @@ const Slider: React.FC<SliderProps> = ({
             transition: { duration: 0.25 },
           }}
           style={{
-            x: useTransform(() =>
-              region === "right" ? overflow.get() / scale.get() : 0,
-            ),
+            x: useTransform(() => (region === "right" ? overflow.get() / scale.get() : 0)),
           }}
           className="cursor-pointer"
           onClick={() => {
@@ -213,7 +199,7 @@ const Slider: React.FC<SliderProps> = ({
       </motion.div>
 
       <Button
-        className="w-full cursor-pointer mt-1"
+        className="mt-1 w-full cursor-pointer"
         variant="outline"
         onClick={() => {
           if (sliderValue) {

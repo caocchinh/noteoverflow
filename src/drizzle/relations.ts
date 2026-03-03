@@ -1,19 +1,19 @@
 import { relations } from "drizzle-orm";
 import {
-  user,
-  session,
   account,
-  userBookmarks,
-  userBookmarkList,
-  question,
-  season,
-  paperType,
-  year,
-  topic,
-  subject,
   curriculum,
   finishedQuestions,
+  paperType,
+  question,
   recentQuery,
+  season,
+  session,
+  subject,
+  topic,
+  user,
+  userBookmarkList,
+  userBookmarks,
+  year,
 } from "./schema";
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -25,16 +25,13 @@ export const userRelations = relations(user, ({ many }) => ({
   recentQuestions: many(recentQuery),
 }));
 
-export const userBookmarkListRelations = relations(
-  userBookmarkList,
-  ({ many, one }) => ({
-    userBookmarks: many(userBookmarks),
-    user: one(user, {
-      fields: [userBookmarkList.userId],
-      references: [user.id],
-    }),
-  })
-);
+export const userBookmarkListRelations = relations(userBookmarkList, ({ many, one }) => ({
+  userBookmarks: many(userBookmarks),
+  user: one(user, {
+    fields: [userBookmarkList.userId],
+    references: [user.id],
+  }),
+}));
 
 export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
   question: one(question, {
@@ -47,19 +44,16 @@ export const userBookmarksRelations = relations(userBookmarks, ({ one }) => ({
   }),
 }));
 
-export const finishedQuestionsRelations = relations(
-  finishedQuestions,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [finishedQuestions.userId],
-      references: [user.id],
-    }),
-    question: one(question, {
-      fields: [finishedQuestions.questionId],
-      references: [question.id],
-    }),
-  })
-);
+export const finishedQuestionsRelations = relations(finishedQuestions, ({ one }) => ({
+  user: one(user, {
+    fields: [finishedQuestions.userId],
+    references: [user.id],
+  }),
+  question: one(question, {
+    fields: [finishedQuestions.questionId],
+    references: [question.id],
+  }),
+}));
 
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
@@ -109,11 +103,7 @@ export const questionRelations = relations(question, ({ one }) => ({
   }),
   paperType: one(paperType, {
     fields: [question.paperType, question.subjectId, question.curriculumName],
-    references: [
-      paperType.paperType,
-      paperType.subjectId,
-      paperType.curriculumName,
-    ],
+    references: [paperType.paperType, paperType.subjectId, paperType.curriculumName],
   }),
   year: one(year, {
     fields: [question.year, question.subjectId, question.curriculumName],

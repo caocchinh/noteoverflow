@@ -1,25 +1,16 @@
-import { Elysia, t } from "elysia";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
+import { getUnprocessedQuestions, processSingleQuestion } from "@/server/api/dimensions/dimensions";
+import { getDimensionStats } from "@/server/api/dimensions/stats";
 import { getBookmarkById } from "@/server/api/getBookmarkById";
 import { getBookmarkListMetadata } from "@/server/api/getBookmarkListMetadata";
 import { getBookmarkQuestions } from "@/server/api/getBookmarkQuestions";
 import { getRecentQueries } from "@/server/api/getRecentQueries";
 import { getSavedActivities } from "@/server/api/getSavedActivities";
-import {
-  getUnindexedQuestions,
-  indexSingleQuestion,
-} from "@/server/api/visual-search/indexing";
-import {
-  searchByImage,
-  searchByText,
-} from "@/server/api/visual-search/searching";
+import { getTopicalQuestions } from "@/server/api/getTopicalQuestions";
+import { getUnindexedQuestions, indexSingleQuestion } from "@/server/api/visual-search/indexing";
+import { searchByImage, searchByText } from "@/server/api/visual-search/searching";
 import { getQuestionStats } from "@/server/api/visual-search/stats";
-import { getDimensionStats } from "@/server/api/dimensions/stats";
-import {
-  getUnprocessedQuestions,
-  processSingleQuestion,
-} from "@/server/api/dimensions/dimensions";
+import { Elysia, t } from "elysia";
 
 const app = new Elysia({ prefix: "/api", aot: false })
   .onError(({ code, status, error }) => {
@@ -154,7 +145,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
           year: t.Optional(t.Array(t.String())),
           season: t.Optional(t.Array(t.String())),
           paperType: t.Optional(t.Array(t.String())),
-        })
+        }),
       ),
     }),
   })
@@ -171,7 +162,7 @@ const app = new Elysia({ prefix: "/api", aot: false })
           year: t.Optional(t.Array(t.String())),
           season: t.Optional(t.Array(t.String())),
           paperType: t.Optional(t.Array(t.String())),
-        })
+        }),
       ),
     }),
   });

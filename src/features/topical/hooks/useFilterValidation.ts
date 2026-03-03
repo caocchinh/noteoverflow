@@ -1,6 +1,6 @@
-import { useCallback, RefObject, SetStateAction, useEffect } from "react";
-import { InvalidInputs } from "../types/models";
+import { RefObject, SetStateAction, useCallback, useEffect } from "react";
 import { isValidInputs as isValidInputsUtil } from "../lib/utils";
+import { InvalidInputs } from "../types/models";
 
 export interface UseFilterValidationOptions {
   /** Refs for scrolling to invalid inputs */

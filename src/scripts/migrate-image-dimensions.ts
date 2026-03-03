@@ -1,7 +1,7 @@
-import "server-only";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import "server-only";
 
 interface ImageDimension {
   width: number;
@@ -63,58 +63,50 @@ async function migrateImageDimensions() {
       break; // No more questions to process
     }
 
-    console.log(
-      `Processing batch: offset ${offset}, count ${questions.length}`
-    );
+    console.log(`Processing batch: offset ${offset}, count ${questions.length}`);
 
     for (const q of questions) {
       try {
         // Parse the old parallel arrays
-        const oldQuestionImages: string[] = JSON.parse(
-          q.questionImages ?? "[]"
-        );
+        const oldQuestionImages: string[] = JSON.parse(q.questionImages ?? "[]");
         const oldQuestionDimensions: (ImageDimension | null)[] = JSON.parse(
-          q.questionImagesDimensions ?? "[]"
+          q.questionImagesDimensions ?? "[]",
         );
         const oldAnswers: string[] = JSON.parse(q.answers ?? "[]");
         const oldAnswerDimensions: (ImageDimension | null)[] = JSON.parse(
-          q.answersImagesDimensions ?? "[]"
+          q.answersImagesDimensions ?? "[]",
         );
 
         // STEP 1: Combine questionImages with their dimensions
-        const newQuestionImages: ImageWithDimensions[] = oldQuestionImages.map(
-          (url, index) => {
-            const dimensions = oldQuestionDimensions[index] ?? null;
-            return {
-              url,
-              width: dimensions?.width ?? null,
-              height: dimensions?.height ?? null,
-            };
-          }
-        );
+        const newQuestionImages: ImageWithDimensions[] = oldQuestionImages.map((url, index) => {
+          const dimensions = oldQuestionDimensions[index] ?? null;
+          return {
+            url,
+            width: dimensions?.width ?? null,
+            height: dimensions?.height ?? null,
+          };
+        });
 
         // STEP 2: Combine answers with their dimensions
         // Determine if each answer is an image or text
-        const newAnswers: AnswerWithDimensions[] = oldAnswers.map(
-          (content, index) => {
-            const dimensions = oldAnswerDimensions[index] ?? null;
-            const isImage = isImageUrl(content);
+        const newAnswers: AnswerWithDimensions[] = oldAnswers.map((content, index) => {
+          const dimensions = oldAnswerDimensions[index] ?? null;
+          const isImage = isImageUrl(content);
 
-            if (isImage) {
-              return {
-                type: "image",
-                content,
-                width: dimensions?.width ?? null,
-                height: dimensions?.height ?? null,
-              };
-            } else {
-              return {
-                type: "text",
-                content,
-              };
-            }
+          if (isImage) {
+            return {
+              type: "image",
+              content,
+              width: dimensions?.width ?? null,
+              height: dimensions?.height ?? null,
+            };
+          } else {
+            return {
+              type: "text",
+              content,
+            };
           }
-        );
+        });
 
         // STEP 3: Update the database with new format
         await db
@@ -158,9 +150,7 @@ function isImageUrl(url: string): boolean {
   const imageHostDomains = ["notestack.online", "noteoverflow.com"];
 
   const hasImageExtension = imageExtensions.test(url);
-  const isFromImageHost = imageHostDomains.some((domain) =>
-    url.includes(domain)
-  );
+  const isFromImageHost = imageHostDomains.some((domain) => url.includes(domain));
 
   return hasImageExtension || isFromImageHost;
 }

@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  TOPICAL_QUESTION_APP_ROUTE,
+  TOPICAL_QUESTION_BOOKMARK_ROUTE,
+  // TOPICAL_QUESTION_HISTORY_ROUTE,
+  TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE,
+} from "@/constants/constants";
+import { cn } from "@/lib/utils";
+import {
   BookOpenCheck,
   Bookmark,
   // FileClock,
@@ -9,13 +16,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
-import {
-  TOPICAL_QUESTION_APP_ROUTE,
-  TOPICAL_QUESTION_BOOKMARK_ROUTE,
-  // TOPICAL_QUESTION_HISTORY_ROUTE,
-  TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE,
-} from "@/constants/constants";
-import { cn } from "@/lib/utils";
 import Dock from "./Dock";
 
 const DockWrapper = () => {
@@ -30,11 +30,7 @@ const DockWrapper = () => {
       items={[
         {
           icon: (
-            <Link
-              href={TOPICAL_QUESTION_APP_ROUTE}
-              ref={dummyLinkRef1}
-              prefetch={false}
-            >
+            <Link href={TOPICAL_QUESTION_APP_ROUTE} ref={dummyLinkRef1} prefetch={false}>
               <LayoutDashboard
                 className={cn(
                   "text-white dark:text-black",
@@ -48,8 +44,7 @@ const DockWrapper = () => {
           onClick: () => {
             dummyLinkRef1.current?.click();
           },
-          backgroundColor:
-            pathname === TOPICAL_QUESTION_APP_ROUTE ? "!bg-logo-main" : "",
+          backgroundColor: pathname === TOPICAL_QUESTION_APP_ROUTE ? "!bg-logo-main" : "",
         },
 
         {
@@ -68,20 +63,15 @@ const DockWrapper = () => {
           onClick: () => {
             dummyLinkRef3.current?.click();
           },
-          backgroundColor:
-            pathname === TOPICAL_QUESTION_BOOKMARK_ROUTE ? "!bg-logo-main" : "",
+          backgroundColor: pathname === TOPICAL_QUESTION_BOOKMARK_ROUTE ? "!bg-logo-main" : "",
         },
         {
           icon: (
-            <Link
-              href={TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE}
-              ref={dummyLinkRef4}
-            >
+            <Link href={TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE} ref={dummyLinkRef4}>
               <BookOpenCheck
                 className={cn(
                   "text-white dark:text-black",
-                  pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE &&
-                    "text-white!",
+                  pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE && "text-white!",
                 )}
                 size={18}
               />
@@ -92,9 +82,7 @@ const DockWrapper = () => {
             dummyLinkRef4.current?.click();
           },
           backgroundColor:
-            pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE
-              ? "!bg-logo-main"
-              : "",
+            pathname === TOPICAL_QUESTION_FINISHED_QUESTIONS_ROUTE ? "!bg-logo-main" : "",
         },
         // {
         //   icon: (

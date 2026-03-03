@@ -29,80 +29,70 @@ const MODE_LABELS: Record<PdfContentType, string> = {
 };
 
 const ExportProgressDialog = memo(
-  forwardRef<ExportProgressDialogHandle, ExportProgressDialogProps>(
-    ({ onCancel }, ref) => {
-      const [state, setState] = useState<{
-        current: number;
-        total: number;
-        mode: PdfContentType;
-      } | null>(null);
+  forwardRef<ExportProgressDialogHandle, ExportProgressDialogProps>(({ onCancel }, ref) => {
+    const [state, setState] = useState<{
+      current: number;
+      total: number;
+      mode: PdfContentType;
+    } | null>(null);
 
-      useImperativeHandle(ref, () => ({
-        start: (total: number, mode: PdfContentType) => {
-          setState({ current: 0, total, mode });
-        },
-        setProgress: (current: number) => {
-          setState((prev) => (prev ? { ...prev, current } : null));
-        },
-        close: () => {
-          setState(null);
-        },
-      }));
+    useImperativeHandle(ref, () => ({
+      start: (total: number, mode: PdfContentType) => {
+        setState({ current: 0, total, mode });
+      },
+      setProgress: (current: number) => {
+        setState((prev) => (prev ? { ...prev, current } : null));
+      },
+      close: () => {
+        setState(null);
+      },
+    }));
 
-      const isFinishedProcessing = state?.current === state?.total;
+    const isFinishedProcessing = state?.current === state?.total;
 
-      return (
-        <Dialog open={!!state}>
-          {!!state && (
-            <>
-              {createPortal(
-                <div className="fixed inset-0 z-100015 bg-black/50" />,
-                document.body
-              )}
-            </>
-          )}
-          <DialogContent
-            className="sm:max-w-[425px] z-100020"
-            showCloseButton={false}
-          >
-            <DialogHeader>
-              <DialogTitle>Generating PDF...</DialogTitle>
-              {!isFinishedProcessing && (
-                <DialogDescription>
-                  Exporting {MODE_LABELS[state?.mode || "question"]}
-                </DialogDescription>
-              )}
-            </DialogHeader>
-            {!isFinishedProcessing ? (
-              <div className="flex flex-col gap-4 py-4">
-                <Progress
-                  value={((state?.current || 0) / (state?.total || 1)) * 100}
-                  className="h-2"
-                />
-                <p className="text-sm text-center text-muted-foreground">
-                  Processed {state?.current} of {state?.total} questions
-                </p>
-              </div>
-            ) : (
-              <div className="text-center text-sm text-red-500 py-4">
-                Putting everything together, please wait. The more you export,
-                the longer this gonna take!
-              </div>
+    return (
+      <Dialog open={!!state}>
+        {!!state && (
+          <>{createPortal(<div className="fixed inset-0 z-100015 bg-black/50" />, document.body)}</>
+        )}
+        <DialogContent className="z-100020 sm:max-w-[425px]" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Generating PDF...</DialogTitle>
+            {!isFinishedProcessing && (
+              <DialogDescription>
+                Exporting {MODE_LABELS[state?.mode || "question"]}
+              </DialogDescription>
             )}
-            <DialogFooter>
-              <Button
-                variant="destructive"
-                onClick={onCancel}
-                className="w-full sm:w-auto cursor-pointer"
-              >
-                Cancel
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      );
-    }
-  )
+          </DialogHeader>
+          {!isFinishedProcessing ? (
+            <div className="flex flex-col gap-4 py-4">
+              <Progress
+                value={((state?.current || 0) / (state?.total || 1)) * 100}
+                className="h-2"
+              />
+              <p className="text-muted-foreground text-center text-sm">
+                Processed {state?.current} of {state?.total} questions
+              </p>
+            </div>
+          ) : (
+            <div className="py-4 text-center text-sm text-red-500">
+              Putting everything together, please wait. The more you export, the longer this gonna
+              take!
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="destructive"
+              onClick={onCancel}
+              className="w-full cursor-pointer sm:w-auto"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }),
 );
 
 ExportProgressDialog.displayName = "ExportProgressDialog";

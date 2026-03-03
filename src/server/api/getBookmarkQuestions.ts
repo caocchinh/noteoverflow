@@ -1,11 +1,11 @@
-import "server-only";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
-import { userBookmarks, userBookmarkList, question } from "@/drizzle/schema";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { eq, and } from "drizzle-orm";
-import { status as elysiaStatus } from "elysia";
+import { question, userBookmarkList, userBookmarks } from "@/drizzle/schema";
 import { SelectedQuestion } from "@/features/topical/types/models";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
+import { and, eq } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
+import "server-only";
 
 export interface BookmarkQuestionsResponse {
   questions: {
@@ -100,9 +100,7 @@ export const getBookmarkQuestions = async ({
       questionImages: JSON.parse(row.questionImages ?? "[]"),
       answers: JSON.parse(row.answers ?? "[]"),
       topics: JSON.parse(row.topics ?? "[]"),
-      questionImagesDimensions: JSON.parse(
-        row.questionImagesDimensions ?? "[]",
-      ),
+      questionImagesDimensions: JSON.parse(row.questionImagesDimensions ?? "[]"),
       answersImagesDimensions: JSON.parse(row.answersImagesDimensions ?? "[]"),
     } as SelectedQuestion,
   }));

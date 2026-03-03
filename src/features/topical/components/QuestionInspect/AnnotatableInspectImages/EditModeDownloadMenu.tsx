@@ -4,11 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
 import { Download } from "lucide-react";
 import { memo, RefObject, useCallback, useMemo } from "react";
-import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 import DownloadButton from "./DownloadButton";
-import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
+import DownloadWithAnnotationsButton from "./DownloadWithAnnotationsButton";
 
 const EditModeDownloadMenu = memo(
   ({
@@ -45,7 +45,7 @@ const EditModeDownloadMenu = memo(
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="cursor-pointer h-[26px]"
+            className="h-[26px] cursor-pointer"
             disabled={!pdfBlob || isSessionFetching}
             variant="outline"
           >
@@ -54,7 +54,7 @@ const EditModeDownloadMenu = memo(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="z-999998 flex flex-col dark:bg-accent p-2 gap-2"
+          className="dark:bg-accent z-999998 flex flex-col gap-2 p-2"
           data-annotatable-download-menu
         >
           <DownloadButton

@@ -8,7 +8,7 @@ export const AnnotationService = {
     userId: string,
     questionId: string,
     questionXfdf?: string,
-    answerXfdf?: string
+    answerXfdf?: string,
   ) {
     try {
       const db = await getDbAsync();
@@ -52,7 +52,7 @@ export const AnnotationService = {
 
   async getAnnotations(
     userId: string,
-    questionId: string
+    questionId: string,
   ): Promise<
     | {
         success: true;
@@ -64,10 +64,7 @@ export const AnnotationService = {
     try {
       const db = await getDbAsync();
       const result = await db.query.userAnnotations.findFirst({
-        where: and(
-          eq(userAnnotations.userId, userId),
-          eq(userAnnotations.questionId, questionId)
-        ),
+        where: and(eq(userAnnotations.userId, userId), eq(userAnnotations.questionId, questionId)),
         columns: {
           questionXfdf: true,
           answerXfdf: true,
@@ -96,12 +93,7 @@ export const AnnotationService = {
       const db = await getDbAsync();
       await db
         .delete(userAnnotations)
-        .where(
-          and(
-            eq(userAnnotations.userId, userId),
-            eq(userAnnotations.questionId, questionId)
-          )
-        );
+        .where(and(eq(userAnnotations.userId, userId), eq(userAnnotations.questionId, questionId)));
 
       return { success: true };
     } catch (error) {

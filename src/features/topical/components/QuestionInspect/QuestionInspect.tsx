@@ -6,21 +6,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import InspectSidebar from "./InspectSidebar/InspectSidebar";
-import QuestionInspectMainContent from "./QuestionInspectMainContent";
 import { usePathname } from "next/navigation";
-import QuestionAnnotationGuardDialog from "./QuestionAnnotationGuardDialog";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InspectProvider } from "../../context/InspectContext";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import {
   InspectSidebarRef,
   InspectUltilityBarRef,
   QuestionInspectMainContentRef,
   QuestionInspectProps,
 } from "../../types/components";
+import InspectSidebar from "./InspectSidebar/InspectSidebar";
+import QuestionAnnotationGuardDialog from "./QuestionAnnotationGuardDialog";
+import QuestionInspectMainContent from "./QuestionInspectMainContent";
 
 const sidebarProviderStyle = {
   "--sidebar-width": "299.6px",
@@ -47,8 +47,7 @@ const QuestionInspect = memo(
       question: false,
       questionId: "",
     });
-    const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
-      useState(false);
+    const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] = useState(false);
 
     useEffect(() => {
       pathNameRef.current = pathname;
@@ -71,11 +70,8 @@ const QuestionInspect = memo(
       };
     }, []);
 
-    const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] =
-      useState(0);
-    const [currentQuestionId, setCurrentQuestionId] = useState<
-      string | undefined
-    >(undefined);
+    const [currentTabThatContainsQuestion, setCurrentTabThatContainsQuestion] = useState(0);
+    const [currentQuestionId, setCurrentQuestionId] = useState<string | undefined>(undefined);
     const [isInspectSidebarOpen, setIsInspectSidebarOpen] = useState(true);
     const isMobile = useIsMobile();
     const currentQuestionIndex = useMemo(() => {
@@ -84,11 +80,7 @@ const QuestionInspect = memo(
           (question) => question.id === currentQuestionId,
         ) ?? 0
       );
-    }, [
-      partitionedTopicalData,
-      currentTabThatContainsQuestion,
-      currentQuestionId,
-    ]);
+    }, [partitionedTopicalData, currentTabThatContainsQuestion, currentQuestionId]);
     const isInputFocusedRef = useRef(false);
     const allQuestions = useMemo(() => {
       return partitionedTopicalData?.flat() ?? [];
@@ -119,26 +111,20 @@ const QuestionInspect = memo(
         return;
       }
       setTimeout(() => {
-        setCurrentTabThatContainsQuestion(
-          calculateTabThatQuestionResidesIn(currentQuestionId),
-        );
+        setCurrentTabThatContainsQuestion(calculateTabThatQuestionResidesIn(currentQuestionId));
       }, 0);
     }, [currentQuestionId, calculateTabThatQuestionResidesIn]);
 
-    const questionInspectMainContentRef =
-      useRef<QuestionInspectMainContentRef | null>(null);
+    const questionInspectMainContentRef = useRef<QuestionInspectMainContentRef | null>(null);
     const sideBarInspectRef = useRef<InspectSidebarRef | null>(null);
     const inspectUltilityBarRef = useRef<InspectUltilityBarRef | null>(null);
     const navigationButtonsContainerRef = useRef<HTMLDivElement | null>(null);
     const isCoolDownRef = useRef(false);
     const [isPendingClose, setIsPendingClose] = useState(false);
 
-    const handleKeyDown = useCallback(
-      (e: React.KeyboardEvent<HTMLDivElement>) => {
-        questionInspectMainContentRef.current?.handleKeyboardNavigation(e);
-      },
-      [],
-    );
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+      questionInspectMainContentRef.current?.handleKeyboardNavigation(e);
+    }, []);
 
     const handleKeyUp = useCallback(() => {
       isCoolDownRef.current = false;
@@ -224,16 +210,10 @@ const QuestionInspect = memo(
     return (
       <>
         <QuestionAnnotationGuardDialog isOpen={isAnnotationGuardDialogOpen} />
-        <Dialog
-          open={isInspectOpen.isOpen}
-          onOpenChange={handleOpenChange}
-          modal={false}
-        >
-          {isInspectOpen.isOpen && (
-            <div className="fixed inset-0 z-100003 bg-black/50" />
-          )}
+        <Dialog open={isInspectOpen.isOpen} onOpenChange={handleOpenChange} modal={false}>
+          {isInspectOpen.isOpen && <div className="fixed inset-0 z-100003 bg-black/50" />}
           <DialogContent
-            className="w-[95vw] h-[94dvh] flex flex-row items-center justify-center max-w-screen! dark:bg-accent overflow-hidden p-0"
+            className="dark:bg-accent flex h-[94dvh] w-[95vw] max-w-screen! flex-row items-center justify-center overflow-hidden p-0"
             showCloseButton={false}
             onKeyDown={handleKeyDown}
             onKeyUp={handleKeyUp}
@@ -288,9 +268,7 @@ const QuestionInspect = memo(
               >
                 <InspectSidebar ref={sideBarInspectRef} />
 
-                <QuestionInspectMainContent
-                  ref={questionInspectMainContentRef}
-                />
+                <QuestionInspectMainContent ref={questionInspectMainContentRef} />
               </SidebarProvider>
             </InspectProvider>
           </DialogContent>

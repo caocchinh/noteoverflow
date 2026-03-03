@@ -1,5 +1,18 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
+import Beams from "@/features/home/components/animation/Beams";
+import ClickSpark from "@/features/home/components/animation/ClickSpark";
+import CountUp from "@/features/home/components/animation/CountUp";
+import Crosshair from "@/features/home/components/animation/Crosshair";
+import GridMotion from "@/features/home/components/animation/GridMotion";
+import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
+import { MacbookScroll } from "@/features/home/components/animation/macbook-scroll";
+import PixelCard from "@/features/home/components/animation/PixelCard";
+import { TextScramble } from "@/features/home/components/animation/text-scramble";
+import Home from "@/features/home/components/home";
+import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
 import {
   Atom,
   ChartLine,
@@ -16,19 +29,6 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
-import Beams from "@/features/home/components/animation/Beams";
-import ClickSpark from "@/features/home/components/animation/ClickSpark";
-import CountUp from "@/features/home/components/animation/CountUp";
-import Crosshair from "@/features/home/components/animation/Crosshair";
-import GridMotion from "@/features/home/components/animation/GridMotion";
-import InfiniteScroll from "@/features/home/components/animation/InfiniteScroll";
-import PixelCard from "@/features/home/components/animation/PixelCard";
-import { TextScramble } from "@/features/home/components/animation/text-scramble";
-import ProfileCard from "@/features/home/components/ProfileCard/ProfileCard";
-import { MacbookScroll } from "@/features/home/components/animation/macbook-scroll";
-import Home from "@/features/home/components/home";
 
 const items = Array.from({ length: 22 }, (_, i) => {
   const num = i + 1;
@@ -155,14 +155,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-(--home-page-bg) overflow-hidden">
-      <ClickSpark
-        duration={400}
-        sparkColor="#fff"
-        sparkCount={8}
-        sparkRadius={15}
-        sparkSize={10}
-      >
+    <div className="min-h-screen overflow-hidden bg-(--home-page-bg)">
+      <ClickSpark duration={400} sparkColor="#fff" sparkCount={8} sparkRadius={15} sparkSize={10}>
         <Home />
 
         <section className="relative flex flex-col items-center justify-center gap-12 px-4 py-10 md:flex-row md:px-8">
@@ -183,19 +177,19 @@ export default function HomePage() {
           <div className="order-1 w-full overflow-hidden md:order-2 md:w-1/2">
             <div>
               <CountUp
-                className="w-full font-bold text-5xl text-logo-main"
+                className="text-logo-main w-full text-5xl font-bold"
                 delay={0}
                 direction="up"
                 duration={2}
                 from={50_000}
                 to={100_000}
               />
-              <span className="font-bold text-5xl text-logo-main">+</span>
+              <span className="text-logo-main text-5xl font-bold">+</span>
             </div>
-            <h1 className="w-full fo1t-bold text-4xl text-(--home-page-text)">
+            <h1 className="fo1t-bold w-full text-4xl text-(--home-page-text)">
               Convenient topical past paper questions
             </h1>
-            <p className="mt-2 w-full text-(--home-page-text-muted) text-lg">
+            <p className="mt-2 w-full text-lg text-(--home-page-text-muted)">
               from 2009 of the most popular AS & A-level subjects
             </p>
           </div>
@@ -220,10 +214,7 @@ export default function HomePage() {
           className="relative z-1000 flex h-screen w-full cursor-none flex-col items-center justify-center gap-6 px-5"
           ref={containerRef}
         >
-          <Crosshair
-            color="#ffffff"
-            containerRef={containerRef as RefObject<HTMLElement>}
-          />
+          <Crosshair color="#ffffff" containerRef={containerRef as RefObject<HTMLElement>} />
 
           <div className="absolute top-0 left-0 h-full w-full">
             <Beams
@@ -237,13 +228,10 @@ export default function HomePage() {
               speed={2}
             />
           </div>
-          <div
-            className="flex w-full items-center justify-center"
-            ref={scrambleRef}
-          >
+          <div className="flex w-full items-center justify-center" ref={scrambleRef}>
             <TextScramble
               as="span"
-              className="-mt-24 relative z-10 text-center font-semibold text-6xl text-(--home-page-text) sm:text-7xl"
+              className="relative z-10 -mt-24 text-center text-6xl font-semibold text-(--home-page-text) sm:text-7xl"
               delay={270}
               duration={1.4}
               trigger={isTrigger}
@@ -252,21 +240,21 @@ export default function HomePage() {
             </TextScramble>
           </div>
           <PixelCard
-            className="absolute! -translate-x-1/2 top-[54%] left-1/2 h-[80px] w-[300px] cursor-none"
+            className="absolute! top-[54%] left-1/2 h-[80px] w-[300px] -translate-x-1/2 cursor-none"
             variant="blue"
           >
             <Button
               asChild
-              className="absolute top-0 left-0 h-full w-full border-2 border-white/70 bg-transparent text-(--home-page-text) text-xl hover:cursor-none hover:bg-transparent active:scale-[0.98]"
+              className="absolute top-0 left-0 h-full w-full border-2 border-white/70 bg-transparent text-xl text-(--home-page-text) hover:cursor-none hover:bg-transparent active:scale-[0.98]"
             >
               <Link href={TOPICAL_QUESTION_APP_ROUTE}>
                 Learn with zero cost
-                <HandCoins className="w-6! h-6!" />
+                <HandCoins className="h-6! w-6!" />
               </Link>
             </Button>
           </PixelCard>
         </section>
-        <section className="relative flex flex-col items-center justify-center gap-10 overflow-hidden px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10 bg-(--home-page-bg) z-1000">
+        <section className="relative z-1000 flex flex-col items-center justify-center gap-10 overflow-hidden bg-(--home-page-bg) px-4 pt-6 pb-12 md:flex-row md:gap-18 md:px-8 md:pt-10">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-indigo-900/35 via-black/70 to-gray-950 blur-3xl"></div>
 
@@ -274,15 +262,15 @@ export default function HomePage() {
               <div className="h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.40)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.40)_1px,transparent_1px)] bg-size-[4rem_4rem]"></div>
             </div>
 
-            <div className="absolute -left-20 top-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>
+            <div className="absolute top-20 -left-20 h-60 w-60 rounded-full bg-purple-600/27 blur-[100px]"></div>
             <div className="absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-blue-600/42 blur-[100px]"></div>
             <motion.div
               animate={glowAnimation}
-              className="absolute left-1/4 top-1/3 h-40 w-40 rounded-full bg-indigo-500/30 blur-[80px]"
+              className="absolute top-1/3 left-1/4 h-40 w-40 rounded-full bg-indigo-500/30 blur-[80px]"
             ></motion.div>
             <motion.div
               animate={glowAnimation}
-              className="absolute bottom-1/3 right-1/4 h-40 w-40 rounded-full bg-purple-500/30 blur-[80px]"
+              className="absolute right-1/4 bottom-1/3 h-40 w-40 rounded-full bg-purple-500/30 blur-[80px]"
             ></motion.div>
 
             <div className="absolute inset-0 opacity-20">
@@ -321,18 +309,18 @@ export default function HomePage() {
 
           <div className="relative z-20 flex w-[90%] flex-col items-center justify-center md:w-[450px]">
             <p className="text-left text-[32px] text-(--home-page-text)">
-              &quot;Be kind whenever possible. It is{" "}
-              <span className="text-rose-700">always</span> possible.&quot;
+              &quot;Be kind whenever possible. It is <span className="text-rose-700">always</span>{" "}
+              possible.&quot;
             </p>
-            <p className="after:-translate-y-1/2 relative self-end text-left text-(--home-page-text-muted) text-md after:absolute after:top-1/2 after:left-[-38px] after:z-10 after:h-px after:w-[35px] after:bg-(--home-page-text-muted) after:content-['']">
+            <p className="text-md relative self-end text-left text-(--home-page-text-muted) after:absolute after:top-1/2 after:left-[-38px] after:z-10 after:h-px after:w-[35px] after:-translate-y-1/2 after:bg-(--home-page-text-muted) after:content-['']">
               14th Dalai Lama (Tenzin Gyatso)
             </p>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="relative z-1000 bg-(--home-page-bg) border-t border-(--home-page-border) py-8 px-4">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <footer className="relative z-1000 border-t border-(--home-page-border) bg-(--home-page-bg) px-4 py-8">
+          <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
               <Image
                 src="/assets/logo-bg-colorised-modified-small.webp"
@@ -347,7 +335,7 @@ export default function HomePage() {
             <div className="flex items-center gap-6">
               <Link
                 href="/disclaimer"
-                className="text-sm text-(--home-page-text-muted) hover:text-(--home-page-text) transition-colors"
+                className="text-sm text-(--home-page-text-muted) transition-colors hover:text-(--home-page-text)"
               >
                 Disclaimer
               </Link>
@@ -355,17 +343,16 @@ export default function HomePage() {
                 href="https://github.com/caocchinh/noteoverflow"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-(--home-page-text-muted) hover:text-(--home-page-text) transition-colors flex items-center gap-1"
+                className="flex items-center gap-1 text-sm text-(--home-page-text-muted) transition-colors hover:text-(--home-page-text)"
               >
                 <Github className="h-4 w-4" />
                 GitHub
               </Link>
             </div>
           </div>
-          <p className="text-center text-xs text-(--home-page-text-muted) mt-4 max-w-2xl mx-auto">
-            NoteOverflow is not affiliated with Cambridge Assessment
-            International Education. All examination materials are property of
-            their respective copyright holders.
+          <p className="mx-auto mt-4 max-w-2xl text-center text-xs text-(--home-page-text-muted)">
+            NoteOverflow is not affiliated with Cambridge Assessment International Education. All
+            examination materials are property of their respective copyright holders.
           </p>
         </footer>
       </ClickSpark>

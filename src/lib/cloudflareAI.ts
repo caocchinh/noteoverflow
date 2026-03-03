@@ -1,5 +1,5 @@
-import "server-only";
 import { retryAI } from "@/dal/retry";
+import "server-only";
 
 /**
  * Cloudflare Workers AI helper functions for OCR and text embedding
@@ -17,8 +17,7 @@ type VisionModelInput = {
   messages: Array<{
     role: string;
     content: Array<
-      | { type: "image_url"; image_url: { url: string } }
-      | { type: "text"; text: string }
+      { type: "image_url"; image_url: { url: string } } | { type: "text"; text: string }
     >;
   }>;
   max_tokens: number;
@@ -32,11 +31,9 @@ type EmbeddingModelInput = {
  * Call Cloudflare AI REST API with automatic retries
  */
 async function callCloudflareAI<T>(
-  model:
-    | "@cf/meta/llama-4-scout-17b-16e-instruct"
-    | "@cf/baai/bge-large-en-v1.5",
+  model: "@cf/meta/llama-4-scout-17b-16e-instruct" | "@cf/baai/bge-large-en-v1.5",
   inputs: VisionModelInput | EmbeddingModelInput,
-  aiBinding?: Ai
+  aiBinding?: Ai,
 ): Promise<T> {
   if (process.env.NODE_ENV === "production" && aiBinding) {
     console.log(`Using Cloudflare AI Binding for ${model}`);
@@ -58,9 +55,7 @@ async function callCloudflareAI<T>(
       const payload = JSON.stringify(inputs);
       const payloadSize = new TextEncoder().encode(payload).length;
       console.log(
-        `Cloudflare AI request to ${model} - Payload size: ${(
-          payloadSize / 1024
-        ).toFixed(2)} KB`
+        `Cloudflare AI request to ${model} - Payload size: ${(payloadSize / 1024).toFixed(2)} KB`,
       );
 
       const response = await fetch(`${CLOUDFLARE_AI_BASE_URL}/${model}`, {
@@ -77,9 +72,7 @@ async function callCloudflareAI<T>(
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(
-          `Cloudflare AI API error: ${response.status} - ${error}`
-        );
+        throw new Error(`Cloudflare AI API error: ${response.status} - ${error}`);
       }
 
       const data = (await response.json()) as {
@@ -116,8 +109,7 @@ const fewShotMessages = [
   },
   {
     role: "user",
-    content:
-      "Extract this text: Calculate the acceleration. acceleration =  ms^(-2) [2]",
+    content: "Extract this text: Calculate the acceleration. acceleration =  ms^(-2) [2]",
   },
   {
     role: "assistant",
@@ -152,10 +144,7 @@ const fewShotMessages = [
  * @param imageBase64 - Base64 encoded image (without data URL prefix)
  * @returns Extracted text from the image
  */
-export async function extractTextFromImage(
-  imageBase64: string,
-  aiBinding?: Ai
-): Promise<string> {
+export async function extractTextFromImage(imageBase64: string, aiBinding?: Ai): Promise<string> {
   console.log("Extracting text from image...");
   const response = await callCloudflareAI<{
     response?: string;
@@ -183,7 +172,7 @@ export async function extractTextFromImage(
       ],
       max_tokens: 6700,
     } as VisionModelInput,
-    aiBinding
+    aiBinding,
   );
 
   return response.response || response.description || "";
@@ -194,14 +183,11 @@ export async function extractTextFromImage(
  * @param text - Text to embed
  * @returns 1024-dimensional embedding vector
  */
-export async function embedText(
-  text: string,
-  aiBinding?: Ai
-): Promise<number[]> {
+export async function embedText(text: string, aiBinding?: Ai): Promise<number[]> {
   const response = await callCloudflareAI<{ data: number[][] }>(
     "@cf/baai/bge-large-en-v1.5",
     { text: [text] },
-    aiBinding
+    aiBinding,
   );
 
   return response.data[0];
@@ -214,7 +200,7 @@ export async function embedText(
  */
 export async function processImage(
   imageBase64: string,
-  aiBinding?: Ai
+  aiBinding?: Ai,
 ): Promise<{ text: string; embedding: number[] }> {
   const text = await extractTextFromImage(imageBase64, aiBinding);
 

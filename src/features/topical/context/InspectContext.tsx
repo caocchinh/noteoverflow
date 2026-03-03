@@ -1,19 +1,13 @@
+import { createContext, Dispatch, RefObject, SetStateAction, useContext } from "react";
 import {
-  createContext,
-  useContext,
-  Dispatch,
-  SetStateAction,
-  RefObject,
-} from "react";
-import { SelectedQuestion, SortParameters } from "../types/models";
-import {
+  InspectSidebarRef,
+  InspectUltilityBarRef,
+  IsHavingUnsafeChangesRef,
+  QuestionInspectMainContentRef,
   QuestionInspectOpenState,
   QuestionInspectViewMode,
-  IsHavingUnsafeChangesRef,
-  InspectUltilityBarRef,
-  InspectSidebarRef,
-  QuestionInspectMainContentRef,
 } from "../types/components";
+import { SelectedQuestion, SortParameters } from "../types/models";
 
 interface InspectContextType {
   // Data

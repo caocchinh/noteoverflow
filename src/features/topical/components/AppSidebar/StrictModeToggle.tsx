@@ -1,6 +1,6 @@
+import { Switch } from "@/components/ui/switch";
 import { memo, useCallback } from "react";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { Switch } from "@/components/ui/switch";
 
 const StrictModeToggle = memo(() => {
   const { uiPreferences, setUiPreference } = useTopicalApp();
@@ -10,10 +10,10 @@ const StrictModeToggle = memo(() => {
   }, [setUiPreference]);
 
   return (
-    <div className="w-full flex items-center justify-around rounded-md border border-muted-foreground/20 bg-muted p-2">
-      <div className="w-[70%] flex items-start justify-center flex-col">
+    <div className="border-muted-foreground/20 bg-muted flex w-full items-center justify-around rounded-md border p-2">
+      <div className="flex w-[70%] flex-col items-start justify-center">
         <p className="text-sm font-semibold">Strict mode</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Questions containing unrelated topics will be excluded.
         </p>
       </div>

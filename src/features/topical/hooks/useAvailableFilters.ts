@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import { TOPICAL_DATA } from "@/constants/constants";
+import { useMemo } from "react";
 
 export interface UseAvailableFiltersProps {
   selectedCurriculum: string;
@@ -18,16 +18,15 @@ export const useAvailableFilters = ({
   }, []);
 
   const availableSubjects = useMemo(() => {
-    return TOPICAL_DATA[
-      TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)
-    ]?.subject;
+    return TOPICAL_DATA[TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)]
+      ?.subject;
   }, [selectedCurriculum]);
 
   const subjectSyllabus = useMemo(
     () =>
-      TOPICAL_DATA.find(
-        (item) => item.curriculum === selectedCurriculum,
-      )?.subject.find((sub) => sub.code === selectedSubject)?.syllabusLink,
+      TOPICAL_DATA.find((item) => item.curriculum === selectedCurriculum)?.subject.find(
+        (sub) => sub.code === selectedSubject,
+      )?.syllabusLink,
     [selectedCurriculum, selectedSubject],
   );
 
@@ -44,9 +43,7 @@ export const useAvailableFilters = ({
   }, [availableSubjects, selectedSubject]);
 
   const availableYears = useMemo(() => {
-    return availableSubjects
-      ?.find((item) => item.code === selectedSubject)
-      ?.year.map(String);
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.year.map(String);
   }, [availableSubjects, selectedSubject]);
 
   const availablePaperTypeFullInfo = useMemo(() => {
@@ -62,8 +59,7 @@ export const useAvailableFilters = ({
   }, [availableSubjects, selectedSubject]);
 
   const availableSeasons = useMemo(() => {
-    return availableSubjects?.find((item) => item.code === selectedSubject)
-      ?.season;
+    return availableSubjects?.find((item) => item.code === selectedSubject)?.season;
   }, [availableSubjects, selectedSubject]);
 
   const subjectPrerequisite = useMemo(() => {

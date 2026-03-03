@@ -6,22 +6,15 @@ interface GridMotionProps {
   gradientColor?: string;
 }
 
-const GridMotion: FC<GridMotionProps> = ({
-  items = [],
-  gradientColor = "black",
-}) => {
+const GridMotion: FC<GridMotionProps> = ({ items = [], gradientColor = "black" }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mouseXRef = useRef<number>(0); // Default value without window reference
 
   // Ensure the grid has 28 items (4 rows x 7 columns) by default
   const totalItems = 28;
-  const defaultItems = Array.from(
-    { length: totalItems },
-    (_, index) => `Item ${index + 1}`
-  );
-  const combinedItems =
-    items.length > 0 ? items.slice(0, totalItems) : defaultItems;
+  const defaultItems = Array.from({ length: totalItems }, (_, index) => `Item ${index + 1}`);
+  const combinedItems = items.length > 0 ? items.slice(0, totalItems) : defaultItems;
 
   useEffect(() => {
     // Set initial mouse position when component mounts in browser
@@ -42,14 +35,12 @@ const GridMotion: FC<GridMotionProps> = ({
         if (row) {
           const direction = index % 2 === 0 ? 1 : -1;
           const moveAmount =
-            ((mouseXRef.current / window.innerWidth) * maxMoveAmount -
-              maxMoveAmount / 2) *
+            ((mouseXRef.current / window.innerWidth) * maxMoveAmount - maxMoveAmount / 2) *
             direction;
 
           gsap.to(row, {
             x: moveAmount,
-            duration:
-              baseDuration + inertiaFactors[index % inertiaFactors.length],
+            duration: baseDuration + inertiaFactors[index % inertiaFactors.length],
             ease: "power3.out",
             overwrite: "auto",
           });

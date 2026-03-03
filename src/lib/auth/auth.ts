@@ -1,18 +1,18 @@
+import { AVATARS } from "@/constants/constants";
+import * as schema from "@/drizzle/schema";
+import { MY_ANNOTATIONS_BOOKMARK_LIST_NAME } from "@/features/topical/constants/constants";
 import { betterAuth, type User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin, captcha } from "better-auth/plugins";
-import { AVATARS } from "@/constants/constants";
-import * as schema from "@/drizzle/schema";
 import {
-  AdminRole,
   ac,
+  AdminRole,
   OwnerRole,
   ROLE_ADMIN,
   ROLE_OWNER,
   ROLE_USER,
   UserRole,
 } from "./permission";
-import { MY_ANNOTATIONS_BOOKMARK_LIST_NAME } from "@/features/topical/constants/constants";
 
 //npx @better-auth/cli generate --config /src/lib/auth/auth.ts
 

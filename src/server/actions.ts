@@ -1,10 +1,10 @@
 "use server";
 
-import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { getDbAsync } from "@/drizzle/db.server";
 import { user } from "@/drizzle/schema";
 import { auth } from "@/lib/auth/auth";
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
 export const updateUserAvatarAction = async (avatar: string) => {
   if (!avatar) {

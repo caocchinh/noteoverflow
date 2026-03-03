@@ -1,11 +1,11 @@
-import "server-only";
+import type { ValidCurriculum } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
-import { userBookmarks, userBookmarkList, question } from "@/drizzle/schema";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
+import { question, userBookmarkList, userBookmarks } from "@/drizzle/schema";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { eq, sql } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
-import type { ValidCurriculum } from "@/constants/types";
+import "server-only";
 
 export interface BookmarkListMetadataResponse {
   listId: string;

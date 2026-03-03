@@ -1,29 +1,17 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
 import type { ServerActionResponse, UploadPayload } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
-import { isValidQuestionId } from "@/lib/utils";
-import {
-  createCurriculum,
-  isCurriculumExists,
-} from "@/features/admin/server/main/curriculum";
-import {
-  createPaperType,
-  isPaperTypeExists,
-} from "@/features/admin/server/main/paperType";
+import { createCurriculum, isCurriculumExists } from "@/features/admin/server/main/curriculum";
+import { createPaperType, isPaperTypeExists } from "@/features/admin/server/main/paperType";
 import { createQuestion } from "@/features/admin/server/main/question";
-import {
-  createSeason,
-  isSeasonExists,
-} from "@/features/admin/server/main/season";
-import {
-  createSubject,
-  isSubjectExists,
-} from "@/features/admin/server/main/subject";
+import { createSeason, isSeasonExists } from "@/features/admin/server/main/season";
+import { createSubject, isSubjectExists } from "@/features/admin/server/main/subject";
 import { createTopic, isTopicExists } from "@/features/admin/server/main/topic";
 import { createYear, isYearExists } from "@/features/admin/server/main/year";
+import { isValidQuestionId } from "@/lib/utils";
+import { redirect } from "next/navigation";
 import {
   validateCurriculum,
   validatePaperType,
@@ -35,9 +23,7 @@ import {
   validateYear,
 } from "../lib/utils";
 
-export async function uploadAction(
-  payload: UploadPayload
-): Promise<ServerActionResponse<void>> {
+export async function uploadAction(payload: UploadPayload): Promise<ServerActionResponse<void>> {
   if (
     typeof payload.curriculumName !== "string" ||
     typeof payload.subjectId !== "string" ||
@@ -95,13 +81,7 @@ export async function uploadAction(
     await Promise.all([
       // Check and create year if needed
       (async () => {
-        if (
-          !(await isYearExists(
-            payload.year,
-            payload.subjectId,
-            payload.curriculumName
-          ))
-        ) {
+        if (!(await isYearExists(payload.year, payload.subjectId, payload.curriculumName))) {
           await createYear({
             year: payload.year,
             subjectId: payload.subjectId,
@@ -112,13 +92,7 @@ export async function uploadAction(
 
       // Check and create season if needed
       (async () => {
-        if (
-          !(await isSeasonExists(
-            payload.season,
-            payload.subjectId,
-            payload.curriculumName
-          ))
-        ) {
+        if (!(await isSeasonExists(payload.season, payload.subjectId, payload.curriculumName))) {
           await createSeason({
             season: payload.season,
             subjectId: payload.subjectId,
@@ -130,11 +104,7 @@ export async function uploadAction(
       // Check and create paper type if needed
       (async () => {
         if (
-          !(await isPaperTypeExists(
-            payload.paperType,
-            payload.subjectId,
-            payload.curriculumName
-          ))
+          !(await isPaperTypeExists(payload.paperType, payload.subjectId, payload.curriculumName))
         ) {
           await createPaperType({
             paperType: payload.paperType,
@@ -146,13 +116,7 @@ export async function uploadAction(
 
       // Check and create topic if needed
       (async () => {
-        if (
-          !(await isTopicExists(
-            payload.topic,
-            payload.subjectId,
-            payload.curriculumName
-          ))
-        ) {
+        if (!(await isTopicExists(payload.topic, payload.subjectId, payload.curriculumName))) {
           await createTopic({
             topic: payload.topic,
             subjectId: payload.subjectId,

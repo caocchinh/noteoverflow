@@ -1,4 +1,4 @@
-import FuzzyText from '@/components/animation/FuzzyText';
+import FuzzyText from "@/components/animation/FuzzyText";
 
 const NotFound = () => {
   return (

@@ -4,14 +4,17 @@ import {
   BAD_REQUEST,
   FILE_SIZE_EXCEEDS_LIMIT,
   INTERNAL_SERVER_ERROR,
+  MAX_FILE_SIZE,
   ONLY_WEBP_FILES_ALLOWED,
   UNAUTHORIZED,
 } from "@/constants/constants";
 import { ServerActionResponse } from "@/constants/types";
-import { MAX_FILE_SIZE } from "@/constants/constants";
 import { verifySession } from "@/dal/verifySession";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { CurriculumType, SubjectType } from "@/features/admin/content/constants/types";
+import { validateCurriculum, validateSubject } from "@/features/admin/content/lib/utils";
 import { isValidQuestionId } from "@/lib/utils";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { redirect } from "next/navigation";
 import { getCurriculum } from "./main/curriculum";
 import { getPaperType } from "./main/paperType";
 import { isQuestionExists } from "./main/question";
@@ -19,15 +22,6 @@ import { getSeason } from "./main/season";
 import { getSubjectByCurriculum } from "./main/subject";
 import { getTopic } from "./main/topic";
 import { getYear } from "./main/year";
-import type {
-  CurriculumType,
-  SubjectType,
-} from "@/features/admin/content/constants/types";
-import {
-  validateCurriculum,
-  validateSubject,
-} from "@/features/admin/content/lib/utils";
-import { redirect } from "next/navigation";
 
 export const uploadToR2 = async ({
   formData,
@@ -185,9 +179,7 @@ export const uploadToR2 = async ({
 //   }
 // };
 
-export const getCurriculumAction = async (): Promise<
-  ServerActionResponse<CurriculumType[]>
-> => {
+export const getCurriculumAction = async (): Promise<ServerActionResponse<CurriculumType[]>> => {
   try {
     const session = await verifySession();
     if (!session) {
@@ -211,13 +203,9 @@ export const getCurriculumAction = async (): Promise<
 };
 
 export const isQuestionExistsAction = async (
-  questionId: string
+  questionId: string,
 ): Promise<ServerActionResponse<boolean>> => {
-  if (
-    typeof questionId !== "string" ||
-    !questionId ||
-    !isValidQuestionId(questionId)
-  ) {
+  if (typeof questionId !== "string" || !questionId || !isValidQuestionId(questionId)) {
     return {
       success: false,
       error: BAD_REQUEST,
@@ -246,12 +234,9 @@ export const isQuestionExistsAction = async (
 };
 
 export const getSubjectByCurriculumAction = async (
-  curriculumName: string
+  curriculumName: string,
 ): Promise<ServerActionResponse<SubjectType[]>> => {
-  if (
-    typeof curriculumName !== "string" ||
-    validateCurriculum(curriculumName)
-  ) {
+  if (typeof curriculumName !== "string" || validateCurriculum(curriculumName)) {
     return {
       success: false,
       error: BAD_REQUEST,
@@ -281,7 +266,7 @@ export const getSubjectByCurriculumAction = async (
 
 export const getSubjectInfoAction = async (
   subjectId: string,
-  curriculumName: string
+  curriculumName: string,
 ): Promise<
   ServerActionResponse<{
     topicData: string[];

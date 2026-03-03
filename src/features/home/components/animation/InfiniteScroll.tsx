@@ -72,8 +72,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
     const itemHeight = firstItem.offsetHeight;
     const itemMarginTop = Number.parseFloat(itemStyle.marginTop) || 0;
     const totalItemHeight = itemHeight + itemMarginTop;
-    const totalHeight =
-      itemHeight * items.length + itemMarginTop * (items.length - 1);
+    const totalHeight = itemHeight * items.length + itemMarginTop * (items.length - 1);
 
     const wrapFn = gsap.utils.wrap(-totalHeight, totalHeight);
 

@@ -1,15 +1,15 @@
-import { Dispatch, SetStateAction, RefObject, ReactNode } from "react";
-import { UseMutateFunction } from "@tanstack/react-query";
-import { WebViewerInstance } from "@pdftron/webviewer";
-import { Root } from "react-dom/client";
 import { ValidCurriculum } from "@/constants/types";
+import { WebViewerInstance } from "@pdftron/webviewer";
+import { UseMutateFunction } from "@tanstack/react-query";
+import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
+import { Root } from "react-dom/client";
 import {
   CurrentQuery,
   FilterData,
   SelectedQuestion,
+  SortParameters,
   SubjectMetadata,
   TopicalData,
-  SortParameters,
 } from "./models";
 
 export interface InfiniteScrollProps {
@@ -25,10 +25,7 @@ export interface ExtendedIntersectionObserverInit extends IntersectionObserverIn
 
 export interface QuestionHoverCardProps {
   question: SelectedQuestion;
-  navigateToQuestion: (params: {
-    questionId: string;
-    scroll?: boolean;
-  }) => void;
+  navigateToQuestion: (params: { questionId: string; scroll?: boolean }) => void;
   isThisTheCurrentQuestion: boolean;
   isInspectSidebarOpen: boolean;
   setCurrentQuestionId: Dispatch<SetStateAction<string | undefined>>;
@@ -103,10 +100,7 @@ export interface AppSidebarProps {
 
 export interface FinishedTrackerProps {
   allQuestions: SelectedQuestion[];
-  navigateToQuestion: (params: {
-    questionId: string;
-    scroll?: boolean;
-  }) => void;
+  navigateToQuestion: (params: { questionId: string; scroll?: boolean }) => void;
 }
 
 export interface SecondaryAppSidebarProps {

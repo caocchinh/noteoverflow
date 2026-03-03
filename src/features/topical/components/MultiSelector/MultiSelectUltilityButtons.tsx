@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Trash2, X as RemoveIcon } from "lucide-react";
+import { X as RemoveIcon, Sparkles, Trash2 } from "lucide-react";
 import { Dispatch, memo, SetStateAction } from "react";
 
 export const MultiSelectorDesktoptUltilityButtons = memo(
@@ -13,10 +13,10 @@ export const MultiSelectorDesktoptUltilityButtons = memo(
     maxLength: number | undefined;
   }) => {
     return (
-      <div className="flex flex-row gap-2 m-2">
+      <div className="m-2 flex flex-row gap-2">
         {!maxLength && (
           <Button
-            className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center h-[30px]"
+            className="hidden h-[30px] flex-1/2 cursor-pointer items-center justify-center md:flex"
             onClick={onSelectAll}
           >
             Select all
@@ -24,7 +24,7 @@ export const MultiSelectorDesktoptUltilityButtons = memo(
           </Button>
         )}
         <Button
-          className="cursor-pointer flex-1/2 md:flex hidden items-center justify-center h-[30px] "
+          className="hidden h-[30px] flex-1/2 cursor-pointer items-center justify-center md:flex"
           onClick={onDeleteAll}
           variant="destructive"
         >
@@ -33,11 +33,10 @@ export const MultiSelectorDesktoptUltilityButtons = memo(
         </Button>
       </div>
     );
-  }
+  },
 );
 
-MultiSelectorDesktoptUltilityButtons.displayName =
-  "MultiSelectorDesktoptUltilityButtons";
+MultiSelectorDesktoptUltilityButtons.displayName = "MultiSelectorDesktoptUltilityButtons";
 
 export const MultiSelectorMobiletUltilityButtons = memo(
   ({
@@ -52,12 +51,8 @@ export const MultiSelectorMobiletUltilityButtons = memo(
     setOpen: Dispatch<SetStateAction<boolean>>;
   }) => {
     return (
-      <div className="flex flex-row gap-3 p-2 ">
-        <Button
-          className="flex-1/3 cursor-pointer"
-          onClick={onDeleteAll}
-          variant="destructive"
-        >
+      <div className="flex flex-row gap-3 p-2">
+        <Button className="flex-1/3 cursor-pointer" onClick={onDeleteAll} variant="destructive">
           Remove all
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -79,8 +74,7 @@ export const MultiSelectorMobiletUltilityButtons = memo(
         </Button>
       </div>
     );
-  }
+  },
 );
 
-MultiSelectorMobiletUltilityButtons.displayName =
-  "MultiSelectorMobiletUltilityButtons";
+MultiSelectorMobiletUltilityButtons.displayName = "MultiSelectorMobiletUltilityButtons";

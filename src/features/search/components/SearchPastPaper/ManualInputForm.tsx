@@ -1,8 +1,8 @@
-import { memo, useCallback, useMemo } from "react";
-import { Trash2, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
 import { TOPICAL_DATA } from "@/constants/constants";
+import EnhancedSelect from "@/features/topical/components/EnhancedSelect";
+import { Trash2, X as XIcon } from "lucide-react";
+import { memo, useCallback, useMemo } from "react";
 import NumberInputWithControls from "./NumberInputWithControls";
 import SeasonSelect from "./SeasonSelect";
 import { ManualInputFormProps, SubjectOption } from "./types";
@@ -29,15 +29,10 @@ const ManualInputForm = memo(
   }: ManualInputFormProps) => {
     const availableSubjects: SubjectOption[] | undefined = useMemo(() => {
       let subjects =
-        TOPICAL_DATA[
-          TOPICAL_DATA.findIndex(
-            (item) => item.curriculum === selectedCurriculum
-          )
-        ]?.subject;
+        TOPICAL_DATA[TOPICAL_DATA.findIndex((item) => item.curriculum === selectedCurriculum)]
+          ?.subject;
       if (selectedCurriculum === "CIE A-LEVEL") {
-        subjects = subjects?.filter(
-          (subject) => !subject.code.includes("9709")
-        );
+        subjects = subjects?.filter((subject) => !subject.code.includes("9709"));
         subjects?.unshift({
           code: "Mathematics (9709)",
           coverImage: "/assets/cover/Mathematics (9709).webp",
@@ -56,7 +51,7 @@ const ManualInputForm = memo(
           code: item.curriculum,
           coverImage: item.coverImage,
         })),
-      []
+      [],
     );
 
     const getPaperTypeError = useCallback(() => {
@@ -87,18 +82,14 @@ const ManualInputForm = memo(
     }, [invalidInputs.year, selectedYear, currentYear]);
 
     return (
-      <div className="flex flex-col gap-5 items-center justify-center overflow-hidden rounded-xl border border-border p-4 shadow-md mt-6">
-        <h4 className="text-base self-start font-semibold text-logo-main">
-          🎯 Manual Input
-        </h4>
+      <div className="border-border mt-6 flex flex-col items-center justify-center gap-5 overflow-hidden rounded-xl border p-4 shadow-md">
+        <h4 className="text-logo-main self-start text-base font-semibold">🎯 Manual Input</h4>
 
         {/* Curriculum Select */}
         <div className="relative w-full">
-          <div className="rounded-lg w-full">
+          <div className="w-full rounded-lg">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold mb-1 text-foreground">
-                📚 Curriculum
-              </span>
+              <span className="text-foreground mb-1 text-xs font-semibold">📚 Curriculum</span>
             </div>
             <EnhancedSelect
               data={curriculumData}
@@ -112,9 +103,9 @@ const ManualInputForm = memo(
               setSelectedValue={setSelectedCurriculum}
             />
             {invalidInputs.curriculum && (
-              <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+              <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-2 dark:border-red-800/30 dark:bg-red-950/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                <p className="text-xs font-medium text-red-600 dark:text-red-400">
                   Curriculum is required
                 </p>
               </div>
@@ -125,9 +116,7 @@ const ManualInputForm = memo(
         {/* Subject Select */}
         <div className="w-full">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold mb-1 text-foreground">
-              🎓 Subject
-            </span>
+            <span className="text-foreground mb-1 text-xs font-semibold">🎓 Subject</span>
           </div>
           <EnhancedSelect
             data={availableSubjects}
@@ -141,8 +130,8 @@ const ManualInputForm = memo(
             setSelectedValue={setSelectedSubject}
           />
           {invalidInputs.subject && (
-            <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-              <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+            <div className="mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-2 dark:border-red-800/30 dark:bg-red-950/20">
+              <p className="text-xs font-medium text-red-600 dark:text-red-400">
                 Subject is required
               </p>
             </div>
@@ -152,12 +141,10 @@ const ManualInputForm = memo(
         {/* Paper Details */}
         <div className="w-full">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-foreground">
-              📄 Paper Details
-            </span>
+            <span className="text-foreground text-xs font-semibold">📄 Paper Details</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <NumberInputWithControls
               value={selectedPaperType}
               onChange={setSelectedPaperType}
@@ -189,9 +176,7 @@ const ManualInputForm = memo(
         {/* Year Input */}
         <div className="w-full">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold mb-1 text-foreground">
-              📅 Year
-            </span>
+            <span className="text-foreground mb-1 text-xs font-semibold">📅 Year</span>
           </div>
           <NumberInputWithControls
             value={selectedYear}
@@ -204,38 +189,38 @@ const ManualInputForm = memo(
         </div>
 
         {/* Action Buttons */}
-        <div className="relative pt-2 w-full">
+        <div className="relative w-full pt-2">
           <Button
-            className="relative w-full cursor-pointer font-semibold bg-logo-main hover:bg-logo-main/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+            className="bg-logo-main hover:bg-logo-main/90 relative w-full cursor-pointer border-0 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
             onClick={onFindPaper}
           >
             Find Paper
           </Button>
         </div>
 
-        <div className="relative mt-[-10px] pt-0 w-full">
+        <div className="relative mt-[-10px] w-full pt-0">
           <Button
-            className="w-full cursor-pointer font-semibold text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+            className="w-full cursor-pointer border-0 font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
             variant="destructive"
             onClick={onClearEverything}
           >
             Clear Everything
-            <Trash2 className="w-4 h-4 ml-2" />
+            <Trash2 className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
-        <div className="relative mt-[-10px] pt-0 w-full">
+        <div className="relative mt-[-10px] w-full pt-0">
           <Button
-            className="w-full cursor-pointer font-semibold border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.01]"
+            className="w-full cursor-pointer border-0 font-semibold shadow-md transition-all duration-200 hover:scale-[1.01] hover:shadow-lg"
             onClick={onClose}
           >
             Close
-            <XIcon className="w-4 h-4 ml-2" />
+            <XIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
         <div className="pt-2 text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             ⚡ Powered by{" "}
             <a
               href="https://bestexamhelp.com"
@@ -249,7 +234,7 @@ const ManualInputForm = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 ManualInputForm.displayName = "ManualInputForm";

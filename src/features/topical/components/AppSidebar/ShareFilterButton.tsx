@@ -1,7 +1,7 @@
-import { memo, useState } from "react";
-import { QR } from "../QR";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { memo, useState } from "react";
+import { QR } from "../QR";
 
 const ShareFilterButton = memo(
   ({ isDisabled, filterUrl }: { isDisabled: boolean; filterUrl: string }) => {
@@ -9,7 +9,7 @@ const ShareFilterButton = memo(
     return (
       <>
         <Button
-          className="w-full cursor-pointer bg-logo-main text-white hover:bg-logo-main/90"
+          className="bg-logo-main hover:bg-logo-main/90 w-full cursor-pointer text-white"
           disabled={isDisabled}
           onClick={() => {
             setIsOpen(true);

@@ -1,7 +1,7 @@
-import "server-only";
-import { eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { curriculum } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
+import "server-only";
 
 export const createCurriculum = async ({ name }: { name: string }) => {
   const db = await getDbAsync();
@@ -10,11 +10,7 @@ export const createCurriculum = async ({ name }: { name: string }) => {
 
 export const isCurriculumExists = async (name: string): Promise<boolean> => {
   const db = await getDbAsync();
-  const result = await db
-    .select()
-    .from(curriculum)
-    .where(eq(curriculum.name, name))
-    .limit(1);
+  const result = await db.select().from(curriculum).where(eq(curriculum.name, name)).limit(1);
 
   return result.length > 0;
 };

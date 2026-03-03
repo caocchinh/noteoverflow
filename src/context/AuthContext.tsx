@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, ReactNode, useContext } from "react";
 
 type AuthData = typeof authClient.$Infer.Session;
 

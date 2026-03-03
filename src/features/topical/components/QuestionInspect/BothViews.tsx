@@ -1,13 +1,9 @@
-import { Ref, RefObject, useCallback, useState } from "react";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { cn } from "@/lib/utils";
-import { Eye, EyeClosed } from "lucide-react";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { Eye, EyeClosed } from "lucide-react";
+import { Ref, RefObject, useCallback, useState } from "react";
 import { SelectedQuestion } from "../../types/models";
 
 interface InspectPanelProps {
@@ -35,7 +31,7 @@ const InspectPanel = ({
   return (
     <ResizablePanel defaultSize={defaultSize} minSize={minSize}>
       <div
-        className="ml-3 mt-2 mb-2 flex flex-row gap-1 items-center justify-start flex-wrap cursor-pointer w-max"
+        className="mt-2 mb-2 ml-3 flex w-max cursor-pointer flex-row flex-wrap items-center justify-start gap-1"
         title="Toggle visibility"
         onClick={useCallback(() => {
           setIsHiding(!isHiding);
@@ -46,7 +42,7 @@ const InspectPanel = ({
       </div>
       <ScrollArea
         className={cn(
-          "h-[65dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-3 pb-5 pt-0",
+          "[&_.bg-border]:bg-logo-main/25 h-[65dvh] w-full pt-0 pr-3 pb-5",
           isMobile && "h-full!",
           isHiding && "blur-sm",
           scrollAreaClassName,
@@ -73,17 +69,13 @@ const BothViews = ({
   annotableQuestionContainerRef: Ref<HTMLDivElement>;
   annotableAnswerContainerRef: Ref<HTMLDivElement>;
 }) => {
-  const isAnswerMultipleChoice =
-    !currentQuestionData?.answers?.[0]?.includes("http");
+  const isAnswerMultipleChoice = !currentQuestionData?.answers?.[0]?.includes("http");
   const isMobile = useIsMobile();
 
   return (
     <ResizablePanelGroup
       orientation={isMobile ? "vertical" : "horizontal"}
-      className={cn(
-        "rounded-lg border w-full",
-        isMobile ? "h-[65dvh]!" : "h-[70dvh]!",
-      )}
+      className={cn("w-full rounded-lg border", isMobile ? "h-[65dvh]!" : "h-[70dvh]!")}
     >
       <InspectPanel
         key={`question-${currentQuestionData?.id}`}

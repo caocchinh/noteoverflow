@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { PAPER_TYPE_FILTER_SEARCH_PAGE_KEY } from "@/constants/constants";
-import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
-import { PaperTypeFilterSearchPageCache } from "@/features/search/constants/type";
 import { CIE_A_LEVEL_SUBDIVISION } from "@/constants/types";
+import { PaperTypeFilterSearchPageCache } from "@/features/search/constants/type";
+import { useEffect, useState } from "react";
+import { validateSubcurriculumnDivision } from "../../topical/lib/utils";
 
 export interface UsePaperTypePersistenceProps {
   selectedCurriculum: string;
@@ -49,9 +49,7 @@ export const usePaperTypePersistence = ({
 
   // Sync state when curriculum or subject changes
   useEffect(() => {
-    setCurrentPaperTypeFilter(
-      getSavedPaperTypeFilter(selectedCurriculum, selectedSubject),
-    );
+    setCurrentPaperTypeFilter(getSavedPaperTypeFilter(selectedCurriculum, selectedSubject));
   }, [selectedCurriculum, selectedSubject]);
 
   // Save paper type filter preference to localStorage when it changes
@@ -61,9 +59,7 @@ export const usePaperTypePersistence = ({
     }
 
     try {
-      const existingCache = localStorage.getItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-      );
+      const existingCache = localStorage.getItem(PAPER_TYPE_FILTER_SEARCH_PAGE_KEY);
       const parsedCache: PaperTypeFilterSearchPageCache = existingCache
         ? JSON.parse(existingCache)
         : {};
@@ -74,10 +70,7 @@ export const usePaperTypePersistence = ({
 
       parsedCache[selectedCurriculum][selectedSubject] = currentPaperTypeFilter;
 
-      localStorage.setItem(
-        PAPER_TYPE_FILTER_SEARCH_PAGE_KEY,
-        JSON.stringify(parsedCache),
-      );
+      localStorage.setItem(PAPER_TYPE_FILTER_SEARCH_PAGE_KEY, JSON.stringify(parsedCache));
     } catch (error) {
       console.error("Failed to save paper type filter to localStorage:", error);
     }

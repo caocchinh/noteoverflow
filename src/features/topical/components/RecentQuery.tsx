@@ -1,53 +1,43 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-  DialogTrigger,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
   Accordion,
-  AccordionItem,
   AccordionContent,
+  AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
-import { Button } from "@/components/ui/button";
-import { History, Loader2, ScanText, Wrench } from "lucide-react";
-import { useIsMutating } from "@tanstack/react-query";
-import {
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useCallback,
-  memo,
-} from "react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ValidCurriculum } from "@/constants/types";
+import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { ValidCurriculum } from "@/constants/types";
+import { useAuth } from "@/context/AuthContext";
+import { MAX_NUMBER_OF_RECENT_QUERIES } from "@/features/topical/constants/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { useIsMutating } from "@tanstack/react-query";
+import { History, Loader2, ScanText, Wrench } from "lucide-react";
+import { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
+import { toast } from "sonner";
+import { useTopicalApp } from "../context/TopicalLayoutProvider";
+import { useRecentQueries } from "../hooks";
 import {
   updateSearchParams,
   validateCurriculum,
   validateFilterData,
   validateSubject,
 } from "../lib/utils";
-import { toast } from "sonner";
-import Sort from "./Sort";
-import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import { useAuth } from "@/context/AuthContext";
 import { RecentQueryProps } from "../types/components";
 import { FilterData } from "../types/models";
-import { useRecentQueries } from "../hooks";
+import Sort from "./Sort";
 
 export const RecentQuery = memo(
   forwardRef(
@@ -78,8 +68,7 @@ export const RecentQuery = memo(
         isAddRecentQueryPending,
       } = useRecentQueries();
 
-      const [accordionValue, setAccordionValue] =
-        useState<string>("skibidi toilet");
+      const [accordionValue, setAccordionValue] = useState<string>("skibidi toilet");
       const [isDialogOpen, setIsDialogOpen] = useState(false);
 
       useImperativeHandle(
@@ -102,10 +91,7 @@ export const RecentQuery = memo(
           if (stringifiedNewQuery !== JSON.stringify(currentQuery)) {
             if (
               !validateCurriculum(parsedQuery.curriculumId) ||
-              !validateSubject(
-                parsedQuery.curriculumId,
-                parsedQuery.subjectId,
-              ) ||
+              !validateSubject(parsedQuery.curriculumId, parsedQuery.subjectId) ||
               !validateFilterData({
                 data: {
                   topic: parsedQuery.topic,
@@ -162,24 +148,21 @@ export const RecentQuery = memo(
       return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button
-              className="w-full cursor-pointer rounded-sm"
-              variant="outline"
-            >
+            <Button className="w-full cursor-pointer rounded-sm" variant="outline">
               <History /> Recently searched
             </Button>
           </DialogTrigger>
           <DialogContent
             showCloseButton={false}
-            className="dark:bg-accent h-[95dvh] z-100008"
+            className="dark:bg-accent z-100008 h-[95dvh]"
             overlayClassName="z-[100007]"
           >
-            <DialogHeader className="flex justify-between flex-row text-left gap-2">
+            <DialogHeader className="flex flex-row justify-between gap-2 text-left">
               <div>
                 <DialogTitle>Recently searched</DialogTitle>
                 <DialogDescription className="w-[85%]">
-                  Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show
-                  here. Synced accross devices.
+                  Your last {MAX_NUMBER_OF_RECENT_QUERIES} searches will show here. Synced accross
+                  devices.
                 </DialogDescription>
               </div>
               <Popover>
@@ -188,8 +171,8 @@ export const RecentQuery = memo(
                     Settings <Wrench />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="z-100009 dark:bg-accent w-max! flex flex-col items-center justify-center">
-                  <p className="text-sm mb-1">Sort by date</p>
+                <PopoverContent className="dark:bg-accent z-100009 flex w-max! flex-col items-center justify-center">
+                  <p className="mb-1 text-sm">Sort by date</p>
                   <Sort
                     sortParameters={{
                       sortBy: uiPreferences.recentlySearchSortedBy,
@@ -201,10 +184,7 @@ export const RecentQuery = memo(
                               sortBy: uiPreferences.recentlySearchSortedBy,
                             })
                           : value;
-                      setUiPreference(
-                        "recentlySearchSortedBy",
-                        newValue.sortBy,
-                      );
+                      setUiPreference("recentlySearchSortedBy", newValue.sortBy);
                     }}
                     isDisabled={false}
                     disabledMessage=""
@@ -223,34 +203,31 @@ export const RecentQuery = memo(
             >
               <ScrollArea type="always" className="h-[65vh] pr-5">
                 {isRecentQueryFetching && (
-                  <div className="flex justify-center items-center h-full gap-2">
+                  <div className="flex h-full items-center justify-center gap-2">
                     Fetching <Loader2 className="animate-spin" />
                   </div>
                 )}
                 {!isAuthenticated && (
-                  <div className="flex justify-center items-center h-full">
-                    <p className="text-red-500 text-center">
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-center text-red-500">
                       Please sign in to view recently searched queries.
                     </p>
                   </div>
                 )}
                 {isRecentQueryError && (
-                  <div className="flex justify-center items-center h-full">
-                    <p className="text-red-500 text-center">
-                      An error occurred while fetching recent queries! Please
-                      refresh the page.
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-center text-red-500">
+                      An error occurred while fetching recent queries! Please refresh the page.
                     </p>
                   </div>
                 )}
-                {isAddRecentQueryPending &&
-                  !isSessionPending &&
-                  isAuthenticated && (
-                    <div className="flex justify-center items-center text-sm gap-2">
-                      Updating <Loader2 className="animate-spin" size={13} />
-                    </div>
-                  )}
+                {isAddRecentQueryPending && !isSessionPending && isAuthenticated && (
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    Updating <Loader2 className="animate-spin" size={13} />
+                  </div>
+                )}
                 {recentQuery && recentQuery.length == 0 && (
-                  <div className="h-full w-full flex items-center justify-center">
+                  <div className="flex h-full w-full items-center justify-center">
                     No item found! Try searching for something.
                   </div>
                 )}
@@ -333,10 +310,10 @@ const RecentQueryItem = memo(
     return (
       <AccordionItem
         value={index.toString()}
-        className={cn(isThisItemDeleting && "opacity-50 pointer-events-none")}
+        className={cn(isThisItemDeleting && "pointer-events-none opacity-50")}
       >
         <AccordionTrigger>
-          <div className="flex flex-row items-center justify-start w-full gap-4">
+          <div className="flex w-full flex-row items-center justify-start gap-4">
             {index + 1}.
             <div
               className={cn(
@@ -346,17 +323,15 @@ const RecentQueryItem = memo(
               )}
             >
               <p>
-                {parsedQuery.curriculumId} - {parsedQuery.subjectId} -{" "}
-                {parsedQuery.topic.length} topic
-                {parsedQuery.topic.length > 1 && "s"} -{" "}
-                {parsedQuery.year.length} year
+                {parsedQuery.curriculumId} - {parsedQuery.subjectId} - {parsedQuery.topic.length}{" "}
+                topic
+                {parsedQuery.topic.length > 1 && "s"} - {parsedQuery.year.length} year
                 {parsedQuery.year.length > 1 && "s"}
               </p>
               <p
                 className={cn(
                   "text-muted-foreground",
-                  accordionValue === index.toString() &&
-                    "dark:text-white text-black",
+                  accordionValue === index.toString() && "text-black dark:text-white",
                 )}
               >
                 {new Date(item.lastSearch).toLocaleString(undefined, {
@@ -371,7 +346,7 @@ const RecentQueryItem = memo(
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="flex flex-col border border-logo-main p-3 rounded-sm mb-2 gap-2">
+        <AccordionContent className="border-logo-main mb-2 flex flex-col gap-2 rounded-sm border p-3">
           <div className="flex w-full flex-wrap gap-2">
             Topic:
             {parsedQuery.topic.map((topic) => (
@@ -409,7 +384,7 @@ const RecentQueryItem = memo(
           </div>
           <Button
             className={cn(
-              "w-full mt-2 bg-logo-main text-white! cursor-pointer hover:bg-logo-main",
+              "bg-logo-main hover:bg-logo-main mt-2 w-full cursor-pointer text-white!",
               isThisItemDeleting && "bg-red-500!",
             )}
             onClick={() => {

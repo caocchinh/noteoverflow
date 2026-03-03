@@ -1,33 +1,30 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import QuestionItem from "./QuestionItem";
-import { Search } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import type { Modifier } from "@dnd-kit/core";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
 } from "@dnd-kit/core";
+import { restrictToVerticalAxis, restrictToWindowEdges } from "@dnd-kit/modifiers";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  restrictToVerticalAxis,
-  restrictToWindowEdges,
-} from "@dnd-kit/modifiers";
-import type { Modifier } from "@dnd-kit/core";
-import OrderableQuestionItem from "./OrderableQuestionItem";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Search } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExportSelectListProps } from "../../types/components";
+import OrderableQuestionItem from "./OrderableQuestionItem";
+import QuestionItem from "./QuestionItem";
 
 const createAdjustOverlayOffset = (
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -69,9 +66,7 @@ const SelectList = memo(
 
     const getItemKey = useCallback(
       (index: number) =>
-        canReorder
-          ? questionsForExportArray[index]
-          : filteredQuestions[index]?.id,
+        canReorder ? questionsForExportArray[index] : filteredQuestions[index]?.id,
       [canReorder, questionsForExportArray, filteredQuestions],
     );
 
@@ -79,9 +74,7 @@ const SelectList = memo(
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const listVirtualizer = useVirtualizer({
-      count: canReorder
-        ? questionsForExportArray.length
-        : filteredQuestions.length,
+      count: canReorder ? questionsForExportArray.length : filteredQuestions.length,
       getScrollElement: () => listScrollAreaRef.current,
       estimateSize: () => estimatedSize,
       enabled: isVirtualizationReady,
@@ -100,10 +93,7 @@ const SelectList = memo(
       }),
     );
 
-    const adjustOverlayOffset = useMemo(
-      () => createAdjustOverlayOffset(listScrollAreaRef),
-      [],
-    );
+    const adjustOverlayOffset = useMemo(() => createAdjustOverlayOffset(listScrollAreaRef), []);
 
     useEffect(() => {
       if (isOpen) {
@@ -118,9 +108,7 @@ const SelectList = memo(
             ? questionsForExportArray
             : filteredQuestions.map((q) => q.id);
           const itemIndex =
-            predicate.findIndex(
-              (question) => question === currentlyPreviewQuestion,
-            ) ?? 0;
+            predicate.findIndex((question) => question === currentlyPreviewQuestion) ?? 0;
 
           if (itemIndex === -1) {
             return;
@@ -201,10 +189,7 @@ const SelectList = memo(
             onDragCancel={handleDragCancel}
             modifiers={[restrictToVerticalAxis]}
           >
-            <SortableContext
-              items={questionsForExportArray}
-              strategy={verticalListSortingStrategy}
-            >
+            <SortableContext items={questionsForExportArray} strategy={verticalListSortingStrategy}>
               <div
                 style={{
                   height: `${listVirtualizer.getTotalSize()}px`,
@@ -214,9 +199,7 @@ const SelectList = memo(
               >
                 {virtualItems.map((virtualItem) => {
                   const questionId = questionsForExportArray[virtualItem.index];
-                  const question = allQuestions.find(
-                    (q) => q.id === questionId,
-                  );
+                  const question = allQuestions.find((q) => q.id === questionId);
                   if (!question) return null;
                   return (
                     <div
@@ -237,18 +220,14 @@ const SelectList = memo(
                         currentlyPreviewQuestion={currentlyPreviewQuestion}
                         isSelected={questionsForExport.has(questionId)}
                         onToggle={() => toggleQuestion(questionId)}
-                        setCurrentlyPreviewQuestion={
-                          setCurrentlyPreviewQuestion
-                        }
+                        setCurrentlyPreviewQuestion={setCurrentlyPreviewQuestion}
                       />
                     </div>
                   );
                 })}
               </div>
             </SortableContext>
-            <DragOverlay
-              modifiers={[adjustOverlayOffset, restrictToWindowEdges]}
-            >
+            <DragOverlay modifiers={[adjustOverlayOffset, restrictToWindowEdges]}>
               {activeQuestion ? (
                 <OrderableQuestionItem
                   question={activeQuestion}
@@ -300,11 +279,11 @@ const SelectList = memo(
 
         {filteredQuestions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+            <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+              <Search className="text-muted-foreground h-8 w-8" />
             </div>
             <p className="text-lg font-medium">No questions found</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               Try adjusting your search or filter criteria
             </p>
           </div>

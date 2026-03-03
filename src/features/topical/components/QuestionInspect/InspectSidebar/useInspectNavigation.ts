@@ -1,11 +1,5 @@
 import { UseInspectNavigationProps } from "@/features/topical/types/hooks";
-import {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useEffectEvent,
-} from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from "react";
 
 export const useInspectNavigation = ({
   partitionedTopicalData,
@@ -25,12 +19,9 @@ export const useInspectNavigation = ({
   calculateTabThatQuestionResidesIn,
   setCurrentTab,
 }: UseInspectNavigationProps) => {
-  const [pendingQuestionId, setPendingQuestionId] = useState<
-    string | undefined
-  >(undefined);
+  const [pendingQuestionId, setPendingQuestionId] = useState<string | undefined>(undefined);
   const [pendingTab, setPendingTab] = useState<number | undefined>(undefined);
-  const [willScrollToQuestionAfterGuard, setWillScrollToQuestionAfterGuard] =
-    useState(false);
+  const [willScrollToQuestionAfterGuard, setWillScrollToQuestionAfterGuard] = useState(false);
 
   const handleNextQuestion = useCallback(() => {
     if (
@@ -44,9 +35,7 @@ export const useInspectNavigation = ({
           partitionedTopicalData[currentTabThatContainsQuestion].length - 1
         ) {
           const newQuestionId =
-            partitionedTopicalData[currentTabThatContainsQuestion][
-              currentQuestionIndex + 1
-            ].id;
+            partitionedTopicalData[currentTabThatContainsQuestion][currentQuestionIndex + 1].id;
           if (
             isHavingUnsafeChangesRef.current?.["answer"] ||
             isHavingUnsafeChangesRef.current?.["question"]
@@ -64,12 +53,8 @@ export const useInspectNavigation = ({
             });
           }
         } else {
-          if (
-            currentTabThatContainsQuestion <
-            partitionedTopicalData.length - 1
-          ) {
-            const newQuestionId =
-              partitionedTopicalData[currentTabThatContainsQuestion + 1][0].id;
+          if (currentTabThatContainsQuestion < partitionedTopicalData.length - 1) {
+            const newQuestionId = partitionedTopicalData[currentTabThatContainsQuestion + 1][0].id;
             if (
               isHavingUnsafeChangesRef.current?.["answer"] ||
               isHavingUnsafeChangesRef.current?.["question"]
@@ -96,8 +81,7 @@ export const useInspectNavigation = ({
           return;
         }
         if (currentQuestionIndexInSearchResult < searchResults.length - 1) {
-          const newQuestionId =
-            searchResults[currentQuestionIndexInSearchResult + 1].id;
+          const newQuestionId = searchResults[currentQuestionIndexInSearchResult + 1].id;
 
           if (
             isHavingUnsafeChangesRef.current?.["answer"] ||
@@ -108,9 +92,7 @@ export const useInspectNavigation = ({
             setWillScrollToQuestionAfterGuard(true);
           } else {
             setCurrentQuestionId(newQuestionId);
-            searchVirtualizer.scrollToIndex(
-              currentQuestionIndexInSearchResult + 1,
-            );
+            searchVirtualizer.scrollToIndex(currentQuestionIndexInSearchResult + 1);
           }
         }
       }
@@ -136,9 +118,7 @@ export const useInspectNavigation = ({
       if (searchInput === "") {
         if (currentQuestionIndex > 0) {
           const newQuestionId =
-            partitionedTopicalData[currentTabThatContainsQuestion][
-              currentQuestionIndex - 1
-            ].id;
+            partitionedTopicalData[currentTabThatContainsQuestion][currentQuestionIndex - 1].id;
           if (
             isHavingUnsafeChangesRef.current?.["answer"] ||
             isHavingUnsafeChangesRef.current?.["question"]
@@ -159,8 +139,7 @@ export const useInspectNavigation = ({
           if (currentTabThatContainsQuestion > 0) {
             const newQuestionId =
               partitionedTopicalData[currentTabThatContainsQuestion - 1][
-                partitionedTopicalData[currentTabThatContainsQuestion - 1]
-                  .length - 1
+                partitionedTopicalData[currentTabThatContainsQuestion - 1].length - 1
               ].id;
             if (
               isHavingUnsafeChangesRef.current?.["answer"] ||
@@ -190,8 +169,7 @@ export const useInspectNavigation = ({
           return;
         }
         if (currentQuestionIndexInSearchResult > 0) {
-          const newQuestionId =
-            searchResults[currentQuestionIndexInSearchResult - 1].id;
+          const newQuestionId = searchResults[currentQuestionIndexInSearchResult - 1].id;
 
           if (
             isHavingUnsafeChangesRef.current?.["answer"] ||
@@ -202,9 +180,7 @@ export const useInspectNavigation = ({
             setWillScrollToQuestionAfterGuard(true);
           } else {
             setCurrentQuestionId(newQuestionId);
-            searchVirtualizer.scrollToIndex(
-              currentQuestionIndexInSearchResult - 1,
-            );
+            searchVirtualizer.scrollToIndex(currentQuestionIndexInSearchResult - 1);
           }
         }
       }
@@ -331,13 +307,7 @@ export const useInspectNavigation = ({
   ]);
 
   const onGuardComplete = useEffectEvent(
-    ({
-      _pendingQuestionId,
-      _pendingTab,
-    }: {
-      _pendingQuestionId: string;
-      _pendingTab: number;
-    }) => {
+    ({ _pendingQuestionId, _pendingTab }: { _pendingQuestionId: string; _pendingTab: number }) => {
       if (willScrollToQuestionAfterGuard) {
         scrollToQuestion({
           questionId: _pendingQuestionId,
@@ -364,12 +334,7 @@ export const useInspectNavigation = ({
         _pendingTab: pendingTab,
       });
     }
-  }, [
-    currentQuestionId,
-    isAnnotationGuardDialogOpen,
-    pendingQuestionId,
-    pendingTab,
-  ]);
+  }, [currentQuestionId, isAnnotationGuardDialogOpen, pendingQuestionId, pendingTab]);
 
   return {
     handleNextQuestion,

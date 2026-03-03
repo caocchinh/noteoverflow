@@ -1,23 +1,23 @@
 import {
+  AlignmentType,
+  BorderStyle,
   Document,
+  ExternalHyperlink,
+  ImageRun,
   Packer,
   Paragraph,
   TextRun,
-  ImageRun,
-  ExternalHyperlink,
-  AlignmentType,
-  BorderStyle,
 } from "docx";
+import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
+import { SelectedQuestion } from "../types/models";
+import { PdfContentType } from "./generatePdfBlob";
 import {
   convertImageToPngBase64,
-  splitContent,
   extractPaperCode,
   extractQuestionNumber,
   generatePastPaperLinks,
+  splitContent,
 } from "./utils";
-import { PdfContentType } from "./generatePdfBlob";
-import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
-import { SelectedQuestion } from "../types/models";
 
 function dataURLToUint8Array(dataURL: string): Uint8Array {
   const base64 = dataURL.split(",")[1] || dataURL;
@@ -33,10 +33,7 @@ function dataURLToUint8Array(dataURL: string): Uint8Array {
 /**
  * Prepares data for a single question for DOCX generation.
  */
-async function prepareQuestionForDocx(
-  question: SelectedQuestion,
-  typeOfContent: PdfContentType,
-) {
+async function prepareQuestionForDocx(question: SelectedQuestion, typeOfContent: PdfContentType) {
   const customQuestionItem: { images: string[]; text: string[] } = {
     images: [],
     text: [],
@@ -46,10 +43,7 @@ async function prepareQuestionForDocx(
     text: [],
   };
 
-  if (
-    typeOfContent === "question" ||
-    typeOfContent === "question-with-answers"
-  ) {
+  if (typeOfContent === "question" || typeOfContent === "question-with-answers") {
     const { images, text } = splitContent(question.questionImages);
     customQuestionItem.images.push(...images);
     customQuestionItem.text.push(...text);
@@ -214,15 +208,10 @@ export async function generateMultipleQuestionsDocxBlob({
         );
 
         // Question Content
-        if (
-          data.questionItem.text.length > 0 ||
-          data.questionItem.images.length > 0
-        ) {
+        if (data.questionItem.text.length > 0 || data.questionItem.images.length > 0) {
           children.push(
             new Paragraph({
-              children: [
-                new TextRun({ text: "Question:", bold: true, size: 22 }),
-              ],
+              children: [new TextRun({ text: "Question:", bold: true, size: 22 })],
               spacing: { after: 100 },
             }),
           );
@@ -265,10 +254,7 @@ export async function generateMultipleQuestionsDocxBlob({
         }
 
         // Answer Content
-        if (
-          data.answerItem.text.length > 0 ||
-          data.answerItem.images.length > 0
-        ) {
+        if (data.answerItem.text.length > 0 || data.answerItem.images.length > 0) {
           children.push(
             new Paragraph({
               children: [

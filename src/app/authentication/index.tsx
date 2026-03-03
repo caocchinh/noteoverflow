@@ -1,20 +1,15 @@
 "use client";
 
 import {
-  ExternalLink,
-  Link as LinkIcon,
-  RefreshCcw,
-  TriangleAlert,
-  ArrowLeft,
-} from "lucide-react";
-import { motion } from "motion/react";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  LOGO_MAIN_COLOR,
-  TOPICAL_QUESTION_APP_ROUTE,
-} from "@/constants/constants";
+import { LOGO_MAIN_COLOR, TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import type { TurnstileOptions } from "@/constants/types";
 import Silk from "@/features/authentication/components/animation/Silk";
 import VerifyingLoader from "@/features/authentication/components/VerifyingLoader/VerifyingLoader";
@@ -23,21 +18,12 @@ import {
   LOADING_MESSAGES,
 } from "@/features/authentication/constants/constants";
 import { authClient } from "@/lib/auth/auth-client";
-import {
-  cn,
-  isEmbeddedBrowser,
-  isAppleDevice,
-  openInExternalBrowser,
-} from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { cn, isAppleDevice, isEmbeddedBrowser, openInExternalBrowser } from "@/lib/utils";
+import { ArrowLeft, ExternalLink, Link as LinkIcon, RefreshCcw, TriangleAlert } from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 // Cloudflare Turnstile type declarations
 declare global {
@@ -47,10 +33,7 @@ declare global {
 }
 
 declare const turnstile: {
-  render: (
-    container: string | HTMLElement,
-    options: TurnstileOptions
-  ) => string;
+  render: (container: string | HTMLElement, options: TurnstileOptions) => string;
   reset: (widgetId: string) => void;
   remove: (widgetId: string) => void;
 };
@@ -119,9 +102,7 @@ const AuthPageClient = ({
           },
           "unsupported-callback"() {
             setIsInvisibleVerifying(false);
-            setError(
-              "Unsupported browser, please try again in a different browser!"
-            );
+            setError("Unsupported browser, please try again in a different browser!");
           },
           retry: "never",
         });
@@ -167,9 +148,7 @@ const AuthPageClient = ({
   }, [searchParams]);
 
   useEffect(() => {
-    const randomIndex = Math.floor(
-      Math.random() * FUNNY_VERIFICATION_MESSAGES.length
-    );
+    const randomIndex = Math.floor(Math.random() * FUNNY_VERIFICATION_MESSAGES.length);
     setVerificationMessage(FUNNY_VERIFICATION_MESSAGES[randomIndex]);
   }, []);
 
@@ -189,9 +168,7 @@ const AuthPageClient = ({
     }, 30_000);
   };
 
-  const handleSignIn = async (
-    provider: "google" | "microsoft" | "reddit" | "discord"
-  ) => {
+  const handleSignIn = async (provider: "google" | "microsoft" | "reddit" | "discord") => {
     try {
       setIsNavigating(true);
       setLoadingText(getRandomMessage());
@@ -206,9 +183,7 @@ const AuthPageClient = ({
         },
       });
       if (response.error) {
-        setError(
-          response.error.message ?? "Something went wrong, please try again"
-        );
+        setError(response.error.message ?? "Something went wrong, please try again");
       }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -226,20 +201,18 @@ const AuthPageClient = ({
   return (
     <>
       <AlertDialog open={isEmbededBrowser}>
-        <AlertDialogContent className="flex flex-col items-center justify-center gap-3 py-4! border border-red-500">
+        <AlertDialogContent className="flex flex-col items-center justify-center gap-3 border border-red-500 py-4!">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600 text-4xl font-bold">
-              Warning
-            </AlertDialogTitle>
+            <AlertDialogTitle className="text-4xl font-bold text-red-600">Warning</AlertDialogTitle>
           </AlertDialogHeader>
           <TriangleAlert className="text-red-500" size={75} />
-          <AlertDialogDescription className="text-xl text-center">
-            Due to security reasons, sign in within an embedded browser is
-            prohibited. Please open the link in an external browser.
+          <AlertDialogDescription className="text-center text-xl">
+            Due to security reasons, sign in within an embedded browser is prohibited. Please open
+            the link in an external browser.
           </AlertDialogDescription>
-          <AlertDialogFooter className="flex flex-col! items-center justify-center gap-3 w-full">
+          <AlertDialogFooter className="flex w-full flex-col! items-center justify-center gap-3">
             <Button
-              className="flex items-center justify-center gap-2 cursor-pointer w-full"
+              className="flex w-full cursor-pointer items-center justify-center gap-2"
               onClick={(e) => {
                 e.preventDefault();
                 openInExternalBrowser(window.location.href);
@@ -249,7 +222,7 @@ const AuthPageClient = ({
               <ExternalLink />
             </Button>
             <Button
-              className="flex items-center justify-center gap-2 cursor-pointer w-full"
+              className="flex w-full cursor-pointer items-center justify-center gap-2"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 setCopied(true);
@@ -262,14 +235,14 @@ const AuthPageClient = ({
               <LinkIcon />
             </Button>
             <Link
-              className="flex items-center justify-center gap-2 p-2 text-sm rounded-sm cursor-pointer w-full bg-logo-main text-white"
+              className="bg-logo-main flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm p-2 text-sm text-white"
               href="/topical"
             >
               <ArrowLeft size={15} />
               Back to topical question app
             </Link>
 
-            <h5 className="font-light text-center text-red-500 text-sm w-full">
+            <h5 className="w-full text-center text-sm font-light text-red-500">
               {isAppleDevice()
                 ? "If you are using iOS version 15 and below, please open any external browser manually!"
                 : "If Chrome hasn't been installed, please open any external browser manually!"}
@@ -277,7 +250,7 @@ const AuthPageClient = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <div className="grid min-h-svh bg-background md:grid-cols-2">
+      <div className="bg-background grid min-h-svh md:grid-cols-2">
         <motion.div
           animate={{ opacity: 1, y: 0 }}
           className="mt-16 flex w-full flex-col items-center justify-center gap-2"
@@ -296,13 +269,13 @@ const AuthPageClient = ({
           >
             <div className="flex w-full flex-col">
               <motion.div
-                className=" mb-2 flex w-full flex-row flex-wrap items-center justify-center gap-1 text-center text-sm"
+                className="mb-2 flex w-full flex-row flex-wrap items-center justify-center gap-1 text-center text-sm"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   show: { opacity: 1, y: 0 },
                 }}
               >
-                <h1 className="relative z-10 bg-background px-2 text-center font-semibold text-3xl text-foreground">
+                <h1 className="bg-background text-foreground relative z-10 px-2 text-center text-3xl font-semibold">
                   {isNavigating ? loadingText : "Sign In"}
                 </h1>
                 <Image
@@ -316,9 +289,7 @@ const AuthPageClient = ({
 
               {isInvisibleVerifying && (
                 <div className="mt-2 flex w-full flex-col items-center justify-center gap-2">
-                  <div className="text-center text-foreground text-sm">
-                    {verificationMessage}
-                  </div>
+                  <div className="text-foreground text-center text-sm">{verificationMessage}</div>
                   <VerifyingLoader />
                 </div>
               )}
@@ -351,9 +322,7 @@ const AuthPageClient = ({
                     show: { opacity: 1, y: 0 },
                   }}
                 >
-                  <div className="text-center font-medium text-red-500">
-                    {error}
-                  </div>
+                  <div className="text-center font-medium text-red-500">{error}</div>
                 </motion.div>
               )}
             </div>
@@ -377,17 +346,12 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="w-[200px]! h-[40px]! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! flex items-center justify-center border border-[#747775] text-[#1F1F1F] hover:cursor-pointer dark:border-[#8E918F] dark:text-[#E3E3E3]"
+                    className="font-roboto! flex h-[40px]! w-[200px]! items-center justify-center gap-[10px]! rounded-[4px]! border border-[#747775] px-[12px]! font-medium! text-[#1F1F1F] hover:cursor-pointer dark:border-[#8E918F] dark:text-[#E3E3E3]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("google")}
                     variant="outline"
                   >
-                    <Image
-                      alt="Google Logo"
-                      height={20}
-                      src="/assets/google.svg"
-                      width={20}
-                    />
+                    <Image alt="Google Logo" height={20} src="/assets/google.svg" width={20} />
                     Sign in with Google
                   </Button>
                 </motion.div>
@@ -400,7 +364,7 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="w-[200px]! h-[41px]! font-medium! font! rounded-[4px]! gap-[10px]! px-[12px]! flex items-center justify-center border border-[#8C8C8C] bg-white text-[#5E5E5E] hover:cursor-pointer dark:border-[#8E918F] dark:bg-[#2F2F2F] dark:text-white"
+                    className="font! flex h-[41px]! w-[200px]! items-center justify-center gap-[10px]! rounded-[4px]! border border-[#8C8C8C] bg-white px-[12px]! font-medium! text-[#5E5E5E] hover:cursor-pointer dark:border-[#8E918F] dark:bg-[#2F2F2F] dark:text-white"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("microsoft")}
                     variant="outline"
@@ -423,17 +387,12 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="w-[200px]! h-[40px]! text-white! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! bg-[#ff4500]! flex items-center justify-center border border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
+                    className="font-roboto! flex h-[40px]! w-[200px]! items-center justify-center gap-[10px]! rounded-[4px]! border border-[#747775] bg-[#ff4500]! px-[12px]! font-medium! text-white! hover:cursor-pointer dark:border-[#8E918F]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("reddit")}
                     variant="outline"
                   >
-                    <Image
-                      alt="Reddit Logo"
-                      height={20}
-                      src="/assets/reddit.svg"
-                      width={20}
-                    />
+                    <Image alt="Reddit Logo" height={20} src="/assets/reddit.svg" width={20} />
                     Sign in with Reddit
                   </Button>
                 </motion.div>
@@ -446,17 +405,12 @@ const AuthPageClient = ({
                   }}
                 >
                   <Button
-                    className="w-[200px]! h-[40px]! text-white! font-medium! font-roboto! rounded-[4px]! gap-[10px]! px-[12px]! bg-[#5865F2]! flex items-center justify-center border border-[#747775] hover:cursor-pointer dark:border-[#8E918F]"
+                    className="font-roboto! flex h-[40px]! w-[200px]! items-center justify-center gap-[10px]! rounded-[4px]! border border-[#747775] bg-[#5865F2]! px-[12px]! font-medium! text-white! hover:cursor-pointer dark:border-[#8E918F]"
                     disabled={isNavigating}
                     onClick={() => handleSignIn("discord")}
                     variant="outline"
                   >
-                    <Image
-                      alt="Discord Logo"
-                      height={20}
-                      src="/assets/discord.svg"
-                      width={20}
-                    />
+                    <Image alt="Discord Logo" height={20} src="/assets/discord.svg" width={20} />
                     Sign in with Discord
                   </Button>
                 </motion.div>
@@ -470,13 +424,7 @@ const AuthPageClient = ({
           initial={{ opacity: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <Silk
-            color={LOGO_MAIN_COLOR}
-            noiseIntensity={1.5}
-            rotation={0}
-            scale={1}
-            speed={5}
-          />
+          <Silk color={LOGO_MAIN_COLOR} noiseIntensity={1.5} rotation={0} scale={1} speed={5} />
         </motion.div>
       </div>
     </>

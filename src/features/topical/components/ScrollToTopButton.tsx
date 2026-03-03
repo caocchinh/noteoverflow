@@ -1,9 +1,5 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ArrowUpFromLine } from "lucide-react";
 import { RefObject } from "react";
@@ -23,7 +19,7 @@ export const ScrollToTopButton = ({
         <TooltipTrigger asChild>
           <Button
             className={cn(
-              "fixed cursor-pointer px-[10px]! bottom-[2.5%] right-[1.5%] rounded-sm z-50",
+              "fixed right-[1.5%] bottom-[2.5%] z-50 cursor-pointer rounded-sm px-[10px]!",
               !isScrollingAndShouldShowScrollButton && "hidden!",
             )}
             onClick={() =>

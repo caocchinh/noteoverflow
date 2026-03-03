@@ -1,36 +1,20 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/constants/constants";
-import type {
-  ServerActionResponse,
-  ValidContentType,
-  ValidSeason,
-} from "@/constants/types";
+import type { ServerActionResponse, ValidContentType, ValidSeason } from "@/constants/types";
 import { verifySession } from "@/dal/verifySession";
-import { isValidQuestionId } from "@/lib/utils";
-import {
-  createCurriculum,
-  isCurriculumExists,
-} from "@/features/admin/server/main/curriculum";
-import {
-  createPaperType,
-  isPaperTypeExists,
-} from "@/features/admin/server/main/paperType";
-import {
-  createQuestion,
-  isQuestionExists,
-} from "@/features/admin/server/main/question";
-import {
-  createSeason,
-  isSeasonExists,
-} from "@/features/admin/server/main/season";
-import {
-  createSubject,
-  isSubjectExists,
-} from "@/features/admin/server/main/subject";
+import { getDbAsync } from "@/drizzle/db.server";
+import { question, topic as topicTable } from "@/drizzle/schema";
+import { createCurriculum, isCurriculumExists } from "@/features/admin/server/main/curriculum";
+import { createPaperType, isPaperTypeExists } from "@/features/admin/server/main/paperType";
+import { createQuestion, isQuestionExists } from "@/features/admin/server/main/question";
+import { createSeason, isSeasonExists } from "@/features/admin/server/main/season";
+import { createSubject, isSubjectExists } from "@/features/admin/server/main/subject";
 import { createTopic, isTopicExists } from "@/features/admin/server/main/topic";
 import { createYear, isYearExists } from "@/features/admin/server/main/year";
+import { isValidQuestionId } from "@/lib/utils";
+import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import {
   validateCurriculum,
   validatePaperType,
@@ -41,9 +25,6 @@ import {
   validateTopic,
   validateYear,
 } from "../../content/lib/utils";
-import { question, topic as topicTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
-import { getDbAsync } from "@/drizzle/db.server";
 
 function insertAtIndex(array: string[], index: number, element: string) {
   const newArray = [...array];
@@ -186,9 +167,7 @@ export const legacyUploadAction = async ({
 
       // Check and create paperType if needed
       (async () => {
-        if (
-          !(await isPaperTypeExists(paperType, subjectFullName, curriculum))
-        ) {
+        if (!(await isPaperTypeExists(paperType, subjectFullName, curriculum))) {
           await createPaperType({
             paperType,
             subjectId: subjectFullName,
@@ -199,13 +178,7 @@ export const legacyUploadAction = async ({
 
       // Check and create topic if needed
       (async () => {
-        if (
-          !(await isTopicExists(
-            JSON.stringify([topic]),
-            subjectFullName,
-            curriculum
-          ))
-        ) {
+        if (!(await isTopicExists(JSON.stringify([topic]), subjectFullName, curriculum))) {
           await createTopic({
             topic: JSON.stringify([topic]),
             subjectId: subjectFullName,
@@ -229,19 +202,18 @@ export const legacyUploadAction = async ({
           existingQuestionImages[0].questionImages.length > 0
         ) {
           const parsedQuestionImages = JSON.parse(
-            existingQuestionImages[0].questionImages as unknown as string
+            existingQuestionImages[0].questionImages as unknown as string,
           ) as string[];
           if (!parsedQuestionImages.includes(imageSrc)) {
             if (
               parsedQuestionImages[order] !== imageSrc &&
-              (parsedQuestionImages[order] == "" ||
-                parsedQuestionImages[order] !== undefined)
+              (parsedQuestionImages[order] == "" || parsedQuestionImages[order] !== undefined)
             ) {
               await db
                 .update(question)
                 .set({
                   questionImages: JSON.stringify(
-                    updateAtIndex(parsedQuestionImages, order, imageSrc)
+                    updateAtIndex(parsedQuestionImages, order, imageSrc),
                   ),
                 })
                 .where(eq(question.id, questionId));
@@ -250,7 +222,7 @@ export const legacyUploadAction = async ({
                 .update(question)
                 .set({
                   questionImages: JSON.stringify(
-                    insertAtIndex(parsedQuestionImages, order, imageSrc)
+                    insertAtIndex(parsedQuestionImages, order, imageSrc),
                   ),
                 })
                 .where(eq(question.id, questionId));
@@ -284,11 +256,9 @@ export const legacyUploadAction = async ({
         existingAnswers[0].answers.length > 0
       ) {
         const parsedAnswers = JSON.parse(
-          existingAnswers[0].answers as unknown as string
+          existingAnswers[0].answers as unknown as string,
         ) as string[];
-        const isNotMultipleChoice = parsedAnswers.some((answer) =>
-          answer.includes("http")
-        );
+        const isNotMultipleChoice = parsedAnswers.some((answer) => answer.includes("http"));
         if (!isNotMultipleChoice) {
           await db
             .update(question)
@@ -309,26 +279,20 @@ export const legacyUploadAction = async ({
             await db
               .update(question)
               .set({
-                answers: JSON.stringify(
-                  updateAtIndex(parsedAnswers, order, imageSrc)
-                ),
+                answers: JSON.stringify(updateAtIndex(parsedAnswers, order, imageSrc)),
               })
               .where(eq(question.id, questionId));
           } else {
             await db
               .update(question)
               .set({
-                answers: JSON.stringify(
-                  insertAtIndex(parsedAnswers, order, imageSrc)
-                ),
+                answers: JSON.stringify(insertAtIndex(parsedAnswers, order, imageSrc)),
               })
               .where(eq(question.id, questionId));
           }
         }
       } else {
-        const answer = imageSrc.includes("http")
-          ? insertAtIndex([], order, imageSrc)
-          : [imageSrc];
+        const answer = imageSrc.includes("http") ? insertAtIndex([], order, imageSrc) : [imageSrc];
         await db
           .update(question)
           .set({ answers: JSON.stringify(answer) })
@@ -343,9 +307,7 @@ export const legacyUploadAction = async ({
       .where(eq(question.id, questionId));
 
     const parsedTopics = JSON.parse(
-      existingTopics[0] && existingTopics[0].topics
-        ? existingTopics[0].topics
-        : "[]"
+      existingTopics[0] && existingTopics[0].topics ? existingTopics[0].topics : "[]",
     ) as string[];
     if (!parsedTopics.includes(topic)) {
       parsedTopics.push(topic);

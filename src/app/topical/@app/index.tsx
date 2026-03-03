@@ -1,25 +1,4 @@
 "use client";
-import { memo, useCallback, useEffectEvent, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import { CACHE_EXPIRE_TIME } from "@/features/topical/constants/constants";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { getCache, setCache } from "@/lib/client-cache";
-import { INITIAL_QUERY } from "@/constants/constants";
-import AppMainContent from "@/features/topical/components/AppMainContent";
-import AppSidebar from "@/features/topical/components/AppSidebar/AppSidebar";
-import { api } from "@/lib/eden";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,17 +8,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { INITIAL_QUERY } from "@/constants/constants";
+import { useAuth } from "@/context/AuthContext";
+import AppMainContent from "@/features/topical/components/AppMainContent";
+import AppSidebar from "@/features/topical/components/AppSidebar/AppSidebar";
+import { CACHE_EXPIRE_TIME } from "@/features/topical/constants/constants";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { AppUltilityBarRef, RecentQueryRef } from "@/features/topical/types/components";
+import { CurrentQuery, SelectedQuestion } from "@/features/topical/types/models";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { getCache, setCache } from "@/lib/client-cache";
+import { api } from "@/lib/eden";
+import { useQuery } from "@tanstack/react-query";
 import { Github } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
-import {
-  CurrentQuery,
-  SelectedQuestion,
-} from "@/features/topical/types/models";
-import {
-  AppUltilityBarRef,
-  RecentQueryRef,
-} from "@/features/topical/types/components";
+import { memo, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 const TopicalClient = ({
   searchParams,
@@ -110,10 +103,7 @@ const TopicalClient = ({
           isRateLimited: boolean;
           cacheExpireTime: number;
         } | null = cachedData ? JSON.parse(cachedData) : null;
-        if (
-          parsedCachedData &&
-          currentTime > parsedCachedData.cacheExpireTime
-        ) {
+        if (parsedCachedData && currentTime > parsedCachedData.cacheExpireTime) {
           throw new Error("Cache expired");
         }
         if (parsedCachedData) {
@@ -167,7 +157,7 @@ const TopicalClient = ({
 
   return (
     <>
-      <div className="pt-12 h-screen overflow-hidden!">
+      <div className="h-screen overflow-hidden! pt-12">
         <SidebarProvider
           onOpenChange={setIsAppSidebarOpen}
           onOpenChangeMobile={setIsAppSidebarOpen}
@@ -223,9 +213,7 @@ const CopyrightAnnouncementDialog = memo(() => {
   });
 
   useEffect(() => {
-    const hasSeenCopyrightAnnouncement = localStorage.getItem(
-      "hasSeenCopyrightAnnouncement",
-    );
+    const hasSeenCopyrightAnnouncement = localStorage.getItem("hasSeenCopyrightAnnouncement");
     if (!hasSeenCopyrightAnnouncement) {
       // Show immediately when user first visits
       onShowCopyrightAnnouncement();
@@ -243,39 +231,34 @@ const CopyrightAnnouncementDialog = memo(() => {
     <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent className="sm:max-w-[450px]">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-center flex items-center justify-center gap-2">
+          <AlertDialogTitle className="flex items-center justify-center gap-2 text-center">
             ⚠️ Important Announcement
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-3 pt-2 text-left">
               <p>
-                The <strong>download</strong> and <strong>export</strong>{" "}
-                features have been <strong>permanently disabled</strong> due to
-                copyright considerations.
+                The <strong>download</strong> and <strong>export</strong> features have been{" "}
+                <strong>permanently disabled</strong> due to copyright considerations.
               </p>
-              <p className="text-sm text-muted-foreground">
-                Cambridge Assessment International Education holds the copyright
-                for all examination materials. Reproducing and distributing
-                these materials without explicit permission may constitute
-                copyright infringement.
+              <p className="text-muted-foreground text-sm">
+                Cambridge Assessment International Education holds the copyright for all examination
+                materials. Reproducing and distributing these materials without explicit permission
+                may constitute copyright infringement.
               </p>
-              <p className="text-sm text-muted-foreground">
-                You can still browse, annotate, and bookmark questions. Your
-                annotations are saved to your account.
+              <p className="text-muted-foreground text-sm">
+                You can still browse, annotate, and bookmark questions. Your annotations are saved
+                to your account.
               </p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="w-full flex-col gap-2 sm:flex-col">
-          <AlertDialogAction
-            onClick={() => handleClose(false)}
-            className="w-full"
-          >
+          <AlertDialogAction onClick={() => handleClose(false)} className="w-full">
             I Understand
           </AlertDialogAction>
           <Link
             href="/disclaimer"
-            className="text-sm text-muted-foreground hover:text-foreground underline text-center"
+            className="text-muted-foreground hover:text-foreground text-center text-sm underline"
             onClick={() => handleClose(false)}
           >
             Read full disclaimer
@@ -318,10 +301,9 @@ const SupportDialog = memo(() => {
             Support <span className="text-logo-main!">NoteOverflow</span>
           </DialogTitle>
           <DialogDescription>
-            This project is completely free and open source. If you find it
-            useful, please consider starring it on GitHub to support the founder
-            to help him releases more features and add more curriculums. I love
-            you ❤️🫦🥰🤗
+            This project is completely free and open source. If you find it useful, please consider
+            starring it on GitHub to support the founder to help him releases more features and add
+            more curriculums. I love you ❤️🫦🥰🤗
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center">
@@ -336,7 +318,7 @@ const SupportDialog = memo(() => {
             </Link>
           </Button>
         </div>
-        <DialogFooter className="w-full -mt-2">
+        <DialogFooter className="-mt-2 w-full">
           <Button
             variant="outline"
             onClick={() => handleCloseSupportDialog(false)}

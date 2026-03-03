@@ -38,7 +38,7 @@ const DownloadButton = memo(
 
     return (
       <Button
-        className="cursor-pointer h-[26px]"
+        className="h-[26px] cursor-pointer"
         variant="outline"
         onClick={handleDownload}
         disabled={isGenerating}
@@ -55,7 +55,7 @@ const DownloadButton = memo(
         )}
       </Button>
     );
-  }
+  },
 );
 
 DownloadButton.displayName = "DownloadButton";

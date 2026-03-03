@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, type Transition } from "motion/react";
 import {
   Children,
@@ -9,12 +10,9 @@ import {
   useId,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
 
 export type AnimatedBackgroundProps = {
-  children:
-    | ReactElement<{ "data-id": string }>[]
-    | ReactElement<{ "data-id": string }>;
+  children: ReactElement<{ "data-id": string }>[] | ReactElement<{ "data-id": string }>;
   defaultValue?: string;
   onValueChange?: (newActiveId: string | null) => void;
   className?: string;
@@ -41,11 +39,9 @@ export function AnimatedBackground({
     }
   };
 
-  const onDefaultValueChange = useEffectEvent(
-    ({ _defaultValue }: { _defaultValue: string }) => {
-      setActiveId(_defaultValue);
-    },
-  );
+  const onDefaultValueChange = useEffectEvent(({ _defaultValue }: { _defaultValue: string }) => {
+    setActiveId(_defaultValue);
+  });
 
   useEffect(() => {
     if (defaultValue !== undefined) {

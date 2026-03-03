@@ -1,34 +1,27 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  addFinishedQuestionAction,
-  removeFinishedQuestionAction,
-} from "../../server/actions";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { addFinishedQuestionAction, removeFinishedQuestionAction } from "../../server/actions";
 
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { useAuth } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
 import {
   Dispatch,
   memo,
   SetStateAction,
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
-  useState,
   useOptimistic,
-  startTransition,
+  useState,
 } from "react";
-import { usePathname } from "next/navigation";
-import { SavedActivitiesResponse, SelectedQuestion } from "../../types/models";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { IsHavingUnsafeChangesRef } from "../../types/components";
+import { SavedActivitiesResponse, SelectedQuestion } from "../../types/models";
 
 export const QuestionInspectFinishedCheckbox = memo(
   ({
@@ -50,19 +43,11 @@ export const QuestionInspectFinishedCheckbox = memo(
     const [isPendingToggle, setIsPendingToggle] = useState(false);
     const isMutatingThisQuestion =
       useIsMutating({
-        mutationKey: [
-          "user_saved_activities",
-          "finished_questions",
-          question.id,
-        ],
+        mutationKey: ["user_saved_activities", "finished_questions", question.id],
       }) > 0;
 
     const isFinished = useMemo(() => {
-      return (
-        userFinishedQuestions?.some(
-          (item) => item.question.id === question.id,
-        ) ?? false
-      );
+      return userFinishedQuestions?.some((item) => item.question.id === question.id) ?? false;
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userFinishedQuestions, question.id, isMutatingThisQuestion]);
 
@@ -72,8 +57,7 @@ export const QuestionInspectFinishedCheckbox = memo(
     );
 
     const queryClient = useQueryClient();
-    const { savedActivitiesIsFetching, savedActivitiesIsError } =
-      useTopicalApp();
+    const { savedActivitiesIsFetching, savedActivitiesIsError } = useTopicalApp();
     const { mutateAsync } = useMutation({
       mutationKey: ["user_saved_activities", "finished_questions", question.id],
       mutationFn: async ({
@@ -84,9 +68,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         isCurrentlyFinished: boolean;
       }) => {
         if (!currentQuestionId) {
-          throw new Error(
-            "No question id provided for finished question mutation",
-          );
+          throw new Error("No question id provided for finished question mutation");
         }
         if (isCurrentlyFinished) {
           const result = await removeFinishedQuestionAction({
@@ -113,42 +95,37 @@ export const QuestionInspectFinishedCheckbox = memo(
         }: { currentQuestionId: string; isCurrentlyFinished: boolean },
       ) => {
         // Optimistically update the cache
-        queryClient.setQueryData<SavedActivitiesResponse>(
-          ["user_saved_activities"],
-          (prev) => {
-            if (!prev) {
-              return prev;
-            }
-            const next = prev.finishedQuestions ?? [];
-            if (isCurrentlyFinished) {
-              next.splice(
-                next.findIndex(
-                  (item) => item.question.id === currentQuestionId,
-                ),
-                1,
-              );
-            } else {
-              next.push({
-                question: {
-                  year: question.year,
-                  id: currentQuestionId,
-                  paperType: question.paperType,
-                  season: question.season,
-                  questionImages: question.questionImages,
-                  answers: question.answers,
-                  topics: question.topics,
-                  answersImagesDimensions: question.answersImagesDimensions,
-                  questionImagesDimensions: question.questionImagesDimensions,
-                },
-                updatedAt: new Date(),
-              });
-            }
-            return {
-              ...prev,
-              finishedQuestions: next,
-            };
-          },
-        );
+        queryClient.setQueryData<SavedActivitiesResponse>(["user_saved_activities"], (prev) => {
+          if (!prev) {
+            return prev;
+          }
+          const next = prev.finishedQuestions ?? [];
+          if (isCurrentlyFinished) {
+            next.splice(
+              next.findIndex((item) => item.question.id === currentQuestionId),
+              1,
+            );
+          } else {
+            next.push({
+              question: {
+                year: question.year,
+                id: currentQuestionId,
+                paperType: question.paperType,
+                season: question.season,
+                questionImages: question.questionImages,
+                answers: question.answers,
+                topics: question.topics,
+                answersImagesDimensions: question.answersImagesDimensions,
+                questionImagesDimensions: question.questionImagesDimensions,
+              },
+              updatedAt: new Date(),
+            });
+          }
+          return {
+            ...prev,
+            finishedQuestions: next,
+          };
+        });
 
         toast.success(
           isCurrentlyFinished
@@ -187,11 +164,7 @@ export const QuestionInspectFinishedCheckbox = memo(
         if ((e.target as HTMLElement).tagName === "LABEL") {
           return;
         }
-        if (
-          isMutatingThisQuestion ||
-          isSessionPending ||
-          savedActivitiesIsFetching
-        ) {
+        if (isMutatingThisQuestion || isSessionPending || savedActivitiesIsFetching) {
           return;
         }
         if (!isAuthenticated) {
@@ -199,9 +172,7 @@ export const QuestionInspectFinishedCheckbox = memo(
           return;
         }
         if (savedActivitiesIsError) {
-          toast.error(
-            "Failed to update finished questions list. Please refresh the page.",
-          );
+          toast.error("Failed to update finished questions list. Please refresh the page.");
           return;
         }
 
@@ -257,10 +228,8 @@ export const QuestionInspectFinishedCheckbox = memo(
     return (
       <div
         className={cn(
-          "border h-full flex items-center justify-center gap-1 p-2 rounded-md cursor-pointer",
-          (isMutatingThisQuestion ||
-            isSessionPending ||
-            savedActivitiesIsFetching) &&
+          "flex h-full cursor-pointer items-center justify-center gap-1 rounded-md border p-2",
+          (isMutatingThisQuestion || isSessionPending || savedActivitiesIsFetching) &&
             "pointer-events-none",
           optimisticIsFinished ? "border-green-600" : "border-muted-foreground",
           className,
@@ -269,10 +238,10 @@ export const QuestionInspectFinishedCheckbox = memo(
         onClick={toggleFinishedQuestion}
       >
         {savedActivitiesIsFetching ? (
-          <Loader2 className="animate-spin w-4 h-4" />
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Switch
-            className="border cursor-pointer border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid "
+            className="cursor-pointer border border-dashed data-[state=checked]:bg-green-600 dark:data-[state=checked]:border-solid"
             id="completed-switch"
             checked={optimisticIsFinished}
           />

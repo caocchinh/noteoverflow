@@ -1,23 +1,16 @@
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import {
-  FILTERS_CACHE_KEY,
-  UI_PREFERENCES_CACHE_KEY,
-} from "../constants/constants";
-import {
-  validateCurriculum,
-  validateSubject,
-  validateFilterData,
-  syncFilterCacheToLocalStorage,
-  validateSubcurriculumnDivision,
-} from "@/features/topical/lib/utils";
-import { FiltersCache, UiPreferencesCache } from "../types/preferences";
-import { CurrentQuery } from "../types/models";
-import {
-  FilterStateValues,
-  FilterStateSetters,
-  FilterStateHandlers,
-} from "./useFilterState";
 import { ValidCurriculum } from "@/constants/types";
+import {
+  syncFilterCacheToLocalStorage,
+  validateCurriculum,
+  validateFilterData,
+  validateSubcurriculumnDivision,
+  validateSubject,
+} from "@/features/topical/lib/utils";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { FILTERS_CACHE_KEY, UI_PREFERENCES_CACHE_KEY } from "../constants/constants";
+import { CurrentQuery } from "../types/models";
+import { FiltersCache, UiPreferencesCache } from "../types/preferences";
+import { FilterStateHandlers, FilterStateSetters, FilterStateValues } from "./useFilterState";
 
 export interface UseFilterPersistenceProps {
   currentQuery: CurrentQuery;
@@ -66,9 +59,7 @@ export const useFilterPersistence = ({
     let parsedQueryFromSearchParams;
     if (searchParams.queryKey) {
       try {
-        parsedQueryFromSearchParams = JSON.parse(
-          searchParams.queryKey as string,
-        );
+        parsedQueryFromSearchParams = JSON.parse(searchParams.queryKey as string);
       } catch {
         parsedQueryFromSearchParams = undefined;
         setIsValidSearchParams(false);
@@ -102,9 +93,7 @@ export const useFilterPersistence = ({
 
     const savedState = localStorage.getItem(FILTERS_CACHE_KEY);
     const savedUiPreferences = localStorage.getItem(UI_PREFERENCES_CACHE_KEY);
-    const parsedState: FiltersCache = savedState
-      ? JSON.parse(savedState)
-      : false;
+    const parsedState: FiltersCache = savedState ? JSON.parse(savedState) : false;
     const parsedUiPreferences: UiPreferencesCache = savedUiPreferences
       ? JSON.parse(savedUiPreferences)
       : false;
@@ -118,9 +107,7 @@ export const useFilterPersistence = ({
         parsedState.lastSessionCurriculum &&
         validateCurriculum(parsedState.lastSessionCurriculum)
       ) {
-        handleCurriculumChange(
-          parsedState.lastSessionCurriculum as ValidCurriculum,
-        );
+        handleCurriculumChange(parsedState.lastSessionCurriculum as ValidCurriculum);
 
         curriculumn = parsedState.lastSessionCurriculum;
         const isSubjectValid = validateSubject(
@@ -144,24 +131,20 @@ export const useFilterPersistence = ({
         ) {
           handleSubjectChange(parsedState.lastSessionSubject);
           handleTopicChange(
-            parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ].topic,
+            parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject]
+              .topic,
           );
           handlePaperTypeChange(
-            parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ].paperType,
+            parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject]
+              .paperType,
           );
           handleYearChange(
-            parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ].year,
+            parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject]
+              .year,
           );
           handleSeasonChange(
-            parsedState.filters[parsedState.lastSessionCurriculum][
-              parsedState.lastSessionSubject
-            ].season,
+            parsedState.filters[parsedState.lastSessionCurriculum][parsedState.lastSessionSubject]
+              .season,
           );
         }
       }
@@ -186,11 +169,9 @@ export const useFilterPersistence = ({
     if (curriculumn && subject) {
       try {
         const savedPaperTypeSubcurriculumnDivision =
-          parsedState.filters[curriculumn][subject]
-            .paperTypeSubcurriculumnDivisionPreference;
+          parsedState.filters[curriculumn][subject].paperTypeSubcurriculumnDivisionPreference;
         const savedTopicSubcurriculumnDivision =
-          parsedState.filters[curriculumn][subject]
-            .topicSubcurriculumnDivisionPreference;
+          parsedState.filters[curriculumn][subject].topicSubcurriculumnDivisionPreference;
         if (
           savedPaperTypeSubcurriculumnDivision &&
           validateSubcurriculumnDivision({

@@ -5,8 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe } from "lucide-react";
-import { Lock } from "lucide-react";
+import { Globe, Lock } from "lucide-react";
 
 export const SelectVisibility = ({
   isMutatingThisQuestion,
@@ -27,26 +26,22 @@ export const SelectVisibility = ({
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a visibility" />
       </SelectTrigger>
-      <SelectContent className="z-999999 dark:bg-accent w-(--radix-select-trigger-width)">
+      <SelectContent className="dark:bg-accent z-999999 w-(--radix-select-trigger-width)">
         <SelectItem value="public" className="w-full">
-          <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3">
-            <Globe className="w-4 h-4" />
-            <div className="flex flex-col justify-center items-start">
+          <div className="flex w-max cursor-pointer flex-row items-center justify-start gap-3">
+            <Globe className="h-4 w-4" />
+            <div className="flex flex-col items-start justify-center">
               <p className="text-sm">Public</p>
-              <p className="text-xs text-muted-foreground">
-                Anyone can see this list
-              </p>
+              <p className="text-muted-foreground text-xs">Anyone can see this list</p>
             </div>
           </div>
         </SelectItem>
         <SelectItem value="private" className="w-full">
-          <div className="flex items-center justify-start w-max cursor-pointer flex-row gap-3 ">
-            <Lock className="w-4 h-4" />
-            <div className="flex flex-col justify-center items-start">
+          <div className="flex w-max cursor-pointer flex-row items-center justify-start gap-3">
+            <Lock className="h-4 w-4" />
+            <div className="flex flex-col items-start justify-center">
               <p className="text-sm">Private</p>
-              <p className="text-xs text-muted-foreground">
-                Only you can see this list
-              </p>
+              <p className="text-muted-foreground text-xs">Only you can see this list</p>
             </div>
           </div>
         </SelectItem>

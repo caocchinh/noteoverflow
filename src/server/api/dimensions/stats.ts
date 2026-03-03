@@ -1,9 +1,9 @@
-import { Context } from "elysia";
+import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { question } from "@/drizzle/schema";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { count, eq } from "drizzle-orm";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
-import { verifySession } from "@/dal/verifySession";
+import { Context } from "elysia";
 
 /**
  * Get statistics for image dimension processing
@@ -36,8 +36,7 @@ export async function getDimensionStats({ status }: Context) {
     return {
       processed: processedResult[0]?.count ?? 0,
       notProcessed: notProcessedResult[0]?.count ?? 0,
-      total:
-        (processedResult[0]?.count ?? 0) + (notProcessedResult[0]?.count ?? 0),
+      total: (processedResult[0]?.count ?? 0) + (notProcessedResult[0]?.count ?? 0),
     };
   } catch (error) {
     console.error("Failed to fetch dimension stats:", error);

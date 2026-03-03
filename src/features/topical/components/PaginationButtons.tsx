@@ -1,11 +1,6 @@
 "use client";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { memo } from "react";
 
 export interface FirstPageButtonProps {
@@ -25,7 +20,7 @@ export const FirstPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer p-[8px]! rounded-[2px]"
+        className="cursor-pointer rounded-[2px] p-[8px]!"
         title="First page"
         disabled={currentChunkIndex === 0}
         onClick={() => {
@@ -63,7 +58,7 @@ export const PreviousPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer p-[8px]! rounded-[2px]"
+        className="cursor-pointer rounded-[2px] p-[8px]!"
         title="Previous page"
         disabled={currentChunkIndex === 0}
         onClick={() => {
@@ -103,7 +98,7 @@ export const NextPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer p-[8px]! rounded-[2px]"
+        className="cursor-pointer rounded-[2px] p-[8px]!"
         title="Next page"
         disabled={currentChunkIndex === totalPages - 1 || totalPages - 1 < 1}
         onClick={() => {
@@ -143,7 +138,7 @@ export const LastPageButton = memo(
     return (
       <Button
         variant="outline"
-        className="cursor-pointer p-[8px]! rounded-[2px]"
+        className="cursor-pointer rounded-[2px] p-[8px]!"
         title="Last page"
         disabled={currentChunkIndex === totalPages - 1 || totalPages - 1 < 1}
         onClick={() => {

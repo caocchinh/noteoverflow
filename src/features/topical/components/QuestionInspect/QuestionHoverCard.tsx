@@ -1,22 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { useIsMutating, useMutationState } from "@tanstack/react-query";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/context/AuthContext";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import Loader from "../Loader/Loader";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
+import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { extractPaperCode, extractQuestionNumber } from "../../lib/utils";
 import { QuestionHoverCardProps } from "../../types/components";
+import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
+import Loader from "../Loader/Loader";
 
 const QuestionHoverCard = memo(
   ({
@@ -45,22 +41,14 @@ const QuestionHoverCard = memo(
 
     const isThisFinishedQuestionSettled = useMutationState({
       filters: {
-        mutationKey: [
-          "user_saved_activities",
-          "finished_questions",
-          question.id,
-        ],
+        mutationKey: ["user_saved_activities", "finished_questions", question.id],
         predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
+          mutation.state.status === "success" || mutation.state.status === "error",
       },
     });
 
     const isThisQuestionFinished = useMemo(
-      () =>
-        userFinishedQuestions?.some(
-          (item) => item.question.id === question?.id,
-        ) ?? false,
+      () => userFinishedQuestions?.some((item) => item.question.id === question?.id) ?? false,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [userFinishedQuestions, question?.id, isThisFinishedQuestionSettled],
     );
@@ -80,18 +68,17 @@ const QuestionHoverCard = memo(
     return (
       <HoverCard
         open={
-          ((hoverCardOpen && !isPopoverOpen) ||
-            (isPopoverOpen && !hoverCardBreakPoint)) &&
+          ((hoverCardOpen && !isPopoverOpen) || (isPopoverOpen && !hoverCardBreakPoint)) &&
           isInspectSidebarOpen
         }
       >
         <HoverCardTrigger asChild>
           <div
             className={cn(
-              "cursor-pointer relative p-2 rounded-sm flex items-center justify-between hover:bg-foreground/10",
+              "hover:bg-foreground/10 relative flex cursor-pointer items-center justify-between rounded-sm p-2",
               isThisTheCurrentQuestion && "bg-logo-main! text-white",
               isThisQuestionFinished &&
-                "bg-green-600 dark:hover:bg-green-600 hover:bg-green-600 text-white",
+                "bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-600",
             )}
             onTouchStart={useCallback(() => {
               touchStartTimeRef.current = Date.now();
@@ -153,7 +140,7 @@ const QuestionHoverCard = memo(
             />
             {isMutatingBookmarkOfThisQuestion && (
               <Badge
-                className="absolute top-1/2 -translate-y-1/2 right-2 text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]! z-31"
+                className="absolute top-1/2 right-2 z-31 flex min-h-[28px]! w-max! -translate-y-1/2 cursor-pointer items-center justify-center rounded-[3px] bg-black text-[10px] text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -163,20 +150,14 @@ const QuestionHoverCard = memo(
                   if (savedActivitiesIsError) {
                     toast.error("Bookmark error. Please refresh the page.", {
                       duration: 2000,
-                      position:
-                        isMobileDevice && isPopoverOpen
-                          ? "top-center"
-                          : "bottom-right",
+                      position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                     });
                     return;
                   }
                   if (!isAuthenticated) {
                     toast.error("Please sign in to bookmark questions.", {
                       duration: 2000,
-                      position:
-                        isMobileDevice && isPopoverOpen
-                          ? "top-center"
-                          : "bottom-right",
+                      position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                     });
                     return;
                   }
@@ -194,7 +175,7 @@ const QuestionHoverCard = memo(
         </HoverCardTrigger>
         <HoverCardContent
           className={cn(
-            "z-100007 w-max p-0 overflow-hidden border-none max-w-[292px] min-h-[100px] bg-white! md:flex hidden items-center justify-center rounded-sm",
+            "z-100007 hidden min-h-[100px] w-max max-w-[292px] items-center justify-center overflow-hidden rounded-sm border-none bg-white! p-0 md:flex",
             isThisTheCurrentQuestion && "hidden!",
           )}
           side="left"
@@ -207,13 +188,13 @@ const QuestionHoverCard = memo(
           }}
         >
           {!isImageLoaded && !isImageError && (
-            <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+            <div className="absolute top-0 left-0 z-99 flex h-full w-full flex-wrap content-center items-center justify-center gap-2 overflow-hidden bg-white p-2">
               <Loader />
             </div>
           )}
           {isImageError && (
-            <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-              <p className="text-red-500 text-sm">Image failed to load</p>
+            <div className="absolute top-0 left-0 z-99 flex h-full w-full flex-wrap content-center items-center justify-center gap-2 overflow-hidden bg-white p-2">
+              <p className="text-sm text-red-500">Image failed to load</p>
             </div>
           )}
           <img

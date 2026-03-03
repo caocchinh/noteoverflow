@@ -1,7 +1,7 @@
-import { useState, useEffect, RefObject } from "react";
-import { usePathname } from "next/navigation";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { updateSearchParams } from "@/features/topical/lib/utils";
+import { usePathname } from "next/navigation";
+import { RefObject, useEffect, useState } from "react";
 import { CurrentQuery, SelectedQuestion } from "../types/models";
 
 interface UseQuestionInspectProps {
@@ -43,12 +43,7 @@ export const useQuestionInspect = ({
         });
       }
     }
-  }, [
-    currentQuery,
-    mountedRef,
-    uiPreferences.isStrictModeEnabled,
-    isInspectOpen.isOpen,
-  ]);
+  }, [currentQuery, mountedRef, uiPreferences.isStrictModeEnabled, isInspectOpen.isOpen]);
 
   // Close inspect when topical data changes (e.g. new search)
   useEffect(() => {
@@ -74,11 +69,7 @@ export const useQuestionInspect = ({
         const existingQuestionid = searchParams.questionId;
 
         if (existingQuestionid && typeof existingQuestionid === "string") {
-          if (
-            topicalData?.data.findIndex(
-              (item) => item.id === existingQuestionid,
-            ) !== -1
-          ) {
+          if (topicalData?.data.findIndex((item) => item.id === existingQuestionid) !== -1) {
             setIsInspectOpen({
               isOpen: searchParams.isInspectOpen === "true",
               questionId: existingQuestionid,

@@ -56,12 +56,7 @@ class Pixel {
   draw() {
     const centerOffset = this.maxSizeInteger * 0.5 - this.size * 0.5;
     this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(
-      this.x + centerOffset,
-      this.y + centerOffset,
-      this.size,
-      this.size,
-    );
+    this.ctx.fillRect(this.x + centerOffset, this.y + centerOffset, this.size, this.size);
   }
 
   appear() {
@@ -184,12 +179,8 @@ export default function PixelCard({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pixelsRef = useRef<Pixel[]>([]);
-  const animationRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(
-    null,
-  );
-  const timePreviousRef = useRef(
-    typeof performance !== "undefined" ? performance.now() : 0,
-  );
+  const animationRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
+  const timePreviousRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
   const reducedMotion = useRef(
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -220,13 +211,8 @@ export default function PixelCard({
     const colorsArray = finalColors.split(",");
     const pxs: Pixel[] = [];
     for (let x = 0; x < width; x += Number.parseInt(finalGap.toString(), 10)) {
-      for (
-        let y = 0;
-        y < height;
-        y += Number.parseInt(finalGap.toString(), 10)
-      ) {
-        const color =
-          colorsArray[Math.floor(Math.random() * colorsArray.length)];
+      for (let y = 0; y < height; y += Number.parseInt(finalGap.toString(), 10)) {
+        const color = colorsArray[Math.floor(Math.random() * colorsArray.length)];
 
         const dx = x - width / 2;
         const dy = y - height / 2;
@@ -252,10 +238,7 @@ export default function PixelCard({
   };
 
   // Define a type for callable methods of Pixel
-  type PixelMethod = Extract<
-    keyof Pixel,
-    "appear" | "disappear" | "shimmer" | "draw"
-  >;
+  type PixelMethod = Extract<keyof Pixel, "appear" | "disappear" | "shimmer" | "draw">;
 
   const doAnimate = (fnName: PixelMethod) => {
     animationRef.current = requestAnimationFrame(() => doAnimate(fnName));
@@ -329,7 +312,7 @@ export default function PixelCard({
 
   return (
     <div
-      className={`relative isolate grid aspect-4/5 h-[60px] w-[230px] select-none place-items-center overflow-hidden rounded-lg border border-background/20 transition-colors duration-200 ease-[cubic-bezier(0.5,1,0.89,1)] ${className}`}
+      className={`border-background/20 relative isolate grid aspect-4/5 h-[60px] w-[230px] place-items-center overflow-hidden rounded-lg border transition-colors duration-200 ease-[cubic-bezier(0.5,1,0.89,1)] select-none ${className}`}
       onBlur={finalNoFocus ? undefined : onBlur}
       onFocus={finalNoFocus ? undefined : onFocus}
       onMouseEnter={onMouseEnter}

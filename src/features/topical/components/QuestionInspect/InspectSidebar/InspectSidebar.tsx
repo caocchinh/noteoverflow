@@ -1,35 +1,30 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
-import { FinishedTracker } from "../FinishedTracker";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SelectSeparator } from "@/components/ui/select";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
-  forwardRef,
-  useImperativeHandle,
 } from "react";
 import { createPortal } from "react-dom";
+import { FinishedTracker } from "../FinishedTracker";
 import QuestionHoverCard from "../QuestionHoverCard";
-import { SelectSeparator } from "@/components/ui/select";
 import TabNavigationButtons from "../TabNavigationButtons";
-import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-import NavigationButtons from "./NavigationButtons";
-import GoToCurrentButton from "./GoToCurrentButton";
-import SearchInputSection from "./SearchInputSection";
-import { useInspectSearch } from "./useInspectSearch";
-import { useInspectNavigation } from "./useInspectNavigation";
-import { useInspectContext } from "../../../context/InspectContext";
 import { QuestionHoverCardProps } from "@/features/topical/types/components";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useInspectContext } from "../../../context/InspectContext";
+import GoToCurrentButton from "./GoToCurrentButton";
+import NavigationButtons from "./NavigationButtons";
+import SearchInputSection from "./SearchInputSection";
+import { useInspectNavigation } from "./useInspectNavigation";
+import { useInspectSearch } from "./useInspectSearch";
 
 // Memoized wrapper with custom comparison to prevent unnecessary re-renders
 const MemoizedQuestionItem = memo(
@@ -43,15 +38,12 @@ const MemoizedQuestionItem = memo(
     // Only re-render if these specific props change
     return (
       prevProps.question.id === nextProps.question.id &&
-      prevProps.isThisTheCurrentQuestion ===
-        nextProps.isThisTheCurrentQuestion &&
+      prevProps.isThisTheCurrentQuestion === nextProps.isThisTheCurrentQuestion &&
       prevProps.isInspectSidebarOpen === nextProps.isInspectSidebarOpen &&
       prevProps.isMobileDevice === nextProps.isMobileDevice &&
       prevProps.listId === nextProps.listId &&
-      prevProps.isAnnotationGuardDialogOpen ===
-        nextProps.isAnnotationGuardDialogOpen &&
-      prevProps.setIsAnnotationGuardDialogOpen ===
-        nextProps.setIsAnnotationGuardDialogOpen &&
+      prevProps.isAnnotationGuardDialogOpen === nextProps.isAnnotationGuardDialogOpen &&
+      prevProps.setIsAnnotationGuardDialogOpen === nextProps.setIsAnnotationGuardDialogOpen &&
       prevProps.isHavingUnsafeChangesRef === nextProps.isHavingUnsafeChangesRef
     );
   },
@@ -86,8 +78,7 @@ const InspectSidebar = memo(
     const isMobile = useIsMobile();
     const [isVirtualizationReady, setIsVirtualizationReady] = useState(false);
 
-    const { searchInput, setSearchInput, searchResults } =
-      useInspectSearch(allQuestions);
+    const { searchInput, setSearchInput, searchResults } = useInspectSearch(allQuestions);
 
     const getSearchItemKey = useCallback(
       (index: number) => searchResults[index]?.id ?? index,
@@ -135,9 +126,7 @@ const InspectSidebar = memo(
         }
 
         const itemIndex =
-          partitionedTopicalData[tab].findIndex(
-            (question) => question.id === questionId,
-          ) ?? 0;
+          partitionedTopicalData[tab].findIndex((question) => question.id === questionId) ?? 0;
         if (itemIndex === -1) {
           return;
         }
@@ -248,9 +237,7 @@ const InspectSidebar = memo(
       if (!isVirtualizationReady) {
         setCurrentTab(tab);
         setCurrentQuestionId(
-          !isOpen.questionId
-            ? partitionedTopicalData?.[tab]?.[0]?.id
-            : isOpen.questionId,
+          !isOpen.questionId ? partitionedTopicalData?.[tab]?.[0]?.id : isOpen.questionId,
         );
       } else {
         scrollToQuestion({ questionId: isOpen.questionId, tab });
@@ -300,17 +287,11 @@ const InspectSidebar = memo(
 
     return (
       <>
-        <Sidebar
-          className="top-0 h-full!"
-          onTransitionEnd={handleTransitionEnd}
-        >
+        <Sidebar className="top-0 h-full!" onTransitionEnd={handleTransitionEnd}>
           <SidebarHeader className="sr-only">Search questions</SidebarHeader>
-          <SidebarContent className="dark:bg-accent flex flex-col gap-2 h-full justify-between items-center border-r border-border p-3 pr-1 overflow-hidden!">
-            <FinishedTracker
-              allQuestions={allQuestions}
-              navigateToQuestion={navigateToQuestion}
-            />
-            <div className="flex items-center justify-start w-full gap-2 px-1 mt-8">
+          <SidebarContent className="dark:bg-accent border-border flex h-full flex-col items-center justify-between gap-2 overflow-hidden! border-r p-3 pr-1">
+            <FinishedTracker allQuestions={allQuestions} navigateToQuestion={navigateToQuestion} />
+            <div className="mt-8 flex w-full items-center justify-start gap-2 px-1">
               <SearchInputSection
                 searchInput={searchInput}
                 setSearchInput={setSearchInput}
@@ -332,18 +313,12 @@ const InspectSidebar = memo(
               />
             </div>
             <ScrollArea
-              className={cn(
-                "w-full",
-                searchInput.length > 0 ? "h-[90%]" : "h-[80%] ",
-              )}
+              className={cn("w-full", searchInput.length > 0 ? "h-[90%]" : "h-[80%]")}
               type="always"
               viewportRef={listScrollAreaRef}
             >
               <div
-                className={cn(
-                  "relative w-full",
-                  searchInput.length > 0 && "hidden!",
-                )}
+                className={cn("relative w-full", searchInput.length > 0 && "hidden!")}
                 style={{
                   height: displayVirtualizer.getTotalSize(),
                 }}
@@ -357,34 +332,23 @@ const InspectSidebar = memo(
                     key={virtualItem.key}
                     data-index={virtualItem.index}
                   >
-                    {partitionedTopicalData?.[currentTab][
-                      virtualItem.index
-                    ] && (
+                    {partitionedTopicalData?.[currentTab][virtualItem.index] && (
                       <MemoizedQuestionItem
-                        key={
-                          partitionedTopicalData[currentTab][virtualItem.index]
-                            .id
-                        }
+                        key={partitionedTopicalData[currentTab][virtualItem.index].id}
                         resetScrollPositions={resetScrollPositions}
-                        question={
-                          partitionedTopicalData[currentTab][virtualItem.index]
-                        }
+                        question={partitionedTopicalData[currentTab][virtualItem.index]}
                         navigateToQuestion={navigateToQuestion}
                         isThisTheCurrentQuestion={
-                          partitionedTopicalData[currentTab][virtualItem.index]
-                            ?.id === currentQuestionId
+                          partitionedTopicalData[currentTab][virtualItem.index]?.id ===
+                          currentQuestionId
                         }
                         setCurrentQuestionId={setCurrentQuestionId}
                         listId={listId}
                         isInspectSidebarOpen={isInspectSidebarOpen}
                         isMobileDevice={isMobile}
                         isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-                        setIsAnnotationGuardDialogOpen={
-                          setIsAnnotationGuardDialogOpen
-                        }
-                        isAnnotationGuardDialogOpen={
-                          isAnnotationGuardDialogOpen
-                        }
+                        setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
+                        isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                       />
                     )}
                   </div>
@@ -411,17 +375,14 @@ const InspectSidebar = memo(
                       question={searchResults[virtualItem.index]}
                       navigateToQuestion={navigateToQuestion}
                       isThisTheCurrentQuestion={
-                        searchResults[virtualItem.index]?.id ===
-                        currentQuestionId
+                        searchResults[virtualItem.index]?.id === currentQuestionId
                       }
                       listId={listId}
                       setCurrentQuestionId={setCurrentQuestionId}
                       isInspectSidebarOpen={isInspectSidebarOpen}
                       isMobileDevice={isMobile}
                       isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-                      setIsAnnotationGuardDialogOpen={
-                        setIsAnnotationGuardDialogOpen
-                      }
+                      setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
                       isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                     />
                   </div>
@@ -431,7 +392,7 @@ const InspectSidebar = memo(
 
             <div
               className={cn(
-                "w-full flex items-center justify-around -mt-2",
+                "-mt-2 flex w-full items-center justify-around",
                 searchInput.length > 0 && "hidden",
               )}
             >
@@ -454,9 +415,7 @@ const InspectSidebar = memo(
               handleNextQuestion={handleNextQuestion}
               handlePreviousQuestion={handlePreviousQuestion}
               isHandleNextQuestionDisabled={isHandleNextQuestionDisabled}
-              isHandlePreviousQuestionDisabled={
-                isHandlePreviousQuestionDisabled
-              }
+              isHandlePreviousQuestionDisabled={isHandlePreviousQuestionDisabled}
             />,
             navigationButtonsContainerRef.current,
           )}

@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import { Inter, Roboto } from "next/font/google";
-import "./globals.css";
-import NextTopLoader from "nextjs-toploader";
 import NavBar from "@/components/NavBar/NavBar";
 import { Toaster } from "@/components/ui/sonner";
 import { LOGO_MAIN_COLOR } from "@/constants/constants";
+import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/context/QueryProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { AuthProvider } from "@/context/AuthContext";
+import type { Metadata } from "next";
+import { Inter, Roboto } from "next/font/google";
 import Script from "next/script";
+import NextTopLoader from "nextjs-toploader";
+import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -89,10 +89,7 @@ export default function RootLayout({
         <meta name="author" content="Mr. Cao Cu Chinh" />
         <meta name="theme-color" content={LOGO_MAIN_COLOR} />
         <meta name="og:image" content="/assets/thumbnail.webp" />
-        <meta
-          name="og:title"
-          content="NoteOverflow - Rebuilding on Solid Foundations"
-        />
+        <meta name="og:title" content="NoteOverflow - Rebuilding on Solid Foundations" />
         <meta
           name="og:description"
           content="NoteOverflow is being rebuilt properly. Learn about our journey, what we learned, and what's next."
@@ -105,14 +102,8 @@ export default function RootLayout({
         <meta name="og:image:height" content="627" />
         <meta property="article:author" content="Mr. Cao Cu Chinh" />
         <meta property="article:publisher" content="Mr. Cao Cu Chinh" />
-        <meta
-          name="twitter:image:alt"
-          content="NoteOverflow - Rebuilding on Solid Foundations"
-        />
-        <meta
-          property="og:image:alt"
-          content="NoteOverflow - Rebuilding on Solid Foundations"
-        />
+        <meta name="twitter:image:alt" content="NoteOverflow - Rebuilding on Solid Foundations" />
+        <meta property="og:image:alt" content="NoteOverflow - Rebuilding on Solid Foundations" />
         <link href="/assets/favicon.ico" rel="icon" />
         <link rel="apple-touch-icon" href="/assets/favicon.ico" />
         <link rel="canonical" href="https://noteoverflow.com/" />
@@ -120,9 +111,7 @@ export default function RootLayout({
 
       <QueryProvider>
         <AuthProvider>
-          <body
-            className={`${inter.variable} ${roboto.variable} font-inter antialiased`}
-          >
+          <body className={`${inter.variable} ${roboto.variable} font-inter antialiased`}>
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"

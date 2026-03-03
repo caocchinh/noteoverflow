@@ -1,26 +1,26 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useState, useRef, useEffect, useEffectEvent } from "react";
-import { ShareFilter } from "@/features/topical/components/ShareFilter";
-import { BookmarkButton } from "@/features/topical/components/BookmarkButton/BookmarkButton";
-import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspect/QuestionInspectFinishedCheckbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
-import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
 import { useAuth } from "@/context/AuthContext";
-import { createPortal } from "react-dom";
-import { Root } from "react-dom/client";
+import { BestExamHelpUltility } from "@/features/topical/components/BestExamHelpUltility";
+import { BookmarkButton } from "@/features/topical/components/BookmarkButton/BookmarkButton";
+import { QuestionInformation } from "@/features/topical/components/QuestionInformation";
 import AnnotatableImagesUpdater from "@/features/topical/components/QuestionInspect/AnnotatableInspectImages/AnnotatableImagesUpdater";
 import BothViews from "@/features/topical/components/QuestionInspect/BothViews";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import QuestionAnnotationGuardDialog from "@/features/topical/components/QuestionInspect/QuestionAnnotationGuardDialog";
-import Link from "next/link";
+import { QuestionInspectFinishedCheckbox } from "@/features/topical/components/QuestionInspect/QuestionInspectFinishedCheckbox";
+import { ShareFilter } from "@/features/topical/components/ShareFilter";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import {
   AnnotatableInspectImagesHandle,
   UnsafeChangesState,
 } from "@/features/topical/types/components";
 import { SelectedQuestion } from "@/features/topical/types/models";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Root } from "react-dom/client";
 
 export const QuestionView = ({
   data,
@@ -29,42 +29,37 @@ export const QuestionView = ({
   data: SelectedQuestion;
   BETTER_AUTH_URL: string;
 }) => {
-  const [currentView, setCurrentView] = useState<
-    "question" | "answer" | "both"
-  >("question");
+  const [currentView, setCurrentView] = useState<"question" | "answer" | "both">("question");
   const { isSessionPending } = useAuth();
   const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
 
-  const [questionViewContainer, setQuestionViewContainer] =
-    useState<HTMLDivElement | null>(null);
-  const [answerViewContainer, setAnswerViewContainer] =
-    useState<HTMLDivElement | null>(null);
+  const [questionViewContainer, setQuestionViewContainer] = useState<HTMLDivElement | null>(null);
+  const [answerViewContainer, setAnswerViewContainer] = useState<HTMLDivElement | null>(null);
   const [bothViewsQuestionContainer, setBothViewsQuestionContainer] =
     useState<HTMLDivElement | null>(null);
-  const [bothViewsAnswerContainer, setBothViewsAnswerContainer] =
-    useState<HTMLDivElement | null>(null);
+  const [bothViewsAnswerContainer, setBothViewsAnswerContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
   const dummyLinkRef = useRef<HTMLAnchorElement | null>(null);
 
-  const [annotatableQuestionInspectImagesElement] =
-    useState<HTMLDivElement | null>(() => {
-      if (typeof document !== "undefined") {
-        const el = document.createElement("div");
-        el.className = "w-full h-full";
-        return el;
-      }
-      return null;
-    });
+  const [annotatableQuestionInspectImagesElement] = useState<HTMLDivElement | null>(() => {
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.className = "w-full h-full";
+      return el;
+    }
+    return null;
+  });
   const annotatableQuestionInspectImagesRootRef = useRef<Root | null>(null);
 
-  const [annotatableAnswerInspectImagesElement] =
-    useState<HTMLDivElement | null>(() => {
-      if (typeof document !== "undefined") {
-        const el = document.createElement("div");
-        el.className = "w-full h-full";
-        return el;
-      }
-      return null;
-    });
+  const [annotatableAnswerInspectImagesElement] = useState<HTMLDivElement | null>(() => {
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.className = "w-full h-full";
+      return el;
+    }
+    return null;
+  });
   const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
 
   const annotatableQuestionInspectImagesRootElementRef =
@@ -78,11 +73,8 @@ export const QuestionView = ({
     answer: false,
     questionId: "",
   });
-  const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] =
-    useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null,
-  );
+  const [isAnnotationGuardDialogOpen, setIsAnnotationGuardDialogOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   const questionScrollAreaRef = useRef<HTMLDivElement>(null);
   const answerScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -113,17 +105,11 @@ export const QuestionView = ({
         }
       }, 0);
     };
-  }, [
-    annotatableAnswerInspectImagesElement,
-    annotatableQuestionInspectImagesElement,
-  ]);
+  }, [annotatableAnswerInspectImagesElement, annotatableQuestionInspectImagesElement]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (
-        isHavingUnsafeChangesRef.current.question ||
-        isHavingUnsafeChangesRef.current.answer
-      ) {
+      if (isHavingUnsafeChangesRef.current.question || isHavingUnsafeChangesRef.current.answer) {
         e.preventDefault();
       }
     };
@@ -146,8 +132,7 @@ export const QuestionView = ({
       if (
         anchor &&
         anchor.href &&
-        (isHavingUnsafeChangesRef.current.question ||
-          isHavingUnsafeChangesRef.current.answer)
+        (isHavingUnsafeChangesRef.current.question || isHavingUnsafeChangesRef.current.answer)
       ) {
         if (anchor.target === "_blank" || e.ctrlKey || e.metaKey) return;
 
@@ -201,15 +186,15 @@ export const QuestionView = ({
         isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
         question={data}
       />
-      <div className="flex flex-col h-screen pt-16 px-4 relative">
-        <div className="flex items-center justify-start w-full gap-4 flex-wrap mb-3 ">
-          <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md  ">
+      <div className="relative flex h-screen flex-col px-4 pt-16">
+        <div className="mb-3 flex w-full flex-wrap items-center justify-start gap-4">
+          <div className="bg-input/80 flex w-max items-center justify-center gap-2 rounded-md p-[3px]">
             <Button
               onClick={() => setCurrentView("question")}
               className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                 currentView === "question" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                  "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
               )}
             >
               Question
@@ -217,9 +202,9 @@ export const QuestionView = ({
             <Button
               onClick={() => setCurrentView("answer")}
               className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                 currentView === "answer" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                  "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
               )}
             >
               Answer
@@ -227,9 +212,9 @@ export const QuestionView = ({
             <Button
               onClick={() => setCurrentView("both")}
               className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                 currentView === "both" &&
-                  "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                  "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
               )}
             >
               Both
@@ -237,9 +222,9 @@ export const QuestionView = ({
             <Button
               onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
               className={cn(
-                "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
+                "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                 isCalculatorOpen &&
-                  "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!",
+                  "border-logo-main! bg-logo-main! hover:bg-logo-main/80! text-white!",
               )}
             >
               Calculator
@@ -259,49 +244,33 @@ export const QuestionView = ({
             type="question"
           />
         </div>
-        <div
-          className={cn(currentView === "question" ? "block w-full" : "hidden")}
-        >
+        <div className={cn(currentView === "question" ? "block w-full" : "hidden")}>
           <ScrollArea
-            className="h-[76dvh]  w-full [&_.bg-border]:bg-transparent"
+            className="h-[76dvh] w-full [&_.bg-border]:bg-transparent"
             type="always"
             viewportRef={questionScrollAreaRef}
           >
-            <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-              <QuestionInformation
-                question={data}
-                showCurriculumn={true}
-                showSubject={true}
-              />
+            <div className="flex w-full flex-row flex-wrap items-start justify-start gap-2 py-2">
+              <QuestionInformation question={data} showCurriculumn={true} showSubject={true} />
             </div>
             <div ref={setQuestionViewContainer}></div>
           </ScrollArea>
         </div>
-        <div
-          className={cn(currentView === "answer" ? "block w-full" : "hidden")}
-        >
+        <div className={cn(currentView === "answer" ? "block w-full" : "hidden")}>
           <ScrollArea
             className="h-[76dvh] w-full [&_.bg-border]:bg-transparent"
             type="always"
             viewportRef={answerScrollAreaRef}
           >
-            <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-              <QuestionInformation
-                question={data}
-                showCurriculumn={true}
-                showSubject={true}
-              />
+            <div className="flex w-full flex-row flex-wrap items-start justify-start gap-2 py-2">
+              <QuestionInformation question={data} showCurriculumn={true} showSubject={true} />
             </div>
             <div ref={setAnswerViewContainer}></div>
           </ScrollArea>
         </div>
         <div className={cn(currentView === "both" ? "block w-full" : "hidden")}>
-          <div className="flex flex-row flex-wrap w-full gap-2 py-2 justify-start items-start">
-            <QuestionInformation
-              question={data}
-              showCurriculumn={true}
-              showSubject={true}
-            />
+          <div className="flex w-full flex-row flex-wrap items-start justify-start gap-2 py-2">
+            <QuestionInformation question={data} showCurriculumn={true} showSubject={true} />
           </div>
           <BothViews
             currentQuestionData={data}
@@ -326,11 +295,9 @@ export const QuestionView = ({
                 node.appendChild(annotatableQuestionInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
-          currentView === "both"
-            ? bothViewsQuestionContainer
-            : questionViewContainer,
+          currentView === "both" ? bothViewsQuestionContainer : questionViewContainer,
         )}
       {bothViewsAnswerContainer &&
         answerViewContainer &&
@@ -346,11 +313,9 @@ export const QuestionView = ({
                 node.appendChild(annotatableAnswerInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
-          currentView === "both"
-            ? bothViewsAnswerContainer
-            : answerViewContainer,
+          currentView === "both" ? bothViewsAnswerContainer : answerViewContainer,
         )}
       <Link ref={dummyLinkRef} href={pendingNavigation || ""} />
     </>

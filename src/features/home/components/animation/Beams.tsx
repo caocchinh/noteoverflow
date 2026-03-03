@@ -1,6 +1,14 @@
-import {PerspectiveCamera} from "@react-three/drei";
-import {Canvas, useFrame} from "@react-three/fiber";
-import {type FC, forwardRef, type ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import { PerspectiveCamera } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import {
+  type FC,
+  forwardRef,
+  type ReactNode,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import {
   BufferAttribute,
   BufferGeometry,
@@ -19,7 +27,7 @@ import {
   type Texture,
   UniformsUtils,
 } from "three";
-import {degToRad} from "three/src/math/MathUtils.js";
+import { degToRad } from "three/src/math/MathUtils.js";
 
 type UniformValue = IUniform<unknown> | unknown;
 
@@ -27,7 +35,7 @@ interface ExtendMaterialConfig {
   header: string;
   vertexHeader?: string;
   fragmentHeader?: string;
-  material?: MeshPhysicalMaterialParameters & {fog?: boolean};
+  material?: MeshPhysicalMaterialParameters & { fog?: boolean };
   uniforms?: Record<string, UniformValue>;
   vertex?: Record<string, string>;
   fragment?: Record<string, string>;
@@ -39,10 +47,10 @@ type ShaderWithDefines = ShaderLibShader & {
 
 function extendMaterial<T extends Material = Material>(
   BaseMaterial: new (params?: MaterialParameters) => T,
-  cfg: ExtendMaterialConfig
+  cfg: ExtendMaterialConfig,
 ): ShaderMaterial {
   const physical = ShaderLib.physical as ShaderWithDefines;
-  const {vertexShader: baseVert, fragmentShader: baseFrag, uniforms: baseUniforms} = physical;
+  const { vertexShader: baseVert, fragmentShader: baseFrag, uniforms: baseUniforms } = physical;
   const baseDefines = physical.defines ?? {};
 
   const uniforms: Record<string, IUniform> = UniformsUtils.clone(baseUniforms);
@@ -72,7 +80,10 @@ function extendMaterial<T extends Material = Material>(
   }
 
   for (const [key, u] of Object.entries(cfg.uniforms ?? {})) {
-    uniforms[key] = u !== null && typeof u === "object" && "value" in u ? (u as IUniform<unknown>) : ({value: u} as IUniform<unknown>);
+    uniforms[key] =
+      u !== null && typeof u === "object" && "value" in u
+        ? (u as IUniform<unknown>)
+        : ({ value: u } as IUniform<unknown>);
   }
 
   let vert = `${cfg.header}\n${cfg.vertexHeader ?? ""}\n${baseVert}`;
@@ -86,7 +97,7 @@ function extendMaterial<T extends Material = Material>(
   }
 
   const mat = new ShaderMaterial({
-    defines: {...baseDefines},
+    defines: { ...baseDefines },
     uniforms,
     vertexShader: vert,
     fragmentShader: frag,
@@ -97,12 +108,8 @@ function extendMaterial<T extends Material = Material>(
   return mat;
 }
 
-const CanvasWrapper: FC<{children: ReactNode}> = ({children}) => (
-  <Canvas
-    className="relative h-full w-full"
-    dpr={[1, 2]}
-    frameloop="always"
-  >
+const CanvasWrapper: FC<{ children: ReactNode }> = ({ children }) => (
+  <Canvas className="relative h-full w-full" dpr={[1, 2]} frameloop="always">
     {children}
   </Canvas>
 );
@@ -257,19 +264,19 @@ const Beams: FC<BeamsProps> = ({
     float randomNoise = noise(gl_FragCoord.xy);
     gl_FragColor.rgb -= randomNoise / 15. * uNoiseIntensity;`,
         },
-        material: {fog: true},
+        material: { fog: true },
         uniforms: {
           diffuse: new Color(...hexToNormalizedRGB("#000000")),
-          time: {shared: true, mixed: true, linked: true, value: 0},
+          time: { shared: true, mixed: true, linked: true, value: 0 },
           roughness: 0.3,
           metalness: 0.3,
-          uSpeed: {shared: true, mixed: true, linked: true, value: speed},
+          uSpeed: { shared: true, mixed: true, linked: true, value: speed },
           envMapIntensity: 10,
           uNoiseIntensity: noiseIntensity,
           uScale: scale,
         },
       }),
-    [speed, noiseIntensity, scale]
+    [speed, noiseIntensity, scale],
   );
 
   return (
@@ -282,26 +289,22 @@ const Beams: FC<BeamsProps> = ({
           ref={meshRef}
           width={beamWidth}
         />
-        <DirLight
-          color={lightColor}
-          position={[0, 3, 10]}
-        />
+        <DirLight color={lightColor} position={[0, 3, 10]} />
       </group>
       <ambientLight intensity={1} />
-      <color
-        args={["#000000"]}
-        attach="background"
-      />
-      <PerspectiveCamera
-        fov={30}
-        makeDefault
-        position={[0, 0, 20]}
-      />
+      <color args={["#000000"]} attach="background" />
+      <PerspectiveCamera fov={30} makeDefault position={[0, 0, 20]} />
     </CanvasWrapper>
   );
 };
 
-function createStackedPlanesBufferGeometry(n: number, width: number, height: number, spacing: number, heightSegments: number): BufferGeometry {
+function createStackedPlanesBufferGeometry(
+  n: number,
+  width: number,
+  height: number,
+  spacing: number,
+  heightSegments: number,
+): BufferGeometry {
   const geometry = new BufferGeometry();
   const numVertices = n * (heightSegments + 1) * 2;
   const numFaces = n * heightSegments * 2;
@@ -357,20 +360,17 @@ const MergedPlanes = forwardRef<
     count: number;
     height: number;
   }
->(({material, width, count, height}, ref) => {
+>(({ material, width, count, height }, ref) => {
   const mesh = useRef<Mesh<BufferGeometry, ShaderMaterial>>(null!);
   useImperativeHandle(ref, () => mesh.current);
-  const geometry = useMemo(() => createStackedPlanesBufferGeometry(count, width, height, 0, 100), [count, width, height]);
+  const geometry = useMemo(
+    () => createStackedPlanesBufferGeometry(count, width, height, 0, 100),
+    [count, width, height],
+  );
   useFrame((_, delta) => {
     mesh.current.material.uniforms.time.value += 0.1 * delta;
   });
-  return (
-    <mesh
-      geometry={geometry}
-      material={material}
-      ref={mesh}
-    />
-  );
+  return <mesh geometry={geometry} material={material} ref={mesh} />;
 });
 MergedPlanes.displayName = "MergedPlanes";
 
@@ -393,7 +393,10 @@ const PlaneNoise = forwardRef<
 ));
 PlaneNoise.displayName = "PlaneNoise";
 
-const DirLight: FC<{position: [number, number, number]; color: string}> = ({position, color}) => {
+const DirLight: FC<{ position: [number, number, number]; color: string }> = ({
+  position,
+  color,
+}) => {
   const dir = useRef<DirectionalLight>(null!);
   useEffect(() => {
     if (!dir.current) {
@@ -413,14 +416,7 @@ const DirLight: FC<{position: [number, number, number]; color: string}> = ({posi
     cam.far = 64;
     dir.current.shadow.bias = -0.004;
   }, []);
-  return (
-    <directionalLight
-      color={color}
-      intensity={1}
-      position={position}
-      ref={dir}
-    />
-  );
+  return <directionalLight color={color} intensity={1} position={position} ref={dir} />;
 };
 
 export default Beams;

@@ -19,19 +19,19 @@ const DisplayModeToggle = memo(
         onValueChange={(value) => {
           if (value) setDisplayMode(value as DisplayMode);
         }}
-        className={`bg-muted/50 rounded-lg p-0.5 border ${className ?? ""}`}
+        className={`bg-muted/50 rounded-lg border p-0.5 ${className ?? ""}`}
       >
         <ToggleGroupItem
           value="questions"
           size="sm"
-          className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
+          className="data-[state=on]:bg-logo-main cursor-pointer rounded-md px-3 py-1 text-xs data-[state=on]:text-white data-[state=on]:shadow-sm"
         >
           Questions
         </ToggleGroupItem>
         <ToggleGroupItem
           value="answers"
           size="sm"
-          className="text-xs px-3 py-1 data-[state=on]:bg-logo-main data-[state=on]:text-white data-[state=on]:shadow-sm rounded-md cursor-pointer"
+          className="data-[state=on]:bg-logo-main cursor-pointer rounded-md px-3 py-1 text-xs data-[state=on]:text-white data-[state=on]:shadow-sm"
         >
           Answers
         </ToggleGroupItem>

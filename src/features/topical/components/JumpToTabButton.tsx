@@ -1,13 +1,9 @@
-import { memo, useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { SkipForward, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { SkipForward, X } from "lucide-react";
+import { memo, useState } from "react";
 
 export const JumpToTabButton = memo(
   ({
@@ -52,14 +48,14 @@ export const JumpToTabButton = memo(
       >
         <PopoverTrigger className={className}>
           <p
-            className="text-md underline cursor-pointer"
+            className="text-md cursor-pointer underline"
             title={`Click to jump to ${prefix ?? "tab"}`}
           >
             {tab + 1}/{totalTabs}
           </p>
         </PopoverTrigger>
         <PopoverContent
-          className="z-999999 dark:bg-accent w-[200px] flex flex-col gap-2"
+          className="dark:bg-accent z-999999 flex w-[200px] flex-col gap-2"
           side="top"
           sideOffset={17}
         >
@@ -72,8 +68,8 @@ export const JumpToTabButton = memo(
             <p className={cn(isInvalidInput && "text-red-500", "text-sm")}>
               Jump to {prefix ?? "tab"}
             </p>
-            <p className="text-xs text-muted-foreground">Max: {totalTabs}</p>
-            <div className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">Max: {totalTabs}</p>
+            <div className="text-muted-foreground text-xs">
               Current {prefix ?? "tab"}: {tab + 1}
             </div>
             <Input
@@ -83,11 +79,7 @@ export const JumpToTabButton = memo(
               className={cn(isInvalidInput && "border-red-500 text-red-500")}
               value={Number.isNaN(jumpToTabInput) ? "" : jumpToTabInput}
               onChange={(e) => {
-                setJumpToTabInput(
-                  e.target.value.length > 0
-                    ? parseInt(e.target.value, 10)
-                    : NaN,
-                );
+                setJumpToTabInput(e.target.value.length > 0 ? parseInt(e.target.value, 10) : NaN);
                 setIsInvalidInput(false);
               }}
               onKeyDown={(e) => {

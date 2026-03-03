@@ -1,8 +1,8 @@
 import { TopicalSubject, ValidCurriculum } from "@/constants/types";
 import { BookMarked, CalendarOff } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { memo } from "react";
 import { default as NextImage } from "next/image";
+import { memo } from "react";
 
 const CoursebookCover = memo(
   ({
@@ -35,14 +35,13 @@ const CoursebookCover = memo(
               className="self-center rounded-[2px]"
               height={126}
               src={
-                availableSubjects.find((item) => item.code === selectedSubject)
-                  ?.coverImage ?? ""
+                availableSubjects.find((item) => item.code === selectedSubject)?.coverImage ?? ""
               }
               width={100}
             />
             {subjectSyllabus ? (
               <a
-                className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row"
+                className="border-muted-foreground/20 bg-muted flex w-full flex-row items-center justify-center gap-1 rounded-md border p-1 text-sm"
                 href={subjectSyllabus}
                 target="_blank"
                 title="Open syllabus"
@@ -52,7 +51,7 @@ const CoursebookCover = memo(
                 <BookMarked size={15} />
               </a>
             ) : (
-              <div className="w-full flex items-center text-sm justify-center rounded-md border border-muted-foreground/20 bg-muted p-1 gap-1 flex-row">
+              <div className="border-muted-foreground/20 bg-muted flex w-full flex-row items-center justify-center gap-1 rounded-md border p-1 text-sm">
                 Outdated
                 <CalendarOff size={15} />
               </div>
@@ -80,7 +79,7 @@ const CoursebookCover = memo(
         )}
       </AnimatePresence>
     );
-  }
+  },
 );
 CoursebookCover.displayName = "CoursebookCover";
 

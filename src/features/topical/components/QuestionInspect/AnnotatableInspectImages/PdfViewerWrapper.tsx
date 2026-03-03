@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  forwardRef,
-  useEffect,
-  useRef,
-  useImperativeHandle,
-  useState,
-  memo,
-} from "react";
-import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
 import { PdfViewerWrapperHandle } from "@/features/topical/types/components";
+import WebViewer, { WebViewerInstance } from "@pdftron/webviewer";
+import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 type AnnotationManager = WebViewerInstance["Core"]["annotationManager"];
-type AnnotationChangedHandler = Parameters<
-  AnnotationManager["addEventListener"]
->[1];
+type AnnotationChangedHandler = Parameters<AnnotationManager["addEventListener"]>[1];
 
 interface PdfViewerWrapperProps {
   documentPath: string | Blob;
@@ -107,9 +98,7 @@ const PdfViewerWrapper = memo(
 
         WebViewer(
           {
-            path: `${
-              typeof window === "undefined" ? "" : window.location.origin
-            }/lib/webviewer`,
+            path: `${typeof window === "undefined" ? "" : window.location.origin}/lib/webviewer`,
             licenseKey: process.env.NEXT_PUBLIC_APRYSE_LICENSE_KEY,
           },
           viewerRef.current,
@@ -195,10 +184,7 @@ const PdfViewerWrapper = memo(
         documentViewer.addEventListener("documentLoaded", handleDocumentLoaded);
         return () => {
           if (!isInitalXfdfLoaded.current) {
-            documentViewer.removeEventListener(
-              "documentLoaded",
-              handleDocumentLoaded,
-            );
+            documentViewer.removeEventListener("documentLoaded", handleDocumentLoaded);
           }
         };
       }, [instance, initialXfdf]);
@@ -217,30 +203,19 @@ const PdfViewerWrapper = memo(
         if (!instance) return;
         const { annotationManager } = instance.Core;
 
-        const handleAnnotationChanged: AnnotationChangedHandler = (
-          annotations,
-          action,
-          info,
-        ) => {
+        const handleAnnotationChanged: AnnotationChangedHandler = (annotations, action, info) => {
           if (info?.imported) return;
-          const onAnnotationsChanged =
-            callbacksRef.current.onAnnotationsChanged;
+          const onAnnotationsChanged = callbacksRef.current.onAnnotationsChanged;
           if (!onAnnotationsChanged) return;
           annotationManager.exportAnnotations().then((xfdf) => {
             onAnnotationsChanged(xfdf);
           });
         };
 
-        annotationManager.addEventListener(
-          "annotationChanged",
-          handleAnnotationChanged,
-        );
+        annotationManager.addEventListener("annotationChanged", handleAnnotationChanged);
 
         return () => {
-          annotationManager.removeEventListener(
-            "annotationChanged",
-            handleAnnotationChanged,
-          );
+          annotationManager.removeEventListener("annotationChanged", handleAnnotationChanged);
         };
       }, [instance]);
 

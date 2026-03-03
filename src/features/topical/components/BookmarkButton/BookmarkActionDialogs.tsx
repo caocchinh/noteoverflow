@@ -1,14 +1,4 @@
 import {
-  memo,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
@@ -16,19 +6,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { SelectVisibility } from "../SelectVisibility";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MAXIMUM_BOOKMARK_LISTS_PER_USER } from "@/constants/constants";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { memo, useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
+import { toast } from "sonner";
 import { LIST_NAME_MAX_LENGTH } from "../../constants/constants";
+import { SelectVisibility } from "../SelectVisibility";
 
+import { useTopicalApp } from "../../context/TopicalLayoutProvider";
+import { BookmarkActionDialogsProps } from "../../types/components";
+import { CreateListMutationVariables } from "../../types/models";
 import {
   createListMutationFn,
   handleBookmarkError,
@@ -36,9 +28,6 @@ import {
   handleToggleBookmarkOptimisticUpdate,
   toggleBookmarkMutationFn,
 } from "../../utils/bookmarkUtils";
-import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { BookmarkActionDialogsProps } from "../../types/components";
-import { CreateListMutationVariables } from "../../types/models";
 
 export const BookmarkActionDialogs = memo(
   ({
@@ -50,23 +39,18 @@ export const BookmarkActionDialogs = memo(
     isAnnotationGuardDialogOpen,
     setIsAnnotationGuardDialogOpen,
   }: BookmarkActionDialogsProps) => {
-    const [visibility, setVisibility] = useState<"public" | "private">(
-      "public",
-    );
+    const [visibility, setVisibility] = useState<"public" | "private">("public");
     const [isInputError, setIsInputError] = useState(false);
     const [isAddNewListDialogOpen, setIsAddNewListDialogOpen] = useState(false);
-    const [newBookmarkListNameInput, setNewBookmarkListNameInput] =
-      useState("");
-    const [isRemoveFromListDialogOpen, setIsRemoveFromListDialogOpen] =
-      useState(false);
+    const [newBookmarkListNameInput, setNewBookmarkListNameInput] = useState("");
+    const [isRemoveFromListDialogOpen, setIsRemoveFromListDialogOpen] = useState(false);
     const isMobileDevice = useIsMobile();
     const queryClient = useQueryClient();
     const isMutatingThisQuestion =
       useIsMutating({
         mutationKey: ["user_saved_activities", "bookmarks", question.id],
       }) > 0;
-    const [isPendingRemoveFromList, setIsPendingRemoveFromList] =
-      useState(false);
+    const [isPendingRemoveFromList, setIsPendingRemoveFromList] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [isBlockingDialogInput, setIsBlockingDialogInput] = useState(false);
     const { bookmarksData } = useTopicalApp();
@@ -102,11 +86,7 @@ export const BookmarkActionDialogs = memo(
         });
       },
       onError: (error, variables) => {
-        handleBookmarkError(
-          error,
-          variables as CreateListMutationVariables,
-          isMobileDevice,
-        );
+        handleBookmarkError(error, variables as CreateListMutationVariables, isMobileDevice);
       },
     });
 
@@ -149,10 +129,7 @@ export const BookmarkActionDialogs = memo(
         setIsInputError(true);
         return;
       }
-      if (
-        bookmarksData &&
-        bookmarksData.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER
-      ) {
+      if (bookmarksData && bookmarksData.length >= MAXIMUM_BOOKMARK_LISTS_PER_USER) {
         toast.error(
           "Failed to update bookmarks. You can only have maximum of " +
             MAXIMUM_BOOKMARK_LISTS_PER_USER +
@@ -228,23 +205,16 @@ export const BookmarkActionDialogs = memo(
       ],
     );
 
-    const onGuardComplete = useEffectEvent(
-      ({ _listId }: { _listId: string }) => {
-        setIsPendingRemoveFromList(false);
-        removeFromList({ listId: _listId });
-      },
-    );
+    const onGuardComplete = useEffectEvent(({ _listId }: { _listId: string }) => {
+      setIsPendingRemoveFromList(false);
+      removeFromList({ listId: _listId });
+    });
 
     useEffect(() => {
       if (isPendingRemoveFromList && !isAnnotationGuardDialogOpen && listId) {
         onGuardComplete({ _listId: listId });
       }
-    }, [
-      isAnnotationGuardDialogOpen,
-      isPendingRemoveFromList,
-      listId,
-      removeFromList,
-    ]);
+    }, [isAnnotationGuardDialogOpen, isPendingRemoveFromList, listId, removeFromList]);
 
     return (
       <div className="flex w-full items-center justify-center gap-2 px-2">
@@ -261,21 +231,18 @@ export const BookmarkActionDialogs = memo(
         >
           <AlertDialogTrigger asChild>
             <div className="flex-1">
-              <Button className="w-full mt-2 cursor-pointer" variant="outline">
+              <Button className="mt-2 w-full cursor-pointer" variant="outline">
                 <Plus /> New list
               </Button>
             </div>
           </AlertDialogTrigger>
-          <AlertDialogContent
-            className="z-100014 dark:bg-accent"
-            overlayClassName="z-[100013] "
-          >
+          <AlertDialogContent className="dark:bg-accent z-100014" overlayClassName="z-[100013] ">
             <AlertDialogHeader>
               <AlertDialogTitle>New list</AlertDialogTitle>
             </AlertDialogHeader>
-            <div className="flex items-center justify-center flex-col">
-              <p className="text-sm w-full text-left mb-1">List name</p>
-              <div className="flex items-center justify-center gap-2 w-full">
+            <div className="flex flex-col items-center justify-center">
+              <p className="mb-1 w-full text-left text-sm">List name</p>
+              <div className="flex w-full items-center justify-center gap-2">
                 <Input
                   onChange={(e) => {
                     if (e.target.value.length > LIST_NAME_MAX_LENGTH) {
@@ -321,8 +288,8 @@ export const BookmarkActionDialogs = memo(
                   size={20}
                 />
               </div>
-              <p className="text-sm w-full text-left mt-3 mb-1">Visibility</p>
-              <div className="flex items-center justify-center gap-2 w-full">
+              <p className="mt-3 mb-1 w-full text-left text-sm">Visibility</p>
+              <div className="flex w-full items-center justify-center gap-2">
                 <SelectVisibility
                   isMutatingThisQuestion={isMutatingThisQuestion}
                   visibility={visibility}
@@ -331,19 +298,18 @@ export const BookmarkActionDialogs = memo(
               </div>
             </div>
             {isInputError && (
-              <p className="text-red-500 text-xs mt-1 text-center">
-                Please enter valid a list name. Max {LIST_NAME_MAX_LENGTH}{" "}
-                characters.
+              <p className="mt-1 text-center text-xs text-red-500">
+                Please enter valid a list name. Max {LIST_NAME_MAX_LENGTH} characters.
               </p>
             )}
-            <p className="text-xs text-muted-foreground mt-1 text-left">
-              If list name with the same visibility already exists, the question
-              will be added to the list.
+            <p className="text-muted-foreground mt-1 text-left text-xs">
+              If list name with the same visibility already exists, the question will be added to
+              the list.
             </p>
-            <div className="flex gap-2 w-full">
+            <div className="flex w-full gap-2">
               <AlertDialogCancel asChild>
                 <Button
-                  className="w-1/2 mt-2 cursor-pointer"
+                  className="mt-2 w-1/2 cursor-pointer"
                   variant="outline"
                   onClick={() => {
                     setIsBlockingDialogInput(true);
@@ -357,14 +323,14 @@ export const BookmarkActionDialogs = memo(
                 </Button>
               </AlertDialogCancel>
               <Button
-                className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+                className="mt-2 flex flex-1 cursor-pointer items-center justify-center gap-0"
                 disabled={isInputError || isMutatingThisQuestion}
                 onClick={createNewList}
               >
                 {isMutatingThisQuestion ? (
                   <>
                     Processing
-                    <Loader2 className="animate-spin ml-1" />
+                    <Loader2 className="ml-1 animate-spin" />
                   </>
                 ) : (
                   <>
@@ -385,31 +351,25 @@ export const BookmarkActionDialogs = memo(
           >
             <AlertDialogTrigger asChild>
               <div className="flex-1">
-                <Button
-                  className="w-full mt-2 cursor-pointer"
-                  variant="destructive"
-                >
+                <Button className="mt-2 w-full cursor-pointer" variant="destructive">
                   <Trash2 />
                   Remove
                 </Button>
               </div>
             </AlertDialogTrigger>
-            <AlertDialogContent
-              className="z-100011 dark:bg-accent"
-              overlayClassName="z-[100010] "
-            >
+            <AlertDialogContent className="dark:bg-accent z-100011" overlayClassName="z-[100010] ">
               <AlertDialogHeader>
                 <AlertDialogTitle>Remove from this list</AlertDialogTitle>
               </AlertDialogHeader>
-              <div className="flex items-center justify-center flex-col">
-                <p className="text-sm w-full text-left mb-1">
+              <div className="flex flex-col items-center justify-center">
+                <p className="mb-1 w-full text-left text-sm">
                   Do you want to remove this question from this bookmark list.
                 </p>
 
-                <div className="flex gap-2 w-full">
+                <div className="flex w-full gap-2">
                   <AlertDialogCancel asChild>
                     <Button
-                      className="w-1/2 mt-2 cursor-pointer"
+                      className="mt-2 w-1/2 cursor-pointer"
                       variant="outline"
                       disabled={isMutatingThisQuestion}
                     >
@@ -417,14 +377,14 @@ export const BookmarkActionDialogs = memo(
                     </Button>
                   </AlertDialogCancel>
                   <Button
-                    className="flex-1 mt-2 cursor-pointer flex items-center gap-0 justify-center "
+                    className="mt-2 flex flex-1 cursor-pointer items-center justify-center gap-0"
                     disabled={isMutatingThisQuestion}
                     onClick={() => removeFromList({ listId })}
                   >
                     {isMutatingThisQuestion ? (
                       <>
                         Processing
-                        <Loader2 className="animate-spin ml-1" />
+                        <Loader2 className="ml-1 animate-spin" />
                       </>
                     ) : (
                       <>

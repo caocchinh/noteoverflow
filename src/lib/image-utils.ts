@@ -19,10 +19,7 @@ const IMAGE_SIGNATURES = {
 /**
  * Check if bytes match a signature
  */
-function matchesSignature(
-  bytes: Uint8Array,
-  signature: readonly number[]
-): boolean {
+function matchesSignature(bytes: Uint8Array, signature: readonly number[]): boolean {
   if (bytes.length < signature.length) return false;
   return signature.every((byte, index) => bytes[index] === byte);
 }
@@ -59,9 +56,7 @@ export function validateImageFormat(imageBytes: Uint8Array): boolean {
   if (matchesSignature(imageBytes, IMAGE_SIGNATURES.WEBP)) {
     const webpSignature = [0x57, 0x45, 0x42, 0x50]; // "WEBP"
     if (imageBytes.length >= 12) {
-      const isWebP = webpSignature.every(
-        (byte, index) => imageBytes[8 + index] === byte
-      );
+      const isWebP = webpSignature.every((byte, index) => imageBytes[8 + index] === byte);
       if (isWebP) return true;
     }
   }
@@ -100,10 +95,7 @@ function readUint16BE(bytes: Uint8Array, offset: number): number {
  */
 function readUint32BE(bytes: Uint8Array, offset: number): number {
   return (
-    (bytes[offset] << 24) |
-    (bytes[offset + 1] << 16) |
-    (bytes[offset + 2] << 8) |
-    bytes[offset + 3]
+    (bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3]
   );
 }
 
@@ -119,10 +111,7 @@ function readUint16LE(bytes: Uint8Array, offset: number): number {
  */
 function readUint32LE(bytes: Uint8Array, offset: number): number {
   return (
-    bytes[offset] |
-    (bytes[offset + 1] << 8) |
-    (bytes[offset + 2] << 16) |
-    (bytes[offset + 3] << 24)
+    bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)
   );
 }
 
@@ -130,9 +119,7 @@ function readUint32LE(bytes: Uint8Array, offset: number): number {
  * Extract dimensions from PNG header
  * PNG stores width at bytes 16-19 and height at bytes 20-23 (big-endian)
  */
-function getPngDimensions(
-  bytes: Uint8Array
-): { width: number; height: number } | null {
+function getPngDimensions(bytes: Uint8Array): { width: number; height: number } | null {
   if (bytes.length < 24) return null;
   const width = readUint32BE(bytes, 16);
   const height = readUint32BE(bytes, 20);
@@ -143,9 +130,7 @@ function getPngDimensions(
  * Extract dimensions from GIF header
  * GIF stores width at bytes 6-7 and height at bytes 8-9 (little-endian)
  */
-function getGifDimensions(
-  bytes: Uint8Array
-): { width: number; height: number } | null {
+function getGifDimensions(bytes: Uint8Array): { width: number; height: number } | null {
   if (bytes.length < 10) return null;
   const width = readUint16LE(bytes, 6);
   const height = readUint16LE(bytes, 8);
@@ -156,9 +141,7 @@ function getGifDimensions(
  * Extract dimensions from BMP header
  * BMP stores width at bytes 18-21 and height at bytes 22-25 (little-endian, signed)
  */
-function getBmpDimensions(
-  bytes: Uint8Array
-): { width: number; height: number } | null {
+function getBmpDimensions(bytes: Uint8Array): { width: number; height: number } | null {
   if (bytes.length < 26) return null;
   const width = readUint32LE(bytes, 18);
   let height = readUint32LE(bytes, 22);
@@ -173,18 +156,11 @@ function getBmpDimensions(
  * Extract dimensions from WebP header
  * WebP VP8/VP8L/VP8X chunks contain dimension info
  */
-function getWebpDimensions(
-  bytes: Uint8Array
-): { width: number; height: number } | null {
+function getWebpDimensions(bytes: Uint8Array): { width: number; height: number } | null {
   if (bytes.length < 30) return null;
 
   // Check for VP8X (extended)
-  if (
-    bytes[12] === 0x56 &&
-    bytes[13] === 0x50 &&
-    bytes[14] === 0x38 &&
-    bytes[15] === 0x58
-  ) {
+  if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x58) {
     // VP8X: width at 24-26 (24-bit LE + 1), height at 27-29 (24-bit LE + 1)
     const width = (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16)) + 1;
     const height = (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16)) + 1;
@@ -192,12 +168,7 @@ function getWebpDimensions(
   }
 
   // Check for VP8L (lossless)
-  if (
-    bytes[12] === 0x56 &&
-    bytes[13] === 0x50 &&
-    bytes[14] === 0x38 &&
-    bytes[15] === 0x4c
-  ) {
+  if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x4c) {
     // VP8L: dimensions encoded in first 4 bytes after signature
     if (bytes.length < 25) return null;
     const bits = readUint32LE(bytes, 21);
@@ -207,12 +178,7 @@ function getWebpDimensions(
   }
 
   // Check for VP8 (lossy)
-  if (
-    bytes[12] === 0x56 &&
-    bytes[13] === 0x50 &&
-    bytes[14] === 0x38 &&
-    bytes[15] === 0x20
-  ) {
+  if (bytes[12] === 0x56 && bytes[13] === 0x50 && bytes[14] === 0x38 && bytes[15] === 0x20) {
     // VP8: find frame header (starts with 0x9d 0x01 0x2a)
     for (let i = 20; i < Math.min(bytes.length - 10, 100); i++) {
       if (bytes[i] === 0x9d && bytes[i + 1] === 0x01 && bytes[i + 2] === 0x2a) {
@@ -230,9 +196,7 @@ function getWebpDimensions(
  * Extract dimensions from JPEG header
  * JPEG stores dimensions in SOF0/SOF2 markers
  */
-function getJpegDimensions(
-  bytes: Uint8Array
-): { width: number; height: number } | null {
+function getJpegDimensions(bytes: Uint8Array): { width: number; height: number } | null {
   if (bytes.length < 4) return null;
 
   let offset = 2; // Skip SOI marker
@@ -286,7 +250,7 @@ function getJpegDimensions(
  * @returns Width and height, or null if extraction fails
  */
 export function getImageDimensionsFromBytes(
-  imageBytes: Uint8Array
+  imageBytes: Uint8Array,
 ): { width: number; height: number } | null {
   try {
     if (!imageBytes || imageBytes.length < 8) {
@@ -315,9 +279,7 @@ export function getImageDimensionsFromBytes(
     if (matchesSignature(imageBytes, IMAGE_SIGNATURES.WEBP)) {
       const webpSignature = [0x57, 0x45, 0x42, 0x50];
       if (imageBytes.length >= 12) {
-        const isWebP = webpSignature.every(
-          (byte, index) => imageBytes[8 + index] === byte
-        );
+        const isWebP = webpSignature.every((byte, index) => imageBytes[8 + index] === byte);
         if (isWebP) {
           return getWebpDimensions(imageBytes);
         }
@@ -342,7 +304,7 @@ export function getImageDimensionsFromBytes(
  * @returns Width and height, or null if extraction fails
  */
 export async function getImageDimensionsFromUrl(
-  imageUrl: string
+  imageUrl: string,
 ): Promise<{ width: number; height: number } | null> {
   try {
     const response = await fetch(imageUrl);

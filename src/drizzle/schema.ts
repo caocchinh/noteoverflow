@@ -1,11 +1,4 @@
-import {
-  foreignKey,
-  index,
-  integer,
-  primaryKey,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { foreignKey, index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -45,7 +38,7 @@ export const session = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     impersonatedBy: text("impersonated_by").references(() => user.id),
   },
-  (table) => [index("idx_session_id").on(table.userId)]
+  (table) => [index("idx_session_id").on(table.userId)],
 );
 
 export const account = sqliteTable(
@@ -71,7 +64,7 @@ export const account = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
-  (table) => [index("idx_account_id").on(table.userId)]
+  (table) => [index("idx_account_id").on(table.userId)],
 );
 
 export const verification = sqliteTable("verification", {
@@ -80,10 +73,10 @@ export const verification = sqliteTable("verification", {
   value: text("value").notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
 });
 
@@ -101,7 +94,7 @@ export const subject = sqliteTable(
   },
   (table) => {
     return [primaryKey({ columns: [table.subjectId, table.curriculumName] })];
-  }
+  },
 );
 
 export const season = sqliteTable(
@@ -122,7 +115,7 @@ export const season = sqliteTable(
         foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
-  }
+  },
 );
 
 export const paperType = sqliteTable(
@@ -142,7 +135,7 @@ export const paperType = sqliteTable(
         foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
-  }
+  },
 );
 
 export const year = sqliteTable(
@@ -160,7 +153,7 @@ export const year = sqliteTable(
       columns: [table.subjectId, table.curriculumName],
       foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
-  ]
+  ],
 );
 
 export const topic = sqliteTable(
@@ -180,7 +173,7 @@ export const topic = sqliteTable(
         foreignColumns: [subject.subjectId, subject.curriculumName],
       }),
     ];
-  }
+  },
 );
 
 export const question = sqliteTable(
@@ -208,12 +201,8 @@ export const question = sqliteTable(
     curriculumName: text("curriculum_name").notNull(),
     questionNumber: integer("question_number").notNull(),
     topics: text("topics"),
-    isQuestionHasImageDimensions: integer("is_question_has_image_dimensions")
-      .notNull()
-      .default(0),
-    isQuestionImageIndexed: integer("is_question_image_indexed")
-      .notNull()
-      .default(0),
+    isQuestionHasImageDimensions: integer("is_question_has_image_dimensions").notNull().default(0),
+    isQuestionImageIndexed: integer("is_question_image_indexed").notNull().default(0),
   },
   (table) => [
     index("idx_question_filter").on(
@@ -221,7 +210,7 @@ export const question = sqliteTable(
       table.curriculumName,
       table.paperType,
       table.year,
-      table.season
+      table.season,
     ),
     foreignKey({
       columns: [table.year, table.subjectId, table.curriculumName],
@@ -233,11 +222,7 @@ export const question = sqliteTable(
     }),
     foreignKey({
       columns: [table.paperType, table.subjectId, table.curriculumName],
-      foreignColumns: [
-        paperType.paperType,
-        paperType.subjectId,
-        paperType.curriculumName,
-      ],
+      foreignColumns: [paperType.paperType, paperType.subjectId, paperType.curriculumName],
     }),
     foreignKey({
       columns: [table.topics, table.subjectId, table.curriculumName],
@@ -248,7 +233,7 @@ export const question = sqliteTable(
       columns: [table.subjectId, table.curriculumName],
       foreignColumns: [subject.subjectId, subject.curriculumName],
     }),
-  ]
+  ],
 );
 
 export const userBookmarkList = sqliteTable("user_bookmark_list", {
@@ -287,7 +272,7 @@ export const userBookmarks = sqliteTable(
       primaryKey({ columns: [table.listId, table.questionId] }),
       index("idx_bookmarks_list_user").on(table.listId, table.userId),
     ];
-  }
+  },
 );
 
 export const finishedQuestions = sqliteTable(
@@ -305,7 +290,7 @@ export const finishedQuestions = sqliteTable(
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.questionId] })];
-  }
+  },
 );
 
 export const recentQuery = sqliteTable(
@@ -322,7 +307,7 @@ export const recentQuery = sqliteTable(
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.queryKey] })];
-  }
+  },
 );
 
 export const userAnnotations = sqliteTable(
@@ -342,7 +327,7 @@ export const userAnnotations = sqliteTable(
   },
   (table) => {
     return [primaryKey({ columns: [table.userId, table.questionId] })];
-  }
+  },
 );
 
 export const globalSearchRateLimit = sqliteTable("global_search_rate_limit", {

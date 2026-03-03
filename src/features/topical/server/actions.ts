@@ -1,22 +1,14 @@
 "use server";
-import { and, eq, sql } from "drizzle-orm";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, UNAUTHORIZED } from "@/constants/constants";
+import { ServerActionResponse } from "@/constants/types";
+import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { finishedQuestions, recentQuery } from "@/drizzle/schema";
-import { verifySession } from "@/dal/verifySession";
-import {
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  UNAUTHORIZED,
-} from "@/constants/constants";
-import { ServerActionResponse } from "@/constants/types";
-import { BookmarkService } from "../services/bookmark.service";
-import { AnnotationService } from "../services/annotation.service";
-import {
-  validateCurriculum,
-  validateFilterData,
-  validateSubject,
-} from "../lib/utils";
+import { and, eq, sql } from "drizzle-orm";
 import { MAX_NUMBER_OF_RECENT_QUERIES } from "../constants/constants";
+import { validateCurriculum, validateFilterData, validateSubject } from "../lib/utils";
+import { AnnotationService } from "../services/annotation.service";
+import { BookmarkService } from "../services/bookmark.service";
 import { FilterData } from "../types/models";
 
 // Bookmark Actions delegated to Service
@@ -36,12 +28,7 @@ export const createBookmarkListAndAddBookmarkAction = async ({
       throw new Error(UNAUTHORIZED);
     }
     const userId = session.user.id;
-    return await BookmarkService.createListAndAddBookmark(
-      userId,
-      listName,
-      visibility,
-      questionId,
-    );
+    return await BookmarkService.createListAndAddBookmark(userId, listName, visibility, questionId);
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return { error: UNAUTHORIZED, success: false };
@@ -67,11 +54,7 @@ export const addBookmarkAction = async ({
       return { error: UNAUTHORIZED, success: false };
     }
     const userId = session.user.id;
-    const result = await BookmarkService.addBookmark(
-      userId,
-      listId,
-      questionId,
-    );
+    const result = await BookmarkService.addBookmark(userId, listId, questionId);
     return result as ServerActionResponse<void>;
   } catch (error) {
     console.error(error);
@@ -150,11 +133,7 @@ export const changeBookmarkListVisibilityAction = async ({
       return { error: UNAUTHORIZED, success: false };
     }
     const userId = session.user.id;
-    return await BookmarkService.changeListVisibility(
-      userId,
-      listId,
-      newVisibility,
-    );
+    return await BookmarkService.changeListVisibility(userId, listId, newVisibility);
   } catch (error) {
     console.error(error);
     return { error: INTERNAL_SERVER_ERROR, success: false };
@@ -222,10 +201,7 @@ export const removeFinishedQuestionAction = async ({
     await db
       .delete(finishedQuestions)
       .where(
-        and(
-          eq(finishedQuestions.userId, userId),
-          eq(finishedQuestions.questionId, questionId),
-        ),
+        and(eq(finishedQuestions.userId, userId), eq(finishedQuestions.questionId, questionId)),
       );
     return {
       success: true,
@@ -373,9 +349,7 @@ export const deleteRecentQuery = async ({
 
     await db
       .delete(recentQuery)
-      .where(
-        and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId)),
-      );
+      .where(and(eq(recentQuery.queryKey, queryKey), eq(recentQuery.userId, userId)));
 
     return {
       success: true,
@@ -407,12 +381,7 @@ export const saveAnnotationsAction = async ({
     }
     const userId = session.user.id;
 
-    return await AnnotationService.saveAnnotations(
-      userId,
-      questionId,
-      questionXfdf,
-      answerXfdf,
-    );
+    return await AnnotationService.saveAnnotations(userId, questionId, questionXfdf, answerXfdf);
   } catch (error) {
     if (error instanceof Error && error.message === UNAUTHORIZED) {
       return {

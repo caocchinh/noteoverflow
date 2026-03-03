@@ -1,23 +1,8 @@
 "use client";
 
-import { ChevronsUpDown } from "lucide-react";
-import React, {
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   CommandEmpty,
   CommandGroup,
@@ -32,27 +17,31 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-
-import MultiSelectorContent from "./MultiSelectorContent";
-import MultiSelectorTrigger from "./MultiSelectorTrigger";
-import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
+import { ChevronsUpDown } from "lucide-react";
 import {
-  extractUniqueTopicCurriculumnSubdivisions,
-  fuzzySearch,
-} from "../../lib/utils";
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { extractUniqueTopicCurriculumnSubdivisions, fuzzySearch } from "../../lib/utils";
 import {
   MultiSelectorDesktoptUltilityButtons,
   MultiSelectorMobiletUltilityButtons,
 } from "./MultiSelectUltilityButtons";
+import MultiSelectorContent from "./MultiSelectorContent";
 import MultiSelectorFilterNavigation from "./MultiSelectorFilterNavigation";
+import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
+import MultiSelectorTrigger from "./MultiSelectorTrigger";
 import {
   EnhancedMultiSelectorListProps,
   EnhancedMultiSelectorProps,
@@ -73,11 +62,7 @@ const EnhancedMultiSelector = memo(
   }: EnhancedMultiSelectorProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const isMobileDevice = useIsMobile();
-    if (
-      maxLength !== undefined &&
-      typeof maxLength == "number" &&
-      maxLength <= 0
-    ) {
+    if (maxLength !== undefined && typeof maxLength == "number" && maxLength <= 0) {
       throw new Error("maxLength must be greater than 0");
     }
 
@@ -118,16 +103,12 @@ const EnhancedMultiSelector = memo(
       const allValueUnderFilterThatIsNotSelectedYet = allAvailableOptions
         .filter((item) => {
           return (
-            item.curriculumnSubdivision.some(
-              (item) => item === currentFilter,
-            ) && !selectedValues.includes(item.value)
+            item.curriculumnSubdivision.some((item) => item === currentFilter) &&
+            !selectedValues.includes(item.value)
           );
         })
         .map((item) => item.value);
-      onValueChange([
-        ...selectedValues,
-        ...allValueUnderFilterThatIsNotSelectedYet,
-      ]);
+      onValueChange([...selectedValues, ...allValueUnderFilterThatIsNotSelectedYet]);
     }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
 
     const onDeleteAll = useCallback(() => {
@@ -139,9 +120,7 @@ const EnhancedMultiSelector = memo(
         ),
       );
 
-      onValueChange(
-        selectedValues.filter((value) => !valuesToRemove.includes(value)),
-      );
+      onValueChange(selectedValues.filter((value) => !valuesToRemove.includes(value)));
     }, [allAvailableOptions, currentFilter, onValueChange, selectedValues]);
 
     const sharedProps: EnhancedMultiSelectorSharedProps = {
@@ -176,14 +155,12 @@ EnhancedMultiSelector.displayName = "EnhancedMultiSelector";
 export default EnhancedMultiSelector;
 
 // Shared error message component
-const MaxLengthErrorMessage = memo(
-  ({ maxLength, label }: { maxLength: number; label: string }) => (
-    <h3 className="w-max font-medium text-sm text-destructive mt-1">
-      You can only select up to {maxLength}{" "}
-      {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
-    </h3>
-  ),
-);
+const MaxLengthErrorMessage = memo(({ maxLength, label }: { maxLength: number; label: string }) => (
+  <h3 className="text-destructive mt-1 w-max text-sm font-medium">
+    You can only select up to {maxLength}{" "}
+    {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
+  </h3>
+));
 
 MaxLengthErrorMessage.displayName = "MaxLengthErrorMessage";
 
@@ -204,12 +181,9 @@ const EnhancedMobileMultiSelector = memo(
   }: EnhancedMultiSelectorSharedProps) => {
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const [open, setOpen] = useState<boolean>(false);
-    const handleSetInputValue = useCallback(
-      (val: string | ((prev: string) => string)) => {
-        multiSelectorListRef.current?.setInputValue(val);
-      },
-      [],
-    );
+    const handleSetInputValue = useCallback((val: string | ((prev: string) => string)) => {
+      multiSelectorListRef.current?.setInputValue(val);
+    }, []);
 
     return (
       <>
@@ -234,7 +208,7 @@ const EnhancedMobileMultiSelector = memo(
             onOpenAutoFocus={(e) => {
               e.preventDefault();
             }}
-            className="z-100011 h-[95vh] max-h-[95vh] dark:bg-accent"
+            className="dark:bg-accent z-100011 h-[95vh] max-h-[95vh]"
           >
             <DrawerHeader className="sr-only">
               <DrawerTitle>Select</DrawerTitle>
@@ -245,10 +219,9 @@ const EnhancedMobileMultiSelector = memo(
               <div className="mx-auto hidden h-2 w-[100px] shrink-0 rounded-full bg-black pt-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:block"></div>
             </div>
             {maxLength && selectedValues.length > maxLength && (
-              <h3 className="w-max font-medium text-sm text-destructive mx-auto -mt-1">
+              <h3 className="text-destructive mx-auto -mt-1 w-max text-sm font-medium">
                 You can only select up to {maxLength}{" "}
-                {label.toLowerCase() +
-                  (label.toLowerCase() === "topic" ? "s" : "")}
+                {label.toLowerCase() + (label.toLowerCase() === "topic" ? "s" : "")}
               </h3>
             )}
             <MultiSelectorMobiletUltilityButtons
@@ -304,12 +277,9 @@ const EnhancedDesktopMultiSelector = memo(
     const multiSelectorListRef = useRef<MultiSelectorListRef | null>(null);
     const popoverTriggerRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState<boolean>(false);
-    const handleSetInputValue = useCallback(
-      (val: string | ((prev: string) => string)) => {
-        multiSelectorListRef.current?.setInputValue(val);
-      },
-      [],
-    );
+    const handleSetInputValue = useCallback((val: string | ((prev: string) => string)) => {
+      multiSelectorListRef.current?.setInputValue(val);
+    }, []);
     return (
       <Popover modal={false} open={open}>
         <PopoverTrigger asChild className="w-full">
@@ -337,7 +307,7 @@ const EnhancedDesktopMultiSelector = memo(
             e.preventDefault();
           }}
           autoFocus={false}
-          className="z-100007 m-0 border p-0 shadow-none dark:bg-accent"
+          className="dark:bg-accent z-100007 m-0 border p-0 shadow-none"
           side="right"
           onWheel={(e) => e.stopPropagation()}
           onInteractOutside={(e) => {
@@ -375,7 +345,7 @@ const EnhancedDesktopMultiSelector = memo(
           />
           <div className="m-2">
             <Button
-              className="w-full cursor-pointer h-[30px]"
+              className="h-[30px] w-full cursor-pointer"
               onClick={() => {
                 setOpen(false);
               }}
@@ -432,9 +402,7 @@ const EnhancedMultiSelectorList = forwardRef(
       return allAvailableOptions
         .filter((item) => {
           return (
-            item.curriculumnSubdivision.some(
-              (item) => item === currentFilter,
-            ) &&
+            item.curriculumnSubdivision.some((item) => item === currentFilter) &&
             fuzzySearch(inputValue, item.value) &&
             item.isUpToDate
           );
@@ -446,9 +414,7 @@ const EnhancedMultiSelectorList = forwardRef(
       return allAvailableOptions
         .filter((item) => {
           return (
-            item.curriculumnSubdivision.some(
-              (item) => item === currentFilter,
-            ) &&
+            item.curriculumnSubdivision.some((item) => item === currentFilter) &&
             fuzzySearch(inputValue, item.value) &&
             !item.isUpToDate
           );
@@ -459,10 +425,9 @@ const EnhancedMultiSelectorList = forwardRef(
     const filteredSelectedValue = useMemo(() => {
       return selectedValues.filter((item) => {
         return (
-          [
-            ...filteredOutdatedAvailableOption,
-            ...filteredUpToDateAvailableOption,
-          ].some((all) => all === item) && fuzzySearch(inputValue, item)
+          [...filteredOutdatedAvailableOption, ...filteredUpToDateAvailableOption].some(
+            (all) => all === item,
+          ) && fuzzySearch(inputValue, item)
         );
       });
     }, [
@@ -471,12 +436,10 @@ const EnhancedMultiSelectorList = forwardRef(
       inputValue,
       selectedValues,
     ]);
-    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] =
-      useState(false);
+    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] = useState(false);
 
     const totalAmountOfItems =
-      filteredUpToDateAvailableOption.length +
-      filteredOutdatedAvailableOption.length;
+      filteredUpToDateAvailableOption.length + filteredOutdatedAvailableOption.length;
 
     const blockMobileKeyboardOpen = useCallback(() => {
       setIsBlockingMobileKeyboard(true);
@@ -511,7 +474,7 @@ const EnhancedMultiSelectorList = forwardRef(
         >
           <CommandList
             className={cn(
-              "z-1000 flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
+              "dark:bg-acccent z-1000 flex h-full w-full flex-col gap-2 p-2",
               label === "Year" || label === "Season",
             )}
           >
@@ -523,10 +486,8 @@ const EnhancedMultiSelectorList = forwardRef(
                 >
                   <h3
                     className={cn(
-                      "font-medium text-xs",
-                      filteredSelectedValue.length > 0
-                        ? "text-logo-main"
-                        : "text-muted-foreground",
+                      "text-xs font-medium",
+                      filteredSelectedValue.length > 0 ? "text-logo-main" : "text-muted-foreground",
                     )}
                   >
                     {`${filteredSelectedValue.length} selected`}
@@ -540,7 +501,7 @@ const EnhancedMultiSelectorList = forwardRef(
                     !inputValue &&
                     filteredSelectedValue.map((item) => (
                       <CommandItem
-                        className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
+                        className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors"
                         key={item}
                         onTouchStart={blockMobileKeyboardOpen}
                         onSelect={() => {
@@ -548,7 +509,7 @@ const EnhancedMultiSelectorList = forwardRef(
                         }}
                       >
                         <Checkbox
-                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main data-[state=checked]:text-white"
                           defaultChecked={true}
                         />
                         {temporaryFix(item) ?? item}
@@ -574,8 +535,7 @@ const EnhancedMultiSelectorList = forwardRef(
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
-                      selectedValues.includes(item) &&
-                        "cursor-default opacity-50",
+                      selectedValues.includes(item) && "cursor-default opacity-50",
                     )}
                     key={item}
                     onTouchStart={blockMobileKeyboardOpen}
@@ -585,7 +545,7 @@ const EnhancedMultiSelectorList = forwardRef(
                   >
                     <Checkbox
                       checked={selectedValues.includes(item)}
-                      className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
+                      className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main data-[state=checked]:text-white"
                     />
                     {temporaryFix(item) ?? item}
                   </CommandItem>
@@ -596,16 +556,12 @@ const EnhancedMultiSelectorList = forwardRef(
                 <>
                   <CommandSeparator />
 
-                  <CommandGroup
-                    heading="Old syllabus"
-                    className={cn(inputValue && "-mt-4")}
-                  >
+                  <CommandGroup heading="Old syllabus" className={cn(inputValue && "-mt-4")}>
                     {filteredOutdatedAvailableOption.map((item) => (
                       <CommandItem
                         className={cn(
                           "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
-                          selectedValues.includes(item) &&
-                            "cursor-default opacity-50",
+                          selectedValues.includes(item) && "cursor-default opacity-50",
                         )}
                         key={item}
                         onTouchStart={blockMobileKeyboardOpen}
@@ -615,7 +571,7 @@ const EnhancedMultiSelectorList = forwardRef(
                       >
                         <Checkbox
                           checked={selectedValues.includes(item)}
-                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
+                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main data-[state=checked]:text-white"
                         />
                         {temporaryFix(item) ?? item}
                       </CommandItem>

@@ -13,7 +13,7 @@ import { BookmarkRepo } from "../dal/bookmark.repo";
 export const BookmarkService = {
   async addBookmark(userId: string, listId: string, questionId: string) {
     const list = await BookmarkRepo.findListById(listId);
-    
+
     if (!list) {
       return { error: DOES_NOT_EXIST, success: false };
     }
@@ -43,7 +43,7 @@ export const BookmarkService = {
     userId: string,
     listName: string,
     visibility: "public" | "private",
-    questionId: string
+    questionId: string,
   ) {
     if (listName.trim() === "" || listName.length > LIST_NAME_MAX_LENGTH) {
       return { error: BAD_REQUEST, success: false };
@@ -117,7 +117,11 @@ export const BookmarkService = {
 
   async changeListVisibility(userId: string, listId: string, newVisibility: "public" | "private") {
     try {
-      const existingList = await BookmarkRepo.findListByUserIdAndIdAndVisibility(userId, listId, newVisibility);
+      const existingList = await BookmarkRepo.findListByUserIdAndIdAndVisibility(
+        userId,
+        listId,
+        newVisibility,
+      );
       if (existingList.length > 0) {
         return { error: BAD_REQUEST, success: false };
       }

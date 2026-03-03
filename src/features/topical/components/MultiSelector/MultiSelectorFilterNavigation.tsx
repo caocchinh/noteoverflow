@@ -10,15 +10,13 @@ const MultiSelectorFilterNavigation = memo(
     currentItem,
   }: {
     items: string[];
-    setItems: Dispatch<
-      SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>
-    >;
+    setItems: Dispatch<SetStateAction<CIE_A_LEVEL_SUBDIVISION | OUTDATED | undefined>>;
     currentItem: string;
   }) => {
     return (
       <div className="-my-2 flex h-max w-full flex-wrap items-center justify-center gap-4 sm:flex-nowrap">
         <AnimatedBackground
-          className=" h-full w-full border-[#0084ff] border-b-2"
+          className="h-full w-full border-b-2 border-[#0084ff]"
           defaultValue={currentItem}
           onValueChange={(value) => {
             setItems((value as CIE_A_LEVEL_SUBDIVISION | OUTDATED) ?? items[0]);
@@ -33,7 +31,7 @@ const MultiSelectorFilterNavigation = memo(
             .toSorted((a, b) => b.localeCompare(a))
             .map((item) => (
               <div
-                className="cursor-pointer flex-1 text-center flex items-center justify-center rounded-none bg-transparent p-2 text-primary shadow-none hover:bg-transparent hover:text-primary"
+                className="text-primary hover:text-primary flex flex-1 cursor-pointer items-center justify-center rounded-none bg-transparent p-2 text-center shadow-none hover:bg-transparent"
                 key={item}
                 data-id={item}
               >
@@ -43,7 +41,7 @@ const MultiSelectorFilterNavigation = memo(
         </AnimatedBackground>
       </div>
     );
-  }
+  },
 );
 
 MultiSelectorFilterNavigation.displayName = "MultiSelectorFilterNavigation";

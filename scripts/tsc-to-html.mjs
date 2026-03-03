@@ -1,8 +1,8 @@
 #!/usr/bin/env node
+import Convert from "ansi-to-html";
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
-import Convert from "ansi-to-html";
 
 const convert = new Convert({
   fg: "#333",

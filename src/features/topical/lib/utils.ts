@@ -1,24 +1,20 @@
 import {
-  BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_CURRICULUM_CODE_PREFIX,
+  BESTEXAMHELP_DOMAIN,
   BESTEXAMHELP_SUBJECT_CODE,
   TOPICAL_DATA,
 } from "@/constants/constants";
-import {
-  DEFAULT_CACHE,
-  FILTERS_CACHE_KEY,
-  INVALID_INPUTS_DEFAULT,
-} from "../constants/constants";
 import type {
-  OUTDATED,
   CIE_A_LEVEL_SUBDIVISION,
-  ValidCurriculum,
-  ValidSeason,
+  OUTDATED,
   TopicalData,
   TopicalSubject,
+  ValidCurriculum,
+  ValidSeason,
 } from "@/constants/types";
-import { Dispatch, RefObject, SetStateAction } from "react";
 import { getShortSeason } from "@/lib/utils";
+import { Dispatch, RefObject, SetStateAction } from "react";
+import { DEFAULT_CACHE, FILTERS_CACHE_KEY, INVALID_INPUTS_DEFAULT } from "../constants/constants";
 import {
   BookmarksMetadata,
   FilterData,
@@ -71,13 +67,8 @@ export function hasOverlap(arr1: string[], arr2: string[]): boolean {
   return arr2.some((item) => set1.has(item));
 }
 
-export const validateSubject = (
-  curriculum: string,
-  subject: string,
-): boolean => {
-  const currentCurriculumData = TOPICAL_DATA.find(
-    (item) => item.curriculum === curriculum,
-  );
+export const validateSubject = (curriculum: string, subject: string): boolean => {
+  const currentCurriculumData = TOPICAL_DATA.find((item) => item.curriculum === curriculum);
   if (!currentCurriculumData) {
     return false;
   }
@@ -88,13 +79,8 @@ export const validateSubject = (
  * Helper to get subject data from TOPICAL_DATA
  * Returns null if curriculum or subject not found
  */
-export const getSubjectData = (
-  curriculum: string,
-  subject: string,
-): TopicalSubject | null => {
-  const currentCurriculumData = TOPICAL_DATA.find(
-    (item) => item.curriculum === curriculum,
-  );
+export const getSubjectData = (curriculum: string, subject: string): TopicalSubject | null => {
+  const currentCurriculumData = TOPICAL_DATA.find((item) => item.curriculum === curriculum);
   if (!currentCurriculumData) {
     return null;
   }
@@ -289,9 +275,7 @@ export const validateSubcurriculumnDivision = ({
 
     // Import TOPICAL_DATA to validate against actual data
     // Find the curriculum data
-    const curriculumData = TOPICAL_DATA.find(
-      (data: TopicalData) => data.curriculum === curriculum,
-    );
+    const curriculumData = TOPICAL_DATA.find((data: TopicalData) => data.curriculum === curriculum);
     if (!curriculumData) return false;
 
     // Find the subject data
@@ -309,10 +293,7 @@ export const validateSubcurriculumnDivision = ({
         }
       | {
           paperType: number;
-          paperTypeCurriculumnSubdivision: (
-            | CIE_A_LEVEL_SUBDIVISION
-            | OUTDATED
-          )[];
+          paperTypeCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
         }
     )[] = [];
     if (type === "topic") {
@@ -337,10 +318,7 @@ export const validateSubcurriculumnDivision = ({
       } else {
         const paperTypeItem = item as {
           paperType: number;
-          paperTypeCurriculumnSubdivision: (
-            | CIE_A_LEVEL_SUBDIVISION
-            | OUTDATED
-          )[];
+          paperTypeCurriculumnSubdivision: (CIE_A_LEVEL_SUBDIVISION | OUTDATED)[];
         };
         return {
           value: paperTypeItem.paperType.toString(),
@@ -349,13 +327,10 @@ export const validateSubcurriculumnDivision = ({
         };
       }
     });
-    const validSubdivisions =
-      extractUniqueTopicCurriculumnSubdivisions(options);
+    const validSubdivisions = extractUniqueTopicCurriculumnSubdivisions(options);
 
     // Check if the value is in the valid subdivisions
-    return validSubdivisions.includes(
-      value as CIE_A_LEVEL_SUBDIVISION | OUTDATED,
-    );
+    return validSubdivisions.includes(value as CIE_A_LEVEL_SUBDIVISION | OUTDATED);
   } catch {
     return false;
   }
@@ -385,11 +360,7 @@ export const fuzzySearch = (query: string, text: string): boolean => {
   }
 };
 
-export const extractPaperCode = ({
-  questionId,
-}: {
-  questionId: string;
-}): string => {
+export const extractPaperCode = ({ questionId }: { questionId: string }): string => {
   try {
     const codePart = questionId.split(";")[2];
     return codePart.replaceAll("_", "/");
@@ -398,11 +369,7 @@ export const extractPaperCode = ({
   }
 };
 
-export const extractQuestionNumber = ({
-  questionId,
-}: {
-  questionId: string;
-}): number => {
+export const extractQuestionNumber = ({ questionId }: { questionId: string }): number => {
   try {
     const questionNumberPart = questionId.split(";")[4];
     return parseInt(questionNumberPart.slice(1));
@@ -423,11 +390,7 @@ export const extractCurriculumCode = ({
   }
 };
 
-export const extractSubjectCode = ({
-  questionId,
-}: {
-  questionId: string;
-}): string => {
+export const extractSubjectCode = ({ questionId }: { questionId: string }): string => {
   try {
     return questionId.split(";")[1] as ValidCurriculum;
   } catch {
@@ -459,11 +422,7 @@ export const extractSeasonFromPaperCode = ({
   }
 };
 
-export const extractYearFromPaperCode = ({
-  paperCode,
-}: {
-  paperCode: string;
-}): string => {
+export const extractYearFromPaperCode = ({ paperCode }: { paperCode: string }): string => {
   try {
     // paperCode format: "9702/11/M/J/24" where 24 is the year
     const parts = paperCode.split("/");
@@ -499,9 +458,7 @@ export const parsePastPaperUrl = ({
     const paper = splitedQuestionId[2].split("_")[1];
     const curriculum = splitedQuestionId[0] as ValidCurriculum;
     const shortSeason = getShortSeason({ season, verbose: false });
-    let newPaperCode = `${subjectCode}-${shortSeason}${year
-      .toString()
-      .slice(2)}-${type}`;
+    let newPaperCode = `${subjectCode}-${shortSeason}${year.toString().slice(2)}-${type}`;
     if (type === "ms" || type === "qp") {
       newPaperCode = `${newPaperCode}-${paper}`;
     }
@@ -569,26 +526,17 @@ export const isOverScrolling = ({
   try {
     if (child && parent) {
       if (child.clientWidth >= parent.clientWidth) {
-        const childLeft = Math.abs(
-          Math.round(child.getBoundingClientRect().left),
-        );
-        const childRight = Math.abs(
-          Math.round(child.getBoundingClientRect().right),
-        );
-        const parentLeft = Math.abs(
-          Math.round(parent.getBoundingClientRect().left),
-        );
-        const parentRight = Math.abs(
-          Math.round(parent.getBoundingClientRect().right),
-        );
+        const childLeft = Math.abs(Math.round(child.getBoundingClientRect().left));
+        const childRight = Math.abs(Math.round(child.getBoundingClientRect().right));
+        const parentLeft = Math.abs(Math.round(parent.getBoundingClientRect().left));
+        const parentRight = Math.abs(Math.round(parent.getBoundingClientRect().right));
 
         const leftThreshold =
           ((Math.max(childLeft, parentLeft) - Math.min(childLeft, parentLeft)) /
             ((childLeft + parentLeft) / 2)) *
           100;
         const rightThreshold =
-          ((Math.max(childRight, parentRight) -
-            Math.min(childRight, parentRight)) /
+          ((Math.max(childRight, parentRight) - Math.min(childRight, parentRight)) /
             ((childRight + parentRight) / 2)) *
           100;
 
@@ -659,11 +607,7 @@ export const updateSearchParams = ({
     params.set("questionId", questionId);
     params.set("isInspectOpen", isInspectOpen.toString());
 
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
   } catch {
     return;
   }
@@ -686,9 +630,7 @@ export const syncFilterCacheToLocalStorage = ({
   selectedYear?: string[];
   selectedSeason?: string[];
   topicSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
-  paperTypeSubcurriculumnDivisionPreference?:
-    | CIE_A_LEVEL_SUBDIVISION
-    | OUTDATED;
+  paperTypeSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
 }) => {
   if (typeof window === "undefined") {
     return;
@@ -698,9 +640,7 @@ export const syncFilterCacheToLocalStorage = ({
 
     try {
       const existingStateJSON = localStorage.getItem(FILTERS_CACHE_KEY);
-      stateToSave = existingStateJSON
-        ? JSON.parse(existingStateJSON)
-        : { ...DEFAULT_CACHE };
+      stateToSave = existingStateJSON ? JSON.parse(existingStateJSON) : { ...DEFAULT_CACHE };
     } catch {
       // If reading fails, start with empty state
       stateToSave = { ...DEFAULT_CACHE };
@@ -712,16 +652,11 @@ export const syncFilterCacheToLocalStorage = ({
 
     if (selectedCurriculum && selectedSubject) {
       // Get existing filter data or create empty object
-      const existingFilterData =
-        stateToSave.filters?.[selectedCurriculum]?.[selectedSubject] || {};
+      const existingFilterData = stateToSave.filters?.[selectedCurriculum]?.[selectedSubject] || {};
 
       const newFilterData: FilterData & {
-        topicSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
-        paperTypeSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
+        topicSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+        paperTypeSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
       } = { ...existingFilterData };
 
       if (selectedTopic) {
@@ -738,8 +673,7 @@ export const syncFilterCacheToLocalStorage = ({
       }
 
       if (topicSubcurriculumnDivisionPreference) {
-        newFilterData.topicSubcurriculumnDivisionPreference =
-          topicSubcurriculumnDivisionPreference;
+        newFilterData.topicSubcurriculumnDivisionPreference = topicSubcurriculumnDivisionPreference;
       }
 
       if (paperTypeSubcurriculumnDivisionPreference) {
@@ -883,9 +817,9 @@ export const truncateListName = ({ listName }: { listName: string }) => {
   return listName;
 };
 
-export function computeCurriculumSubjectMapping<
-  T extends { question: SelectedQuestion },
->(questions: T[]): Partial<Record<ValidCurriculum, string[]>> {
+export function computeCurriculumSubjectMapping<T extends { question: SelectedQuestion }>(
+  questions: T[],
+): Partial<Record<ValidCurriculum, string[]>> {
   const metadata: Partial<Record<ValidCurriculum, string[]>> = {};
   questions.forEach((question) => {
     const extractedCurriculum = extractCurriculumCode({
@@ -913,8 +847,7 @@ export function computeCurriculumSubjectMapping<
 export function computeFinishedQuestionsMetadata(
   finishedQuestions: SelectedFinishedQuestion[],
 ): FinishedQuestionsMetadata {
-  const curriculumSubjectMapping =
-    computeCurriculumSubjectMapping(finishedQuestions);
+  const curriculumSubjectMapping = computeCurriculumSubjectMapping(finishedQuestions);
 
   // Transform the flat mapping into the required nested structure
   const metadata: FinishedQuestionsMetadata = {};
@@ -925,9 +858,7 @@ export function computeFinishedQuestionsMetadata(
   return metadata;
 }
 
-export function computeSubjectMetadata<
-  T extends { question: SelectedQuestion },
->(
+export function computeSubjectMetadata<T extends { question: SelectedQuestion }>(
   questions: T[],
   selectedCurriculumn: string | null,
   selectedSubject: string | null,
@@ -949,10 +880,7 @@ export function computeSubjectMetadata<
       questionId: questionItem.question.id,
     });
 
-    if (
-      extractedCurriculumn === selectedCurriculumn &&
-      extractedSubjectCode === selectedSubject
-    ) {
+    if (extractedCurriculumn === selectedCurriculumn && extractedSubjectCode === selectedSubject) {
       questionItem.question.topics.forEach((topic) => {
         if (topic && !temp.topic.includes(topic)) {
           temp.topic.push(topic);
@@ -963,9 +891,7 @@ export function computeSubjectMetadata<
         temp.year.push(questionItem.question.year.toString());
       }
 
-      if (
-        !temp.paperType.includes(questionItem.question.paperType.toString())
-      ) {
+      if (!temp.paperType.includes(questionItem.question.paperType.toString())) {
         temp.paperType.push(questionItem.question.paperType.toString());
       }
 
@@ -978,9 +904,7 @@ export function computeSubjectMetadata<
   return temp;
 }
 
-export function computeBookmarksMetadata(
-  bookmarks: SelectedBookmark[],
-): BookmarksMetadata {
+export function computeBookmarksMetadata(bookmarks: SelectedBookmark[]): BookmarksMetadata {
   const metadata: BookmarksMetadata = {
     public: {},
     private: {},
@@ -1000,26 +924,18 @@ export function computeBookmarksMetadata(
       };
     }
 
-    const curriculumSubjectMapping = computeCurriculumSubjectMapping(
-      bookmark.userBookmarks,
-    );
+    const curriculumSubjectMapping = computeCurriculumSubjectMapping(bookmark.userBookmarks);
 
     // Transform the flat mapping into the required nested structure
-    Object.entries(curriculumSubjectMapping).forEach(
-      ([curriculum, subjects]) => {
-        metadata[visibility][bookmark.id].curricula[
-          curriculum as ValidCurriculum
-        ] = { subjects };
-      },
-    );
+    Object.entries(curriculumSubjectMapping).forEach(([curriculum, subjects]) => {
+      metadata[visibility][bookmark.id].curricula[curriculum as ValidCurriculum] = { subjects };
+    });
   });
 
   return metadata;
 }
 
-export function filterQuestionsByCriteria<
-  T extends { question: SelectedQuestion },
->(
+export function filterQuestionsByCriteria<T extends { question: SelectedQuestion }>(
   items: T[] | null | undefined,
   currentFilter:
     | {
@@ -1058,9 +974,7 @@ export function filterQuestionsByCriteria<
     }
     if (
       !hasOverlap(
-        item.question.topics
-          .map((topic) => topic)
-          .filter((topic) => topic !== null),
+        item.question.topics.map((topic) => topic).filter((topic) => topic !== null),
         currentFilter.topic,
       )
     ) {
@@ -1122,10 +1036,11 @@ type ConvertImageToPngBase64Params =
   | { url: string; includeDimensions?: false }
   | { url: string; includeDimensions: true };
 
-type ConvertImageToPngBase64Result<T extends ConvertImageToPngBase64Params> =
-  T extends { includeDimensions: true }
-    ? { base64: string; width: number; height: number }
-    : string;
+type ConvertImageToPngBase64Result<T extends ConvertImageToPngBase64Params> = T extends {
+  includeDimensions: true;
+}
+  ? { base64: string; width: number; height: number }
+  : string;
 
 /**
  * Converts an image from a URL to a PNG Base64 string.
@@ -1134,9 +1049,9 @@ type ConvertImageToPngBase64Result<T extends ConvertImageToPngBase64Params> =
  * @param params.includeDimensions If true, returns an object with base64, width, and height.
  * @returns A Promise that resolves to the Base64 string or an object with base64 and dimensions.
  */
-export function convertImageToPngBase64<
-  T extends ConvertImageToPngBase64Params,
->(params: T): Promise<ConvertImageToPngBase64Result<T>> {
+export function convertImageToPngBase64<T extends ConvertImageToPngBase64Params>(
+  params: T,
+): Promise<ConvertImageToPngBase64Result<T>> {
   const { url, includeDimensions } = params;
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -1187,9 +1102,7 @@ export async function hashUltil(inputString: string): Promise<string> {
   const data = encoder.encode(inputString);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   return hashHex;
 }
 

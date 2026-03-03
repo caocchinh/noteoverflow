@@ -1,9 +1,5 @@
 import { InvalidInputs, SortByOptions } from "../types/models";
-import {
-  FiltersCache,
-  LayoutStyle,
-  UiPreferencesCache,
-} from "../types/preferences";
+import { FiltersCache, LayoutStyle, UiPreferencesCache } from "../types/preferences";
 
 export const FILTERS_CACHE_KEY = "noteoverflow-filters-cache";
 export const UI_PREFERENCES_CACHE_KEY = "noteoverflow-ui-preferences-cache";
@@ -56,7 +52,6 @@ export const PDF_HEADER_LOGO_SRC = "/assets/logo-bg-colorised-modified.webp";
 export const MY_ANNOTATIONS_BOOKMARK_LIST_NAME = "My annotations";
 export const MY_ANNOTATIONS_BOOKMARK_LIST_VISIBILITY = "private";
 
-export const QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME =
-  "question-semantic-search";
+export const QUESTION_SEMANTIC_SEARCH_VECTORIZE_NAME = "question-semantic-search";
 
 export const NUMBER_OF_RETURN_QUESTIONS_FROM_VECTORIZE = 20;

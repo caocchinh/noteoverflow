@@ -1,3 +1,5 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   CommandEmpty,
   CommandGroup,
@@ -5,34 +7,15 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { fuzzySearch } from "../../lib/utils";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import { cn } from "@/lib/utils";
-import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 import { ChevronsUpDown } from "lucide-react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { fuzzySearch } from "../../lib/utils";
+import MultiSelectorSearchInput from "./MultiSelectorSearchInput";
 import { MultiSelectorListProps } from "./selectors";
 
-const formatOptionLabel = ({
-  item,
-  label,
-}: {
-  item: string;
-  label: string;
-}) => {
+const formatOptionLabel = ({ item, label }: { item: string; label: string }) => {
   if (label === "Season") {
     if (item === "Winter") {
       return "Winter - O/N";
@@ -77,15 +60,11 @@ const MultiSelectorList = forwardRef(
 
     const filteredSelectedValue = useMemo(() => {
       return selectedValues.filter((item) => {
-        return (
-          selectedValues.some((all) => all === item) &&
-          fuzzySearch(inputValue, item)
-        );
+        return selectedValues.some((all) => all === item) && fuzzySearch(inputValue, item);
       });
     }, [inputValue, selectedValues]);
 
-    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] =
-      useState(false);
+    const [isBlockingMobileKeyboard, setIsBlockingMobileKeyboard] = useState(false);
 
     const blockMobileKeyboardOpen = useCallback(() => {
       setIsBlockingMobileKeyboard(true);
@@ -113,7 +92,7 @@ const MultiSelectorList = forwardRef(
         >
           <CommandList
             className={cn(
-              "z-1000 flex h-full w-full flex-col gap-2 dark:bg-acccent p-2",
+              "dark:bg-acccent z-1000 flex h-full w-full flex-col gap-2 p-2",
               label === "Year" || label === "Season",
             )}
           >
@@ -125,10 +104,8 @@ const MultiSelectorList = forwardRef(
                 >
                   <h3
                     className={cn(
-                      "font-medium text-xs",
-                      filteredSelectedValue.length > 0
-                        ? "text-logo-main"
-                        : "text-muted-foreground",
+                      "text-xs font-medium",
+                      filteredSelectedValue.length > 0 ? "text-logo-main" : "text-muted-foreground",
                     )}
                   >
                     {`${filteredSelectedValue.length} selected`}
@@ -142,7 +119,7 @@ const MultiSelectorList = forwardRef(
                     !inputValue &&
                     filteredSelectedValue.map((item) => (
                       <CommandItem
-                        className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors "
+                        className="flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors"
                         key={item}
                         onTouchStart={blockMobileKeyboardOpen}
                         onSelect={() => {
@@ -150,7 +127,7 @@ const MultiSelectorList = forwardRef(
                         }}
                       >
                         <Checkbox
-                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main"
+                          className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main data-[state=checked]:text-white"
                           defaultChecked={true}
                         />
                         {formatOptionLabel({ item, label })}
@@ -164,11 +141,8 @@ const MultiSelectorList = forwardRef(
                 heading={
                   inputValue
                     ? "Search results"
-                    : `${
-                        filteredAvailableOption?.length
-                      } available ${label.toLowerCase()}${
-                        filteredAvailableOption?.length &&
-                        filteredAvailableOption?.length > 1
+                    : `${filteredAvailableOption?.length} available ${label.toLowerCase()}${
+                        filteredAvailableOption?.length && filteredAvailableOption?.length > 1
                           ? "s"
                           : ""
                       }`
@@ -178,8 +152,7 @@ const MultiSelectorList = forwardRef(
                   <CommandItem
                     className={cn(
                       "flex cursor-pointer justify-start rounded-md px-2 py-1 transition-colors",
-                      selectedValues.includes(item) &&
-                        "cursor-default opacity-50",
+                      selectedValues.includes(item) && "cursor-default opacity-50",
                     )}
                     key={item}
                     onTouchStart={blockMobileKeyboardOpen}
@@ -189,7 +162,7 @@ const MultiSelectorList = forwardRef(
                   >
                     <Checkbox
                       checked={selectedValues.includes(item)}
-                      className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main "
+                      className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main data-[state=checked]:text-white"
                     />
                     {formatOptionLabel({ item, label })}
                   </CommandItem>

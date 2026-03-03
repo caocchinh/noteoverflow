@@ -1,6 +1,3 @@
-import { memo, useCallback, useMemo } from "react";
-import { ExternalLink, Trash2, X as XIcon } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +7,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ExternalLink, Trash2, X as XIcon } from "lucide-react";
+import { memo, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import { PaperDetailsDialogProps } from "./types";
 
 const PaperDetailsDialog = memo(
@@ -70,7 +70,7 @@ const PaperDetailsDialog = memo(
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent
-          className="dark:bg-muted z-9999999 max-w-[475px]! w-[85%] px-2!"
+          className="dark:bg-muted z-9999999 w-[85%] max-w-[475px]! px-2!"
           overlayClassName="z-[999999]"
         >
           <DialogHeader>
@@ -79,25 +79,25 @@ const PaperDetailsDialog = memo(
               Check the paper details before visiting the paper
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="w-full h-[83dvh] px-4" type="always">
+          <ScrollArea className="h-[83dvh] w-full px-4" type="always">
             {/* Paper Details Card */}
-            <div className="relative rounded-xl border border-border bg-linear-to-br from-background via-accent/30 to-accent/50 p-6 shadow-lg">
+            <div className="border-border from-background via-accent/30 to-accent/50 relative rounded-xl border bg-linear-to-br p-6 shadow-lg">
               <div className="relative z-10 grid grid-cols-1 gap-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="flex flex-col space-y-1">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                       Curriculum
                     </span>
-                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                    <span className="text-foreground bg-accent/50 rounded-lg border px-3 py-2 text-sm font-semibold">
                       {selectedCurriculum}
                     </span>
                   </div>
                   <div className="flex flex-col space-y-1">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                       Subject
                     </span>
                     <span
-                      className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border truncate"
+                      className="text-foreground bg-accent/50 truncate rounded-lg border px-3 py-2 text-sm font-semibold"
                       title={selectedSubject}
                     >
                       {selectedSubject}
@@ -105,40 +105,40 @@ const PaperDetailsDialog = memo(
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="flex flex-col space-y-1">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                       Paper
                     </span>
-                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                    <span className="text-foreground bg-accent/50 rounded-lg border px-3 py-2 text-sm font-semibold">
                       Paper {selectedPaperType} Variant {selectedVariant}
                     </span>
                   </div>
                   <div className="flex flex-col space-y-1">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                       Year
                     </span>
-                    <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                    <span className="text-foreground bg-accent/50 rounded-lg border px-3 py-2 text-sm font-semibold">
                       {selectedYear}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                     Exam Season
                   </span>
-                  <span className="text-sm font-semibold text-foreground bg-accent/50 px-3 py-2 rounded-lg border">
+                  <span className="text-foreground bg-accent/50 rounded-lg border px-3 py-2 text-sm font-semibold">
                     {selectedSeason} {seasonAbbreviation}
                   </span>
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                     Paper code
                   </span>
                   <span
-                    className="text-sm font-semibold cursor-pointer text-foreground bg-accent/50 px-3 py-2 rounded-lg border"
+                    className="text-foreground bg-accent/50 cursor-pointer rounded-lg border px-3 py-2 text-sm font-semibold"
                     title="Click to copy paper code"
                     onClick={handleCopyPaperCode}
                   >
@@ -148,8 +148,8 @@ const PaperDetailsDialog = memo(
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center sm:mt-2 mt-3">
-              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+            <div className="mt-3 flex w-full flex-col items-center justify-center gap-3 sm:mt-2 sm:flex-row sm:gap-2">
+              <Button className="w-full cursor-pointer sm:w-[49%]" asChild>
                 <a
                   href={msLink}
                   target="_blank"
@@ -159,35 +159,32 @@ const PaperDetailsDialog = memo(
                   Open marking scheme <ExternalLink />
                 </a>
               </Button>
-              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+              <Button className="w-full cursor-pointer sm:w-[49%]" asChild>
                 <a href={qpLink} target="_blank" rel="noopener noreferrer">
                   Open question paper <ExternalLink />
                 </a>
               </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full items-center justify-center mt-3 sm:mt-2">
-              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+            <div className="mt-3 flex w-full flex-col items-center justify-center gap-3 sm:mt-2 sm:flex-row sm:gap-2">
+              <Button className="w-full cursor-pointer sm:w-[49%]" asChild>
                 <a href={erLink} target="_blank" rel="noopener noreferrer">
                   Open examiner report <ExternalLink />
                 </a>
               </Button>
-              <Button className="w-full sm:w-[49%] cursor-pointer" asChild>
+              <Button className="w-full cursor-pointer sm:w-[49%]" asChild>
                 <a href={gtLink} target="_blank" rel="noopener noreferrer">
                   Open grade threshold <ExternalLink />
                 </a>
               </Button>
             </div>
 
-            <Button
-              className="w-full mt-3 cursor-pointer"
-              onClick={handleClose}
-            >
+            <Button className="mt-3 w-full cursor-pointer" onClick={handleClose}>
               Close <XIcon />
             </Button>
 
             <Button
-              className="w-full mt-3 cursor-pointer"
+              className="mt-3 w-full cursor-pointer"
               variant="destructive"
               onClick={handleClearAndClose}
             >
@@ -197,7 +194,7 @@ const PaperDetailsDialog = memo(
         </DialogContent>
       </Dialog>
     );
-  }
+  },
 );
 
 PaperDetailsDialog.displayName = "PaperDetailsDialog";

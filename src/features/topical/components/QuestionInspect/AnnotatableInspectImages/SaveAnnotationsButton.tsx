@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CloudCheck, Loader2, Save } from "lucide-react";
 import { memo } from "react";
 
@@ -27,16 +22,11 @@ const SaveAnnotationsButton = memo(
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="cursor-pointer h-[26px]"
+              className="h-[26px] cursor-pointer"
               variant={hasUnsavedChanges ? "default" : "outline"}
               onClick={onSave}
-              disabled={
-                (isDisabled || isSaving || !hasUnsavedChanges) &&
-                !isUserNotAuthenticated
-              }
-              title={
-                hasUnsavedChanges ? "Save annotations" : "No unsaved changes"
-              }
+              disabled={(isDisabled || isSaving || !hasUnsavedChanges) && !isUserNotAuthenticated}
+              title={hasUnsavedChanges ? "Save annotations" : "No unsaved changes"}
             >
               {isSaving ? (
                 <>
@@ -78,7 +68,7 @@ const SaveAnnotationsButton = memo(
         </Tooltip>
       </TooltipProvider>
     );
-  }
+  },
 );
 
 SaveAnnotationsButton.displayName = "SaveAnnotationsButton";

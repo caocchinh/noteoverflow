@@ -1,49 +1,41 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import {
-  memo,
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-  RefObject,
-  useEffectEvent,
-} from "react";
-import {
-  Loader2,
-  Edit3,
-  Eye,
-  Maximize,
-  Shrink,
-  Calculator,
-  TriangleAlert,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import "@/features/topical/components/react-photo-view.css";
+import { generateSingleQuestionPdfBlob } from "@/features/topical/lib/generatePdfBlob";
 import {
   extractPaperCode,
   extractQuestionNumber,
   splitContent,
 } from "@/features/topical/lib/utils";
-import { generateSingleQuestionPdfBlob } from "@/features/topical/lib/generatePdfBlob";
-import { PhotoProvider, PhotoView } from "react-photo-view";
-import "@/features/topical/components/react-photo-view.css";
-import { Button } from "@/components/ui/button";
-import { createRoot, Root } from "react-dom/client";
-import { createPortal } from "react-dom";
-import dynamic from "next/dynamic";
-import ClearAllButton from "./ClearAllButton";
-import Loader from "../../Loader/Loader";
-import SaveAnnotationsButton from "./SaveAnnotationsButton";
-import { toast } from "sonner";
 import {
   AnnotatableInspectImageProps,
   AnnotatableInspectImagesHandle,
   InnitPdfProps,
   PdfViewerWrapperHandle,
 } from "@/features/topical/types/components";
+import { cn } from "@/lib/utils";
+import { Calculator, Edit3, Eye, Loader2, Maximize, Shrink, TriangleAlert } from "lucide-react";
+import dynamic from "next/dynamic";
+import {
+  forwardRef,
+  memo,
+  RefObject,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import { createRoot, Root } from "react-dom/client";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import { toast } from "sonner";
+import Loader from "../../Loader/Loader";
+import ClearAllButton from "./ClearAllButton";
+import SaveAnnotationsButton from "./SaveAnnotationsButton";
 
 const PdfViewerWrapper = dynamic(() => import("./PdfViewerWrapper"), {
   ssr: false,
@@ -107,9 +99,7 @@ const PdfPortalContent = memo(
       [pdfViewerElementRef],
     );
 
-    return (
-      <div key={portalKey} ref={attachPdfViewer} className="w-full h-full" />
-    );
+    return <div key={portalKey} ref={attachPdfViewer} className="h-full w-full" />;
   },
 );
 
@@ -153,10 +143,8 @@ const AnnotatableInspectImagesComponent = memo(
       const [isMounted, setIsMounted] = useState(false);
       const [currentXfdf, setCurrentXfdf] = useState<string | null>(null);
       const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-      const [normalContainer, setNormalContainer] =
-        useState<HTMLDivElement | null>(null);
-      const [fullscreenContainer, setFullscreenContainer] =
-        useState<HTMLDivElement | null>(null);
+      const [normalContainer, setNormalContainer] = useState<HTMLDivElement | null>(null);
+      const [fullscreenContainer, setFullscreenContainer] = useState<HTMLDivElement | null>(null);
 
       const latestXfdfRef = useRef(currentXfdf);
       const pdfViewerRef = useRef<PdfViewerWrapperHandle>(null);
@@ -204,10 +192,7 @@ const AnnotatableInspectImagesComponent = memo(
       // Filter only image URLs
       const { images: imageUrls, text: textItems } = useMemo(() => {
         if (!question) return { images: [], text: [] };
-        const items =
-          typeOfView === "question"
-            ? question.questionImages
-            : question.answers;
+        const items = typeOfView === "question" ? question.questionImages : question.answers;
         return splitContent(items);
       }, [question, typeOfView]);
 
@@ -285,13 +270,7 @@ const AnnotatableInspectImagesComponent = memo(
             },
           );
         }
-      }, [
-        currentXfdf,
-        isHavingUnsafeChangesRef,
-        onSaveAnnotations,
-        question,
-        typeOfView,
-      ]);
+      }, [currentXfdf, isHavingUnsafeChangesRef, onSaveAnnotations, question, typeOfView]);
 
       // Debounced auto-save effect
       useEffect(() => {
@@ -426,36 +405,24 @@ const AnnotatableInspectImagesComponent = memo(
       }, [question]);
 
       if (!question || (!question.questionImages && !question.answers)) {
-        return (
-          <p className="text-center text-red-600 mt-2">
-            Unable to fetch resource
-          </p>
-        );
+        return <p className="mt-2 text-center text-red-600">Unable to fetch resource</p>;
       }
       return (
         <>
-          <div className="flex flex-col w-full relative overflow-hidden">
+          <div className="relative flex w-full flex-col overflow-hidden">
             <div
-              className="flex items-center justify-end mb-2 gap-2 flex-wrap"
+              className="mb-2 flex flex-wrap items-center justify-end gap-2"
               ref={ultilityBarRef}
             >
               {imageUrls.length > 0 && (
                 <Button
                   type="button"
                   variant={
-                    !isSavedActivitiesLoading && isSavedActivitiesError
-                      ? "destructive"
-                      : "outline"
+                    !isSavedActivitiesLoading && isSavedActivitiesError ? "destructive" : "outline"
                   }
-                  disabled={
-                    isSessionFetching ||
-                    isSavedActivitiesLoading ||
-                    isSavedActivitiesError
-                  }
-                  className="cursor-pointer gap-2 h-[26px]"
-                  title={
-                    isEditMode ? "Switch to view mode" : "Switch to edit mode"
-                  }
+                  disabled={isSessionFetching || isSavedActivitiesLoading || isSavedActivitiesError}
+                  className="h-[26px] cursor-pointer gap-2"
+                  title={isEditMode ? "Switch to view mode" : "Switch to edit mode"}
                   onClick={() => setIsEditMode(!isEditMode)}
                 >
                   {!isSavedActivitiesLoading && isSavedActivitiesError ? (
@@ -486,9 +453,7 @@ const AnnotatableInspectImagesComponent = memo(
                     isSaving={isSavingAnnotations}
                     hasUnsavedChanges={hasUnsavedChanges}
                     isDisabled={isSessionFetching || !isPdfViewerLoaded}
-                    isUserNotAuthenticated={
-                      !isAuthenticated && !isSessionFetching
-                    }
+                    isUserNotAuthenticated={!isAuthenticated && !isSessionFetching}
                   />
                   <ClearAllButton
                     pdfViewerRef={pdfViewerRef}
@@ -497,7 +462,7 @@ const AnnotatableInspectImagesComponent = memo(
                   />
 
                   <Button
-                    className="cursor-pointer h-[26px]"
+                    className="h-[26px] cursor-pointer"
                     disabled={isSessionFetching}
                     variant="outline"
                     onClick={toggleFullscreen}
@@ -510,13 +475,11 @@ const AnnotatableInspectImagesComponent = memo(
               )}
             </div>
 
-            <div className="flex flex-col w-full items-center relative">
+            <div className="relative flex w-full flex-col items-center">
               <div
                 className={cn(
-                  !isEditMode
-                    ? "absolute top-[999999px] left-[999999px] z-[-999999]"
-                    : "",
-                  "w-full h-full",
+                  !isEditMode ? "absolute top-[999999px] left-[999999px] z-[-999999]" : "",
+                  "h-full w-full",
                 )}
               >
                 <NotFullScreenContainer
@@ -530,13 +493,13 @@ const AnnotatableInspectImagesComponent = memo(
                 {createPortal(
                   <div
                     className={cn(
-                      "fixed inset-0 z-999998 bg-white flex flex-col h-dvh w-screen",
+                      "fixed inset-0 z-999998 flex h-dvh w-screen flex-col bg-white",
                       isFullscreen ? "block" : "hidden",
                     )}
                     data-pdf-viewer
                   >
-                    <div className="flex items-center h-[40px] justify-between py-1 px-2 border-b border-gray-700 bg-gray-700 shrink-0">
-                      <span className="text-[13px] font-medium text-gray-300 p-1">
+                    <div className="flex h-[40px] shrink-0 items-center justify-between border-b border-gray-700 bg-gray-700 px-2 py-1">
+                      <span className="p-1 text-[13px] font-medium text-gray-300">
                         NoteOverflow Inspector
                       </span>
                       <div className="flex items-center gap-2">
@@ -544,9 +507,7 @@ const AnnotatableInspectImagesComponent = memo(
                           onSave={handleSave}
                           isSaving={isSavingAnnotations}
                           hasUnsavedChanges={hasUnsavedChanges}
-                          isUserNotAuthenticated={
-                            !isAuthenticated && !isSessionFetching
-                          }
+                          isUserNotAuthenticated={!isAuthenticated && !isSessionFetching}
                           isDisabled={isSessionFetching || !isPdfViewerLoaded}
                         />
                         <ClearAllButton
@@ -556,7 +517,7 @@ const AnnotatableInspectImagesComponent = memo(
                         />
 
                         <Button
-                          className="relative z-99998 dark:text-white text-white !hover:text-black cursor-pointer"
+                          className="!hover:text-black relative z-99998 cursor-pointer text-white dark:text-white"
                           variant="ghost"
                           size="icon"
                           onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
@@ -566,7 +527,7 @@ const AnnotatableInspectImagesComponent = memo(
                         </Button>
 
                         <Button
-                          className="relative z-999999 dark:text-white text-white !hover:text-black cursor-pointer"
+                          className="!hover:text-black relative z-999999 cursor-pointer text-white dark:text-white"
                           variant="ghost"
                           size="icon"
                           onClick={toggleFullscreen}
@@ -581,15 +542,11 @@ const AnnotatableInspectImagesComponent = memo(
                         fullscreenContainerRef.current = node;
                         setFullscreenContainer(node);
                       }}
-                      className="h-[calc(100dvh-30px)] w-full relative"
+                      className="relative h-[calc(100dvh-30px)] w-full"
                     >
                       {!isPdfViewerLoaded && (
                         <LoadingMessage
-                          message={
-                            !pdfBlob
-                              ? "Generating PDF"
-                              : "Initializing PDF viewer"
-                          }
+                          message={!pdfBlob ? "Generating PDF" : "Initializing PDF viewer"}
                         />
                       )}
                     </div>
@@ -599,10 +556,8 @@ const AnnotatableInspectImagesComponent = memo(
               </div>
               <div
                 className={cn(
-                  "w-full h-full flex items-center relative justify-start flex-col min-h-[100px]",
-                  !isEditMode
-                    ? ""
-                    : "absolute top-[999999px] left-[999999px] z-[-999999]",
+                  "relative flex h-full min-h-[100px] w-full flex-col items-center justify-start",
+                  !isEditMode ? "" : "absolute top-[999999px] left-[999999px] z-[-999999]",
                 )}
               >
                 <PhotoProvider>
@@ -618,7 +573,7 @@ const AnnotatableInspectImagesComponent = memo(
                     >
                       <img
                         className={cn(
-                          "w-full h-full object-contain relative z-2 max-w-[750px]! cursor-pointer",
+                          "relative z-2 h-full w-full max-w-[750px]! cursor-pointer object-contain",
                           imageTheme === "dark" && "invert!",
                         )}
                         src={item}
@@ -629,7 +584,7 @@ const AnnotatableInspectImagesComponent = memo(
                   ))}
                 </PhotoProvider>
                 {!isEditMode && imageUrls.length > 0 && (
-                  <Loader2 className="animate-spin text-red absolute left-1/2 h-4 w-4 -translate-x-1/2 z-1 top-0" />
+                  <Loader2 className="text-red absolute top-0 left-1/2 z-1 h-4 w-4 -translate-x-1/2 animate-spin" />
                 )}
                 {textItems.map((item, index) => (
                   <p key={`text-${index}`}>{item}</p>
@@ -643,10 +598,7 @@ const AnnotatableInspectImagesComponent = memo(
           {fullscreenContainer &&
             normalContainer &&
             createPortal(
-              <PdfPortalContent
-                portalKey={key}
-                pdfViewerElementRef={pdfViewerElementRef}
-              />,
+              <PdfPortalContent portalKey={key} pdfViewerElementRef={pdfViewerElementRef} />,
               isFullscreen ? fullscreenContainer : normalContainer,
             )}
         </>
@@ -655,14 +607,13 @@ const AnnotatableInspectImagesComponent = memo(
   ),
 );
 
-AnnotatableInspectImagesComponent.displayName =
-  "AnnotatableInspectImagesComponent";
+AnnotatableInspectImagesComponent.displayName = "AnnotatableInspectImagesComponent";
 
 export const AnnotatableInspectImages = memo(AnnotatableInspectImagesComponent);
 
 const LoadingMessage = memo(({ message }: { message: string }) => {
   return (
-    <div className="flex items-center justify-center flex-col gap-1 absolute top-2 left-1/2 -translate-x-1/2 text-logo-main!">
+    <div className="text-logo-main! absolute top-2 left-1/2 flex -translate-x-1/2 flex-col items-center justify-center gap-1">
       <span className="ml-2 text-center">{message}</span>
       <Loader />
     </div>
@@ -682,11 +633,9 @@ const NotFullScreenContainer = memo(
     isPdfViewerLoaded: boolean;
   }) => {
     return (
-      <div ref={onRefChange} className="w-full relative h-[67dvh]">
+      <div ref={onRefChange} className="relative h-[67dvh] w-full">
         {!isPdfViewerLoaded && (
-          <LoadingMessage
-            message={pdfBlob ? "Initializing PDF viewer" : "Generating PDF"}
-          />
+          <LoadingMessage message={pdfBlob ? "Initializing PDF viewer" : "Generating PDF"} />
         )}
       </div>
     );

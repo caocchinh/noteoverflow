@@ -139,15 +139,11 @@ const filter = {
 //   paperType: { $in: [1] },
 // }
 
-const matches = await queryVectorize(
-  "question-semantic-search",
-  queryEmbedding,
-  {
-    topK: 5,
-    returnMetadata: "all",
-    filter: filter,
-  }
-);
+const matches = await queryVectorize("question-semantic-search", queryEmbedding, {
+  topK: 5,
+  returnMetadata: "all",
+  filter: filter,
+});
 ```
 
 ### Available Filter Operators

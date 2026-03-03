@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useRef } from "react";
-import { MotionValue, motion, useScroll, useTransform } from "motion/react";
-import { cn } from "@/lib/utils";
-import { Spotlight } from "../spotlight";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { MotionValue, motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
+import { Spotlight } from "../spotlight";
 
 export const MacbookScroll = ({
   src,
@@ -25,16 +25,8 @@ export const MacbookScroll = ({
 
   const isMobile = useIsMobile();
 
-  const scaleX = useTransform(
-    scrollYProgress,
-    [0, 0.3],
-    [1.2, isMobile ? 1 : 1.5],
-  );
-  const scaleY = useTransform(
-    scrollYProgress,
-    [0, 0.3],
-    [0.6, isMobile ? 1 : 1.5],
-  );
+  const scaleX = useTransform(scrollYProgress, [0, 0.3], [1.2, isMobile ? 1 : 1.5]);
+  const scaleY = useTransform(scrollYProgress, [0, 0.3], [0.6, isMobile ? 1 : 1.5]);
   const translate = useTransform(scrollYProgress, [0, 1], [0, 1500]);
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
   const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
@@ -45,31 +37,25 @@ export const MacbookScroll = ({
       <Spotlight />
       <div className="pointer-events-none absolute h-full w-full overflow-hidden opacity-50 perspective-[200px]">
         <div className="absolute inset-0 transform-[rotateX(35deg)]">
-          <div className="animate-grid bg-[linear-gradient(to_right,rgba(255,255,255,0.6)_1px,transparent_0),linear-gradient(to_bottom,rgba(255,255,255,0.5)_1px,transparent_0)] bg-repeat bg-size-[120px_120px] h-[300vh] inset-[0%_0px] ml-[-50%] origin-[100%_0_0] w-[600vw]"></div>
+          <div className="animate-grid inset-[0%_0px] ml-[-50%] h-[300vh] w-[600vw] origin-[100%_0_0] bg-[linear-gradient(to_right,rgba(255,255,255,0.6)_1px,transparent_0),linear-gradient(to_bottom,rgba(255,255,255,0.5)_1px,transparent_0)] bg-size-[120px_120px] bg-repeat"></div>
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-black to-transparent to-90%"></div>
       </div>
       <div
         ref={ref}
-        className="flex min-h-screen relative z-100 shrink-0 scale-[0.65] transform flex-col items-center justify-start py-0 perspective-midrange sm:scale-70 md:scale-100 md:pb-80 pt-28 md:pt-28"
+        className="relative z-100 flex min-h-screen shrink-0 scale-[0.65] transform flex-col items-center justify-start py-0 pt-28 perspective-midrange sm:scale-70 md:scale-100 md:pt-28 md:pb-80"
       >
         <motion.h2
           style={{
             translateY: textTransform,
             opacity: textOpacity,
           }}
-          className="mb-12 text-center text-3xl font-bold bg-linear-to-b dark:from-foreground dark:via-foreground/80 dark:to-foreground/40 from-background via-background/80 to-background/40  bg-clip-text text-transparent uppercase"
+          className="dark:from-foreground dark:via-foreground/80 dark:to-foreground/40 from-background via-background/80 to-background/40 mb-12 bg-linear-to-b bg-clip-text text-center text-3xl font-bold text-transparent uppercase"
         >
           {title}
         </motion.h2>
         {/* Lid */}
-        <Lid
-          src={src}
-          scaleX={scaleX}
-          scaleY={scaleY}
-          rotate={rotate}
-          translate={translate}
-        />
+        <Lid src={src} scaleX={scaleX} scaleY={scaleY} rotate={rotate} translate={translate} />
         {/* Base area */}
         <div className="relative -z-10 h-88 w-lg overflow-hidden rounded-2xl bg-gray-200 dark:bg-[#272729]">
           {/* above keyboard bar */}
@@ -128,7 +114,7 @@ export const Lid = ({
           }}
           className="absolute inset-0 flex items-center justify-center rounded-lg bg-[#010101]"
         >
-          <span className="text-white text-center">
+          <span className="text-center text-white">
             Think <span className="text-logo-main">outside</span> the books
           </span>
         </div>
@@ -703,10 +689,7 @@ export const Keypad = () => {
             <span className="block">option</span>
           </div>
         </KBtn>
-        <KBtn
-          className="w-8"
-          childrenClassName="h-full justify-between py-[4px]"
-        >
+        <KBtn className="w-8" childrenClassName="h-full justify-between py-[4px]">
           <div className="flex w-full justify-end pr-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -729,10 +712,7 @@ export const Keypad = () => {
           </div>
         </KBtn>
         <KBtn className="w-[8.2rem]"></KBtn>
-        <KBtn
-          className="w-8"
-          childrenClassName="h-full justify-between py-[4px]"
-        >
+        <KBtn className="w-8" childrenClassName="h-full justify-between py-[4px]">
           <div className="flex w-full justify-start pl-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -847,8 +827,7 @@ export const KBtn = ({
           className,
         )}
         style={{
-          boxShadow:
-            "0px -0.5px 2px 0 #0D0D0F inset, -0.5px 0px 2px 0 #0D0D0F inset",
+          boxShadow: "0px -0.5px 2px 0 #0D0D0F inset, -0.5px 0px 2px 0 #0D0D0F inset",
         }}
       >
         <div
@@ -870,8 +849,7 @@ export const SpeakerGrid = () => {
     <div
       className="mt-2 flex h-40 gap-[2px] px-[0.5px]"
       style={{
-        backgroundImage:
-          "radial-gradient(circle, #08080A 0.5px, transparent 0.5px)",
+        backgroundImage: "radial-gradient(circle, #08080A 0.5px, transparent 0.5px)",
         backgroundSize: "3px 3px",
       }}
     ></div>
@@ -888,26 +866,13 @@ export const OptionKey = ({ className }: { className: string }) => {
       viewBox="0 0 32 32"
       className={className}
     >
-      <rect
-        stroke="currentColor"
-        strokeWidth={2}
-        x="18"
-        y="5"
-        width="10"
-        height="2"
-      />
+      <rect stroke="currentColor" strokeWidth={2} x="18" y="5" width="10" height="2" />
       <polygon
         stroke="currentColor"
         strokeWidth={2}
         points="10.6,5 4,5 4,7 9.4,7 18.4,27 28,27 28,25 19.6,25 "
       />
-      <rect
-        id="_Transparent_Rectangle_"
-        className="st0"
-        width="32"
-        height="32"
-        stroke="none"
-      />
+      <rect id="_Transparent_Rectangle_" className="st0" width="32" height="32" stroke="none" />
     </svg>
   );
 };

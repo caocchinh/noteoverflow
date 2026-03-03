@@ -1,23 +1,18 @@
 "use client";
-import Sort from "@/features/topical/components/Sort";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Blocks, MoreHorizontalIcon, X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import ElasticSlider from "@/features/topical/components/ElasticSlider";
+import Sort from "@/features/topical/components/Sort";
 import { MAX_NUMBER_OF_COLUMNS } from "@/features/topical/constants/constants";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import { SortParameters } from "@/features/topical/types/models";
+import { Blocks, MoreHorizontalIcon, X } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 const Ultility = ({
   sortParameters,
@@ -32,16 +27,11 @@ const Ultility = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="cursor-pointer"
-          title="More settings"
-        >
-          <MoreHorizontalIcon className="w-5 h-5" />
+        <Button variant="outline" size="icon" className="cursor-pointer" title="More settings">
+          <MoreHorizontalIcon className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48 p-2 space-y-2">
+      <DropdownMenuContent className="w-48 space-y-2 p-2">
         <div className="space-y-2">
           <Sort
             sortParameters={sortParameters}
@@ -56,19 +46,19 @@ const Ultility = ({
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="w-full">
-              <Blocks className="w-4 h-4 mr-2" />
+              <Blocks className="mr-2 h-4 w-4" />
               Layout settings
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md dark:bg-accent">
+          <DialogContent className="dark:bg-accent max-w-md">
             <DialogTitle className="sr-only">Layout settings</DialogTitle>
             <X
-              className="w-4 h-4 absolute top-4 right-4 cursor-pointer"
+              className="absolute top-4 right-4 h-4 w-4 cursor-pointer"
               onClick={() => setIsDialogOpen(false)}
             />
             <div className="flex flex-col items-center justify-center gap-4 pt-6">
-              <div className="flex flex-col items-center justify-center gap-3 w-full">
-                <h4 className="text-lg font-medium text-center">
+              <div className="flex w-full flex-col items-center justify-center gap-3">
+                <h4 className="text-center text-lg font-medium">
                   Number of maximum displayed columns
                 </h4>
                 <ElasticSlider

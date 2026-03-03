@@ -1,7 +1,7 @@
-import "server-only";
-import { and, eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { subject } from "@/drizzle/schema";
+import { and, eq } from "drizzle-orm";
+import "server-only";
 
 export const createSubject = async ({
   subjectId,
@@ -15,27 +15,19 @@ export const createSubject = async ({
 };
 
 export const getSubjectByCurriculum = async (
-  curriculumName: string
+  curriculumName: string,
 ): Promise<{ subjectId: string; curriculumName: string }[]> => {
   const db = await getDbAsync();
-  const result = await db
-    .select()
-    .from(subject)
-    .where(eq(subject.curriculumName, curriculumName));
+  const result = await db.select().from(subject).where(eq(subject.curriculumName, curriculumName));
   return result;
 };
 
-export const isSubjectExists = async (
-  id: string,
-  curriculumName: string
-): Promise<boolean> => {
+export const isSubjectExists = async (id: string, curriculumName: string): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(subject)
-    .where(
-      and(eq(subject.subjectId, id), eq(subject.curriculumName, curriculumName))
-    )
+    .where(and(eq(subject.subjectId, id), eq(subject.curriculumName, curriculumName)))
     .limit(1);
   return result.length > 0;
 };

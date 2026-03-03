@@ -1,11 +1,11 @@
-import "server-only";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
+import { SelectedPublickBookmark } from "@/features/topical/types/models";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
-import { SelectedPublickBookmark } from "@/features/topical/types/models";
+import "server-only";
 
 export const getBookmarkById = async ({
   params,
@@ -43,10 +43,7 @@ export const getBookmarkById = async ({
   }
 
   // Check permissions - only owner can access private lists
-  if (
-    bookmarkList.visibility === "private" &&
-    session.user.id !== bookmarkList.userId
-  ) {
+  if (bookmarkList.visibility === "private" && session.user.id !== bookmarkList.userId) {
     return status(HTTP_STATUS.FORBIDDEN, {
       error: ERROR_MESSAGES[ERROR_CODES.PRIVATE_LIST],
       code: ERROR_CODES.PRIVATE_LIST,
@@ -75,26 +72,20 @@ export const getBookmarkById = async ({
     },
   });
 
-  const data: SelectedPublickBookmark[] = selectedBookmarkQuestions.map(
-    (item) => {
-      return {
-        updatedAt: item.updatedAt,
-        questionId: item.question.id,
-        question: {
-          ...item.question,
-          questionImages: JSON.parse(item.question.questionImages ?? "[]"),
-          answers: JSON.parse(item.question.answers ?? "[]"),
-          topics: JSON.parse(item.question.topics ?? "[]"),
-          answersImagesDimensions: JSON.parse(
-            item.question.answersImagesDimensions ?? "[]",
-          ),
-          questionImagesDimensions: JSON.parse(
-            item.question.questionImagesDimensions ?? "[]",
-          ),
-        },
-      };
-    },
-  );
+  const data: SelectedPublickBookmark[] = selectedBookmarkQuestions.map((item) => {
+    return {
+      updatedAt: item.updatedAt,
+      questionId: item.question.id,
+      question: {
+        ...item.question,
+        questionImages: JSON.parse(item.question.questionImages ?? "[]"),
+        answers: JSON.parse(item.question.answers ?? "[]"),
+        topics: JSON.parse(item.question.topics ?? "[]"),
+        answersImagesDimensions: JSON.parse(item.question.answersImagesDimensions ?? "[]"),
+        questionImagesDimensions: JSON.parse(item.question.questionImagesDimensions ?? "[]"),
+      },
+    };
+  });
 
   return data;
 };

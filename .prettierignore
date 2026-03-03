@@ -1,0 +1,17 @@
+# Ignore Next.js build output
+.next/
+dist/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore public assets (images, fonts, etc.)
+public/
+
+# Ignore lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignore local env files
+.env*

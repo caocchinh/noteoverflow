@@ -1,4 +1,5 @@
 import { InspectTriggerButton } from "@/features/topical/components/AppUltilityBar";
+import DisplayModeToggle from "@/features/topical/components/DisplayModeToggle";
 import Masonry from "@/features/topical/components/Masonry";
 import QuestionInspect from "@/features/topical/components/QuestionInspect/QuestionInspect";
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
@@ -6,17 +7,13 @@ import { ShareFilter } from "@/features/topical/components/ShareFilter";
 import { DEFAULT_SORT_OPTIONS } from "@/features/topical/constants/constants";
 import TopicalLayoutProvider from "@/features/topical/context/TopicalLayoutProvider";
 import { chunkQuestionsData } from "@/features/topical/lib/utils";
+import { QuestionInspectRef } from "@/features/topical/types/components";
+import { SortParameters, VectorizeSelectedQuestion } from "@/features/topical/types/models";
+import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import DisplayModeToggle from "@/features/topical/components/DisplayModeToggle";
-import Ultility from "./Ultility";
-import { cn } from "@/lib/utils";
 import { SearchResultsHeaderProps } from "../constants/type";
-import { QuestionInspectRef } from "@/features/topical/types/components";
-import {
-  VectorizeSelectedQuestion,
-  SortParameters,
-} from "@/features/topical/types/models";
+import Ultility from "./Ultility";
 
 const isImageUrl = (str: string) => str.startsWith("http");
 
@@ -36,23 +33,19 @@ const SearchResultsHeader = memo(
     return (
       <div
         className={cn(
-          "flex items-center justify-between gap-2 flex-wrap transition-all duration-300",
+          "flex flex-wrap items-center justify-between gap-2 transition-all duration-300",
           isSticky
-            ? "fixed top-13 left-0 right-0 z-20 px-4 py-2 bg-background/80 backdrop-blur-md shadow-sm border-b animate-in slide-in-from-top-2"
-            : "relative px-2 mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700",
+            ? "bg-background/80 animate-in slide-in-from-top-2 fixed top-13 right-0 left-0 z-20 border-b px-4 py-2 shadow-sm backdrop-blur-md"
+            : "animate-in fade-in slide-in-from-bottom-8 relative mb-6 px-2 duration-700",
         )}
       >
-        <div className="flex items-center gap-3 px-2 mb-1">
-          <p className="text-sm text-muted-foreground font-medium">
-            Found{" "}
-            <span className="text-foreground font-bold">{resultCount}</span>{" "}
+        <div className="mb-1 flex items-center gap-3 px-2">
+          <p className="text-muted-foreground text-sm font-medium">
+            Found <span className="text-foreground font-bold">{resultCount}</span>{" "}
             {displayMode === "questions" ? "question" : "answer"}
             {resultCount !== 1 ? "s" : ""}
           </p>
-          <DisplayModeToggle
-            displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
-          />
+          <DisplayModeToggle displayMode={displayMode} setDisplayMode={setDisplayMode} />
           {currentTab == "text" && (
             <ShareFilter
               isDisabled={false}
@@ -62,15 +55,12 @@ const SearchResultsHeader = memo(
           )}
         </div>
         {resultCount > 0 && (
-          <div className="flex items-center justify-between mb-1 gap-2">
+          <div className="mb-1 flex items-center justify-between gap-2">
             <InspectTriggerButton
               isQuestionViewDisabled={false}
               setIsQuestionInspectOpen={onInspectOpen}
             />
-            <Ultility
-              sortParameters={sortParameters}
-              setSortParameters={setSortParameters}
-            />
+            <Ultility sortParameters={sortParameters} setSortParameters={setSortParameters} />
           </div>
         )}
       </div>
@@ -130,9 +120,7 @@ const MainContent = memo(
     const filteredResults = useMemo(() => {
       if (!results) return [];
       if (displayMode === "questions") return results;
-      return results.filter((q) =>
-        q.answers.some((answer) => isImageUrl(answer)),
-      );
+      return results.filter((q) => q.answers.some((answer) => isImageUrl(answer)));
     }, [results, displayMode]);
 
     const sortedData = useMemo(() => {
@@ -154,24 +142,19 @@ const MainContent = memo(
 
       const chunkSize = 25;
 
-      return chunkQuestionsData(
-        sortedData,
-        chunkSize,
-      ) as VectorizeSelectedQuestion[][];
+      return chunkQuestionsData(sortedData, chunkSize) as VectorizeSelectedQuestion[][];
     }, [sortedData]);
 
     return (
       <TopicalLayoutProvider
-        enableSavedActivitiesQuery={
-          enableSavedActivitiesQuery && (results?.length ?? 0) > 0
-        }
+        enableSavedActivitiesQuery={enableSavedActivitiesQuery && (results?.length ?? 0) > 0}
       >
         <div className="relative">
           {results && !isSearching && (
             <>
               <div
                 ref={sentinelRef}
-                className="absolute top-0 w-full h-px -translate-y-4 opacity-0 pointer-events-none"
+                className="pointer-events-none absolute top-0 h-px w-full -translate-y-4 opacity-0"
               />
               <SearchResultsHeader
                 resultCount={sortedData.length}
@@ -187,14 +170,12 @@ const MainContent = memo(
 
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {sortedData.length === 0 ? (
-                  <div className="text-center py-4 rounded-3xl">
-                    <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-background flex items-center justify-center shadow-sm">
-                      <Search className="w-10 h-10 text-muted-foreground/30" />
+                  <div className="rounded-3xl py-4 text-center">
+                    <div className="bg-background mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full shadow-sm">
+                      <Search className="text-muted-foreground/30 h-10 w-10" />
                     </div>
-                    <h3 className="text-lg font-bold text-foreground">
-                      {displayMode === "answers"
-                        ? "No answers found"
-                        : "No questions found"}
+                    <h3 className="text-foreground text-lg font-bold">
+                      {displayMode === "answers" ? "No answers found" : "No questions found"}
                     </h3>
                     <p className="text-muted-foreground mt-1">
                       {displayMode === "answers"
@@ -265,9 +246,9 @@ const MasonryContent = memo(
             const element = isBestMatch ? (
               <div
                 key={`${question.id}-${imageSrc}-${index}`}
-                className="w-full mb-6 p-1 rounded-xl bg-logo-main relative mansory-item"
+                className="bg-logo-main mansory-item relative mb-6 w-full rounded-xl p-1"
               >
-                <div className="absolute -top-3 left-4 bg-logo-main text-white px-3 py-1 rounded-full text-xs font-bold shadow-md z-15 flex items-center gap-1">
+                <div className="bg-logo-main absolute -top-3 left-4 z-15 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-white shadow-md">
                   <span>✨</span> Best Match
                 </div>
                 <div className="bg-background/50 rounded-lg p-2 backdrop-blur-xs">
@@ -284,7 +265,7 @@ const MasonryContent = memo(
                     showCurriculumBadge={true}
                     showSubjectBadge={true}
                     imageHeight={height}
-                    className="border-logo-main/20 shadow-lg mb-0!"
+                    className="border-logo-main/20 mb-0! shadow-lg"
                   />
                 </div>
               </div>

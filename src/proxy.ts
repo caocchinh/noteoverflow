@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { betterFetch } from "@better-fetch/fetch";
 import type { Session, User } from "better-auth/types";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // Routes that should redirect non-owners to maintenance
 const MAINTENANCE_PROTECTED_ROUTES = [
@@ -19,8 +19,7 @@ export async function proxy(request: NextRequest) {
 
   // Check if this path should be protected and redirect to maintenance
   const isMaintenanceProtected = MAINTENANCE_PROTECTED_ROUTES.some(
-    (route) =>
-      pathname === route || (route !== "/" && pathname.startsWith(`${route}/`)),
+    (route) => pathname === route || (route !== "/" && pathname.startsWith(`${route}/`)),
   );
 
   if (!isMaintenanceProtected) {

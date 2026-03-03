@@ -23,23 +23,19 @@ const ExportFormatSelector = memo(
         onValueChange={(v) => setExportFormat(v as ExportFormat)}
         className="w-full"
       >
-        <TabsList className="flex flex-wrap w-full">
+        <TabsList className="flex w-full flex-wrap">
           <TabsTrigger value="pdf" className="cursor-pointer">
-            <FileText className="w-4 h-4 mr-2" />
+            <FileText className="mr-2 h-4 w-4" />
             PDF
           </TabsTrigger>
-          <TabsTrigger
-            value="docx"
-            className="cursor-not-allowed opacity-50"
-            disabled
-          >
-            <Copy className="w-4 h-4 mr-2" />
+          <TabsTrigger value="docx" className="cursor-not-allowed opacity-50" disabled>
+            <Copy className="mr-2 h-4 w-4" />
             Word (Coming Soon)
           </TabsTrigger>
         </TabsList>
       </Tabs>
     );
-  })
+  }),
 );
 
 ExportFormatSelector.displayName = "ExportFormatSelector";

@@ -1,7 +1,7 @@
 import { includeIgnoreFile } from "@eslint/compat";
-import { fileURLToPath } from "url";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
+import { fileURLToPath } from "url";
 
 const gitignorePath = fileURLToPath(new URL("./.gitignore", import.meta.url));
 

@@ -4,14 +4,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { Settings, X } from "lucide-react";
 import { useState } from "react";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
@@ -32,21 +28,16 @@ export default function CacheAccordion() {
       </PopoverTrigger>
       <PopoverContent className="z-100006 flex flex-col items-center justify-center gap-3">
         <X
-          className="w-4 h-4 absolute top-2 right-2 cursor-pointer"
+          className="absolute top-2 right-2 h-4 w-4 cursor-pointer"
           onClick={() => setIsPopoverOpen(false)}
         />
-        <Accordion
-          className="w-full"
-          collapsible
-          defaultValue="session-cache"
-          type="single"
-        >
+        <Accordion className="w-full" collapsible defaultValue="session-cache" type="single">
           <AccordionItem value="session-cache">
             <AccordionTrigger>Session cache</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-4 text-balance">
               <p>
-                Automatically restores your filters from the last session on
-                page refresh. Not synced across devices. Is enabled by default.
+                Automatically restores your filters from the last session on page refresh. Not
+                synced across devices. Is enabled by default.
               </p>
               <div className="flex items-center gap-2">
                 <Label htmlFor="session-cache">Enable session cache</Label>
@@ -64,23 +55,17 @@ export default function CacheAccordion() {
             <AccordionTrigger>Persistant cache</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-4 text-balance">
               <p>
-                Permanently saves your filter preferences for each subject. When
-                you re-select a subject, previously used filters are
-                automatically applied. Not synced across devices. Is enabled by
-                default.
+                Permanently saves your filter preferences for each subject. When you re-select a
+                subject, previously used filters are automatically applied. Not synced across
+                devices. Is enabled by default.
               </p>
               <div className="flex items-center gap-2">
-                <Label htmlFor="persistant-cache">
-                  Enable persistant cache
-                </Label>
+                <Label htmlFor="persistant-cache">Enable persistant cache</Label>
                 <Switch
                   checked={uiPreferences.isPersistantCacheEnabled}
                   id="persistant-cache"
                   onCheckedChange={() => {
-                    setUiPreference(
-                      "isPersistantCacheEnabled",
-                      (prev) => !prev,
-                    );
+                    setUiPreference("isPersistantCacheEnabled", (prev) => !prev);
                   }}
                 />
               </div>
@@ -90,9 +75,9 @@ export default function CacheAccordion() {
             <AccordionTrigger>Question cache</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-4 text-balance">
               <p>
-                Caches opened questions during inspection. On refresh, cached
-                questions will automatically reopen in inspect mode if it was
-                previously active. Is enabled by default.
+                Caches opened questions during inspection. On refresh, cached questions will
+                automatically reopen in inspect mode if it was previously active. Is enabled by
+                default.
               </p>
               <div className="flex items-center gap-2">
                 <Label htmlFor="question-cache">Enable question cache</Label>

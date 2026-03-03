@@ -1,7 +1,7 @@
-import "server-only";
-import { and, eq, sql } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { userBookmarkList, userBookmarks } from "@/drizzle/schema";
+import { and, eq, sql } from "drizzle-orm";
+import "server-only";
 
 export const BookmarkRepo = {
   async findListById(listId: string) {
@@ -14,7 +14,7 @@ export const BookmarkRepo = {
   async findListByUserIdAndName(
     userId: string,
     listName: string,
-    visibility: "public" | "private"
+    visibility: "public" | "private",
   ) {
     const db = await getDbAsync();
     return db
@@ -24,16 +24,12 @@ export const BookmarkRepo = {
         and(
           eq(userBookmarkList.userId, userId),
           eq(userBookmarkList.listName, listName),
-          eq(userBookmarkList.visibility, visibility)
-        )
+          eq(userBookmarkList.visibility, visibility),
+        ),
       );
   },
 
-  async findListByUserIdAndIdAndName(
-    userId: string,
-    listId: string,
-    listName: string
-  ) {
+  async findListByUserIdAndIdAndName(userId: string, listId: string, listName: string) {
     const db = await getDbAsync();
     return db
       .select()
@@ -42,15 +38,15 @@ export const BookmarkRepo = {
         and(
           eq(userBookmarkList.userId, userId),
           eq(userBookmarkList.id, listId),
-          eq(userBookmarkList.listName, listName)
-        )
+          eq(userBookmarkList.listName, listName),
+        ),
       );
   },
 
   async findListByUserIdAndIdAndVisibility(
     userId: string,
     listId: string,
-    visibility: "public" | "private"
+    visibility: "public" | "private",
   ) {
     const db = await getDbAsync();
     return db
@@ -60,8 +56,8 @@ export const BookmarkRepo = {
         and(
           eq(userBookmarkList.id, listId),
           eq(userBookmarkList.userId, userId),
-          eq(userBookmarkList.visibility, visibility)
-        )
+          eq(userBookmarkList.visibility, visibility),
+        ),
       );
   },
 
@@ -70,9 +66,7 @@ export const BookmarkRepo = {
     const [{ total }] = await db
       .select({ total: sql<number>`count(*)` })
       .from(userBookmarks)
-      .where(
-        and(eq(userBookmarks.listId, listId), eq(userBookmarks.userId, userId))
-      );
+      .where(and(eq(userBookmarks.listId, listId), eq(userBookmarks.userId, userId)));
     return total;
   },
 
@@ -96,7 +90,7 @@ export const BookmarkRepo = {
     userId: string,
     listId: string,
     listName: string,
-    visibility: "public" | "private"
+    visibility: "public" | "private",
   ) {
     const db = await getDbAsync();
     return db
@@ -119,8 +113,8 @@ export const BookmarkRepo = {
         and(
           eq(userBookmarks.questionId, questionId),
           eq(userBookmarks.listId, listId),
-          eq(userBookmarks.userId, userId)
-        )
+          eq(userBookmarks.userId, userId),
+        ),
       );
   },
 
@@ -128,12 +122,7 @@ export const BookmarkRepo = {
     const db = await getDbAsync();
     return db
       .delete(userBookmarkList)
-      .where(
-        and(
-          eq(userBookmarkList.id, listId),
-          eq(userBookmarkList.userId, userId)
-        )
-      );
+      .where(and(eq(userBookmarkList.id, listId), eq(userBookmarkList.userId, userId)));
   },
 
   async updateListName(userId: string, listId: string, newName: string) {
@@ -141,28 +130,14 @@ export const BookmarkRepo = {
     return db
       .update(userBookmarkList)
       .set({ listName: newName })
-      .where(
-        and(
-          eq(userBookmarkList.userId, userId),
-          eq(userBookmarkList.id, listId)
-        )
-      );
+      .where(and(eq(userBookmarkList.userId, userId), eq(userBookmarkList.id, listId)));
   },
 
-  async updateListVisibility(
-    userId: string,
-    listId: string,
-    newVisibility: "public" | "private"
-  ) {
+  async updateListVisibility(userId: string, listId: string, newVisibility: "public" | "private") {
     const db = await getDbAsync();
     return db
       .update(userBookmarkList)
       .set({ visibility: newVisibility })
-      .where(
-        and(
-          eq(userBookmarkList.id, listId),
-          eq(userBookmarkList.userId, userId)
-        )
-      );
+      .where(and(eq(userBookmarkList.id, listId), eq(userBookmarkList.userId, userId)));
   },
 };

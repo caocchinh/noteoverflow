@@ -1,19 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { Badge } from "@/components/ui/badge";
-import { BookmarkButton } from "./BookmarkButton/BookmarkButton";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { useIsMutating, useMutationState } from "@tanstack/react-query";
 import { Bookmark, Loader2 } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
-import Loader from "./Loader/Loader";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTopicalApp } from "../context/TopicalLayoutProvider";
-import { useAuth } from "@/context/AuthContext";
 import { extractCurriculumCode, extractSubjectCode } from "../lib/utils";
 import { SelectedQuestion } from "../types/models";
+import { BookmarkButton } from "./BookmarkButton/BookmarkButton";
+import Loader from "./Loader/Loader";
 
 const QuestionPreview = memo(
   ({
@@ -60,14 +60,9 @@ const QuestionPreview = memo(
 
     const isThisFinishedQuestionSettled = useMutationState({
       filters: {
-        mutationKey: [
-          "user_saved_activities",
-          "finished_questions",
-          question.id,
-        ],
+        mutationKey: ["user_saved_activities", "finished_questions", question.id],
         predicate: (mutation) =>
-          mutation.state.status === "success" ||
-          mutation.state.status === "error",
+          mutation.state.status === "success" || mutation.state.status === "error",
       },
     });
 
@@ -75,16 +70,14 @@ const QuestionPreview = memo(
       if (!userFinishedQuestions || userFinishedQuestions.length === 0) {
         return false;
       }
-      return userFinishedQuestions.some(
-        (item) => item.question.id === question.id,
-      );
+      return userFinishedQuestions.some((item) => item.question.id === question.id);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userFinishedQuestions, question.id, isThisFinishedQuestionSettled]);
 
     return (
       <div
         className={cn(
-          "w-full h-full object-cover bg-white flex items-center justify-center group cursor-pointer  group rounded-sm border dark:border-transparent mansory-item border-black/50 relative overflow-hidden min-h-[110px]",
+          "group group mansory-item relative flex h-full min-h-[110px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-sm border border-black/50 bg-white object-cover dark:border-transparent",
           className,
           uiPreferences.imageTheme === "dark" && "bg-black! dark:border-white!",
         )}
@@ -108,59 +101,55 @@ const QuestionPreview = memo(
       >
         <div
           className={cn(
-            "absolute inset-0 rounded-[10px] bg-linear-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out z-12",
+            "absolute inset-0 z-12 rounded-[10px] bg-linear-to-tr from-green-600/15 to-green-500/0 transition-opacity duration-400 ease-in-out",
             doesThisQuestionFinished && uiPreferences.showFinishedQuestionTint
               ? "opacity-100"
-              : " opacity-0",
+              : "opacity-0",
           )}
         />
 
         <div
           className={cn(
-            "absolute top-0 left-0 w-full h-full bg-black opacity-0 group-hover:opacity-37 z-10",
+            "absolute top-0 left-0 z-10 h-full w-full bg-black opacity-0 group-hover:opacity-37",
             uiPreferences.imageTheme === "dark" && "bg-white!",
           )}
         ></div>
         {loading && (
-          <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
+          <div className="absolute top-0 left-0 z-99 flex h-full w-full flex-wrap content-center items-center justify-center gap-2 overflow-hidden bg-white p-2">
             <Loader />
           </div>
         )}
         {error && (
-          <div className="absolute top-0 left-0 w-full h-full z-99 bg-white flex flex-wrap gap-2 items-center justify-center content-center p-2 overflow-hidden">
-            <p className="text-red-500 text-sm">Image failed to load</p>
+          <div className="absolute top-0 left-0 z-99 flex h-full w-full flex-wrap content-center items-center justify-center gap-2 overflow-hidden bg-white p-2">
+            <p className="text-sm text-red-500">Image failed to load</p>
           </div>
         )}
 
-        <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-0 group-hover:opacity-100 flex flex-wrap gap-2 items-center justify-center p-2 overflow-hidden z-11">
-          <div className="flex flex-wrap gap-2 items-center justify-center content-start">
+        <div className="absolute top-0 left-0 z-11 flex h-full w-full flex-wrap items-center justify-center gap-2 overflow-hidden bg-transparent p-2 opacity-0 group-hover:opacity-100">
+          <div className="flex flex-wrap content-start items-center justify-center gap-2">
             {showCurriculumBadge && (
-              <Badge className="h-max bg-green-600 text-white! text-center">
+              <Badge className="h-max bg-green-600 text-center text-white!">
                 {extractCurriculumCode({ questionId: question.id })}
               </Badge>
             )}
             {showSubjectBadge && (
-              <Badge className="h-max bg-logo-main text-white! text-center">
+              <Badge className="bg-logo-main h-max text-center text-white!">
                 {extractSubjectCode({ questionId: question.id })}
               </Badge>
             )}
             {question?.topics?.map((topic) => (
               <Badge
                 key={topic}
-                className="h-max bg-white text-black! text-center max-w-full whitespace-pre-wrap"
+                className="h-max max-w-full bg-white text-center whitespace-pre-wrap text-black!"
               >
                 {topic}
               </Badge>
             ))}
-            <Badge className="h-max bg-white text-black! text-center">
-              {question?.year}
-            </Badge>
-            <Badge className="h-max bg-white text-black! text-center">
+            <Badge className="h-max bg-white text-center text-black!">{question?.year}</Badge>
+            <Badge className="h-max bg-white text-center text-black!">
               Paper {question?.paperType}
             </Badge>
-            <Badge className="h-max bg-white text-black! text-center">
-              {question?.season}
-            </Badge>
+            <Badge className="h-max bg-white text-center text-black!">{question?.season}</Badge>
           </div>
         </div>
 
@@ -185,7 +174,7 @@ const QuestionPreview = memo(
         />
         {isMutatingThisBookmarkQuestion && (
           <Badge
-            className="absolute bottom-1 right-1 text-white text-[10px] w-max! flex items-center justify-center cursor-pointer bg-black rounded-[3px] min-h-[28px]! z-31"
+            className="absolute right-1 bottom-1 z-31 flex min-h-[28px]! w-max! cursor-pointer items-center justify-center rounded-[3px] bg-black text-[10px] text-white"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -195,20 +184,14 @@ const QuestionPreview = memo(
               if (savedActivitiesIsError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
-                  position:
-                    isMobileDevice && isPopoverOpen
-                      ? "top-center"
-                      : "bottom-right",
+                  position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                 });
                 return;
               }
               if (!isAuthenticated) {
                 toast.error("Please sign in to bookmark questions.", {
                   duration: 2000,
-                  position:
-                    isMobileDevice && isPopoverOpen
-                      ? "top-center"
-                      : "bottom-right",
+                  position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                 });
                 return;
               }
@@ -227,22 +210,17 @@ const QuestionPreview = memo(
         {!isMutatingThisBookmarkQuestion && isHovering && (
           <Button
             className={cn(
-              "absolute bottom-1 right-1 h-7 w-7 cursor-pointer",
-              "rounded-[3px] z-30",
+              "absolute right-1 bottom-1 h-7 w-7 cursor-pointer",
+              "z-30 rounded-[3px]",
               (() => {
                 for (const bookmark of bookmarks ?? []) {
-                  if (
-                    bookmark.userBookmarks.some(
-                      (b) => b.question.id === question.id,
-                    )
-                  ) {
+                  if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
                     return true;
                   }
                 }
                 return false;
               })() && "bg-logo-main! text-white!",
-              (savedActivitiesIsLoading || savedActivitiesIsFetching) &&
-                "opacity-50",
+              (savedActivitiesIsLoading || savedActivitiesIsFetching) && "opacity-50",
             )}
             tabIndex={-1}
             onClick={(e) => {
@@ -253,20 +231,14 @@ const QuestionPreview = memo(
               if (savedActivitiesIsError) {
                 toast.error("Bookmark error. Please refresh the page.", {
                   duration: 2000,
-                  position:
-                    isMobileDevice && isPopoverOpen
-                      ? "top-center"
-                      : "bottom-right",
+                  position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                 });
                 return;
               }
               if (!isAuthenticated) {
                 toast.error("Please sign in to bookmark questions.", {
                   duration: 2000,
-                  position:
-                    isMobileDevice && isPopoverOpen
-                      ? "top-center"
-                      : "bottom-right",
+                  position: isMobileDevice && isPopoverOpen ? "top-center" : "bottom-right",
                 });
                 return;
               }
@@ -284,7 +256,7 @@ const QuestionPreview = memo(
 
         <img
           className={cn(
-            "w-full h-full object-contain",
+            "h-full w-full object-contain",
             uiPreferences.imageTheme === "dark" && "invert!",
           )}
           src={imageSrc}

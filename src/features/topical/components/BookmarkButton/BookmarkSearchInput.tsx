@@ -1,17 +1,12 @@
-import { memo } from "react";
 import { CommandInput } from "@/components/ui/command";
 import { XIcon } from "lucide-react";
+import { memo } from "react";
 import { BookmarkSearchInputProps } from "../../types/components";
 
 export const BookmarkSearchInput = memo(
-  ({
-    searchInput,
-    setSearchInput,
-    searchInputRef,
-    setOpen,
-  }: BookmarkSearchInputProps) => {
+  ({ searchInput, setSearchInput, searchInputRef, setOpen }: BookmarkSearchInputProps) => {
     return (
-      <div className="flex w-full items-center justify-between gap-1 dark:bg-accent mb-2 pb-3 border-b border-border ">
+      <div className="dark:bg-accent border-border mb-2 flex w-full items-center justify-between gap-1 border-b pb-3">
         <CommandInput
           placeholder="Search bookmark lists"
           wrapperClassName="w-full ml-2"
@@ -26,7 +21,7 @@ export const BookmarkSearchInput = memo(
           }}
         />
         <XIcon
-          className="bg-transparent! cursor-pointer mr-2 text-destructive"
+          className="text-destructive mr-2 cursor-pointer bg-transparent!"
           size={20}
           onClick={(e) => {
             e.stopPropagation();

@@ -1,41 +1,34 @@
 "use client";
 
-import { ValidCurriculum } from "@/constants/types";
-import { truncateListName } from "@/features/topical/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Globe, Lock, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CURRICULUM_COVER_IMAGE, SUBJECT_COVER_IMAGE } from "@/constants/constants";
+import { ValidCurriculum } from "@/constants/types";
+import { useAuth } from "@/context/AuthContext";
 import { ListFolder } from "@/features/topical/components/ListFolder";
 import NavigateToTopicalApp from "@/features/topical/components/NavigateToTopicalApp";
-import Image from "next/image";
-import {
-  CURRICULUM_COVER_IMAGE,
-  SUBJECT_COVER_IMAGE,
-} from "@/constants/constants";
 import SecondaryAppSidebar from "@/features/topical/components/SecondaryAppSidebar";
 import SecondaryAppUltilityBar from "@/features/topical/components/SecondaryAppUltilityBar";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import SecondaryMainContent from "@/features/topical/components/SecondaryMainContent";
-import { useAuth } from "@/context/AuthContext";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { truncateListName } from "@/features/topical/lib/utils";
+import { BreadcrumbContentProps, QuestionInspectRef } from "@/features/topical/types/components";
+import { SubjectMetadata } from "@/features/topical/types/models";
 import { api } from "@/lib/eden";
 import type { BookmarkListMetadataResponse } from "@/server/api/getBookmarkListMetadata";
-import {
-  BreadcrumbContentProps,
-  QuestionInspectRef,
-} from "@/features/topical/types/components";
-import { SubjectMetadata } from "@/features/topical/types/models";
+import { useQuery } from "@tanstack/react-query";
+import { Globe, Loader2, Lock } from "lucide-react";
+import Image from "next/image";
+import { useMemo, useRef, useState } from "react";
 
 const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   const { isSessionPending, isAuthenticated } = useAuth();
-  const { bookmarksData: bookmarkLists, savedActivitiesIsFetching } =
-    useTopicalApp();
+  const { bookmarksData: bookmarkLists, savedActivitiesIsFetching } = useTopicalApp();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chosenList, setChosenList] = useState<{
@@ -43,12 +36,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     visibility: "public" | "private";
     listName: string;
   } | null>(null);
-  const [selectedCurriculumn, setSelectedCurriculum] =
-    useState<ValidCurriculum | null>(null);
+  const [selectedCurriculumn, setSelectedCurriculum] = useState<ValidCurriculum | null>(null);
   const [selectedSubject, setSelecteSubject] = useState<string | null>(null);
-  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(
-    null,
-  );
+  const [currentFilter, setCurrentFilter] = useState<SubjectMetadata | null>(null);
   const questionInspectRef = useRef<QuestionInspectRef | null>(null);
   const sideBarInsetRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,15 +71,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     isLoading: isQuestionsLoading,
     isError: isQuestionsError,
   } = useQuery({
-    queryKey: [
-      "bookmark-questions",
-      chosenList?.id,
-      selectedCurriculumn,
-      selectedSubject,
-    ],
+    queryKey: ["bookmark-questions", chosenList?.id, selectedCurriculumn, selectedSubject],
     queryFn: async () => {
-      if (!chosenList?.id || !selectedCurriculumn || !selectedSubject)
-        return null;
+      if (!chosenList?.id || !selectedCurriculumn || !selectedSubject) return null;
       const { data, error } = await api.topical["bookmark-list"]({
         listId: chosenList.id,
       }).questions.get({
@@ -111,8 +95,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
   // Derive subject metadata from fetched questions
   const subjectMetadata = useMemo((): SubjectMetadata | null => {
-    if (!questionsData?.questions || questionsData.questions.length === 0)
-      return null;
+    if (!questionsData?.questions || questionsData.questions.length === 0) return null;
 
     const temp: SubjectMetadata = {
       topic: [],
@@ -146,8 +129,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     if (!questionsData?.questions || !currentFilter) return [];
 
     return questionsData.questions.filter(({ question }) => {
-      if (!currentFilter.paperType.includes(question.paperType.toString()))
-        return false;
+      if (!currentFilter.paperType.includes(question.paperType.toString())) return false;
       if (!currentFilter.year.includes(question.year.toString())) return false;
       if (!currentFilter.season.includes(question.season)) return false;
       const hasTopicOverlap = question.topics.some(
@@ -167,13 +149,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
       !topicalData ||
       topicalData.length === 0
     );
-  }, [
-    chosenList,
-    selectedCurriculumn,
-    selectedSubject,
-    currentFilter,
-    topicalData,
-  ]);
+  }, [chosenList, selectedCurriculumn, selectedSubject, currentFilter, topicalData]);
 
   // Build simple metadata from bookmark lists for initial list view
   const listsMetadata = useMemo(() => {
@@ -198,7 +174,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         isSessionPending ||
         isMetadataLoading ||
         isQuestionsLoading) && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
           <Loader2 className="animate-spin" />
         </div>
       )}
@@ -207,15 +183,13 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         !isAuthenticated &&
         !isSessionPending &&
         bookmarkLists?.length === 0 && (
-          <p className="text-sm text-red-500 text-center">
+          <p className="text-center text-sm text-red-500">
             You are not signed in. Please sign to create a list!
           </p>
         )}
 
       {(isMetadataError || isQuestionsError) && (
-        <p className="text-sm text-red-500 text-center">
-          Error loading data. Please try again.
-        </p>
+        <p className="text-center text-sm text-red-500">Error loading data. Please try again.</p>
       )}
     </>
   );
@@ -232,11 +206,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
   }: BreadcrumbContentProps) =>
     chosenList ? (
       <div
-        className="flex flex-row items-center justify-between w-full sm:w-[95%] mb-2 flex-wrap gap-2"
+        className="mb-2 flex w-full flex-row flex-wrap items-center justify-between gap-2 sm:w-[95%]"
         ref={sideBarInsetRef}
       >
         <div>
-          <Breadcrumb className="flex mr-0 sm:mr-6 max-w-full w-max">
+          <Breadcrumb className="mr-0 flex w-max max-w-full sm:mr-6">
             <BreadcrumbList>
               <BreadcrumbItem
                 className="cursor-pointer"
@@ -249,11 +223,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               >
                 {chosenList ? (
                   <>
-                    {chosenList.visibility === "public" ? (
-                      <Globe size={13} />
-                    ) : (
-                      <Lock size={13} />
-                    )}
+                    {chosenList.visibility === "public" ? <Globe size={13} /> : <Lock size={13} />}
                     {truncateListName({ listName: chosenList.listName })}
                   </>
                 ) : (
@@ -307,9 +277,7 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
           isQuestionViewDisabled={isQuestionViewDisabled}
           sideBarInsetRef={sideBarInsetRef}
           isSidebarOpen={isSidebarOpen}
-          setIsQuestionInspectOpen={
-            questionInspectRef.current?.setIsInspectOpen
-          }
+          setIsQuestionInspectOpen={questionInspectRef.current?.setIsInspectOpen}
           isExportModeEnabled={isExportModeEnabled}
           fullPartitionedData={fullPartitionedData}
           currentChunkIndex={currentChunkIndex}
@@ -324,13 +292,13 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
     <>
       {/* List selection view */}
       {listsMetadata && !chosenList && isAuthenticated && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your list</h1>
-          <div className="flex flex-col flex-wrap gap-5 items-center justify-center w-full ">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your list</h1>
+          <div className="flex w-full flex-col flex-wrap items-center justify-center gap-5">
             {Object.keys(listsMetadata.private).length > 0 && (
-              <div className="flex flex-col gap-2 w-full items-start justify-center">
-                <h2 className="font text-lg text-logo-main">Private</h2>
-                <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
+              <div className="flex w-full flex-col items-start justify-center gap-2">
+                <h2 className="font text-logo-main text-lg">Private</h2>
+                <div className="flex w-full flex-row flex-wrap items-center justify-start gap-5">
                   {Object.keys(listsMetadata.private).map((listId) => (
                     <ListFolder
                       BETTER_AUTH_URL={BETTER_AUTH_URL}
@@ -346,9 +314,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               </div>
             )}
             {Object.keys(listsMetadata.public).length > 0 && (
-              <div className="flex flex-col gap-2 w-full items-start justify-center">
-                <h2 className="font text-lg text-logo-main">Public</h2>
-                <div className="flex flex-row flex-wrap gap-5 items-center justify-start w-full ">
+              <div className="flex w-full flex-col items-start justify-center gap-2">
+                <h2 className="font text-logo-main text-lg">Public</h2>
+                <div className="flex w-full flex-row flex-wrap items-center justify-start gap-5">
                   {Object.keys(listsMetadata.public).map((listId) => (
                     <ListFolder
                       listName={listsMetadata.public[listId].listName}
@@ -368,14 +336,11 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
               !savedActivitiesIsFetching &&
               isAuthenticated &&
               !isSessionPending && (
-                <div className="flex flex-col gap-4 items-center justify-center w-full">
-                  <p className="text-sm text-muted-foreground text-center">
-                    No lists found. Search for questions and add them to a new
-                    list!
+                <div className="flex w-full flex-col items-center justify-center gap-4">
+                  <p className="text-muted-foreground text-center text-sm">
+                    No lists found. Search for questions and add them to a new list!
                   </p>
-                  <NavigateToTopicalApp>
-                    Search for questions
-                  </NavigateToTopicalApp>
+                  <NavigateToTopicalApp>Search for questions</NavigateToTopicalApp>
                 </div>
               )}
           </div>
@@ -384,24 +349,21 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
 
       {/* Curriculum selection view - uses lazy-loaded metadata */}
       {listMetadata && !selectedCurriculumn && chosenList && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <h1 className="font-semibold text-2xl">Choose your curriculumn</h1>
-          <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full">
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-semibold">Choose your curriculumn</h1>
+          <div className="flex w-full flex-row flex-wrap items-center justify-center gap-5">
             {Object.keys(listMetadata.curricula).length === 0 && (
-              <div className="flex flex-col gap-4 items-center justify-center w-full">
-                <p className="text-sm text-muted-foreground text-center">
-                  No curriculums found. Search for questions and add them to
-                  this list!
+              <div className="flex w-full flex-col items-center justify-center gap-4">
+                <p className="text-muted-foreground text-center text-sm">
+                  No curriculums found. Search for questions and add them to this list!
                 </p>
-                <NavigateToTopicalApp>
-                  Search for questions{" "}
-                </NavigateToTopicalApp>
+                <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
               </div>
             )}
             {Object.keys(listMetadata.curricula).map((curriculum) => (
               <div
                 key={curriculum}
-                className="flex flex-col items-center justify-center gap-1 cursor-pointer"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1"
                 onClick={() => {
                   setSelectedCurriculum(curriculum as ValidCurriculum);
                 }}
@@ -411,13 +373,9 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
                   width={182}
                   height={80}
                   loading="lazy"
-                  className="h-20! object-cover border border-foreground p-2 rounded-sm bg-white "
+                  className="border-foreground h-20! rounded-sm border bg-white object-cover p-2"
                   alt="Curriculum cover image"
-                  src={
-                    CURRICULUM_COVER_IMAGE[
-                      curriculum as keyof typeof CURRICULUM_COVER_IMAGE
-                    ]
-                  }
+                  src={CURRICULUM_COVER_IMAGE[curriculum as keyof typeof CURRICULUM_COVER_IMAGE]}
                 />
                 <p>{curriculum}</p>
               </div>
@@ -431,63 +389,56 @@ const BookmarkClient = ({ BETTER_AUTH_URL }: { BETTER_AUTH_URL: string }) => {
         selectedCurriculumn &&
         !selectedSubject &&
         listMetadata.curricula[selectedCurriculumn] && (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            <h1 className="font-semibold text-2xl">Choose your subject</h1>
+          <div className="flex w-full flex-col items-center justify-center gap-4">
+            <h1 className="text-2xl font-semibold">Choose your subject</h1>
             {listMetadata.curricula[selectedCurriculumn].subjects.length > 0 ? (
               <ScrollArea
-                className="h-[60dvh] px-4 w-full [&_.bg-border]:bg-logo-main "
+                className="[&_.bg-border]:bg-logo-main h-[60dvh] w-full px-4"
                 type="always"
               >
-                <div className="flex flex-row flex-wrap gap-8 items-start justify-center w-full  ">
-                  {listMetadata.curricula[selectedCurriculumn].subjects.map(
-                    (subject) => (
-                      <div
-                        key={subject}
-                        className="flex flex-col items-center  justify-center gap-1 cursor-pointer w-[150px]"
-                        onClick={() => {
-                          setSelecteSubject(subject);
-                        }}
-                      >
-                        <Image
-                          width={150}
-                          height={200}
-                          loading="lazy"
-                          title={subject}
-                          className="object-cover rounded-[3px] "
-                          alt="Curriculum cover image"
-                          src={
-                            SUBJECT_COVER_IMAGE[
-                              selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
-                            ][subject]
-                          }
-                        />
-                        <p className="text-sm text-muted-foreground text-center px-1">
-                          {subject}
-                        </p>
-                      </div>
-                    ),
-                  )}
+                <div className="flex w-full flex-row flex-wrap items-start justify-center gap-8">
+                  {listMetadata.curricula[selectedCurriculumn].subjects.map((subject) => (
+                    <div
+                      key={subject}
+                      className="flex w-[150px] cursor-pointer flex-col items-center justify-center gap-1"
+                      onClick={() => {
+                        setSelecteSubject(subject);
+                      }}
+                    >
+                      <Image
+                        width={150}
+                        height={200}
+                        loading="lazy"
+                        title={subject}
+                        className="rounded-[3px] object-cover"
+                        alt="Curriculum cover image"
+                        src={
+                          SUBJECT_COVER_IMAGE[
+                            selectedCurriculumn as keyof typeof SUBJECT_COVER_IMAGE
+                          ][subject]
+                        }
+                      />
+                      <p className="text-muted-foreground px-1 text-center text-sm">{subject}</p>
+                    </div>
+                  ))}
                 </div>
               </ScrollArea>
             ) : (
-              <div className="flex flex-col gap-4 items-center justify-center w-full">
-                <p className="text-sm text-muted-foreground text-center">
-                  No subjects found. Search for questions and add them to this
-                  list!
+              <div className="flex w-full flex-col items-center justify-center gap-4">
+                <p className="text-muted-foreground text-center text-sm">
+                  No subjects found. Search for questions and add them to this list!
                 </p>
-                <NavigateToTopicalApp>
-                  Search for questions{" "}
-                </NavigateToTopicalApp>
+                <NavigateToTopicalApp>Search for questions </NavigateToTopicalApp>
               </div>
             )}
           </div>
         )}
 
       {topicalData?.length === 0 && selectedSubject && !isQuestionsLoading && (
-        <div className="flex flex-col gap-4 items-center justify-center w-full">
-          <p className="text-sm text-muted-foreground text-center">
-            No questions found. Search for questions and add them to this list!
-            Or change your filters.
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <p className="text-muted-foreground text-center text-sm">
+            No questions found. Search for questions and add them to this list! Or change your
+            filters.
           </p>
           <NavigateToTopicalApp>Search for questions</NavigateToTopicalApp>
         </div>

@@ -1,14 +1,14 @@
-import "server-only";
+import { retryDatabase } from "@/dal/retry";
 import { getDbAsync } from "@/drizzle/db.server";
 import { globalSearchRateLimit } from "@/drizzle/schema";
-import { eq, sql } from "drizzle-orm";
-import { HTTP_STATUS, ERROR_CODES } from "@/lib/errors";
-import { status as elysiaStatus } from "elysia";
-import { retryDatabase } from "@/dal/retry";
 import {
   DAILY_IMAGE_SEARCH_LIMIT,
   DAILY_TEXT_SEARCH_LIMIT,
 } from "@/features/search/constants/constants";
+import { ERROR_CODES, HTTP_STATUS } from "@/lib/errors";
+import { eq, sql } from "drizzle-orm";
+import { status as elysiaStatus } from "elysia";
+import "server-only";
 
 type SearchType = "image" | "text";
 
@@ -22,25 +22,17 @@ function getTodayDateString(): string {
 /**
  * Check if global daily rate limit has been exceeded
  */
-export async function checkRateLimit(
-  searchType: SearchType,
-  status: typeof elysiaStatus
-) {
+export async function checkRateLimit(searchType: SearchType, status: typeof elysiaStatus) {
   const db = await getDbAsync();
   const today = getTodayDateString();
 
   // Get today's rate limit record with retry logic
   const [record] = await retryDatabase(
-    () =>
-      db
-        .select()
-        .from(globalSearchRateLimit)
-        .where(eq(globalSearchRateLimit.date, today)),
-    `check ${searchType} search rate limit`
+    () => db.select().from(globalSearchRateLimit).where(eq(globalSearchRateLimit.date, today)),
+    `check ${searchType} search rate limit`,
   );
 
-  const limit =
-    searchType === "image" ? DAILY_IMAGE_SEARCH_LIMIT : DAILY_TEXT_SEARCH_LIMIT;
+  const limit = searchType === "image" ? DAILY_IMAGE_SEARCH_LIMIT : DAILY_TEXT_SEARCH_LIMIT;
 
   const currentCount = record
     ? searchType === "image"
@@ -65,8 +57,7 @@ export async function incrementSearchCount(searchType: SearchType) {
   const db = await getDbAsync();
   const today = getTodayDateString();
 
-  const incrementField =
-    searchType === "image" ? "imageSearchCount" : "textSearchCount";
+  const incrementField = searchType === "image" ? "imageSearchCount" : "textSearchCount";
 
   // Upsert the record with retry logic
   await retryDatabase(
@@ -86,6 +77,6 @@ export async function incrementSearchCount(searchType: SearchType) {
             updatedAt: new Date(),
           },
         }),
-    `increment ${searchType} search count`
+    `increment ${searchType} search count`,
   );
 }

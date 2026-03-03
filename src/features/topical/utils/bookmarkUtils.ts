@@ -1,16 +1,16 @@
 import {
+  DOES_NOT_EXIST,
+  LIMIT_EXCEEDED,
+  MAXIMUM_BOOKMARK_LISTS_PER_USER,
+  MAXIMUM_BOOKMARKS_PER_LIST,
+} from "@/constants/constants";
+import {
   addBookmarkAction,
   createBookmarkListAndAddBookmarkAction,
   removeBookmarkAction,
 } from "@/features/topical/server/actions";
 import { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  DOES_NOT_EXIST,
-  LIMIT_EXCEEDED,
-  MAXIMUM_BOOKMARK_LISTS_PER_USER,
-  MAXIMUM_BOOKMARKS_PER_LIST,
-} from "@/constants/constants";
 import {
   CreateListMutationVariables,
   SavedActivitiesResponse,
@@ -99,18 +99,14 @@ export const handleCreateListOptimisticUpdate = (
       }
 
       const updatedBookmarks = prev.bookmarks ?? [];
-      const isListAlreadyExist = updatedBookmarks.some(
-        (bookmark) => bookmark.id === listId,
-      );
+      const isListAlreadyExist = updatedBookmarks.some((bookmark) => bookmark.id === listId);
 
       callbacks?.onSuccess?.();
 
       if (isListAlreadyExist) {
         // Add bookmark to existing list (shouldn't happen for create new, but safe fallback)
         callbacks?.addChosenBookmarkList?.(listId);
-        const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId,
-        );
+        const existingBookmark = updatedBookmarks.find((bookmark) => bookmark.id === listId);
         if (existingBookmark) {
           existingBookmark.userBookmarks.push({
             question: {
@@ -189,9 +185,7 @@ export const handleToggleBookmarkOptimisticUpdate = (
       if (!isBookmarked) {
         // Add bookmark to existing list
         callbacks?.addChosenBookmarkList?.(listId);
-        const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId,
-        );
+        const existingBookmark = updatedBookmarks.find((bookmark) => bookmark.id === listId);
         if (existingBookmark) {
           existingBookmark.userBookmarks.push({
             question: {
@@ -211,14 +205,11 @@ export const handleToggleBookmarkOptimisticUpdate = (
       } else {
         // Remove bookmark from list
         callbacks?.removeChosenBookmarkList?.(listId);
-        const existingBookmark = updatedBookmarks.find(
-          (bookmark) => bookmark.id === listId,
-        );
+        const existingBookmark = updatedBookmarks.find((bookmark) => bookmark.id === listId);
         if (existingBookmark) {
-          existingBookmark.userBookmarks =
-            existingBookmark.userBookmarks.filter(
-              (userBookmark) => userBookmark.question.id !== question.id,
-            );
+          existingBookmark.userBookmarks = existingBookmark.userBookmarks.filter(
+            (userBookmark) => userBookmark.question.id !== question.id,
+          );
         }
       }
 

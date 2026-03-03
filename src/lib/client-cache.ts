@@ -97,7 +97,7 @@ const THUMBNAIL_QUALITY = 0.9; // JPEG compression quality
 async function createThumbnail(
   imageDataUrl: string,
   maxSize: number = THUMBNAIL_MAX_SIZE,
-  quality: number = THUMBNAIL_QUALITY
+  quality: number = THUMBNAIL_QUALITY,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -148,7 +148,7 @@ export async function getSearchHistory(): Promise<SearchHistoryItem[]> {
 }
 
 export async function addSearchHistory(
-  item: Omit<SearchHistoryItem, "id" | "timestamp">
+  item: Omit<SearchHistoryItem, "id" | "timestamp">,
 ): Promise<void> {
   try {
     const history = await getSearchHistory();

@@ -1,19 +1,11 @@
-import { memo, useCallback } from "react";
-import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Minus, Plus } from "lucide-react";
+import { memo, useCallback } from "react";
 import { NumberInputWithControlsProps } from "./types";
 
 const NumberInputWithControls = memo(
-  ({
-    value,
-    onChange,
-    min,
-    max,
-    placeholder,
-    label,
-    error,
-  }: NumberInputWithControlsProps) => {
+  ({ value, onChange, min, max, placeholder, label, error }: NumberInputWithControlsProps) => {
     const handleDecrease = useCallback(() => {
       const current = parseInt(value) || min;
       onChange((current > min ? current - 1 : max).toString());
@@ -28,25 +20,21 @@ const NumberInputWithControls = memo(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.target.value);
       },
-      [onChange]
+      [onChange],
     );
 
     return (
       <div>
-        {label && (
-          <span className="text-xs font-medium text-muted-foreground">
-            {label}
-          </span>
-        )}
+        {label && <span className="text-muted-foreground text-xs font-medium">{label}</span>}
         <div className="flex items-center gap-2">
           <Button
-            className="w-8 h-8 rounded-lg cursor-pointer"
+            className="h-8 w-8 cursor-pointer rounded-lg"
             variant="outline"
             size="sm"
             title="Decrease"
             onClick={handleDecrease}
           >
-            <Minus className="w-3 h-3" />
+            <Minus className="h-3 w-3" />
           </Button>
           <Input
             placeholder={placeholder}
@@ -54,29 +42,27 @@ const NumberInputWithControls = memo(
             min={min}
             value={value}
             type="number"
-            className="text-center font-mono font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex-1"
+            className="flex-1 [appearance:textfield] text-center font-mono font-semibold [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             onChange={handleInputChange}
           />
           <Button
-            className="w-8 h-8 rounded-lg cursor-pointer"
+            className="h-8 w-8 cursor-pointer rounded-lg"
             variant="outline"
             size="sm"
             title="Increase"
             onClick={handleIncrease}
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="h-3 w-3" />
           </Button>
         </div>
         {error && (
-          <div className="flex items-center mt-2 gap-2 p-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-md">
-            <p className="text-xs text-red-600 dark:text-red-400 font-medium">
-              {error}
-            </p>
+          <div className="mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-2 dark:border-red-800/30 dark:bg-red-950/20">
+            <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
       </div>
     );
-  }
+  },
 );
 
 NumberInputWithControls.displayName = "NumberInputWithControls";

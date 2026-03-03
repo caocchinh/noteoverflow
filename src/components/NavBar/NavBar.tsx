@@ -1,28 +1,24 @@
 "use client";
+import ShinyText from "@/components/ShinyText";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Github, Layers, SearchIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ShinyText from "@/components/ShinyText";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
 import { GlowEffect } from "../ui/glow-effect";
+import { Input } from "../ui/input";
 import { ModeToggle } from "./ThemeToggle";
 import User from "./User";
-import { Input } from "../ui/input";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const NavBar = () => {
   const pathname = usePathname();
   const breakpoint = useIsMobile({ breakpoint: 735 });
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-100000 flex min-w-screen items-center justify-between border-(--navbar-border) border-b bg-(--navbar-bg) px-1 py-[7px] sm:px-10 lg:px-20">
+    <header className="fixed top-0 right-0 left-0 z-100000 flex min-w-screen items-center justify-between border-b border-(--navbar-border) bg-(--navbar-bg) px-1 py-[7px] sm:px-10 lg:px-20">
       <nav className="flex w-full items-center justify-center gap-3 sm:justify-between sm:gap-8">
         {pathname !== "/" ? (
           <>
@@ -63,7 +59,7 @@ const NavBar = () => {
             </a>
           </>
         )}
-        <Link href="/search" className="h-10 w-full max-w-md items-center flex">
+        <Link href="/search" className="flex h-10 w-full max-w-md items-center">
           <Input
             className="h-full w-full max-w-md rounded-xl rounded-r-none border border-(--navbar-input-border) bg-(--navbar-bg) text-(--navbar-text) placeholder:text-white/50 dark:bg-(--navbar-bg)"
             placeholder={breakpoint ? "Search" : "Search past paper question"}
@@ -85,7 +81,7 @@ const NavBar = () => {
           </Button> */}
           <Button
             asChild
-            className="group relative rounded-lg border border-(--navbar-border) bg-(--navbar-bg) text-(--navbar-text) hover:bg-(--navbar-bg) "
+            className="group relative rounded-lg border border-(--navbar-border) bg-(--navbar-bg) text-(--navbar-text) hover:bg-(--navbar-bg)"
           >
             <Link className="relative" href={TOPICAL_QUESTION_APP_ROUTE}>
               <GlowEffect
@@ -99,10 +95,7 @@ const NavBar = () => {
 
               <div className="flex items-center justify-center gap-2">
                 <Layers />
-                <ShinyText
-                  className="hidden sm:inline-block"
-                  text="Topical questions"
-                />
+                <ShinyText className="hidden sm:inline-block" text="Topical questions" />
                 <ShinyText className="inline-block sm:hidden" text="Topical" />
               </div>
             </Link>

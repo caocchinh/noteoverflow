@@ -1,8 +1,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
 import { cache } from "react";
-import * as schema from "./schema";
 import * as relations from "./relations";
+import * as schema from "./schema";
 //  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --> Local development
 //  npx wrangler d1 execute noteoverflow --file=./src/drizzle/migrations/{$filename} --remote --> Remote development
 

@@ -1,11 +1,10 @@
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { ShareFilter } from "../ShareFilter";
-import { BestExamHelpUltility } from "../BestExamHelpUltility";
-import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
-import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, PanelsTopLeft } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, PanelsTopLeft } from "lucide-react";
+import { usePathname } from "next/navigation";
 import {
   forwardRef,
   memo,
@@ -15,22 +14,17 @@ import {
   useRef,
   useState,
 } from "react";
-import Sort from "../Sort";
-import { useAuth } from "@/context/AuthContext";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverScrolling } from "../../lib/utils";
-import { usePathname } from "next/navigation";
 import { InspectUltilityBarProps } from "../../types/components";
+import { BestExamHelpUltility } from "../BestExamHelpUltility";
+import { BookmarkButton } from "../BookmarkButton/BookmarkButton";
+import { ShareFilter } from "../ShareFilter";
+import Sort from "../Sort";
+import { QuestionInspectFinishedCheckbox } from "./QuestionInspectFinishedCheckbox";
 
 const ToggleInspectSidebarButton = memo(
-  ({
-    isInspectSidebarOpen,
-    onToggle,
-  }: {
-    isInspectSidebarOpen: boolean;
-    onToggle: () => void;
-  }) => (
+  ({ isInspectSidebarOpen, onToggle }: { isInspectSidebarOpen: boolean; onToggle: () => void }) => (
     <Button variant="outline" className="cursor-pointer" onClick={onToggle}>
       {isInspectSidebarOpen ? "Hide" : "Show"}
       <PanelsTopLeft />
@@ -64,13 +58,9 @@ const InspectUltilityBar = memo(
       const ultilityRef = useRef<HTMLDivElement | null>(null);
       const { isSessionPending } = useAuth();
       const { setIsCalculatorOpen, isCalculatorOpen } = useTopicalApp();
-      const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] =
-        useState(false);
-      const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] =
-        useState(false);
-      const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(
-        null,
-      );
+      const [isUltilityOverflowingRight, setIsUltilityOverflowingRight] = useState(false);
+      const [isUltilityOverflowingLeft, setIsUltilityOverflowingLeft] = useState(false);
+      const ultilityHorizontalScrollBarRef = useRef<HTMLDivElement | null>(null);
       const isMobile = useIsMobile();
       const pathname = usePathname();
 
@@ -81,9 +71,7 @@ const InspectUltilityBar = memo(
           specialLeftCase: !isMobile,
         });
         setIsUltilityOverflowingLeft(isOverScrollingResult.isOverScrollingLeft);
-        setIsUltilityOverflowingRight(
-          isOverScrollingResult.isOverScrollingRight,
-        );
+        setIsUltilityOverflowingRight(isOverScrollingResult.isOverScrollingRight);
       }, [isMobile, sideBarInsetRef]);
 
       const toggleInspectSidebar = useCallback(() => {
@@ -110,7 +98,7 @@ const InspectUltilityBar = memo(
         <>
           {isUltilityOverflowingRight && (
             <Button
-              className="absolute right-0 top-1  rounded-full cursor-pointer w-7 h-7 z-200"
+              className="absolute top-1 right-0 z-200 h-7 w-7 cursor-pointer rounded-full"
               title="Move right"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -126,7 +114,7 @@ const InspectUltilityBar = memo(
           )}
           {isUltilityOverflowingLeft && (
             <Button
-              className="absolute left-0 top-1 rounded-full cursor-pointer w-7 h-7 z-200"
+              className="absolute top-1 left-0 z-200 h-7 w-7 cursor-pointer rounded-full"
               title="Move left"
               onClick={() => {
                 if (ultilityHorizontalScrollBarRef.current) {
@@ -146,16 +134,16 @@ const InspectUltilityBar = memo(
             viewportRef={ultilityHorizontalScrollBarRef}
           >
             <div
-              className="flex pt-1 items-stretch w-max justify-center gap-4 mb-2 relative"
+              className="relative mb-2 flex w-max items-stretch justify-center gap-4 pt-1"
               ref={ultilityRef}
             >
-              <div className="flex items-center w-max justify-center gap-2 p-[3px] bg-input/80 rounded-md">
+              <div className="bg-input/80 flex w-max items-center justify-center gap-2 rounded-md p-[3px]">
                 <Button
                   onClick={() => setCurrentView("question")}
                   className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                    "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                     currentView === "question" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                      "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
                   )}
                 >
                   Question
@@ -163,9 +151,9 @@ const InspectUltilityBar = memo(
                 <Button
                   onClick={() => setCurrentView("answer")}
                   className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                    "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                     currentView === "answer" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                      "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
                   )}
                 >
                   Answer
@@ -176,9 +164,9 @@ const InspectUltilityBar = memo(
                     setIsInspectSidebarOpen(false);
                   }}
                   className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2  bg-input text-black hover:bg-input dark:bg-transparent",
+                    "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                     currentView === "both" &&
-                      "border-input bg-white hover:bg-white dark:text-white dark:bg-input/30 ",
+                      "border-input dark:bg-input/30 bg-white hover:bg-white dark:text-white",
                   )}
                 >
                   Both
@@ -186,9 +174,9 @@ const InspectUltilityBar = memo(
                 <Button
                   onClick={() => setIsCalculatorOpen(!isCalculatorOpen)}
                   className={cn(
-                    "cursor-pointer border-2 border-transparent h-[calc(100%-1px)] dark:text-muted-foreground py-1 px-2 bg-input text-black hover:bg-input dark:bg-transparent",
+                    "dark:text-muted-foreground bg-input hover:bg-input h-[calc(100%-1px)] cursor-pointer border-2 border-transparent px-2 py-1 text-black dark:bg-transparent",
                     isCalculatorOpen &&
-                      "border-logo-main! bg-logo-main! text-white! hover:bg-logo-main/80!",
+                      "border-logo-main! bg-logo-main! hover:bg-logo-main/80! text-white!",
                   )}
                 >
                   Calculator
@@ -203,18 +191,14 @@ const InspectUltilityBar = memo(
                 <QuestionInspectFinishedCheckbox
                   question={currentQuestionData}
                   isHavingUnsafeChangesRef={isHavingUnsafeChangesRef}
-                  setIsAnnotationGuardDialogOpen={
-                    setIsAnnotationGuardDialogOpen
-                  }
+                  setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
                   isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
                 />
               )}
               {currentQuestionData && (
                 <BookmarkButton
                   isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
-                  setIsAnnotationGuardDialogOpen={
-                    setIsAnnotationGuardDialogOpen
-                  }
+                  setIsAnnotationGuardDialogOpen={setIsAnnotationGuardDialogOpen}
                   triggerButtonClassName="h-[35px] w-[35px] border-black border !static"
                   badgeClassName="h-[35px] min-h-[35px] !static"
                   question={currentQuestionData}
@@ -239,14 +223,10 @@ const InspectUltilityBar = memo(
                   disabledMessage=""
                   showSortTextTrigger={false}
                   descendingSortText={
-                    pathname == "/search"
-                      ? "Best match first"
-                      : "Newest year first"
+                    pathname == "/search" ? "Best match first" : "Newest year first"
                   }
                   ascendingSortText={
-                    pathname == "/search"
-                      ? "Worst match first"
-                      : "Oldest year first"
+                    pathname == "/search" ? "Worst match first" : "Oldest year first"
                   }
                 />
               )}
@@ -258,10 +238,7 @@ const InspectUltilityBar = memo(
                 )}`}
               />
             </div>
-            <ScrollBar
-              orientation="horizontal"
-              className="[&_.bg-border]:bg-transparent"
-            />
+            <ScrollBar orientation="horizontal" className="[&_.bg-border]:bg-transparent" />
           </ScrollArea>
         </>
       );

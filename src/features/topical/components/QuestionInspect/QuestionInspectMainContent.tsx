@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarInset } from "@/components/ui/sidebar";
-import BrowseMoreQuestions from "./BrowseMoreQuestions";
-import InspectUltilityBar from "./InspectUltilityBar";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 import {
   forwardRef,
   memo,
@@ -12,23 +13,19 @@ import {
   useRef,
   useState,
 } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { QuestionInformation } from "../QuestionInformation";
-import BothViews from "./BothViews";
-import { Root } from "react-dom/client";
 import { createPortal } from "react-dom";
-import AnnotatableImagesUpdater from "./AnnotatableInspectImages/AnnotatableImagesUpdater";
-import { usePathname } from "next/navigation";
+import { Root } from "react-dom/client";
 import { useInspectContext } from "../../context/InspectContext";
-import {
-  AnnotatableInspectImagesHandle,
-  QuestionInspectViewMode,
-} from "../../types/components";
+import { AnnotatableInspectImagesHandle, QuestionInspectViewMode } from "../../types/components";
+import { QuestionInformation } from "../QuestionInformation";
+import AnnotatableImagesUpdater from "./AnnotatableInspectImages/AnnotatableImagesUpdater";
+import BothViews from "./BothViews";
+import BrowseMoreQuestions from "./BrowseMoreQuestions";
+import InspectUltilityBar from "./InspectUltilityBar";
 
 const CloseButton = memo(({ onClick }: { onClick: () => void }) => (
   <Button
-    className="w-full h-7 flex items-center justify-center cursor-pointer mb-1"
+    className="mb-1 flex h-7 w-full cursor-pointer items-center justify-center"
     variant="outline"
     onClick={onClick}
   >
@@ -66,36 +63,32 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
   const bothViewsQuestionScrollAreaRef = useRef<HTMLDivElement>(null);
   const bothViewsAnswerScrollAreaRef = useRef<HTMLDivElement>(null);
   const [isBrowseMoreOpen, setIsBrowseMoreOpen] = useState(false);
-  const [currentView, setCurrentView] =
-    useState<QuestionInspectViewMode>("question");
-  const [questionViewContainer, setQuestionViewContainer] =
-    useState<HTMLDivElement | null>(null);
+  const [currentView, setCurrentView] = useState<QuestionInspectViewMode>("question");
+  const [questionViewContainer, setQuestionViewContainer] = useState<HTMLDivElement | null>(null);
   const pathname = usePathname();
-  const [answerViewContainer, setAnswerViewContainer] =
-    useState<HTMLDivElement | null>(null);
+  const [answerViewContainer, setAnswerViewContainer] = useState<HTMLDivElement | null>(null);
   const [bothViewsQuestionContainer, setBothViewsQuestionContainer] =
     useState<HTMLDivElement | null>(null);
-  const [bothViewsAnswerContainer, setBothViewsAnswerContainer] =
-    useState<HTMLDivElement | null>(null);
-  const [annotatableQuestionInspectImagesElement] =
-    useState<HTMLDivElement | null>(() => {
-      if (typeof document !== "undefined") {
-        const el = document.createElement("div");
-        el.className = "w-full h-full";
-        return el;
-      }
-      return null;
-    });
+  const [bothViewsAnswerContainer, setBothViewsAnswerContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const [annotatableQuestionInspectImagesElement] = useState<HTMLDivElement | null>(() => {
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.className = "w-full h-full";
+      return el;
+    }
+    return null;
+  });
   const annotatableQuestionInspectImagesRootRef = useRef<Root | null>(null);
-  const [annotatableAnswerInspectImagesElement] =
-    useState<HTMLDivElement | null>(() => {
-      if (typeof document !== "undefined") {
-        const el = document.createElement("div");
-        el.className = "w-full h-full";
-        return el;
-      }
-      return null;
-    });
+  const [annotatableAnswerInspectImagesElement] = useState<HTMLDivElement | null>(() => {
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.className = "w-full h-full";
+      return el;
+    }
+    return null;
+  });
   const annotatableAnswerInspectImagesRootRef = useRef<Root | null>(null);
   const [isPendingCloseInspect, setIsPendingCloseInspect] = useState(false);
   const annotatableQuestionInspectImagesRootElementRef =
@@ -109,14 +102,8 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
   // Instantly initalizes the element since there's no constrain (act like normal React rerender cycle)
 
   const currentQuestionData = useMemo(() => {
-    return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[
-      currentQuestionIndex
-    ];
-  }, [
-    partitionedTopicalData,
-    currentTabThatContainsQuestion,
-    currentQuestionIndex,
-  ]);
+    return partitionedTopicalData?.[currentTabThatContainsQuestion]?.[currentQuestionIndex];
+  }, [partitionedTopicalData, currentTabThatContainsQuestion, currentQuestionIndex]);
 
   // Cleanup roots only when component unmounts
   useEffect(() => {
@@ -171,11 +158,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
           annotatableQuestionInspectImagesRootElementRef.current?.isEditMode) ||
         (currentView === "answer" &&
           annotatableAnswerInspectImagesRootElementRef.current?.isEditMode);
-      if (
-        e.key === "e" &&
-        !isInputFocusedRef.current &&
-        !isInterferingWithPdfEditor
-      ) {
+      if (e.key === "e" && !isInputFocusedRef.current && !isInterferingWithPdfEditor) {
         e.preventDefault();
         if (currentView === "question") {
           setCurrentView("answer");
@@ -183,11 +166,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
           setCurrentView("question");
         }
       }
-      if (
-        e.key === "r" &&
-        !isInputFocusedRef.current &&
-        !isInterferingWithPdfEditor
-      ) {
+      if (e.key === "r" && !isInputFocusedRef.current && !isInterferingWithPdfEditor) {
         e.preventDefault();
         setCurrentView("both");
         setIsInspectSidebarOpen(false);
@@ -199,8 +178,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
       if (isCoolDownRef.current || isInterferingWithPdfEditor) return;
 
       if (
-        (e.key === "ArrowUp" ||
-          ((e.key === "w" || e.key === "a") && !isInputFocusedRef.current)) &&
+        (e.key === "ArrowUp" || ((e.key === "w" || e.key === "a") && !isInputFocusedRef.current)) &&
         !sideBarInspectRef.current?.isHandlePreviousQuestionDisabled
       ) {
         e.preventDefault();
@@ -257,10 +235,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
   );
 
   const handleCloseClick = useCallback(() => {
-    if (
-      isHavingUnsafeChangesRef.current.question ||
-      isHavingUnsafeChangesRef.current.answer
-    ) {
+    if (isHavingUnsafeChangesRef.current.question || isHavingUnsafeChangesRef.current.answer) {
       setIsAnnotationGuardDialogOpen(true);
       setIsPendingCloseInspect(true);
       return;
@@ -269,28 +244,14 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
     if (currentQuestionId) {
       setIsOpen({ isOpen: false, questionId: currentQuestionId });
     }
-  }, [
-    currentQuestionId,
-    isHavingUnsafeChangesRef,
-    setIsAnnotationGuardDialogOpen,
-    setIsOpen,
-  ]);
+  }, [currentQuestionId, isHavingUnsafeChangesRef, setIsAnnotationGuardDialogOpen, setIsOpen]);
 
   useEffect(() => {
-    if (
-      isPendingCloseInspect &&
-      currentQuestionId &&
-      !isAnnotationGuardDialogOpen
-    ) {
+    if (isPendingCloseInspect && currentQuestionId && !isAnnotationGuardDialogOpen) {
       setIsPendingCloseInspect(false);
       setIsOpen({ isOpen: false, questionId: currentQuestionId });
     }
-  }, [
-    currentQuestionId,
-    isAnnotationGuardDialogOpen,
-    isPendingCloseInspect,
-    setIsOpen,
-  ]);
+  }, [currentQuestionId, isAnnotationGuardDialogOpen, isPendingCloseInspect, setIsOpen]);
 
   return (
     <>
@@ -316,9 +277,9 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
         isAnnotationGuardDialogOpen={isAnnotationGuardDialogOpen}
         question={currentQuestionData}
       />
-      <SidebarInset className="h-[inherit] w-full p-2 rounded-md px-4 dark:bg-accent gap-2 overflow-hidden flex flex-col items-center justify-between">
+      <SidebarInset className="dark:bg-accent flex h-[inherit] w-full flex-col items-center justify-between gap-2 overflow-hidden rounded-md p-2 px-4">
         <div
-          className="w-full h-[inherit] flex flex-col gap-2 items-center justify-start relative"
+          className="relative flex h-[inherit] w-full flex-col items-center justify-start gap-2"
           ref={sideBarInsetRef}
         >
           <InspectUltilityBar
@@ -339,17 +300,13 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
             sideBarInsetRef={sideBarInsetRef}
           />
 
-          <div
-            className={cn(
-              currentView === "question" ? "w-full" : "absolute top-[-99999px]",
-            )}
-          >
+          <div className={cn(currentView === "question" ? "w-full" : "absolute top-[-99999px]")}>
             <ScrollArea
-              className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-4!"
+              className="[&_.bg-border]:bg-logo-main/25 h-[76dvh] w-full pr-4!"
               type="always"
               viewportRef={questionScrollAreaRef}
             >
-              <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
+              <div className="flex w-full flex-row flex-wrap items-start justify-start gap-2">
                 <QuestionInformation
                   question={currentQuestionData}
                   showCurriculumn={pathname == "/search"}
@@ -366,17 +323,13 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
               />
             </ScrollArea>
           </div>
-          <div
-            className={cn(
-              currentView === "answer" ? "w-full" : "absolute top-[-99999px]",
-            )}
-          >
+          <div className={cn(currentView === "answer" ? "w-full" : "absolute top-[-99999px]")}>
             <ScrollArea
-              className="h-[76dvh] w-full [&_.bg-border]:bg-logo-main/25 pr-4!"
+              className="[&_.bg-border]:bg-logo-main/25 h-[76dvh] w-full pr-4!"
               type="always"
               viewportRef={answerScrollAreaRef}
             >
-              <div className="flex flex-row flex-wrap w-full gap-2 justify-start items-start">
+              <div className="flex w-full flex-row flex-wrap items-start justify-start gap-2">
                 <QuestionInformation
                   question={currentQuestionData}
                   showCurriculumn={pathname == "/search"}
@@ -386,12 +339,8 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
               <div ref={setAnswerViewContainer}></div>
             </ScrollArea>
           </div>
-          <div
-            className={cn(
-              currentView === "both" ? "w-full" : "absolute top-[-99999px]",
-            )}
-          >
-            <div className="flex flex-row flex-wrap w-full gap-2 -mb-3 py-2 justify-start items-start">
+          <div className={cn(currentView === "both" ? "w-full" : "absolute top-[-99999px]")}>
+            <div className="-mb-3 flex w-full flex-row flex-wrap items-start justify-start gap-2 py-2">
               <QuestionInformation
                 question={currentQuestionData}
                 showCurriculumn={pathname == "/search"}
@@ -423,7 +372,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
                 node.appendChild(annotatableQuestionInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
           questionViewContainer,
         )}
@@ -441,7 +390,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
                 node.appendChild(annotatableQuestionInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
           bothViewsQuestionContainer,
         )}
@@ -459,7 +408,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
                 node.appendChild(annotatableAnswerInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
           answerViewContainer,
         )}
@@ -477,7 +426,7 @@ const QuestionInspectMainContent = forwardRef((_, ref) => {
                 node.appendChild(annotatableAnswerInspectImagesElement);
               }
             }}
-            className="w-full h-full"
+            className="h-full w-full"
           />,
           bothViewsAnswerContainer,
         )}

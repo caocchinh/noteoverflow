@@ -1,6 +1,5 @@
 import type { CIE_A_LEVEL_SUBDIVISION, OUTDATED } from "@/constants/types";
-import { SortByOptions } from "./models";
-import { FilterData } from "./models";
+import { FilterData, SortByOptions } from "./models";
 
 export type LayoutStyle = "pagination" | "infinite";
 export type ImageTheme = "dark" | "light";
@@ -42,12 +41,8 @@ export type FiltersCache = {
   filters: {
     [curriculum: string]: {
       [subject: string]: FilterData & {
-        topicSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
-        paperTypeSubcurriculumnDivisionPreference?:
-          | CIE_A_LEVEL_SUBDIVISION
-          | OUTDATED;
+        topicSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
+        paperTypeSubcurriculumnDivisionPreference?: CIE_A_LEVEL_SUBDIVISION | OUTDATED;
       };
     };
   };

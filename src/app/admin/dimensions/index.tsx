@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/eden";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,7 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SelectedQuestion } from "@/features/topical/types/models";
+import { api } from "@/lib/eden";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 
 interface Question {
   id: string;
@@ -79,10 +79,9 @@ export default function ImageDimensionsClient() {
 
     try {
       // Step 1: Fetch all unprocessed questions
-      const { data: questionsData, error: fetchError } =
-        await api.admin.dimensions.questions.get({
-          query: processParams,
-        });
+      const { data: questionsData, error: fetchError } = await api.admin.dimensions.questions.get({
+        query: processParams,
+      });
 
       if (fetchError) {
         // @ts-expect-error type inference issue
@@ -154,10 +153,7 @@ export default function ImageDimensionsClient() {
         return {
           ...oldStats,
           processed: oldStats.processed + questions.length - totalFailed,
-          notProcessed: Math.max(
-            0,
-            oldStats.notProcessed - (questions.length - totalFailed),
-          ),
+          notProcessed: Math.max(0, oldStats.notProcessed - (questions.length - totalFailed)),
           total: oldStats.total,
         };
       });
@@ -169,49 +165,45 @@ export default function ImageDimensionsClient() {
   }, [processParams, queryClient]);
 
   return (
-    <div className="container mx-auto py-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="container mx-auto max-w-5xl py-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Image Dimensions Admin</h1>
       </div>
 
       {/* Stats Cards */}
       {statsLoading ? (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="mb-6 grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader className="py-4">
-                <div className="h-8 bg-muted animate-pulse rounded" />
-                <div className="h-4 bg-muted animate-pulse rounded w-1/2 mx-auto mt-2" />
+                <div className="bg-muted h-8 animate-pulse rounded" />
+                <div className="bg-muted mx-auto mt-2 h-4 w-1/2 animate-pulse rounded" />
               </CardHeader>
             </Card>
           ))}
         </div>
       ) : (
         stats && (
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="mb-6 grid grid-cols-3 gap-4">
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-2xl text-green-600 text-center">
+                <CardTitle className="text-center text-2xl text-green-600">
                   {stats.processed}
                 </CardTitle>
-                <CardDescription className="text-center">
-                  Processed
-                </CardDescription>
+                <CardDescription className="text-center">Processed</CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-2xl text-gray-600 text-center">
+                <CardTitle className="text-center text-2xl text-gray-600">
                   {stats.notProcessed}
                 </CardTitle>
-                <CardDescription className="text-center">
-                  Not Processed
-                </CardDescription>
+                <CardDescription className="text-center">Not Processed</CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader className="py-4">
-                <CardTitle className="text-2xl text-purple-600 text-center">
+                <CardTitle className="text-center text-2xl text-purple-600">
                   {stats.total}
                 </CardTitle>
                 <CardDescription className="text-center">Total</CardDescription>
@@ -226,9 +218,8 @@ export default function ImageDimensionsClient() {
         <CardHeader>
           <CardTitle>Bulk Dimension Processing</CardTitle>
           <CardDescription>
-            Process image dimensions for questions that haven&apos;t been
-            processed yet. This will fetch each question image and extract its
-            width and height.
+            Process image dimensions for questions that haven&apos;t been processed yet. This will
+            fetch each question image and extract its width and height.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -267,7 +258,7 @@ export default function ImageDimensionsClient() {
           <Button
             onClick={handleProcessDimensions}
             disabled={isProcessing}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
+            className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700"
           >
             {isProcessing
               ? `Processing ${currentProgress.current}/${currentProgress.total}...`
@@ -276,68 +267,55 @@ export default function ImageDimensionsClient() {
 
           {/* Current Progress Indicator */}
           {isProcessing && currentProgress.total > 0 && (
-            <div className="p-4 bg-blue-50 rounded-md text-sm border border-blue-200 dark:bg-blue-900/30">
-              <p className="font-semibold mb-2">
-                Processing question {currentProgress.current} of{" "}
-                {currentProgress.total}
+            <div className="rounded-md border border-blue-200 bg-blue-50 p-4 text-sm dark:bg-blue-900/30">
+              <p className="mb-2 font-semibold">
+                Processing question {currentProgress.current} of {currentProgress.total}
               </p>
               <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                <div className="rounded bg-green-100 p-2 dark:bg-green-900/30">
                   <div className="text-xl font-bold text-green-700 dark:text-green-400">
                     {currentProgress.processed}
                   </div>
-                  <div className="text-xs text-green-800 dark:text-green-500">
-                    Processed
-                  </div>
+                  <div className="text-xs text-green-800 dark:text-green-500">Processed</div>
                 </div>
-                <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                <div className="rounded bg-yellow-100 p-2 dark:bg-yellow-900/30">
                   <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                     {currentProgress.skipped}
                   </div>
-                  <div className="text-xs text-yellow-800 dark:text-yellow-500">
-                    Skipped
-                  </div>
+                  <div className="text-xs text-yellow-800 dark:text-yellow-500">Skipped</div>
                 </div>
-                <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                <div className="rounded bg-red-100 p-2 dark:bg-red-900/30">
                   <div className="text-xl font-bold text-red-700 dark:text-red-400">
                     {currentProgress.failed}
                   </div>
-                  <div className="text-xs text-red-800 dark:text-red-500">
-                    Failed
-                  </div>
+                  <div className="text-xs text-red-800 dark:text-red-500">Failed</div>
                 </div>
               </div>
             </div>
           )}
 
           {processResult && (
-            <div className="p-4 bg-muted rounded-md text-sm border">
-              <p className="font-semibold mb-2">{processResult.message}</p>
+            <div className="bg-muted rounded-md border p-4 text-sm">
+              <p className="mb-2 font-semibold">{processResult.message}</p>
               {processResult.progress && (
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-green-100 p-2 rounded dark:bg-green-900/30">
+                  <div className="rounded bg-green-100 p-2 dark:bg-green-900/30">
                     <div className="text-xl font-bold text-green-700 dark:text-green-400">
                       {processResult.progress.processed}
                     </div>
-                    <div className="text-xs text-green-800 dark:text-green-500">
-                      Processed
-                    </div>
+                    <div className="text-xs text-green-800 dark:text-green-500">Processed</div>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded dark:bg-yellow-900/30">
+                  <div className="rounded bg-yellow-100 p-2 dark:bg-yellow-900/30">
                     <div className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                       {processResult.progress.skipped}
                     </div>
-                    <div className="text-xs text-yellow-800 dark:text-yellow-500">
-                      Skipped
-                    </div>
+                    <div className="text-xs text-yellow-800 dark:text-yellow-500">Skipped</div>
                   </div>
-                  <div className="bg-red-100 p-2 rounded dark:bg-red-900/30">
+                  <div className="rounded bg-red-100 p-2 dark:bg-red-900/30">
                     <div className="text-xl font-bold text-red-700 dark:text-red-400">
                       {processResult.progress.failed}
                     </div>
-                    <div className="text-xs text-red-800 dark:text-red-500">
-                      Failed
-                    </div>
+                    <div className="text-xs text-red-800 dark:text-red-500">Failed</div>
                   </div>
                 </div>
               )}
@@ -348,9 +326,7 @@ export default function ImageDimensionsClient() {
 
       {/* Error Message */}
       {error && (
-        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded border border-red-200">
-          {error}
-        </div>
+        <div className="mt-6 rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
       )}
     </div>
   );

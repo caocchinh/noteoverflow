@@ -1,14 +1,15 @@
 import { pdf } from "@react-pdf/renderer";
 import { PDFDocument } from "pdf-lib";
-import { convertImageToPngBase64, splitContent } from "./utils";
+import ExportPdfTemplate from "../components/QuestionPdfTemplate";
+import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
+import { SelectedQuestion } from "../types/models";
 import {
+  convertImageToPngBase64,
   extractPaperCode,
   extractQuestionNumber,
   generatePastPaperLinks,
+  splitContent,
 } from "./utils";
-import { PDF_HEADER_LOGO_SRC } from "../constants/constants";
-import ExportPdfTemplate from "../components/QuestionPdfTemplate";
-import { SelectedQuestion } from "../types/models";
 
 export type PdfContentType = "question" | "answer" | "question-with-answers";
 
@@ -45,10 +46,7 @@ async function prepareQuestionForPdf(
   };
 
   // Extract question content if needed
-  if (
-    typeOfContent === "question" ||
-    typeOfContent === "question-with-answers"
-  ) {
+  if (typeOfContent === "question" || typeOfContent === "question-with-answers") {
     const { images, text } = splitContent(question.questionImages);
     questionItem.images.push(...images);
     questionItem.text.push(...text);
@@ -63,16 +61,8 @@ async function prepareQuestionForPdf(
 
   // Convert images to base64
   const [convertedQuestionImages, convertedAnswerImages] = await Promise.all([
-    Promise.all(
-      questionItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl }),
-      ),
-    ),
-    Promise.all(
-      answerItem.images.map((imgUrl) =>
-        convertImageToPngBase64({ url: imgUrl }),
-      ),
-    ),
+    Promise.all(questionItem.images.map((imgUrl) => convertImageToPngBase64({ url: imgUrl }))),
+    Promise.all(answerItem.images.map((imgUrl) => convertImageToPngBase64({ url: imgUrl }))),
   ]);
 
   questionItem.images = convertedQuestionImages;
@@ -126,10 +116,7 @@ export async function generateSingleQuestionPdfBlob({
     ]);
 
     return await pdf(
-      <ExportPdfTemplate
-        questions={[questionData]}
-        headerLogo={headerLogo || ""}
-      />,
+      <ExportPdfTemplate questions={[questionData]} headerLogo={headerLogo || ""} />,
     ).toBlob();
   } catch (error) {
     console.error("Error generating PDF:", error);
@@ -228,10 +215,7 @@ export async function generateMultipleQuestionsPdfBlob({
 
       // Generate PDF blob for this chunk
       const chunkBlob = await pdf(
-        <ExportPdfTemplate
-          questions={chunkData}
-          headerLogo={headerLogo || ""}
-        />,
+        <ExportPdfTemplate questions={chunkData} headerLogo={headerLogo || ""} />,
       ).toBlob();
 
       // Load the chunk PDF into pdf-lib
@@ -245,10 +229,7 @@ export async function generateMultipleQuestionsPdfBlob({
     // Merge all chunks into the final document
     for (const chunkBlob of chunkBlobs) {
       const chunkPdfDoc = await PDFDocument.load(await chunkBlob.arrayBuffer());
-      const copiedPages = await mergedPdf.copyPages(
-        chunkPdfDoc,
-        chunkPdfDoc.getPageIndices(),
-      );
+      const copiedPages = await mergedPdf.copyPages(chunkPdfDoc, chunkPdfDoc.getPageIndices());
       copiedPages.forEach((page) => mergedPdf.addPage(page));
     }
 

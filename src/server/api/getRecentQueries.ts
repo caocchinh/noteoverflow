@@ -1,16 +1,12 @@
-import "server-only";
 import { verifySession } from "@/dal/verifySession";
 import { getDbAsync } from "@/drizzle/db.server";
 import { recentQuery } from "@/drizzle/schema";
-import { HTTP_STATUS, ERROR_CODES, ERROR_MESSAGES } from "@/lib/errors";
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from "@/lib/errors";
 import { eq } from "drizzle-orm";
 import { status as elysiaStatus } from "elysia";
+import "server-only";
 
-export const getRecentQueries = async ({
-  status,
-}: {
-  status: typeof elysiaStatus;
-}) => {
+export const getRecentQueries = async ({ status }: { status: typeof elysiaStatus }) => {
   const session = await verifySession();
   if (!session) {
     return status(HTTP_STATUS.UNAUTHORIZED, {

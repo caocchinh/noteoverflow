@@ -1,32 +1,24 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { useMutationState } from "@tanstack/react-query";
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
 import {
-  INFINITE_SCROLL_CHUNK_SIZE,
   DEFAULT_SORT_OPTIONS,
+  INFINITE_SCROLL_CHUNK_SIZE,
 } from "@/features/topical/constants/constants";
-import { isSubset, chunkQuestionsData } from "@/features/topical/lib/utils";
-import {
-  SelectedQuestion,
-  SortParameters,
-  CurrentQuery,
-} from "../types/models";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { chunkQuestionsData, isSubset } from "@/features/topical/lib/utils";
+import { useMutationState } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CurrentQuery, SelectedQuestion, SortParameters } from "../types/models";
 
 interface UseQuestionDataProps {
   topicalData: { data: SelectedQuestion[] } | undefined;
   currentQuery: CurrentQuery;
 }
 
-export const useQuestionData = ({
-  topicalData,
-  currentQuery,
-}: UseQuestionDataProps) => {
+export const useQuestionData = ({ topicalData, currentQuery }: UseQuestionDataProps) => {
   const { uiPreferences, finishedQuestionsData } = useTopicalApp();
 
   const [showFinishedQuestion, setShowFinishedQuestion] = useState(true);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] =
-    useState(1);
+  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] = useState(1);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: DEFAULT_SORT_OPTIONS,
   });
@@ -39,24 +31,21 @@ export const useQuestionData = ({
     filters: {
       mutationKey: ["user_saved_activities", "finished_questions"],
       predicate: (mutation) =>
-        (mutation.state.status === "success" ||
-          mutation.state.status === "error") &&
+        (mutation.state.status === "success" || mutation.state.status === "error") &&
         !showFinishedQuestion,
     },
   });
 
   const sortedData = useMemo(() => {
     if (!topicalData?.data) return [];
-    return topicalData.data.toSorted(
-      (a: SelectedQuestion, b: SelectedQuestion) => {
-        if (sortParameters.sortBy === "ascending") {
-          return a.year - b.year;
-        } else {
-          // Default to year-desc
-          return b.year - a.year;
-        }
-      },
-    );
+    return topicalData.data.toSorted((a: SelectedQuestion, b: SelectedQuestion) => {
+      if (sortParameters.sortBy === "ascending") {
+        return a.year - b.year;
+      } else {
+        // Default to year-desc
+        return b.year - a.year;
+      }
+    });
   }, [sortParameters.sortBy, topicalData]);
 
   const chunkedData = useMemo(() => {
@@ -68,11 +57,7 @@ export const useQuestionData = ({
         : INFINITE_SCROLL_CHUNK_SIZE;
 
     return chunkQuestionsData(sortedData, chunkSize) ?? undefined;
-  }, [
-    sortedData,
-    uiPreferences.layoutStyle,
-    uiPreferences.numberOfQuestionsPerPage,
-  ]);
+  }, [sortedData, uiPreferences.layoutStyle, uiPreferences.numberOfQuestionsPerPage]);
 
   const filteredProcessedData = useMemo(() => {
     const chunkSize =
@@ -97,8 +82,7 @@ export const useQuestionData = ({
       return true;
     });
 
-    const chunkData =
-      chunkQuestionsData(filteredFinishedData, chunkSize) ?? undefined;
+    const chunkData = chunkQuestionsData(filteredFinishedData, chunkSize) ?? undefined;
 
     return {
       chunkData,
@@ -118,8 +102,7 @@ export const useQuestionData = ({
 
   // Derived state (no useEffect needed)
   const fullPartitionedData = chunkedData;
-  const finishedQuestionsFilteredPartitionedData =
-    filteredProcessedData.chunkData;
+  const finishedQuestionsFilteredPartitionedData = filteredProcessedData.chunkData;
 
   // Derive displayed data based on layout style
   const finishedQuestionsFilteredDisplayData = useMemo(() => {
@@ -130,9 +113,7 @@ export const useQuestionData = ({
       return finishedQuestionsFilteredPartitionedData[currentChunkIndex] ?? [];
     } else {
       // For infinite scroll, show all chunks up to the loaded count
-      return finishedQuestionsFilteredPartitionedData
-        .slice(0, infiniteScrollLoadedChunks)
-        .flat();
+      return finishedQuestionsFilteredPartitionedData.slice(0, infiniteScrollLoadedChunks).flat();
     }
   }, [
     finishedQuestionsFilteredPartitionedData,

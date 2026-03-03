@@ -1,12 +1,5 @@
-import {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  Dispatch,
-  SetStateAction,
-} from "react";
 import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
 interface UseExportModeProps {
   isExportModeEnabled: boolean;
@@ -14,18 +7,11 @@ interface UseExportModeProps {
   allQuestions: { id: string }[];
 }
 
-export const useExportMode = ({
-  isExportModeEnabled,
-  allQuestions,
-}: UseExportModeProps) => {
+export const useExportMode = ({ isExportModeEnabled, allQuestions }: UseExportModeProps) => {
   const { isAppSidebarOpen, setIsAppSidebarOpen } = useTopicalApp();
 
-  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
-    new Set(),
-  );
-  const [questionsForExportArray, setQuestionsForExportArray] = useState<
-    string[]
-  >([]);
+  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(new Set());
+  const [questionsForExportArray, setQuestionsForExportArray] = useState<string[]>([]);
   const questionsForExportRef = useRef(questionsForExport);
   questionsForExportRef.current = questionsForExport;
 

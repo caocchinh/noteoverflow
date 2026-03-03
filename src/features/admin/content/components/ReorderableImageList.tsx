@@ -1,8 +1,8 @@
-'use client';
-import { X } from 'lucide-react';
-import { Reorder } from 'motion/react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+"use client";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { Reorder } from "motion/react";
+import { useState } from "react";
 
 interface ReorderableImageListProps {
   images: File[];
@@ -35,13 +35,13 @@ const ReorderableImageList = ({
           >
             <div className="flex w-full flex-row items-center justify-start gap-2">
               <p
-                className="flex h-10 w-10 cursor-grab items-center justify-center rounded-md border border-foreground border-dashed bg-background"
+                className="border-foreground bg-background flex h-10 w-10 cursor-grab items-center justify-center rounded-md border border-dashed"
                 title="Change order"
               >
                 {index + 1}.
               </p>
               <Button
-                className=" wrap-anywhere h-max w-[200px] cursor-pointer whitespace-break-spaces text-sm sm:w-[300px] dark:bg-black dark:hover:bg-black"
+                className="h-max w-[200px] cursor-pointer text-sm wrap-anywhere whitespace-break-spaces sm:w-[300px] dark:bg-black dark:hover:bg-black"
                 onClick={() => {
                   if (!isDragging) {
                     onViewImage(URL.createObjectURL(image));

@@ -1,37 +1,33 @@
 "use client";
-import { usePathname } from "next/navigation";
-import {
-  createContext,
-  useContext,
-  useState,
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-  ReactNode,
-} from "react";
-import {
-  Sidebar,
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
+import DockWrapper from "@/features/topical/components/DockWrapper";
 import {
   DEFAULT_UI_PREFERENCES_CACHE,
   UI_PREFERENCES_CACHE_KEY,
 } from "@/features/topical/constants/constants";
-import DockWrapper from "@/features/topical/components/DockWrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePathname } from "next/navigation";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/eden";
 import { cn } from "@/lib/utils";
-import { UiPreferences, UiPreferencesCache } from "../types/preferences";
+import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { SavedActivitiesResponse } from "../types/models";
+import { UiPreferences, UiPreferencesCache } from "../types/preferences";
 
 type UiPreferencesKey = keyof UiPreferences;
 
@@ -44,46 +40,33 @@ const getInitialUiPreferences = (): UiPreferences => {
   if (savedState) {
     const parsedState: UiPreferencesCache = JSON.parse(savedState);
     return {
-      numberOfColumns:
-        parsedState.numberOfColumns ??
-        DEFAULT_UI_PREFERENCES_CACHE.numberOfColumns,
-      layoutStyle:
-        parsedState.layoutStyle ?? DEFAULT_UI_PREFERENCES_CACHE.layoutStyle,
+      numberOfColumns: parsedState.numberOfColumns ?? DEFAULT_UI_PREFERENCES_CACHE.numberOfColumns,
+      layoutStyle: parsedState.layoutStyle ?? DEFAULT_UI_PREFERENCES_CACHE.layoutStyle,
       numberOfQuestionsPerPage:
         parsedState.numberOfQuestionsPerPage ??
         DEFAULT_UI_PREFERENCES_CACHE.numberOfQuestionsPerPage,
-      imageTheme:
-        parsedState.imageTheme ?? DEFAULT_UI_PREFERENCES_CACHE.imageTheme,
+      imageTheme: parsedState.imageTheme ?? DEFAULT_UI_PREFERENCES_CACHE.imageTheme,
       isStrictModeEnabled:
-        parsedState.isStrictModeEnabled ??
-        DEFAULT_UI_PREFERENCES_CACHE.isStrictModeEnabled,
+        parsedState.isStrictModeEnabled ?? DEFAULT_UI_PREFERENCES_CACHE.isStrictModeEnabled,
       isQuestionCacheEnabled:
-        parsedState.isQuestionCacheEnabled ??
-        DEFAULT_UI_PREFERENCES_CACHE.isQuestionCacheEnabled,
+        parsedState.isQuestionCacheEnabled ?? DEFAULT_UI_PREFERENCES_CACHE.isQuestionCacheEnabled,
       showFinishedQuestionTint:
         parsedState.showFinishedQuestionTint ??
         DEFAULT_UI_PREFERENCES_CACHE.showFinishedQuestionTint,
       showScrollToTopButton:
-        parsedState.showScrollToTopButton ??
-        DEFAULT_UI_PREFERENCES_CACHE.showScrollToTopButton,
+        parsedState.showScrollToTopButton ?? DEFAULT_UI_PREFERENCES_CACHE.showScrollToTopButton,
       scrollUpWhenPageChange:
-        parsedState.scrollUpWhenPageChange ??
-        DEFAULT_UI_PREFERENCES_CACHE.scrollUpWhenPageChange,
+        parsedState.scrollUpWhenPageChange ?? DEFAULT_UI_PREFERENCES_CACHE.scrollUpWhenPageChange,
       isSessionCacheEnabled:
-        parsedState.isSessionCacheEnabled ??
-        DEFAULT_UI_PREFERENCES_CACHE.isSessionCacheEnabled,
+        parsedState.isSessionCacheEnabled ?? DEFAULT_UI_PREFERENCES_CACHE.isSessionCacheEnabled,
       isPersistantCacheEnabled:
         parsedState.isPersistantCacheEnabled ??
         DEFAULT_UI_PREFERENCES_CACHE.isPersistantCacheEnabled,
       recentlySearchSortedBy:
-        parsedState.recentlySearchSortedBy ??
-        DEFAULT_UI_PREFERENCES_CACHE.recentlySearchSortedBy,
+        parsedState.recentlySearchSortedBy ?? DEFAULT_UI_PREFERENCES_CACHE.recentlySearchSortedBy,
     };
   } else {
-    localStorage.setItem(
-      UI_PREFERENCES_CACHE_KEY,
-      JSON.stringify(DEFAULT_UI_PREFERENCES_CACHE),
-    );
+    localStorage.setItem(UI_PREFERENCES_CACHE_KEY, JSON.stringify(DEFAULT_UI_PREFERENCES_CACHE));
   }
 
   return {
@@ -91,12 +74,9 @@ const getInitialUiPreferences = (): UiPreferences => {
   };
 };
 
-const DesmosCalculator = dynamic(
-  () => import("@/features/topical/components/DesmosCalculator"),
-  {
-    ssr: false,
-  },
-);
+const DesmosCalculator = dynamic(() => import("@/features/topical/components/DesmosCalculator"), {
+  ssr: false,
+});
 
 const TopicalContext = createContext<{
   // Original state
@@ -112,9 +92,7 @@ const TopicalContext = createContext<{
   ) => void;
   // Optimized user saved activities - separated to prevent unnecessary re-renders
   bookmarksData: SavedActivitiesResponse["bookmarks"] | undefined;
-  finishedQuestionsData:
-    | SavedActivitiesResponse["finishedQuestions"]
-    | undefined;
+  finishedQuestionsData: SavedActivitiesResponse["finishedQuestions"] | undefined;
   annotationsData: SavedActivitiesResponse["annotations"] | undefined;
   savedActivitiesError: Error | null;
   savedActivitiesIsLoading: boolean;
@@ -145,17 +123,12 @@ export default function TopicalLayoutProvider({
   const { isAuthenticated } = useAuth();
 
   // UI Preferences state - use lazy initialization to avoid setState in effect
-  const [uiPreferences, setUiPreferences] = useState<UiPreferences>(
-    getInitialUiPreferences,
-  );
+  const [uiPreferences, setUiPreferences] = useState<UiPreferences>(getInitialUiPreferences);
 
   useEffect(() => {
     if (isMounted.current) return;
     const webViewerKeys = Object.keys(localStorage).filter(
-      (key) =>
-        key.startsWith("wc--") ||
-        key.includes("webviewer") ||
-        key.includes("pdftron"),
+      (key) => key.startsWith("wc--") || key.includes("webviewer") || key.includes("pdftron"),
     );
 
     if (webViewerKeys.length > 0) {
@@ -189,10 +162,7 @@ export default function TopicalLayoutProvider({
         recentlySearchSortedBy: uiPreferences.recentlySearchSortedBy,
       };
 
-      localStorage.setItem(
-        UI_PREFERENCES_CACHE_KEY,
-        JSON.stringify(uiPreferencesCache),
-      );
+      localStorage.setItem(UI_PREFERENCES_CACHE_KEY, JSON.stringify(uiPreferencesCache));
     } catch (error) {
       console.error("Failed to save UI preferences to localStorage:", error);
     }
@@ -200,10 +170,7 @@ export default function TopicalLayoutProvider({
 
   // Generic setter for any UI preference
   const setUiPreference = useCallback(
-    <K extends UiPreferencesKey>(
-      key: K,
-      value: SetStateAction<UiPreferences[K]>,
-    ) => {
+    <K extends UiPreferencesKey>(key: K, value: SetStateAction<UiPreferences[K]>) => {
       setUiPreferences((prev) => {
         const newValue = typeof value === "function" ? value(prev[key]) : value;
         return { ...prev, [key]: newValue };
@@ -307,15 +274,8 @@ export default function TopicalLayoutProvider({
             open={isAppSidebarOpen && pathname === TOPICAL_QUESTION_APP_ROUTE}
             className={cn("h-0!", pathname === "/search" && "h-0! min-h-0!")}
           >
-            {!isMobileDevice && (
-              <Sidebar className="bg-background! border-none! z-[-1]!" />
-            )}
-            <SidebarInset
-              className={cn(
-                "relative w-full",
-                pathname === "/search" && "h-0!",
-              )}
-            >
+            {!isMobileDevice && <Sidebar className="bg-background! z-[-1]! border-none!" />}
+            <SidebarInset className={cn("relative w-full", pathname === "/search" && "h-0!")}>
               <div className="absolute left-0 z-1000 flex w-full items-start justify-center">
                 <div className="fixed bottom-1">
                   <DockWrapper />

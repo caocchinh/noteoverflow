@@ -1,3 +1,13 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -7,7 +17,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ValidCurriculum } from "@/constants/types";
+import { Filter, Save, Search, X } from "lucide-react";
 import {
   forwardRef,
   memo,
@@ -19,21 +30,10 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { ValidCurriculum } from "@/constants/types";
-import { useAvailableFilters, useFilterState } from "../../topical/hooks";
-import { Button } from "@/components/ui/button";
-import { Filter, Save, Search, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import EnhancedSelect from "../../topical/components/EnhancedSelect";
-import MultiSelector from "../../topical/components/MultiSelector/MultiSelector";
 import EnhancedMultiSelector from "../../topical/components/MultiSelector/EnhancedMultiSelector";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+import MultiSelector from "../../topical/components/MultiSelector/MultiSelector";
+import { useAvailableFilters, useFilterState } from "../../topical/hooks";
 import { OptionalFiltersProps, OptionalSearchFilter } from "../constants/type";
 
 export interface OptionalFiltersHandle {
@@ -87,8 +87,7 @@ const OptionalFilters = memo(
       });
 
       const isMountedRef = useRef(false);
-      const [portalContainer, setPortalContainer] =
-        useState<HTMLElement | null>(null);
+      const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
       const [isSheetOpen, setIsSheetOpen] = useState(false);
 
       // Count active filters
@@ -110,11 +109,9 @@ const OptionalFilters = memo(
         if (selectedSubject) newFilter.subject = selectedSubject;
         if (selectedYear.length > 0) newFilter.year = selectedYear;
         if (selectedSeason.length > 0) newFilter.season = selectedSeason;
-        if (selectedPaperType.length > 0)
-          newFilter.paperType = selectedPaperType;
+        if (selectedPaperType.length > 0) newFilter.paperType = selectedPaperType;
 
-        const finalFilter =
-          Object.keys(newFilter).length > 0 ? newFilter : null;
+        const finalFilter = Object.keys(newFilter).length > 0 ? newFilter : null;
         setCurrentFilter(finalFilter);
         onSearch({ filter: finalFilter });
       }, [
@@ -138,16 +135,10 @@ const OptionalFilters = memo(
       );
 
       const onMount = useEffectEvent(
-        ({
-          _currentFilter,
-        }: {
-          _currentFilter: OptionalSearchFilter | null;
-        }) => {
+        ({ _currentFilter }: { _currentFilter: OptionalSearchFilter | null }) => {
           if (_currentFilter) {
             if (_currentFilter.curriculum) {
-              handleCurriculumChange(
-                _currentFilter.curriculum as ValidCurriculum,
-              );
+              handleCurriculumChange(_currentFilter.curriculum as ValidCurriculum);
             }
             if (_currentFilter.subject) {
               handleSubjectChange(_currentFilter.subject);
@@ -184,9 +175,9 @@ const OptionalFilters = memo(
               onClick={handleApplyFilters}
               disabled={isSearching || !isInputValid}
               size="lg"
-              className="rounded-full px-8 w-full bg-logo-main! cursor-pointer text-white! h-12 gap-2 transition-all text-base"
+              className="bg-logo-main! h-12 w-full cursor-pointer gap-2 rounded-full px-8 text-base text-white! transition-all"
             >
-              <Search className="w-4 h-4" />
+              <Search className="h-4 w-4" />
               {isSearching ? "Searching..." : "Search Questions"}
             </Button>,
             portalContainer,
@@ -204,14 +195,14 @@ const OptionalFilters = memo(
                     variant="outline"
                     disabled={isSearching}
                     size="sm"
-                    className="gap-2 h-10 px-4 rounded-sm cursor-pointer border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 transition-all"
+                    className="border-muted-foreground/20 hover:border-primary/30 hover:bg-primary/5 h-10 cursor-pointer gap-2 rounded-sm px-4 transition-all"
                   >
-                    <Filter className="w-4 h-4" />
+                    <Filter className="h-4 w-4" />
                     <span>Optional Filters</span>
                     {activeFilterCount > 0 && (
                       <Badge
                         variant="secondary"
-                        className="ml-1 h-5 min-w-5 px-1 rounded-full text-[10px] font-bold"
+                        className="ml-1 h-5 min-w-5 rounded-full px-1 text-[10px] font-bold"
                       >
                         {activeFilterCount}
                       </Badge>
@@ -220,17 +211,14 @@ const OptionalFilters = memo(
                 </SheetTrigger>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem
-                  onClick={handleClearAll}
-                  className="cursor-pointer"
-                >
+                <ContextMenuItem onClick={handleClearAll} className="cursor-pointer">
                   Clear all filter
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
             <SheetContent
               onOpenAutoFocus={(event) => event.preventDefault()}
-              className="gap-0 bg-sidebar"
+              className="bg-sidebar gap-0"
             >
               <SheetHeader className="pb-0">
                 <SheetTitle>Search Filters</SheetTitle>
@@ -241,7 +229,7 @@ const OptionalFilters = memo(
               <ScrollArea className="h-[calc(100dvh-9rem)] p-4">
                 <div className="flex flex-col gap-4">
                   <div className="" ref={curriculumRef}>
-                    <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
+                    <Label className="text-muted-foreground/80 mb-1 ml-1 text-xs font-bold tracking-widest uppercase">
                       Curriculum
                     </Label>
                     <EnhancedSelect
@@ -249,16 +237,14 @@ const OptionalFilters = memo(
                       label="Curriculum"
                       prerequisite=""
                       selectedValue={selectedCurriculum}
-                      setSelectedValue={(value) =>
-                        handleCurriculumChange(value as ValidCurriculum)
-                      }
+                      setSelectedValue={(value) => handleCurriculumChange(value as ValidCurriculum)}
                       triggerClassName="w-full h-11 bg-background/60 hover:bg-background hover:border-primary/50 transition-all rounded-xl"
                       modal={true}
                     />
                   </div>
 
                   <div className="py-2" ref={subjectRef}>
-                    <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
+                    <Label className="text-muted-foreground/80 mb-1 ml-1 text-xs font-bold tracking-widest uppercase">
                       Subject
                     </Label>
                     <EnhancedSelect
@@ -273,7 +259,7 @@ const OptionalFilters = memo(
                   </div>
 
                   <div className="py-2" ref={paperTypeRef}>
-                    <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
+                    <Label className="text-muted-foreground/80 mb-1 ml-1 text-xs font-bold tracking-widest uppercase">
                       Paper
                     </Label>
                     <EnhancedMultiSelector
@@ -288,7 +274,7 @@ const OptionalFilters = memo(
                   </div>
 
                   <div className="py-2" ref={yearRef}>
-                    <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
+                    <Label className="text-muted-foreground/80 mb-1 ml-1 text-xs font-bold tracking-widest uppercase">
                       Year
                     </Label>
                     <MultiSelector
@@ -300,7 +286,7 @@ const OptionalFilters = memo(
                   </div>
 
                   <div className="py-2" ref={seasonRef}>
-                    <Label className="text-xs font-bold text-muted-foreground/80 uppercase tracking-widest ml-1 mb-1">
+                    <Label className="text-muted-foreground/80 mb-1 ml-1 text-xs font-bold tracking-widest uppercase">
                       Season
                     </Label>
                     <MultiSelector
@@ -312,22 +298,22 @@ const OptionalFilters = memo(
                   </div>
                 </div>
               </ScrollArea>
-              <SheetFooter className="flex flex-row gap-3 px-4 py-4 border-t">
+              <SheetFooter className="flex flex-row gap-3 border-t px-4 py-4">
                 <Button
                   onClick={handleCloseSheet}
-                  className="flex-1 gap-2 bg-logo-main text-white! hover:bg-logo-main/90 cursor-pointer"
+                  className="bg-logo-main hover:bg-logo-main/90 flex-1 cursor-pointer gap-2 text-white!"
                   disabled={isSearching}
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="h-4 w-4" />
                   Save
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleClearAll}
-                  className="flex-1 gap-2 cursor-pointer"
+                  className="flex-1 cursor-pointer gap-2"
                   disabled={activeFilterCount === 0}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                   Clear All
                 </Button>
               </SheetFooter>

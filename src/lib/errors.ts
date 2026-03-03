@@ -20,8 +20,7 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.BOOKMARK_LIST_NOT_FOUND]: "Bookmark list not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "An error occurred",
   [ERROR_CODES.UNKNOWN_ERROR]: "An unknown error occurred",
-  [ERROR_CODES.RATE_LIMIT_EXCEEDED]:
-    "Rate limit exceeded. Please try again tomorrow.",
+  [ERROR_CODES.RATE_LIMIT_EXCEEDED]: "Rate limit exceeded. Please try again tomorrow.",
 } as const;
 
 // HTTP status codes for API responses

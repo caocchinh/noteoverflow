@@ -6,27 +6,15 @@ import QuestionInspect from "@/features/topical/components/QuestionInspect/Quest
 import QuestionPreview from "@/features/topical/components/QuestionPreview";
 import { ScrollToTopButton } from "@/features/topical/components/ScrollToTopButton";
 
-import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
-import {
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-  memo,
-  useCallback,
-} from "react";
-import Masonry from "./Masonry";
-import ExportBar from "./ExportMode/ExportBar";
-import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
-import {
-  SelectedQuestion,
-  SortableTopicalItem,
-  SortParameters,
-} from "../types/models";
+import { useTopicalApp } from "@/features/topical/context/TopicalLayoutProvider";
+import { cn } from "@/lib/utils";
+import { memo, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { SecondaryMainContentProps } from "../types/components";
+import { SelectedQuestion, SortableTopicalItem, SortParameters } from "../types/models";
+import ExportBar from "./ExportMode/ExportBar";
+import ExportDisabledDialog from "./ExportMode/ExportDisabledDialog";
+import Masonry from "./Masonry";
 
 const SecondaryMainContent = ({
   topicalData,
@@ -39,23 +27,16 @@ const SecondaryMainContent = ({
   mainContent,
 }: SecondaryMainContentProps) => {
   const { uiPreferences } = useTopicalApp();
-  const [
-    isScrollingAndShouldShowScrollButton,
-    setIsScrollingAndShouldShowScrollButton,
-  ] = useState(false);
+  const [isScrollingAndShouldShowScrollButton, setIsScrollingAndShouldShowScrollButton] =
+    useState(false);
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] =
-    useState(1);
+  const [infiniteScrollLoadedChunks, setInfiniteScrollLoadedChunks] = useState(1);
   const [sortParameters, setSortParameters] = useState<SortParameters>({
     sortBy: "descending",
   });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(
-    new Set(),
-  );
-  const [questionsForExportArray, setQuestionsForExportArray] = useState<
-    string[]
-  >([]);
+  const [questionsForExport, setQuestionsForExport] = useState<Set<string>>(new Set());
+  const [questionsForExportArray, setQuestionsForExportArray] = useState<string[]>([]);
   const questionsForExportRef = useRef(questionsForExport);
 
   const [isExportModeEnabled, setIsExportModeEnabled] = useState(false);
@@ -75,31 +56,24 @@ const SecondaryMainContent = ({
     if (!topicalData) return undefined;
 
     const chunkSize =
-      uiPreferences.layoutStyle === "pagination"
-        ? uiPreferences.numberOfQuestionsPerPage
-        : 20; // INFINITE_SCROLL_CHUNK_SIZE equivalent
+      uiPreferences.layoutStyle === "pagination" ? uiPreferences.numberOfQuestionsPerPage : 20; // INFINITE_SCROLL_CHUNK_SIZE equivalent
 
     const sortedData = topicalData
       .toSorted((a: SortableTopicalItem, b: SortableTopicalItem) => {
         const aIndex = new Date(a.updatedAt || 0).getTime();
         const bIndex = new Date(b.updatedAt || 0).getTime();
-        return sortParameters.sortBy === "descending"
-          ? bIndex - aIndex
-          : aIndex - bIndex;
+        return sortParameters.sortBy === "descending" ? bIndex - aIndex : aIndex - bIndex;
       })
       .map((item) => item.question);
 
-    return sortedData.reduce(
-      (acc: SelectedQuestion[][], item: SelectedQuestion, index: number) => {
-        const chunkIndex = Math.floor(index / chunkSize);
-        if (!acc[chunkIndex]) {
-          acc[chunkIndex] = [];
-        }
-        acc[chunkIndex].push(item);
-        return acc;
-      },
-      [],
-    );
+    return sortedData.reduce((acc: SelectedQuestion[][], item: SelectedQuestion, index: number) => {
+      const chunkIndex = Math.floor(index / chunkSize);
+      if (!acc[chunkIndex]) {
+        acc[chunkIndex] = [];
+      }
+      acc[chunkIndex].push(item);
+      return acc;
+    }, []);
   }, [
     topicalData,
     uiPreferences.layoutStyle,
@@ -193,7 +167,7 @@ const SecondaryMainContent = ({
 
   return (
     <>
-      <div className="pt-16 relative z-10 flex flex-col w-full items-center justify-start p-4 overflow-hidden h-screen">
+      <div className="relative z-10 flex h-screen w-full flex-col items-center justify-start overflow-hidden p-4 pt-16">
         {breadcrumbContent({
           setSortParameters,
           sortParameters,
@@ -217,7 +191,7 @@ const SecondaryMainContent = ({
         {!isQuestionViewDisabled && displayedData?.length > 0 && (
           <ScrollArea
             viewportRef={scrollAreaRef}
-            className="h-[70dvh] lg:h-[78dvh] px-4 w-full [&_.bg-border]:bg-logo-main overflow-auto"
+            className="[&_.bg-border]:bg-logo-main h-[70dvh] w-full overflow-auto px-4 lg:h-[78dvh]"
             type="always"
             viewPortOnScrollEnd={() => {
               if (scrollAreaRef.current?.scrollTop === 0) {
@@ -231,41 +205,27 @@ const SecondaryMainContent = ({
               <p>{topicalData?.length} items</p>
 
               {!isExportModeEnabled && (
-                <ExportDisabledDialog
-                  variant="secondary"
-                  buttonClassName="mb-2"
-                />
+                <ExportDisabledDialog variant="secondary" buttonClassName="mb-2" />
               )}
             </div>
             <Masonry
               items={displayedData?.flatMap((question) =>
-                question?.questionImages.map(
-                  (imageSrc: string, imageIndex: number) => ({
-                    element: (
-                      <QuestionViewItem
-                        key={`${question.id}-${imageSrc}`}
-                        isQuestionForExport={questionsForExport.has(
-                          question.id,
-                        )}
-                        question={question}
-                        handleQuestionClick={handleQuestionClick}
-                        imageSrc={imageSrc}
-                        isExportModeEnabled={isExportModeEnabled}
-                        imageWidth={
-                          question.questionImagesDimensions?.[imageIndex]?.width
-                        }
-                        imageHeight={
-                          question.questionImagesDimensions?.[imageIndex]
-                            ?.height
-                        }
-                      />
-                    ),
-                    width:
-                      question.questionImagesDimensions?.[imageIndex]?.width,
-                    height:
-                      question.questionImagesDimensions?.[imageIndex]?.height,
-                  }),
-                ),
+                question?.questionImages.map((imageSrc: string, imageIndex: number) => ({
+                  element: (
+                    <QuestionViewItem
+                      key={`${question.id}-${imageSrc}`}
+                      isQuestionForExport={questionsForExport.has(question.id)}
+                      question={question}
+                      handleQuestionClick={handleQuestionClick}
+                      imageSrc={imageSrc}
+                      isExportModeEnabled={isExportModeEnabled}
+                      imageWidth={question.questionImagesDimensions?.[imageIndex]?.width}
+                      imageHeight={question.questionImagesDimensions?.[imageIndex]?.height}
+                    />
+                  ),
+                  width: question.questionImagesDimensions?.[imageIndex]?.width,
+                  height: question.questionImagesDimensions?.[imageIndex]?.height,
+                })),
               )}
             />
 
@@ -278,8 +238,7 @@ const SecondaryMainContent = ({
                   }
                 }}
                 hasMore={
-                  !!fullPartitionedData &&
-                  currentChunkIndex < fullPartitionedData.length - 1
+                  !!fullPartitionedData && currentChunkIndex < fullPartitionedData.length - 1
                 }
                 isLoading={!fullPartitionedData}
               />
@@ -289,9 +248,7 @@ const SecondaryMainContent = ({
       </div>
       {isExportModeEnabled && (
         <ExportBar
-          allQuestions={
-            topicalData ? topicalData.map((item) => item.question) : []
-          }
+          allQuestions={topicalData ? topicalData.map((item) => item.question) : []}
           questionsForExport={questionsForExport}
           questionsForExportArray={questionsForExportArray}
           setIsExportModeEnabled={setIsExportModeEnabled}
@@ -338,18 +295,17 @@ const QuestionViewItem = memo(
       <div
         key={`${question.id}-${imageSrc}`}
         className={cn(
-          "relative transition-all  duration-200 border-2 border-transparent ease-in-out w-full mb-[10px]",
-          isQuestionForExport &&
-            "transform-[scale(0.975)] border-logo-main rounded-md",
+          "relative mb-[10px] w-full border-2 border-transparent transition-all duration-200 ease-in-out",
+          isQuestionForExport && "border-logo-main transform-[scale(0.975)] rounded-md",
         )}
       >
         {isExportModeEnabled && (
           <div
-            className="absolute z-20 top-2 left-2 w-max h-max"
+            className="absolute top-2 left-2 z-20 h-max w-max"
             onClick={() => handleQuestionClick(question.id)}
           >
             <Checkbox
-              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main data-[state=checked]:text-white dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 bg-white dark:bg-white rounded-full  cursor-pointer"
+              className="data-[state=checked]:border-logo-main data-[state=checked]:bg-logo-main dark:data-[state=checked]:border-logo-main dark:data-[state=checked]:bg-logo-main h-5 w-5 cursor-pointer rounded-full bg-white data-[state=checked]:text-white dark:bg-white"
               checked={isQuestionForExport}
             />
           </div>

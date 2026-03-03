@@ -1,21 +1,12 @@
-'use client';
-import { usePathname } from 'next/navigation';
-import { TOPICAL_QUESTION_APP_ROUTE } from '@/constants/constants';
-import { cn } from '@/lib/utils';
+"use client";
+import { TOPICAL_QUESTION_APP_ROUTE } from "@/constants/constants";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
-export default function AppWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div
-      className={cn(
-        pathname !== TOPICAL_QUESTION_APP_ROUTE && 'hidden',
-        'w-full'
-      )}
-    >
+    <div className={cn(pathname !== TOPICAL_QUESTION_APP_ROUTE && "hidden", "w-full")}>
       {children}
     </div>
   );

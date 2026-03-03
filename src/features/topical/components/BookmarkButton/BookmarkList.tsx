@@ -1,33 +1,17 @@
-import {
-  memo,
-  useMemo,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CommandEmpty, CommandGroup, CommandList, CommandSeparator } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandSeparator,
-} from "@/components/ui/command";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BookmarkSearchInput } from "./BookmarkSearchInput";
-import { BookmarkItem } from "./BookmarkItem";
+import { ChevronsUpDown } from "lucide-react";
+import { forwardRef, memo, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { BookmarkActionDialogs } from "./BookmarkActionDialogs";
+import { BookmarkItem } from "./BookmarkItem";
+import { BookmarkSearchInput } from "./BookmarkSearchInput";
 
+import { useMutationState } from "@tanstack/react-query";
 import { useTopicalApp } from "../../context/TopicalLayoutProvider";
 import { fuzzySearch } from "../../lib/utils";
-import { useMutationState } from "@tanstack/react-query";
-import { BookmarkListRef, BookmarkListProps } from "../../types/components";
+import { BookmarkListProps, BookmarkListRef } from "../../types/components";
 import { SelectedQuestion } from "../../types/models";
 
 export const BookmarkList = memo(
@@ -52,17 +36,14 @@ export const BookmarkList = memo(
         filters: {
           mutationKey: ["user_saved_activities", "bookmarks", question.id],
           predicate: (mutation) =>
-            mutation.state.status === "success" ||
-            mutation.state.status === "error",
+            mutation.state.status === "success" || mutation.state.status === "error",
         },
       });
 
       const chosenBookmarkList = useMemo(() => {
         const set = new Set<string>();
         for (const bookmark of bookmarksData ?? []) {
-          if (
-            bookmark.userBookmarks.some((b) => b.question.id === question.id)
-          ) {
+          if (bookmark.userBookmarks.some((b) => b.question.id === question.id)) {
             set.add(bookmark.id);
           }
         }
@@ -90,7 +71,7 @@ export const BookmarkList = memo(
       );
 
       return (
-        <div className="h-full flex flex-col md:mb-0">
+        <div className="flex h-full flex-col md:mb-0">
           <BookmarkSearchInput
             searchInput={searchInput}
             setSearchInput={setSearchInput}
@@ -99,10 +80,10 @@ export const BookmarkList = memo(
           />
           <ScrollArea
             viewportRef={scrollAreaRef}
-            className="h-[60%] md:h-[200px] [&_.bg-border]:bg-logo-main/50"
+            className="[&_.bg-border]:bg-logo-main/50 h-[60%] md:h-[200px]"
             type="always"
           >
-            <CommandList className="w-full h-max flex flex-col">
+            <CommandList className="flex h-max w-full flex-col">
               <SelectedValueList
                 searchInput={searchInput}
                 question={question}
@@ -122,9 +103,7 @@ export const BookmarkList = memo(
                           key={bookmark.id}
                           listName={bookmark.listName}
                           listId={bookmark.id}
-                          visibility={
-                            bookmark.visibility as "public" | "private"
-                          }
+                          visibility={bookmark.visibility as "public" | "private"}
                           question={question}
                           chosenBookmarkList={chosenBookmarkList}
                         />
@@ -170,10 +149,7 @@ const SelectedValueList = memo(
         return [];
       }
       return bookmarksData.filter((item) => {
-        return (
-          chosenBookmarkList.has(item.id) &&
-          fuzzySearch(searchInput, item.listName)
-        );
+        return chosenBookmarkList.has(item.id) && fuzzySearch(searchInput, item.listName);
       });
     }, [bookmarksData, chosenBookmarkList, searchInput]);
 
@@ -186,10 +162,8 @@ const SelectedValueList = memo(
           >
             <h3
               className={cn(
-                "font-medium text-xs",
-                chosenBookmarkList.size > 0
-                  ? "text-logo-main"
-                  : "text-muted-foreground",
+                "text-xs font-medium",
+                chosenBookmarkList.size > 0 ? "text-logo-main" : "text-muted-foreground",
               )}
             >
               {`${chosenBookmarkList.size} selected`}

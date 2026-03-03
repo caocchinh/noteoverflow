@@ -1,7 +1,7 @@
-import "server-only";
-import { and, eq } from "drizzle-orm";
 import { getDbAsync } from "@/drizzle/db.server";
 import { paperType } from "@/drizzle/schema";
+import { and, eq } from "drizzle-orm";
+import "server-only";
 
 export const createPaperType = async ({
   paperType: paperTypeProp,
@@ -13,32 +13,25 @@ export const createPaperType = async ({
   curriculumName: string;
 }) => {
   const db = await getDbAsync();
-  await db
-    .insert(paperType)
-    .values({ paperType: paperTypeProp, subjectId, curriculumName });
+  await db.insert(paperType).values({ paperType: paperTypeProp, subjectId, curriculumName });
 };
 
 export const getPaperType = async (
   subjectId: string,
-  curriculumName: string
+  curriculumName: string,
 ): Promise<number[]> => {
   const db = await getDbAsync();
   const result = await db
     .select()
     .from(paperType)
-    .where(
-      and(
-        eq(paperType.subjectId, subjectId),
-        eq(paperType.curriculumName, curriculumName)
-      )
-    );
+    .where(and(eq(paperType.subjectId, subjectId), eq(paperType.curriculumName, curriculumName)));
   return result.map((item) => item.paperType);
 };
 
 export const isPaperTypeExists = async (
   paperTypeProp: number,
   subjectId: string,
-  curriculumName: string
+  curriculumName: string,
 ): Promise<boolean> => {
   const db = await getDbAsync();
   const result = await db
@@ -48,8 +41,8 @@ export const isPaperTypeExists = async (
       and(
         eq(paperType.paperType, paperTypeProp),
         eq(paperType.subjectId, subjectId),
-        eq(paperType.curriculumName, curriculumName)
-      )
+        eq(paperType.curriculumName, curriculumName),
+      ),
     )
     .limit(1);
   return result.length > 0;

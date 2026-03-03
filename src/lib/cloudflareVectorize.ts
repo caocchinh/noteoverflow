@@ -1,11 +1,10 @@
-import "server-only";
 import { retryExternalApi } from "@/dal/retry";
+import "server-only";
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
 // Use Vectorize-specific token if available, otherwise fall back to AI token
 const CLOUDFLARE_API_TOKEN =
-  process.env.CLOUDFLARE_VECTORIZE_API_TOKEN ||
-  process.env.CLOUDFLARE_AI_API_TOKEN;
+  process.env.CLOUDFLARE_VECTORIZE_API_TOKEN || process.env.CLOUDFLARE_AI_API_TOKEN;
 
 const CLOUDFLARE_API_BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/vectorize/v2/indexes`;
 
@@ -17,11 +16,11 @@ async function callVectorizeAPI<T>(
   endpoint: string,
   method: "POST" | "GET" | "DELETE",
   body?: unknown,
-  contentType: string = "application/json"
+  contentType: string = "application/json",
 ): Promise<T> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
     throw new Error(
-      "Cloudflare credentials missing. Please set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AI_API_TOKEN (or CLOUDFLARE_VECTORIZE_API_TOKEN) in your environment variables."
+      "Cloudflare credentials missing. Please set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AI_API_TOKEN (or CLOUDFLARE_VECTORIZE_API_TOKEN) in your environment variables.",
     );
   }
 
@@ -30,11 +29,7 @@ async function callVectorizeAPI<T>(
   return retryExternalApi(async () => {
     const isNdJson = contentType === "application/x-ndjson";
     const requestBody =
-      body && isNdJson
-        ? (body as string)
-        : body
-        ? JSON.stringify(body)
-        : undefined;
+      body && isNdJson ? (body as string) : body ? JSON.stringify(body) : undefined;
 
     const response = await fetch(url, {
       method,
@@ -54,17 +49,13 @@ async function callVectorizeAPI<T>(
       try {
         const errorJson = JSON.parse(errorText);
         if (errorJson.errors && Array.isArray(errorJson.errors)) {
-          errorMessage = errorJson.errors
-            .map((e: { message: string }) => e.message)
-            .join(", ");
+          errorMessage = errorJson.errors.map((e: { message: string }) => e.message).join(", ");
         }
       } catch {
         // ignore json parse error
       }
 
-      throw new Error(
-        `Cloudflare Vectorize API error (${statusCode}): ${errorMessage}`
-      );
+      throw new Error(`Cloudflare Vectorize API error (${statusCode}): ${errorMessage}`);
     }
 
     const data = (await response.json()) as {
@@ -74,9 +65,7 @@ async function callVectorizeAPI<T>(
     };
 
     if (!data.success) {
-      throw new Error(
-        `Cloudflare Vectorize API success=false: ${JSON.stringify(data.errors)}`
-      );
+      throw new Error(`Cloudflare Vectorize API success=false: ${JSON.stringify(data.errors)}`);
     }
 
     return data.result;
@@ -91,7 +80,7 @@ async function callVectorizeAPI<T>(
 export async function upsertVectorize(
   indexName: string,
   vectors: VectorizeVector[],
-  vectorizeBinding?: VectorizeIndex
+  vectorizeBinding?: VectorizeIndex,
 ): Promise<{ count: number; ids: string[] }> {
   if (vectorizeBinding && process.env.NODE_ENV === "production") {
     console.log(`Using Vectorize Binding for upsert`);
@@ -105,7 +94,7 @@ export async function upsertVectorize(
     "insert",
     "POST",
     ndjson,
-    "application/x-ndjson"
+    "application/x-ndjson",
   );
 }
 
@@ -119,7 +108,7 @@ export async function queryVectorize(
   indexName: string,
   vector: number[],
   options?: VectorizeQueryOptions,
-  vectorizeBinding?: VectorizeIndex
+  vectorizeBinding?: VectorizeIndex,
 ): Promise<VectorizeMatches> {
   if (vectorizeBinding && process.env.NODE_ENV === "production") {
     // console.log(`Using Vectorize Binding for query`);
@@ -133,10 +122,5 @@ export async function queryVectorize(
     filter: options?.filter,
   };
 
-  return callVectorizeAPI<VectorizeMatches>(
-    indexName,
-    "query",
-    "POST",
-    payload
-  );
+  return callVectorizeAPI<VectorizeMatches>(indexName, "query", "POST", payload);
 }
